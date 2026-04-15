@@ -24,41 +24,7 @@
 
     @if (config('app.hosted') || config('app.report_errors'))
     <script {!! nonce_attr() !!}>
-        window.sentryOnLoad = function () {
-            Sentry.init({
-                beforeSend: function (event) {
-                    if (event.exception && event.exception.values) {
-                        for (var i = 0; i < event.exception.values.length; i++) {
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Script error.') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Vue failed to load') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && (
-                                event.exception.values[i].value === 'undefined' ||
-                                event.exception.values[i].value.indexOf('Non-Error promise rejection') !== -1
-                            )) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Share canceled') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Unexpected token') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('ResizeObserver loop') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('webkit.messageHandlers') !== -1) {
-                                return null;
-                            }
-                        }
-                    }
-                    return event;
-                }
-            });
-        };
+        @include('layouts.sentry')
         window.addEventListener('load', function() {
             var s = document.createElement('script');
             s.src = "{{ config('app.sentry_js_dsn') }}";
