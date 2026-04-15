@@ -13,8 +13,11 @@ use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AnalyticsSocialClicksDaily;
+use App\Models\AnalyticsUtmDaily;
 use App\Models\BoostCampaign;
 use App\Models\Event;
+use App\Models\PageView;
 use App\Models\Role;
 use App\Models\RoleUser;
 use App\Models\Sale;
@@ -444,6 +447,11 @@ class RoleController extends Controller
         }
 
         if ($slug) {
+            // Check if slug is a social platform vanity URL
+            if (in_array($slug, UrlUtils::getUniquePlatforms())) {
+                return $this->handleSocialRedirect($role, $slug, $request);
+            }
+
             // Check if slug is a group slug first
             if ($role->groups) {
                 $group = $role->groups->where('slug', $slug)->first();
@@ -946,6 +954,84 @@ class RoleController extends Controller
             'events' => $eventsData,
             'has_more' => $hasMore,
         ]);
+    }
+
+    private function handleSocialRedirect(Role $role, string $platform, Request $request)
+    {
+        $socialLinks = is_string($role->social_links)
+            ? json_decode($role->social_links, true)
+            : $role->social_links;
+
+        if (is_array($socialLinks)) {
+            foreach ($socialLinks as $link) {
+                $url = $link['url'] ?? '';
+                if ($url && UrlUtils::detectPlatform($url) === $platform) {
+                    $user = auth()->user();
+                    if (! $user || (! $user->isMember($role->subdomain) && ! $user->isAdmin())) {
+                        $this->recordSocialClick($role, $platform, $request);
+                    }
+
+                    return redirect($url, 302);
+                }
+            }
+        }
+
+        return redirect($role->getGuestUrl());
+    }
+
+    private function recordSocialClick(Role $role, string $platform, Request $request): void
+    {
+        $userAgent = $request->userAgent();
+
+        if (PageView::isBot($userAgent)) {
+            return;
+        }
+
+        if (PageView::isSuspiciousRequest($request)) {
+            return;
+        }
+
+        $ip = $request->ip();
+        if ($ip) {
+            $dailySalt = config('app.key').now()->format('Y-m-d');
+            $ipHash = hash('sha256', $ip.$dailySalt);
+            $cacheKey = "social_click:{$role->id}:{$ipHash}";
+            $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
+            Cache::add($cacheKey, 0, $secondsUntilMidnight);
+            if (Cache::increment($cacheKey) > 10) {
+                return;
+            }
+        }
+
+        AnalyticsSocialClicksDaily::incrementClick($role->id, $platform);
+
+        // Track referrer source
+        $referrer = $request->header('referer');
+        $utmSource = $request->query('utm_source');
+        $sourceOverride = match ($utmSource) {
+            'boost' => 'boost',
+            'newsletter' => 'newsletter',
+            default => null,
+        };
+        if (! $sourceOverride && $request->query('promo')) {
+            $sourceOverride = 'promo';
+        }
+        AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
+
+        // Track UTM parameters
+        $utmParams = [
+            'source' => $request->query('utm_source'),
+            'medium' => $request->query('utm_medium'),
+            'campaign' => $request->query('utm_campaign'),
+            'content' => $request->query('utm_content'),
+            'term' => $request->query('utm_term'),
+        ];
+        foreach ($utmParams as $paramType => $paramValue) {
+            if ($paramValue !== null && $paramValue !== '') {
+                $paramValue = mb_substr(trim($paramValue), 0, 255);
+                AnalyticsUtmDaily::incrementView($role->id, $paramType, $paramValue);
+            }
+        }
     }
 
     private function eventToVueArray(Event $event, ?Role $role, ?string $subdomain): array
@@ -3373,11 +3459,12 @@ class RoleController extends Controller
 
         $urlInfo = UrlUtils::getUrlInfo($request->url);
         if ($urlInfo === null) {
-            return response()->json(['error' => __('messages.invalid_link')], 422);
+            return response()->json(['error' => __('messages.invalid_url')], 422);
         }
 
         $urlInfo->brand = UrlUtils::getBrand($urlInfo->url);
         $urlInfo->clean_url = UrlUtils::clean($urlInfo->url);
+        $urlInfo->platform = UrlUtils::detectPlatform($urlInfo->url);
 
         return response()->json($urlInfo);
     }

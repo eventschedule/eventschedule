@@ -152,6 +152,7 @@ return [
     'date' => 'Date',
     'sent_date' => 'Sent Date',
     'social_links' => 'Social Links',
+    'social_link_clicks' => 'Social Link Clicks',
     'create_account' => 'Create Account',
     'continue_as_guest' => 'Continue as Guest',
     'event_created_guest' => 'Event created successfully! You can now view it on the schedule.',

@@ -152,6 +152,7 @@ return [
     'date' => 'Kuupäev',
     'sent_date' => 'Saatmise kuupäev',
     'social_links' => 'Sotsiaalsed lingid',
+    'social_link_clicks' => 'Sotsiaalmeedia linkide klikid',
     'create_account' => 'Loo konto',
     'continue_as_guest' => 'Jätka külalisena',
     'event_created_guest' => 'Sündmus edukalt loodud! Nüüd saate seda ajakavast vaadata.',

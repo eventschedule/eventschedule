@@ -47,7 +47,7 @@
         </svg>
         <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
         <span v-else>
-            <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> &bull; <span v-text="event.coupon_code"></span></span>
+            <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> &bull; {{ __('messages.coupon_code') }}</span>
         </span>
     </div>
     <div v-if="event.can_edit" class="mt-auto pt-3">

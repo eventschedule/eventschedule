@@ -149,6 +149,7 @@ return [
     'date' => 'Data',
     'sent_date' => 'Data di invio',
     'social_links' => 'Link Social',
+    'social_link_clicks' => 'Clic sui link social',
     'add' => 'Aggiungi',
     'remove' => 'Rimuovi',
     'up' => 'Su',

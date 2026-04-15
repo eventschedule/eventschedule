@@ -144,6 +144,7 @@ return [
     'date' => 'Fecha',
     'sent_date' => 'Fecha de envío',
     'social_links' => 'Enlaces Sociales',
+    'social_link_clicks' => 'Clics en enlaces sociales',
     'add' => 'Agregar',
     'remove' => 'Eliminar',
     'up' => 'Subir',

@@ -141,6 +141,9 @@ class AnalyticsController extends Controller
         $topUtmMediums = $analytics->getTopUtmParams($user, 'medium', 10, $start, $end, $selectedRoleId);
         $topUtmCampaigns = $analytics->getTopUtmParams($user, 'campaign', 10, $start, $end, $selectedRoleId);
 
+        // Get social link click stats
+        $socialClickStats = $analytics->getSocialClickStats($user, $start, $end, $selectedRoleId);
+
         // Get boost views by period for chart overlay
         $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
         $boostViewsByPeriod = $boostStats['has_data']
@@ -175,7 +178,8 @@ class AnalyticsController extends Controller
             'newsletterViewsByPeriod',
             'topUtmSources',
             'topUtmMediums',
-            'topUtmCampaigns'
+            'topUtmCampaigns',
+            'socialClickStats'
         ));
     }
 }

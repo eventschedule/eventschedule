@@ -120,6 +120,7 @@ return [
     'date' => 'Datum',
     'sent_date' => 'Sendedatum',
     'social_links' => 'Soziale Links',
+    'social_link_clicks' => 'Klicks auf soziale Links',
     'add' => 'Hinzufügen',
     'remove' => 'Entfernen',
     'up' => 'Hoch',

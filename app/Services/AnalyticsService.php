@@ -6,6 +6,7 @@ use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AnalyticsSocialClicksDaily;
 use App\Models\AnalyticsUtmDaily;
 use App\Models\BoostCampaign;
 use App\Models\Event;
@@ -621,6 +622,32 @@ class AnalyticsService
             ->map(fn ($item) => [
                 'param_value' => $item->param_value,
                 'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
+     * Get social link click stats grouped by platform
+     */
+    public function getSocialClickStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsSocialClicksDaily::select(
+            'platform',
+            DB::raw('SUM(clicks) as click_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->groupBy('platform')
+            ->orderByDesc('click_count')
+            ->get()
+            ->map(fn ($item) => [
+                'platform' => $item->platform,
+                'click_count' => (int) $item->click_count,
             ]);
     }
 

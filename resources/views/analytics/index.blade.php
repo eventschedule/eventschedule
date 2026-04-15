@@ -697,7 +697,7 @@
             </div>
 
             {{-- Bar Charts Grid --}}
-            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty())
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty() || $socialClickStats->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty())
@@ -799,6 +799,29 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_campaigns') }}</h3>
                     <div class="h-64">
                         <canvas id="topUtmCampaignsChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Social Link Clicks --}}
+                @if ($socialClickStats->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.social_link_clicks') }}</h3>
+                    <div class="space-y-3">
+                        @foreach ($socialClickStats as $stat)
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-6 h-6">
+                                <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="{{ \App\Utils\UrlUtils::getSocialSvgPath($stat['platform']) }}"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 w-24 truncate">{{ \App\Utils\UrlUtils::getPlatformBrandName($stat['platform']) }}</span>
+                            <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div class="bg-[var(--brand-button-bg)] h-2 rounded-full" style="width: {{ $socialClickStats->max('click_count') > 0 ? ($stat['click_count'] / $socialClickStats->max('click_count')) * 100 : 0 }}%"></div>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white w-16 text-end">{{ number_format($stat['click_count']) }}</span>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
                 @endif

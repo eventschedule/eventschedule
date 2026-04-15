@@ -430,8 +430,9 @@
               <div class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach (json_decode($event->venue->social_links) as $link)
                   @if ($link)
+                  @php $venueLinkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
                   <a
-                    href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                    href="{{ $venueLinkPlatform !== 'website' ? $event->venue->getGuestUrl() . '/' . $venueLinkPlatform : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                     class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                     title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                     >

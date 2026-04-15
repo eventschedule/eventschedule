@@ -1818,6 +1818,7 @@
                                 @if ($role->social_links && $role->social_links != '[]')
                                 @foreach(json_decode($role->social_links) as $link)
                                 @if ($link)
+                                @php $linkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
                                 <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
                                     <div class="flex items-center gap-4">
                                         <div class="flex-shrink-0 text-gray-500 dark:text-gray-400">
@@ -1826,10 +1827,19 @@
                                             </x-url-icon>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
-                                            </x-link>
+                                            </a>
+                                            @if ($linkPlatform !== 'website')
+                                            @php $vanityUrl = $role->getGuestUrl(true) . '/' . $linkPlatform; @endphp
+                                            <div class="flex items-center gap-1.5 mt-1">
+                                                <p class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ preg_replace('/^https?:\/\//', '', $vanityUrl) }}</p>
+                                                <button type="button" data-action="copy-vanity-url" class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $vanityUrl }}" title="{{ __('messages.copy') }}">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
+                                                </button>
+                                            </div>
+                                            @endif
                                         </div>
                                         <button type="button"
                                             class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
@@ -1871,10 +1881,10 @@
                                             </x-url-icon>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
-                                            </x-link>
+                                            </a>
                                         </div>
                                         <button type="button"
                                             class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
@@ -3740,6 +3750,8 @@
             mainForm.addEventListener('submit', function(e) {
                 if (!e.defaultPrevented) { isDirty = false; }
             });
+
+            window._markFormDirty = function() { isDirty = true; };
 
             window.addEventListener('beforeunload', function(e) {
                 if (isDirty && !window._skipUnsavedWarning) { e.preventDefault(); e.returnValue = ''; }
@@ -6168,6 +6180,13 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'copy-group-url':
                 copyGroupUrl(btn, btn.dataset.copyUrl);
                 break;
+            case 'copy-vanity-url':
+                navigator.clipboard.writeText(btn.dataset.url).then(function() {
+                    var originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-green-500"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
+                    setTimeout(function() { btn.innerHTML = originalHTML; }, 1500);
+                }).catch(function() {});
+                break;
             case 'toggle-subdomain-edit':
                 toggleSubdomainEdit();
                 break;
@@ -6563,12 +6582,13 @@ document.addEventListener('DOMContentLoaded', function() {
             payment_links: JSON.parse(document.getElementById('payment_links_data').value || '[]')
         };
         var currentLinkType = '';
+        var guestUrl = @json($role->getGuestUrl(true));
 
         // Helper: update hidden input and trigger unsaved changes warning
         function updateLinkInput(linkType) {
             var input = document.getElementById(linkType + '_data');
             input.value = JSON.stringify(linkData[linkType]);
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            if (window._markFormDirty) window._markFormDirty();
         }
 
         // Helper: get tab content div from link type
@@ -6668,6 +6688,28 @@ document.addEventListener('DOMContentLoaded', function() {
             a.appendChild(p);
             content.appendChild(a);
 
+            // Show vanity URL for social links with a detected platform
+            var platform = link.platform || '';
+            if (linkType === 'social_links' && platform && platform !== 'website' && guestUrl) {
+                var fullVanityUrl = guestUrl + '/' + platform;
+                var displayUrl = fullVanityUrl.replace(/^https?:\/\//, '');
+                var vanityRow = document.createElement('div');
+                vanityRow.className = 'flex items-center gap-1.5 mt-1';
+                var vanityText = document.createElement('p');
+                vanityText.className = 'text-xs text-gray-400 dark:text-gray-500 truncate';
+                vanityText.textContent = displayUrl;
+                vanityRow.appendChild(vanityText);
+                var copyBtn = document.createElement('button');
+                copyBtn.type = 'button';
+                copyBtn.className = 'flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors';
+                copyBtn.setAttribute('data-url', fullVanityUrl);
+                copyBtn.setAttribute('data-action', 'copy-vanity-url');
+                copyBtn.title = @json(__('messages.copy'));
+                copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>';
+                vanityRow.appendChild(copyBtn);
+                content.appendChild(vanityRow);
+            }
+
             var removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm';
@@ -6702,6 +6744,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 addLinkModal.style.display = 'none';
                 addLinkModal.classList.add('hidden');
             });
+        });
+
+        // Submit modal on Enter key
+        document.getElementById('link').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btn-save-link').click();
+            }
         });
 
         // Save link (fetch preview, append to list)

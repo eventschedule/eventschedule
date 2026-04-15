@@ -172,7 +172,8 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                     @if($hasSocial)
                         @foreach (json_decode($role->social_links) as $link)
                         @if ($link)
-                        <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                        @php $gpLinkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
+                        <a href="{{ $gpLinkPlatform !== 'website' ? $role->getGuestUrl() . '/' . $gpLinkPlatform : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                            class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
                            style="background-color: {{ $accentColor }}"
                            data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
@@ -336,7 +337,8 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                       @if($hasSocial)
                           @foreach (json_decode($role->social_links) as $link)
                           @if ($link)
-                          <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                          @php $gpLinkPlatform2 = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
+                          <a href="{{ $gpLinkPlatform2 !== 'website' ? $role->getGuestUrl() . '/' . $gpLinkPlatform2 : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                              class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
                              data-tooltip="{{ App\Utils\UrlUtils::getBrand($link->url) }}: {{ App\Utils\UrlUtils::getHandle($link->url) }}">
                               <x-url-icon class="w-5 h-5" color="currentColor">
