@@ -260,7 +260,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               @if($role->translatedDescription())
               @php $descPreview = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...'); @endphp
               <div class="w-full mt-2">
-                <div x-data="{ expanded: false, long: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
+                <div x-data="{ expanded: false, long: false }"
                      x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                      class="text-start text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="long && !expanded" x-cloak>{{ $descPreview }}</div>
@@ -270,7 +270,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                   <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ $role->customLabel('show_more') }}
                   </button>
-                  <button x-show="long && expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                  <button x-show="long && expanded" x-cloak @click="expanded = false" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                     {{ $role->customLabel('show_less') }}
                   </button>
                 </div>
@@ -457,7 +457,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
               @php $descPreviewDesktop = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...'); @endphp
-              <div x-data="{ expanded: false, long: false, collapse() { if (window.scrollY < 5) { this.expanded = false; return; } window.scrollTo({ top: 0, behavior: 'smooth' }); let f = 0; const check = () => { if (window.scrollY < 5 || f++ > 300) this.expanded = false; else requestAnimationFrame(check); }; requestAnimationFrame(check); } }"
+              <div x-data="{ expanded: false, long: false }"
                    x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
                    class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <div x-show="long && !expanded" x-cloak>{{ $descPreviewDesktop }}</div>
@@ -467,7 +467,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                 <button x-show="long && !expanded" x-cloak @click="expanded = true" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                   {{ $role->customLabel('show_more') }}
                 </button>
-                <button x-show="long && expanded" x-cloak @click="collapse()" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
+                <button x-show="long && expanded" x-cloak @click="expanded = false" class="text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap mt-1">
                   {{ $role->customLabel('show_less') }}
                 </button>
               </div>

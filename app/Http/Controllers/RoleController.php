@@ -3631,6 +3631,11 @@ class RoleController extends Controller
             );
         }
 
+        // Owners/editors can preview the guest import form for their own schedule
+        if (auth()->user()->isEditor($subdomain)) {
+            return redirect(route('event.guest_import', ['subdomain' => $role->subdomain]));
+        }
+
         session(['pending_request' => $subdomain]);
         session(['pending_request_allow_guest' => ! $role->require_account]);
         session(['pending_request_form' => 'import']);

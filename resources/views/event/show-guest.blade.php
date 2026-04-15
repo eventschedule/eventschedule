@@ -824,7 +824,7 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="desktop-cta-buttons" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canAcceptRsvp($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
@@ -1051,9 +1051,42 @@
             if (!form) return;
 
             var paramKey = form.querySelector('#ticket-selector') ? 'tickets' : 'rsvp';
+            var desktopCta = document.getElementById('desktop-cta-buttons');
+            var mobileCta = document.getElementById('mobile-cta-bar');
+
+            function hideCta() {
+                if (desktopCta) { desktopCta.style.display = 'none'; }
+                if (mobileCta) { mobileCta.style.display = 'none'; }
+            }
+
+            function showCta() {
+                if (desktopCta) { desktopCta.style.display = ''; }
+                if (mobileCta) { mobileCta.style.display = ''; }
+            }
+
+            function hidePanelsBelow() {
+                var sibling = form.nextElementSibling;
+                while (sibling) {
+                    if (sibling.tagName !== 'SCRIPT') {
+                        sibling.setAttribute('data-hidden-by-form', '1');
+                        sibling.style.display = 'none';
+                    }
+                    sibling = sibling.nextElementSibling;
+                }
+            }
+
+            function showPanelsBelow() {
+                var els = form.parentNode.querySelectorAll('[data-hidden-by-form]');
+                for (var i = 0; i < els.length; i++) {
+                    els[i].removeAttribute('data-hidden-by-form');
+                    els[i].style.display = '';
+                }
+            }
 
             function showForm() {
                 form.style.display = '';
+                hideCta();
+                hidePanelsBelow();
                 requestAnimationFrame(function() {
                     form.style.opacity = '1';
                     form.style.transform = 'none';
@@ -1075,6 +1108,8 @@
                 setTimeout(function() {
                     form.style.display = 'none';
                 }, 200);
+                showCta();
+                showPanelsBelow();
                 var url = new URL(window.location);
                 url.searchParams.delete(paramKey);
                 history.replaceState(null, '', url);
@@ -1088,6 +1123,8 @@
                 form.style.opacity = '0';
                 form.style.transform = 'translateY(-8px)';
                 form.style.display = '';
+                hideCta();
+                hidePanelsBelow();
                 requestAnimationFrame(function() {
                     form.style.opacity = '1';
                     form.style.transform = 'none';
@@ -1994,7 +2031,7 @@
   </main>
 
   {{-- Sticky mobile CTA --}}
-  <div x-data="{ shareState: 'idle' }"
+  <div id="mobile-cta-bar" x-data="{ shareState: 'idle' }"
        class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
