@@ -141,6 +141,17 @@ class GoogleCalendarController extends Controller
                     ]);
                 }
             }
+            // Clear selected calendar and sync settings from all roles
+            $user->roles()->update([
+                'google_calendar_id' => null,
+                'sync_direction' => null,
+            ]);
+
+            // Clear Google event IDs from all event-role pivots
+            \DB::table('event_role')
+                ->whereIn('role_id', $user->roles()->pluck('roles.id'))
+                ->whereNotNull('google_event_id')
+                ->update(['google_event_id' => null]);
         } catch (\Exception $e) {
             Log::warning('Failed to clean up webhooks during Google Calendar disconnect', [
                 'user_id' => $user->id,
