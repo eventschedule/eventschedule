@@ -150,6 +150,7 @@ return [
     'sent_date' => 'Data di invio',
     'social_links' => 'Link Social',
     'social_link_clicks' => 'Clic sui link social',
+    'visitor_locations' => 'Posizioni dei visitatori',
     'add' => 'Aggiungi',
     'remove' => 'Rimuovi',
     'up' => 'Su',

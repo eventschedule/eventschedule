@@ -144,6 +144,9 @@ class AnalyticsController extends Controller
         // Get social link click stats
         $socialClickStats = $analytics->getSocialClickStats($user, $start, $end, $selectedRoleId);
 
+        // Get visitor locations
+        $locationBreakdown = $analytics->getLocationBreakdown($user, 10, $start, $end, $selectedRoleId);
+
         // Get boost views by period for chart overlay
         $boostStats = $analytics->getBoostStats($user, $start, $end, $selectedRoleId);
         $boostViewsByPeriod = $boostStats['has_data']
@@ -179,7 +182,8 @@ class AnalyticsController extends Controller
             'topUtmSources',
             'topUtmMediums',
             'topUtmCampaigns',
-            'socialClickStats'
+            'socialClickStats',
+            'locationBreakdown'
         ));
     }
 }

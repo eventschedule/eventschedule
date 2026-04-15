@@ -341,6 +341,18 @@ class AppController extends Controller
                 Cache::put('notified_pending_today', true, now()->endOfDay());
             }
 
+            // === MONTHLY ===
+            if (! Cache::has('td_monthly')) {
+                Cache::put('td_monthly', true, now()->addMonth());
+
+                try {
+                    \Artisan::call('app:update-geoip');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:update-geoip failed: '.$e->getMessage());
+                    report($e);
+                }
+            }
+
         } finally {
             $lock->release();
         }

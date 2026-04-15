@@ -697,7 +697,7 @@
             </div>
 
             {{-- Bar Charts Grid --}}
-            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty() || $socialClickStats->isNotEmpty())
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $locationBreakdown->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty() || $socialClickStats->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Top Events Chart --}}
                 @if ($topEvents->isNotEmpty())
@@ -749,6 +749,16 @@
                             <span class="inline-block w-2 h-2 rounded-full mt-1 flex-shrink-0" style="background-color: #6B7280;"></span>
                             <span><strong>{{ __('messages.other') }}:</strong> {{ __('messages.other_description') }}</span>
                         </div>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Visitor Locations Chart --}}
+                @if ($locationBreakdown->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.visitor_locations') }}</h3>
+                    <div class="h-64">
+                        <canvas id="locationsChart"></canvas>
                     </div>
                 </div>
                 @endif
@@ -1347,6 +1357,52 @@
                     legend: {
                         position: 'bottom',
                         labels: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($locationBreakdown->isNotEmpty())
+        // Visitor Locations Chart
+        const locationsCtx = document.getElementById('locationsChart').getContext('2d');
+        new Chart(locationsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($locationBreakdown->pluck('country_name')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($locationBreakdown->pluck('view_count')->toArray()),
+                    backgroundColor: '#10B981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
                             color: textColor
                         }
                     }

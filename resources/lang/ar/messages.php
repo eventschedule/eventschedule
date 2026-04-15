@@ -120,6 +120,7 @@ return [
     'sent_date' => 'تاريخ الإرسال',
     'social_links' => 'روابط اجتماعية',
     'social_link_clicks' => 'نقرات روابط التواصل الاجتماعي',
+    'visitor_locations' => 'مواقع الزوار',
     'add' => 'إضافة',
     'remove' => 'إزالة',
     'up' => 'أعلى',

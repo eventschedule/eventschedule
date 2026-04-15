@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\GeoIpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -273,6 +274,14 @@ class PageView
 
         // Increment schedule-level analytics
         AnalyticsDaily::incrementView($role->id, $deviceType);
+
+        // Track visitor location
+        if ($ip) {
+            $countryCode = app(GeoIpService::class)->lookup($ip);
+            if ($countryCode) {
+                AnalyticsLocationsDaily::incrementView($role->id, $countryCode);
+            }
+        }
 
         // Track referrer source (UTM overrides referrer categorization)
         $referrer = $request->header('referer');

@@ -133,3 +133,7 @@ Schedule::call(function () {
         Artisan::call('app:process-referral-credits');
     }
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('app:update-geoip');
+})->monthly()->appendOutputTo(storage_path('logs/scheduler.log'));

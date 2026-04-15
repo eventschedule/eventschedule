@@ -147,6 +147,7 @@ return [
     'sent_date' => 'Verzenddatum',
     'social_links' => 'Sociale Links',
     'social_link_clicks' => 'Klikken op sociale links',
+    'visitor_locations' => 'Bezoekerslocaties',
     'add' => 'Toevoegen',
     'remove' => 'Verwijderen',
     'up' => 'Omhoog',

@@ -152,6 +152,7 @@ return [
     'sent_date' => 'Date d\'envoi',
     'social_links' => 'Liens sociaux',
     'social_link_clicks' => 'Clics sur les liens sociaux',
+    'visitor_locations' => 'Localisations des visiteurs',
     'add' => 'Ajouter',
     'remove' => 'Supprimer',
     'up' => 'Haut',

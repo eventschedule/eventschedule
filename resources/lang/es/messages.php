@@ -145,6 +145,7 @@ return [
     'sent_date' => 'Fecha de envío',
     'social_links' => 'Enlaces Sociales',
     'social_link_clicks' => 'Clics en enlaces sociales',
+    'visitor_locations' => 'Ubicaciones de visitantes',
     'add' => 'Agregar',
     'remove' => 'Eliminar',
     'up' => 'Subir',

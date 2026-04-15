@@ -153,6 +153,7 @@ return [
     'sent_date' => 'Data Trimiterii',
     'social_links' => 'Linkuri Sociale',
     'social_link_clicks' => 'Clicuri pe linkuri sociale',
+    'visitor_locations' => 'Locațiile vizitatorilor',
     'create_account' => 'Creează Cont',
     'continue_as_guest' => 'Continuă ca Vizitator',
     'event_created_guest' => 'Eveniment creat cu succes! Acum îl puteți vedea în program.',

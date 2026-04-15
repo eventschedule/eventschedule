@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
+use App\Models\AnalyticsLocationsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\AnalyticsSocialClicksDaily;
 use App\Models\AnalyticsUtmDaily;
+use App\Utils\CountryUtils;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Newsletter;
@@ -648,6 +650,34 @@ class AnalyticsService
             ->map(fn ($item) => [
                 'platform' => $item->platform,
                 'click_count' => (int) $item->click_count,
+            ]);
+    }
+
+    /**
+     * Get visitor location breakdown by country
+     */
+    public function getLocationBreakdown(User $user, int $limit, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsLocationsDaily::select(
+            'country_code',
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->groupBy('country_code')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($item) => [
+                'country_code' => $item->country_code,
+                'country_name' => CountryUtils::getName($item->country_code),
+                'view_count' => (int) $item->view_count,
             ]);
     }
 
