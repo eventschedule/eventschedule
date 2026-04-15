@@ -21,6 +21,10 @@ return [
     'followed_role' => 'Urmărești cu succes :name',
     'add_member' => 'Adaugă Membru',
     'member_added' => 'Membru adăugat cu succes',
+    'member_added_phone_failed' => 'Membru adăugat, dar numărul de telefon este deja utilizat. A fost trimisă o notificare prin e-mail în schimb.',
+    'member_added_sms_sent' => 'Membru adăugat cu succes. Invitație SMS trimisă.',
+    'member_added_email_failed' => 'Membru adăugat, dar adresa de e-mail nu a putut fi actualizată. Notificarea a fost trimisă la adresa de e-mail existentă.',
+    'member_added_different_email' => 'Membru adăugat. Notificarea a fost trimisă la adresa de e-mail înregistrată (:email).',
     'removed_member' => 'Membru eliminat cu succes',
     'edit_venue' => 'Editează Locația',
     'added_link' => 'Link adăugat cu succes',
@@ -2989,4 +2993,15 @@ return [
     'schedule_limit' => 'Ați atins numărul maxim de calendare.',
     'ai_import_ready' => 'Importul este gata',
     'ai_import_ready_body' => 'Evenimentele au fost analizate și sunt gata de verificare.',
+
+    // SMS invitations
+    'send_sms_to_notify_them' => 'Trimite un SMS pentru a-i notifica',
+    'sms_claim_message' => ':event - Gestionează-ți pagina: :url',
+    'sms_member_invite' => 'Ai fost adăugat la :name. Înregistrează-te aici: :url',
+    'phone_will_be_verified' => 'Numărul tău de telefon va fi verificat automat',
+    'account_exists_please_login' => 'Un cont cu acest număr de telefon există deja. Te rugăm să te autentifici.',
+    'member_already_signed_up' => 'Acest membru s-a înregistrat deja.',
+    'invite_link_expired' => 'Acest link de invitație a expirat sau nu mai este valid.',
+    'invite_phone_mismatch' => 'Această invitație a fost trimisă la un alt număr de telefon. Vă rugăm să vă conectați cu contul corect.',
+    'member_added_sms_email_not_updated' => 'Membru adăugat și invitație SMS trimisă, dar adresa de e-mail nu a putut fi actualizată.',
 ];

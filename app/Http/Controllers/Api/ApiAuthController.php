@@ -43,8 +43,7 @@ class ApiAuthController extends Controller
         // Check if email is already registered (allow stub users through)
         $existingUser = User::where('email', $email)->first();
         if ($existingUser) {
-            $isStub = is_null($existingUser->password) && is_null($existingUser->google_id) && is_null($existingUser->facebook_id);
-            if (! $isStub) {
+            if (! $existingUser->isStub()) {
                 return response()->json(['error' => 'Unable to send verification code'], 422);
             }
         }
@@ -136,8 +135,7 @@ class ApiAuthController extends Controller
         $existingUser = User::where('email', $email)->first();
 
         if ($existingUser) {
-            $isStub = is_null($existingUser->password) && is_null($existingUser->google_id) && is_null($existingUser->facebook_id);
-            if (! $isStub) {
+            if (! $existingUser->isStub()) {
                 return response()->json([
                     'error' => 'Validation failed',
                     'errors' => ['email' => ['Email is already registered']],

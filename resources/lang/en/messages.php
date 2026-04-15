@@ -21,6 +21,10 @@ return [
     'followed_role' => 'Successfully followed :name',
     'add_member' => 'Add Member',
     'member_added' => 'Successfully added member',
+    'member_added_phone_failed' => 'Member added but the phone number is already in use. Email notification was sent instead.',
+    'member_added_sms_sent' => 'Successfully added member. SMS invite sent.',
+    'member_added_email_failed' => 'Member added but the email could not be updated. Notification was sent to the existing email address.',
+    'member_added_different_email' => 'Member added. Notification was sent to their registered email address (:email).',
     'removed_member' => 'Successfully removed member',
     'edit_venue' => 'Edit Venue',
     'added_link' => 'Successfully added link',
@@ -2992,4 +2996,15 @@ return [
     'schedule_limit' => 'You have reached the maximum number of schedules.',
     'ai_import_ready' => 'AI Import Ready',
     'ai_import_ready_body' => 'Your events have been parsed and are ready for review.',
+
+    // SMS invitations
+    'send_sms_to_notify_them' => 'Send an SMS to notify them',
+    'sms_claim_message' => ':event - Manage your page: :url',
+    'sms_member_invite' => 'You\'ve been added to :name. Sign up here: :url',
+    'phone_will_be_verified' => 'Your phone number will be automatically verified',
+    'account_exists_please_login' => 'An account with this phone number already exists. Please log in.',
+    'member_already_signed_up' => 'This member has already signed up.',
+    'invite_link_expired' => 'This invite link has expired or is no longer valid.',
+    'invite_phone_mismatch' => 'This invite was sent to a different phone number. Please log in with the correct account.',
+    'member_added_sms_email_not_updated' => 'Member added and SMS invite sent, but the email address could not be updated.',
 ];

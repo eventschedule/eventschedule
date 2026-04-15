@@ -31,12 +31,24 @@
 @endphp
 
 <x-slot name="head">
+  <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
   <style {!! nonce_attr() !!}>
     [v-cloak] { display: none !important; }
     form button {
       min-width: 100px;
       min-height: 40px;
     }
+    .dark .iti {
+      --iti-dropdown-bg: #1e1e1e;
+      --iti-hover-color: #2d2d30;
+      --iti-border-color: #2d2d30;
+      --iti-dialcode-color: #9ca3af;
+      --iti-arrow-color: #d1d5db;
+    }
+    .dark .iti__dropdown-content { color: #d1d5db; }
+    .dark .iti__selected-dial-code { color: #d1d5db; }
+    .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
+    .iti:not(.iti--country-only) > .iti__country-container { padding: 0 0 0 4px !important; }
     
     /* Hide all sections except the first one by default */
     .section-content {
@@ -143,6 +155,7 @@
   </script>
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
+  <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
   <script {!! nonce_attr() !!}>
     // --- Global time helper functions (used by main event and parts) ---
     var use24hr = {{ $use24hr ? 'true' : 'false' }};
@@ -1592,17 +1605,33 @@
                                                 @blur="searchVenues" v-model="venueEmail" autocomplete="off" />
                                         </div>
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_email')" />
-                                        @if (config('app.hosted'))
-                                        <div v-if="(venueType === 'create_new' || (!selectedVenue.user_id && venueEmail)) && venueEmail" class="mt-2">
-                                            <div class="flex items-center">
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="venue_phone_input" :value="__('messages.phone_number')" />
+                                        <input type="hidden" name="venue_phone" v-model="venuePhone">
+                                        <input type="tel" id="venue_phone_input" ref="venuePhoneInput"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                            autocomplete="off" />
+                                    </div>
+
+                                    <div v-if="(venueType === 'create_new' || !selectedVenue.user_id) && ((venueEmail && isHosted) || (venuePhone && smsConfigured))" class="mb-6">
+                                        <div class="flex items-center">
+                                            <template v-if="venueEmail && isHosted">
                                                 <input id="send_email_to_venue" name="send_email_to_venue" type="checkbox" v-model="sendEmailToVenue"
                                                     class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                                 <label for="send_email_to_venue" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                     {{ __('messages.send_email_to_notify_them') }}
                                                 </label>
-                                            </div>
+                                            </template>
+                                            <template v-else-if="venuePhone && smsConfigured">
+                                                <input id="send_sms_to_venue" name="send_sms_to_venue" type="checkbox" v-model="sendSmsToVenue"
+                                                    class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                <label for="send_sms_to_venue" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.send_sms_to_notify_them') }}
+                                                </label>
+                                            </template>
                                         </div>
-                                        @endif
                                     </div>
 
                                     <div class="mb-6">
@@ -1745,6 +1774,7 @@
                             <div v-if="selectedMembers && selectedMembers.length > 0" class="mb-2">
                                 <div v-for="member in selectedMembers" :key="member.id" class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
                                     <input type="hidden" v-bind:name="'members[' + member.id + '][email]'" v-bind:value="member.email" />
+                                    <input type="hidden" v-bind:name="'members[' + member.id + '][phone]'" v-bind:value="member.phone" />
                                     <div v-show="editMemberId === member.id" class="w-full">
                                         <div class="mb-6">
                                             <x-input-label :value="__('messages.name') . ' *'" />
@@ -1760,9 +1790,18 @@
                                             <x-text-input v-bind:id="'edit_member_email_' + member.id"
                                                 v-bind:name="'members[' + member.id + '][email]'" type="email" class="me-2 block w-full"
                                                 v-model="selectedMembers.find(m => m.id === member.id).email" @keydown.enter.prevent="editMember()" autocomplete="off" />
-                                            @if (config('app.hosted'))
-                                            <div v-if="selectedMembers.find(m => m.id === member.id).email && !member.user_id" class="mt-2">
-                                                <div class="flex items-center">
+                                        </div>
+
+                                        <div class="mb-6">
+                                            <x-input-label :value="__('messages.phone_number')" />
+                                            <input type="tel" :id="'edit_member_phone_' + member.id"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                                @keydown.enter.prevent="editMember()" autocomplete="off" />
+                                        </div>
+
+                                        <div v-if="!member.user_id && ((selectedMembers.find(m => m.id === member.id).email && isHosted) || (selectedMembers.find(m => m.id === member.id).phone && smsConfigured))" class="mb-6">
+                                            <div class="flex items-center">
+                                                <template v-if="selectedMembers.find(m => m.id === member.id).email && isHosted">
                                                     <input type="checkbox"
                                                         :id="'send_email_to_edit_member_' + member.id"
                                                         :name="'send_email_to_members[' + selectedMembers.find(m => m.id === member.id).email + ']'"
@@ -1771,9 +1810,18 @@
                                                     <label :for="'send_email_to_edit_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                         {{ __('messages.send_email_to_notify_them') }}
                                                     </label>
-                                                </div>
+                                                </template>
+                                                <template v-else-if="selectedMembers.find(m => m.id === member.id).phone && smsConfigured">
+                                                    <input type="checkbox"
+                                                        :id="'send_sms_to_edit_member_' + member.id"
+                                                        :name="'send_sms_to_members[' + selectedMembers.find(m => m.id === member.id).phone + ']'"
+                                                        v-model="sendSmsToMembers[selectedMembers.find(m => m.id === member.id).phone]"
+                                                        class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                    <label :for="'send_sms_to_edit_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                        {{ __('messages.send_sms_to_notify_them') }}
+                                                    </label>
+                                                </template>
                                             </div>
-                                            @endif
                                         </div>
 
                                         <div class="mb-6">
@@ -1801,6 +1849,9 @@
                                                     <template v-if="member.email">
                                                         (<a :href="'mailto:' + member.email" class="hover:underline">@{{ member.email }}</a>)
                                                     </template>
+                                                    <template v-else-if="member.phone">
+                                                        (@{{ member.phone }})
+                                                    </template>
                                                 </span>
                                                 <a v-if="member.youtube_url" :href="member.youtube_url" target="_blank" class="ms-2">
                                                     <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1808,20 +1859,30 @@
                                                     </svg>
                                                 </a>
                                             </div>
-                                            @if (config('app.hosted'))
-                                            <div v-if="((member.id && member.id.toString().startsWith('new_')) || (!member.user_id)) && member.email" class="mt-2">
+                                            <div v-if="((member.id && member.id.toString().startsWith('new_')) || (!member.user_id)) && ((member.email && isHosted) || (member.phone && smsConfigured))" class="mt-2">
                                                 <div class="flex items-center">
-                                                    <input type="checkbox" 
-                                                        :id="'send_email_to_member_' + member.id" 
-                                                        :name="'send_email_to_members[' + member.email + ']'" 
-                                                        v-model="sendEmailToMembers[member.email]"
-                                                        class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
-                                                    <label :for="'send_email_to_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                                        {{ __('messages.send_email_to_notify_them') }}
-                                                    </label>
+                                                    <template v-if="member.email && isHosted">
+                                                        <input type="checkbox"
+                                                            :id="'send_email_to_member_' + member.id"
+                                                            :name="'send_email_to_members[' + member.email + ']'"
+                                                            v-model="sendEmailToMembers[member.email]"
+                                                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                        <label :for="'send_email_to_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                            {{ __('messages.send_email_to_notify_them') }}
+                                                        </label>
+                                                    </template>
+                                                    <template v-else-if="member.phone && smsConfigured">
+                                                        <input type="checkbox"
+                                                            :id="'send_sms_to_member_' + member.id"
+                                                            :name="'send_sms_to_members[' + member.phone + ']'"
+                                                            v-model="sendSmsToMembers[member.phone]"
+                                                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                        <label :for="'send_sms_to_member_' + member.id" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                            {{ __('messages.send_sms_to_notify_them') }}
+                                                        </label>
+                                                    </template>
                                                 </div>
                                             </div>
-                                            @endif
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <button v-if="!member.user_id" @click="editMember(member)" type="button" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
@@ -1886,9 +1947,19 @@
                                             @keydown.enter.prevent="addMember" @blur="searchMembers" v-model="memberEmail" autocomplete="off" />
                                         </div>
                                         <x-input-error class="mt-2" :messages="$errors->get('member_email')" />
-                                        @if (config('app.hosted'))
-                                        <div v-if="memberEmail" class="mt-2">
-                                            <div class="flex items-center">
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <x-input-label for="member_phone_input" :value="__('messages.phone_number')" />
+                                        <input type="hidden" v-model="memberPhone">
+                                        <input type="tel" id="member_phone_input" ref="memberPhoneInput"
+                                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                            autocomplete="off" />
+                                    </div>
+
+                                    <div v-if="(memberEmail && isHosted) || (memberPhone && smsConfigured)" class="mb-6">
+                                        <div class="flex items-center">
+                                            <template v-if="memberEmail && isHosted">
                                                 <input id="send_email_to_new_member"
                                                     type="checkbox"
                                                     v-model="sendEmailToNewMember"
@@ -1896,9 +1967,17 @@
                                                 <label for="send_email_to_new_member" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
                                                     {{ __('messages.send_email_to_notify_them') }}
                                                 </label>
-                                            </div>
+                                            </template>
+                                            <template v-else-if="memberPhone && smsConfigured">
+                                                <input id="send_sms_to_new_member"
+                                                    type="checkbox"
+                                                    v-model="sendSmsToNewMember"
+                                                    class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                <label for="send_sms_to_new_member" class="ms-3 block text-sm font-medium leading-6 text-gray-900 dark:text-gray-100">
+                                                    {{ __('messages.send_sms_to_notify_them') }}
+                                                </label>
+                                            </template>
                                         </div>
-                                        @endif
                                     </div>
 
                                     <div v-if="memberSearchResults.length" class="mb-6">
@@ -4266,8 +4345,11 @@
         memberSearchResults: [],
         selectedMember: "",
         editMemberId: "",
+        editMemberOriginalPhone: "",
+        editMemberOriginalEmail: "",
         memberEmail: "",
         memberName: "",
+        memberPhone: "",
         memberYoutubeUrl: "",
         showMemberTypeRadio: @json(empty($selectedMembers)),
         showVenueAddressFields: false,
@@ -4354,6 +4436,13 @@
         sendEmailToVenue: false,
         sendEmailToMembers: {},
         sendEmailToNewMember: false,
+        sendSmsToVenue: false,
+        sendSmsToMembers: {},
+        sendSmsToNewMember: false,
+        venuePhone: @json($selectedVenue ? $selectedVenue->phone : ''),
+        smsConfigured: @json(\App\Services\SmsService::isConfigured() && config('app.hosted')),
+        isHosted: @json(config('app.hosted')),
+        phoneInputInstances: {},
         eventParts: @json($event->exists ? $event->parts : ($clonedParts ?? [])).map((part, i) => ({
           uid: i,
           id: part.id || '',
@@ -4568,7 +4657,29 @@
           return;
         }
 
-        fetch(`{{ url('/search_roles') }}?type=venue&search=${encodeURIComponent(this.venueEmail)}`, {
+        fetch(`{{ url('/search-roles') }}?type=venue&search=${encodeURIComponent(this.venueEmail)}`, {
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+          }
+        })
+        .then(response => {
+          if (!response.ok) throw new Error('Request failed');
+          return response.json();
+        })
+        .then(data => {
+          this.venueSearchResults = data;
+        })
+        .catch(error => {
+          console.error('Error searching venues:', error);
+        });
+      },
+      searchVenueByPhone() {
+        if (!this.venuePhone || this.venuePhone.length < 8) {
+          return;
+        }
+
+        fetch(`{{ url('/search-roles') }}?type=venue&search=${encodeURIComponent(this.venuePhone)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -4589,6 +4700,7 @@
         this.selectedVenue = venue;
         this.venueName = venue.name;
         this.venueEmail = venue.email;
+        this.venuePhone = venue.phone || '';
         this.venueAddress1 = venue.address1;
         this.venueCity = venue.city;
         this.venueState = venue.state;
@@ -4616,13 +4728,23 @@
         }
 
         const emailInput = document.getElementById('member_email');
-        
+
         if (!emailInput.checkValidity()) {
           emailInput.reportValidity();
           return;
         }
 
-        fetch(`{{ url('/search_roles') }}?type=member&search=${encodeURIComponent(this.memberEmail)}`, {
+        this.searchMember(this.memberEmail);
+      },
+      searchByPhone() {
+        if (!this.memberPhone || this.memberPhone.length < 8) {
+          return;
+        }
+
+        this.searchMember(this.memberPhone);
+      },
+      searchMember(search) {
+        fetch(`{{ url('/search-roles') }}?type=member&search=${encodeURIComponent(search)}`, {
           headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json',
@@ -4642,39 +4764,81 @@
       selectMember(member) {
         if (! this.selectedMembers.some(m => m.id === member.id)) {
           this.selectedMembers.push(member);
-          // Initialize sendEmailToMembers for selected member if they don't have user_id and have email
-          if (!member.user_id && member.email) {
-            this.sendEmailToMembers[member.email] = false;
+          if (!member.user_id) {
+            if (member.email) {
+              this.sendEmailToMembers[member.email] = false;
+            } else if (member.phone) {
+              this.sendSmsToMembers[member.phone] = false;
+            }
           }
-        }        
+        }
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
+        this.memberPhone = "";
         this.memberYoutubeUrl = "";
+        this.sendSmsToNewMember = false;
+        this.destroyPhoneInput('member_phone_input');
         this.showMemberTypeRadio = false;
       },
       removeMember(member) {
         if (this.roleIsTalent && member.id === this.roleEncodedId) {
           return;
         }
+        if (this.editMemberId === member.id) {
+          this.destroyPhoneInput('edit_member_phone_' + member.id);
+          this.editMemberId = "";
+        }
         this.selectedMembers = this.selectedMembers.filter(m => m.id !== member.id);
-        // Remove from sendEmailToMembers
+        // Remove from sendEmailToMembers/sendSmsToMembers
         if (member.email && this.sendEmailToMembers[member.email] !== undefined) {
           delete this.sendEmailToMembers[member.email];
+        }
+        if (member.phone && this.sendSmsToMembers[member.phone] !== undefined) {
+          delete this.sendSmsToMembers[member.phone];
         }
         if (this.selectedMembers.length === 0) {
           this.showMemberTypeRadio = true;
         }
       },
+      migrateEditedMemberPreferences() {
+        var editedMember = this.selectedMembers.find(m => m.id === this.editMemberId);
+        if (!editedMember) return;
+        if (this.editMemberOriginalPhone && editedMember.phone !== this.editMemberOriginalPhone) {
+          if (this.sendSmsToMembers[this.editMemberOriginalPhone] !== undefined) {
+            if (editedMember.phone) {
+              this.sendSmsToMembers[editedMember.phone] = this.sendSmsToMembers[this.editMemberOriginalPhone];
+            }
+            delete this.sendSmsToMembers[this.editMemberOriginalPhone];
+          }
+        }
+        if (this.editMemberOriginalEmail && editedMember.email !== this.editMemberOriginalEmail) {
+          if (this.sendEmailToMembers[this.editMemberOriginalEmail] !== undefined) {
+            if (editedMember.email) {
+              this.sendEmailToMembers[editedMember.email] = this.sendEmailToMembers[this.editMemberOriginalEmail];
+            }
+            delete this.sendEmailToMembers[this.editMemberOriginalEmail];
+          }
+        }
+      },
       editMember(member) {
         if (member) {
+          if (this.editMemberId && this.editMemberId !== member.id) {
+            this.migrateEditedMemberPreferences();
+            this.destroyPhoneInput('edit_member_phone_' + this.editMemberId);
+          }
           this.showMemberTypeRadio = false;
           this.editMemberId = member.id;
+          this.editMemberOriginalPhone = member.phone || "";
+          this.editMemberOriginalEmail = member.email || "";
           this.$nextTick(() => {
             const memberNameInput = document.getElementById(`edit_member_name_${member.id}`);
             if (memberNameInput) {
               memberNameInput.focus();
             }
+            var editPhoneId = 'edit_member_phone_' + member.id;
+            var memberData = this.selectedMembers.find(m => m.id === member.id);
+            this.initPhoneInput(editPhoneId, (number) => { memberData.phone = number; }, memberData.phone);
           });
         } else {
            const memberNameInput = document.getElementById(`edit_member_name_${this.editMemberId}`);
@@ -4689,46 +4853,21 @@
             return;
           }
 
+          this.migrateEditedMemberPreferences();
+          this.destroyPhoneInput('edit_member_phone_' + this.editMemberId);
           this.editMemberId = "";
         }
-      },
-      addNewMember() {
-        const nameInput = document.getElementById('member_name');    
-        if (!nameInput.checkValidity()) {
-          nameInput.reportValidity();
-          return;
-        }
-
-        const youtubeInput = document.getElementById('member_youtube_url');
-        if (youtubeInput && youtubeInput.value && !youtubeInput.checkValidity()) {
-          youtubeInput.reportValidity();
-          return;
-        }
-
-        const newMember = {
-          id: 'new_' + Date.now(),
-          name: this.memberName,
-          email: this.memberEmail,
-          youtube_url: this.memberYoutubeUrl,
-        };
-
-        this.selectedMembers.push(newMember);
-        // Initialize sendEmailToMembers for new member using the checkbox value
-        if (newMember.email) {
-          this.sendEmailToMembers[newMember.email] = this.sendEmailToNewMember;
-        }
-        this.memberEmail = "";
-        this.memberName = "";
-        this.memberYoutubeUrl = "";
-        this.sendEmailToNewMember = false;
-        this.showMemberTypeRadio = false;
       },
       addExistingMember() {
         if (this.selectedMember && !this.selectedMembers.some(m => m.id === this.selectedMember.id)) {
           this.selectedMembers.push(this.selectedMember);
-          // Initialize sendEmailToMembers for selected member if they don't have user_id and have email
-          if (!this.selectedMember.user_id && this.selectedMember.email) {
-            this.sendEmailToMembers[this.selectedMember.email] = false;
+          // Initialize sendEmailToMembers/sendSmsToMembers for selected member
+          if (!this.selectedMember.user_id) {
+            if (this.selectedMember.email) {
+              this.sendEmailToMembers[this.selectedMember.email] = false;
+            } else if (this.selectedMember.phone) {
+              this.sendSmsToMembers[this.selectedMember.phone] = false;
+            }
           }
           this.$nextTick(() => {
             this.selectedMember = "";
@@ -4766,19 +4905,25 @@
           id: 'new_' + Date.now(),
           name: this.memberName,
           email: this.memberEmail,
+          phone: this.memberPhone,
           youtube_url: this.memberYoutubeUrl,
         };
 
         this.selectedMembers.push(newMember);
-        // Initialize sendEmailToMembers for new member using the checkbox value
+        // Initialize sendEmailToMembers/sendSmsToMembers for new member using the checkbox value
         if (newMember.email) {
           this.sendEmailToMembers[newMember.email] = this.sendEmailToNewMember;
+        } else if (newMember.phone) {
+          this.sendSmsToMembers[newMember.phone] = this.sendSmsToNewMember;
         }
         this.memberSearchResults = [];
         this.memberName = "";
         this.memberEmail = "";
+        this.memberPhone = "";
         this.memberYoutubeUrl = "";
         this.sendEmailToNewMember = false;
+        this.sendSmsToNewMember = false;
+        this.destroyPhoneInput('member_phone_input');
         this.showMemberTypeRadio = false;
       },
       setFocusBasedOnMemberType() {
@@ -4794,8 +4939,11 @@
       cancelAddMember() {
         this.memberName = "";
         this.memberEmail = "";
+        this.memberPhone = "";
         this.memberYoutubeUrl = "";
         this.memberSearchResults = [];
+        this.sendSmsToNewMember = false;
+        this.destroyPhoneInput('member_phone_input');
         this.showMemberTypeRadio = false;
       },
       showAddMemberForm() {
@@ -4805,6 +4953,49 @@
           this.memberType = 'create_new';
         }
         this.setFocusBasedOnMemberType();
+        this.$nextTick(() => {
+          this.initPhoneInput('member_phone_input', (number) => { this.memberPhone = number; });
+        });
+      },
+      initPhoneInput(inputId, callback, initialValue) {
+        var input = document.getElementById(inputId);
+        if (!input || this.phoneInputInstances[inputId]) return;
+        var iti = window.intlTelInput(input, {
+          utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
+          initialCountry: '{{ strtolower($role->country_code ?? 'us') }}',
+          separateDialCode: true,
+          strictMode: true,
+          nationalMode: false,
+          autoPlaceholder: 'off',
+        });
+        var wrapper = input.closest('.iti');
+        if (wrapper) {
+          wrapper.style.setProperty('display', 'block', 'important');
+          wrapper.style.setProperty('width', '100%', 'important');
+        }
+        if (initialValue) {
+          iti.setNumber(initialValue);
+        }
+        var updateFn = function() {
+          callback(iti.getNumber() || '');
+        };
+        input.addEventListener('change', updateFn);
+        input.addEventListener('input', updateFn);
+        input.addEventListener('countrychange', updateFn);
+        this.phoneInputInstances[inputId] = { iti: iti, updateFn: updateFn };
+      },
+      destroyPhoneInput(inputId) {
+        var instance = this.phoneInputInstances[inputId];
+        if (instance) {
+          var input = document.getElementById(inputId);
+          if (input && instance.updateFn) {
+            input.removeEventListener('change', instance.updateFn);
+            input.removeEventListener('input', instance.updateFn);
+            input.removeEventListener('countrychange', instance.updateFn);
+          }
+          instance.iti.destroy();
+          delete this.phoneInputInstances[inputId];
+        }
       },
       clearEventUrl() {
         this.event.event_url = "";
@@ -5931,28 +6122,55 @@
       hasIncompleteParticipantData() {
         return this.showMemberTypeRadio &&
           this.memberType === 'create_new' &&
-          (this.memberName.trim() || this.memberEmail.trim() || this.memberYoutubeUrl.trim());
+          (this.memberName.trim() || this.memberEmail.trim() || this.memberPhone.trim() || this.memberYoutubeUrl.trim());
       },
     },
     watch: {
       venueType() {
         this.venueEmail = "";
+        this.venuePhone = "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
+        this.destroyPhoneInput('venue_phone_input');
 
         this.$nextTick(() => {
             var ci = window.getCountryInput('venue_country_code');
             if (ci) ci.setCountry("{{ $role && $role->country_code ? $role->country_code : '' }}");
+            this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; });
         });
       },
       memberType() {
         this.memberSearchResults = [];
         this.memberEmail = "";
         this.memberName = "";
+        this.memberPhone = "";
+        this.destroyPhoneInput('member_phone_input');
+        if (this.memberType === 'create_new') {
+          this.$nextTick(() => {
+            this.initPhoneInput('member_phone_input', (number) => { this.memberPhone = number; });
+          });
+        }
+      },
+      memberPhone(newValue) {
+        clearTimeout(this._phoneSearchTimeout);
+        if (newValue && newValue.length >= 8) {
+          this._phoneSearchTimeout = setTimeout(() => {
+            this.searchByPhone();
+          }, 400);
+        }
+      },
+      venuePhone(newValue) {
+        clearTimeout(this._venuePhoneSearchTimeout);
+        if (newValue && newValue.length >= 8 && this.venueType === 'create_new') {
+          this._venuePhoneSearchTimeout = setTimeout(() => {
+            this.searchVenueByPhone();
+          }, 400);
+        }
       },
       selectedVenue() {
         this.venueName = this.selectedVenue ? this.selectedVenue.name : "";
         this.venueEmail = this.selectedVenue ? this.selectedVenue.email : "";
+        this.venuePhone = this.selectedVenue ? (this.selectedVenue.phone || '') : "";
         this.venueAddress1 = this.selectedVenue ? this.selectedVenue.address1 : "";
         this.venueCity = this.selectedVenue ? this.selectedVenue.city : "";
         this.venueState = this.selectedVenue ? this.selectedVenue.state : "";
@@ -5961,13 +6179,20 @@
         this.venueWebsite = this.selectedVenue ? this.selectedVenue.website : "";
         this.venueSearchEmail = "";
         this.venueSearchResults = [];
+        this.destroyPhoneInput('venue_phone_input');
+        this.$nextTick(() => {
+          this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+        });
       },
       isInPerson(newValue) {
         this.savePreferences();
         if (newValue) {
           this.$nextTick(() => {
             window.initCountryInput('venue_country_code', this.venueCountryCode);
+            this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
           });
+        } else {
+          this.destroyPhoneInput('venue_phone_input');
         }
       },
       isOnline(newValue) {
@@ -5982,15 +6207,16 @@
             this.eventName = newValue[0].name;
           }
           
-          // Clean up sendEmailToMembers for removed members
-          // Note: Email changes are handled by the checkbox binding using the current email
+          // Clean up sendEmailToMembers/sendSmsToMembers for removed members
           if (oldValue && Array.isArray(oldValue)) {
             oldValue.forEach(oldMember => {
               const newMember = newValue.find(m => m.id === oldMember.id);
-              if (!newMember && oldMember.email) {
-                // Member was removed - clean up
-                if (this.sendEmailToMembers[oldMember.email] !== undefined) {
+              if (!newMember) {
+                if (oldMember.email && this.sendEmailToMembers[oldMember.email] !== undefined) {
                   delete this.sendEmailToMembers[oldMember.email];
+                }
+                if (oldMember.phone && this.sendSmsToMembers[oldMember.phone] !== undefined) {
+                  delete this.sendSmsToMembers[oldMember.phone];
                 }
               }
             });
@@ -6100,10 +6326,21 @@
         self.initAllTicketSalesEndDatePickers();
       });
       
-      // Initialize sendEmailToMembers for existing selectedMembers
+      // Initialize venue phone input if venue section is visible
+      if (this.isInPerson) {
+        this.$nextTick(() => {
+          this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+        });
+      }
+
+      // Initialize sendEmailToMembers/sendSmsToMembers for existing selectedMembers
       this.selectedMembers.forEach(member => {
-        if (((member.id && member.id.toString().startsWith('new_')) || !member.user_id) && member.email) {
-          this.sendEmailToMembers[member.email] = false;
+        if ((member.id && member.id.toString().startsWith('new_')) || !member.user_id) {
+          if (member.email) {
+            this.sendEmailToMembers[member.email] = false;
+          } else if (member.phone) {
+            this.sendSmsToMembers[member.phone] = false;
+          }
         }
       });
 

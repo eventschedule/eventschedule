@@ -12,6 +12,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Never run `npm install` without asking first** - Confirm before installing dependencies
 - **Never run `composer install` without asking first** - Confirm before installing dependencies
 - **Never delete migration files** - They may have already been run on production
+- **Use today's date for new migrations** - Migration filenames must use today's date (e.g. `2026_04_15_000000_`), never a future or past date
 - **Use "selfhost" not "self-host"** - Always write "selfhost" and "selfhosted" (no hyphen) except for "self-hosting"
 - **Keep the sitemap up-to-date** - When adding new pages, add them to `resources/views/sitemap.blade.php`
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)

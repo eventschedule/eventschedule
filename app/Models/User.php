@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -108,6 +109,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
         static::saving(function ($model) {
             $model->email = strtolower($model->email);
+            if ($model->phone) {
+                $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
+            }
             if (! config('app.hosted') && $model->isDirty('phone')) {
                 $model->phone_verified_at = $model->phone ? now() : null;
             }
@@ -289,6 +293,85 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Webhook::class);
     }
 
+    public function claimRolesByPhone(string $phone): bool
+    {
+        $phone = \App\Utils\PhoneUtils::normalize($phone);
+        if (! $phone) {
+            return false;
+        }
+
+        $claimed = false;
+
+        DB::transaction(function () use ($phone, &$claimed) {
+            // Clear phone from other users first to maintain uniqueness
+            $phoneMatchUsers = User::where('phone', $phone)
+                ->where('id', '!=', $this->id)
+                ->whereNull('password')
+                ->whereNull('google_id')
+                ->whereNull('google_oauth_id')
+                ->whereNull('facebook_id')
+                ->lockForUpdate()
+                ->get();
+
+            // The query above already filters for stub users (all auth fields null),
+            // so every user in this collection is guaranteed to be a stub
+            foreach ($phoneMatchUsers as $phoneUser) {
+                foreach ($phoneUser->roles()->withPivot('level')->get() as $role) {
+                    if (! $this->roles()->where('roles.id', $role->id)->exists()) {
+                        $this->roles()->attach($role->id, ['level' => $role->pivot->level, 'created_at' => now()]);
+                        $claimed = true;
+                    }
+                }
+                $phoneUser->roles()->detach();
+                $phoneUser->default_role_id = null;
+                $phoneUser->password = null;
+                $phoneUser->phone = null;
+                $phoneUser->phone_verified_at = null;
+                $phoneUser->saveQuietly();
+            }
+
+            // Use saveQuietly to bypass boot hooks that null phone_verified_at when phone changes
+            // Skip if user already has a different verified phone to avoid silent overwrite
+            if ($this->phone && $this->phone !== $phone && $this->hasVerifiedPhone()) {
+                // Keep existing phone, still claim roles below
+            } else {
+                try {
+                    $this->phone = $phone;
+                    $this->phone_verified_at = now();
+                    $this->saveQuietly();
+                } catch (\Illuminate\Database\QueryException $e) {
+                    // Phone uniqueness conflict - skip setting phone but continue claiming roles
+                    report($e);
+                    $this->refresh();
+                }
+            }
+
+            // Claim unclaimed schedules (Role records) with this phone
+            $phoneClaims = Role::where('phone', $phone)
+                ->whereNull('user_id')
+                ->where('created_at', '>=', now()->subYear())
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($phoneClaims as $claimRole) {
+                $claimRole->user_id = $this->id;
+                $claimRole->phone_verified_at = now();
+                $claimRole->save();
+
+                $this->roles()->syncWithoutDetaching([$claimRole->id => ['level' => 'owner', 'created_at' => now()]]);
+
+                if (! $this->default_role_id) {
+                    $this->default_role_id = $claimRole->id;
+                    $this->saveQuietly();
+                }
+
+                $claimed = true;
+            }
+        });
+
+        return $claimed;
+    }
+
     public function isMember($subdomain): bool
     {
         return $this->member()->where('subdomain', $subdomain)->exists();
@@ -411,6 +494,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasVerifiedPhone(): bool
     {
         return ! is_null($this->phone_verified_at);
+    }
+
+    public function isStub(): bool
+    {
+        return is_null($this->password)
+            && is_null($this->google_id)
+            && is_null($this->google_oauth_id)
+            && is_null($this->facebook_id);
     }
 
     /**

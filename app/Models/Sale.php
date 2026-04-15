@@ -50,6 +50,12 @@ class Sale extends Model
 
     protected static function booted()
     {
+        static::saving(function ($sale) {
+            if ($sale->phone) {
+                $sale->phone = \App\Utils\PhoneUtils::normalize($sale->phone);
+            }
+        });
+
         static::updated(function ($sale) {
             if ($sale->isDirty('status') && $sale->status === 'paid') {
                 TicketWaitlist::where('event_id', $sale->event_id)

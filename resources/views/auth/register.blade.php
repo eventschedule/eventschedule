@@ -457,6 +457,15 @@
         <div id="registration-fields" style="display: none;">
         @endif
 
+        @if(!empty($smsPhone))
+            <input type="hidden" name="sms_token" value="{{ old('sms_token', session('sms_token', request('sms_token'))) }}">
+            <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                <p class="text-sm text-green-700 dark:text-green-300">
+                    {{ __('messages.phone_will_be_verified') }}: {{ $smsPhone }}
+                </p>
+            </div>
+        @endif
+
         <!-- Email Address -->
         <div class="mt-4">
             <x-input-label for="email" :value="__('messages.email')" />

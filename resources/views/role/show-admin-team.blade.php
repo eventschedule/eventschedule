@@ -63,7 +63,10 @@
                                     <a href="mailto:{{ $member->email }}" class="hover:text-gray-700 dark:hover:text-gray-300">{{ $member->email }}</a>
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                    @if ($isOwner && $member->pivot->level != 'owner' && $member->email_verified_at)
+                                    @php
+                                        $hasActuallySignedUp = ! $member->isStub();
+                                    @endphp
+                                    @if ($isOwner && $member->pivot->level != 'owner' && $hasActuallySignedUp)
                                         <form method="POST" action="{{ route('role.update_member_level', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" class="inline">
                                             @csrf
                                             @method('PATCH')
@@ -73,15 +76,28 @@
                                                 <option value="viewer" {{ $member->pivot->level == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>
                                             </select>
                                         </form>
-                                    @elseif ($member->email_verified_at)
+                                    @elseif ($hasActuallySignedUp)
                                         {{ __('messages.' . strtolower($member->pivot->level)) }}
                                     @else
-                                        <a href="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}">
-                                            <button type="button"
-                                                class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                                {{ __('messages.resend_invite') }}
-                                            </button>
-                                        </a>
+                                        <div class="flex items-center gap-2">
+                                            <form method="POST" action="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                    {{ __('messages.resend_invite') }}
+                                                </button>
+                                            </form>
+                                            @if ($member->phone && \App\Services\SmsService::isConfigured() && config('app.hosted'))
+                                                <form method="POST" action="{{ route('role.resend_invite', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" class="inline">
+                                                    @csrf
+                                                    <input type="hidden" name="via" value="sms">
+                                                    <button type="submit"
+                                                        class="inline-flex items-center rounded-lg bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                                        SMS
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                                 <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">

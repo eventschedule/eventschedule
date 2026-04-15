@@ -8,6 +8,7 @@ use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\RoleVideoSaveRequest;
 use App\Http\Requests\RoleVideosSaveRequest;
+use App\Jobs\SendQueuedSms;
 use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
@@ -34,6 +35,7 @@ use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
+use App\Utils\PhoneUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -43,6 +45,7 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -1398,15 +1401,45 @@ class RoleController extends Controller
         $data = $request->validated();
         $user = User::whereEmail($data['email'])->first();
 
+        $userFoundByPhone = false;
+        if (! $user && ! empty($data['phone'])) {
+            $user = User::where('phone', PhoneUtils::normalize($data['phone']))->first();
+            if ($user) {
+                $userFoundByPhone = true;
+            }
+        }
+
         if ($user && $user->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.member_already_exists'));
         }
 
+        // Update stub's email to match admin input so the invite goes to the right address
+        // (after membership check to avoid side effects on early return)
+        // Only update if the stub has no other team memberships (besides this schedule) to avoid corrupting another invite
+        $emailUpdateFailed = false;
+        if ($user && $userFoundByPhone && ! empty($data['phone']) && $user->isStub() && $user->email !== strtolower($data['email'])) {
+            if ($user->roles()->where('roles.id', '!=', $role->id)->count() === 0) {
+                try {
+                    $user->email = strtolower($data['email']);
+                    $user->saveQuietly();
+                } catch (\Illuminate\Database\QueryException $e) {
+                    report($e);
+                    $user->refresh();
+                    $emailUpdateFailed = true;
+                }
+            } else {
+                $emailUpdateFailed = true;
+            }
+        }
+
+        $isNewStub = false;
+        $phoneAssignFailed = false;
         if (! $user) {
+            $isNewStub = true;
             $user = new User;
-            $user->email = $data['email'];
+            $user->email = strtolower($data['email']);
             $user->name = $data['name'];
-            $user->password = bcrypt(Str::random(32));
+            $user->password = null;
             $user->timezone = $request->user()->timezone;
             $user->language_code = $request->user()->language_code;
 
@@ -1414,7 +1447,39 @@ class RoleController extends Controller
                 $user->email_verified_at = now();
             }
 
-            $user->save();
+            if (! empty($data['phone'])) {
+                $user->phone = $data['phone'];
+            }
+
+            try {
+                $user->save();
+            } catch (\Illuminate\Database\QueryException $e) {
+                if (! empty($data['phone'])) {
+                    report($e);
+                    $user->phone = null;
+                    try {
+                        $user->save();
+                    } catch (\Illuminate\Database\QueryException $e2) {
+                        throw $e;
+                    }
+                    $phoneAssignFailed = true;
+                } else {
+                    throw $e;
+                }
+            }
+        } elseif (! $user->phone && ! empty($data['phone'])) {
+            if (! User::where('phone', PhoneUtils::normalize($data['phone']))->where('id', '!=', $user->id)->exists()) {
+                try {
+                    $user->phone = $data['phone'];
+                    $user->save();
+                } catch (\Illuminate\Database\QueryException $e) {
+                    report($e);
+                    $user->refresh();
+                    $phoneAssignFailed = true;
+                }
+            } else {
+                $phoneAssignFailed = true;
+            }
         }
 
         $level = in_array($request->input('level'), ['admin', 'viewer']) ? $request->input('level') : 'admin';
@@ -1431,12 +1496,45 @@ class RoleController extends Controller
             $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
         }
 
-        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        $sendSms = $user->phone && SmsService::isConfigured() && config('app.hosted')
+            && ($isNewStub || $userFoundByPhone)
+            && ($isNewStub || (! $user->email_verified_at && ! $user->hasVerifiedPhone()));
+        if ($sendSms) {
+            $token = Str::random(40);
+            Cache::put('sms_signup_'.$token, $user->phone, now()->addDays(30));
+            $signupUrl = route('sign_up', ['sms_token' => $token]);
+            $safeName = str_replace(["\r", "\n"], ' ', Str::limit($role->name, 60));
+            $message = __('messages.sms_member_invite', ['name' => $safeName, 'url' => $signupUrl]);
+            SendQueuedSms::dispatch($user->phone, $message);
+        } else {
+            Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        }
 
-        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $user->email);
+        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $sendSms ? 'sms:'.$user->phone : $user->email);
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
-            ->with('message', __('messages.member_added'));
+        $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
+
+        if ($phoneAssignFailed) {
+            return $redirect->with('warning', __('messages.member_added_phone_failed'));
+        }
+
+        if ($sendSms) {
+            if ($emailUpdateFailed) {
+                return $redirect->with('warning', __('messages.member_added_sms_email_not_updated'));
+            }
+
+            return $redirect->with('message', __('messages.member_added_sms_sent'));
+        }
+
+        if ($emailUpdateFailed) {
+            return $redirect->with('warning', __('messages.member_added_email_failed'));
+        }
+
+        if ($userFoundByPhone && ! $user->isStub() && $user->email !== strtolower($data['email'])) {
+            return $redirect->with('warning', __('messages.member_added_different_email', ['email' => $user->email]));
+        }
+
+        return $redirect->with('message', __('messages.member_added'));
     }
 
     public function removeMember(Request $request, $subdomain, $hash)
@@ -3557,11 +3655,9 @@ class RoleController extends Controller
 
     public function resendInvite(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isEditor($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $this->authorize('manageMembers', $role);
         $userId = UrlUtils::decodeId($hash);
         $user = User::findOrFail($userId);
 
@@ -3570,7 +3666,24 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        // Don't resend if user has already signed up
+        if (! $user->isStub()) {
+            return redirect()->back()->with('error', __('messages.member_already_signed_up'));
+        }
+
+        // Send SMS if user has phone and SMS is configured, otherwise send email
+        if ($request->input('via') === 'sms' && $user->phone && SmsService::isConfigured() && config('app.hosted')) {
+            $token = Str::random(40);
+            Cache::put('sms_signup_'.$token, $user->phone, now()->addDays(30));
+            $signupUrl = route('sign_up', ['sms_token' => $token]);
+            $safeName = str_replace(["\r", "\n"], ' ', Str::limit($role->name, 60));
+            $message = __('messages.sms_member_invite', ['name' => $safeName, 'url' => $signupUrl]);
+            SendQueuedSms::dispatch($user->phone, $message);
+
+            return redirect()->back()->with('message', __('messages.invite_resent'));
+        } else {
+            Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        }
 
         return redirect()->back()->with('message', __('messages.invite_resent'));
     }
@@ -3580,10 +3693,12 @@ class RoleController extends Controller
         $type = $request->type;
         $search = $request->search;
 
+        $normalizedPhone = PhoneUtils::normalize($search);
+
         $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['talent'])
-            ->where(function ($query) use ($search) {
-                $query->where('email', '=', $search);
-                // ->orWhere('phone', '=', $search)
+            ->where(function ($query) use ($search, $normalizedPhone) {
+                $query->where('email', '=', $search)
+                    ->orWhere('phone', '=', $normalizedPhone ?: $search);
                 // ->orWhere('name', 'like', "%{$search}%");
             })
             ->get([
@@ -3596,6 +3711,7 @@ class RoleController extends Controller
                 'state',
                 'postal_code',
                 'email',
+                'phone',
                 'user_id',
                 'profile_image_url',
                 'country_code',

@@ -3,6 +3,7 @@
 namespace App\Repos;
 
 use App\Jobs\SendQueuedEmail;
+use App\Jobs\SendQueuedSms;
 use App\Mail\ClaimRole;
 use App\Mail\ClaimVenue;
 use App\Models\Event;
@@ -11,12 +12,14 @@ use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\SmsService;
 use App\Services\WebhookService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -134,12 +137,13 @@ class EventRepo
             $user = $currentRole->user;
         }
 
-        if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email || $request->venue_website) {
+        if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email || $request->venue_phone || $request->venue_website) {
             if (! $venue) {
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
                 $venue->name_en = $request->venue_name_en ?? null;
                 $venue->email = $request->venue_email ?? null;
+                $venue->phone = $request->venue_phone ?: null;
                 $venue->subdomain = Role::generateSubdomain($request->venue_name);
                 $venue->type = 'venue';
                 $venue->name = $request->venue_name ?? null;
@@ -164,6 +168,20 @@ class EventRepo
                 if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
                     $venue->user_id = $matchingUser->id;
                     $venue->email_verified_at = $matchingUser->email_verified_at;
+                    if ($venue->phone && $matchingUser->phone === $venue->phone) {
+                        $venue->phone_verified_at = $matchingUser->phone_verified_at;
+                    }
+                    $venue->save();
+
+                    $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+
+                    if (! $matchingUser->default_role_id) {
+                        $matchingUser->default_role_id = $venue->id;
+                        $matchingUser->save();
+                    }
+                } elseif ($venue->phone && $matchingUser = User::where('phone', $venue->phone)->whereNotNull('phone_verified_at')->first()) {
+                    $venue->user_id = $matchingUser->id;
+                    $venue->phone_verified_at = $matchingUser->phone_verified_at;
                     $venue->save();
 
                     $matchingUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
@@ -181,6 +199,7 @@ class EventRepo
                 if ($request->venue_email) {
                     $venue->email = $request->venue_email;
                 }
+                $venue->phone = $request->venue_phone ?: null;
 
                 $venue->name = $request->venue_name ?? null;
                 $venue->address1 = $request->venue_address1;
@@ -203,6 +222,7 @@ class EventRepo
                     $role = new Role;
                     $role->name = $member['name'];
                     $role->email = isset($member['email']) && $member['email'] !== '' ? $member['email'] : null;
+                    $role->phone = isset($member['phone']) && $member['phone'] !== '' ? $member['phone'] : null;
                     $role->subdomain = Role::generateSubdomain($member['name']);
                     $role->type = $request->role_type ? $request->role_type : 'talent';
                     $role->timezone = $currentRole->timezone;
@@ -227,9 +247,22 @@ class EventRepo
                     $role->save();
                     $role->refresh();
 
-                    if ($matchingUser = User::whereEmail($role->email)->first()) {
+                    $matchingUser = null;
+                    if ($role->email) {
+                        $matchingUser = User::whereEmail($role->email)->first();
+                    }
+                    if (! $matchingUser && $role->phone) {
+                        $matchingUser = User::where('phone', $role->phone)->whereNotNull('phone_verified_at')->first();
+                    }
+
+                    if ($matchingUser) {
                         $role->user_id = $matchingUser->id;
-                        $role->email_verified_at = $matchingUser->email_verified_at;
+                        if ($role->email && $matchingUser->email === $role->email) {
+                            $role->email_verified_at = $matchingUser->email_verified_at;
+                        }
+                        if ($role->phone && $matchingUser->phone === $role->phone) {
+                            $role->phone_verified_at = $matchingUser->phone_verified_at;
+                        }
                         $role->save();
                         $matchingUser->roles()->attach($role->id, ['level' => 'owner', 'created_at' => now()]);
 
@@ -253,6 +286,10 @@ class EventRepo
 
                         if (! empty($member['email'])) {
                             $role->email = $member['email'];
+                        }
+
+                        if (! empty($member['phone'])) {
+                            $role->phone = $member['phone'];
                         }
 
                         $links = $role->youtube_links ? json_decode($role->youtube_links, true) : [];
@@ -750,20 +787,25 @@ class EventRepo
 
         if (config('app.hosted') && ! $event->is_draft) {
             $sendEmailToMembers = $request->input('send_email_to_members', []);
+            $sendSmsToMembers = $request->input('send_sms_to_members', []);
 
             foreach ($roles as $role) {
-                if (! $role->isClaimed() && $role->is_subscribed && $role->email) {
+                if (! $role->isClaimed() && $role->is_subscribed) {
                     $shouldSendEmail = false;
+                    $shouldSendSms = false;
 
-                    if ($role->isVenue()) {
-                        // Check if send_email_to_venue checkbox is checked
-                        // Checkbox values can be "1", "on", or true - all are truthy
-                        $shouldSendEmail = ! empty($request->input('send_email_to_venue', false));
-                    } elseif ($role->isTalent()) {
-                        // Check if this role's email is in the send_email_to_members array
-                        // The array uses email addresses as keys
-                        // Checkbox values can be "1", "on", or true - all are truthy
-                        $shouldSendEmail = ! empty($sendEmailToMembers[$role->email]);
+                    if ($role->email) {
+                        if ($role->isVenue()) {
+                            $shouldSendEmail = ! empty($request->input('send_email_to_venue', false));
+                        } elseif ($role->isTalent()) {
+                            $shouldSendEmail = ! empty($sendEmailToMembers[$role->email]);
+                        }
+                    } elseif ($role->phone && SmsService::isConfigured()) {
+                        if ($role->isVenue()) {
+                            $shouldSendSms = ! empty($request->input('send_sms_to_venue', false));
+                        } elseif ($role->isTalent()) {
+                            $shouldSendSms = ! empty($sendSmsToMembers[$role->phone]);
+                        }
                     }
 
                     if ($shouldSendEmail) {
@@ -778,6 +820,13 @@ class EventRepo
                                 $role->email
                             );
                         }
+                    } elseif ($shouldSendSms) {
+                        $token = Str::random(40);
+                        Cache::put('sms_signup_'.$token, $role->phone, now()->addDays(30));
+                        $url = route('sign_up', ['sms_token' => $token]);
+                        $eventName = str_replace(["\r", "\n"], ' ', Str::limit($event->name, 60));
+                        $message = __('messages.sms_claim_message', ['event' => $eventName, 'url' => $url]);
+                        SendQueuedSms::dispatch($role->phone, $message);
                     }
                 }
             }

@@ -21,6 +21,10 @@ return [
     'followed_role' => 'Suivi avec succès :name',
     'add_member' => 'Ajouter un membre',
     'member_added' => 'Membre ajouté avec succès',
+    'member_added_phone_failed' => 'Membre ajouté, mais le numéro de téléphone est déjà utilisé. Une notification par e-mail a été envoyée à la place.',
+    'member_added_sms_sent' => 'Membre ajouté avec succès. Invitation par SMS envoyée.',
+    'member_added_email_failed' => 'Membre ajouté, mais l\'adresse e-mail n\'a pas pu être mise à jour. La notification a été envoyée à l\'adresse e-mail existante.',
+    'member_added_different_email' => 'Membre ajouté. La notification a été envoyée à son adresse e-mail enregistrée (:email).',
     'removed_member' => 'Membre supprimé avec succès',
     'edit_venue' => 'Modifier le lieu',
     'added_link' => 'Lien ajouté avec succès',
@@ -2955,4 +2959,15 @@ return [
     'schedule_limit' => 'Vous avez atteint le nombre maximum de calendriers.',
     'ai_import_ready' => 'Importation terminée',
     'ai_import_ready_body' => 'Vos événements ont été analysés et sont prêts à être vérifiés.',
+
+    // SMS invitations
+    'send_sms_to_notify_them' => 'Envoyer un SMS pour les notifier',
+    'sms_claim_message' => ':event - Gérez votre page : :url',
+    'sms_member_invite' => 'Vous avez été ajouté à :name. Inscrivez-vous ici : :url',
+    'phone_will_be_verified' => 'Votre numéro de téléphone sera vérifié automatiquement',
+    'account_exists_please_login' => 'Un compte avec ce numéro de téléphone existe déjà. Veuillez vous connecter.',
+    'member_already_signed_up' => 'Ce membre s\'est déjà inscrit.',
+    'invite_link_expired' => 'Ce lien d\'invitation a expiré ou n\'est plus valide.',
+    'invite_phone_mismatch' => 'Cette invitation a été envoyée à un autre numéro de téléphone. Veuillez vous connecter avec le bon compte.',
+    'member_added_sms_email_not_updated' => 'Membre ajouté et invitation par SMS envoyée, mais l\'adresse e-mail n\'a pas pu être mise à jour.',
 ];

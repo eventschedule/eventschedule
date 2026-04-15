@@ -174,6 +174,9 @@ class Role extends Model implements MustVerifyEmail
             if ($model->email) {
                 $model->email = strtolower($model->email);
             }
+            if ($model->phone) {
+                $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
+            }
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
