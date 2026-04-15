@@ -117,7 +117,7 @@ class ApiScheduleController extends Controller
 
         $user = auth()->user();
 
-        if (config('app.hosted') && $user->roles()->where('is_deleted', false)->count() >= 50) {
+        if (config('app.hosted') && $user->owner()->count() >= 50) {
             return response()->json(['error' => __('messages.schedule_limit')], 422);
         }
 

@@ -192,7 +192,7 @@ class HomeController extends Controller
             $trafficSources = $analyticsService->getTopReferrerDomains($user, $trafficCount, $trafficStart, $now);
         }
 
-        $canCreateSchedule = ! config('app.hosted') || $user->roles()->where('is_deleted', false)->count() < 50;
+        $canCreateSchedule = ! config('app.hosted') || $user->owner()->count() < 50;
 
         $allRoles = app('userRoles');
         $schedules = $allRoles->where('type', 'talent')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);

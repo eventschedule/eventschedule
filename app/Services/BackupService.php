@@ -1036,7 +1036,7 @@ class BackupService
 
         if (config('app.hosted')) {
             $user = \App\Models\User::find($userId);
-            if ($user && $user->roles()->where('is_deleted', false)->count() >= 50) {
+            if ($user && $user->owner()->count() >= 50) {
                 throw new \Exception(__('messages.schedule_limit'));
             }
         }
