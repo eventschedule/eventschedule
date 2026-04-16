@@ -109,9 +109,14 @@ class ProfileTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('button[data-tab="general"]', 5)
                 ->click('button[data-tab="general"]')
-                ->waitFor('#name', 5)
-                ->clear('name')
-                ->type('name', 'New Name');
+                ->waitFor('#name', 5);
+
+            $browser->script("
+                var input = document.getElementById('name');
+                input.value = 'New Name';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            ");
+
             $browser->script("document.querySelector('#section-profile form').requestSubmit()");
             $browser->waitForText('Saved', 15);
 

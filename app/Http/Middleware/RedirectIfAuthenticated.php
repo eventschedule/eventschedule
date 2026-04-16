@@ -48,6 +48,20 @@ class RedirectIfAuthenticated
                     return redirect(route('home'))->with('warning', __('messages.invite_link_expired'));
                 }
 
+                // Custom-domain bounce: a guest hit /request on a custom domain (where
+                // the .eventschedule.com session cookie did not apply), got redirected
+                // here via redirect_with_pending_action(). Now that the cookie applies
+                // and we can see the user is already authenticated, restore the cached
+                // pending action and bounce to the subdomain /request URL so
+                // RoleController::request can route them correctly.
+                if ($request->query('pa')) {
+                    restore_pending_action();
+                    $pendingRequest = session('pending_request');
+                    if ($pendingRequest) {
+                        return redirect(route('role.request', ['subdomain' => $pendingRequest]));
+                    }
+                }
+
                 return redirect(route('home'));
             }
         }
