@@ -44,6 +44,7 @@ All users get these features with no subscription required.
 | Event cloning | Duplicate an existing event as a starting point for a new one |
 | Backup & restore | Export and import schedule data with optional images |
 | 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email) |
+| AI event parsing | `EventController::parse`, daily limit | Parse event details from text/images via Gemini (10/day free, 50/day pro, 100/day enterprise) |
 
 ## Pro Features
 
@@ -82,12 +83,11 @@ Gated by `$role->isEnterprise()`.
 
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
-| AI event parsing | `EventController:1019`, `$role->isEnterprise()` | Parse event details from text/images via Gemini |
+| Agenda scanning | `EventController::parseEventParts`, `$role->isEnterprise()` | Scan agendas to auto-create event parts |
 | AI flyer generation | `EventController`, `$role->isEnterprise()` | Generate event flyer images from event details via OpenAI DALL-E |
 | AI style generation | `RoleController`, `$role->isEnterprise()` | Generate cohesive schedule branding (profile/header/background images via OpenAI DALL-E, accent color and font via Gemini) |
 | AI schedule details generation | `RoleController::generateScheduleDetails`, `$role->isEnterprise()` | Generate schedule short description and description via Gemini |
 | AI event details generation | `EventController::generateEventDetails`, `$role->isEnterprise()` | Generate event category, short description, and description via Gemini |
-| Agenda scanning | `EventController:1594`, `$role->isEnterprise()` | Scan agendas to auto-create event parts |
 | Save parsed event parts | `EventController:1654`, `$role->isEnterprise()` | Save AI-parsed event data |
 | AI text processing on graphics | `GraphicController:298`, `$role->isEnterprise()` | AI prompt for graphic text via Gemini |
 | Email scheduling (graphic emails) | `GraphicController:142`, `$role->isEnterprise()` | Schedule automated graphic emails |

@@ -696,7 +696,7 @@
         </div>
 
         {{-- Location icon badge --}}
-        @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
+        @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->getEventUrlDomain())
         <div>
           <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900

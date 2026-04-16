@@ -1316,10 +1316,6 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->isEnterprise()) {
-            return response()->json(['error' => __('messages.not_authorized')], 403);
-        }
-
         if (! $role->canMakeAiTextRequest()) {
             return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
         }
@@ -1718,10 +1714,6 @@ class EventController extends Controller
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
-
-        if (! $role->isEnterprise()) {
-            return response()->json(['error' => __('messages.not_authorized')], 403);
-        }
 
         if (! $role->canMakeAiTextRequest()) {
             return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);

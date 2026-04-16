@@ -6835,28 +6835,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
-// Scroll guard: force page to stay at top during all initialization.
-// Catches any scroll from focus, hash anchors, layout shifts, or browser behavior.
-// Active immediately and removed 300ms after load + rAF.
-var _scrollGuard = function() { window.scrollTo(0, 0); };
-window.addEventListener('scroll', _scrollGuard);
-
-window.addEventListener('load', function() {
-    window.scrollTo(0, 0);
-    requestAnimationFrame(function() {
-        var isNewEvent = {{ $event->exists ? 'false' : 'true' }};
-        if (isNewEvent) {
-            var nameField = document.getElementById('event_name');
-            if (nameField) {
-                nameField.focus({ preventScroll: true });
-            }
-        }
-        window.scrollTo(0, 0);
-        setTimeout(function() {
-            window.removeEventListener('scroll', _scrollGuard);
-        }, 300);
-    });
-});
+window.scrollTo(0, 0);
+var isNewEvent = {{ $event->exists ? 'false' : 'true' }};
+if (isNewEvent) {
+    var nameField = document.getElementById('event_name');
+    if (nameField) {
+        nameField.focus({ preventScroll: true });
+    }
+}
 
 function deleteFlyer(url, hash, token, element) {
     if (!confirm(@json(__('messages.are_you_sure')))) {
