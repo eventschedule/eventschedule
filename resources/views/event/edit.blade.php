@@ -152,6 +152,32 @@
     if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
     }
+    // Smart scroll guard: corrects automatic scroll-down during init,
+    // but stops as soon as the user intentionally scrolls.
+    (function() {
+        var userScrolled = false;
+        function onUserScroll() { userScrolled = true; }
+        window.addEventListener('wheel', onUserScroll, { passive: true });
+        window.addEventListener('touchmove', onUserScroll, { passive: true });
+
+        function fixScroll() {
+            if (!userScrolled && window.scrollY > 0) {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        window.addEventListener('load', function() {
+            fixScroll();
+            requestAnimationFrame(function() {
+                fixScroll();
+                requestAnimationFrame(function() {
+                    fixScroll();
+                    window.removeEventListener('wheel', onUserScroll);
+                    window.removeEventListener('touchmove', onUserScroll);
+                });
+            });
+        });
+    })();
   </script>
   <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
   <script src="{{ asset('js/sortable.min.js') }}" {!! nonce_attr() !!}></script>
