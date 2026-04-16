@@ -839,6 +839,7 @@ return [
     'code_invalid' => 'Le code de vérification est invalide ou a expiré.',
     'code_rate_limit' => 'Trop de demandes de code. Veuillez réessayer plus tard.',
     'ai_rate_limit' => 'Trop de demandes. Veuillez patienter une minute et réessayer.',
+    'ai_generation_timed_out' => 'La requête a expiré. Veuillez réessayer.',
     'email_already_registered' => 'Cet e-mail est déjà enregistré.',
     'error_sending_code' => 'Erreur lors de l\'envoi du code de vérification. Veuillez réessayer.',
     'theme_light' => 'Clair',

@@ -862,6 +862,7 @@ return [
     'code_invalid' => 'Codul de verificare este invalid sau a expirat.',
     'code_rate_limit' => 'Prea multe solicitări de cod. Vă rugăm încercați mai târziu.',
     'ai_rate_limit' => 'Prea multe solicitări. Vă rugăm așteptați un minut și încercați din nou.',
+    'ai_generation_timed_out' => 'Solicitarea a expirat. Vă rugăm încercați din nou.',
     'email_already_registered' => 'Acest email este deja înregistrat.',
     'error_sending_code' => 'Eroare la trimiterea codului de verificare. Vă rugăm încercați din nou.',
     'theme_light' => 'Luminos',

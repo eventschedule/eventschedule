@@ -41,6 +41,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -1512,74 +1513,95 @@ class EventController extends Controller
             $event->setRelation('roles', $roles->push($venueRole));
         }
 
-        try {
-            $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role, $request->input('custom_prompt'));
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_flyer_{$requestId}", ['status' => 'processing'], 300);
 
-            if (! $imageData) {
-                \Log::warning('AI flyer generation returned no image data', [
-                    'role_id' => $role->id,
-                    'event_id' => $eventId,
-                    'has_custom_prompt' => ! empty($request->input('custom_prompt')),
-                ]);
+        $styleInstructions = $request->input('style_instructions');
+        $customPrompt = $request->input('custom_prompt');
+        $roleId = $role->id;
 
-                return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
-            }
+        dispatch(function () use ($requestId, $event, $styleInstructions, $role, $customPrompt, $eventId, $roleId, $subdomain) {
+            set_time_limit(120);
 
-            $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
+            try {
+                $imageData = GeminiUtils::generateEventFlyer($event, $styleInstructions, $role, $customPrompt);
 
-            if ($eventId) {
-                // Delete old flyer from storage if exists
-                if ($event->flyer_image_url) {
-                    $path = $event->getAttributes()['flyer_image_url'];
-                    if (config('filesystems.default') == 'local') {
-                        $path = 'public/'.$path;
-                    }
-                    Storage::delete($path);
+                if (! $imageData) {
+                    \Log::warning('AI flyer generation returned no image data', [
+                        'role_id' => $roleId,
+                        'event_id' => $eventId,
+                    ]);
+                    Cache::put("ai_flyer_{$requestId}", ['status' => 'failed'], 300);
+
+                    return;
                 }
 
-                $event->flyer_image_url = $filename;
-                $event->save();
+                $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
+
+                if ($eventId) {
+                    if ($event->flyer_image_url) {
+                        $path = $event->getAttributes()['flyer_image_url'];
+                        if (config('filesystems.default') == 'local') {
+                            $path = 'public/'.$path;
+                        }
+                        Storage::delete($path);
+                    }
+
+                    $event->flyer_image_url = $filename;
+                    $event->save();
+                }
+
+                UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $roleId);
+
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $flyerUrl = url('/storage/'.$filename);
+                } else {
+                    $flyerUrl = $filename;
+                }
+
+                $result = [
+                    'status' => 'completed',
+                    'success' => true,
+                    'flyer_image_url' => $flyerUrl,
+                    'delete_url' => route('event.delete_image', ['subdomain' => $subdomain]),
+                ];
+
+                if (! $eventId) {
+                    $result['flyer_image_filename'] = $filename;
+                }
+
+                Cache::put("ai_flyer_{$requestId}", $result, 300);
+            } catch (\App\Exceptions\ContentModerationException $e) {
+                Cache::put("ai_flyer_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
+            } catch (\Exception $e) {
+                \Log::error('AI flyer generation failed: '.$e->getMessage(), [
+                    'role_id' => $roleId,
+                    'event_id' => $eventId,
+                    'exception' => get_class($e),
+                ]);
+                report($e);
+                Cache::put("ai_flyer_{$requestId}", ['status' => 'failed'], 300);
             }
+        })->afterResponse();
 
-            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $role->id);
+        return response()->json(['request_id' => $requestId]);
+    }
 
-            // Build full URL for the flyer
-            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-            } elseif (config('filesystems.default') == 'local') {
-                $flyerUrl = url('/storage/'.$filename);
-            } else {
-                $flyerUrl = $filename;
-            }
-
-            $response = [
-                'success' => true,
-                'flyer_image_url' => $flyerUrl,
-                'delete_url' => route('event.delete_image', ['subdomain' => $subdomain]),
-            ];
-
-            if (! $eventId) {
-                $response['flyer_image_filename'] = $filename;
-            }
-
-            return response()->json($response);
-        } catch (\App\Exceptions\ContentModerationException $e) {
-            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
-        } catch (\Exception $e) {
-            \Log::error('AI flyer generation failed: '.$e->getMessage(), [
-                'role_id' => $role->id,
-                'event_id' => $eventId,
-                'exception' => get_class($e),
-                'has_custom_prompt' => ! empty($request->input('custom_prompt')),
-            ]);
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
+    public function pollFlyer($subdomain, $requestId)
+    {
+        if (! auth()->check() || ! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
+
+        $data = Cache::get("ai_flyer_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function getEventDetailsPrompt(Request $request, $subdomain)

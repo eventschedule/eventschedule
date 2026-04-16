@@ -827,6 +827,7 @@ return [
     'code_invalid' => 'קוד האימות אינו תקין או שפג תוקפו.',
     'code_rate_limit' => 'יותר מדי בקשות קוד. אנא נסה שוב מאוחר יותר.',
     'ai_rate_limit' => 'יותר מדי בקשות. אנא המתן דקה ונסה שוב.',
+    'ai_generation_timed_out' => 'הבקשה פגה. אנא נסה שוב.',
     'email_already_registered' => 'דוא"ל זה כבר רשום.',
     'error_sending_code' => 'שגיאה בשליחת קוד האימות. אנא נסה שוב.',
     'theme_light' => 'בהיר',

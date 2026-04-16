@@ -854,6 +854,7 @@ return [
     'code_invalid' => 'Kinnituskood on kehtetu või aegunud.',
     'code_rate_limit' => 'Liiga palju kooditaotlusi. Proovige hiljem uuesti.',
     'ai_rate_limit' => 'Liiga palju päringuid. Palun oodake minut ja proovige uuesti.',
+    'ai_generation_timed_out' => 'Päring aegus. Palun proovige uuesti.',
     'email_already_registered' => 'See meil on juba registreeritud.',
     'error_sending_code' => 'Viga kinnituskoodi saatmisel. Palun proovi uuesti.',
     'theme_light' => 'Valgus',

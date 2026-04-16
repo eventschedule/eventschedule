@@ -526,6 +526,8 @@ document.addEventListener('alpine:init', function() {
                         self.elementStatus[key] = 'error';
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
+                        } else if (err.message === 'gateway_timeout') {
+                            self.elementErrors[key] = @json(__('messages.ai_generation_timed_out'));
                         }
                     })
                     .finally(function() {
@@ -574,6 +576,25 @@ document.addEventListener('alpine:init', function() {
                 }).then(function(response) {
                     if (response.status === 429) {
                         throw new Error('rate_limit');
+                    }
+                    if (response.status === 502 || response.status === 503 || response.status === 504) {
+                        throw new Error('gateway_timeout');
+                    }
+                    var contentType = response.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) {
+                        throw new Error('gateway_timeout');
+                    }
+                    return response.json();
+                });
+            },
+            pollRequest: function(url) {
+                return fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('poll_error');
                     }
                     return response.json();
                 });
@@ -648,15 +669,69 @@ document.addEventListener('alpine:init', function() {
                 }
                 @endif
 
-                self.makeRequest(@json($imageEndpoint ?? ''), body)
+                var imageEndpoint = @json($imageEndpoint ?? '');
+
+                self.makeRequest(imageEndpoint, body)
                 .then(function(data) {
                     if (genId !== self.generationId) return;
-                    if (data.success) {
+                    if (data.request_id) {
+                        var pollUrl = imageEndpoint + '/' + data.request_id;
+                        var pollResolved = false;
+                        var pollInterval = setInterval(function() {
+                            if (genId !== self.generationId) {
+                                clearInterval(pollInterval);
+                                return;
+                            }
+                            self.pollRequest(pollUrl)
+                            .then(function(pollData) {
+                                if (pollResolved || genId !== self.generationId) {
+                                    clearInterval(pollInterval);
+                                    return;
+                                }
+                                if (pollData.status === 'completed') {
+                                    pollResolved = true;
+                                    clearInterval(pollInterval);
+                                    Object.assign(self.previewResults, pollData);
+                                    self.elementStatus[imageKey] = 'complete';
+                                    self.pendingRequests--;
+                                    self.checkComplete();
+                                } else if (pollData.status === 'failed') {
+                                    pollResolved = true;
+                                    clearInterval(pollInterval);
+                                    self.elementStatus[imageKey] = 'error';
+                                    if (pollData.error) self.elementErrors[imageKey] = pollData.error;
+                                    self.pendingRequests--;
+                                    self.checkComplete();
+                                }
+                            })
+                            .catch(function() {
+                                if (pollResolved) return;
+                                pollResolved = true;
+                                clearInterval(pollInterval);
+                                self.elementStatus[imageKey] = 'error';
+                                self.pendingRequests--;
+                                self.checkComplete();
+                            });
+                        }, 3000);
+                        setTimeout(function() {
+                            if (pollResolved) return;
+                            pollResolved = true;
+                            clearInterval(pollInterval);
+                            self.elementStatus[imageKey] = 'error';
+                            self.elementErrors[imageKey] = @json(__('messages.ai_generation_timed_out'));
+                            self.pendingRequests--;
+                            self.checkComplete();
+                        }, 120000);
+                    } else if (data.success) {
                         Object.assign(self.previewResults, data);
                         self.elementStatus[imageKey] = 'complete';
+                        self.pendingRequests--;
+                        self.checkComplete();
                     } else {
                         self.elementStatus[imageKey] = 'error';
                         if (data.error) self.elementErrors[imageKey] = data.error;
+                        self.pendingRequests--;
+                        self.checkComplete();
                     }
                 })
                 .catch(function(err) {
@@ -664,10 +739,9 @@ document.addEventListener('alpine:init', function() {
                     self.elementStatus[imageKey] = 'error';
                     if (err.message === 'rate_limit') {
                         alert(@json(__('messages.ai_rate_limit')));
+                    } else if (err.message === 'gateway_timeout') {
+                        self.elementErrors[imageKey] = @json(__('messages.ai_generation_timed_out'));
                     }
-                })
-                .finally(function() {
-                    if (genId !== self.generationId) return;
                     self.pendingRequests--;
                     self.checkComplete();
                 });
@@ -709,6 +783,8 @@ document.addEventListener('alpine:init', function() {
                         self.elements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
+                        } else if (err.message === 'gateway_timeout') {
+                            alert(@json(__('messages.ai_generation_timed_out')));
                         } else {
                             alert(@json($errorMessage));
                         }
@@ -777,6 +853,8 @@ document.addEventListener('alpine:init', function() {
                         textElements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
+                        } else if (err.message === 'gateway_timeout') {
+                            textElements.forEach(function(el) { self.elementErrors[el] = @json(__('messages.ai_generation_timed_out')); });
                         }
                         if (needsSequencing) fireImages();
                     })

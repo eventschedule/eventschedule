@@ -832,6 +832,7 @@ return [
     'code_invalid' => 'De verificatiecode is ongeldig of verlopen.',
     'code_rate_limit' => 'Te veel code-aanvragen. Probeer het later opnieuw.',
     'ai_rate_limit' => 'Te veel verzoeken. Wacht een minuut en probeer het opnieuw.',
+    'ai_generation_timed_out' => 'Het verzoek is verlopen. Probeer het opnieuw.',
     'email_already_registered' => 'Dit e-mailadres is al geregistreerd.',
     'error_sending_code' => 'Fout bij het verzenden van de verificatiecode. Probeer het opnieuw.',
     'theme_light' => 'Licht',

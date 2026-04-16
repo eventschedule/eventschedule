@@ -832,6 +832,7 @@ return [
     'code_invalid' => 'El código de verificación es inválido o ha expirado.',
     'code_rate_limit' => 'Demasiadas solicitudes de código. Por favor intenta de nuevo más tarde.',
     'ai_rate_limit' => 'Demasiadas solicitudes. Por favor espera un minuto e intenta de nuevo.',
+    'ai_generation_timed_out' => 'La solicitud ha expirado. Por favor intenta de nuevo.',
     'email_already_registered' => 'Este correo electrónico ya está registrado.',
     'error_sending_code' => 'Error al enviar el código de verificación. Por favor intenta de nuevo.',
     'theme_light' => 'Claro',

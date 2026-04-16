@@ -353,13 +353,16 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
     Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
     Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer');
+    Route::get('/{subdomain}/generate-flyer/{requestId}', [EventController::class, 'pollFlyer'])->name('event.poll_flyer');
     Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style');
     Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image');
+    Route::get('/{subdomain}/generate-style-image/{requestId}', [RoleController::class, 'pollStyleImage'])->name('role.poll_style_image');
     Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details');
     Route::post('/{subdomain}/get-style-prompt', [RoleController::class, 'getStylePrompt'])->name('role.get_style_prompt');
     Route::post('/{subdomain}/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPrompt'])->name('role.get_schedule_details_prompt');
     Route::post('/generate-style', [RoleController::class, 'generateStyleNew'])->name('role.generate_style_new');
     Route::post('/generate-style-image', [RoleController::class, 'generateStyleImageNew'])->name('role.generate_style_image_new');
+    Route::get('/generate-style-image/{requestId}', [RoleController::class, 'pollStyleImageNew'])->name('role.poll_style_image_new');
     Route::post('/generate-schedule-details', [RoleController::class, 'generateScheduleDetailsNew'])->name('role.generate_schedule_details_new');
     Route::post('/get-style-prompt', [RoleController::class, 'getStylePromptNew'])->name('role.get_style_prompt_new');
     Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new');

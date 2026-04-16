@@ -835,6 +835,7 @@ return [
     'code_invalid' => 'Il codice di verifica non è valido o è scaduto.',
     'code_rate_limit' => 'Troppe richieste di codice. Per favore riprova più tardi.',
     'ai_rate_limit' => 'Troppe richieste. Attendi un minuto e riprova.',
+    'ai_generation_timed_out' => 'La richiesta è scaduta. Riprova.',
     'email_already_registered' => 'Questa email è già registrata.',
     'error_sending_code' => 'Errore nell\'invio del codice di verifica. Per favore riprova.',
     'theme_light' => 'Chiaro',

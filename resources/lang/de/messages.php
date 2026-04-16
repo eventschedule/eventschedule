@@ -836,6 +836,7 @@ return [
     'code_invalid' => 'Der Bestätigungscode ist ungültig oder abgelaufen.',
     'code_rate_limit' => 'Zu viele Code-Anfragen. Bitte versuchen Sie es später erneut.',
     'ai_rate_limit' => 'Zu viele Anfragen. Bitte warten Sie eine Minute und versuchen Sie es erneut.',
+    'ai_generation_timed_out' => 'Die Anfrage ist abgelaufen. Bitte versuchen Sie es erneut.',
     'email_already_registered' => 'Diese E-Mail ist bereits registriert.',
     'error_sending_code' => 'Fehler beim Senden des Bestätigungscodes. Bitte versuchen Sie es erneut.',
     'theme_light' => 'Hell',

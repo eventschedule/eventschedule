@@ -861,6 +861,7 @@ return [
     'code_invalid' => 'The verification code is invalid or has expired.',
     'code_rate_limit' => 'Too many code requests. Please try again later.',
     'ai_rate_limit' => 'Too many requests. Please wait a minute and try again.',
+    'ai_generation_timed_out' => 'The request timed out. Please try again.',
     'email_already_registered' => 'This email is already registered.',
     'error_sending_code' => 'Error sending verification code. Please try again.',
     'theme_light' => 'Light',

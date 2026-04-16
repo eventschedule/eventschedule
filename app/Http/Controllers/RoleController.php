@@ -3189,8 +3189,6 @@ class RoleController extends Controller
 
     public function generateStyleImage(Request $request, $subdomain)
     {
-        set_time_limit(300);
-
         if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -3225,55 +3223,77 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
 
-        try {
-            if ($customPrompt) {
-                $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
-                $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
-            } elseif ($imageType === 'profile_image') {
-                $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
-            } elseif ($imageType === 'header_image') {
-                $imageData = GeminiUtils::generateScheduleHeaderImage($role, $accentColor, $styleInstructions);
-            } else {
-                $imageData = GeminiUtils::generateScheduleBackgroundImage($role, $accentColor, $styleInstructions);
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_style_image_{$requestId}", ['status' => 'processing'], 300);
+
+        $roleId = $role->id;
+
+        dispatch(function () use ($requestId, $role, $imageType, $accentColor, $styleInstructions, $customPrompt, $roleId) {
+            set_time_limit(120);
+
+            try {
+                if ($customPrompt) {
+                    $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
+                    $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+                } elseif ($imageType === 'profile_image') {
+                    $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
+                } elseif ($imageType === 'header_image') {
+                    $imageData = GeminiUtils::generateScheduleHeaderImage($role, $accentColor, $styleInstructions);
+                } else {
+                    $imageData = GeminiUtils::generateScheduleBackgroundImage($role, $accentColor, $styleInstructions);
+                }
+
+                if (! $imageData) {
+                    Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
+
+                    return;
+                }
+
+                $prefix = str_replace('_image', '_', $imageType);
+                $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+                $result = ['status' => 'completed', 'success' => true];
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $result[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $result[$imageType.'_url'] = url('/storage/'.$filename);
+                } else {
+                    $result[$imageType.'_url'] = $filename;
+                }
+                $result[$imageType.'_filename'] = $filename;
+
+                UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE, $roleId);
+
+                Cache::put("ai_style_image_{$requestId}", $result, 300);
+            } catch (\App\Exceptions\ContentModerationException $e) {
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
+            } catch (\Exception $e) {
+                \Log::error('AI style image generation failed: '.$e->getMessage(), ['role_id' => $roleId]);
+                report($e);
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
             }
+        })->afterResponse();
 
-            if (! $imageData) {
-                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-            }
+        return response()->json(['request_id' => $requestId]);
+    }
 
-            $prefix = str_replace('_image', '_', $imageType);
-            $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
-
-            $response = ['success' => true];
-            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                $response[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-            } elseif (config('filesystems.default') == 'local') {
-                $response[$imageType.'_url'] = url('/storage/'.$filename);
-            } else {
-                $response[$imageType.'_url'] = $filename;
-            }
-            $response[$imageType.'_filename'] = $filename;
-
-            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE, $role->id);
-
-            return response()->json($response);
-        } catch (\App\Exceptions\ContentModerationException $e) {
-            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-        } catch (\Exception $e) {
-            \Log::error('AI style image generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+    public function pollStyleImage($subdomain, $requestId)
+    {
+        if (! auth()->check() || ! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
+
+        $data = Cache::get("ai_style_image_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function generateStyleImageNew(Request $request)
     {
-        set_time_limit(300);
-
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -3305,47 +3325,69 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
 
-        try {
-            if ($customPrompt) {
-                $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
-                $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
-            } elseif ($imageType === 'profile_image') {
-                $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
-            } elseif ($imageType === 'header_image') {
-                $imageData = GeminiUtils::generateScheduleHeaderImage($tempRole, $accentColor, $styleInstructions);
-            } else {
-                $imageData = GeminiUtils::generateScheduleBackgroundImage($tempRole, $accentColor, $styleInstructions);
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_style_image_{$requestId}", ['status' => 'processing'], 300);
+
+        dispatch(function () use ($requestId, $tempRole, $imageType, $accentColor, $styleInstructions, $customPrompt) {
+            set_time_limit(120);
+
+            try {
+                if ($customPrompt) {
+                    $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
+                    $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+                } elseif ($imageType === 'profile_image') {
+                    $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
+                } elseif ($imageType === 'header_image') {
+                    $imageData = GeminiUtils::generateScheduleHeaderImage($tempRole, $accentColor, $styleInstructions);
+                } else {
+                    $imageData = GeminiUtils::generateScheduleBackgroundImage($tempRole, $accentColor, $styleInstructions);
+                }
+
+                if (! $imageData) {
+                    Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
+
+                    return;
+                }
+
+                $prefix = str_replace('_image', '_', $imageType);
+                $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+                $result = ['status' => 'completed', 'success' => true];
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $result[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $result[$imageType.'_url'] = url('/storage/'.$filename);
+                } else {
+                    $result[$imageType.'_url'] = $filename;
+                }
+                $result[$imageType.'_filename'] = $filename;
+
+                Cache::put("ai_style_image_{$requestId}", $result, 300);
+            } catch (\App\Exceptions\ContentModerationException $e) {
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
+            } catch (\Exception $e) {
+                \Log::error('AI style image generation failed: '.$e->getMessage());
+                report($e);
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
             }
+        })->afterResponse();
 
-            if (! $imageData) {
-                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-            }
+        return response()->json(['request_id' => $requestId]);
+    }
 
-            $prefix = str_replace('_image', '_', $imageType);
-            $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
-
-            $response = ['success' => true];
-            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                $response[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-            } elseif (config('filesystems.default') == 'local') {
-                $response[$imageType.'_url'] = url('/storage/'.$filename);
-            } else {
-                $response[$imageType.'_url'] = $filename;
-            }
-            $response[$imageType.'_filename'] = $filename;
-
-            return response()->json($response);
-        } catch (\App\Exceptions\ContentModerationException $e) {
-            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-        } catch (\Exception $e) {
-            \Log::error('AI style image generation failed: '.$e->getMessage());
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+    public function pollStyleImageNew($requestId)
+    {
+        if (! auth()->check()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
+
+        $data = Cache::get("ai_style_image_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function generateScheduleDetails(Request $request, $subdomain)
