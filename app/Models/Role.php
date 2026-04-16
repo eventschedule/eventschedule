@@ -561,6 +561,15 @@ class Role extends Model implements MustVerifyEmail
         return $this->event_request_form === 'booking';
     }
 
+    public function getRequireApprovalAttribute($value)
+    {
+        if ($this->isTalent()) {
+            return true;
+        }
+
+        return (bool) $value;
+    }
+
     public function isRegistered()
     {
         return $this->email || $this->phone;

@@ -3682,6 +3682,11 @@ class RoleController extends Controller
     {
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
+        // Talent schedules always use the booking form (require_account does not apply)
+        if ($role->isTalent()) {
+            return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
+        }
+
         // require_account=true → always route through the AP add-event screen
         if ($role->require_account) {
             if (! auth()->user()) {

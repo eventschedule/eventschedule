@@ -2906,6 +2906,7 @@
                                 help="{{ __($role->isTalent() ? 'messages.accept_requests_help_talent' : 'messages.accept_requests_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
+                        @if (! $role->isTalent())
                         <div class="mb-6" id="require_account_section">
                             <x-toggle name="require_account"
                                 label="{{ __('messages.require_account') }}"
@@ -2913,7 +2914,6 @@
                                 help="{{ __('messages.require_account_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
                         </div>
-                        @if (! $role->isTalent())
                         <div class="mb-6" id="event_request_form_section">
                             <x-input-label :value="__('messages.event_request_form')" />
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.event_request_form_help') }}</p>
@@ -2939,6 +2939,7 @@
                             </div>
                         </div>
                         @endif
+                        @if (! $role->isTalent())
                         <div class="mb-6" id="require_approval_section">
                             <x-toggle name="require_approval"
                                 label="{{ __('messages.require_approval') }}"
@@ -2966,6 +2967,7 @@
                                 + {{ __('messages.add_schedule') }}
                             </button>
                         </div>
+                        @endif
                         <div class="mb-6" id="request_terms_section">
                             <x-input-label for="request_terms" :value="__('messages.request_terms')" />
                             <textarea id="request_terms" name="request_terms"
