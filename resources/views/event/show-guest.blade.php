@@ -334,7 +334,7 @@
         @endforeach
 
         {{-- Venue card --}}
-        @if ($event->venue && $event->venue->name)
+        @if ($event->venue && ($event->venue->name || $event->venue->formatted_address))
         @php
           $hasVenueHeader = ($event->venue->header_image && $event->venue->header_image !== 'none') || $event->venue->header_image_url;
         @endphp
@@ -360,21 +360,27 @@
               <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
-              @if ($event->venue->isClaimed())
-                @php
-                  $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
-                @endphp
-                <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
-                  <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
+              @if ($event->venue->name)
+                @if ($event->venue->isClaimed())
+                  @php
+                    $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+                  @endphp
+                  <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
+                    <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
+                      {{ $event->venue->translatedName() }}
+                    </span>
+                    <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                    </svg>
+                  </a>
+                @else
+                  <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
                     {{ $event->venue->translatedName() }}
-                  </span>
-                  <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                  </svg>
-                </a>
+                  </p>
+                @endif
               @else
-                <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
-                  {{ $event->venue->translatedName() }}
+                <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
+                  {{ $event->venue->shortAddress() }}
                 </p>
               @endif
               @if ($event->venue->translatedDescription())
@@ -509,7 +515,7 @@
         @endif
 
         {{-- Calendar links dropdown (fallback when no venue) --}}
-        @if (!$event->is_draft && !($event->venue && $event->venue->name) && $event->tickets_enabled && $event->isPro())
+        @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled && $event->isPro())
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
               class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"

@@ -2935,8 +2935,8 @@ class RoleController extends Controller
         $imageElements = array_intersect($request->input('elements', []), ['profile_image', 'header_image', 'background_image']);
         $textElements = array_diff($request->input('elements', []), $imageElements);
 
-        if (! empty($textElements) && ! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! empty($textElements) && ! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
         }
 
         if (! empty($imageElements) && ! $role->canGenerateAiImage()) {
@@ -3360,8 +3360,8 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        if (! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
         }
 
         if (is_demo_mode()) {

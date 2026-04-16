@@ -368,8 +368,8 @@ class GraphicController extends Controller
             return response()->json(['error' => 'Enterprise feature'], 403);
         }
 
-        if (! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
         }
 
         $text = $request->input('text', '');

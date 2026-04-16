@@ -828,12 +828,11 @@ class GeminiUtils
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
                 ->upcomingOrOngoing()
-                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
                 ->first();
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();
                 $data[$key]['event_id'] = UrlUtils::encodeId($event->id);
-                $data[$key]['is_curated'] = $role->isCurator();
+                $data[$key]['is_curated'] = $role->isCurator() && $event->roles->contains($role->id);
             }
 
             // Check for similar events at the same time

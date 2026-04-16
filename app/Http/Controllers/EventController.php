@@ -1316,8 +1316,8 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! $role->canMakeAiParseRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()])], 422);
         }
 
         try {
@@ -1346,8 +1346,8 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        if (! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! $role->canMakeAiAgendaRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiAgendaDailyLimit()])], 422);
         }
 
         $request->validate([
@@ -1648,8 +1648,8 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
-        if (! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
         }
 
         if (is_demo_mode()) {
@@ -1715,8 +1715,8 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->canMakeAiTextRequest()) {
-            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        if (! $role->canMakeAiParseRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()])], 422);
         }
 
         try {

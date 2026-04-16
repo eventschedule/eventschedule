@@ -1376,46 +1376,91 @@ class Role extends Model implements MustVerifyEmail
         return $this->aiImageGenerationsToday() < $limit;
     }
 
-    public function aiTextDailyLimit(): ?int
+    public function aiParseDailyLimit(): ?int
     {
         if (! config('app.hosted')) {
             return null;
         }
 
         if ($this->isOnTrial()) {
-            return config('usage.ai_text_daily_limit_trial');
+            return config('usage.ai_parse_daily_limit_trial');
         }
 
         if ($this->isEnterprise()) {
-            return config('usage.ai_text_daily_limit_enterprise');
+            return config('usage.ai_parse_daily_limit_enterprise');
         }
 
-        return config('usage.ai_text_daily_limit_pro');
+        return config('usage.ai_parse_daily_limit_pro');
     }
 
-    public function aiTextOperationsToday(): int
+    public function canMakeAiParseRequest(): bool
     {
-        return (int) \App\Models\UsageDaily::where('role_id', $this->id)
-            ->where('date', now()->toDateString())
-            ->whereIn('operation', [
-                \App\Services\UsageTrackingService::GEMINI_PARSE_EVENT,
-                \App\Services\UsageTrackingService::GEMINI_PARSE_PARTS,
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE,
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS,
-                \App\Services\UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS,
-            ])
-            ->sum('count');
-    }
-
-    public function canMakeAiTextRequest(): bool
-    {
-        $limit = $this->aiTextDailyLimit();
+        $limit = $this->aiParseDailyLimit();
 
         if (is_null($limit)) {
             return true;
         }
 
-        return $this->aiTextOperationsToday() < $limit;
+        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->where('operation', \App\Services\UsageTrackingService::GEMINI_PARSE_EVENT)
+            ->sum('count');
+
+        return $count < $limit;
+    }
+
+    public function aiAgendaDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        return config('usage.ai_agenda_daily_limit_enterprise');
+    }
+
+    public function canMakeAiAgendaRequest(): bool
+    {
+        $limit = $this->aiAgendaDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->where('operation', \App\Services\UsageTrackingService::GEMINI_PARSE_PARTS)
+            ->sum('count');
+
+        return $count < $limit;
+    }
+
+    public function aiContentDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        return config('usage.ai_content_daily_limit_enterprise');
+    }
+
+    public function canMakeAiContentRequest(): bool
+    {
+        $limit = $this->aiContentDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->whereIn('operation', [
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS,
+            ])
+            ->sum('count');
+
+        return $count < $limit;
     }
 
     public function photoLimit(): ?int
