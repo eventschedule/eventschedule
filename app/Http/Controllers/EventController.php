@@ -1538,19 +1538,6 @@ class EventController extends Controller
 
                 $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
 
-                if ($eventId) {
-                    if ($event->flyer_image_url) {
-                        $path = $event->getAttributes()['flyer_image_url'];
-                        if (config('filesystems.default') == 'local') {
-                            $path = 'public/'.$path;
-                        }
-                        Storage::delete($path);
-                    }
-
-                    $event->flyer_image_url = $filename;
-                    $event->save();
-                }
-
                 UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $roleId);
 
                 if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
@@ -1568,9 +1555,7 @@ class EventController extends Controller
                     'delete_url' => route('event.delete_image', ['subdomain' => $subdomain]),
                 ];
 
-                if (! $eventId) {
-                    $result['flyer_image_filename'] = $filename;
-                }
+                $result['flyer_image_filename'] = $filename;
 
                 Cache::put("ai_flyer_{$requestId}", $result, 300);
             } catch (\App\Exceptions\ContentModerationException $e) {

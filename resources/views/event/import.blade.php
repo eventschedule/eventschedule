@@ -1438,9 +1438,6 @@
 
             handleSubmit() {
                 if (this.canSubmit) {
-                    if (window.Notification && Notification.permission === 'default') {
-                        Notification.requestPermission();
-                    }
                     this.fetchPreview();
                 }
             },
@@ -1470,15 +1467,6 @@
             },
 
             notifyParseComplete() {
-                if (document.hidden && window.Notification && Notification.permission === 'granted') {
-                    const n = new Notification(@json(__('messages.ai_import_ready')), {
-                        body: @json(__('messages.ai_import_ready_body')),
-                    });
-                    n.onclick = () => {
-                        window.focus();
-                        n.close();
-                    };
-                }
                 this.playNotificationChime();
             },
 

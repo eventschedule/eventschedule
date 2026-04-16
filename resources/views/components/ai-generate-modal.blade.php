@@ -649,9 +649,33 @@ document.addEventListener('alpine:init', function() {
                 this.customImagePrompts = JSON.parse(JSON.stringify(this.defaultImagePrompts));
             },
             @endif
+            playNotificationChime: function() {
+                try {
+                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (ctx.state === 'suspended') ctx.resume();
+                    var playTone = function(freq, startTime, duration) {
+                        var osc = ctx.createOscillator();
+                        var gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.3, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                        osc.start(startTime);
+                        osc.stop(startTime + duration);
+                    };
+                    playTone(523.25, ctx.currentTime, 0.15);
+                    playTone(659.25, ctx.currentTime + 0.15, 0.2);
+                    setTimeout(function() { ctx.close(); }, 1000);
+                } catch (e) {
+                    // Web Audio not supported
+                }
+            },
             checkComplete: function() {
                 if (this.pendingRequests <= 0) {
                     this.generating = false;
+                    this.playNotificationChime();
                 }
             },
             fireImageRequest: function(imageKey, extraBody) {
@@ -793,6 +817,7 @@ document.addEventListener('alpine:init', function() {
                         if (genId !== self.generationId) return;
                         self.generating = false;
                         self.generationStarted = false;
+                        self.playNotificationChime();
                     });
                     return;
                 }

@@ -6877,6 +6877,23 @@ function deleteFlyer(url, hash, token, element) {
         return;
     }
 
+    var aiInput = document.getElementById('ai_flyer_image');
+    if (aiInput) {
+        var img = document.getElementById('flyer_preview');
+        if (img && img.dataset.originalSrc) {
+            img.src = img.dataset.originalSrc;
+            img.setAttribute('data-lightbox-src', img.dataset.originalLightboxSrc || img.dataset.originalSrc);
+            delete img.dataset.originalSrc;
+            delete img.dataset.originalLightboxSrc;
+        } else {
+            element.remove();
+            var chooseSection = document.getElementById('flyer_image_choose');
+            if (chooseSection) chooseSection.style.display = '';
+        }
+        aiInput.remove();
+        return;
+    }
+
     if (!hash) {
         element.remove();
         var aiInput = document.getElementById('ai_flyer_image');
@@ -7023,7 +7040,14 @@ window.handleAiEventDetailsResults = function(data) {
         var existingDiv = document.getElementById('flyer_image_existing');
         if (existingDiv) {
             var img = document.getElementById('flyer_preview');
-            if (img) img.src = data.flyer_image_url;
+            if (img) {
+                if (!img.dataset.originalSrc) {
+                    img.dataset.originalSrc = img.src;
+                    img.dataset.originalLightboxSrc = img.getAttribute('data-lightbox-src') || '';
+                }
+                img.src = data.flyer_image_url;
+                img.setAttribute('data-lightbox-src', data.flyer_image_url);
+            }
         } else {
             var container = document.createElement('div');
             container.id = 'flyer_image_existing';
