@@ -137,12 +137,6 @@ class InvoiceNinjaController extends Controller
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -191,12 +185,6 @@ class InvoiceNinjaController extends Controller
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_purchase:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -351,12 +339,6 @@ class InvoiceNinjaController extends Controller
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_event_purchase:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }

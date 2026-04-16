@@ -1225,12 +1225,7 @@ class TicketController extends Controller
             $sale->save();
 
             // Record free ticket sale in analytics (0 revenue)
-            $analyticsCount = ($sale->group_id && $sale->isPrimarySale())
-                ? Sale::where('group_id', $sale->id)->count()
-                : 1;
-            for ($i = 0; $i < $analyticsCount; $i++) {
-                AnalyticsEventsDaily::incrementSale($event->id, 0);
-            }
+            AnalyticsEventsDaily::incrementSale($event->id, 0);
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
             }
@@ -1517,13 +1512,8 @@ class TicketController extends Controller
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
 
-        // Record in analytics (0 revenue) - count each attendee
-        $rsvpAnalyticsCount = ($sale->group_id && $sale->isPrimarySale())
-            ? Sale::where('group_id', $sale->id)->count()
-            : 1;
-        for ($i = 0; $i < $rsvpAnalyticsCount; $i++) {
-            AnalyticsEventsDaily::incrementSale($event->id, 0);
-        }
+        // Record RSVP sale in analytics (0 revenue)
+        AnalyticsEventsDaily::incrementSale($event->id, 0);
 
         // Dispatch webhooks
         WebhookService::dispatch('sale.created', $sale);
@@ -1995,20 +1985,20 @@ class TicketController extends Controller
             abort(403);
         }
 
-        $cancelled = DB::transaction(function () use ($sale) {
+        $expired = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return false;
             }
-            $sale->status = 'cancelled';
+            $sale->status = 'expired';
             $sale->save();
 
             return true;
         });
 
-        if ($cancelled) {
-            AuditService::log(AuditService::SALE_CANCEL, $sale->user_id, 'Sale', $sale->id,
-                ['status' => 'unpaid'], ['status' => 'cancelled'], 'guest_cancel:event_id:'.$sale->event_id);
+        if ($expired) {
+            AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], 'guest_abandon:event_id:'.$sale->event_id);
         }
 
         $event = $sale->event;
@@ -2045,12 +2035,6 @@ class TicketController extends Controller
                 ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -2084,20 +2068,20 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
-        $cancelled = DB::transaction(function () use ($sale) {
+        $expired = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return false;
             }
-            $sale->status = 'cancelled';
+            $sale->status = 'expired';
             $sale->save();
 
             return true;
         });
 
-        if ($cancelled) {
-            AuditService::log(AuditService::SALE_CANCEL, $sale->user_id, 'Sale', $sale->id,
-                ['status' => 'unpaid'], ['status' => 'cancelled'], 'payment_url_cancel:event_id:'.$sale->event_id);
+        if ($expired) {
+            AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], 'payment_url_abandon:event_id:'.$sale->event_id);
         }
 
         $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
@@ -2271,12 +2255,6 @@ class TicketController extends Controller
                     if ($sale->discount_amount > 0) {
                         AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
                     }
-                    if ($sale->group_id && $sale->isPrimarySale()) {
-                        $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                        for ($i = 0; $i < $guestCount; $i++) {
-                            AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                        }
-                    }
                 }
                 break;
 
@@ -2289,12 +2267,6 @@ class TicketController extends Controller
                         // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
                         if ($sale->payment_method !== 'rsvp') {
                             AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                                for ($i = 0; $i < $guestCount; $i++) {
-                                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                                }
-                            }
 
                             if ($sale->discount_amount > 0) {
                                 AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
@@ -2318,12 +2290,6 @@ class TicketController extends Controller
                     // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
                     if ($wasPaid && $sale->payment_method !== 'rsvp') {
                         AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                        if ($sale->group_id && $sale->isPrimarySale()) {
-                            $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                            for ($i = 0; $i < $guestCount; $i++) {
-                                AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                            }
-                        }
 
                         if ($sale->discount_amount > 0) {
                             AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
@@ -2334,21 +2300,16 @@ class TicketController extends Controller
 
             case 'delete':
                 DB::transaction(function () use ($sale) {
-                    // If the sale was paid, cancel first to release ticket inventory
-                    // (triggers Sale::booted hook) and decrement analytics
-                    if ($sale->status === 'paid') {
+                    // Cancel first to release ticket inventory (triggers Sale::booted hook)
+                    if (in_array($sale->status, ['unpaid', 'paid'])) {
+                        $wasPaid = $sale->status === 'paid';
                         $sale->status = 'cancelled';
                         $sale->save();
 
-                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                        if ($sale->payment_method !== 'rsvp') {
+                        // Decrement analytics only for previously paid sales
+                        // Skip RSVP sales - handled by Sale::booted hook
+                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
                             AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                                for ($i = 0; $i < $guestCount; $i++) {
-                                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                                }
-                            }
 
                             if ($sale->discount_amount > 0) {
                                 AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);

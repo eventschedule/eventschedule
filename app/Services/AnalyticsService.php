@@ -546,8 +546,6 @@ class AnalyticsService
 
         $stats = AnalyticsEventsDaily::select(
             DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as total_views'),
-            DB::raw('SUM(sales_count) as total_sales'),
-            DB::raw('SUM(revenue) as total_revenue'),
             DB::raw('SUM(promo_sales_count) as promo_sales'),
             DB::raw('SUM(promo_discount_total) as promo_discounts')
         )
@@ -555,9 +553,16 @@ class AnalyticsService
             ->inDateRange($start, $end)
             ->first();
 
+        // Get actual sales data from the sales table (source of truth)
+        $salesStats = Sale::whereIn('event_id', $eventIds->toArray())
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('COUNT(*) as total_sales, COALESCE(SUM(payment_amount), 0) as total_revenue')
+            ->first();
+
         $totalViews = (int) ($stats->total_views ?? 0);
-        $totalSales = (int) ($stats->total_sales ?? 0);
-        $totalRevenue = (float) ($stats->total_revenue ?? 0);
+        $totalSales = (int) ($salesStats->total_sales ?? 0);
+        $totalRevenue = (float) ($salesStats->total_revenue ?? 0);
         $promoSales = (int) ($stats->promo_sales ?? 0);
         $promoDiscounts = (float) ($stats->promo_discounts ?? 0);
 
@@ -597,28 +602,49 @@ class AnalyticsService
             return collect();
         }
 
-        return AnalyticsEventsDaily::select(
-            'event_id',
-            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count'),
-            DB::raw('SUM(sales_count) as sales_count'),
-            DB::raw('SUM(revenue) as revenue')
-        )
-            ->forEvents($eventIds)
-            ->inDateRange($start, $end)
+        // Get top events by revenue from the sales table (source of truth)
+        $salesData = Sale::whereIn('event_id', $eventIds->toArray())
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
             ->groupBy('event_id')
-            ->having('revenue', '>', 0)
+            ->selectRaw('event_id, COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as revenue')
+            ->havingRaw('COALESCE(SUM(payment_amount), 0) > 0')
             ->orderByDesc('revenue')
             ->limit($limit)
-            ->with('event')
+            ->get();
+
+        if ($salesData->isEmpty()) {
+            return collect();
+        }
+
+        // Get view counts from analytics for matched events
+        $salesEventIds = $salesData->pluck('event_id');
+        $viewCounts = AnalyticsEventsDaily::select(
+            'event_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
+            ->forEvents($salesEventIds)
+            ->inDateRange($start, $end)
+            ->groupBy('event_id')
             ->get()
-            ->filter(fn ($item) => $item->event !== null)
-            ->map(fn ($item) => [
-                'event' => $item->event,
-                'view_count' => (int) $item->view_count,
-                'sales_count' => (int) $item->sales_count,
-                'revenue' => (float) $item->revenue,
-                'conversion_rate' => $item->view_count > 0 ? round(($item->sales_count / $item->view_count) * 100, 2) : 0,
-            ]);
+            ->keyBy('event_id');
+
+        $events = Event::whereIn('id', $salesEventIds)->get()->keyBy('id');
+
+        return $salesData
+            ->filter(fn ($item) => isset($events[$item->event_id]))
+            ->map(function ($item) use ($viewCounts, $events) {
+                $viewCount = isset($viewCounts[$item->event_id]) ? (int) $viewCounts[$item->event_id]->view_count : 0;
+
+                return [
+                    'event' => $events[$item->event_id],
+                    'view_count' => $viewCount,
+                    'sales_count' => (int) $item->sales_count,
+                    'revenue' => (float) $item->revenue,
+                    'conversion_rate' => $viewCount > 0 ? round(($item->sales_count / $viewCount) * 100, 2) : 0,
+                ];
+            })
+            ->values();
     }
 
     /**
