@@ -262,7 +262,8 @@ class PageView
         }
 
         // Skip recording if IP has exceeded view limit for this role today
-        $ip = $request->ip();
+        // Prefer Cloudflare's CF-Connecting-IP header for the real client IP
+        $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
         if ($ip) {
             $ipHash = self::getIpHash($ip);
             if (self::hasExceededViewLimit($role->id, $ipHash)) {
