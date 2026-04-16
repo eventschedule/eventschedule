@@ -91,7 +91,7 @@ class Sale extends Model
 
                     // Only decrement analytics for primary/ungrouped sales (1 sale = 1 analytics entry)
                     if (! $sale->group_id || $sale->isPrimarySale()) {
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
+                        AnalyticsEventsDaily::decrementSale($sale->event_id, 0, $sale->created_at->toDateString());
                     }
                 } else {
                     foreach ($sale->saleTickets as $saleTicket) {

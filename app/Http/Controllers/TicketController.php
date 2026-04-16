@@ -2248,28 +2248,29 @@ class TicketController extends Controller
                         $sale->status = 'paid';
                         $sale->transaction_reference = __('messages.manual_payment');
                         $sale->save();
+
+                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     });
                     $actionPerformed = true;
-
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                    if ($sale->discount_amount > 0) {
-                        AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
-                    }
                 }
                 break;
 
             case 'refund':
                 if ($sale->status === 'paid') {
                     DB::transaction(function () use ($sale) {
+                        $analyticsDate = $sale->created_at->toDateString();
                         $sale->status = 'refunded';
                         $sale->save();
 
                         // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
                         if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
 
                             if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
                     });
@@ -2281,20 +2282,21 @@ class TicketController extends Controller
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $wasPaid = $sale->status === 'paid';
 
-                    DB::transaction(function () use ($sale) {
+                    DB::transaction(function () use ($sale, $wasPaid) {
                         $sale->status = 'cancelled';
                         $sale->save();
+
+                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
+                            $analyticsDate = $sale->created_at->toDateString();
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
+
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
+                            }
+                        }
                     });
                     $actionPerformed = true;
-
-                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                    if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
-                        }
-                    }
                 }
                 break;
 
@@ -2309,10 +2311,11 @@ class TicketController extends Controller
                         // Decrement analytics only for previously paid sales
                         // Skip RSVP sales - handled by Sale::booted hook
                         if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
+                            $analyticsDate = $sale->created_at->toDateString();
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
 
                             if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
                     }

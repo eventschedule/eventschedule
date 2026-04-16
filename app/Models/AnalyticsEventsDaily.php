@@ -88,9 +88,9 @@ class AnalyticsEventsDaily extends Model
     /**
      * Decrement promo sale count and discount total for an event when a sale is refunded or cancelled
      */
-    public static function decrementPromoSale(int $eventId, float $discountAmount): void
+    public static function decrementPromoSale(int $eventId, float $discountAmount, ?string $date = null): void
     {
-        $date = now()->toDateString();
+        $date = $date ?? now()->toDateString();
 
         DB::statement(
             'UPDATE analytics_events_daily
@@ -104,9 +104,9 @@ class AnalyticsEventsDaily extends Model
     /**
      * Decrement sale count and revenue for an event when a sale is refunded or cancelled
      */
-    public static function decrementSale(int $eventId, float $amount): void
+    public static function decrementSale(int $eventId, float $amount, ?string $date = null): void
     {
-        $date = now()->toDateString();
+        $date = $date ?? now()->toDateString();
 
         DB::statement(
             'UPDATE analytics_events_daily

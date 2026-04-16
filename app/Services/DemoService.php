@@ -1088,8 +1088,6 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
                     'seats' => json_encode(array_fill(1, $quantity, null)),
                 ]);
 
-                // Update ticket sold count
-                $ticket->updateSold($eventDate, $quantity);
                 $totalAmount += $ticket->price * $quantity;
             }
 

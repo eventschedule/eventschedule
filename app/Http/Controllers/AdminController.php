@@ -606,21 +606,21 @@ class AdminController extends Controller
         $endDate = $dates['end'];
 
         // Revenue & Sales Metrics
-        $totalRevenue = Sale::where('status', 'completed')->sum('payment_amount');
-        $revenueInPeriod = Sale::where('status', 'completed')
+        $totalRevenue = Sale::where('status', 'paid')->sum('payment_amount');
+        $revenueInPeriod = Sale::where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('payment_amount');
 
-        $totalSales = Sale::where('status', 'completed')->count();
-        $salesInPeriod = Sale::where('status', 'completed')
+        $totalSales = Sale::where('status', 'paid')->count();
+        $salesInPeriod = Sale::where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
         $refundedSales = Sale::where('status', 'refunded')->count();
         $refundRate = ($totalSales + $refundedSales) > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
 
-        $pendingSales = Sale::where('status', 'pending')->count();
-        $pendingRevenue = Sale::where('status', 'pending')->sum('payment_amount');
+        $pendingSales = Sale::where('status', 'unpaid')->count();
+        $pendingRevenue = Sale::where('status', 'unpaid')->sum('payment_amount');
 
         // Boost markup revenue
         $boostMarkupTotal = BoostBillingRecord::where('type', 'charge')
