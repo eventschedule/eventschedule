@@ -208,6 +208,10 @@ class OpenAIUtils
         curl_close($ch);
 
         if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
+            \Log::warning('OpenAI image generation request timed out', [
+                'prompt_preview' => substr($prompt, 0, 100),
+            ]);
+
             $exception = new \Exception('OpenAI API request timed out');
 
             \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $prompt): void {
@@ -322,6 +326,10 @@ class OpenAIUtils
 
                 // Rate limit
                 if ($httpCode === 429) {
+                    \Log::warning('OpenAI image generation rate limited', [
+                        'error' => $errorMessage,
+                    ]);
+
                     $exception = new \Exception('OpenAI API rate limit exceeded: '.$errorMessage);
 
                     \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt): void {

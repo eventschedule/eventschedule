@@ -338,7 +338,10 @@ document.addEventListener('DOMContentLoaded', function() {
         var triggerBtn = e.target.closest('[data-trigger-file-input]');
         if (triggerBtn) {
             var fileInput = document.getElementById(triggerBtn.dataset.triggerFileInput);
-            if (fileInput) fileInput.click();
+            if (fileInput) {
+                fileInput.value = null;
+                fileInput.click();
+            }
             return;
         }
 

@@ -85,9 +85,9 @@ class EventManagementTest extends DuskTestCase
             $newestHash = UrlUtils::encodeId($newestEvent->id);
 
             $browser->visit('/talent/edit-event/'.$newestHash)
-                ->waitFor('#event-actions-menu-button', 5)
-                ->click('#event-actions-menu-button')
-                ->waitFor('#event-delete-form', 5);
+                ->waitFor('#event-actions-menu-button', 5);
+            $browser->script("document.getElementById('event-actions-menu-button').click()");
+            $browser->waitFor('#event-delete-form', 5);
             $browser->script('window.confirm = function() { return true; }');
             $browser->click('#event-delete-form button[type="submit"]')
                 ->waitForLocation('/talent/schedule', 15);

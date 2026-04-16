@@ -6411,7 +6411,9 @@
   var flyerChooseBtn = document.getElementById('flyer-choose-btn');
   if (flyerChooseBtn) {
     flyerChooseBtn.addEventListener('click', function() {
-      document.getElementById('flyer_image').click();
+      var fi = document.getElementById('flyer_image');
+      fi.value = null;
+      fi.click();
     });
   }
 

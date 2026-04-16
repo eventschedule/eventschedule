@@ -1516,6 +1516,12 @@ class EventController extends Controller
             $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role, $request->input('custom_prompt'));
 
             if (! $imageData) {
+                \Log::warning('AI flyer generation returned no image data', [
+                    'role_id' => $role->id,
+                    'event_id' => $eventId,
+                    'has_custom_prompt' => ! empty($request->input('custom_prompt')),
+                ]);
+
                 return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
             }
 
@@ -1566,7 +1572,11 @@ class EventController extends Controller
         } catch (\Exception $e) {
             \Log::error('AI flyer generation failed: '.$e->getMessage(), [
                 'role_id' => $role->id,
+                'event_id' => $eventId,
+                'exception' => get_class($e),
+                'has_custom_prompt' => ! empty($request->input('custom_prompt')),
             ]);
+            report($e);
 
             return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
         }

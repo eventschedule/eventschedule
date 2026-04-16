@@ -254,10 +254,6 @@
                 });
             });
 
-            $('#profile_image').on('change', function() {
-                previewImage(this, 'profile_image_preview');
-            });
-
             $('#header_image').on('input', function() {
                 var headerImageUrl = $(this).find(':selected').val();
                 if (headerImageUrl && headerImageUrl !== 'none') {
@@ -348,6 +344,22 @@
             const reader = new FileReader();
 
             reader.onloadend = function () {
+                if (!reader.result) return;
+
+                // Show preview immediately
+                preview.src = reader.result;
+                preview.style.display = '';
+                if (clearBtn) {
+                    clearBtn.style.display = 'inline-block';
+                }
+                updatePreview();
+
+                if (previewId === 'background_image_preview') {
+                    $('#style_background_image img:not(#background_image_preview)').hide();
+                    $('#style_background_image a').hide();
+                }
+
+                // Check dimensions/size asynchronously (for warnings only)
                 const img = new Image();
                 img.onload = function() {
                     const width = this.width;
@@ -372,20 +384,6 @@
                             warningElement.textContent = '';
                             warningElement.style.display = 'none';
                         }
-                    }
-
-                    // Always show the preview, even with warnings
-                    preview.src = reader.result;
-                    if (clearBtn) {
-                        clearBtn.style.display = 'inline-block';
-                    } else {
-                        preview.style.display = 'block';
-                    }
-                    updatePreview();
-
-                    if (previewId === 'background_image_preview') {
-                        $('#style_background_image img:not(#background_image_preview)').hide();
-                        $('#style_background_image a').hide();
                     }
                 };
                 img.src = reader.result;
@@ -6155,7 +6153,10 @@ document.addEventListener('DOMContentLoaded', function() {
             var triggerBtn = e.target.closest('[data-trigger-file-input]');
             if (triggerBtn) {
                 var fileInput = document.getElementById(triggerBtn.dataset.triggerFileInput);
-                if (fileInput) fileInput.click();
+                if (fileInput) {
+                    fileInput.value = null;
+                    fileInput.click();
+                }
                 return;
             }
 
