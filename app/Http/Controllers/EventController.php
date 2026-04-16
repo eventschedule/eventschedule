@@ -220,6 +220,8 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        restore_pending_action();
+
         if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }

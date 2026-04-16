@@ -222,11 +222,17 @@
             }
 
             const eventRequestFormSection = document.getElementById('event_request_form_section');
+            const requireAccountCheckbox = document.querySelector('input[name="require_account"][type="checkbox"]');
             if (acceptRequestsCheckbox && eventRequestFormSection) {
-                eventRequestFormSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
-                acceptRequestsCheckbox.addEventListener('change', function() {
-                    eventRequestFormSection.style.display = this.checked ? 'block' : 'none';
-                });
+                function toggleEventRequestForm() {
+                    const show = acceptRequestsCheckbox.checked && !(requireAccountCheckbox && requireAccountCheckbox.checked);
+                    eventRequestFormSection.style.display = show ? 'block' : 'none';
+                }
+                toggleEventRequestForm();
+                acceptRequestsCheckbox.addEventListener('change', toggleEventRequestForm);
+                if (requireAccountCheckbox) {
+                    requireAccountCheckbox.addEventListener('change', toggleEventRequestForm);
+                }
             }
 
             const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
@@ -2900,6 +2906,13 @@
                                 help="{{ __($role->isTalent() ? 'messages.accept_requests_help_talent' : 'messages.accept_requests_help') }}" />
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
+                        <div class="mb-6" id="require_account_section">
+                            <x-toggle name="require_account"
+                                label="{{ __('messages.require_account') }}"
+                                checked="{{ old('require_account', $role->exists ? $role->require_account : ($role->require_account ?? $role->isCurator())) }}"
+                                help="{{ __('messages.require_account_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
+                        </div>
                         @if (! $role->isTalent())
                         <div class="mb-6" id="event_request_form_section">
                             <x-input-label :value="__('messages.event_request_form')" />
@@ -2926,13 +2939,6 @@
                             </div>
                         </div>
                         @endif
-                        <div class="mb-6" id="require_account_section">
-                            <x-toggle name="require_account"
-                                label="{{ __('messages.require_account') }}"
-                                checked="{{ old('require_account', $role->exists ? $role->require_account : true) }}"
-                                help="{{ __('messages.require_account_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
-                        </div>
                         <div class="mb-6" id="require_approval_section">
                             <x-toggle name="require_approval"
                                 label="{{ __('messages.require_approval') }}"

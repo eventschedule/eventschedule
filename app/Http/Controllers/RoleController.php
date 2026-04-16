@@ -327,21 +327,36 @@ class RoleController extends Controller
         if ($subdomain = session('pending_request')) {
             $pendingRole = Role::whereSubdomain($subdomain)->first();
 
+            $pendingData = [
+                'pending_request' => $subdomain,
+                'pending_request_allow_guest' => session('pending_request_allow_guest', $pendingRole ? ! $pendingRole->require_account : false),
+                'pending_request_form' => session('pending_request_form', 'import'),
+            ];
+
             if ($pendingRole && $pendingRole->isTalent()) {
                 // Requesting a talent - need a venue schedule
                 if ($user->venues()->count() == 0) {
-                    return redirect(app_url(route('new', ['type' => 'venue'], false)));
+                    return redirect_with_pending_action(
+                        app_url(route('new', ['type' => 'venue'], false)),
+                        $pendingData
+                    );
                 }
                 $redirectRole = $user->venues()->first();
             } else {
                 // Requesting a venue/curator - need a talent schedule
                 if ($user->talents()->count() == 0) {
-                    return redirect(app_url(route('new', ['type' => 'talent'], false)));
+                    return redirect_with_pending_action(
+                        app_url(route('new', ['type' => 'talent'], false)),
+                        $pendingData
+                    );
                 }
                 $redirectRole = $user->talents()->first();
             }
 
-            return redirect(app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)));
+            return redirect_with_pending_action(
+                app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)),
+                $pendingData
+            );
 
         } else {
             return redirect(app_url(route('following', [], false)))
@@ -1837,6 +1852,8 @@ class RoleController extends Controller
 
     public function create($type)
     {
+        restore_pending_action();
+
         if (is_demo_mode()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -1847,6 +1864,7 @@ class RoleController extends Controller
 
         $role = new Role;
         $role->type = $type;
+        $role->require_account = $type === 'curator';
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';
@@ -3664,47 +3682,60 @@ class RoleController extends Controller
     {
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
-        // Schedules using the booking form get the simplified booking request form
+        // require_account=true → always route through the AP add-event screen
+        if ($role->require_account) {
+            if (! auth()->user()) {
+                $lang = session()->has('translate') ? 'en' : $role->language_code;
+
+                return redirect_with_pending_action(
+                    app_url(route('sign_up', ['lang' => $lang], false)),
+                    [
+                        'pending_request' => $subdomain,
+                        'pending_request_allow_guest' => false,
+                        'pending_request_form' => 'import',
+                    ]
+                );
+            }
+
+            $user = auth()->user();
+
+            // Editors of this schedule go straight to AP add-event for this schedule
+            if ($user->isEditor($subdomain)) {
+                return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
+            }
+
+            // Prevent demo account from following other roles
+            if (! DemoService::isDemoUser($user) && ! $user->isConnected($subdomain)) {
+                $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            }
+
+            $pendingData = [
+                'pending_request' => $subdomain,
+                'pending_request_allow_guest' => false,
+                'pending_request_form' => 'import',
+            ];
+
+            // Requesting a venue/curator - need a talent schedule
+            if ($user->talents()->count() == 0) {
+                return redirect_with_pending_action(
+                    app_url(route('new', ['type' => 'talent'], false)),
+                    $pendingData
+                );
+            }
+            $redirectRole = $user->talents()->first();
+
+            return redirect_with_pending_action(
+                app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)),
+                $pendingData
+            );
+        }
+
+        // require_account=false → guest booking form OR guest AI-import form
         if ($role->usesBookingForm()) {
             return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
         }
 
-        if (! auth()->user()) {
-            $lang = session()->has('translate') ? 'en' : $role->language_code;
-
-            return redirect_with_pending_action(
-                app_url(route('sign_up', ['lang' => $lang], false)),
-                [
-                    'pending_request' => $subdomain,
-                    'pending_request_allow_guest' => ! $role->require_account,
-                    'pending_request_form' => 'import',
-                ]
-            );
-        }
-
-        // Owners/editors can preview the guest import form for their own schedule
-        if (auth()->user()->isEditor($subdomain)) {
-            return redirect(route('event.guest_import', ['subdomain' => $role->subdomain]));
-        }
-
-        session(['pending_request' => $subdomain]);
-        session(['pending_request_allow_guest' => ! $role->require_account]);
-        session(['pending_request_form' => 'import']);
-
-        $user = auth()->user();
-
-        // Prevent demo account from following other roles
-        if (! DemoService::isDemoUser($user) && ! $user->isConnected($subdomain)) {
-            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-        }
-
-        // Requesting a venue/curator - need a talent schedule
-        if ($user->talents()->count() == 0) {
-            return redirect(app_url(route('new', ['type' => 'talent'], false)));
-        }
-        $redirectRole = $user->talents()->first();
-
-        return redirect(app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)));
+        return redirect(route('event.guest_import', ['subdomain' => $role->subdomain]));
     }
 
     public function validateAddress(Request $request)
