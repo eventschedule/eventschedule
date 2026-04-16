@@ -2,6 +2,9 @@
 
     <x-slot name="head">
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+        <style {!! nonce_attr() !!}>
+            [v-cloak] { display: none !important; }
+        </style>
     </x-slot>
 
     <div class="space-y-4">
@@ -26,9 +29,9 @@
                     <div class="relative" id="event-selector-dropdown">
                         <select @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
                             class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
-                            <option v-text="selectedEvent ? selectedEvent.name : '{{ __('messages.all_events') }}'"></option>
+                            <option>{{ $selectedEventName }}</option>
                         </select>
-                        <div v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
+                        <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
                             <button @click="onEventChange('')" type="button"
                                 class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
                                 :class="!selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">

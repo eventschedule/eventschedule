@@ -50,6 +50,10 @@ class AnalyticsController extends Controller
         // Get events list for the dropdown (only when a schedule is selected)
         $events = $selectedRoleId ? $analytics->getEventsForSchedule($selectedRoleId) : collect();
 
+        // Resolve the selected event's display name for the initial (pre-Vue-mount) render of the picker
+        $selectedEventEntry = $selectedEventId ? $events->firstWhere('raw_id', $selectedEventId) : null;
+        $selectedEventName = $selectedEventEntry ? $selectedEventEntry['name'] : __('messages.all_events');
+
         // Tab selection
         $tab = $request->tab ?? 'web';
 
@@ -73,6 +77,7 @@ class AnalyticsController extends Controller
                 'roles',
                 'selectedRoleId',
                 'selectedEventId',
+                'selectedEventName',
                 'events',
                 'range',
                 'tab',
@@ -102,6 +107,7 @@ class AnalyticsController extends Controller
                 'roles',
                 'selectedRoleId',
                 'selectedEventId',
+                'selectedEventName',
                 'events',
                 'range',
                 'tab',
@@ -196,6 +202,7 @@ class AnalyticsController extends Controller
             'roles',
             'selectedRoleId',
             'selectedEventId',
+            'selectedEventName',
             'events',
             'totalViews',
             'momComparison',
