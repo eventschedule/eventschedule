@@ -163,7 +163,7 @@ Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->
 Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
 Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
     Route::get('/dashboard', [HomeController::class, 'home'])->name('home');
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
@@ -350,21 +350,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/import/eventbrite', [EventbriteController::class, 'show'])->name('event.show_import_eventbrite');
     Route::post('/{subdomain}/import/eventbrite/connect', [EventbriteController::class, 'connect'])->name('event.eventbrite_connect')->middleware('throttle:10,1');
     Route::post('/{subdomain}/import/eventbrite/import', [EventbriteController::class, 'import'])->name('event.eventbrite_import')->middleware('throttle:60,1');
-    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/get-style-prompt', [RoleController::class, 'getStylePrompt'])->name('role.get_style_prompt')->middleware('throttle:30,1');
-    Route::post('/{subdomain}/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPrompt'])->name('role.get_schedule_details_prompt')->middleware('throttle:30,1');
-    Route::post('/generate-style', [RoleController::class, 'generateStyleNew'])->name('role.generate_style_new')->middleware('throttle:5,1');
-    Route::post('/generate-style-image', [RoleController::class, 'generateStyleImageNew'])->name('role.generate_style_image_new')->middleware('throttle:5,1');
-    Route::post('/generate-schedule-details', [RoleController::class, 'generateScheduleDetailsNew'])->name('role.generate_schedule_details_new')->middleware('throttle:5,1');
-    Route::post('/get-style-prompt', [RoleController::class, 'getStylePromptNew'])->name('role.get_style_prompt_new')->middleware('throttle:30,1');
-    Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new')->middleware('throttle:30,1');
-    Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt')->middleware('throttle:30,1');
+    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
+    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
+    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer');
+    Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style');
+    Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image');
+    Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details');
+    Route::post('/{subdomain}/get-style-prompt', [RoleController::class, 'getStylePrompt'])->name('role.get_style_prompt');
+    Route::post('/{subdomain}/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPrompt'])->name('role.get_schedule_details_prompt');
+    Route::post('/generate-style', [RoleController::class, 'generateStyleNew'])->name('role.generate_style_new');
+    Route::post('/generate-style-image', [RoleController::class, 'generateStyleImageNew'])->name('role.generate_style_image_new');
+    Route::post('/generate-schedule-details', [RoleController::class, 'generateScheduleDetailsNew'])->name('role.generate_schedule_details_new');
+    Route::post('/get-style-prompt', [RoleController::class, 'getStylePromptNew'])->name('role.get_style_prompt_new');
+    Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new');
+    Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details');
+    Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
     Route::post('/{subdomain}/update-all-categories', [RoleController::class, 'updateAllCategories'])->name('role.update_all_categories');
     Route::post('/{subdomain}/update-all-slugs', [RoleController::class, 'updateAllSlugs'])->name('role.update_all_slugs');

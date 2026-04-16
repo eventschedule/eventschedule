@@ -2933,6 +2933,11 @@ class RoleController extends Controller
         }
 
         $imageElements = array_intersect($request->input('elements', []), ['profile_image', 'header_image', 'background_image']);
+        $textElements = array_diff($request->input('elements', []), $imageElements);
+
+        if (! empty($textElements) && ! $role->canMakeAiTextRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        }
 
         if (! empty($imageElements) && ! $role->canGenerateAiImage()) {
             return response()->json(['error' => __('messages.ai_daily_limit_reached', ['limit' => $role->aiImageDailyLimit()])], 422);
@@ -3353,6 +3358,10 @@ class RoleController extends Controller
 
         if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $role->canMakeAiTextRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
         }
 
         if (is_demo_mode()) {

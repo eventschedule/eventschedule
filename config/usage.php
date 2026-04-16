@@ -10,4 +10,7 @@ return [
     'stuck_translation_attempts' => (int) env('USAGE_STUCK_THRESHOLD', 3),
     'ai_image_daily_limit_trial' => (int) env('AI_IMAGE_DAILY_LIMIT_TRIAL', 3),
     'ai_image_daily_limit_paid' => (int) env('AI_IMAGE_DAILY_LIMIT_PAID', 10),
+    'ai_text_daily_limit_trial' => (int) env('AI_TEXT_DAILY_LIMIT_TRIAL', 10),
+    'ai_text_daily_limit_pro' => (int) env('AI_TEXT_DAILY_LIMIT_PRO', 50),
+    'ai_text_daily_limit_enterprise' => (int) env('AI_TEXT_DAILY_LIMIT_ENTERPRISE', 100),
 ];

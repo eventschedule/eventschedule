@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\EventGraphicGenerator;
 use App\Services\GraphicEmailService;
+use App\Services\UsageTrackingService;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use App\Utils\OpenAIUtils;
@@ -367,6 +368,10 @@ class GraphicController extends Controller
             return response()->json(['error' => 'Enterprise feature'], 403);
         }
 
+        if (! $role->canMakeAiTextRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiTextDailyLimit()])], 422);
+        }
+
         $text = $request->input('text', '');
         $aiPrompt = trim($request->input('ai_prompt', ''));
         $aiModel = $request->input('ai_model', '');
@@ -396,13 +401,16 @@ class GraphicController extends Controller
         $requestId = Str::uuid()->toString();
         Cache::put("ai_text_{$requestId}", ['status' => 'processing'], 300);
 
-        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel) {
+        $roleId = $role->id;
+
+        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel, $roleId) {
             set_time_limit(120);
 
             $result = $this->processTextWithAI($text, $aiPrompt, $events, $aiModel);
 
             if ($result) {
                 Cache::put("ai_text_{$requestId}", ['status' => 'completed', 'text' => $result], 300);
+                UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS, $roleId);
             } else {
                 Cache::put("ai_text_{$requestId}", ['status' => 'failed'], 300);
             }

@@ -66,6 +66,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => RedirectIfAuthenticated::class,
             'admin' => EnsureUserIsAdmin::class,
             'throttle' => \App\Http\Middleware\ThrottleRequests::class,
+            'app_subdomain' => \App\Http\Middleware\RedirectToAppSubdomain::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

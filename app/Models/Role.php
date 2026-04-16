@@ -1376,6 +1376,48 @@ class Role extends Model implements MustVerifyEmail
         return $this->aiImageGenerationsToday() < $limit;
     }
 
+    public function aiTextDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        if ($this->isOnTrial()) {
+            return config('usage.ai_text_daily_limit_trial');
+        }
+
+        if ($this->isEnterprise()) {
+            return config('usage.ai_text_daily_limit_enterprise');
+        }
+
+        return config('usage.ai_text_daily_limit_pro');
+    }
+
+    public function aiTextOperationsToday(): int
+    {
+        return (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->whereIn('operation', [
+                \App\Services\UsageTrackingService::GEMINI_PARSE_EVENT,
+                \App\Services\UsageTrackingService::GEMINI_PARSE_PARTS,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS,
+            ])
+            ->sum('count');
+    }
+
+    public function canMakeAiTextRequest(): bool
+    {
+        $limit = $this->aiTextDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        return $this->aiTextOperationsToday() < $limit;
+    }
+
     public function photoLimit(): ?int
     {
         if (! config('app.hosted')) {

@@ -882,7 +882,7 @@ class GeminiUtils
         return $data;
     }
 
-    public static function parseEventParts($imageData = null, $textDescription = null, $aiPrompt = null)
+    public static function parseEventParts($imageData = null, $textDescription = null, $aiPrompt = null, int $roleId = 0)
     {
         $config = config('ai_prompts.event_parts');
         $source = ($imageData && $textDescription) ? 'image and text' : ($imageData ? 'image' : 'text');
@@ -902,7 +902,7 @@ class GeminiUtils
             return [];
         }
 
-        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_PARTS);
+        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_PARTS, $roleId);
 
         // Normalize: sendRequest wraps single objects in an array
         $parts = [];
