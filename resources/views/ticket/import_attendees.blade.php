@@ -8,6 +8,10 @@
         <style {!! nonce_attr() !!}>
             [v-cloak] { display: none !important; }
             .iti { display: block !important; width: 100% !important; }
+            .iti:not(.iti--country-only) > .iti__country-container { padding: 0 0 0 4px !important; }
+            .dark .iti { --iti-dropdown-bg: #1e1e1e; --iti-hover-color: #2d2d30; --iti-border-color: #2d2d30; --iti-dialcode-color: #d1d5db; --iti-arrow-color: #d1d5db; }
+            .dark .iti__dropdown-content, .dark .iti__selected-dial-code { color: #d1d5db; }
+            .dark .iti__search-input { background: #1e1e1e; color: #d1d5db; border-color: #2d2d30; }
         </style>
     </x-slot>
 
@@ -658,6 +662,19 @@
                         el.addEventListener('countrychange', sync);
                         if (entry.phone) iti.setNumber(entry.phone);
                         this.itiInstances[key] = iti;
+                        this.$nextTick(() => this.matchPhoneHeights());
+                    },
+                    matchPhoneHeights() {
+                        // Read the rendered height of a sibling text/email input and copy it
+                        // onto every tel input. Works regardless of CSS cascade quirks.
+                        const refInput = document.querySelector('#import-attendees-app input[type=email]')
+                            || document.querySelector('#import-attendees-app input[type=text]');
+                        if (!refInput) return;
+                        const h = refInput.offsetHeight;
+                        if (!h) return;
+                        document.querySelectorAll('#import-attendees-app .iti__tel-input').forEach(tel => {
+                            tel.style.setProperty('height', h + 'px', 'important');
+                        });
                     },
                     refreshPhoneInputs() {
                         // For existing entries that already have iti, re-sync values
@@ -882,8 +899,10 @@
                             document.querySelectorAll('#import-attendees-app input[type=tel][data-key]').forEach(el => {
                                 this.setPhoneRef(el);
                             });
+                            this.matchPhoneHeights();
                         });
                     }
+                    window.addEventListener('resize', () => this.matchPhoneHeights());
                     // Warn on navigation with unsaved changes
                     window._importAttendeesIsDirty = false;
                     window.addEventListener('beforeunload', (e) => {

@@ -11,7 +11,7 @@
     --iti-dropdown-bg: #1e1e1e;
     --iti-hover-color: #2d2d30;
     --iti-border-color: #2d2d30;
-    --iti-dialcode-color: #9ca3af;
+    --iti-dialcode-color: #d1d5db;
     --iti-arrow-color: #d1d5db;
 }
 .dark .iti__dropdown-content { color: #d1d5db; }
@@ -51,23 +51,17 @@
         wrapper.style.setProperty('width', '100%', 'important');
     }
 
-    // Match height to adjacent text inputs (with CSS-load guard)
+    // Match height to adjacent text/email input (covers cascade quirks on some pages)
     function matchHeight() {
         var form = input.closest('form');
         var refInput = form && form.querySelector('input[type="text"], input[type="email"]');
-        if (refInput && refInput.offsetHeight > 30) {
+        if (refInput && refInput.offsetHeight > 0) {
             input.style.setProperty('height', refInput.offsetHeight + 'px', 'important');
-            return true;
         }
-        return false;
     }
-
-    requestAnimationFrame(function() {
-        if (!matchHeight()) {
-            // CSS not loaded yet (Vite dev mode) - retry after full page load
-            window.addEventListener('load', matchHeight);
-        }
-    });
+    requestAnimationFrame(matchHeight);
+    window.addEventListener('load', matchHeight);
+    window.addEventListener('resize', matchHeight);
 
     // If we have an initial value, set it
     if (hidden.value) {
