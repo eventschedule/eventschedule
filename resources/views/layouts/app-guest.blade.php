@@ -12,10 +12,13 @@
             $otherRole = $event->getOtherRole($subdomain);
         }
         $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+        $isUnverifiedRole = $role && $role->exists
+            && !($role->email && $role->email_verified_at)
+            && !($role->phone && $role->phone_verified_at);
     @endphp
 
     <x-slot name="meta">
-        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)))
+        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)) || $isUnverifiedRole)
             <meta name="robots" content="noindex, nofollow">
         @else
             <meta name="robots" content="index, follow">
@@ -349,9 +352,9 @@
                     }
                 }
                 
-                // Get social links
+                // Suppressed for unverified schedules to avoid seeding structured-data backlinks.
                 $sameAs = [];
-                if ($role->social_links) {
+                if ($role->social_links && !$isUnverifiedRole) {
                     $socialLinks = json_decode($role->social_links, true);
                     if (is_array($socialLinks)) {
                         foreach ($socialLinks as $link) {

@@ -546,7 +546,7 @@ class UrlUtils
             // Escape URL for safe HTML attribute and display
             $escapedUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
 
-            return '<a href="'.$escapedUrl.'" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">'.$escapedUrl.'</a>';
+            return '<a href="'.$escapedUrl.'" target="_blank" rel="noopener noreferrer nofollow" class="text-blue-600 dark:text-blue-400 hover:underline">'.$escapedUrl.'</a>';
         }, $text);
     }
 
