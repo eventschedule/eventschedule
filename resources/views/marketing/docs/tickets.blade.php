@@ -460,7 +460,7 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Additional Settings</h3>
                             <ul class="doc-list">
-                                <li><strong class="text-gray-900 dark:text-white">Ask for phone number:</strong> Add a phone number field to the checkout form. You can make it required and optionally include a country code selector.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Ask for phone number:</strong> Add a phone number field to the checkout form. You can make it required and optionally include a country code selector. Collected phone numbers are also used for SMS notifications where Twilio is configured.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Individual tickets:</strong> Each attendee receives their own confirmation and QR code. When enabled, you can also collect custom ticket fields per guest.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Allow sales after event starts:</strong> Continue selling tickets until the event ends (start time plus duration) instead of stopping at the start time</li>
                                 <li><strong class="text-gray-900 dark:text-white">Configure sales dates:</strong> Enable per-ticket-type start and end dates to schedule when each ticket type becomes available or stops selling</li>
@@ -636,7 +636,7 @@
 
                         <!-- Importing Attendees -->
                         <section id="importing-attendees" class="doc-section">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing Attendees</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing Attendees <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 ml-2">Pro</span></h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Bulk-add attendees who paid out-of-band (cash, sponsored, or through a third-party system) instead of checking them out through the public ticket page. Up to 5,000 attendees per import.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">

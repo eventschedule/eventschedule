@@ -133,6 +133,7 @@ class HelpUtils
         '{subdomain}/followers' => '/docs/managing-schedules#followers',
         '{subdomain}/team' => '/docs/managing-schedules#team',
         '{subdomain}/plan' => '/docs/managing-schedules#plan',
+        '{subdomain}/audit-log' => '/docs/managing-schedules#audit-log',
         '{subdomain}/videos' => '/docs/managing-schedules#videos',
         '{subdomain}/subscribe' => '/docs/creating-schedules',
         '{subdomain}/import' => '/docs/ai-import',

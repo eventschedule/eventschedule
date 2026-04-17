@@ -194,8 +194,17 @@
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Event URL / Slug</span></td>
                                             <td>For existing events, the event URL is displayed with a copy button. You can click <strong>Edit</strong> to customize the URL slug.</td>
                                         </tr>
+                                        <tr>
+                                            <td id="draft"><span class="font-semibold text-gray-900 dark:text-white">Draft</span></td>
+                                            <td>Mark the event as a draft to keep it private while you finish editing. Draft events are hidden from the public schedule, event feeds, RSS, event graphics, newsletters, and Google Calendar/CalDAV sync. Admins see a banner indicating the event is still in draft. Uncheck to publish.</td>
+                                        </tr>
                                     </tbody>
                                 </table>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Draft by default</div>
+                                <p>You can make all new events default to draft from <strong>Schedule Settings &rarr; Advanced</strong>. See <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-500">Advanced Settings</a>.</p>
                             </div>
                         </section>
 

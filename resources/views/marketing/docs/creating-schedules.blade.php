@@ -814,8 +814,20 @@
                             <h3 id="settings-advanced" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Advanced</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default to Draft</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, new events are created as drafts and stay hidden from the public schedule until you uncheck the Draft toggle on each event. See <a href="{{ route('marketing.docs.creating_events') }}#draft" class="text-cyan-400 hover:text-cyan-300">Draft events</a>.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Videos</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Hide the videos panel from your public schedule. Useful for Venue and Curator schedules that don't want to feature video content alongside events.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Choose which day your calendar week starts on. All seven days are available (Sunday, Monday, Tuesday, etc.).</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default Category</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Preselect an event category (e.g. Concert, Workshop) on every new event so you don't have to pick one each time. Once saved, a button appears to apply the default to all existing events in one click.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Import Form Fields</h4>
@@ -1036,6 +1048,11 @@
                                 <li>Authorize Event Schedule to access your Google Calendar</li>
                                 <li>Select which calendar to sync and choose sync direction</li>
                             </ol>
+
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Team members</div>
+                                <p>Each team member on the schedule can connect their own Google Calendar independently. Events are synced per-member, so everyone on the team stays in sync with their personal calendar.</p>
+                            </div>
 
                             <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Selfhost Note</div>

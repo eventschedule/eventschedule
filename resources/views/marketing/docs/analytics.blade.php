@@ -245,6 +245,14 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Top Schedules Appeared On</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Shows which external schedules generate the most views for your events when you appear as a guest (shown for talent and venue schedules).</p>
                                 </div>
+                                <div id="web-geography" class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Visitor Locations</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A country-level breakdown of where your visitors are based, resolved from IP address. Use it to see whether your audience is local, regional, or international.</p>
+                                </div>
+                                <div id="web-social-clicks" class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Social Link Clicks</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Tracks clicks on the social links configured in your <a href="{{ route('marketing.docs.creating_schedules') }}#videos-links" class="text-cyan-400 hover:text-cyan-300">schedule settings</a>, broken down by platform (Instagram, Facebook, TikTok, etc.). Helpful for seeing which channels are actually driving engagement.</p>
+                                </div>
                             </div>
                         </section>
 

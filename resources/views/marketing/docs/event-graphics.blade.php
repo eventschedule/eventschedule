@@ -535,6 +535,11 @@ https://example.com/event/summer-concert</code></pre>
                                     <code class="text-rose-300">Add relevant hashtags for Instagram</code>
                                 </div>
                             </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Choosing an AI Model</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                The <strong class="text-gray-900 dark:text-white">AI Model</strong> dropdown lets you pick which Gemini model processes the prompt. Faster, lighter models work well for short transformations like adding emojis or translating; higher-capability models are better for longer text that needs nuanced rewriting.
+                            </p>
                         </section>
 
                         <!-- Email Scheduling -->

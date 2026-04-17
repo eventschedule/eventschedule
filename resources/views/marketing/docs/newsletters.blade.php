@@ -197,8 +197,8 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Image</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Upload or link to an image with optional alt text.</p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> URL, Alt text, Width, Alignment (left/center/right)</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Upload or link to one or more images. Add a caption, make the image clickable with a link URL, and pick a layout when using multiple images.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">Fields:</strong> URL, Alt text, Caption, Link URL, Width, Alignment (left/center/right), Layout (column, row, or grid) when adding multiple images</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Video</h4>
@@ -387,6 +387,11 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sub-schedule</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Send to ticket buyers from a specific sub-schedule. Perfect for category-specific promotions.</p>
                                 </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Schedule members are always included</div>
+                                <p>Team members on the schedule (owner, admins, and viewers) who have email verified and are subscribed always receive every newsletter, regardless of the segment selected. This keeps the team in the loop on what's being sent.</p>
                             </div>
                         </section>
 

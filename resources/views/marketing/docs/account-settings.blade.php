@@ -315,13 +315,13 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Google Calendar</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Integrations</a>.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Google Calendar to enable two-way sync between Event Schedule and Google Calendar. This is a separate integration from the Google Account login above and can be connected or disconnected independently. Events created in either platform are automatically synced to the other. Each team member on a schedule can connect their own Google Calendar, so shared schedules sync to every member's personal calendar. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations" class="text-cyan-400 hover:text-cyan-300">Integrations</a>.</p>
                                 </div>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>Google Calendar sync is configured per schedule in the schedule settings. Connect your Google account here first, then enable sync on each schedule you want to keep in sync.</p>
+                                <p>Google Calendar sync is configured per schedule in the schedule settings. Connect your Google account here first, then enable sync on each schedule you want to keep in sync. Team members on a shared schedule each control their own connection.</p>
                             </div>
                         </section>
 
