@@ -769,7 +769,7 @@ class NewsletterController extends Controller
         if ($segment->type === 'manual') {
             $sortBy = $request->get('sort_by', 'created_at');
             $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-            $allowedSortColumns = ['name', 'email', 'created_at'];
+            $allowedSortColumns = ['name', 'created_at'];
             if (! in_array($sortBy, $allowedSortColumns)) {
                 $sortBy = 'created_at';
             }

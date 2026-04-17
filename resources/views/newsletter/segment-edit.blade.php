@@ -96,7 +96,6 @@
                         <tr>
                             @if ($segment->type === 'manual')
                             <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.name') }}</x-sortable-header>
-                            <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.email') }}</x-sortable-header>
                             <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.date_added') }}</x-sortable-header>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             @else
@@ -111,7 +110,6 @@
                         {{-- Display row --}}
                         <tr data-display-row="{{ $encodedId }}">
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->email }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
                             <td class="px-4 py-3 text-sm text-right">
                                 <div class="flex gap-3 justify-end">
@@ -127,13 +125,13 @@
                         </tr>
                         {{-- Edit row --}}
                         <tr data-edit-row="{{ $encodedId }}" style="display: none;">
-                            <td colspan="4" class="px-4 py-3">
+                            <td colspan="3" class="px-4 py-3">
                                 <form method="POST" action="{{ route('newsletter.segment.user.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
                                     class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                                     @csrf
                                     @method('PUT')
                                     <x-text-input name="name" type="text" class="flex-1 text-sm" :value="$subscriber->name" :placeholder="__('messages.name')" />
-                                    <x-text-input name="email" type="email" class="flex-1 text-sm" :value="$subscriber->email" :placeholder="__('messages.email')" required />
+                                    <input type="hidden" name="email" value="{{ $subscriber->email }}">
                                     <div class="flex gap-2">
                                         <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-[var(--brand-button-bg-hover)]">
                                             {{ __('messages.save_changes') }}

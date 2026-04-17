@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ImportAttendeesRequest;
 use App\Http\Requests\TicketCheckoutRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
@@ -2514,5 +2515,269 @@ class TicketController extends Controller
 
             return response()->json(['error' => __('messages.failed_to_send_email')], 500);
         }
+    }
+
+    public function importAttendees(Request $request)
+    {
+        $user = auth()->user();
+
+        $roles = $user->roles()->wherePivot('level', '!=', 'follower')->get();
+
+        if ($roles->isEmpty()) {
+            abort(403);
+        }
+
+        $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
+        if ($selectedRoleId && ! $roles->pluck('id')->contains($selectedRoleId)) {
+            $selectedRoleId = null;
+        }
+        if (! $selectedRoleId) {
+            $selectedRoleId = $roles->first()->id;
+        }
+
+        $selectedRole = $selectedRoleId ? $roles->firstWhere('id', $selectedRoleId) : null;
+
+        if ($selectedRole && ! $selectedRole->isPro()) {
+            return view('ticket.import_attendees', [
+                'roles' => $roles,
+                'selectedRoleId' => $selectedRoleId,
+                'events' => collect(),
+                'event' => null,
+                'tickets' => collect(),
+                'eventDates' => [],
+                'hasEmailSettings' => false,
+                'emailSettingsRole' => null,
+                'requiresPro' => true,
+            ]);
+        }
+
+        $events = collect();
+        if ($selectedRoleId) {
+            $events = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $selectedRoleId))
+                ->where('is_draft', false)
+                ->orderBy('starts_at', 'desc')
+                ->get()
+                ->map(fn ($e) => [
+                    'id' => UrlUtils::encodeId($e->id),
+                    'raw_id' => $e->id,
+                    'name' => $e->translatedName(),
+                    'starts_at' => $e->getShortDateRangeDisplay('D, M j, Y'),
+                    'image_url' => $e->getImageUrl(),
+                ]);
+        }
+
+        $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;
+        if ($selectedEventId && ! $events->pluck('raw_id')->contains($selectedEventId)) {
+            $selectedEventId = null;
+        }
+
+        $event = null;
+        $tickets = collect();
+        $eventDates = [];
+
+        $hasEmailSettings = false;
+        $emailSettingsRole = null;
+
+        if ($selectedEventId) {
+            $event = Event::with(['tickets', 'creatorRole', 'roles'])->find($selectedEventId);
+            if ($event) {
+                $emailSettingsRole = $event->getRoleWithEmailSettings();
+                $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
+                $tickets = $event->tickets->where('is_addon', false)->values();
+
+                if ($event->days_of_week) {
+                    $start = now()->startOfDay();
+                    $end = now()->addYear();
+                    $cursor = $start->copy();
+                    while ($cursor->lte($end) && count($eventDates) < 60) {
+                        if ($event->matchesDate($cursor)) {
+                            $eventDates[] = $cursor->format('Y-m-d');
+                        }
+                        $cursor->addDay();
+                    }
+                } elseif ($event->starts_at) {
+                    $eventDates[] = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')
+                        ->format('Y-m-d');
+                }
+            }
+        }
+
+        return view('ticket.import_attendees', [
+            'roles' => $roles,
+            'selectedRoleId' => $selectedRoleId,
+            'events' => $events,
+            'event' => $event,
+            'tickets' => $tickets,
+            'eventDates' => $eventDates,
+            'hasEmailSettings' => $hasEmailSettings,
+            'emailSettingsRole' => $emailSettingsRole,
+            'requiresPro' => false,
+        ]);
+    }
+
+    public function importAttendeesStore(ImportAttendeesRequest $request)
+    {
+        $user = auth()->user();
+
+        $event = Event::with(['tickets', 'roles', 'creatorRole'])
+            ->findOrFail(UrlUtils::decodeId($request->event_id));
+
+        if (! $user->canEditEvent($event)) {
+            abort(403);
+        }
+
+        if (! $event->isPro()) {
+            abort(403);
+        }
+
+        $subdomain = $event->creatorRole?->subdomain
+            ?? $event->roles->first()?->subdomain
+            ?? '';
+
+        $fallbackTicketId = UrlUtils::decodeId($request->ticket_id);
+        $fallbackTicket = $event->tickets->firstWhere('id', $fallbackTicketId);
+        if (! $fallbackTicket) {
+            return back()->withInput()->with('error', __('messages.ticket_not_found'));
+        }
+
+        $eventDate = $request->event_date;
+        $defaultStatus = $request->default_status;
+        $sendEmails = $request->boolean('send_emails');
+
+        $eventCustomFieldIndices = $this->customFieldIndicesFor($event->custom_fields ?? []);
+        $ticketCustomFieldIndices = [];
+        foreach ($event->tickets as $t) {
+            $ticketCustomFieldIndices[$t->id] = $this->customFieldIndicesFor($t->custom_fields ?? []);
+        }
+
+        $imported = 0;
+        $skipped = [];
+        $sentEmails = [];
+
+        try {
+            DB::transaction(function () use (
+                $request, $event, $fallbackTicket, $eventDate, $defaultStatus, $subdomain,
+                $eventCustomFieldIndices, $ticketCustomFieldIndices, &$imported, &$skipped, &$sentEmails
+            ) {
+                foreach ($request->entries as $i => $entry) {
+                    $rowNum = $i + 1;
+
+                    $ticket = $fallbackTicket;
+                    if (! empty($entry['ticket_id'])) {
+                        $ticketId = UrlUtils::decodeId($entry['ticket_id']);
+                        $found = $event->tickets->firstWhere('id', $ticketId);
+                        if ($found && ! $found->is_addon) {
+                            $ticket = $found;
+                        }
+                    }
+
+                    $quantity = (int) ($entry['quantity'] ?? 1);
+                    if ($quantity < 1) {
+                        $quantity = 1;
+                    }
+
+                    $lockedTicket = $event->tickets()->lockForUpdate()->find($ticket->id);
+                    if ($lockedTicket->quantity > 0) {
+                        $sold = $lockedTicket->sold ? json_decode($lockedTicket->sold, true) : [];
+                        $soldCount = $sold[$eventDate] ?? 0;
+                        $remaining = $lockedTicket->quantity - $soldCount;
+                        if ($quantity > $remaining) {
+                            $skipped[] = __('messages.row_error', [
+                                'row' => $rowNum,
+                                'error' => __('messages.tickets_not_available'),
+                            ]);
+
+                            continue;
+                        }
+                    }
+
+                    $status = ! empty($entry['status']) ? strtolower($entry['status']) : $defaultStatus;
+                    if (! in_array($status, ['paid', 'unpaid'], true)) {
+                        $status = $defaultStatus;
+                    }
+
+                    $amount = isset($entry['amount']) && $entry['amount'] !== '' ? (float) $entry['amount'] : 0;
+
+                    $sale = new Sale;
+                    $sale->name = trim($entry['name'] ?? '') ?: strtok($entry['email'], '@');
+                    $sale->email = strtolower(trim($entry['email']));
+                    $sale->phone = ! empty($entry['phone']) ? strip_tags(trim($entry['phone'])) : null;
+                    $sale->event_id = $event->id;
+                    $sale->event_date = $eventDate;
+                    $sale->subdomain = $subdomain;
+                    $sale->secret = strtolower(Str::random(32));
+                    $sale->payment_method = 'import';
+                    $sale->payment_amount = $amount;
+                    $sale->status = $status;
+
+                    $entryCustomValues = $entry['custom_values'] ?? [];
+                    foreach ($eventCustomFieldIndices as $idx) {
+                        $value = $entryCustomValues[$idx] ?? null;
+                        if ($value !== null) {
+                            $value = trim(strip_tags((string) $value));
+                            $sale->{"custom_value{$idx}"} = $value !== '' ? $value : null;
+                        }
+                    }
+
+                    $sale->save();
+
+                    $saleTicketData = [
+                        'sale_id' => $sale->id,
+                        'ticket_id' => $ticket->id,
+                        'quantity' => $quantity,
+                        'seats' => json_encode(array_fill(1, $quantity, null)),
+                    ];
+
+                    $entryTicketCustomValues = $entry['ticket_custom_values'] ?? [];
+                    foreach (($ticketCustomFieldIndices[$ticket->id] ?? []) as $idx) {
+                        $value = $entryTicketCustomValues[$idx] ?? null;
+                        if ($value !== null) {
+                            $value = trim(strip_tags((string) $value));
+                            $saleTicketData["custom_value{$idx}"] = $value !== '' ? $value : null;
+                        }
+                    }
+
+                    $sale->saleTickets()->create($saleTicketData);
+
+                    $ticket->updateSold($eventDate, $quantity);
+
+                    $imported++;
+                    $sentEmails[] = $sale->id;
+                }
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return back()->withInput()->with('error', __('messages.error'));
+        }
+
+        if ($sendEmails && ! empty($sentEmails)) {
+            $sales = Sale::whereIn('id', $sentEmails)->get();
+            foreach ($sales as $sale) {
+                $this->sendTicketPurchaseEmail($sale, $event);
+            }
+        }
+
+        $statusMessage = __('messages.imported_n_attendees', ['count' => $imported]);
+        if (! empty($skipped)) {
+            $statusMessage .= ' '.__('messages.skipped_n_rows', ['count' => count($skipped)]);
+        }
+
+        return redirect()->route('sales')->with('status', $statusMessage);
+    }
+
+    protected function customFieldIndicesFor(array $customFields): array
+    {
+        $indices = [];
+        $fallback = 1;
+        foreach ($customFields as $fieldConfig) {
+            $idx = $fieldConfig['index'] ?? $fallback;
+            $fallback++;
+            if ($idx >= 1 && $idx <= 10) {
+                $indices[] = (int) $idx;
+            }
+        }
+
+        return array_values(array_unique($indices));
     }
 }

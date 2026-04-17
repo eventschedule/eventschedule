@@ -174,64 +174,59 @@
                 </template>
 
                 <div class="mb-4">
-                    <input x-ref="csvFileInput" type="file" accept=".csv" @change="handleCsvFile($event); $refs.csvFilename.textContent = $event.target.files[0]?.name || ''" class="hidden" />
-                    <div class="flex items-center gap-3">
-                        <button type="button" @click="$refs.csvFileInput.click()"
-                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                            {{ __('messages.choose_file') }}
-                        </button>
-                        <span x-ref="csvFilename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                        <button type="button" x-show="csvPreview.length > 0" x-cloak @click="clearCsvFile()"
-                            class="text-gray-400 hover:text-red-500 p-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
+                    <input x-ref="csvFileInput" type="file" accept=".csv" @change="handleCsvFile($event)" class="hidden" />
+                    <div @click="$refs.csvFileInput.click()"
+                        @dragover.prevent="csvDragOver = true"
+                        @dragenter.prevent="csvDragOver = true"
+                        @dragleave.prevent.self="csvDragOver = false"
+                        @drop.prevent="handleCsvDrop($event)"
+                        :class="csvDragOver ? 'border-[var(--brand-blue)] bg-[var(--brand-blue)]/5' : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'"
+                        class="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center transition-colors">
+                        <svg class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500 mb-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        <p x-show="!csvFilename" class="text-sm text-gray-700 dark:text-gray-300 pointer-events-none">{{ __('messages.drop_csv_or_click') }}</p>
+                        <p x-show="csvFilename" x-text="csvFilename" class="text-sm text-gray-700 dark:text-gray-300 pointer-events-none"></p>
                     </div>
                 </div>
 
-                {{-- CSV Preview --}}
-                <template x-if="csvPreview.length > 0">
+                {{-- Column Mapping --}}
+                <template x-if="csvHeaders.length > 0">
                     <div>
-                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">{{ __('messages.csv_preview') }}</h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.row_count') }}: <span x-text="csvTotalRows"></span></p>
-
-                        {{-- Column Mapping --}}
-                        <div class="mb-4">
-                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.map_columns') }}</p>
-                            <div class="flex gap-4 flex-wrap">
-                                <template x-for="(header, index) in csvHeaders" :key="index">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="text-xs text-gray-500 dark:text-gray-400" x-text="header"></span>
-                                        <select :value="columnMappings[index]" @change="columnMappings[index] = $event.target.value"
-                                            class="text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                                            <option value="skip">{{ __('messages.skip_column') }}</option>
-                                            <option value="email">{{ __('messages.email') }}</option>
-                                            <option value="name">{{ __('messages.name') }}</option>
-                                        </select>
-                                    </div>
-                                </template>
-                            </div>
+                        <div class="flex items-center justify-between gap-3 mb-3">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.map_columns') }}</h4>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.row_count') }}: <span x-text="csvTotalRows"></span></span>
                         </div>
 
-                        {{-- Preview Table --}}
-                        <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                            <template x-for="(header, index) in csvHeaders" :key="index">
+                                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-[#252526]">
+                                    <p class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 truncate" x-text="header || '-'"></p>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1 mb-3 truncate" :title="(csvPreview[0] && csvPreview[0][index]) || ''" x-text="(csvPreview[0] && csvPreview[0][index]) || '-'"></p>
+                                    <select :value="columnMappings[index]" @change="columnMappings[index] = $event.target.value"
+                                        class="text-sm w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        <option value="skip">{{ __('messages.skip_column') }}</option>
+                                        <option value="email">{{ __('messages.email') }}</option>
+                                        <option value="name">{{ __('messages.name') }}</option>
+                                    </select>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg mb-4 max-h-60">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <template x-for="(header, index) in csvHeaders" :key="index">
-                                            <th class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase" x-text="header"></th>
+                                        <template x-for="(h, i) in csvHeaders" :key="'hh-'+i">
+                                            <th class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase text-left" x-text="h"></th>
                                         </template>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <template x-for="(row, rowIndex) in csvPreview" :key="rowIndex">
+                                    <template x-for="(row, ri) in csvPreview" :key="'rr-'+ri">
                                         <tr>
-                                            <template x-for="(cell, cellIndex) in row" :key="cellIndex">
-                                                <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300" x-text="cell"></td>
+                                            <template x-for="(cell, ci) in row" :key="'cc-'+ci">
+                                                <td class="px-3 py-2 text-gray-700 dark:text-gray-300" x-text="cell"></td>
                                             </template>
                                         </tr>
                                     </template>
@@ -240,10 +235,9 @@
                         </div>
 
                         <div class="flex justify-end mt-4">
-                            <button @click="submitCsv()" :disabled="submitting || !hasEmailColumn()"
+                            <button @click="loadCsvIntoForm()" :disabled="!hasEmailColumn()"
                                 class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed">
-                                <span x-show="!submitting">{{ __('messages.confirm_import') }}</span>
-                                <span x-show="submitting">{{ __('messages.loading') }}...</span>
+                                {{ __('messages.next') }}
                             </button>
                         </div>
                     </div>
@@ -264,6 +258,8 @@
                 csvPreview: [],
                 csvAllRows: [],
                 csvTotalRows: 0,
+                csvFilename: '',
+                csvDragOver: false,
                 columnMappings: [],
                 submitting: false,
                 formEntries: [{ name: '', email: '' }],
@@ -273,14 +269,21 @@
 
                 handleCsvFile(event) {
                     const file = event.target.files[0];
+                    if (file) this.readCsvFile(file);
+                },
+                handleCsvDrop(event) {
+                    this.csvDragOver = false;
+                    const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
                     if (!file) return;
-
+                    if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') return;
+                    this.readCsvFile(file);
+                },
+                readCsvFile(file) {
                     if (file.size > 10 * 1024 * 1024) {
                         alert(@json(__('messages.file_too_large')));
-                        event.target.value = '';
                         return;
                     }
-
+                    this.csvFilename = file.name;
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         const text = e.target.result;
@@ -452,7 +455,7 @@
                     this.tab = 'form';
                 },
 
-                async submitCsv() {
+                loadCsvIntoForm() {
                     this.csvErrors = [];
 
                     if (!this.hasEmailColumn()) {
@@ -467,35 +470,22 @@
                     }, []);
 
                     const entries = [];
-                    const seen = {};
-
-                    this.csvAllRows.forEach((row, i) => {
-                        const rowNum = i + 1;
+                    this.csvAllRows.forEach(row => {
                         const email = (row[emailIdx] || '').trim().toLowerCase();
                         const name = nameIndices.map(idx => (row[idx] || '').trim()).filter(Boolean).join(' ');
-
-                        if (!email && !name) return; // Skip empty rows
-
-                        if (!email) {
-                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.email_required'))));
-                        } else if (!this.isValidEmail(email)) {
-                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.invalid_email'))));
-                        } else if (seen[email]) {
-                            this.csvErrors.push(@json(__('messages.row_error', ['row' => ''])).replace(':row', rowNum).replace(':error', @json(__('messages.duplicate_email'))));
-                        }
-
-                        if (email && this.isValidEmail(email) && !seen[email]) {
-                            seen[email] = true;
-                            entries.push({ email, name });
-                        }
+                        if (!email && !name) return;
+                        entries.push({ name, email });
                     });
 
-                    if (this.csvErrors.length > 0) return;
                     if (!entries.length) {
                         alert(@json(__('messages.no_valid_emails')));
                         return;
                     }
-                    await this.doSubmit(entries);
+
+                    this.formEntries = entries;
+                    this.formErrors = [];
+                    this.tab = 'form';
+                    this.clearCsvFile();
                 },
 
                 async doSubmit(entries) {
@@ -553,7 +543,7 @@
 
                 clearCsvFile() {
                     this.$refs.csvFileInput.value = '';
-                    this.$refs.csvFilename.textContent = '';
+                    this.csvFilename = '';
                     this.csvHeaders = [];
                     this.csvPreview = [];
                     this.csvAllRows = [];
