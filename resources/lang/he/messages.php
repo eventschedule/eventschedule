@@ -1680,6 +1680,7 @@ return [
     'unsaved_changes_confirm' => 'יש לך שינויים שלא נשמרו. האם אתה בטוח שברצונך לעזוב?',
     'drop_csv_or_click' => 'גרור לכאן קובץ CSV או לחץ לבחירה',
     'comma_separated' => 'מופרד בפסיקים',
+    'invalid_event_date' => 'תאריך האירוע אינו תקף עבור אירוע זה.',
     'create_new_segment' => 'יצירת קטע חדש',
     'add_to_existing_segment' => 'הוספה לקטע קיים',
     'select_segment' => 'בחר קטע',

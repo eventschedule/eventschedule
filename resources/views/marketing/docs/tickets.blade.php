@@ -92,6 +92,7 @@
                             <div class="doc-nav-group-items">
                                 <a href="#sale-notifications" class="doc-nav-link">Sale Notifications</a>
                                 <a href="#export" class="doc-nav-link">Exporting Sales Data</a>
+                                <a href="#importing-attendees" class="doc-nav-link">Importing Attendees</a>
                             </div>
                         </div>
                         <div class="doc-nav-group">
@@ -630,6 +631,36 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>The CSV includes a byte order mark (BOM) for Excel compatibility. Export your sales data regularly for your records - this is especially useful for tax reporting and financial reconciliation.</p>
+                            </div>
+                        </section>
+
+                        <!-- Importing Attendees -->
+                        <section id="importing-attendees" class="doc-section">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Importing Attendees</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Bulk-add attendees who paid out-of-band (cash, sponsored, or through a third-party system) instead of checking them out through the public ticket page. Up to 5,000 attendees per import.</p>
+
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Sales</strong> and click <strong class="text-gray-900 dark:text-white">Import</strong></li>
+                                <li>Pick a schedule (if you own more than one) and an event</li>
+                                <li>Either type rows in the Form tab or upload a CSV</li>
+                                <li>When uploading, map each CSV column to a field (name, email, phone, ticket type, etc.), then click <strong class="text-gray-900 dark:text-white">Next</strong> to review</li>
+                                <li>Optionally toggle <strong class="text-gray-900 dark:text-white">Send Email</strong> to send a confirmation email to each attendee</li>
+                                <li>Click <strong class="text-gray-900 dark:text-white">Save Attendees</strong></li>
+                            </ol>
+
+                            <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Supported CSV columns</h4>
+                                <ul class="doc-list text-sm">
+                                    <li>Name, Email (required), Phone</li>
+                                    <li>Ticket Type (matched by name to existing ticket types)</li>
+                                    <li>Quantity, Amount, Status (paid / unpaid)</li>
+                                    <li>Any event-level or ticket-level custom fields you've defined</li>
+                                </ul>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Tips</div>
+                                <p>Email is the only required column - everything else auto-detects from the header name. Comma, semicolon, and tab delimiters are all supported, as are UTF-8 CSVs exported from Excel. Duplicate emails within the same import are skipped automatically.</p>
                             </div>
                         </section>
 

@@ -12,6 +12,7 @@ return new class extends Migration
 
     public function down(): void
     {
+        DB::statement("UPDATE sales SET payment_method = 'cash' WHERE payment_method = 'import'");
         DB::statement("ALTER TABLE sales MODIFY COLUMN payment_method ENUM('cash', 'stripe', 'invoiceninja', 'payment_url', 'rsvp') DEFAULT 'cash'");
     }
 };

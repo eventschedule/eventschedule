@@ -2639,13 +2639,20 @@ class TicketController extends Controller
 
         $fallbackTicketId = UrlUtils::decodeId($request->ticket_id);
         $fallbackTicket = $event->tickets->firstWhere('id', $fallbackTicketId);
-        if (! $fallbackTicket) {
+        if (! $fallbackTicket || $fallbackTicket->is_addon) {
             return back()->withInput()->with('error', __('messages.ticket_not_found'));
         }
 
         $eventDate = $request->event_date;
         $defaultStatus = $request->default_status;
         $sendEmails = $request->boolean('send_emails');
+
+        if (! $event->matchesDate($eventDate)) {
+            return back()->withInput()->with('error', __('messages.invalid_event_date'));
+        }
+
+        $emailSettingsRole = $event->getRoleWithEmailSettings();
+        $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
 
         $eventCustomFieldIndices = $this->customFieldIndicesFor($event->custom_fields ?? []);
         $ticketCustomFieldIndices = [];
@@ -2656,14 +2663,29 @@ class TicketController extends Controller
         $imported = 0;
         $skipped = [];
         $sentEmails = [];
+        $seenEmails = [];
 
         try {
             DB::transaction(function () use (
                 $request, $event, $fallbackTicket, $eventDate, $defaultStatus, $subdomain,
-                $eventCustomFieldIndices, $ticketCustomFieldIndices, &$imported, &$skipped, &$sentEmails
+                $eventCustomFieldIndices, $ticketCustomFieldIndices,
+                &$imported, &$skipped, &$sentEmails, &$seenEmails
             ) {
                 foreach ($request->entries as $i => $entry) {
                     $rowNum = $i + 1;
+
+                    $email = strtolower(trim($entry['email'] ?? ''));
+                    if ($email === '') {
+                        continue;
+                    }
+                    if (isset($seenEmails[$email])) {
+                        $skipped[] = __('messages.row_error', [
+                            'row' => $rowNum,
+                            'error' => __('messages.duplicate_email'),
+                        ]);
+
+                        continue;
+                    }
 
                     $ticket = $fallbackTicket;
                     if (! empty($entry['ticket_id'])) {
@@ -2702,8 +2724,8 @@ class TicketController extends Controller
                     $amount = isset($entry['amount']) && $entry['amount'] !== '' ? (float) $entry['amount'] : 0;
 
                     $sale = new Sale;
-                    $sale->name = trim($entry['name'] ?? '') ?: strtok($entry['email'], '@');
-                    $sale->email = strtolower(trim($entry['email']));
+                    $sale->name = trim($entry['name'] ?? '') ?: Str::before($email, '@');
+                    $sale->email = $email;
                     $sale->phone = ! empty($entry['phone']) ? strip_tags(trim($entry['phone'])) : null;
                     $sale->event_id = $event->id;
                     $sale->event_date = $eventDate;
@@ -2744,6 +2766,17 @@ class TicketController extends Controller
 
                     $ticket->updateSold($eventDate, $quantity);
 
+                    // Sale::booted() clears matching TicketWaitlist rows only on `updated`,
+                    // not `created` — so bulk-created paid imports must clear them inline.
+                    if ($status === 'paid') {
+                        TicketWaitlist::where('event_id', $event->id)
+                            ->where('event_date', $eventDate)
+                            ->where('email', $email)
+                            ->whereIn('status', ['waiting', 'notified'])
+                            ->update(['status' => 'purchased']);
+                    }
+
+                    $seenEmails[$email] = true;
                     $imported++;
                     $sentEmails[] = $sale->id;
                 }
@@ -2754,7 +2787,7 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.error'));
         }
 
-        if ($sendEmails && ! empty($sentEmails)) {
+        if ($sendEmails && $hasEmailSettings && ! empty($sentEmails)) {
             $sales = Sale::whereIn('id', $sentEmails)->get();
             foreach ($sales as $sale) {
                 $this->sendTicketPurchaseEmail($sale, $event);

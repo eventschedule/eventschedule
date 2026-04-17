@@ -144,6 +144,7 @@ class HelpUtils
         'following' => '/docs/sharing',
         'tickets' => '/docs/tickets',
         'sales' => '/docs/tickets#managing-sales',
+        'sales.import' => '/docs/tickets#importing-attendees',
         'analytics' => [
             'doc' => '/docs/analytics',
             'anchors' => [

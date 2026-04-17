@@ -1685,6 +1685,7 @@ return [
     'unsaved_changes_confirm' => 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt vertrekken?',
     'drop_csv_or_click' => 'Sleep een CSV-bestand hierheen, of klik om te selecteren',
     'comma_separated' => 'door komma\'s gescheiden',
+    'invalid_event_date' => 'De datum van het evenement is niet geldig voor dit evenement.',
     'create_new_segment' => 'Nieuw segment aanmaken',
     'add_to_existing_segment' => 'Toevoegen aan bestaand segment',
     'select_segment' => 'Segment selecteren',

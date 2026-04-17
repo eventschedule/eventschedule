@@ -1681,6 +1681,7 @@ return [
     'unsaved_changes_confirm' => 'Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter ?',
     'drop_csv_or_click' => 'Déposez un fichier CSV ici ou cliquez pour sélectionner',
     'comma_separated' => 'séparé par des virgules',
+    'invalid_event_date' => 'La date de l\'événement n\'est pas valide pour cet événement.',
     'create_new_segment' => 'Créer un nouveau segment',
     'add_to_existing_segment' => 'Ajouter à un segment existant',
     'select_segment' => 'Sélectionner un segment',

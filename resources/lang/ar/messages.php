@@ -1679,6 +1679,7 @@ return [
     'unsaved_changes_confirm' => 'لديك تغييرات غير محفوظة. هل أنت متأكد من الخروج؟',
     'drop_csv_or_click' => 'أفلت ملف CSV هنا أو انقر للتحديد',
     'comma_separated' => 'مفصولة بفواصل',
+    'invalid_event_date' => 'تاريخ الفعالية غير صالح لهذه الفعالية.',
     'create_new_segment' => 'إنشاء شريحة جديدة',
     'add_to_existing_segment' => 'إضافة إلى شريحة موجودة',
     'select_segment' => 'اختر شريحة',

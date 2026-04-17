@@ -1708,6 +1708,7 @@ return [
     'unsaved_changes_confirm' => 'Aveți modificări nesalvate. Sigur doriți să părăsiți pagina?',
     'drop_csv_or_click' => 'Trageți un fișier CSV aici sau faceți clic pentru a selecta',
     'comma_separated' => 'separate prin virgulă',
+    'invalid_event_date' => 'Data evenimentului nu este validă pentru acest eveniment.',
     'create_new_segment' => 'Creează segment nou',
     'add_to_existing_segment' => 'Adaugă la segmentul existent',
     'select_segment' => 'Selectează segment',

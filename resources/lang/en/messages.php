@@ -1707,6 +1707,7 @@ return [
     'unsaved_changes_confirm' => 'You have unsaved changes. Are you sure you want to leave?',
     'drop_csv_or_click' => 'Drop a CSV file here, or click to select',
     'comma_separated' => 'comma-separated',
+    'invalid_event_date' => 'The event date is not valid for this event.',
     'create_new_segment' => 'Create new segment',
     'add_to_existing_segment' => 'Add to existing segment',
     'select_segment' => 'Select segment',

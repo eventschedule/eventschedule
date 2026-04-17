@@ -72,6 +72,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
 | Eventbrite import | EventbriteController, $role->isPro() | Import events from Eventbrite |
+| Bulk attendee import | `TicketController::importAttendees`, `$event->isPro()` | Import attendees in bulk from CSV or form entry (up to 5,000 rows per import) |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |
 | 100 newsletter emails per month | `$role->newsletterLimit()` | Increased email sending limit (counts each recipient as one email) |
 | Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |

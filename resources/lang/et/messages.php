@@ -1693,6 +1693,7 @@ return [
     'unsaved_changes_confirm' => 'Teil on salvestamata muudatusi. Kas olete kindel, et soovite lahkuda?',
     'drop_csv_or_click' => 'Kukutage CSV-fail siia või klõpsake valimiseks',
     'comma_separated' => 'komadega eraldatud',
+    'invalid_event_date' => 'Sündmuse kuupäev pole selle sündmuse jaoks kehtiv.',
     'create_new_segment' => 'Loo uus segment',
     'add_to_existing_segment' => 'Lisa olemasolevale segmendile',
     'select_segment' => 'Valige segment',

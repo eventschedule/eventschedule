@@ -181,7 +181,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/my-carpools', [CarpoolController::class, 'myCarpools'])->name('my_carpools');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
     Route::get('/sales/import', [TicketController::class, 'importAttendees'])->name('sales.import');
-    Route::post('/sales/import', [TicketController::class, 'importAttendeesStore'])->name('sales.import_store');
+    Route::post('/sales/import', [TicketController::class, 'importAttendeesStore'])->middleware('throttle:10,1')->name('sales.import_store');
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
     Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback')->middleware('throttle:10,1');
     Route::post('/sales/send-feedback-now', [TicketController::class, 'sendFeedbackNow'])->name('sales.send_feedback_now');

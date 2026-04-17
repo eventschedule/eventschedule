@@ -1682,6 +1682,7 @@ return [
     'unsaved_changes_confirm' => 'Sie haben ungespeicherte Änderungen. Möchten Sie die Seite wirklich verlassen?',
     'drop_csv_or_click' => 'CSV-Datei hier ablegen oder zum Auswählen klicken',
     'comma_separated' => 'durch Komma getrennt',
+    'invalid_event_date' => 'Das Event-Datum ist für dieses Event nicht gültig.',
     'create_new_segment' => 'Neues Segment erstellen',
     'add_to_existing_segment' => 'Zu bestehendem Segment hinzufügen',
     'select_segment' => 'Segment auswählen',

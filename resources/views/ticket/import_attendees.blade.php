@@ -90,7 +90,7 @@
             {{ __('messages.pro_feature_required') }}
         </x-upgrade-prompt>
         @elseif (! $event)
-        <div class="ap-card sm:rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
+        <div class="ap-card rounded-xl p-6 text-center text-gray-500 dark:text-gray-400">
             {{ __('messages.select_event_to_begin') }}
         </div>
         @else
@@ -103,7 +103,7 @@
             </div>
 
             {{-- Tabs --}}
-            <div class="ap-card sm:rounded-xl overflow-hidden">
+            <div class="ap-card rounded-xl overflow-hidden">
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex -mb-px overflow-x-auto scrollbar-hide">
                         <button @click="tab = 'form'" :class="tab === 'form' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="px-6 py-3 border-b-2 font-medium text-sm transition-colors">
@@ -340,7 +340,7 @@
             </div>
 
             {{-- CSV preview in its own panel --}}
-            <div v-if="tab === 'csv' && csvHeaders.length" class="ap-card sm:rounded-xl p-6 mt-4">
+            <div v-if="tab === 'csv' && csvHeaders.length" class="ap-card rounded-xl p-6 mt-4">
                 <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.csv_preview') }}</h4>
                 <div class="overflow-x-auto max-h-60">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
@@ -661,8 +661,13 @@
                         this.expanded = this.expanded.filter(x => x !== i).map(x => x > i ? x - 1 : x);
                     },
                     setPhoneRef(el) {
-                        // Ref callback: fires for each phone input as it mounts
-                        if (!el || !window.intlTelInput) return;
+                        // Vue function refs call with `null` on unmount. When that happens,
+                        // sweep any iti instances whose input is no longer in the DOM.
+                        if (!el) {
+                            this.$nextTick(() => this.pruneDetachedItiInstances());
+                            return;
+                        }
+                        if (!window.intlTelInput) return;
                         const key = el.getAttribute('data-key');
                         if (!key || this.itiInstances[key]) return;
                         const entry = this.entries.find(e => String(e._key) === String(key));
@@ -682,13 +687,24 @@
                         el.addEventListener('countrychange', sync);
                         if (entry.phone) iti.setNumber(entry.phone);
                         this.itiInstances[key] = iti;
+                        iti._input = el;
                         this.$nextTick(() => this.matchPhoneHeights());
                     },
+                    pruneDetachedItiInstances() {
+                        for (const [key, iti] of Object.entries(this.itiInstances)) {
+                            const input = iti && iti._input;
+                            if (!input || !document.body.contains(input)) {
+                                try { iti && iti.destroy(); } catch (e) {}
+                                delete this.itiInstances[key];
+                            }
+                        }
+                    },
                     matchPhoneHeights() {
-                        // Read the rendered height of a sibling text/email input and copy it
-                        // onto every tel input. Works regardless of CSS cascade quirks.
-                        const refInput = document.querySelector('#import-attendees-app input[type=email]')
-                            || document.querySelector('#import-attendees-app input[type=text]');
+                        // Read the rendered height of a sibling text/email input inside the
+                        // entries table and copy it onto every tel input. Scoping to the table
+                        // avoids accidentally measuring the event-date picker above the table.
+                        const refInput = document.querySelector('#import-attendees-app table input[type=email]')
+                            || document.querySelector('#import-attendees-app table input[type=text]');
                         if (!refInput) return;
                         const h = refInput.offsetHeight;
                         if (!h) return;
@@ -772,6 +788,22 @@
                         return 'skip';
                     },
                     parseCsv(text) {
+                        // Strip UTF-8 BOM (Excel's default CSV export).
+                        text = text.replace(/^\uFEFF/, '');
+                        // Auto-detect delimiter: sample the first line and pick whichever
+                        // character appears most often outside quoted runs among , ; and tab.
+                        const firstNewline = text.search(/\r?\n/);
+                        const sample = firstNewline >= 0 ? text.slice(0, firstNewline) : text;
+                        const count = (needle) => {
+                            let n = 0, q = false;
+                            for (const ch of sample) {
+                                if (ch === '"') q = !q;
+                                else if (!q && ch === needle) n++;
+                            }
+                            return n;
+                        };
+                        const counts = { ',': count(','), ';': count(';'), '\t': count('\t') };
+                        const delim = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
                         const rows = [];
                         let current = [];
                         let cell = '';
@@ -785,7 +817,7 @@
                                 else cell += ch;
                             } else {
                                 if (ch === '"') inQuotes = true;
-                                else if (ch === ',') { current.push(cell.trim()); cell = ''; }
+                                else if (ch === delim) { current.push(cell.trim()); cell = ''; }
                                 else if (ch === '\n' || (ch === '\r' && next === '\n')) {
                                     current.push(cell.trim());
                                     if (current.some(c => c)) rows.push(current);
@@ -822,7 +854,7 @@
                                 else if (target === 'phone') entry.phone = this.normalizePhone(val);
                                 else if (target === 'ticket_type') ticketTypeName = val;
                                 else if (target === 'quantity') entry.quantity = Math.max(1, parseInt(val, 10) || 1);
-                                else if (target === 'amount') entry.amount = parseFloat(val.replace(/[^0-9.\-]/g, '')) || 0;
+                                else if (target === 'amount') { const n = parseFloat(val.replace(/[^0-9.\-]/g, '')); entry.amount = isNaN(n) ? '' : n; }
                                 else if (target === 'status') {
                                     const lc = val.toLowerCase();
                                     if (lc === 'paid' || lc === 'free') entry.status = 'paid';
@@ -964,6 +996,15 @@
                             e.preventDefault();
                             e.returnValue = '';
                         }
+                    });
+                    // Absorb any watcher fires from initial setup (deep entries watcher,
+                    // sendEmails watcher, iti sync writing entry.phone) so the dirty flag
+                    // starts clean.
+                    this.$nextTick(() => {
+                        this.$nextTick(() => {
+                            this.isDirty = false;
+                            window._importAttendeesIsDirty = false;
+                        });
                     });
                 },
             }).mount('#import-attendees-app');
