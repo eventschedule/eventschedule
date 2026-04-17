@@ -124,7 +124,7 @@
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="min-w-full">
+                        <table class="w-full">
                             <thead>
                                 <tr class="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     <th v-if="hasAnyCustomFields" class="pb-2 w-8"></th>
