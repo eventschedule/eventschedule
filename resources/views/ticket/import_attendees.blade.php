@@ -1,7 +1,7 @@
 <x-app-admin-layout>
     <x-slot name="head">
         <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
-        @if ($event && ! $requiresPro && $event->country_code_phone)
+        @if ($event && ! $requiresPro)
         <link rel="stylesheet" href="{{ asset('vendor/intl-tel-input/css/intlTelInput.css') }}">
         <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
         @endif
@@ -136,7 +136,7 @@
                                     <th v-if="showAmount" class="pb-2 pr-2 w-28">{{ __('messages.amount') }}</th>
                                     <th v-if="!showAmount" class="pb-2 pr-2 w-32">{{ __('messages.status') }}</th>
                                     <th v-for="cf in eventCustomFields" :key="'ecf-'+cf.index" class="pb-2 pr-2">
-                                        @{{ cf.name }}
+                                        <span>@{{ cf.name }}</span><span v-if="cf.required" class="text-red-500 ms-0.5">*</span>
                                     </th>
                                     <th class="pb-2 w-16"></th>
                                 </tr>
@@ -155,9 +155,7 @@
                                         <td class="py-1 pr-2"><input v-model="entry.name" type="text" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></td>
                                         <td class="py-1 pr-2"><input v-model="entry.email" type="email" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm" placeholder="email@example.com"></td>
                                         <td v-if="showPhone" class="py-1 pr-2">
-                                            <input v-if="useIntlTel" type="tel" :ref="setPhoneRef" :data-key="entry._key"
-                                                class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
-                                            <input v-else v-model="entry.phone" type="tel"
+                                            <input type="tel" :ref="setPhoneRef" :data-key="entry._key" :required="eventHasPhone"
                                                 class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                         </td>
                                         <td v-if="tickets.length > 1" class="py-1 pr-2">
@@ -174,18 +172,18 @@
                                             </select>
                                         </td>
                                         <td v-for="cf in eventCustomFields" :key="'ecfv-'+cf.index" class="py-1 pr-2">
-                                            <select v-if="cf.type === 'switch'" v-model="entry.custom_values[cf.index]" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                            <select v-if="cf.type === 'switch'" v-model="entry.custom_values[cf.index]" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                 <option value=""></option>
                                                 <option value="Yes">{{ __('messages.yes') }}</option>
                                                 <option value="No">{{ __('messages.no') }}</option>
                                             </select>
-                                            <input v-else-if="cf.type === 'date'" v-model="entry.custom_values[cf.index]" type="date" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
-                                            <select v-else-if="cf.type === 'dropdown'" v-model="entry.custom_values[cf.index]" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                            <input v-else-if="cf.type === 'date'" v-model="entry.custom_values[cf.index]" type="date" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                            <select v-else-if="cf.type === 'dropdown'" v-model="entry.custom_values[cf.index]" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                 <option value=""></option>
                                                 <option v-for="opt in cf.options" :key="opt" :value="opt">@{{ opt }}</option>
                                             </select>
-                                            <textarea v-else-if="cf.type === 'multiline_string'" v-model="entry.custom_values[cf.index]" rows="1" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></textarea>
-                                            <input v-else v-model="entry.custom_values[cf.index]" type="text" :placeholder="cf.type === 'multiselect' ? commaSeparatedLabel : ''" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                            <textarea v-else-if="cf.type === 'multiline_string'" v-model="entry.custom_values[cf.index]" :required="cf.required" rows="1" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></textarea>
+                                            <input v-else v-model="entry.custom_values[cf.index]" type="text" :required="cf.required" :placeholder="cf.type === 'multiselect' ? commaSeparatedLabel : ''" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                         </td>
                                         <td class="py-1">
                                             <button v-if="entries.length > 1" type="button" @click="removeRow(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
@@ -200,18 +198,20 @@
                                                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">{{ __('messages.ticket_custom_fields') }}</p>
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                     <div v-for="cf in ticketCustomFieldsFor(entry.ticket_id)" :key="'tcf-'+cf.index">
-                                                        <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">@{{ cf.name }}</label>
-                                                        <select v-if="cf.type === 'switch'" v-model="entry.ticket_custom_values[cf.index]" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                                        <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                                            <span>@{{ cf.name }}</span><span v-if="cf.required" class="text-red-500 ms-0.5">*</span>
+                                                        </label>
+                                                        <select v-if="cf.type === 'switch'" v-model="entry.ticket_custom_values[cf.index]" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                             <option value=""></option>
                                                             <option value="Yes">{{ __('messages.yes') }}</option>
                                                             <option value="No">{{ __('messages.no') }}</option>
                                                         </select>
-                                                        <input v-else-if="cf.type === 'date'" v-model="entry.ticket_custom_values[cf.index]" type="date" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
-                                                        <select v-else-if="cf.type === 'dropdown'" v-model="entry.ticket_custom_values[cf.index]" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                                        <input v-else-if="cf.type === 'date'" v-model="entry.ticket_custom_values[cf.index]" type="date" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                                        <select v-else-if="cf.type === 'dropdown'" v-model="entry.ticket_custom_values[cf.index]" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                             <option value=""></option>
                                                             <option v-for="opt in cf.options" :key="opt" :value="opt">@{{ opt }}</option>
                                                         </select>
-                                                        <textarea v-else-if="cf.type === 'multiline_string'" v-model="entry.ticket_custom_values[cf.index]" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></textarea>
+                                                        <textarea v-else-if="cf.type === 'multiline_string'" v-model="entry.ticket_custom_values[cf.index]" :required="cf.required" rows="2" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"></textarea>
                                                         <div v-else-if="cf.type === 'multiselect'" class="space-y-1">
                                                             <label v-for="opt in cf.options" :key="opt" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                                                                 <input type="checkbox" :value="opt" :checked="multiselectContains(entry.ticket_custom_values[cf.index], opt)"
@@ -220,7 +220,7 @@
                                                                 @{{ opt }}
                                                             </label>
                                                         </div>
-                                                        <input v-else v-model="entry.ticket_custom_values[cf.index]" type="text" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                                        <input v-else v-model="entry.ticket_custom_values[cf.index]" type="text" :required="cf.required" class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                                                     </div>
                                                 </div>
                                             </div>
@@ -249,9 +249,9 @@
                                         <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
                                         <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
                                     </label>
-                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer" @click="sendEmails = !sendEmails">{{ __('messages.send_confirmation_emails') }}</span>
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer" @click="sendEmails = !sendEmails">{{ __('messages.send_email') }}</span>
                                 </div>
-                                <button type="button" @click="submit()" :disabled="submitting || validCount === 0"
+                                <button type="button" @click="submit()" :disabled="submitting || validCount === 0 || (sendEmails && !hasEmailSettings)"
                                     class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed">
                                     <span v-if="!submitting">{{ __('messages.save_n_attendees') }}</span>
                                     <span v-else>{{ __('messages.loading') }}...</span>
@@ -267,6 +267,7 @@
                                 <span>
                                     {{ __('messages.notification_requires_email_settings') }}
                                     <a href="{{ route('role.edit', ['subdomain' => $emailSettingsRole->subdomain]) }}#section-integrations"
+                                        target="_blank" rel="noopener"
                                         class="text-[var(--brand-blue)] hover:underline font-medium">{{ __('messages.configure_email_settings') }}</a>
                                 </span>
                             </p>
@@ -283,8 +284,8 @@
                         </ul>
                     </div>
 
-                    <div class="mb-4">
-                        <input ref="csvFileInput" type="file" accept=".csv,text/csv" @change="handleCsvFileInput" class="hidden">
+                    <input ref="csvFileInput" type="file" accept=".csv,text/csv" @change="handleCsvFileInput" class="hidden">
+                    <div v-if="!csvHeaders.length" class="mb-4">
                         <div @click="$refs.csvFileInput.click()"
                             @dragover.prevent="csvDragOver = true"
                             @dragenter.prevent="csvDragOver = true"
@@ -295,14 +296,11 @@
                             <svg class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500 mb-2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                             </svg>
-                            <p v-if="!csvFilename" class="text-sm text-gray-700 dark:text-gray-300 pointer-events-none">{{ __('messages.drop_csv_or_click') }}</p>
-                            <p v-else class="text-sm text-gray-700 dark:text-gray-300 pointer-events-none">@{{ csvFilename }}</p>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 pointer-events-none">{{ __('messages.drop_csv_or_click') }}</p>
                         </div>
                     </div>
 
                     <div v-if="csvHeaders.length">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.row_count') }}: @{{ csvRows.length }}</p>
-
                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('messages.map_columns') }}</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                             <div v-for="(header, idx) in csvHeaders" :key="'map-'+idx">
@@ -327,22 +325,11 @@
                             </div>
                         </div>
 
-                        <div class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg mb-4 max-h-60">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-                                <thead class="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th v-for="(h, i) in csvHeaders" :key="'hh-'+i" class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase text-left">@{{ h }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="(row, ri) in csvRows.slice(0, 5)" :key="'rr-'+ri">
-                                        <td v-for="(cell, ci) in row" :key="'cc-'+ci" class="px-3 py-2 text-gray-700 dark:text-gray-300">@{{ cell }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="flex justify-end">
+                        <div class="flex justify-end gap-2">
+                            <button type="button" @click="clearCsv()"
+                                class="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200">
+                                {{ __('messages.clear') }}
+                            </button>
                             <button type="button" @click="applyCsvToForm()"
                                 class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50">
                                 {{ __('messages.next') }}
@@ -350,6 +337,26 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {{-- CSV preview in its own panel --}}
+            <div v-if="tab === 'csv' && csvHeaders.length" class="ap-card sm:rounded-xl p-6 mt-4">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('messages.csv_preview') }}</h4>
+                <div class="overflow-x-auto max-h-60">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
+                            <tr>
+                                <th v-for="(h, i) in csvHeaders" :key="'hh-'+i" class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-300 uppercase text-left">@{{ h }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr v-for="(row, ri) in csvRows.slice(0, 5)" :key="'rr-'+ri">
+                                <td v-for="(cell, ci) in row" :key="'cc-'+ci" class="px-3 py-2 text-gray-700 dark:text-gray-300">@{{ cell }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">{{ __('messages.row_count') }}: @{{ csvRows.length }}</p>
             </div>
         </div>
         @endif
@@ -446,6 +453,7 @@
                         'index' => $index,
                         'type' => $type,
                         'options' => $options,
+                        'required' => (bool) ($fc['required'] ?? false),
                     ];
                 }
             }
@@ -463,7 +471,12 @@
             ];
         }
         $eventCustomFieldsPayload = $normalizeCustomFields($event->custom_fields ?? []);
-        $initialCountry = strtolower($event->creatorRole->country_code ?? 'us');
+        $selectedRoleForCountry = $roles->firstWhere('id', $selectedRoleId);
+        $initialCountry = strtolower(
+            $selectedRoleForCountry->country_code
+            ?? $event->creatorRole->country_code
+            ?? 'us'
+        );
     @endphp
     <script {!! nonce_attr() !!}>
         (function() {
@@ -474,7 +487,7 @@
             const EVENT_DATES = @json($eventDates);
             const IS_RECURRING = @json((bool) $event->days_of_week);
             const EVENT_HAS_PHONE = @json((bool) $event->require_phone);
-            const USE_INTL_TEL = @json((bool) $event->country_code_phone);
+            const HAS_EMAIL_SETTINGS = @json((bool) $hasEmailSettings);
             const INITIAL_COUNTRY = @json($initialCountry);
             const UTILS_SCRIPT = '{{ asset('vendor/intl-tel-input/js/utils.js') }}';
 
@@ -509,7 +522,7 @@
                         eventDates: EVENT_DATES,
                         isRecurring: IS_RECURRING,
                         eventHasPhone: EVENT_HAS_PHONE,
-                        useIntlTel: USE_INTL_TEL,
+                        hasEmailSettings: HAS_EMAIL_SETTINGS,
                         fallbackTicketId: TICKETS[0] ? TICKETS[0].id : '',
                         eventDate: EVENT_DATES[0] || '',
                         defaultStatus: 'paid',
@@ -570,7 +583,7 @@
                 },
                 watch: {
                     showPhone(v) {
-                        if (v && USE_INTL_TEL) {
+                        if (v) {
                             this.$nextTick(() => this.refreshPhoneInputs());
                         }
                     },
@@ -578,7 +591,7 @@
                         deep: true,
                         handler() {
                             this.markDirty();
-                            if (this.showPhone && USE_INTL_TEL) {
+                            if (this.showPhone) {
                                 this.$nextTick(() => this.refreshPhoneInputs());
                             }
                         },
@@ -603,6 +616,13 @@
                     multiselectContains(csv, opt) {
                         if (!csv) return false;
                         return String(csv).split(',').map(s => s.trim()).includes(opt);
+                    },
+                    normalizePhone(val) {
+                        if (!val) return '';
+                        const cleaned = String(val).trim();
+                        const hasPlus = cleaned.startsWith('+');
+                        const digits = cleaned.replace(/\D/g, '');
+                        return hasPlus ? '+' + digits : digits;
                     },
                     normalizeCustomValue(cf, val) {
                         if (!cf || val == null) return val;
@@ -642,7 +662,7 @@
                     },
                     setPhoneRef(el) {
                         // Ref callback: fires for each phone input as it mounts
-                        if (!el || !USE_INTL_TEL || !window.intlTelInput) return;
+                        if (!el || !window.intlTelInput) return;
                         const key = el.getAttribute('data-key');
                         if (!key || this.itiInstances[key]) return;
                         const entry = this.entries.find(e => String(e._key) === String(key));
@@ -696,6 +716,16 @@
                         if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') return;
                         this.readCsvFile(file);
                     },
+                    clearCsv() {
+                        this.csvFilename = '';
+                        this.csvHeaders = [];
+                        this.csvRows = [];
+                        this.columnMappings = [];
+                        this.csvErrors = [];
+                        this.csvHasPhone = false;
+                        this.csvHasAmount = false;
+                        if (this.$refs.csvFileInput) this.$refs.csvFileInput.value = '';
+                    },
                     readCsvFile(file) {
                         if (file.size > 5 * 1024 * 1024) {
                             alert(@json(__('messages.file_too_large')));
@@ -710,8 +740,15 @@
                                 return;
                             }
                             this.csvErrors = [];
-                            this.csvHeaders = rows[0];
-                            this.csvRows = rows.slice(1).filter(r => r.some(c => c && c.trim()));
+                            const rawHeaders = rows[0];
+                            const rawRows = rows.slice(1).filter(r => r.some(c => c && c.trim()));
+                            // Drop columns whose header is blank AND every data row is blank.
+                            const keep = rawHeaders.map((h, i) => {
+                                if (h && h.trim()) return true;
+                                return rawRows.some(r => (r[i] || '').trim());
+                            });
+                            this.csvHeaders = rawHeaders.filter((_, i) => keep[i]);
+                            this.csvRows = rawRows.map(r => r.filter((_, i) => keep[i]));
                             this.columnMappings = this.csvHeaders.map(h => this.autoDetect(h));
                         };
                         reader.readAsText(file);
@@ -782,7 +819,7 @@
                                 if (!target || target === 'skip' || !val) continue;
                                 if (target === 'name') entry.name = val;
                                 else if (target === 'email') entry.email = val.toLowerCase();
-                                else if (target === 'phone') entry.phone = val;
+                                else if (target === 'phone') entry.phone = this.normalizePhone(val);
                                 else if (target === 'ticket_type') ticketTypeName = val;
                                 else if (target === 'quantity') entry.quantity = Math.max(1, parseInt(val, 10) || 1);
                                 else if (target === 'amount') entry.amount = parseFloat(val.replace(/[^0-9.\-]/g, '')) || 0;
@@ -814,23 +851,40 @@
                         }
                         this.entries = entries;
                         this.tab = 'form';
+                        this.clearCsv();
                     },
                     submit() {
                         this.formErrors = [];
                         const valid = [];
                         const seen = {};
+                        const pushErr = (rowNum, msg) => this.formErrors.push(@json(__('messages.row_error', ['row' => ':row', 'error' => ':error'])).replace(':row', rowNum).replace(':error', msg));
                         this.entries.forEach((entry, i) => {
                             const email = (entry.email || '').trim().toLowerCase();
                             if (!email) return;
                             const rowNum = i + 1;
                             if (!this.isValidEmail(email)) {
-                                this.formErrors.push(@json(__('messages.row_error', ['row' => ':row', 'error' => ':error'])).replace(':row', rowNum).replace(':error', @json(__('messages.invalid_email'))));
-                            } else if (seen[email]) {
-                                this.formErrors.push(@json(__('messages.row_error', ['row' => ':row', 'error' => ':error'])).replace(':row', rowNum).replace(':error', @json(__('messages.duplicate_email'))));
-                            } else {
-                                seen[email] = true;
-                                valid.push({ ...entry, email });
+                                pushErr(rowNum, @json(__('messages.invalid_email')));
+                                return;
                             }
+                            if (seen[email]) {
+                                pushErr(rowNum, @json(__('messages.duplicate_email')));
+                                return;
+                            }
+                            if (this.eventHasPhone && !(entry.phone || '').trim()) {
+                                pushErr(rowNum, @json(__('messages.phone').' '.strtolower(__('messages.required'))));
+                                return;
+                            }
+                            const ticketCfs = this.ticketCustomFieldsFor(entry.ticket_id);
+                            const missingCf = [
+                                ...this.eventCustomFields.filter(cf => cf.required && !(String(entry.custom_values[cf.index] || '').trim())),
+                                ...ticketCfs.filter(cf => cf.required && !(String(entry.ticket_custom_values[cf.index] || '').trim())),
+                            ];
+                            if (missingCf.length) {
+                                pushErr(rowNum, missingCf[0].name + ' ' + @json(strtolower(__('messages.required'))));
+                                return;
+                            }
+                            seen[email] = true;
+                            valid.push({ ...entry, email });
                         });
 
                         if (this.formErrors.length) return;
@@ -894,7 +948,7 @@
                         });
                     }
                     // Initialize iti for already-rendered phone inputs
-                    if (USE_INTL_TEL && this.showPhone) {
+                    if (this.showPhone) {
                         this.$nextTick(() => {
                             document.querySelectorAll('#import-attendees-app input[type=tel][data-key]').forEach(el => {
                                 this.setPhoneRef(el);

@@ -42,7 +42,7 @@
                 <div class="flex items-center gap-3">
                     <x-secondary-link href="{{ route('sales.import') }}">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M5,20H19V18H5M5,9H9V3H15V9H19L12,16L5,9Z" />
+                            <path d="M5,20H19V18H5V20M12,3L5,10H9V16H15V10H19L12,3Z" />
                         </svg>
                         {{ __('messages.import') }}
                     </x-secondary-link>

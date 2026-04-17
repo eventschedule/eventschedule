@@ -2570,6 +2570,9 @@ class TicketController extends Controller
         if ($selectedEventId && ! $events->pluck('raw_id')->contains($selectedEventId)) {
             $selectedEventId = null;
         }
+        if (! $selectedEventId && $events->isNotEmpty()) {
+            $selectedEventId = $events->first()['raw_id'];
+        }
 
         $event = null;
         $tickets = collect();

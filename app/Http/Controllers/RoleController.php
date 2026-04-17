@@ -1371,7 +1371,7 @@ class RoleController extends Controller
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
+            return redirect()->route('home')->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
