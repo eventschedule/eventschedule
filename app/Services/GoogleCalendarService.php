@@ -49,6 +49,8 @@ class GoogleCalendarService
      */
     public function getAuthUrl(): string
     {
+        $this->client->setState($this->generateAndStoreState());
+
         return $this->client->createAuthUrl();
     }
 
@@ -59,8 +61,20 @@ class GoogleCalendarService
     {
         $this->client->setApprovalPrompt('force');
         $this->client->setPrompt('consent');
+        $this->client->setState($this->generateAndStoreState());
 
         return $this->client->createAuthUrl();
+    }
+
+    /**
+     * Generate a CSRF state token for the OAuth flow and store it in the session.
+     */
+    private function generateAndStoreState(): string
+    {
+        $state = bin2hex(random_bytes(32));
+        session(['google_oauth_state' => $state]);
+
+        return $state;
     }
 
     /**

@@ -1754,8 +1754,9 @@ class EventController extends Controller
 
     public function import(Request $request, $subdomain)
     {
-        // \Log::info($request->all());
-        // return redirect()->back();
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 

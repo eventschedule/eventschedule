@@ -369,13 +369,13 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = $request->user();
 
-        if (! $role->email) {
-            $role->is_deleted = true;
-            $role->save();
-        }
-
         if ($user->isConnected($role->subdomain)) {
             $user->roles()->detach($role->id);
+
+            if (! $role->email && $role->users()->count() === 0) {
+                $role->is_deleted = true;
+                $role->save();
+            }
         }
 
         return redirect(route('following'))
@@ -390,14 +390,14 @@ class RoleController extends Controller
 
         foreach ($subdomains as $subdomain) {
             $role = Role::subdomain($subdomain)->first();
-            if ($role) {
-                if (! $role->email) {
+            if ($role && $user->isConnected($role->subdomain)) {
+                $user->roles()->detach($role->id);
+
+                if (! $role->email && $role->users()->count() === 0) {
                     $role->is_deleted = true;
                     $role->save();
                 }
-                if ($user->isConnected($role->subdomain)) {
-                    $user->roles()->detach($role->id);
-                }
+
                 $count++;
             }
         }

@@ -66,6 +66,16 @@ class GoogleCalendarController extends Controller
                     ->with('error', 'Google authorization failed. Please try again.');
             }
 
+            $expectedState = session()->pull('google_oauth_state');
+            $providedState = (string) $request->get('state');
+
+            if (! $expectedState || ! hash_equals($expectedState, $providedState)) {
+                Log::warning('Google OAuth state mismatch', ['user_id' => Auth::id()]);
+
+                return redirect()->to(route('profile.edit').'#section-google-calendar')
+                    ->with('error', 'Google authorization failed. Please try again.');
+            }
+
             $token = $this->googleCalendarService->getAccessToken($code);
 
             if (isset($token['error'])) {
