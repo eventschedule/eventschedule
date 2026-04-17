@@ -359,7 +359,7 @@ class TicketController extends Controller
                 continue;
             }
 
-            $delayHours = $saleRole->feedback_delay_hours ?? 24;
+            $delayHours = (int) ($saleRole->feedback_delay_hours ?? 24);
             $estimatedSendAt = $endDateTime->copy()->addHours($delayHours);
 
             // Ceil to next hour boundary (cron runs hourly)
@@ -511,7 +511,7 @@ class TicketController extends Controller
                     continue;
                 }
 
-                $delayHours = $saleRole->feedback_delay_hours ?? 24;
+                $delayHours = (int) ($saleRole->feedback_delay_hours ?? 24);
                 if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {
                     continue;
                 }

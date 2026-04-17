@@ -91,7 +91,7 @@ class SendFeedbackRequests extends Command
                     continue;
                 }
 
-                $delayHours = $role->feedback_delay_hours ?? 24;
+                $delayHours = (int) ($role->feedback_delay_hours ?? 24);
 
                 if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {
                     continue;
@@ -108,7 +108,7 @@ class SendFeedbackRequests extends Command
                 );
 
                 $count++;
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $sale->feedback_sent_at = null;
                 $sale->save();
                 report($e);
