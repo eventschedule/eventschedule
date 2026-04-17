@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Management Features - Event Schedule</x-slot>
-    <x-slot name="description">Discover all the features that make Event Schedule a simple, powerful way to manage events, sell tickets, and engage your audience.</x-slot>
+    <x-slot name="title">{{ __('marketing.features_title') }}</x-slot>
+    <x-slot name="description">{{ __('marketing.features_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Features</x-slot>
 
     <x-slot name="structuredData">

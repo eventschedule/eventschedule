@@ -452,6 +452,7 @@ return [
     'refund' => 'Rückerstattung',
     'mark_paid' => 'Als bezahlt markieren',
     'manual_payment' => 'Manuelle Zahlung',
+    'manual_import' => 'Manueller Import',
     'mark_paid_success' => 'Ticket erfolgreich als bezahlt markiert',
     'refund_success' => 'Ticket erfolgreich erstattet',
     'cancel_success' => 'Ticket erfolgreich storniert',

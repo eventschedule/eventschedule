@@ -482,6 +482,7 @@ return [
     'refund' => 'Rembourser',
     'mark_paid' => 'Marquer comme Payé',
     'manual_payment' => 'Paiement Manuel',
+    'manual_import' => 'Import Manuel',
     'mark_paid_success' => 'Billet marqué comme payé avec succès',
     'refund_success' => 'Billet remboursé avec succès',
     'cancel_success' => 'Billet annulé avec succès',

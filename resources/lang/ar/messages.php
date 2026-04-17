@@ -445,6 +445,7 @@ return [
     'refund' => 'استرداد',
     'mark_paid' => 'تحديد كمدفوع',
     'manual_payment' => 'دفع يدوي',
+    'manual_import' => 'استيراد يدوي',
     'mark_paid_success' => 'تم تحديد التذكرة كمدفوعة بنجاح',
     'refund_success' => 'تم استرداد التذكرة بنجاح',
     'cancel_success' => 'تم إلغاء التذكرة بنجاح',

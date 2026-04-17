@@ -313,6 +313,7 @@ return [
     'refund' => 'Rimborso',
     'mark_paid' => 'Segna come Pagato',
     'manual_payment' => 'Pagamento Manuale',
+    'manual_import' => 'Importazione Manuale',
     'mark_paid_success' => 'Biglietto segnato come pagato con successo',
     'refund_success' => 'Biglietto rimborsato con successo',
     'cancel_success' => 'Biglietto annullato con successo',

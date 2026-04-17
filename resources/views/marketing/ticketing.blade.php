@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Ticketing with No Fees - Event Schedule</x-slot>
-    <x-slot name="description">Sell tickets directly through your event schedule with QR codes, multiple ticket types, and secure payment processing.</x-slot>
+    <x-slot name="title">{{ __('marketing.ticketing_title') }}</x-slot>
+    <x-slot name="description">{{ __('marketing.ticketing_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Ticketing</x-slot>
 
     <x-slot name="structuredData">
@@ -934,4 +934,6 @@
         }
     }
     </script>
+
+    <x-marketing.related-pages />
 </x-marketing-layout>

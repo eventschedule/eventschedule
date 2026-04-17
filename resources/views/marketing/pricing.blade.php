@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Scheduling Pricing Plans - Event Schedule</x-slot>
-    <x-slot name="description">Start free with unlimited events. Upgrade to Pro for ticketing, boosting, and white-label branding, or Enterprise for AI features. No hidden fees.</x-slot>
+    <x-slot name="title">{{ __('marketing.pricing_title') }}</x-slot>
+    <x-slot name="description">{{ __('marketing.pricing_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Pricing</x-slot>
 
     <x-slot name="structuredData">
@@ -755,4 +755,6 @@
             </div>
         </div>
     </section>
+
+    <x-marketing.related-pages />
 </x-marketing-layout>

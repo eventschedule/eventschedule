@@ -225,6 +225,14 @@
         } elseif (in_array($path, ['stripe', 'google-calendar', 'caldav', 'invoiceninja'])) {
             $breadcrumbs[] = ['name' => 'Integrations', 'url' => url('/features/integrations')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif ($path === 'use-cases') {
+            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url()->current()];
+        } elseif ($path === 'features') {
+            $breadcrumbs[] = ['name' => 'Features', 'url' => url()->current()];
+        } elseif ($path === 'compare') {
+            $breadcrumbs[] = ['name' => 'Compare', 'url' => url()->current()];
+        } elseif ($path === 'replace') {
+            $breadcrumbs[] = ['name' => 'Replace', 'url' => url()->current()];
         } else {
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         }

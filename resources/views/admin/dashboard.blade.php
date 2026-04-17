@@ -157,10 +157,16 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse ($recentSignups as $signup)
+                            @php($src = $signup->getSignupSourceDisplay())
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $signup->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $signup->created_at->diffForHumans() }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm" @if($src['landing']) title="{{ $src['landing'] }}" @endif>
+                                    <div class="text-gray-900 dark:text-white">{{ $src['primary'] }}</div>
+                                    @if($src['secondary'])
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ Str::limit($src['secondary'], 60) }}</div>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>

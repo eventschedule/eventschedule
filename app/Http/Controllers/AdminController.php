@@ -301,7 +301,12 @@ class AdminController extends Controller
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->orderByDesc('created_at')
             ->limit(10)
-            ->get(['name', 'created_at', 'utm_source']);
+            ->with(['referredBy:id,name'])
+            ->get([
+                'id', 'name', 'created_at',
+                'utm_source', 'utm_medium', 'referrer_url', 'landing_page',
+                'referred_by_user_id',
+            ]);
 
         // Stripe paid count (verified, non-demo roles only)
         $validSubscriptionScope = function ($sq) {

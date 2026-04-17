@@ -111,6 +111,8 @@
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     @if ($sale->transaction_reference == __('messages.manual_payment'))
                                         <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
+                                    @elseif ($sale->payment_method == 'import')
+                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
                                     @elseif ($sale->payment_method == 'invoiceninja' && str_starts_with($sale->transaction_reference, 'sub:'))
                                         <span class="font-mono text-sm">{{ $sale->transaction_reference }}</span>
                                     @elseif ($sale->payment_method == 'invoiceninja')
@@ -459,6 +461,8 @@
                         <div class="text-sm text-gray-900 dark:text-gray-100">
                             @if ($sale->transaction_reference == __('messages.manual_payment'))
                                 <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_payment') }}</span>
+                            @elseif ($sale->payment_method == 'import')
+                                <span class="text-gray-600 dark:text-gray-400">{{ __('messages.manual_import') }}</span>
                             @elseif ($sale->payment_method == 'invoiceninja' && str_starts_with($sale->transaction_reference, 'sub:'))
                                 <span class="font-mono text-sm break-all">{{ $sale->transaction_reference }}</span>
                             @elseif ($sale->payment_method == 'invoiceninja')

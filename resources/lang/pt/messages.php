@@ -311,6 +311,7 @@ return [
     'refund' => 'Reembolso',
     'mark_paid' => 'Marcar como Pago',
     'manual_payment' => 'Pagamento Manual',
+    'manual_import' => 'Importação Manual',
     'mark_paid_success' => 'Ingresso marcado como pago com sucesso',
     'refund_success' => 'Ingresso reembolsado com sucesso',
     'cancel_success' => 'Ingresso cancelado com sucesso',

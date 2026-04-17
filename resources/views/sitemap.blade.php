@@ -1,10 +1,11 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>{{ url('/') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/')])
     </url>
     @if(config('app.hosted') && $showMarketingLinks)
     <url>
@@ -12,18 +13,21 @@
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features')])
     </url>
     <url>
         <loc>{{ url('/pricing') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/pricing')])
     </url>
     <url>
         <loc>{{ url('/about') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/about')])
     </url>
     <url>
         <loc>{{ url('/examples') }}</loc>
@@ -242,6 +246,7 @@
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/ticketing')])
     </url>
     <url>
         <loc>{{ url('/features/integrations') }}</loc>
@@ -254,18 +259,21 @@
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/selfhost')])
     </url>
     <url>
         <loc>{{ url('/features/ai') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/ai')])
     </url>
     <url>
         <loc>{{ url('/features/calendar-sync') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/calendar-sync')])
     </url>
     <url>
         <loc>{{ url('/google-calendar') }}</loc>

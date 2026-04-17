@@ -901,4 +901,6 @@
             text-shadow: 0 0 10px #f59e0b, 0 0 20px #f59e0b, 0 0 30px #f59e0b;
         }
     </style>
+
+    <x-marketing.related-pages />
 </x-marketing-layout>

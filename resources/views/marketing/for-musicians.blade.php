@@ -887,4 +887,6 @@
             text-shadow: 0 0 40px rgba(34, 211, 238, 0.3);
         }
     </style>
+
+    <x-marketing.related-pages />
 </x-marketing-layout>

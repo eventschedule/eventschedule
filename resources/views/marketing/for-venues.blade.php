@@ -996,4 +996,5 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
 </x-marketing-layout>

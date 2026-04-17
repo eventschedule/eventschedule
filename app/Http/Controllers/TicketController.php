@@ -2721,7 +2721,9 @@ class TicketController extends Controller
                         $status = $defaultStatus;
                     }
 
-                    $amount = isset($entry['amount']) && $entry['amount'] !== '' ? (float) $entry['amount'] : 0;
+                    $amount = isset($entry['amount']) && $entry['amount'] !== ''
+                        ? (float) $entry['amount']
+                        : (float) $ticket->price * $quantity;
 
                     $sale = new Sale;
                     $sale->name = trim($entry['name'] ?? '') ?: Str::before($email, '@');

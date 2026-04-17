@@ -532,6 +532,7 @@ return [
     'refund' => 'Rambursare',
     'mark_paid' => 'Marchează Plătit',
     'manual_payment' => 'Plată Manuală',
+    'manual_import' => 'Import Manual',
     'mark_paid_success' => 'Bilet marcat ca plătit cu succes',
     'refund_success' => 'Bilet rambursat cu succes',
     'cancel_success' => 'Bilet anulat cu succes',

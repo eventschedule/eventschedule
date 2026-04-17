@@ -310,6 +310,7 @@ return [
     'refund' => 'Terugbetaling',
     'mark_paid' => 'Markeer als Betaald',
     'manual_payment' => 'Handmatige Betaling',
+    'manual_import' => 'Handmatige Import',
     'mark_paid_success' => 'Ticket succesvol gemarkeerd als betaald',
     'refund_success' => 'Ticket succesvol terugbetaald',
     'cancel_success' => 'Ticket succesvol geannuleerd',

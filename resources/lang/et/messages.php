@@ -525,6 +525,7 @@ return [
     'refund' => 'Tagasimakse',
     'mark_paid' => 'Mark makstud',
     'manual_payment' => 'Käsitsimakse',
+    'manual_import' => 'Käsitsi import',
     'mark_paid_success' => 'Pilet märgiti tasutuks',
     'refund_success' => 'Pilet on edukalt tagastatud',
     'cancel_success' => 'Pileti tühistamine õnnestus',

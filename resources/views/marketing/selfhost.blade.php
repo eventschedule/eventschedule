@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Selfhost Event Schedule - Run on Your Own Server</x-slot>
-    <x-slot name="description">Selfhost Event Schedule on your own server. 100% open source with one-click Docker installation, automatic updates, and exclusive AI-powered features.</x-slot>
+    <x-slot name="title">{{ __('marketing.selfhost_title') }}</x-slot>
+    <x-slot name="description">{{ __('marketing.selfhost_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
 
     <x-slot name="structuredData">
@@ -36,6 +36,13 @@
         }
     }
     </script>
+    <x-seo.faq-schema :items="[
+        ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is fully open source under the Attribution Assurance License (AAL). You can inspect the code, contribute improvements, or fork it for your own needs at no cost.'],
+        ['q' => 'How do I install Event Schedule on my server?', 'a' => 'You can install Event Schedule with a one-click Softaculous installer on most shared hosts, or deploy it with Docker Compose on a VPS, cloud server, or locally. Both paths are documented in the install guide.'],
+        ['q' => 'How do updates work for selfhosted installations?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds with minimal disruption. No terminal access is required.'],
+        ['q' => 'Does the selfhosted version support ticket sales and AI features?', 'a' => 'Yes. Selfhosted installations include ticketing, QR check-ins, AI-powered event auto-import, and AI blog generation for SEO. You connect your own Stripe and Gemini API keys.'],
+        ['q' => 'Can I run Event Schedule as a white-label SaaS for my customers?', 'a' => 'Yes. The selfhosted version supports white-label multi-tenant use, so you can run it as a branded SaaS product for your own customers.'],
+    ]" />
     </x-slot>
 
     <style {!! nonce_attr() !!}>
@@ -667,4 +674,6 @@
             </div>
         </div>
     </section>
+
+    <x-marketing.related-pages />
 </x-marketing-layout>

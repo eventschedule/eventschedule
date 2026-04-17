@@ -532,6 +532,7 @@ return [
     'refund' => 'Refund',
     'mark_paid' => 'Mark Paid',
     'manual_payment' => 'Manual Payment',
+    'manual_import' => 'Manual import',
     'mark_paid_success' => 'Successfully marked ticket as paid',
     'refund_success' => 'Successfully refunded ticket',
     'cancel_success' => 'Successfully cancelled ticket',

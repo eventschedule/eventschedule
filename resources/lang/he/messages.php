@@ -278,6 +278,7 @@ return [
     'refund' => 'החזר',
     'mark_paid' => 'סמן כשולם',
     'manual_payment' => 'תשלום ידני',
+    'manual_import' => 'ייבוא ידני',
     'mark_paid_success' => 'הכרטיס סומן כשולם בהצלחה',
     'refund_success' => 'הזיכוי בוצע בהצלחה',
     'cancel_success' => 'הכרטיס בוטל בהצלחה',
