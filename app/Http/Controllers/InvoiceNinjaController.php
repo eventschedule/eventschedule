@@ -332,6 +332,35 @@ class InvoiceNinjaController extends Controller
                 }
             }
 
+            // Reconcile the server-computed payment_amount against the invoice
+            // total from the webhook payload. This defends against a tampered
+            // payload (e.g. inflated discount or dropped line items) that would
+            // otherwise mark the sale paid for less than we charged.
+            $invoiceTotal = null;
+            foreach (['amount', 'total', 'balance'] as $field) {
+                if (isset($payload[$field]) && is_numeric($payload[$field])) {
+                    $invoiceTotal = (float) $payload[$field];
+                    break;
+                }
+            }
+
+            if ($invoiceTotal !== null && abs($invoiceTotal - (float) $sale->payment_amount) > 0.01) {
+                \Log::warning('Invoice Ninja event purchase webhook amount mismatch', [
+                    'sale_id' => $sale->id,
+                    'event_id' => $event->id,
+                    'expected_amount' => $sale->payment_amount,
+                    'invoice_total' => $invoiceTotal,
+                ]);
+
+                $sale->status = 'amount_mismatch';
+                $sale->save();
+
+                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'invoiceninja_event_purchase_amount_mismatch:event_id:'.$sale->event_id);
+
+                return;
+            }
+
             $sale->status = 'paid';
             $sale->save();
 

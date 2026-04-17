@@ -912,6 +912,7 @@ return [
     'or_continue_with_email' => 'ou continuer avec l\'email',
     'google_auth_failed' => 'L\'authentification Google a échoué. Veuillez réessayer.',
     'google_account_already_linked' => 'Cet email est déjà lié à un autre compte Google.',
+    'google_link_requires_password_login' => 'Un compte existe déjà avec cet email. Veuillez d\'abord vous connecter avec votre mot de passe, puis lier votre compte Google depuis les paramètres.',
     'google_reauth_required' => 'Veuillez vous vérifier avec Google avant de définir un mot de passe.',
     'google_reauth_to_set_password' => 'Votre compte a été créé avec Google. Pour ajouter un mot de passe, veuillez d\'abord vérifier votre identité.',
     'google_account_mismatch' => 'Le compte Google ne correspond pas à celui lié à votre compte.',

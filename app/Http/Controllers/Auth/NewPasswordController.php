@@ -7,6 +7,7 @@ use App\Services\AuditService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -53,6 +54,15 @@ class NewPasswordController extends Controller
                 }
 
                 $user->forceFill($updateData)->save();
+
+                // Invalidate all existing sessions so a stolen cookie does not
+                // survive a password reset. Only effective with the database
+                // session driver (which we ship by default).
+                if (config('session.driver') === 'database') {
+                    DB::table(config('session.table', 'sessions'))
+                        ->where('user_id', $user->id)
+                        ->delete();
+                }
 
                 AuditService::log(AuditService::AUTH_PASSWORD_RESET, $user->id);
 

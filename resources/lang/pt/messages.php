@@ -906,6 +906,7 @@ return [
     'or_continue_with_email' => 'ou continue com email',
     'google_auth_failed' => 'Falha na autenticação do Google. Por favor, tente novamente.',
     'google_account_already_linked' => 'Este email já está vinculado a outra conta do Google.',
+    'google_link_requires_password_login' => 'Já existe uma conta com este email. Por favor, entre primeiro com sua senha e depois vincule sua conta do Google nas configurações.',
     'google_reauth_required' => 'Por favor, verifique com o Google antes de definir uma senha.',
     'google_reauth_to_set_password' => 'Sua conta foi criada com o Google. Para adicionar uma senha, primeiro verifique sua identidade.',
     'google_account_mismatch' => 'A conta do Google não corresponde à vinculada à sua conta.',

@@ -906,6 +906,7 @@ return [
     'or_continue_with_email' => 'أو المتابعة بالبريد الإلكتروني',
     'google_auth_failed' => 'فشلت مصادقة Google. يرجى المحاولة مرة أخرى.',
     'google_account_already_linked' => 'هذا البريد الإلكتروني مرتبط بالفعل بحساب Google آخر.',
+    'google_link_requires_password_login' => 'يوجد حساب بهذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول بكلمة المرور أولاً، ثم ربط حساب Google من الإعدادات.',
     'google_reauth_required' => 'يرجى التحقق من Google قبل تعيين كلمة مرور.',
     'google_reauth_to_set_password' => 'تم إنشاء حسابك باستخدام Google. لإضافة كلمة مرور، يرجى التحقق من هويتك أولاً.',
     'google_account_mismatch' => 'حساب Google لا يتطابق مع الحساب المرتبط.',

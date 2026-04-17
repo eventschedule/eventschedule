@@ -937,6 +937,7 @@ return [
     'or_continue_with_email' => 'sau continuă cu email',
     'google_auth_failed' => 'Autentificarea Google a eșuat. Vă rugăm încercați din nou.',
     'google_account_already_linked' => 'Acest email este deja legat de un alt cont Google.',
+    'google_link_requires_password_login' => 'Există deja un cont cu acest email. Te rugăm să te conectezi mai întâi cu parola, apoi să îți legi contul Google din setări.',
     'google_reauth_required' => 'Vă rugăm verificați cu Google înainte de a seta o parolă.',
     'google_reauth_to_set_password' => 'Contul tău a fost creat cu Google. Pentru a adăuga o parolă, vă rugăm verificați-vă mai întâi identitatea.',
     'google_account_mismatch' => 'Contul Google nu corespunde cu cel asociat contului tău.',

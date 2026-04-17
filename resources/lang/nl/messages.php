@@ -905,6 +905,7 @@ return [
     'or_continue_with_email' => 'of ga verder met e-mail',
     'google_auth_failed' => 'Google-authenticatie mislukt. Probeer het opnieuw.',
     'google_account_already_linked' => 'Dit e-mailadres is al gekoppeld aan een ander Google-account.',
+    'google_link_requires_password_login' => 'Er bestaat al een account met dit e-mailadres. Log eerst in met je wachtwoord en koppel daarna je Google-account via de instellingen.',
     'google_reauth_required' => 'Verifieer met Google voordat u een wachtwoord instelt.',
     'google_reauth_to_set_password' => 'Uw account is aangemaakt met Google. Om een wachtwoord toe te voegen, moet u eerst uw identiteit verifiëren.',
     'google_account_mismatch' => 'Het Google-account komt niet overeen met het gekoppelde account.',

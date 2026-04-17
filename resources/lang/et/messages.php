@@ -929,6 +929,7 @@ return [
     'or_continue_with_email' => 'või jätka e-kirjaga',
     'google_auth_failed' => 'Google\'i autentimine ebaõnnestus. Palun proovi uuesti.',
     'google_account_already_linked' => 'See meil on juba lingitud teise Google\'i kontoga.',
+    'google_link_requires_password_login' => 'Selle meiliaadressiga konto on juba olemas. Palun logi esmalt sisse parooliga ja lingi seejärel oma Google\'i konto seadetes.',
     'google_reauth_required' => 'Enne parooli määramist kontrollige Google\'iga.',
     'google_reauth_to_set_password' => 'Teie konto loodi Google\'iga. Parooli lisamiseks kinnitage esmalt oma identiteet.',
     'google_account_mismatch' => 'Google\'i konto ei ühti teie kontoga lingitud kontoga.',

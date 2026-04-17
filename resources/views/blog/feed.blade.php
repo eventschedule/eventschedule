@@ -32,7 +32,7 @@
             <category>{{ htmlspecialchars($tag, ENT_XML1, 'UTF-8') }}</category>
             @endforeach
             @endif
-            <content:encoded><![CDATA[{!! $post->content !!}]]></content:encoded>
+            <content:encoded><![CDATA[{!! str_replace(']]>', ']]]]><![CDATA[>', \App\Utils\MarkdownUtils::sanitizeHtml($post->content)) !!}]]></content:encoded>
         </item>
         @endforeach
     </channel>

@@ -64,6 +64,16 @@ class SocialAuthController extends Controller
                     ->withErrors(['email' => __('messages.google_account_already_linked')]);
             }
 
+            // If the existing local account has a password, we cannot safely
+            // auto-link a Google account on first SSO attempt — that would let
+            // an attacker who controls a matching Google mailbox hijack a
+            // password-protected account they never owned. Require the user to
+            // sign in with their password first and link from settings.
+            if (! $user->google_oauth_id && $user->hasPassword()) {
+                return redirect()->route('login')
+                    ->withErrors(['email' => __('messages.google_link_requires_password_login')]);
+            }
+
             // Link Google account to existing user
             $user->google_oauth_id = $googleId;
             if (! $user->profile_image_url && $googleUser->getAvatar()) {
