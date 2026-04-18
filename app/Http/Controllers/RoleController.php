@@ -2238,7 +2238,7 @@ class RoleController extends Controller
 
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
-            ['new_sale' => false, 'new_request' => false, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
+            ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 

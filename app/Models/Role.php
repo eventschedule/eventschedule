@@ -400,6 +400,11 @@ class Role extends Model implements MustVerifyEmail
             ->filter(function ($user) use ($type) {
                 $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
 
+                // new_request defaults to opt-in when the user has not explicitly set a preference.
+                if ($type === 'new_request' && ! array_key_exists($type, $settings)) {
+                    return true;
+                }
+
                 return ! empty($settings[$type]);
             });
     }

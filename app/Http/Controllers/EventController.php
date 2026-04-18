@@ -26,6 +26,7 @@ use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\DeletedEventNotification;
+use App\Notifications\NewRequestsNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
@@ -2068,6 +2069,23 @@ class EventController extends Controller
         // Attach venue role if created (skip if venue is the schedule itself)
         if ($venue && $venue->id !== $role->id) {
             $event->roles()->attach($venue->id, ['is_accepted' => true]);
+        }
+
+        if ($isAccepted === null && $role->accept_requests && $role->require_approval) {
+            $pendingCount = Event::whereHas('roles', function ($query) use ($role) {
+                $query->where('event_role.role_id', $role->id)
+                    ->whereNull('event_role.is_accepted');
+            })->count();
+
+            $editors = $role->getEditorsWantingNotification('new_request');
+            foreach ($editors as $editor) {
+                $editor->notify(new NewRequestsNotification($role, $pendingCount));
+            }
+
+            if ($editors->isNotEmpty()) {
+                $role->last_notified_request_count = $pendingCount;
+                $role->save();
+            }
         }
 
         // Auto-curate event
