@@ -327,7 +327,10 @@ class InvoiceNinjaController extends Controller
 
                 $sale->payment_amount = $sale->calculateTotal();
 
-                // Check if a promo code discount was applied on the IN purchase page
+                // Check if a discount was applied on the IN purchase page.
+                // The payload doesn't include the promo code string, so we can't
+                // reliably match to a specific PromoCode row - record the discount
+                // amount for reporting but leave promo_code_id null.
                 $invoiceDiscount = (float) ($payload['discount'] ?? 0);
                 if ($invoiceDiscount > 0) {
                     $isAmountDiscount = $payload['is_amount_discount'] ?? true;
@@ -338,13 +341,8 @@ class InvoiceNinjaController extends Controller
                     }
 
                     if ($discountAmount > 0) {
-                        $promoCode = $event->promoCodes()->where('is_active', true)->first();
-                        if ($promoCode) {
-                            $sale->promo_code_id = $promoCode->id;
-                            $sale->discount_amount = $discountAmount;
-                            $sale->payment_amount = max(0, $sale->payment_amount - $discountAmount);
-                            $promoCode->increment('times_used');
-                        }
+                        $sale->discount_amount = $discountAmount;
+                        $sale->payment_amount = max(0, $sale->payment_amount - $discountAmount);
                     }
                 }
             }

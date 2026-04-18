@@ -77,85 +77,85 @@ class CheckData extends Command
 
     private function checkRoleOwnership(array &$errors, bool $shouldFix): void
     {
-        $roles = Role::with('members')->where('is_deleted', false)->get();
+        Role::with('members')->where('is_deleted', false)->chunkById(500, function ($roles) use (&$errors, $shouldFix) {
+            foreach ($roles as $role) {
+                if ($role->isClaimed() && ! $role->owner()) {
+                    $error = 'No owner for role '.$role->id.': '.$role->name;
 
-        foreach ($roles as $role) {
-            if ($role->isClaimed() && ! $role->owner()) {
-                $error = 'No owner for role '.$role->id.': '.$role->name;
-
-                if (! $shouldFix) {
-                    $errors[] = $error;
-                } else {
-                    $this->error("Attempting to fix role {$role->id}");
-
-                    $roleUser = RoleUser::where('role_id', $role->id)->first();
-
-                    if ($roleUser && $roleUser->user_id == $role->user_id) {
-                        $this->info('Found matching role_user: correcting...');
-                        $roleUser->level = 'owner';
-                        $roleUser->save();
-                    } else {
+                    if (! $shouldFix) {
                         $errors[] = $error;
+                    } else {
+                        $this->error("Attempting to fix role {$role->id}");
+
+                        $roleUser = RoleUser::where('role_id', $role->id)->first();
+
+                        if ($roleUser && $roleUser->user_id == $role->user_id) {
+                            $this->info('Found matching role_user: correcting...');
+                            $roleUser->level = 'owner';
+                            $roleUser->save();
+                        } else {
+                            $errors[] = $error;
+                        }
                     }
                 }
             }
-        }
+        });
     }
 
     private function checkEvents(array &$errors, ?string $check): void
     {
-        $events = Event::with(['venue', 'roles', 'user'])->get();
+        Event::with(['venue', 'roles', 'user'])->chunkById(500, function ($events) use (&$errors, $check) {
+            foreach ($events as $event) {
+                if ((! $check || $check === 'event-slugs') && ! $event->slug) {
+                    $errors[] = 'No slug for event '.$event->id.': '.$event->name.' ('.$event->user->id.': '.$event->user->name.')';
+                }
 
-        foreach ($events as $event) {
-            if ((! $check || $check === 'event-slugs') && ! $event->slug) {
-                $errors[] = 'No slug for event '.$event->id.': '.$event->name.' ('.$event->user->id.': '.$event->user->name.')';
-            }
+                if ((! $check || $check === 'event-subdomains')) {
+                    $data = $event->getGuestUrlData();
 
-            if ((! $check || $check === 'event-subdomains')) {
-                $data = $event->getGuestUrlData();
+                    if (! $data['subdomain']) {
+                        $error = 'No subdomain for event '.$event->id.': '.$event->name.' ('.$event->user->id.': '.$event->user->name.') - ';
 
-                if (! $data['subdomain']) {
-                    $error = 'No subdomain for event '.$event->id.': '.$event->name.' ('.$event->user->id.': '.$event->user->name.') - ';
+                        foreach ($event->roles as $role) {
+                            $error .= $role->name.' ('.$role->type.'), ';
+                        }
 
-                    foreach ($event->roles as $role) {
-                        $error .= $role->name.' ('.$role->type.'), ';
+                        $error = rtrim($error, ', ');
+
+                        $errors[] = $error;
                     }
-
-                    $error = rtrim($error, ', ');
-
-                    $errors[] = $error;
                 }
             }
-        }
+        });
     }
 
     private function checkEventCreatorRoles(array &$errors, bool $shouldFix): void
     {
-        $events = Event::with('roles')->whereNotNull('creator_role_id')->get();
+        Event::with('roles')->whereNotNull('creator_role_id')->chunkById(500, function ($events) use (&$errors, $shouldFix) {
+            foreach ($events as $event) {
+                $roleIds = $event->roles->pluck('id')->toArray();
 
-        foreach ($events as $event) {
-            $roleIds = $event->roles->pluck('id')->toArray();
+                if (! in_array($event->creator_role_id, $roleIds)) {
+                    $error = 'Creator role not in event roles for event '.$event->id.': '.$event->name;
 
-            if (! in_array($event->creator_role_id, $roleIds)) {
-                $error = 'Creator role not in event roles for event '.$event->id.': '.$event->name;
+                    if ($shouldFix) {
+                        $claimedRole = $event->roles->first(function ($role) {
+                            return $role->isClaimed();
+                        });
 
-                if ($shouldFix) {
-                    $claimedRole = $event->roles->first(function ($role) {
-                        return $role->isClaimed();
-                    });
-
-                    if ($claimedRole) {
-                        $event->creator_role_id = $claimedRole->id;
-                        $event->save();
-                        $this->info("Fixed creator_role_id for event {$event->id} to role {$claimedRole->id}");
+                        if ($claimedRole) {
+                            $event->creator_role_id = $claimedRole->id;
+                            $event->save();
+                            $this->info("Fixed creator_role_id for event {$event->id} to role {$claimedRole->id}");
+                        } else {
+                            $errors[] = $error;
+                        }
                     } else {
                         $errors[] = $error;
                     }
-                } else {
-                    $errors[] = $error;
                 }
             }
-        }
+        });
     }
 
     private function checkEncryption(array &$errors): void
@@ -209,34 +209,36 @@ class CheckData extends Command
 
     private function checkOrphanedEvents(array &$errors): void
     {
-        $events = Event::doesntHave('roles')->get();
-
-        foreach ($events as $event) {
-            $errors[] = 'No roles for event '.$event->id.': '.$event->name;
-        }
+        Event::doesntHave('roles')->chunkById(500, function ($events) use (&$errors) {
+            foreach ($events as $event) {
+                $errors[] = 'No roles for event '.$event->id.': '.$event->name;
+            }
+        });
     }
 
     private function checkUnverifiedClaimedRoles(array &$errors): void
     {
-        $roles = Role::whereNotNull('user_id')
+        Role::whereNotNull('user_id')
             ->whereNull('email_verified_at')
             ->whereNull('phone_verified_at')
-            ->get();
-
-        foreach ($roles as $role) {
-            $errors[] = 'Unverified role with owner '.$role->id.': '.$role->name;
-        }
+            ->chunkById(500, function ($roles) use (&$errors) {
+                foreach ($roles as $role) {
+                    $errors[] = 'Unverified role with owner '.$role->id.': '.$role->name;
+                }
+            });
     }
 
     private function checkRoleSubdomains(array &$errors): void
     {
-        $roles = Role::where('is_deleted', false)->where(function ($query) {
-            $query->whereNull('subdomain')->orWhere('subdomain', '');
-        })->get();
-
-        foreach ($roles as $role) {
-            $errors[] = 'No subdomain for role '.$role->id.': '.$role->name;
-        }
+        Role::where('is_deleted', false)
+            ->where(function ($query) {
+                $query->whereNull('subdomain')->orWhere('subdomain', '');
+            })
+            ->chunkById(500, function ($roles) use (&$errors) {
+                foreach ($roles as $role) {
+                    $errors[] = 'No subdomain for role '.$role->id.': '.$role->name;
+                }
+            });
     }
 
     private function checkSalesAnalytics(array &$errors, bool $shouldFix): void
@@ -373,22 +375,10 @@ class CheckData extends Command
             $actualByTicket[$row->ticket_id][$row->event_date] = (int) $row->total_sold;
         }
 
-        // Get all tickets that have a sold JSON value
-        $tickets = Ticket::whereNotNull('sold')->where('sold', '!=', '')->get();
-
-        // Also check tickets that have actual sales but no cached sold value
-        $ticketIdsWithSales = array_keys($actualByTicket);
-        $ticketIdsWithCache = $tickets->pluck('id')->toArray();
-        $missingCacheIds = array_diff($ticketIdsWithSales, $ticketIdsWithCache);
-        if (! empty($missingCacheIds)) {
-            $tickets = $tickets->merge(Ticket::whereIn('id', $missingCacheIds)->get());
-        }
-
-        foreach ($tickets as $ticket) {
+        $processTicket = function ($ticket) use (&$errors, $shouldFix, $actualByTicket) {
             $cachedSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
             $actualSold = $actualByTicket[$ticket->id] ?? [];
 
-            // Compare all dates from both sides
             $allDates = array_unique(array_merge(array_keys($cachedSold), array_keys($actualSold)));
 
             foreach ($allDates as $date) {
@@ -410,6 +400,25 @@ class CheckData extends Command
                     $this->info("Fixed sold data for ticket {$ticket->id}");
                 }
             }
+        };
+
+        // Chunk through all tickets that have a sold JSON value
+        $processedTicketIds = [];
+        Ticket::whereNotNull('sold')->where('sold', '!=', '')->chunkById(500, function ($tickets) use ($processTicket, &$processedTicketIds) {
+            foreach ($tickets as $ticket) {
+                $processedTicketIds[] = $ticket->id;
+                $processTicket($ticket);
+            }
+        });
+
+        // Also check tickets that have actual sales but no cached sold value
+        $missingCacheIds = array_diff(array_keys($actualByTicket), $processedTicketIds);
+        if (! empty($missingCacheIds)) {
+            Ticket::whereIn('id', $missingCacheIds)->chunkById(500, function ($tickets) use ($processTicket) {
+                foreach ($tickets as $ticket) {
+                    $processTicket($ticket);
+                }
+            });
         }
     }
 
@@ -430,22 +439,10 @@ class CheckData extends Command
             $actualByEvent[$row->event_id][$row->event_date] = (int) $row->rsvp_count;
         }
 
-        // Get all events that have rsvp_sold data
-        $events = Event::whereNotNull('rsvp_sold')->where('rsvp_sold', '!=', '')->get();
-
-        // Also check events that have actual RSVP sales but no cached value
-        $eventIdsWithSales = array_keys($actualByEvent);
-        $eventIdsWithCache = $events->pluck('id')->toArray();
-        $missingCacheIds = array_diff($eventIdsWithSales, $eventIdsWithCache);
-        if (! empty($missingCacheIds)) {
-            $events = $events->merge(Event::whereIn('id', $missingCacheIds)->get());
-        }
-
-        foreach ($events as $event) {
+        $processEvent = function ($event) use (&$errors, $shouldFix, $actualByEvent) {
             $cachedRsvp = $event->rsvp_sold ? json_decode($event->rsvp_sold, true) : [];
             $actualRsvp = $actualByEvent[$event->id] ?? [];
 
-            // Compare all dates from both sides
             $allDates = array_unique(array_merge(array_keys($cachedRsvp), array_keys($actualRsvp)));
 
             foreach ($allDates as $date) {
@@ -467,6 +464,25 @@ class CheckData extends Command
                     $this->info("Fixed rsvp_sold data for event {$event->id}");
                 }
             }
+        };
+
+        // Chunk through all events that have rsvp_sold data
+        $processedEventIds = [];
+        Event::whereNotNull('rsvp_sold')->where('rsvp_sold', '!=', '')->chunkById(500, function ($events) use ($processEvent, &$processedEventIds) {
+            foreach ($events as $event) {
+                $processedEventIds[] = $event->id;
+                $processEvent($event);
+            }
+        });
+
+        // Also check events that have actual RSVP sales but no cached value
+        $missingCacheIds = array_diff(array_keys($actualByEvent), $processedEventIds);
+        if (! empty($missingCacheIds)) {
+            Event::whereIn('id', $missingCacheIds)->chunkById(500, function ($events) use ($processEvent) {
+                foreach ($events as $event) {
+                    $processEvent($event);
+                }
+            });
         }
     }
 }

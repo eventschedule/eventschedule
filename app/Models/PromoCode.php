@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Utils\MoneyUtils;
 use Illuminate\Database\Eloquent\Model;
 
 class PromoCode extends Model
@@ -85,6 +86,8 @@ class PromoCode extends Model
             $discount = $value;
         }
 
-        return round(min($discount, $eligibleSubtotal), 2);
+        $decimals = MoneyUtils::decimalsFor($this->event?->currency_code);
+
+        return round(min($discount, $eligibleSubtotal), $decimals);
     }
 }

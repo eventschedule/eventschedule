@@ -16,10 +16,19 @@ class MoneyUtils
         'ILS' => 'NIS',
     ];
 
+    public static function decimalsFor($currencyCode): int
+    {
+        if (! $currencyCode) {
+            return 2;
+        }
+
+        return in_array(strtoupper($currencyCode), self::$zeroDecimalCurrencies) ? 0 : 2;
+    }
+
     public static function format($amount, $currencyCode)
     {
         $upper = strtoupper($currencyCode);
-        $decimals = in_array($upper, self::$zeroDecimalCurrencies) ? 0 : 2;
+        $decimals = self::decimalsFor($upper);
 
         $formatted = number_format($amount, $decimals, '.', ',');
 

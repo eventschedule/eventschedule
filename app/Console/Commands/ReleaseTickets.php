@@ -27,20 +27,13 @@ class ReleaseTickets extends Command
      */
     public function handle()
     {
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-
         $expiredSales = Sale::where('status', 'unpaid')
             ->where(function ($q) {
                 $q->whereNull('group_id')->orWhereColumn('group_id', 'id');
             })
-            ->whereHas('event', function ($query) use ($driver) {
-                $query->where('events.expire_unpaid_tickets', '>', 0);
-                if ($driver === 'sqlite') {
-                    $query->whereRaw("(strftime('%s', 'now') - strftime('%s', sales.created_at))/3600 >= events.expire_unpaid_tickets");
-                } else {
-                    $query->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= events.expire_unpaid_tickets');
-                }
+            ->whereHas('event', function ($query) {
+                $query->where('events.expire_unpaid_tickets', '>', 0)
+                    ->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= events.expire_unpaid_tickets');
             })
             ->get();
 
