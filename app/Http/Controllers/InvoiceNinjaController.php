@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\EmailService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\UrlUtils;
@@ -96,8 +97,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
+        $didTransitionToPaid = false;
+
         // Use lockForUpdate to prevent race conditions from webhook retries
-        \DB::transaction(function () use ($sale, $payload, $invoiceId) {
+        \DB::transaction(function () use ($sale, $payload, $invoiceId, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -132,6 +135,7 @@ class InvoiceNinjaController extends Controller
             $sale->payment_amount = $webhookAmount;
             $sale->status = 'paid';
             $sale->save();
+            $didTransitionToPaid = true;
 
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja:event_id:'.$sale->event_id);
@@ -148,6 +152,10 @@ class InvoiceNinjaController extends Controller
                 }
             }
         });
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
 
         return response()->json(['status' => 'success']);
     }
@@ -171,8 +179,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
         }
 
+        $didTransitionToPaid = false;
+
         // Mark sale as paid with row locking
-        \DB::transaction(function () use ($sale) {
+        \DB::transaction(function () use ($sale, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -180,6 +190,7 @@ class InvoiceNinjaController extends Controller
 
             $sale->status = 'paid';
             $sale->save();
+            $didTransitionToPaid = true;
 
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_purchase:event_id:'.$sale->event_id);
@@ -196,6 +207,10 @@ class InvoiceNinjaController extends Controller
                 }
             }
         });
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
 
         return response()->json(['status' => 'success']);
     }
@@ -244,8 +259,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
+        $didTransitionToPaid = false;
+
         // Mark sale as paid with row locking
-        \DB::transaction(function () use ($sale, $event, $payload) {
+        \DB::transaction(function () use ($sale, $event, $payload, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -363,6 +380,7 @@ class InvoiceNinjaController extends Controller
 
             $sale->status = 'paid';
             $sale->save();
+            $didTransitionToPaid = true;
 
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_event_purchase:event_id:'.$sale->event_id);
@@ -379,6 +397,10 @@ class InvoiceNinjaController extends Controller
                 }
             }
         });
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
 
         return response()->json(['status' => 'success']);
     }

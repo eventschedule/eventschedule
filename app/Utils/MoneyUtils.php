@@ -12,11 +12,24 @@ class MoneyUtils
         'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
     ];
 
+    private static $displayCodeOverrides = [
+        'ILS' => 'NIS',
+    ];
+
     public static function format($amount, $currencyCode)
     {
-        $decimals = in_array(strtoupper($currencyCode), self::$zeroDecimalCurrencies) ? 0 : 2;
+        $upper = strtoupper($currencyCode);
+        $decimals = in_array($upper, self::$zeroDecimalCurrencies) ? 0 : 2;
 
-        return number_format($amount, $decimals, '.', ',').' '.$currencyCode;
+        $formatted = number_format($amount, $decimals, '.', ',');
+
+        if ($decimals === 2 && str_ends_with($formatted, '.00')) {
+            $formatted = substr($formatted, 0, -3);
+        }
+
+        $displayCode = self::$displayCodeOverrides[$upper] ?? $currencyCode;
+
+        return $formatted.' '.$displayCode;
     }
 
     public static function getSmallestUnitMultiplier($currencyCode)

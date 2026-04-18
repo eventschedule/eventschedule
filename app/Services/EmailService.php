@@ -131,6 +131,52 @@ class EmailService
     }
 
     /**
+     * Dispatch ticket confirmation to the buyer and new-sale notification to editors.
+     * Only fires when the sale is fully paid - prevents leaks for abandoned checkouts,
+     * failed payments, and amount-mismatch webhooks. Call outside DB transactions so a
+     * rollback does not leave queued emails behind.
+     */
+    public function sendSaleConfirmationEmails(Sale $sale): void
+    {
+        if ($sale->status !== 'paid') {
+            Log::warning('Skipping sale confirmation emails: sale not paid', [
+                'sale_id' => $sale->id,
+                'status' => $sale->status,
+            ]);
+
+            return;
+        }
+
+        try {
+            $event = $sale->event;
+            if (! $event) {
+                return;
+            }
+
+            $role = $event->getRoleWithEmailSettings();
+            if (! $role) {
+                return;
+            }
+
+            if ($event->individual_tickets && $sale->group_id && $sale->isPrimarySale()) {
+                $groupedSales = Sale::where('group_id', $sale->id)->get();
+                foreach ($groupedSales as $groupSale) {
+                    $this->sendTicketEmail($groupSale, $role);
+                }
+            } else {
+                $this->sendTicketEmail($sale, $role);
+            }
+
+            $this->sendNewSaleNotification($sale, $event, $role);
+        } catch (\Exception $e) {
+            Log::error('Failed to send sale confirmation emails: '.$e->getMessage(), [
+                'sale_id' => $sale->id,
+                'event_id' => $sale->event_id,
+            ]);
+        }
+    }
+
+    /**
      * Send test email to verify SMTP credentials
      */
     public function sendTestEmail(Role $role, string $toEmail): bool

@@ -1198,17 +1198,6 @@ class TicketController extends Controller
 
         $total = $sale->payment_amount;
 
-        // Send emails
-        if ($event->individual_tickets && $sale->group_id) {
-            $groupedSales = Sale::where('group_id', $sale->id)->get();
-            foreach ($groupedSales as $groupSale) {
-                $this->sendTicketPurchaseEmail($groupSale, $event);
-            }
-        } else {
-            $this->sendTicketPurchaseEmail($sale, $event);
-        }
-        $this->sendNewSaleNotification($sale, $event);
-
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
         // Dispatch sale.created webhook (outside transaction)
@@ -1237,6 +1226,8 @@ class TicketController extends Controller
                     WebhookService::dispatch('sale.paid', $gs);
                 }
             }
+
+            (new EmailService)->sendSaleConfirmationEmails($sale);
 
             $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
             if ($isEmbed) {
@@ -1500,17 +1491,6 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.error'));
         }
 
-        // Send confirmation email and admin notification
-        if ($event->individual_tickets && $sale->group_id) {
-            $groupedSales = Sale::where('group_id', $sale->id)->get();
-            foreach ($groupedSales as $groupSale) {
-                $this->sendTicketPurchaseEmail($groupSale, $event);
-            }
-        } else {
-            $this->sendTicketPurchaseEmail($sale, $event);
-        }
-        $this->sendNewSaleNotification($sale, $event);
-
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
 
         // Record RSVP sale in analytics (0 revenue)
@@ -1525,6 +1505,8 @@ class TicketController extends Controller
                 WebhookService::dispatch('sale.paid', $gs);
             }
         }
+
+        (new EmailService)->sendSaleConfirmationEmails($sale);
 
         $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         if ($request->boolean('embed')) {
@@ -2021,8 +2003,10 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
+        $didTransitionToPaid = false;
+
         // Use lockForUpdate to prevent race conditions from concurrent requests
-        DB::transaction(function () use ($sale) {
+        DB::transaction(function () use ($sale, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status === 'paid') {
                 return;
@@ -2031,6 +2015,7 @@ class TicketController extends Controller
             $sale->status = 'paid';
             $sale->transaction_reference = __('messages.manual_payment');
             $sale->save();
+            $didTransitionToPaid = true;
 
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
@@ -2046,6 +2031,10 @@ class TicketController extends Controller
             foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
                 WebhookService::dispatch('sale.paid', $gs);
             }
+        }
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
         }
 
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
@@ -2360,6 +2349,10 @@ class TicketController extends Controller
                     }
                 }
             }
+
+            if ($request->action === 'mark_paid') {
+                (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+            }
         }
 
         if ($request->ajax()) {
@@ -2423,56 +2416,6 @@ class TicketController extends Controller
         }
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-    }
-
-    /**
-     * Send ticket purchase email
-     */
-    private function sendTicketPurchaseEmail(Sale $sale, Event $event): void
-    {
-        try {
-            $role = $event->getRoleWithEmailSettings();
-
-            if (! $role) {
-                \Log::warning('No schedule found for ticket email', [
-                    'sale_id' => $sale->id,
-                    'event_id' => $event->id,
-                ]);
-
-                return;
-            }
-
-            $emailService = new EmailService;
-            $emailService->sendTicketEmail($sale, $role);
-        } catch (\Exception $e) {
-            // Log error but don't fail the sale creation
-            \Log::error('Failed to send ticket purchase email: '.$e->getMessage(), [
-                'sale_id' => $sale->id,
-                'event_id' => $event->id,
-            ]);
-        }
-    }
-
-    /**
-     * Send new sale notification to opted-in editors
-     */
-    private function sendNewSaleNotification(Sale $sale, Event $event): void
-    {
-        try {
-            $role = $event->getRoleWithEmailSettings();
-
-            if (! $role) {
-                return;
-            }
-
-            $emailService = new EmailService;
-            $emailService->sendNewSaleNotification($sale, $event, $role);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send sale notification: '.$e->getMessage(), [
-                'sale_id' => $sale->id,
-                'event_id' => $event->id,
-            ]);
-        }
     }
 
     /**
@@ -2780,7 +2723,9 @@ class TicketController extends Controller
 
                     $seenEmails[$email] = true;
                     $imported++;
-                    $sentEmails[] = $sale->id;
+                    if ($status === 'paid') {
+                        $sentEmails[] = $sale->id;
+                    }
                 }
             });
         } catch (\Illuminate\Database\QueryException $e) {
@@ -2790,9 +2735,10 @@ class TicketController extends Controller
         }
 
         if ($sendEmails && $hasEmailSettings && ! empty($sentEmails)) {
+            $emailService = new EmailService;
             $sales = Sale::whereIn('id', $sentEmails)->get();
             foreach ($sales as $sale) {
-                $this->sendTicketPurchaseEmail($sale, $event);
+                $emailService->sendSaleConfirmationEmails($sale);
             }
         }
 

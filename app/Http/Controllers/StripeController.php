@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
 use App\Services\AuditService;
+use App\Services\EmailService;
 use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
@@ -145,8 +146,10 @@ class StripeController extends Controller
                         break;
                     }
 
+                    $didTransitionToPaid = false;
+
                     // Use lockForUpdate to prevent race with the success redirect handler
-                    \DB::transaction(function () use ($sale, $paymentIntent) {
+                    \DB::transaction(function () use ($sale, $paymentIntent, &$didTransitionToPaid) {
                         $sale = Sale::lockForUpdate()->find($sale->id);
                         if ($sale->status === 'paid') {
                             return;
@@ -183,6 +186,7 @@ class StripeController extends Controller
                         $sale->status = 'paid';
                         $sale->transaction_reference = $paymentIntent->id;
                         $sale->save();
+                        $didTransitionToPaid = true;
 
                         AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                             ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
@@ -203,6 +207,10 @@ class StripeController extends Controller
                             }
                         }
                     });
+
+                    if ($didTransitionToPaid) {
+                        (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+                    }
                 }
                 break;
 
@@ -224,8 +232,10 @@ class StripeController extends Controller
                             break;
                         }
 
+                        $didTransitionToPaid = false;
+
                         // Use lockForUpdate to prevent race with the success redirect handler
-                        \DB::transaction(function () use ($sale, $session) {
+                        \DB::transaction(function () use ($sale, $session, &$didTransitionToPaid) {
                             $sale = Sale::lockForUpdate()->find($sale->id);
                             if ($sale->status === 'paid') {
                                 return;
@@ -262,6 +272,7 @@ class StripeController extends Controller
                             $sale->status = 'paid';
                             $sale->transaction_reference = $session->payment_intent;
                             $sale->save();
+                            $didTransitionToPaid = true;
 
                             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                                 ['status' => 'unpaid'], ['status' => 'paid'], 'stripe_checkout:event_id:'.$sale->event_id);
@@ -284,6 +295,10 @@ class StripeController extends Controller
                                 }
                             }
                         });
+
+                        if ($didTransitionToPaid) {
+                            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+                        }
                     }
                 }
                 break;
