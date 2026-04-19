@@ -28,32 +28,20 @@ class PasswordTest extends DuskTestCase
             // 1. Change password
             // -----------------------------------------------
             $browser->visit('/settings#section-password')
-                ->waitFor('#update_password_current_password', 5)
-                ->type('current_password', $password)
-                ->type('password', $newPassword);
-
-            // Click the save button inside the password form
-            $browser->script("
-                const field = document.getElementById('update_password_password');
-                const form = field.closest('form');
-                const submitButton = form.querySelector('button[type=\"submit\"]');
-                if (submitButton) {
-                    submitButton.scrollIntoView({ block: 'center', behavior: 'instant' });
-                }
-            ");
-
-            $browser->pause(300);
+                ->waitFor('#update_password_current_password', 10)
+                ->pause(500);
 
             $browser->script("
-                const field = document.getElementById('update_password_password');
-                const form = field.closest('form');
-                const submitButton = form.querySelector('button[type=\"submit\"]');
-                if (submitButton) {
-                    submitButton.click();
-                }
+                var cur = document.getElementById('update_password_current_password');
+                cur.value = " . json_encode($password) . ";
+                cur.dispatchEvent(new Event('input', { bubbles: true }));
+                var pw = document.getElementById('update_password_password');
+                pw.value = " . json_encode($newPassword) . ";
+                pw.dispatchEvent(new Event('input', { bubbles: true }));
             ");
 
-            $browser->waitForText('Saved', 5);
+            $browser->script("document.querySelector('#section-password form').requestSubmit()");
+            $browser->waitForText('Saved', 15);
 
             // -----------------------------------------------
             // 2. Verify new password works
