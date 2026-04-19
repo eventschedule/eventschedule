@@ -119,8 +119,8 @@ trait SanitizesNewsletterContent
 
             // Validate social link platforms
             if (($block['type'] ?? '') === 'social_links' && isset($block['data']['links'])) {
-                $allowedPlatforms = ['website', 'facebook', 'instagram', 'twitter', 'youtube', 'tiktok', 'linkedin'];
-                $block['data']['links'] = array_values(array_filter($block['data']['links'], fn ($l) => ! empty($l['platform']) && in_array($l['platform'], $allowedPlatforms)
+                $allowedPlatforms = array_merge(['website'], \App\Utils\UrlUtils::getUniquePlatforms());
+                $block['data']['links'] = array_values(array_filter($block['data']['links'], fn ($l) => ! empty($l['platform']) && in_array($l['platform'], $allowedPlatforms, true)
                 ));
             }
 
