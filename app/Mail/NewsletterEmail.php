@@ -48,10 +48,13 @@ class NewsletterEmail extends Mailable
             }
         }
 
+        $replyToAddress = ! empty($role?->email) ? $role->email : $fromAddress;
+        $replyToName = ! empty($role?->email) ? ($role->name ?: $fromName) : $fromName;
+
         return new Envelope(
             subject: $this->newsletter->subject,
             from: new Address($fromAddress, $fromName),
-            replyTo: [new Address($fromAddress, $fromName)],
+            replyTo: [new Address($replyToAddress, $replyToName)],
         );
     }
 
