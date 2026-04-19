@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Traits;
 
 use App\Models\Newsletter;
+use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
 trait SanitizesNewsletterContent
@@ -119,7 +120,7 @@ trait SanitizesNewsletterContent
 
             // Validate social link platforms
             if (($block['type'] ?? '') === 'social_links' && isset($block['data']['links'])) {
-                $allowedPlatforms = array_merge(['website'], \App\Utils\UrlUtils::getUniquePlatforms());
+                $allowedPlatforms = array_merge(['website'], UrlUtils::getUniquePlatforms());
                 $block['data']['links'] = array_values(array_filter($block['data']['links'], fn ($l) => ! empty($l['platform']) && in_array($l['platform'], $allowedPlatforms, true)
                 ));
             }
