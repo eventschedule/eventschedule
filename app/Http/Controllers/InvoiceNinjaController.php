@@ -10,6 +10,7 @@ use App\Services\AuditService;
 use App\Services\EmailService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
@@ -337,7 +338,8 @@ class InvoiceNinjaController extends Controller
                     if ($isAmountDiscount) {
                         $discountAmount = $invoiceDiscount;
                     } else {
-                        $discountAmount = round($sale->payment_amount * ($invoiceDiscount / 100), 2);
+                        $decimals = MoneyUtils::decimalsFor($event->ticket_currency_code);
+                        $discountAmount = round($sale->payment_amount * ($invoiceDiscount / 100), $decimals);
                     }
 
                     if ($discountAmount > 0) {

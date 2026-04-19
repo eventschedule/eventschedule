@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $trustedProxies = env('TRUSTED_PROXIES');
         if ($trustedProxies) {
             $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : explode(',', $trustedProxies));
+        } elseif (env('IS_NEXUS')) {
+            $middleware->trustProxies(at: '*');
         }
 
         $middleware->validateCsrfTokens(except: [
