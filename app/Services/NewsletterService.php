@@ -357,7 +357,7 @@ class NewsletterService
                                 'question' => $poll->question,
                                 'options' => $poll->options,
                                 'eventName' => $event->name,
-                                'eventUrl' => $event->getGuestUrl(),
+                                'eventUrl' => $event->getGuestUrl($role->subdomain, null, true),
                             ];
                             break;
                         }

@@ -45,7 +45,7 @@
       }
   @endphp
 {{ $dateStr }}
-  {{ $event->getGuestUrl() }}
+  {{ $event->getGuestUrl($role?->subdomain, null, true) }}
 
 @endforeach
 @elseif ($blockType === 'button' && !empty($block['data']['text']))

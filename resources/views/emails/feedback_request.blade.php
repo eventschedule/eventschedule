@@ -45,7 +45,7 @@
             <div style="background-color: #f0f4ff; padding: 16px 20px; border-radius: 8px; margin: 20px 0;">
                 <p style="font-size: 14px; font-weight: bold; margin: 0 0 6px 0; color: #333;">{{ __('messages.feedback_share_content') }}</p>
                 <p style="font-size: 13px; margin: 0 0 8px 0; color: #555;">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
-                <a href="{{ $event->getGuestUrl() }}#event-media-section" style="font-size: 13px; color: #4E81FA;">{{ __('messages.feedback_share_content_link') }}</a>
+                <a href="{{ $event->getGuestUrl($role?->subdomain, null, true) }}#event-media-section" style="font-size: 13px; color: #4E81FA;">{{ __('messages.feedback_share_content_link') }}</a>
             </div>
         @endif
 

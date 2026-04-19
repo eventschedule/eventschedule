@@ -24,7 +24,7 @@
 @endphp
 {{ __('messages.feedback_share_content') }}
 {{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}
-{{ __('messages.feedback_share_content_link') }}: {{ $event->getGuestUrl() }}#event-media-section
+{{ __('messages.feedback_share_content_link') }}: {{ $event->getGuestUrl($role?->subdomain, null, true) }}#event-media-section
 @endif
 
 @php
