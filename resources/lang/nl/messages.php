@@ -1978,6 +1978,7 @@ return [
     'require_account' => 'Account vereist',
     'require_account_help' => 'Wanneer ingeschakeld, moeten mensen een account aanmaken om evenementen in te dienen. Wanneer uitgeschakeld, kunnen ze als gast indienen.',
     'send_on_days' => 'Verzenden op dagen',
+    'send_days_required' => 'Selecteer ten minste één dag van de week',
     'user' => 'Gebruiker',
     'payment_error' => 'Betalingsverwerking mislukt. Probeer het opnieuw.',
     'deleted_event' => 'Verwijderd evenement',

@@ -1983,6 +1983,7 @@ return [
     'require_account' => 'Exiger un compte',
     'require_account_help' => 'Lorsqu\'activé, les personnes doivent créer un compte pour soumettre des événements. Lorsque désactivé, elles peuvent soumettre en tant qu\'invité.',
     'send_on_days' => 'Envoyer les jours',
+    'send_days_required' => 'Veuillez sélectionner au moins un jour de la semaine',
     'user' => 'Utilisateur',
     'payment_error' => 'Le traitement du paiement a échoué. Veuillez réessayer.',
     'deleted_event' => 'Événement supprimé',

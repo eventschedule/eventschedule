@@ -1053,6 +1053,7 @@ return [
     'weekly' => 'Weekly',
     'send_on' => 'Send On',
     'send_on_days' => 'Send on Days',
+    'send_days_required' => 'Please select at least one day of the week',
     'day_of_month' => 'Day of Month',
     'send_at_hour' => 'Send At',
     'ai_text_prompt' => 'AI Text Prompt',

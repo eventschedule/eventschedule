@@ -1996,6 +1996,7 @@ return [
     'require_account' => 'Nõua kontot',
     'require_account_help' => 'Kui lubatud, peavad inimesed sündmuste esitamiseks looma konto. Kui keelatud, saavad nad esitada külalisena.',
     'send_on_days' => 'Saada päevadel',
+    'send_days_required' => 'Valige vähemalt üks nädalapäev',
     'user' => 'Kasutaja',
     'payment_error' => 'Makse töötlemine ebaõnnestus. Palun proovige uuesti.',
     'deleted_event' => 'Kustutatud sündmus',

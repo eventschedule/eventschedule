@@ -37,11 +37,14 @@ class EventTextGenerator
             $text .= $message . "\n" . $url . "\n";
         }
 
-        // Prepend Right-to-Left Mark for RTL languages so text
-        // displays correctly when pasted in apps like WhatsApp
-        if ($role->isRtl()) {
-            $text = "\u{200F}" . $text;
-        }
+        // Prepend a direction marker to every line so the message
+        // displays in the schedule's intended direction when pasted
+        // into apps like WhatsApp, which applies bidi per line.
+        // Based on the schedule's language_code, not Role::isRtl()
+        // (which is viewer-dependent).
+        $isRtlLanguage = $role->language_code == 'he' || $role->language_code == 'ar';
+        $marker = $isRtlLanguage ? "\u{200F}" : "\u{200E}";
+        $text = $marker . str_replace("\n", "\n" . $marker, $text);
 
         return $text;
     }

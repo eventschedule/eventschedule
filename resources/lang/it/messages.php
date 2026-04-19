@@ -1980,6 +1980,7 @@ return [
     'require_account' => 'Richiedi account',
     'require_account_help' => 'Quando abilitato, le persone devono creare un account per inviare eventi. Quando disabilitato, possono inviare come ospite.',
     'send_on_days' => 'Invia nei giorni',
+    'send_days_required' => 'Seleziona almeno un giorno della settimana',
     'user' => 'Utente',
     'payment_error' => 'Elaborazione del pagamento non riuscita. Per favore riprova.',
     'deleted_event' => 'Evento eliminato',

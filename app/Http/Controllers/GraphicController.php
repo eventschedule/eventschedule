@@ -134,6 +134,14 @@ class GraphicController extends Controller
                     'errors' => ['recipient_emails' => [__('messages.email_required')]],
                 ], 422);
             }
+
+            if (($newSettings['frequency'] ?? null) === 'weekly' && empty($newSettings['send_days'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => __('messages.send_days_required'),
+                    'errors' => ['send_days' => [__('messages.send_days_required')]],
+                ], 422);
+            }
         }
 
         $role->graphic_settings = $newSettings;

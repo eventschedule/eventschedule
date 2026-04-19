@@ -1980,6 +1980,7 @@ return [
     'require_account' => 'Requerir cuenta',
     'require_account_help' => 'Cuando está activado, las personas deben crear una cuenta para enviar eventos. Cuando está desactivado, pueden enviar como invitado.',
     'send_on_days' => 'Enviar en días',
+    'send_days_required' => 'Por favor selecciona al menos un día de la semana',
     'user' => 'Usuario',
     'payment_error' => 'El procesamiento del pago falló. Por favor, inténtelo de nuevo.',
     'deleted_event' => 'Evento eliminado',

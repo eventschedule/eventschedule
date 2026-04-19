@@ -1055,6 +1055,7 @@ return [
     'weekly' => 'Săptămânal',
     'send_on' => 'Trimite Pe',
     'send_on_days' => 'Trimite în Zilele',
+    'send_days_required' => 'Vă rugăm selectați cel puțin o zi a săptămânii',
     'day_of_month' => 'Ziua Lunii',
     'send_at_hour' => 'Trimite La',
     'ai_text_prompt' => 'Prompt AI pentru Text',

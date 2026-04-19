@@ -1984,6 +1984,7 @@ return [
     'require_account' => 'Konto erforderlich',
     'require_account_help' => 'Wenn aktiviert, müssen Personen ein Konto erstellen, um Veranstaltungen einzureichen. Wenn deaktiviert, können sie als Gast einreichen.',
     'send_on_days' => 'An Tagen senden',
+    'send_days_required' => 'Bitte wählen Sie mindestens einen Wochentag aus',
     'user' => 'Benutzer',
     'payment_error' => 'Zahlungsverarbeitung fehlgeschlagen. Bitte versuchen Sie es erneut.',
     'deleted_event' => 'Gelöschte Veranstaltung',

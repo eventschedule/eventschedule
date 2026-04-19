@@ -771,8 +771,7 @@
                             if (cb.checked) sendDays.push(parseInt(cb.value));
                         });
                     }
-                    if (sendDays.length === 0) sendDays = [1]; // Default to Monday
-                    sendDay = sendDays[0];
+                    if (sendDays.length > 0) sendDay = sendDays[0];
                 } else if (frequency === 'monthly') {
                     const monthlyDayEl = document.getElementById('monthly_day') || document.getElementById('monthly_day_mobile');
                     sendDay = monthlyDayEl ? monthlyDayEl.value : 1;
@@ -1771,7 +1770,7 @@
                                         </div>
 
                                         <div>
-                                            <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                            <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }} ({{ $role->timezone ?: 'UTC' }})</label>
                                             <select id="send_hour_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                 @for ($i = 0; $i < 24; $i++)
                                                     <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
@@ -2108,7 +2107,7 @@
                                             </div>
 
                                             <div>
-                                                <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                                <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }} ({{ $role->timezone ?: 'UTC' }})</label>
                                                 <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                     @for ($i = 0; $i < 24; $i++)
                                                         <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
