@@ -5,6 +5,7 @@
         <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-base leading-snug line-clamp-2" dir="auto">
             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-4 h-4 text-gray-400 me-2 align-[-0.2em]"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
             <span v-text="event.name"></span>
+            <span v-if="event.is_draft" class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 ms-1.5">{{ __('messages.draft') }}</span>
         </h3>
     </div>
     <p v-if="event.short_description && !event.is_password_protected" class="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2" dir="auto" v-text="event.short_description"></p>
@@ -21,10 +22,24 @@
         <span class="line-clamp-2" v-text="event.venue_name" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></span>
     </div>
     <div class="mt-1 flex items-center text-sm text-gray-500 dark:text-gray-400">
-        <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
-        </svg>
-        <span v-text="getEventTime(event)"></span>
+        <template v-if="event.is_multi_day">
+            <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+            </svg>
+            <span>
+                <span v-text="getEventTime(event)"></span>
+                <span v-if="event.duration" class="ms-1" v-text="'(' + formatDuration(event.duration) + ')'"></span>
+            </span>
+        </template>
+        <template v-else>
+            <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clip-rule="evenodd" />
+            </svg>
+            <span v-text="getEventTime(event)"></span>
+        </template>
+    </div>
+    <div v-if="event._multiDayNum > 1" class="mt-0.5 ms-6 text-xs text-gray-400 dark:text-gray-500">
+        <span v-text="'↳ ' + event._multiDayNum + ' / ' + event._multiDayTotal"></span>
     </div>
     <div v-if="event.registration_url && event.ticket_price != null && !event.is_password_protected" class="mt-1 flex items-start text-sm text-gray-500 dark:text-gray-400">
         <svg class="h-4 w-4 text-gray-400 flex-shrink-0 me-2 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -32,7 +47,7 @@
         </svg>
         <span v-if="event.ticket_price == 0">{{ __('messages.free_entry') }}</span>
         <span v-else>
-            <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> &bull; <span v-text="event.coupon_code"></span></span>
+            <span v-text="formatPrice(event.ticket_price, event.ticket_currency_code)"></span><span v-if="event.coupon_code"> &bull; {{ __('messages.coupon_code') }}</span>
         </span>
     </div>
     <div v-if="event.can_edit" class="mt-auto pt-3">

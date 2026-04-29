@@ -16,6 +16,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -191,6 +192,13 @@ class HomeController extends Controller
             $trafficSources = $analyticsService->getTopReferrerDomains($user, $trafficCount, $trafficStart, $now);
         }
 
+        $canCreateSchedule = ! config('app.hosted') || $user->owner()->count() < 50;
+
+        $allRoles = app('userRoles');
+        $schedules = $allRoles->where('type', 'talent')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
+        $venues = $allRoles->where('type', 'venue')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
+        $curators = $allRoles->where('type', 'curator')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
+
         return view('home', compact(
             'events',
             'month',
@@ -212,6 +220,10 @@ class HomeController extends Controller
             'latestNewsletters',
             'boostCampaigns',
             'trafficSources',
+            'canCreateSchedule',
+            'schedules',
+            'venues',
+            'curators',
         ));
     }
 
@@ -251,56 +263,84 @@ class HomeController extends Controller
 
     public function sitemap()
     {
-        $roles = Role::with('groups')
-            ->where(function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNotNull('email')
-                        ->whereNotNull('email_verified_at');
-                })->orWhere(function ($q) {
-                    $q->whereNotNull('phone')
-                        ->whereNotNull('phone_verified_at');
-                });
-            })
-            ->where('is_deleted', false)
-            ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
-            ->get();
+        try {
+            $cacheKey = 'sitemap:'.md5(request()->fullUrl());
 
-        $events = Event::with(['roles'])
-            ->whereNotNull('starts_at')
-            ->where('is_private', false)
-            ->whereNull('event_password')
-            ->whereHas('roles', fn ($q) => $q->where('is_accepted', true))
-            ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
-            ->get();
+            $content = Cache::remember($cacheKey, 3600, function () {
+                $roles = Role::select([
+                    'id', 'subdomain', 'email', 'email_verified_at', 'phone', 'phone_verified_at',
+                    'user_id', 'custom_domain', 'custom_domain_mode', 'custom_domain_status',
+                    'is_deleted', 'updated_at',
+                ])
+                    ->with(['groups:id,role_id,slug,updated_at'])
+                    ->where(function ($query) {
+                        $query->where(function ($q) {
+                            $q->whereNotNull('email')
+                                ->whereNotNull('email_verified_at');
+                        })->orWhere(function ($q) {
+                            $q->whereNotNull('phone')
+                                ->whereNotNull('phone_verified_at');
+                        });
+                    })
+                    ->where('is_deleted', false)
+                    ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
+                    ->get();
 
-        $blogPosts = BlogPost::published()
-            ->orderBy('published_at', 'desc')
-            ->get();
+                $events = Event::select([
+                    'id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id',
+                    'is_private', 'is_draft', 'event_password', 'updated_at',
+                ])
+                    ->with([
+                        'roles:id,subdomain,type,email_verified_at,phone_verified_at,user_id,custom_domain,custom_domain_mode,custom_domain_status',
+                        'creatorRole:id,subdomain,type,email_verified_at,phone_verified_at,user_id',
+                    ])
+                    ->whereNotNull('starts_at')
+                    ->where('is_private', false)
+                    ->where('is_draft', false)
+                    ->whereNull('event_password')
+                    ->whereHas('roles', fn ($q) => $q->where('is_accepted', true))
+                    ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
+                    ->get();
 
-        $hasQueryFilter = request()->has('events') || request()->has('roles');
+                $blogPosts = BlogPost::select(['id', 'slug', 'published_at', 'updated_at', 'is_published'])
+                    ->published()
+                    ->orderBy('published_at', 'desc')
+                    ->get();
 
-        $sitemapView = view('sitemap', [
-            'roles' => ! request()->has('events') ? $roles : [],
-            'events' => ! request()->has('roles') ? $events : [],
-            'blogPosts' => $hasQueryFilter ? [] : $blogPosts,
-            'showMarketingLinks' => ! $hasQueryFilter,
-            'lastmod' => now()->toIso8601String(),
-        ]);
+                $hasQueryFilter = request()->has('events') || request()->has('roles');
 
-        // Check if the request is for the gzipped version
-        $isGzipped = str_ends_with(request()->path(), '.gz');
+                return view('sitemap', [
+                    'roles' => ! request()->has('events') ? $roles : [],
+                    'events' => ! request()->has('roles') ? $events : [],
+                    'blogPosts' => $hasQueryFilter ? [] : $blogPosts,
+                    'showMarketingLinks' => ! $hasQueryFilter,
+                    'lastmod' => now()->toIso8601String(),
+                ])->render();
+            });
 
-        if ($isGzipped) {
-            $content = $sitemapView->render();
-            $gzipped = gzencode($content, 9);
+            $isGzipped = str_ends_with(request()->path(), '.gz');
 
-            return response($gzipped)
-                ->header('Content-Type', 'application/xml')
-                ->header('Content-Encoding', 'gzip');
+            if ($isGzipped) {
+                $gzipped = gzencode($content, 1);
+
+                return response($gzipped)
+                    ->header('Content-Type', 'application/xml')
+                    ->header('Content-Encoding', 'gzip');
+            }
+
+            return response($content)
+                ->header('Content-Type', 'application/xml');
+        } catch (\Throwable $e) {
+            report($e);
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            $xml .= '<url><loc>'.url('/').'</loc></url>';
+            $xml .= '</urlset>';
+
+            return response($xml)
+                ->header('Content-Type', 'application/xml');
         }
-
-        return response($sitemapView)
-            ->header('Content-Type', 'application/xml');
     }
 
     public function saveDashboardConfig(Request $request): JsonResponse
@@ -461,14 +501,14 @@ class HomeController extends Controller
         $followerUsers = DB::table('users')->whereIn('id', $followerUserIds)->get()->keyBy('id');
 
         $followers = $followers->map(function ($follow) use ($followerUsers) {
-                $user = $followerUsers[$follow->user_id] ?? null;
+            $user = $followerUsers[$follow->user_id] ?? null;
 
-                return [
-                    'type' => 'follower',
-                    'description' => $user ? trim(($user->first_name ?? '').' '.($user->last_name ?? '')) : '',
-                    'date' => Carbon::parse($follow->created_at),
-                ];
-            });
+            return [
+                'type' => 'follower',
+                'description' => $user ? trim(($user->first_name ?? '').' '.($user->last_name ?? '')) : '',
+                'date' => Carbon::parse($follow->created_at),
+            ];
+        });
         $activities = $activities->merge($followers);
 
         // Recent newsletters sent
@@ -489,7 +529,7 @@ class HomeController extends Controller
         $activities = $activities->merge($newsletters);
 
         // Sort by date descending
-        return $activities->filter(fn($a) => $a['date'] !== null)->sortByDesc('date')->take($count)->values();
+        return $activities->filter(fn ($a) => $a['date'] !== null)->sortByDesc('date')->take($count)->values();
     }
 
     private function getSparklineData($user, int $days = 30): array
@@ -526,6 +566,8 @@ class HomeController extends Controller
             return null;
         }
 
+        $role = Role::where('subdomain', $pending['subdomain'] ?? '')->first();
+
         $eventPartId = $pending['event_part_id'] ?? null;
         if ($eventPartId) {
             $eventPartId = UrlUtils::decodeId($eventPartId);
@@ -541,7 +583,14 @@ class HomeController extends Controller
             $parsedUrl = parse_url($returnUrl);
             $appHost = parse_url(config('app.url'), PHP_URL_HOST);
             if (isset($parsedUrl['host']) && $parsedUrl['host'] !== $appHost && ! str_ends_with($parsedUrl['host'], '.'.$appHost)) {
-                $returnUrl = null;
+                // Allow return URLs on valid custom domains
+                $isCustomDomain = Role::where('custom_domain_host', $parsedUrl['host'])
+                    ->where('custom_domain_mode', 'direct')
+                    ->where('custom_domain_status', 'active')
+                    ->exists();
+                if (! $isCustomDomain) {
+                    $returnUrl = null;
+                }
             }
             $lowerUrl = strtolower(trim($returnUrl ?? ''));
             if (str_starts_with($lowerUrl, 'javascript:') || str_starts_with($lowerUrl, 'data:')) {
@@ -584,6 +633,10 @@ class HomeController extends Controller
                 ]);
                 $returnUrl = $event->getGuestUrl($pending['subdomain']);
                 session()->flash('scroll_to', 'pending-video-'.$video->id);
+
+                if ($role && ! auth()->user()->isConnected($role->subdomain)) {
+                    auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+                }
             }
 
             session()->flash('message', __('messages.video_submitted'));
@@ -604,9 +657,12 @@ class HomeController extends Controller
             $returnUrl = $event->getGuestUrl($pending['subdomain']);
             session()->flash('scroll_to', 'pending-comment-'.$comment->id);
 
+            if ($role && ! auth()->user()->isConnected($role->subdomain)) {
+                auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            }
+
             session()->flash('message', __('messages.comment_submitted'));
         } elseif ($pending['type'] === 'photo') {
-            $role = Role::where('subdomain', $pending['subdomain'] ?? '')->first();
             if ($role && ! $role->canUploadPhoto()) {
                 $tempFilename = $pending['temp_filename'] ?? '';
                 if ($tempFilename) {
@@ -646,6 +702,11 @@ class HomeController extends Controller
                 'photo_url' => $filename,
                 'is_approved' => false,
             ]);
+
+            if ($role && ! auth()->user()->isConnected($role->subdomain)) {
+                auth()->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            }
+
             if (($pending['return_to'] ?? null) === 'gallery') {
                 $returnUrl = $event->getPhotoGalleryUrl($pending['subdomain']);
             } else {

@@ -33,6 +33,7 @@ class FeedController extends Controller
                     ->where('is_accepted', true);
             })
             ->where('is_private', false)
+            ->where('is_draft', false)
             ->whereNull('event_password')
             ->with(['roles', 'venue'])
             ->orderBy('starts_at')
@@ -101,6 +102,7 @@ class FeedController extends Controller
                     ->where('is_accepted', true);
             })
             ->where('is_private', false)
+            ->where('is_draft', false)
             ->whereNull('event_password')
             ->with(['roles', 'venue'])
             ->orderBy('starts_at')
@@ -158,7 +160,7 @@ class FeedController extends Controller
         $startAt = $event->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->copy()->addSeconds($duration * 3600)->format('Ymd\THis\Z');
-        $url = $event->getGuestUrl($role->subdomain, $date);
+        $url = custom_domain_url($event->getGuestUrl($role->subdomain, $date));
 
         $vevent = "BEGIN:VEVENT\r\n";
         $vevent .= 'UID:'.$uid."\r\n";

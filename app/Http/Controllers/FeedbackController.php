@@ -6,6 +6,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\FeedbackNotification;
 use App\Models\Event;
 use App\Models\EventFeedback;
+use App\Models\Role;
 use App\Models\Sale;
 use App\Services\WebhookService;
 use App\Utils\UrlUtils;
@@ -19,14 +20,21 @@ class FeedbackController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 
-        $event->loadMissing('roles');
-        $role = $event->role() ?? $event->roles->first();
+        $role = Role::where('subdomain', $sale->subdomain)->where('is_deleted', false)->first();
+        if (! $role) {
+            $event->loadMissing('roles');
+            $role = $event->role() ?? $event->roles->first();
+        }
 
         if (! $role || ! $role->isPro()) {
             abort(404);
         }
 
-        if (! $event->isFeedbackEnabled()) {
+        if ($event->is_draft) {
+            abort(404);
+        }
+
+        if (! $event->isFeedbackEnabled($role)) {
             abort(404);
         }
 
@@ -35,13 +43,15 @@ class FeedbackController extends Controller
             abort(404);
         }
 
+        $fonts = array_unique(array_filter([$role->font_family]));
+
         $existingFeedback = EventFeedback::where('sale_id', $sale->id)->first();
 
         if ($existingFeedback) {
-            return view('feedback.thank-you', compact('event', 'sale', 'role', 'existingFeedback'));
+            return view('feedback.thank-you', compact('event', 'sale', 'role', 'existingFeedback', 'fonts'));
         }
 
-        return view('feedback.show', compact('event', 'sale', 'role'));
+        return view('feedback.show', compact('event', 'sale', 'role', 'fonts'));
     }
 
     public function store(Request $request, $eventId, $secret)
@@ -49,14 +59,21 @@ class FeedbackController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->where('status', 'paid')->where('is_deleted', false)->firstOrFail();
 
-        $event->loadMissing('roles');
-        $role = $event->role() ?? $event->roles->first();
+        $role = Role::where('subdomain', $sale->subdomain)->where('is_deleted', false)->first();
+        if (! $role) {
+            $event->loadMissing('roles');
+            $role = $event->role() ?? $event->roles->first();
+        }
 
         if (! $role || ! $role->isPro()) {
             abort(404);
         }
 
-        if (! $event->isFeedbackEnabled()) {
+        if ($event->is_draft) {
+            abort(404);
+        }
+
+        if (! $event->isFeedbackEnabled($role)) {
             abort(404);
         }
 
@@ -98,23 +115,27 @@ class FeedbackController extends Controller
             ]);
         }
 
-        // Dispatch webhook
-        WebhookService::dispatch('feedback.submitted', $sale, [
-            'event' => 'feedback.submitted',
-            'timestamp' => now()->toIso8601String(),
-            'data' => [
-                'event_id' => UrlUtils::encodeId($event->id),
-                'event_name' => $event->name,
-                'event_date' => $sale->event_date,
-                'attendee_name' => $sale->name,
-                'attendee_email' => $sale->email,
-                'rating' => $feedback->rating,
-                'comment' => $feedback->comment,
-            ],
-        ]);
+        try {
+            // Dispatch webhook
+            WebhookService::dispatch('feedback.submitted', $sale, [
+                'event' => 'feedback.submitted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => [
+                    'event_id' => UrlUtils::encodeId($event->id),
+                    'event_name' => $event->name,
+                    'event_date' => $sale->event_date,
+                    'attendee_name' => $sale->name,
+                    'attendee_email' => $sale->email,
+                    'rating' => $feedback->rating,
+                    'comment' => $feedback->comment,
+                ],
+            ]);
 
-        // Notify opted-in editors
-        $this->notifyEditors($feedback, $sale, $event, $role);
+            // Notify opted-in editors
+            $this->notifyEditors($feedback, $sale, $event, $role);
+        } catch (\Exception $e) {
+            report($e);
+        }
 
         return redirect()->route('feedback.show', [
             'event_id' => UrlUtils::encodeId($event->id),

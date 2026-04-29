@@ -79,7 +79,7 @@ class Ticket extends Model
         \DB::transaction(function () use ($date, $quantity) {
             $ticket = Ticket::lockForUpdate()->find($this->id);
             $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-            $sold[$date] = ($sold[$date] ?? 0) + $quantity;
+            $sold[$date] = max(0, ($sold[$date] ?? 0) + $quantity);
             $ticket->sold = json_encode($sold);
             $ticket->save();
         });

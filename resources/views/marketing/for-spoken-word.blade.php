@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Poets & Spoken Word | Share Your Readings</x-slot>
+    <x-slot name="title">Free Event Schedule for Spoken Word | Share Your Performances</x-slot>
     <x-slot name="description">Share your poetry readings, open mics, and workshops. Sell tickets directly and reach fans with newsletters. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
@@ -88,6 +88,7 @@
             "Auto-generated promotional graphics for social media"
         ],
         "url": "{{ url()->current() }}",
+        "keywords": "spoken word schedule, poetry event calendar, spoken word booking, poetry slam management, free spoken word scheduling",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -655,8 +656,18 @@
                     </x-slot:icon>
                 </x-feature-link-card>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all features
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
+
+    @include('marketing.partials.pricing-nudge')
 
     <!-- Related Pages -->
     <section class="bg-white dark:bg-[#0a0a0f] py-20">
@@ -700,6 +711,14 @@
                     </svg>
                 </a>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all use cases
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -715,70 +734,62 @@
                 </p>
             </div>
 
-            <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+            <div class="space-y-4">
+                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Is Event Schedule free for spoken word artists?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule is free forever for sharing your performance schedule, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Yes. Event Schedule is free forever for sharing your performance schedule, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.
+                    </p>
+                </details>
 
-                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I promote open mics, slams, and readings together?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 2" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Use sub-schedules to organize by event type - open mics, poetry slams, book readings, workshops, and featured sets. Each event can include descriptions, featured performer info, venue details, and signup information.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Yes. Use sub-schedules to organize by event type - open mics, poetry slams, book readings, workshops, and featured sets. Each event can include descriptions, featured performer info, venue details, and signup information.
+                    </p>
+                </details>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             How do poetry fans discover my events?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Fans can follow your schedule and receive email notifications when you add new events. Share your schedule link on social media, literary websites, or embed it on your personal site.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Fans can follow your schedule and receive email notifications when you add new events. Share your schedule link on social media, literary websites, or embed it on your personal site.
+                    </p>
+                </details>
 
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I sell tickets to featured shows?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 4" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Connect your Stripe account and sell tickets directly from your schedule. Set different prices for general admission and featured seating. Event Schedule charges zero platform fees.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Yes. Connect your Stripe account and sell tickets directly from your schedule. Set different prices for general admission and featured seating. Event Schedule charges zero platform fees.
+                    </p>
+                </details>
             </div>
         </div>
     </section>

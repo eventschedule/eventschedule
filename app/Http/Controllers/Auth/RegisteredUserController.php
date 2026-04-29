@@ -31,15 +31,52 @@ class RegisteredUserController extends Controller
      */
     public function create()
     {
+        // Preserve SMS token in session before any redirects so the login flow can use it
+        $smsToken = request('sms_token');
+        if (is_string($smsToken) && strlen($smsToken) > 0 && strlen($smsToken) <= 60) {
+            session(['sms_token' => $smsToken]);
+        }
+
         if (! config('app.hosted') && config('app.url') && ! config('app.is_testing') && User::exists()) {
             return redirect()->route('login');
         }
+
+        restore_pending_action();
 
         if (request()->has('lang') && is_valid_language_code(request('lang'))) {
             \App::setLocale(request('lang'));
         }
 
-        return view('auth.register');
+        $smsPhone = null;
+        $smsToken = session('sms_token');
+        if ($smsToken) {
+            $smsPhone = Cache::get('sms_signup_'.$smsToken);
+            if ($smsPhone) {
+                // Store in session so it survives Google OAuth redirect and validation failures
+                session(['sms_token' => $smsToken]);
+
+                // Check if a non-stub user with this phone already exists
+                $existingPhoneUser = User::where('phone', $smsPhone)
+                    ->where(function ($q) {
+                        $q->whereNotNull('password')
+                            ->orWhereNotNull('google_id')
+                            ->orWhereNotNull('google_oauth_id')
+                            ->orWhereNotNull('facebook_id');
+                    })->first();
+
+                if ($existingPhoneUser) {
+                    return redirect()->route('login')
+                        ->with('status', __('messages.account_exists_please_login'));
+                }
+            } else {
+                // Clear stale token from session
+                session()->forget('sms_token');
+            }
+        }
+
+        return view('auth.register', [
+            'smsPhone' => $smsPhone,
+        ]);
     }
 
     /**
@@ -82,7 +119,8 @@ class RegisteredUserController extends Controller
         // Check if email is already registered (allow stub users through)
         $existingUser = User::where('email', $email)->first();
         if ($existingUser) {
-            $isStub = is_null($existingUser->password) && is_null($existingUser->google_id) && is_null($existingUser->facebook_id);
+            $isStub = $existingUser->isStub();
+
             if (! $isStub) {
                 return response()->json([
                     'success' => false,
@@ -115,7 +153,7 @@ class RegisteredUserController extends Controller
         // Send notification to email (using a temporary user object for notification)
         $tempUser = new User;
         $tempUser->email = $email;
-        Notification::route('mail', $email)->notify(new SignupVerificationCode($code));
+        Notification::route('mail', $email)->notifyNow(new SignupVerificationCode($code));
 
         $response = [
             'success' => true,
@@ -243,8 +281,9 @@ class RegisteredUserController extends Controller
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
             'password' => ['required', 'string', 'min:8'],
-            'language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english'])))],
+            'language_code' => ['nullable', 'string', 'max:5'],
             'cf-turnstile-response' => [new ValidTurnstile],
+            'sms_token' => ['nullable', 'string', 'max:60'],
         ];
 
         // Add verification code validation for hosted mode only
@@ -267,6 +306,12 @@ class RegisteredUserController extends Controller
             }
         }
 
+        // Default to English if browser language is not supported
+        $languageCode = $request->language_code;
+        if (! $languageCode || ! array_key_exists($languageCode, config('app.supported_languages', ['en' => 'english']))) {
+            $languageCode = 'en';
+        }
+
         $utmParams = session('utm_params', []);
 
         // Fall back to cookie if session has no UTM data
@@ -278,7 +323,8 @@ class RegisteredUserController extends Controller
         $existingUser = User::where('email', $email)->first();
 
         if ($existingUser) {
-            $isStub = is_null($existingUser->password) && is_null($existingUser->google_id) && is_null($existingUser->facebook_id);
+            $isStub = $existingUser->isStub();
+
             if (! $isStub) {
                 throw ValidationException::withMessages([
                     'email' => [__('messages.email_already_registered')],
@@ -289,8 +335,8 @@ class RegisteredUserController extends Controller
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
                 'timezone' => $request->timezone ?? 'America/New_York',
-                'language_code' => $request->language_code ?? 'en',
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'language_code' => $languageCode,
+                'use_24_hour_time' => detect_24_hour_time($request->timezone, $languageCode),
                 'utm_source' => $utmParams['utm_source'] ?? null,
                 'utm_medium' => $utmParams['utm_medium'] ?? null,
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -303,11 +349,11 @@ class RegisteredUserController extends Controller
         } else {
             $user = User::create([
                 'name' => $request->name,
-                'email' => $request->email,
+                'email' => $email,
                 'password' => Hash::make($request->password),
                 'timezone' => $request->timezone ?? 'America/New_York',
-                'language_code' => $request->language_code ?? 'en',
-                'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'language_code' => $languageCode,
+                'use_24_hour_time' => detect_24_hour_time($request->timezone, $languageCode),
                 'utm_source' => $utmParams['utm_source'] ?? null,
                 'utm_medium' => $utmParams['utm_medium'] ?? null,
                 'utm_campaign' => $utmParams['utm_campaign'] ?? null,
@@ -347,6 +393,18 @@ class RegisteredUserController extends Controller
         if ((config('app.hosted') && ! config('app.is_testing')) || ! config('app.hosted') || config('app.is_testing')) {
             $user->email_verified_at = now();
             $user->save();
+        }
+
+        // Process SMS signup token - auto-verify phone and claim matching roles
+        $smsToken = $request->sms_token ?? session('sms_token');
+        if ($smsToken) {
+            $smsPhone = Cache::get('sms_signup_'.$smsToken);
+            if ($smsPhone) {
+                $user->claimRolesByPhone($smsPhone);
+                Cache::forget('sms_signup_'.$smsToken);
+            }
+            // Clean up session token (stored in create() for Google OAuth flow)
+            $request->session()->forget('sms_token');
         }
 
         event(new Registered($user));

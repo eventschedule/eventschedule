@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Feedback and Reviews | Collect Guest Opinions - Event Schedule</x-slot>
+    <x-slot name="title">Event Feedback & Reviews - Event Schedule</x-slot>
     <x-slot name="description">Collect feedback and reviews from event attendees. Guests leave star ratings and written reviews after events. Pro feature to understand your audience. No credit card required.</x-slot>
     <x-slot name="breadcrumbTitle">Event Feedback</x-slot>
 

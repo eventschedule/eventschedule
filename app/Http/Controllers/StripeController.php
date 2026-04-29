@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Sale;
 use App\Services\AuditService;
+use App\Services\EmailService;
 use App\Services\MetaAdsService;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
@@ -145,8 +146,10 @@ class StripeController extends Controller
                         break;
                     }
 
+                    $didTransitionToPaid = false;
+
                     // Use lockForUpdate to prevent race with the success redirect handler
-                    \DB::transaction(function () use ($sale, $paymentIntent) {
+                    \DB::transaction(function () use ($sale, $paymentIntent, &$didTransitionToPaid) {
                         $sale = Sale::lockForUpdate()->find($sale->id);
                         if ($sale->status === 'paid') {
                             return;
@@ -173,6 +176,9 @@ class StripeController extends Controller
                             $sale->transaction_reference = $paymentIntent->id;
                             $sale->save();
 
+                            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                                ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_amount_mismatch:event_id:'.$sale->event_id);
+
                             return;
                         }
 
@@ -180,14 +186,12 @@ class StripeController extends Controller
                         $sale->status = 'paid';
                         $sale->transaction_reference = $paymentIntent->id;
                         $sale->save();
+                        $didTransitionToPaid = true;
+
+                        AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                            ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                        if ($sale->group_id && $sale->isPrimarySale()) {
-                            $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                            for ($i = 0; $i < $guestCount; $i++) {
-                                AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                            }
-                        }
                         if ($sale->discount_amount > 0) {
                             AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
                         }
@@ -203,6 +207,10 @@ class StripeController extends Controller
                             }
                         }
                     });
+
+                    if ($didTransitionToPaid) {
+                        (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+                    }
                 }
                 break;
 
@@ -224,8 +232,10 @@ class StripeController extends Controller
                             break;
                         }
 
+                        $didTransitionToPaid = false;
+
                         // Use lockForUpdate to prevent race with the success redirect handler
-                        \DB::transaction(function () use ($sale, $session) {
+                        \DB::transaction(function () use ($sale, $session, &$didTransitionToPaid) {
                             $sale = Sale::lockForUpdate()->find($sale->id);
                             if ($sale->status === 'paid') {
                                 return;
@@ -252,6 +262,9 @@ class StripeController extends Controller
                                 $sale->transaction_reference = $session->payment_intent;
                                 $sale->save();
 
+                                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_checkout_amount_mismatch:event_id:'.$sale->event_id);
+
                                 return;
                             }
 
@@ -259,17 +272,15 @@ class StripeController extends Controller
                             $sale->status = 'paid';
                             $sale->transaction_reference = $session->payment_intent;
                             $sale->save();
+                            $didTransitionToPaid = true;
+
+                            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                                ['status' => 'unpaid'], ['status' => 'paid'], 'stripe_checkout:event_id:'.$sale->event_id);
 
                             UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 
                             // Record sale in analytics
                             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                                for ($i = 0; $i < $guestCount; $i++) {
-                                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                                }
-                            }
                             if ($sale->discount_amount > 0) {
                                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
                             }
@@ -284,6 +295,10 @@ class StripeController extends Controller
                                 }
                             }
                         });
+
+                        if ($didTransitionToPaid) {
+                            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+                        }
                     }
                 }
                 break;

@@ -22,11 +22,14 @@ class NewsletterEmail extends Mailable
 
     protected $renderedHtml;
 
-    public function __construct(Newsletter $newsletter, NewsletterRecipient $recipient, string $renderedHtml)
+    protected $processedBlocks;
+
+    public function __construct(Newsletter $newsletter, NewsletterRecipient $recipient, string $renderedHtml, array $processedBlocks = [])
     {
         $this->newsletter = $newsletter;
         $this->recipient = $recipient;
         $this->renderedHtml = $renderedHtml;
+        $this->processedBlocks = $processedBlocks;
     }
 
     public function envelope(): Envelope
@@ -45,10 +48,13 @@ class NewsletterEmail extends Mailable
             }
         }
 
+        $replyToAddress = ! empty($role?->email) ? $role->email : $fromAddress;
+        $replyToName = ! empty($role?->email) ? ($role->name ?: $fromName) : $fromName;
+
         return new Envelope(
             subject: $this->newsletter->subject,
             from: new Address($fromAddress, $fromName),
-            replyTo: [new Address($fromAddress, $fromName)],
+            replyTo: [new Address($replyToAddress, $replyToName)],
         );
     }
 
@@ -58,9 +64,7 @@ class NewsletterEmail extends Mailable
             \App\Models\Newsletter::defaultStyleSettings(),
             $this->newsletter->style_settings ?? []
         );
-        $newsletterService = app(\App\Services\NewsletterService::class);
         $role = $this->newsletter->role;
-        $blocks = $newsletterService->processBlocks($this->newsletter);
         $unsubscribeUrl = url('/nl/u/'.$this->recipient->token);
 
         return new Content(
@@ -72,7 +76,7 @@ class NewsletterEmail extends Mailable
                 'role' => $role,
                 'style' => $style,
                 'unsubscribeUrl' => $unsubscribeUrl,
-                'blocks' => $blocks,
+                'blocks' => $this->processedBlocks,
             ],
         );
     }

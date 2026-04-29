@@ -33,6 +33,12 @@
                         </div>
 
                         <div class="mb-6">
+                            <x-input-label for="phone" :value="__('messages.phone_number')" />
+                            <x-phone-input name="phone" :value="old('phone')" :country="$role->country_code ?? 'us'" />
+                            <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+                        </div>
+
+                        <div class="mb-6">
                             <x-input-label for="level" :value="__('messages.role')" />
                             <select id="level" name="level" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                 <option value="admin" {{ old('level', 'admin') == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>

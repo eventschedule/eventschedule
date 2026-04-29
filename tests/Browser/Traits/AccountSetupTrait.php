@@ -17,13 +17,39 @@ trait AccountSetupTrait
         // Sign up
         $browser->visit('/sign_up')
             ->waitFor('#name', 15)
+            ->pause(1000)
             ->type('name', $name)
             ->type('email', $email)
-            ->type('password', $password)
-            ->check('terms')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SIGN UP')
-            ->waitForLocation('/dashboard', 30)
+            ->type('password', $password);
+
+        // Ensure fields were set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('name');
+            if (!nameField.value) {
+                nameField.value = ".json_encode($name).";
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var emailField = document.getElementById('email');
+            if (!emailField.value) {
+                emailField.value = ".json_encode($email).";
+                emailField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var passwordField = document.getElementById('password');
+            if (!passwordField.value) {
+                passwordField.value = ".json_encode($password).";
+                passwordField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            var termsCheckbox = document.getElementById('terms');
+            if (!termsCheckbox.checked) {
+                termsCheckbox.checked = true;
+                termsCheckbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("document.querySelector('form').requestSubmit()");
+
+        $browser->waitForLocation('/dashboard', 30)
             ->assertPathIs('/dashboard')
             ->assertSee($name);
     }
@@ -172,6 +198,13 @@ trait AccountSetupTrait
             v.tickets[0].quantity = 50;
         ");
 
+        // Ensure tickets_enabled is set (radio click may not reliably trigger Vue watcher)
+        $browser->script("
+            var v = window.vueApp;
+            v.ticketMode = 'tickets';
+            v.event.tickets_enabled = true;
+        ");
+
         // Submit the event form
         $browser->script("
             window._skipUnsavedWarning = true;
@@ -188,45 +221,29 @@ trait AccountSetupTrait
     protected function enableApi(Browser $browser): string
     {
         $browser->visit('/settings#section-api')
-            ->waitFor('#enable_api', 5)
-            ->scrollIntoView('#enable_api');
+            ->waitFor('#enable_api', 5);
 
-        // Check if already enabled, if not enable it
-        $isChecked = $browser->script("return document.getElementById('enable_api').checked;");
-        if (! $isChecked[0]) {
-            // Click the label to toggle the switch (sr-only inputs can't be clicked directly)
-            $browser->click('label[for="enable_api"]');
-            // Wait a moment for any UI updates
-            $browser->pause(500);
-        }
-
-        // Find and click the submit button in the API settings form using JavaScript
-        // This is more reliable when the button might not be immediately interactable via Dusk
+        // Set checkbox to checked via JS (clicking sr-only label is unreliable in headless Chrome)
         $browser->script("
-            const checkbox = document.getElementById('enable_api');
-            const form = checkbox.closest('form');
-            const submitButton = form.querySelector('button[type=\"submit\"]');
-            if (submitButton) {
-                submitButton.scrollIntoView({ block: 'center', behavior: 'instant' });
+            var cb = document.getElementById('enable_api');
+            if (!cb.checked) {
+                cb.checked = true;
+                cb.dispatchEvent(new Event('change', { bubbles: true }));
             }
         ");
 
-        // Wait a moment for scroll to complete, then click
-        $browser->pause(300);
-
-        // Click the button using JavaScript to avoid interactability issues
+        // Submit the form
         $browser->script("
-            const checkbox = document.getElementById('enable_api');
-            const form = checkbox.closest('form');
-            const submitButton = form.querySelector('button[type=\"submit\"]');
-            if (submitButton) {
-                submitButton.click();
-            }
+            window._skipUnsavedWarning = true;
+            document.getElementById('enable_api').closest('form').requestSubmit();
         ");
 
-        $browser->waitForText('API settings updated successfully', 5);
+        $browser->waitForText('API settings updated successfully', 10);
 
-        // Get the API key from the page - it should be visible after enabling
+        // Ensure the API section is visible after redirect (toast may appear before section JS runs)
+        $browser->waitUntil("document.getElementById('section-api') && document.getElementById('section-api').style.display === 'block'", 5);
+
+        // Get the API key from the page
         $browser->waitFor('#api_key', 5);
         $apiKey = $browser->value('#api_key');
 

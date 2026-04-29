@@ -7,6 +7,7 @@ use App\Rules\ValidTurnstile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
@@ -31,10 +32,20 @@ class PasswordResetLinkController extends Controller
             'cf-turnstile-response' => [new ValidTurnstile],
         ]);
 
-        // Delete existing password reset token
-        \DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        // Per-email rate limit: at most 3 reset emails per 10 minutes for a
+        // given address. Complements the existing per-IP throttle and blunts
+        // targeted flooding of a single victim's inbox. Silently swallow the
+        // attempt when hit so we don't leak which addresses are targeted.
+        $emailKey = 'password-reset-email:'.strtolower((string) $request->email);
+        if (RateLimiter::tooManyAttempts($emailKey, 3)) {
+            return back()->with('status', __('passwords.sent'));
+        }
+        RateLimiter::hit($emailKey, 600);
 
-        // Send reset link - silently handles non-existent or unverified emails
+        // Send reset link - silently handles non-existent or unverified emails.
+        // Password::sendResetLink() already upserts the token row, so there is
+        // no need to delete the existing row first (and doing so would widen an
+        // enumeration timing window).
         Password::sendResetLink(
             $request->only('email')
         );

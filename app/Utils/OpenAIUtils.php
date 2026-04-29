@@ -10,7 +10,7 @@ class OpenAIUtils
      *
      * @return array|null Parsed response data or null on failure
      */
-    public static function sendTextRequest($prompt, $imageData = null, $purpose = 'content')
+    public static function sendTextRequest($prompt, $imageData = null, $purpose = 'content', $options = [])
     {
         $apiKey = config('services.openai.api_key');
         if (! $apiKey) {
@@ -45,7 +45,7 @@ class OpenAIUtils
         $messages[] = ['role' => 'user', 'content' => $content];
 
         $data = [
-            'model' => config('services.openai.'.($purpose === 'translation' ? 'translation_model' : 'content_model'), 'gpt-4o'),
+            'model' => ! empty($options['model']) ? $options['model'] : config('services.openai.'.($purpose === 'translation' ? 'translation_model' : 'content_model'), 'gpt-4o'),
             'messages' => $messages,
             'response_format' => ['type' => 'json_object'],
         ];
@@ -64,7 +64,7 @@ class OpenAIUtils
             ],
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 55,
+            CURLOPT_TIMEOUT => $options['timeout'] ?? 55,
         ]);
 
         $response = curl_exec($ch);
@@ -208,6 +208,10 @@ class OpenAIUtils
         curl_close($ch);
 
         if ($curlErrno === CURLE_OPERATION_TIMEDOUT) {
+            \Log::warning('OpenAI image generation request timed out', [
+                'prompt_preview' => substr($prompt, 0, 100),
+            ]);
+
             $exception = new \Exception('OpenAI API request timed out');
 
             \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $prompt): void {
@@ -322,6 +326,10 @@ class OpenAIUtils
 
                 // Rate limit
                 if ($httpCode === 429) {
+                    \Log::warning('OpenAI image generation rate limited', [
+                        'error' => $errorMessage,
+                    ]);
+
                     $exception = new \Exception('OpenAI API rate limit exceeded: '.$errorMessage);
 
                     \Sentry\withScope(function (\Sentry\State\Scope $scope) use ($exception, $httpCode, $response, $prompt): void {

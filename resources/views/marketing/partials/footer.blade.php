@@ -33,11 +33,6 @@
                             Replace
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ marketing_url('/features/integrations') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            Integrations
-                        </a>
-                    </li>
                 </ul>
             </div>
 

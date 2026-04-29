@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule - Plan, Promote & Share Event Calendars</x-slot>
-    <x-slot name="description">Create professional event calendars, sell tickets with no platform fees, and check in attendees with QR codes. Free for venues, performers, and communities.</x-slot>
+    <x-slot name="title">{{ __('marketing.home_title') }}</x-slot>
+    <x-slot name="description">{{ __('marketing.home_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
     <style {!! nonce_attr() !!}>
         /* Homepage-specific animations (not shared across pages) */
@@ -51,34 +51,22 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "HowTo",
-        "name": "How to share your event schedule",
-        "description": "Get your event schedule live and shared with your audience in three simple steps.",
-        "step": [
-            {
-                "@type": "HowToStep",
-                "position": 1,
-                "name": "Create your schedule",
-                "text": "Sign up free. Add your events manually or import from Google Calendar."
-            },
-            {
-                "@type": "HowToStep",
-                "position": 2,
-                "name": "Share your link",
-                "text": "Get your custom URL. Put it in your bio, website, or anywhere you want."
-            },
-            {
-                "@type": "HowToStep",
-                "position": 3,
-                "name": "Grow your audience",
-                "text": "Fans follow your schedule. Send them newsletters and notify them when you add new events."
-            }
-        ]
-    }
-    </script>
+    <x-seo.howto-schema
+        name="How to share your event schedule"
+        description="Get your event schedule live and shared with your audience in three simple steps."
+        :steps="[
+            ['name' => 'Create your schedule', 'text' => 'Sign up free. Add your events manually or import from Google Calendar.'],
+            ['name' => 'Share your link', 'text' => 'Get your custom URL. Put it in your bio, website, or anywhere you want.'],
+            ['name' => 'Grow your audience', 'text' => 'Fans follow your schedule. Send them newsletters and notify them when you add new events.'],
+        ]"
+    />
+    <x-seo.faq-schema :items="[
+        ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules. Pro and Enterprise plans add features like ticketing, event boosting, custom branding, and AI tools.'],
+        ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, you can sell tickets with zero platform fees using Stripe or Invoice Ninja. Tickets include QR codes for check-in, and you can create multiple ticket types with promo codes.'],
+        ['q' => 'Does Event Schedule sync with Google Calendar?', 'a' => 'Yes, Event Schedule offers two-way Google Calendar sync with real-time webhook updates. You can also sync with any CalDAV-compatible calendar server.'],
+        ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com.'],
+        ['q' => 'Who is Event Schedule for?', 'a' => 'Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience.'],
+    ]" />
     </x-slot>
 
     <!-- Hero Section - Stacked layout with large video -->

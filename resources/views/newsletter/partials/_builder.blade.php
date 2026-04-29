@@ -1,5 +1,6 @@
 @php
 $isAdmin = $isAdmin ?? false;
+$isTemplateMode = $isTemplateMode ?? false;
 
 $templateDefaults = [
     'modern' => \App\Models\Newsletter::templateDefaults('modern'),
@@ -66,11 +67,15 @@ if (isset($newsletter) && $newsletter->exists) {
 if ($isAdmin) {
     $routesData = [
         'manage_segments' => route('admin.newsletters.segments'),
+        'upload_image' => route('admin.newsletters.upload_image'),
     ];
     if (isset($newsletter) && $newsletter->exists) {
         $routesData['test_send'] = route('admin.newsletters.test_send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['schedule'] = route('admin.newsletters.schedule', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['send'] = route('admin.newsletters.send', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        if (!$isTemplateMode) {
+            $routesData['save_as_template'] = route('admin.newsletters.save_as_template', ['hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        }
     }
 
     $previewUrl = isset($newsletter) && $newsletter->exists
@@ -79,11 +84,15 @@ if ($isAdmin) {
 } else {
     $routesData = [
         'manage_segments' => route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
+        'upload_image' => route('newsletter.upload_image', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]),
     ];
     if (isset($newsletter) && $newsletter->exists) {
         $routesData['test_send'] = route('newsletter.test_send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['schedule'] = route('newsletter.schedule', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
         $routesData['send'] = route('newsletter.send', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        if (!$isTemplateMode) {
+            $routesData['save_as_template'] = route('newsletter.save_as_template', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($newsletter->id)]);
+        }
     }
 
     $previewUrl = isset($newsletter) && $newsletter->exists
@@ -115,9 +124,11 @@ $builderProps = [
     'roleEmail' => $isAdmin ? (auth()->user()->email ?? '') : ($role->email ?? ''),
     'roleName' => $isAdmin ? config('app.name') : ($role->name ?? ''),
     'abTestHtml' => $abTestHtml,
+    'isTemplateMode' => $isTemplateMode,
+    'canUploadImages' => $isAdmin || (isset($role) && $role->isPro()),
     'availableBlockTypes' => $isAdmin
         ? ['heading', 'text', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'offer']
-        : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner'],
+        : ['heading', 'text', 'events', 'button', 'image', 'video', 'divider', 'spacer', 'social_links', 'quote', 'profile_image', 'header_banner', 'sponsors', 'poll'],
     'translations' => [
         'add_block' => __('messages.add_block'),
         'blocks' => __('messages.blocks'),
@@ -161,7 +172,14 @@ $builderProps = [
         'spacer_height' => __('messages.spacer_height'),
         'image_url' => __('messages.image_url'),
         'image_alt' => __('messages.image_alt'),
+        'image_caption' => __('messages.image_caption'),
+        'image_link' => __('messages.image_link'),
         'width' => __('messages.width'),
+        'layout' => __('messages.layout'),
+        'layout_column' => __('messages.layout_column'),
+        'layout_row' => __('messages.layout_row'),
+        'layout_grid' => __('messages.layout_grid'),
+        'add_image' => __('messages.add_image'),
         'platform' => __('messages.platform'),
         'add_link' => __('messages.add_link'),
         'auto_populated_from_schedule' => __('messages.auto_populated_from_schedule'),
@@ -170,6 +188,8 @@ $builderProps = [
         'remove_block' => __('messages.remove_block'),
         'profile_image' => __('messages.profile_image'),
         'header_image' => __('messages.header_image'),
+        'image' => __('messages.image'),
+        'images' => __('messages.images'),
         'links' => __('messages.links'),
         'background_color' => __('messages.background_color'),
         'accent_color' => __('messages.accent_color'),
@@ -216,6 +236,21 @@ $builderProps = [
         'quote_text' => __('messages.quote_text'),
         'quote_author' => __('messages.quote_author'),
         'quote_author_title' => __('messages.quote_author_title'),
+        'save_as_template' => __('messages.save_as_template'),
+        'template_name' => __('messages.template_name'),
+        'template_name_placeholder' => __('messages.template_name_placeholder'),
+        'upload_image' => __('messages.upload_image'),
+        'or_enter_url' => __('messages.or_enter_url'),
+        'uploading' => __('messages.uploading'),
+        'choose_file' => __('messages.choose_file'),
+        'error_uploading_image' => __('messages.error_uploading_image'),
+        'block_sponsors' => __('messages.block_sponsors'),
+        'block_poll' => __('messages.block_poll'),
+        'sponsor_source' => __('messages.sponsor_source'),
+        'sponsor_source_schedule' => __('messages.sponsor_source_schedule'),
+        'sponsor_source_first_event' => __('messages.sponsor_source_first_event'),
+        'sponsor_source_help' => __('messages.sponsor_source_help'),
+        'poll_auto_description' => __('messages.poll_auto_description'),
     ],
 ];
 @endphp

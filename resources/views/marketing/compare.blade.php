@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule vs Eventbrite, Luma, Ticket Tailor & Google Calendar | Comparison</x-slot>
-    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, and Google Calendar. See how our 0% platform fees, open source platform, and AI features stack up.</x-slot>
+    <x-slot name="title">Compare Event Schedule | vs Eventbrite, Luma, Meetup & 13 More</x-slot>
+    <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, Google Calendar, Meetup, and 11 more platforms. Feature-by-feature comparisons, fee calculator, and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 
     <x-slot name="structuredData">
@@ -8,8 +8,8 @@
     {
         "@context": "https://schema.org",
         "@type": ["WebPage", "ItemPage"],
-        "name": "Event Schedule vs Eventbrite, Luma, Ticket Tailor & Google Calendar",
-        "description": "Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, and Google Calendar. See how our 0% platform fees, open source platform, and AI features stack up.",
+        "name": "Compare Event Schedule with 16+ Event Platforms",
+        "description": "Compare Event Schedule with Eventbrite, Luma, Ticket Tailor, Google Calendar, Meetup, and 11 more platforms. Feature-by-feature comparisons, fee calculator, and zero platform fees.",
         "url": "{{ config('app.url') }}/compare",
         "mainEntity": {
             "@type": "SoftwareApplication",
@@ -17,6 +17,54 @@
             "applicationCategory": "BusinessApplication",
             "operatingSystem": ["Web", "Android", "iOS"]
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How does Event Schedule pricing compare to other platforms?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Event Schedule starts at $5/month for Pro with zero platform fees. Competitors like Eventbrite charge 3.7% + $1.79 per ticket, Luma charges 5% or $59/month, and Ticket Tailor charges per-ticket fees. You only pay standard Stripe processing (2.9% + $0.30)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Event Schedule charge platform fees on ticket sales?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. Event Schedule charges zero platform fees at every plan level. You keep 100% of your ticket revenue minus standard Stripe payment processing fees (2.9% + $0.30 per transaction)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I import events from other platforms to Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Event Schedule supports auto-import from Eventbrite, transferring event details, ticket types, venues, and images automatically. For other platforms, you can use AI event parsing to paste event details in any format and have them extracted automatically."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is Event Schedule open source?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Event Schedule is fully open source and can be selfhosted on your own server. No other major event platform in this comparison offers both open source code and a selfhosting option."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What features does Event Schedule have that competitors don't?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Event Schedule uniquely offers AI event parsing and flyer generation, two-way Google Calendar and CalDAV sync, automatic event graphics generation, sub-schedules for organizing events, fan videos and comments, carpool matching, and WhatsApp event creation. It is also the only platform in its class that is fully open source with a selfhosting option."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -143,64 +191,6 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/5">
-                        @php
-                            $sections = [
-                                'Pricing & Fees' => [
-                                    ['Free plan', 'Yes (forever)', 'Free to publish events', 'Yes (forever)', 'Free events only', 'Yes (forever)'],
-                                    ['Paid plan price', 'From $5/mo (7-day free trial)', 'Free (fees on tickets)', '$59/mo', 'From $0.28/ticket', 'Free'],
-                                    ['Platform fees', '0%', '3.7% + $1.79/ticket', '5% (free plan), 0% (Plus)', '$0.28-$0.60/ticket', 'N/A (no ticketing)'],
-                                    ['Payment processing', 'Stripe (2.9% + $0.30)', 'Built-in (included above)', 'Stripe (2.9% + $0.30)', 'Stripe/PayPal/Square', 'No'],
-                                ],
-                                'Events & Ticketing' => [
-                                    ['Ticketing', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
-                                    ['QR check-ins', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
-                                    ['Ticket waitlist', 'Yes (Pro)', 'Yes', 'Yes', 'No', 'No'],
-                                    ['Check-in dashboard', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
-                                    ['Sale notifications', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
-                                    ['Sales data export', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
-                                    ['Online events', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
-                                    ['Free event RSVP', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
-                                    ['Recurring events', 'Yes (Free)', 'Yes', 'Yes', 'No', 'Yes'],
-                                    ['Event polls', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
-                                    ['Promo/discount codes', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
-                                    ['Post-event feedback', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
-                                    ['Embed ticket widget', 'Yes (Pro)', 'Yes', 'No', 'Yes', 'No'],
-                                    ['Individual tickets', 'Yes (Pro)', 'Yes', 'No', 'No', 'No'],
-                                ],
-                                'Integrations' => [
-                                    ['Google Calendar sync', 'Yes (Free)', 'No native 2-way sync', 'Yes', 'No', 'N/A'],
-                                    ['CalDAV sync', 'Yes (Free)', 'No', 'No', 'No', 'No'],
-                                    ['Newsletters', 'Yes (Free)', 'Yes', 'Yes', 'No', 'No'],
-                                    ['Embed calendar on website', 'Yes (Free)', 'Yes', 'No', 'Yes', 'Yes (limited styling)'],
-                                ],
-                                'Customization' => [
-                                    ['Custom domains', 'Yes (Enterprise)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
-                                    ['Remove branding', 'Yes (Pro)', 'No', 'Yes (Plus)', 'Yes (paid)', 'No'],
-                                    ['Custom fields', 'Yes (Pro)', 'Yes', 'Yes', 'Yes', 'No'],
-                                    ['Built-in analytics', 'Yes (Free)', 'Yes', 'Yes', 'Yes', 'No'],
-                                ],
-                                'Unique Features' => [
-                                    ['AI event parsing, agenda scanning & flyer generation', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
-                                    ['Event graphics gen', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
-                                    ['Sub-schedules', 'Yes (Free)', 'No', 'No', 'No', 'Multiple calendars'],
-                                    ['Fan videos & comments', 'Yes (Free)', 'No', 'No', 'No', 'No'],
-                                    ['Event boost (ads)', 'Yes (Pro)', 'Yes (paid)', 'No', 'No', 'No'],
-                                    ['Team collaboration', '1 member (Free), multiple (Enterprise)', 'Yes', '3 admins (free), 5 (Plus)', 'Yes', 'Yes'],
-                                    ['Private/password-protected events', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
-                                    ['Availability management', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
-                                    ['WhatsApp event creation', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
-                                    ['Email scheduling', 'Yes (Enterprise)', 'No', 'No', 'No', 'No'],
-                                    ['Carpool matching', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
-                                    ['Sponsor/partner logos', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
-                                ],
-                                'Platform' => [
-                                    ['REST API', 'Yes (Pro)', 'Yes', 'Yes (Plus)', 'Yes', 'Yes'],
-                                    ['Webhooks', 'Yes (Pro)', 'No', 'No', 'No', 'No'],
-                                    ['Open source', 'Yes', 'No', 'No', 'No', 'No'],
-                                    ['Selfhosting', 'Yes', 'No', 'No', 'No', 'No'],
-                                ],
-                            ];
-                        @endphp
                         @foreach ($sections as $sectionName => $rows)
                             <tr class="section-header">
                                 <td class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -248,19 +238,7 @@
             </div>
 
             <!-- Fee Calculator -->
-            <div class="mt-16" x-data="{
-                price: 10,
-                tickets: 100,
-                get revenue() { return this.price * this.tickets },
-                get esTotal() { return 5 + (this.revenue * 0.029) + (this.tickets * 0.30) },
-                get ebTotal() { return (this.revenue * 0.037) + (this.tickets * 1.79) },
-                get lumaFree() { return (this.revenue * 0.05) + (this.revenue * 0.029) + (this.tickets * 0.30) },
-                get lumaPlus() { return 59 + (this.revenue * 0.029) + (this.tickets * 0.30) },
-                get lumaTotal() { return Math.min(this.lumaFree, this.lumaPlus) },
-                get lumaIsFree() { return this.lumaFree <= this.lumaPlus },
-                get ttTotal() { return (this.tickets * 0.41) + (this.revenue * 0.029) + (this.tickets * 0.30) },
-                fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
-            }">
+            <div id="fee-calculator" class="mt-16">
                 <div class="text-center mb-8">
                     <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">Fee Calculator</h3>
                     <p class="text-gray-500 dark:text-gray-400">See how much you'd pay each month on each platform.</p>
@@ -272,12 +250,12 @@
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Ticket price</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">$</span>
-                            <input type="number" x-model.number="price" min="1" max="10000" class="w-28 pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
+                            <input type="number" v-model.number="price" min="1" max="10000" class="w-28 pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Tickets per month</label>
-                        <input type="number" x-model.number="tickets" min="1" max="100000" class="w-28 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
+                        <input type="number" v-model.number="tickets" min="1" max="100000" class="w-28 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
                     </div>
                 </div>
 
@@ -287,32 +265,44 @@
                     <div class="relative rounded-2xl border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-500/5 p-6">
                         <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold whitespace-nowrap">Best value</span>
                         <div class="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">Event Schedule</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(esTotal)"></div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(esTotal)"></div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">$5/mo + Stripe fees</div>
                     </div>
 
                     <!-- Eventbrite -->
                     <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
                         <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Eventbrite</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(ebTotal)"></div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(ebTotal)"></div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">3.7% + $1.79/ticket</div>
                     </div>
 
                     <!-- Luma -->
                     <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
                         <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Luma</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(lumaTotal)"></div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(lumaTotal)"></div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">
-                            <span x-show="lumaIsFree">Free plan (5% + Stripe)</span>
-                            <span x-show="!lumaIsFree">Plus plan ($59/mo + Stripe)</span>
+                            <span v-show="lumaIsFree">Free plan (5% + Stripe)</span>
+                            <span v-show="!lumaIsFree">Plus plan ($59/mo + Stripe)</span>
                         </div>
                     </div>
 
                     <!-- Ticket Tailor -->
                     <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
                         <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Ticket Tailor</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" x-text="fmt(ttTotal)"></div>
+                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(ttTotal)"></div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">~$0.41/ticket + Stripe fees</div>
+                    </div>
+                </div>
+
+                <!-- Savings Summary -->
+                <div v-show="maxSavings > 0" class="mt-6 text-center">
+                    <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                            You save up to <span class="font-bold" v-text="fmt(maxSavings)"></span>/month with Event Schedule
+                        </span>
                     </div>
                 </div>
 
@@ -320,6 +310,34 @@
                     Stripe fees (2.9% + $0.30/ticket) apply to Event Schedule, Luma, and Ticket Tailor. Eventbrite includes payment processing in their fees.
                 </p>
             </div>
+            <script {!! nonce_attr() !!}>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.Vue) {
+                    window.Vue.createApp({
+                        data() {
+                            return {
+                                price: 10,
+                                tickets: 100,
+                            };
+                        },
+                        computed: {
+                            revenue() { return this.price * this.tickets; },
+                            esTotal() { return 5 + (this.revenue * 0.029) + (this.tickets * 0.30); },
+                            ebTotal() { return (this.revenue * 0.037) + (this.tickets * 1.79); },
+                            lumaFree() { return (this.revenue * 0.05) + (this.revenue * 0.029) + (this.tickets * 0.30); },
+                            lumaPlus() { return 59 + (this.revenue * 0.029) + (this.tickets * 0.30); },
+                            lumaTotal() { return Math.min(this.lumaFree, this.lumaPlus); },
+                            lumaIsFree() { return this.lumaFree <= this.lumaPlus; },
+                            ttTotal() { return (this.tickets * 0.41) + (this.revenue * 0.029) + (this.tickets * 0.30); },
+                            maxSavings() { return Math.max(this.ebTotal - this.esTotal, this.lumaTotal - this.esTotal, this.ttTotal - this.esTotal); },
+                        },
+                        methods: {
+                            fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); },
+                        },
+                    }).mount('#fee-calculator');
+                }
+            });
+            </script>
         </div>
     </section>
 
@@ -632,6 +650,116 @@
                     <p class="text-gray-600 dark:text-gray-400">Generate shareable event graphics automatically. No design skills required, unique to Event Schedule.</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Transition -->
+    <div class="section-fade-to-white h-24"></div>
+
+    <!-- FAQ Section -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Common questions about Event Schedule and how it compares.
+                </p>
+            </div>
+
+            <div id="compare-faq" class="space-y-4">
+                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How does Event Schedule pricing compare to other platforms?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div v-show="open === 1" class="faq-answer">
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Event Schedule starts at $5/month for Pro with zero platform fees. Competitors like Eventbrite charge 3.7% + $1.79 per ticket, Luma charges 5% or $59/month, and Ticket Tailor charges per-ticket fees. You only pay standard Stripe processing (2.9% + $0.30).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Does Event Schedule charge platform fees on ticket sales?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div v-show="open === 2" class="faq-answer">
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            No. Event Schedule charges zero platform fees at every plan level. You keep 100% of your ticket revenue minus standard Stripe payment processing fees (2.9% + $0.30 per transaction).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I import events from other platforms to Event Schedule?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div v-show="open === 3" class="faq-answer">
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Event Schedule supports auto-import from Eventbrite, transferring event details, ticket types, venues, and images automatically. For other platforms, you can use AI event parsing to paste event details in any format and have them extracted automatically.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is Event Schedule open source?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div v-show="open === 4" class="faq-answer">
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes. Event Schedule is fully open source and can be selfhosted on your own server. No other major event platform in this comparison offers both open source code and a selfhosting option.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            What features does Event Schedule have that competitors don't?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div v-show="open === 5" class="faq-answer">
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Event Schedule uniquely offers AI event parsing and flyer generation, two-way Google Calendar and CalDAV sync, automatic event graphics generation, sub-schedules for organizing events, fan videos and comments, carpool matching, and WhatsApp event creation. It is also the only platform in its class that is fully open source with a selfhosting option.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <script {!! nonce_attr() !!}>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.Vue) {
+                    window.Vue.createApp({
+                        data() {
+                            return { open: null };
+                        }
+                    }).mount('#compare-faq');
+                }
+            });
+            </script>
         </div>
     </section>
 

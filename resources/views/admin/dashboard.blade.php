@@ -91,20 +91,19 @@
             </x-stat-panel>
         </div>
 
-        {{-- Boost & Newsletter Stats --}}
+        {{-- Boost & Revenue Stats --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <x-stat-panel label="{{ __('messages.stripe_paid') }}" color="green">
                 {{ number_format($stripePaidCount) }}
+            </x-stat-panel>
+            <x-stat-panel label="ARR" color="green">
+                ${{ number_format($arr, 2) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.active_boost_campaigns') }}">
                 {{ number_format($activeBoostCampaigns) }}
             </x-stat-panel>
             <x-stat-panel label="{{ __('messages.boost_markup_revenue') }}" color="green">
                 ${{ number_format($boostMarkupRevenue, 2) }}
-                <x-slot:subtitle>@lang('messages.in_period')</x-slot:subtitle>
-            </x-stat-panel>
-            <x-stat-panel label="{{ __('messages.newsletter_subscribers') }}">
-                {{ number_format($newsletterSubscribers) }}
             </x-stat-panel>
         </div>
 
@@ -158,10 +157,16 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse ($recentSignups as $signup)
+                            @php($src = $signup->getSignupSourceDisplay())
                             <tr>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ $signup->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $signup->created_at->diffForHumans() }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm" @if($src['landing']) title="{{ $src['landing'] }}" @endif>
+                                    <div class="text-gray-900 dark:text-white">{{ $src['primary'] }}</div>
+                                    @if($src['secondary'])
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ Str::limit($src['secondary'], 60) }}</div>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>

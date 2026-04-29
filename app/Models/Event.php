@@ -23,6 +23,7 @@ class Event extends Model
         'event_url',
         'event_password',
         'is_private',
+        'is_draft',
         'name',
         'name_en',
         'slug',
@@ -72,6 +73,7 @@ class Event extends Model
     protected $casts = [
         'duration' => 'float',
         'is_private' => 'boolean',
+        'is_draft' => 'boolean',
         'rsvp_enabled' => 'boolean',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
@@ -245,6 +247,15 @@ class Event extends Model
                     $user = $role->user;
                     if ($user && $user->google_token) {
                         SyncEventToGoogleCalendar::dispatchSync($event, $role, 'delete');
+                    }
+                }
+
+                // Delete from member Google Calendars
+                foreach ($role->getMembersWithCalendarSync() as $member) {
+                    if ($member->google_token) {
+                        SyncEventToGoogleCalendar::dispatchSync(
+                            $event, $role, 'delete', $member, $member->pivot->google_calendar_id
+                        );
                     }
                 }
 
@@ -468,13 +479,15 @@ class Event extends Model
         return $this->hasMany(CarpoolOffer::class);
     }
 
-    public function isFeedbackEnabled()
+    public function isFeedbackEnabled(?Role $role = null)
     {
         if (! is_null($this->feedback_enabled)) {
             return (bool) $this->feedback_enabled;
         }
 
-        $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+        if (! $role) {
+            $role = $this->roles->first(fn ($role) => $role->isTalent()) ?? $this->roles->first();
+        }
 
         return $role ? (bool) $role->feedback_enabled : false;
     }
@@ -699,14 +712,14 @@ class Event extends Model
         return $value;
     }
 
-    public function scopeInMonth($query, $startOfMonthUtc)
+    public function scopeInMonth($query, $gridStartUtc)
     {
-        return $query->where(function ($q) use ($startOfMonthUtc) {
-            $q->where('starts_at', '>=', $startOfMonthUtc)
+        return $query->where(function ($q) use ($gridStartUtc) {
+            $q->where('starts_at', '>=', $gridStartUtc)
                 ->orWhereNotNull('days_of_week')
-                ->orWhere(function ($q2) use ($startOfMonthUtc) {
+                ->orWhere(function ($q2) use ($gridStartUtc) {
                     $q2->where('duration', '>=', 24)
-                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$startOfMonthUtc]);
+                        ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [$gridStartUtc]);
                 });
         });
     }
@@ -1376,11 +1389,13 @@ class Event extends Model
         return $url;
     }
 
-    public function getStartDateTime($date = null, $locale = false)
+    public function getStartDateTime($date = null, $locale = false, $timezoneOverride = null)
     {
         $timezone = 'UTC';
 
-        if ($user = auth()->user()) {
+        if ($timezoneOverride) {
+            $timezone = $timezoneOverride;
+        } elseif ($user = auth()->user()) {
             $timezone = $user->timezone;
         } elseif ($this->creatorRole) {
             $timezone = $this->creatorRole->timezone;
@@ -1598,6 +1613,7 @@ class Event extends Model
         $data->category_id = $this->category_id;
         $data->category_name = $this->category_id ? (config('app.event_categories')[$this->category_id] ?? null) : null;
         $data->is_private = (bool) $this->is_private;
+        $data->is_draft = (bool) $this->is_draft;
         $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;
@@ -1779,39 +1795,48 @@ class Event extends Model
     }
 
     /**
-     * Get Google event ID for a specific role
+     * Get Google event ID for a specific role (uses owner's sync record)
      */
     public function getGoogleEventIdForRole($roleId)
     {
-        $eventRole = $this->roles->first(function ($role) use ($roleId) {
+        $role = $this->roles->first(function ($role) use ($roleId) {
             return $role->id == $roleId;
         });
 
-        return $eventRole ? $eventRole->pivot->google_event_id : null;
+        if (! $role) {
+            return null;
+        }
+
+        return CalendarSync::where('user_id', $role->user_id)
+            ->where('event_id', $this->id)
+            ->where('role_id', $roleId)
+            ->first()?->google_event_id;
     }
 
     /**
-     * Set Google event ID for a specific role
-     *
-     * @return bool True if the pivot was updated, false if not found
+     * Set Google event ID for a specific role (uses owner's sync record)
      */
     public function setGoogleEventIdForRole($roleId, $googleEventId)
     {
-        // Check if the pivot exists before updating
-        $exists = $this->roles()->where('roles.id', $roleId)->exists();
-        if (! $exists) {
-            \Log::warning('Cannot set Google event ID: pivot record does not exist', [
-                'event_id' => $this->id,
-                'role_id' => $roleId,
-                'google_event_id' => $googleEventId,
-            ]);
+        $role = $this->roles->first(function ($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
 
-            return false;
+        if (! $role) {
+            return;
         }
 
-        $this->roles()->updateExistingPivot($roleId, ['google_event_id' => $googleEventId]);
-
-        return true;
+        if ($googleEventId) {
+            CalendarSync::updateOrCreate(
+                ['user_id' => $role->user_id, 'event_id' => $this->id, 'role_id' => $roleId],
+                ['google_event_id' => $googleEventId]
+            );
+        } else {
+            CalendarSync::where('user_id', $role->user_id)
+                ->where('event_id', $this->id)
+                ->where('role_id', $roleId)
+                ->delete();
+        }
     }
 
     /**
@@ -1845,11 +1870,23 @@ class Event extends Model
      */
     public function syncToGoogleCalendar($action = 'create')
     {
+        // Owner sync
         foreach ($this->roles as $role) {
             if ($role->syncsToGoogle()) {
                 $user = $role->user;
                 if ($user && $user->google_token) {
                     SyncEventToGoogleCalendar::dispatchSync($this, $role, $action);
+                }
+            }
+        }
+
+        // Member sync (admins/followers with personal calendar sync enabled)
+        foreach ($this->roles as $role) {
+            foreach ($role->getMembersWithCalendarSync() as $member) {
+                if ($member->google_token) {
+                    SyncEventToGoogleCalendar::dispatchSync(
+                        $this, $role, $action, $member, $member->pivot->google_calendar_id
+                    );
                 }
             }
         }
@@ -1902,9 +1939,9 @@ class Event extends Model
     /**
      * Get end date/time for the event
      */
-    public function getEndDateTime($date = null, $locale = false)
+    public function getEndDateTime($date = null, $locale = false, $timezoneOverride = null)
     {
-        $startAt = $this->getStartDateTime($date, $locale);
+        $startAt = $this->getStartDateTime($date, $locale, $timezoneOverride);
         $duration = $this->duration > 0 ? $this->duration : 2; // Default to 2 hours if no duration
 
         return $startAt->copy()->addHours($duration);

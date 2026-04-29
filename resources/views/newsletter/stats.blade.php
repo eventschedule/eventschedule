@@ -105,7 +105,7 @@
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.email') }}</x-sortable-header>
+                        <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.name') }}</x-sortable-header>
                         <x-sortable-header column="status" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.status') }}</x-sortable-header>
                         <x-sortable-header column="opened_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.opened') }}</x-sortable-header>
                         <x-sortable-header column="clicked_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.clicked') }}</x-sortable-header>
@@ -114,7 +114,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @forelse ($recipients as $recipient)
                     <tr>
-                        <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $recipient->email }}</td>
+                        <td class="px-6 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $recipient->name }}</td>
                         <td class="px-6 py-3 text-sm">
                             @php
                                 $rStatusColors = [

@@ -22,6 +22,10 @@ class WaitlistController extends Controller
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::with('tickets')->findOrFail($eventId);
 
+        if ($event->is_draft) {
+            abort(404);
+        }
+
         // Verify event belongs to this schedule
         $role = Role::subdomain($subdomain)->firstOrFail();
         if (! $event->roles()->wherePivot('role_id', $role->id)->exists()) {

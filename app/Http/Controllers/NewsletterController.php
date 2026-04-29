@@ -8,9 +8,11 @@ use App\Models\NewsletterAbTest;
 use App\Models\NewsletterRecipient;
 use App\Models\NewsletterSegment;
 use App\Models\NewsletterSegmentUser;
+use App\Models\NewsletterTemplate;
 use App\Models\User;
 use App\Services\NewsletterService;
 use App\Utils\UrlUtils;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
@@ -65,6 +67,19 @@ class NewsletterController extends Controller
     protected function roleIdParam($role)
     {
         return ['role_id' => UrlUtils::encodeId($role->id)];
+    }
+
+    protected function requiresNewsletterVerification($role): bool
+    {
+        if (! config('app.hosted') || config('app.is_testing')) {
+            return false;
+        }
+
+        if (auth()->user()->isAdmin()) {
+            return false;
+        }
+
+        return ! $role->hasEmailSettings() && ! auth()->user()->hasVerifiedPhone();
     }
 
     public function index(Request $request)
@@ -124,6 +139,7 @@ class NewsletterController extends Controller
         }
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get();
 
@@ -138,7 +154,27 @@ class NewsletterController extends Controller
         $defaultStyleSettings = $lastNewsletter ? $lastNewsletter->style_settings : Newsletter::defaultStyleSettingsForRole($role);
         $defaultSegmentIds = $lastNewsletter ? ($lastNewsletter->segment_ids ?? []) : [];
 
-        return view('newsletter.create', compact('role', 'segments', 'events', 'defaultBlocks', 'defaultTemplate', 'defaultStyleSettings', 'defaultSegmentIds'));
+        // Load saved templates for the template picker
+        $savedTemplates = NewsletterTemplate::where('role_id', $role->id)
+            ->where('is_system', false)
+            ->orderBy('name')
+            ->get();
+        // If a template_id is provided, use that template's design
+        if ($request->has('template_id')) {
+            $decoded = UrlUtils::decodeId($request->template_id);
+            if ($decoded) {
+                $fromTemplate = NewsletterTemplate::where('role_id', $role->id)
+                    ->where('id', $decoded)
+                    ->first();
+                if ($fromTemplate) {
+                    $defaultBlocks = ! empty($fromTemplate->blocks) ? $fromTemplate->blocks : $defaultBlocks;
+                    $defaultTemplate = $fromTemplate->template ?? 'modern';
+                    $defaultStyleSettings = $fromTemplate->style_settings ?? $defaultStyleSettings;
+                }
+            }
+        }
+
+        return view('newsletter.create', compact('role', 'segments', 'events', 'defaultBlocks', 'defaultTemplate', 'defaultStyleSettings', 'defaultSegmentIds', 'savedTemplates'));
     }
 
     public function store(Request $request)
@@ -195,6 +231,7 @@ class NewsletterController extends Controller
         }
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get();
 
@@ -238,6 +275,10 @@ class NewsletterController extends Controller
         $newsletter->event_ids = $service->deriveEventIds($newsletter);
         $newsletter->save();
 
+        if ($request->header('X-Save-Before-Action')) {
+            return response()->json(['saved' => true]);
+        }
+
         return back()->with('status', __('messages.newsletter_saved'));
     }
 
@@ -265,6 +306,10 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
+
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
@@ -280,7 +325,24 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
         }
 
+        // On sync queue, large sends would timeout the HTTP request - advise scheduling instead
+        if (config('queue.default') === 'sync') {
+            $estimatedCount = $service->resolveRecipients($role, $newsletter->segment_ids ?? [])->count();
+
+            if ($estimatedCount > 50) {
+                return back()->with('error', __('messages.newsletter_sync_queue_limit'));
+            }
+        }
+
         $result = $service->send($newsletter);
+
+        if ($result === false) {
+            return back()->with('error', __('messages.newsletter_send_failed'));
+        }
+
+        if (is_array($result) && $result[0] === 'no_recipients') {
+            return back()->with('error', __('messages.newsletter_no_recipients'));
+        }
 
         if (is_array($result) && $result[0] === 'limit_exceeded') {
             $recipientCount = $result[1];
@@ -303,6 +365,10 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
+
         $newsletter = Newsletter::where('role_id', $role->id)
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
@@ -318,13 +384,20 @@ class NewsletterController extends Controller
             return back()->with('error', __('messages.newsletter_limit_reached', ['used' => $used, 'limit' => $limit]));
         }
 
-        $validated = $request->validate([
-            'scheduled_at' => 'required|date|after:now',
+        $request->validate([
+            'scheduled_at' => 'required|date',
         ]);
+
+        $timezone = auth()->user()->timezone ?? $role->timezone ?? 'UTC';
+        $scheduledAtUtc = Carbon::parse($request->scheduled_at, $timezone)->setTimezone('UTC');
+
+        if ($scheduledAtUtc->lte(now())) {
+            return back()->withErrors(['scheduled_at' => __('validation.after', ['attribute' => 'scheduled at', 'date' => 'now'])]);
+        }
 
         $newsletter->update([
             'status' => 'scheduled',
-            'scheduled_at' => $validated['scheduled_at'],
+            'scheduled_at' => $scheduledAtUtc,
         ]);
 
         return back()->with('status', __('messages.newsletter_scheduled'));
@@ -426,6 +499,10 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
+
         if (empty($role->email)) {
             return back()->with('error', __('messages.email_required'));
         }
@@ -475,7 +552,7 @@ class NewsletterController extends Controller
 
         $sortBy = $request->get('sort_by', 'opened_at');
         $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-        $allowedSortColumns = ['email', 'status', 'opened_at', 'clicked_at'];
+        $allowedSortColumns = ['name', 'status', 'opened_at', 'clicked_at'];
         if (! in_array($sortBy, $allowedSortColumns)) {
             $sortBy = 'opened_at';
         }
@@ -537,6 +614,7 @@ class NewsletterController extends Controller
 
         $events = $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->orderBy('starts_at')
             ->get(['events.id', 'events.name', 'events.starts_at', 'events.duration'])
             ->map(fn ($e) => [
@@ -567,6 +645,7 @@ class NewsletterController extends Controller
 
         $eventsData = $role->events()
             ->where('event_role.is_accepted', true)
+            ->where('is_draft', false)
             ->where('name', '!=', '')
             ->whereNotNull('name')
             ->orderBy('starts_at', 'desc')
@@ -659,6 +738,15 @@ class NewsletterController extends Controller
             ->where('id', UrlUtils::decodeId($hash))
             ->firstOrFail();
 
+        $inUse = Newsletter::where('role_id', $role->id)
+            ->whereIn('status', ['draft', 'scheduled'])
+            ->whereJsonContains('segment_ids', $segment->id)
+            ->exists();
+
+        if ($inUse) {
+            return back()->with('error', __('messages.segment_in_use'));
+        }
+
         $segment->delete();
 
         return back()->with('status', __('messages.segment_deleted'));
@@ -681,7 +769,7 @@ class NewsletterController extends Controller
         if ($segment->type === 'manual') {
             $sortBy = $request->get('sort_by', 'created_at');
             $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-            $allowedSortColumns = ['name', 'email', 'created_at'];
+            $allowedSortColumns = ['name', 'created_at'];
             if (! in_array($sortBy, $allowedSortColumns)) {
                 $sortBy = 'created_at';
             }
@@ -870,6 +958,10 @@ class NewsletterController extends Controller
         $this->authorizeAccess();
         $role = $this->getRole($request);
 
+        if ($this->requiresNewsletterVerification($role)) {
+            return back()->with('error', __('messages.newsletter_requires_verification'));
+        }
+
         if (! $role->canSendNewsletter()) {
             $limit = $role->newsletterLimit();
             $used = $role->newslettersSentThisMonth();
@@ -941,29 +1033,74 @@ class NewsletterController extends Controller
         $sampleB = $sample->slice($halfSize)->values();
 
         // Send each variant to its sample
-        foreach ([['newsletter' => $variants->where('ab_variant', 'A')->first(), 'recipients' => $sampleA],
-            ['newsletter' => $variants->where('ab_variant', 'B')->first(), 'recipients' => $sampleB]] as $variant) {
+        $variantData = [
+            ['newsletter' => $variants->where('ab_variant', 'A')->first(), 'recipients' => $sampleA],
+            ['newsletter' => $variants->where('ab_variant', 'B')->first(), 'recipients' => $sampleB],
+        ];
+
+        DB::beginTransaction();
+        try {
+            foreach ($variantData as $variant) {
+                $vn = $variant['newsletter'];
+
+                // Atomic status update to prevent double-send on double-click
+                $updated = Newsletter::where('id', $vn->id)
+                    ->whereIn('status', ['draft', 'scheduled'])
+                    ->update(['status' => 'sending', 'send_token' => Str::random(64)]);
+
+                if ($updated === 0) {
+                    continue;
+                }
+
+                $vn->refresh();
+
+                $chunk = [];
+                foreach ($variant['recipients'] as $recipient) {
+                    $chunk[] = [
+                        'newsletter_id' => $vn->id,
+                        'user_id' => $recipient->user_id,
+                        'email' => $recipient->email,
+                        'name' => $recipient->name,
+                        'token' => Str::random(64),
+                        'status' => 'pending',
+                    ];
+                    if (count($chunk) >= 500) {
+                        NewsletterRecipient::insert($chunk);
+                        $chunk = [];
+                    }
+                }
+                if (! empty($chunk)) {
+                    NewsletterRecipient::insert($chunk);
+                }
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Reset variant statuses
+            foreach ($variantData as $variant) {
+                $variant['newsletter']?->update(['status' => 'draft', 'send_token' => null]);
+            }
+            $abTest->update(['status' => 'pending']);
+            report($e);
+
+            return back()->with('error', __('messages.newsletter_send_failed'));
+        }
+
+        // Dispatch batch jobs outside the transaction
+        foreach ($variantData as $variant) {
             $vn = $variant['newsletter'];
-            $vn->update(['status' => 'sending', 'send_token' => Str::random(64)]);
-
-            $recipientIds = [];
-            foreach ($variant['recipients'] as $recipient) {
-                $nr = NewsletterRecipient::create([
-                    'newsletter_id' => $vn->id,
-                    'user_id' => $recipient->user_id,
-                    'email' => $recipient->email,
-                    'name' => $recipient->name,
-                    'token' => Str::random(64),
-                    'status' => 'pending',
-                ]);
-                $recipientIds[] = $nr->id;
+            if ($vn->status !== 'sending') {
+                continue;
             }
 
-            $chunks = array_chunk($recipientIds, 50);
-            foreach ($chunks as $index => $chunk) {
-                \App\Jobs\SendNewsletterBatch::dispatch($vn->id, $chunk)
-                    ->delay(now()->addSeconds($index * 15));
-            }
+            $batchIndex = 0;
+            NewsletterRecipient::where('newsletter_id', $vn->id)
+                ->where('status', 'pending')
+                ->chunkById(50, function ($recipientChunk) use ($vn, &$batchIndex) {
+                    \App\Jobs\SendNewsletterBatch::dispatch($vn->id, $recipientChunk->pluck('id')->toArray())
+                        ->delay(now()->addSeconds($batchIndex * 15));
+                    $batchIndex++;
+                });
         }
 
         // Schedule winner evaluation
@@ -1016,7 +1153,7 @@ class NewsletterController extends Controller
                 ->firstOrFail();
         }
 
-        $imported = DB::transaction(function () use ($segment, $validated, $role) {
+        $result = DB::transaction(function () use ($segment, $validated, $role) {
             $existingEmails = $segment->segmentUsers()
                 ->pluck('email')
                 ->map(fn ($e) => strtolower($e))
@@ -1028,10 +1165,13 @@ class NewsletterController extends Controller
                 ->whereIn('user_id', $existingUsers->pluck('id'))->pluck('user_id')->flip();
 
             $imported = 0;
+            $duplicates = 0;
             $seen = [];
             foreach ($validated['entries'] as $entry) {
                 $email = strtolower(trim($entry['email']));
                 if (in_array($email, $seen) || in_array($email, $existingEmails)) {
+                    $duplicates++;
+
                     continue;
                 }
                 $seen[] = $email;
@@ -1061,14 +1201,222 @@ class NewsletterController extends Controller
                 $imported++;
             }
 
-            return $imported;
+            return ['imported' => $imported, 'duplicates' => $duplicates];
         });
 
-        if ($imported === 0) {
-            return back()->with('error', __('messages.no_valid_emails'));
+        if ($result['imported'] === 0) {
+            $message = $result['duplicates'] > 0
+                ? __('messages.emails_already_in_segment')
+                : __('messages.no_valid_emails');
+
+            return back()->with('error', $message);
         }
 
         return redirect()->route('newsletter.segments', $this->roleIdParam($role))
-            ->with('status', __('messages.emails_imported', ['count' => $imported]));
+            ->with('status', __('messages.emails_imported', ['count' => $result['imported']]));
+    }
+
+    // ── Newsletter Templates ────────────────────────────────────────
+
+    public function templates(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $userTemplates = NewsletterTemplate::where('role_id', $role->id)
+            ->where('is_system', false)
+            ->orderBy('name')
+            ->get();
+
+        return view('newsletter.templates', compact('role', 'userTemplates'));
+    }
+
+    public function createTemplate(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $defaultBlocks = Newsletter::defaultBlocks($role);
+        $events = $role->events()
+            ->upcomingOrOngoing()
+            ->where('is_draft', false)
+            ->orderBy('starts_at')
+            ->get();
+
+        $segments = collect();
+
+        return view('newsletter.template-edit', [
+            'role' => $role,
+            'newsletterTemplate' => null,
+            'defaultBlocks' => $defaultBlocks,
+            'events' => $events,
+            'segments' => $segments,
+        ]);
+    }
+
+    public function storeTemplate(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'blocks' => 'nullable|string',
+            'template' => 'required|in:modern,classic,minimal,bold,compact',
+            'style_settings' => 'nullable|array',
+        ]);
+
+        $blocks = $this->parseBlocks($request);
+
+        NewsletterTemplate::create([
+            'role_id' => $role->id,
+            'user_id' => auth()->id(),
+            'name' => $validated['name'],
+            'blocks' => $blocks,
+            'template' => $validated['template'],
+            'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
+        ]);
+
+        return redirect()->route('newsletter.templates', $this->roleIdParam($role))
+            ->with('status', __('messages.template_saved'));
+    }
+
+    public function editTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($newsletterTemplate->is_system) {
+            abort(403);
+        }
+
+        $events = $role->events()
+            ->upcomingOrOngoing()
+            ->where('is_draft', false)
+            ->orderBy('starts_at')
+            ->get();
+
+        $segments = collect();
+
+        return view('newsletter.template-edit', [
+            'role' => $role,
+            'newsletterTemplate' => $newsletterTemplate,
+            'events' => $events,
+            'segments' => $segments,
+        ]);
+    }
+
+    public function updateTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($newsletterTemplate->is_system) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'blocks' => 'nullable|string',
+            'template' => 'required|in:modern,classic,minimal,bold,compact',
+            'style_settings' => 'nullable|array',
+        ]);
+
+        $blocks = $this->parseBlocks($request);
+
+        $newsletterTemplate->update([
+            'name' => $validated['name'],
+            'blocks' => $blocks,
+            'template' => $validated['template'],
+            'style_settings' => $this->sanitizeStyleSettings($validated['style_settings'] ?? null),
+        ]);
+
+        return back()->with('status', __('messages.template_updated'));
+    }
+
+    public function deleteTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        if ($newsletterTemplate->is_system) {
+            abort(403);
+        }
+
+        $newsletterTemplate->delete();
+
+        return back()->with('status', __('messages.template_deleted'));
+    }
+
+    public function saveAsTemplate(Request $request, string $hash)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletter = Newsletter::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'template_name' => 'required|string|max:255',
+        ]);
+
+        NewsletterTemplate::create([
+            'role_id' => $role->id,
+            'user_id' => auth()->id(),
+            'name' => $validated['template_name'],
+            'blocks' => $newsletter->blocks,
+            'template' => $newsletter->template,
+            'style_settings' => $newsletter->style_settings,
+        ]);
+
+        return back()->with('status', __('messages.template_saved'));
+    }
+
+    public function previewTemplate(Request $request, string $hash, NewsletterService $service)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        $newsletterTemplate = NewsletterTemplate::where('role_id', $role->id)
+            ->where('id', UrlUtils::decodeId($hash))
+            ->firstOrFail();
+
+        $newsletter = new Newsletter([
+            'role_id' => $role->id,
+            'subject' => '',
+            'blocks' => $newsletterTemplate->blocks,
+            'template' => $newsletterTemplate->template,
+            'style_settings' => $newsletterTemplate->style_settings,
+        ]);
+        $newsletter->setRelation('role', $role);
+
+        $html = $service->renderPreview($newsletter);
+
+        return response()->json(['html' => $html]);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $this->authorizeAccess();
+        $role = $this->getRole($request);
+
+        if (! $role->isPro()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        return $this->handleNewsletterImageUpload($request);
     }
 }

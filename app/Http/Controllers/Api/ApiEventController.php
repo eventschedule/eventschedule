@@ -208,6 +208,7 @@ class ApiEventController extends Controller
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
+                'is_draft' => 'nullable|boolean',
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:255',
@@ -257,7 +258,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'is_private', 'rsvp_enabled', 'rsvp_limit',
+            'event_url', 'event_password', 'is_private', 'is_draft', 'rsvp_enabled', 'rsvp_limit',
             'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
@@ -276,6 +277,11 @@ class ApiEventController extends Controller
 
         // Convert days_of_week string to individual checkbox params for saveEvent()
         $this->convertDaysOfWeek($request);
+
+        // Default is_draft to role's draft_events_default if not provided
+        if (! $request->has('is_draft')) {
+            $request->merge(['is_draft' => $role->draft_events_default]);
+        }
 
         // Pre-processing: venue, members, group, category
         $errorResponse = $this->preprocessEventRequest($request, $role, $encodedRoleId);
@@ -321,6 +327,7 @@ class ApiEventController extends Controller
                 'event_url' => 'nullable|url|max:255',
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
+                'is_draft' => 'nullable|boolean',
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:255',
@@ -370,7 +377,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'is_private', 'rsvp_enabled', 'rsvp_limit',
+            'event_url', 'event_password', 'is_private', 'is_draft', 'rsvp_enabled', 'rsvp_limit',
             'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
@@ -565,12 +572,14 @@ class ApiEventController extends Controller
         }
 
         // Capture webhook payload before deletion
-        $webhookPayload = [
-            'event' => 'event.deleted',
-            'timestamp' => now()->toIso8601String(),
-            'data' => $event->toApiData(),
-        ];
-        WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        if (! $event->is_draft) {
+            $webhookPayload = [
+                'event' => 'event.deleted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => $event->toApiData(),
+            ];
+            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        }
 
         $event->delete();
 

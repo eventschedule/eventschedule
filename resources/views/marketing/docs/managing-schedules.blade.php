@@ -81,6 +81,7 @@
                         <a href="#followers" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Followers</a>
                         <a href="#team" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Team</a>
                         <a href="#plan" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Plan</a>
+                        <a href="#audit-log" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Audit Log</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See Also</a>
                     </nav>
                 </aside>
@@ -90,7 +91,13 @@
                     <div class="prose-dark">
                         <!-- Overview -->
                         <section id="overview" class="doc-section">
-                            <h2 class="doc-heading">Overview</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Overview
+                            </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 Your schedule's admin panel is the central hub for day-to-day management. It contains several tabs, each focused on a different aspect of running your schedule.
                             </p>
@@ -125,7 +132,7 @@
                                 For details on adding and editing events, see <x-link href="{{ route('marketing.docs.creating_events') }}">Creating Events</x-link>.
                             </p>
 
-                            <h3 id="actions" class="text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Actions Dropdown</h3>
+                            <h3 id="actions" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mt-6 mb-3">Actions Dropdown</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The <strong class="text-gray-900 dark:text-white">Actions</strong> dropdown on the Schedule tab gives you quick access to common schedule operations:
                             </p>
@@ -345,9 +352,35 @@
                             @endif
                         </section>
 
+                        <!-- Audit Log -->
+                        <section id="audit-log" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+                                </svg>
+                                Audit Log
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The Audit Log records every significant action taken on your schedule so you can trace who did what and when - useful for shared schedules and after-the-fact investigations.</p>
+
+                            <ul class="doc-list mb-6">
+                                <li><strong>Categories tracked:</strong> events (create, update, delete, accept, decline), sales, boost campaigns, schedule settings, and subscription changes</li>
+                                <li><strong>Per-entry details:</strong> actor, timestamp, action, before/after values, IP address, and user agent</li>
+                                <li><strong>Filters:</strong> filter by category, date range, or search across actions and details</li>
+                            </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Open it from <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Audit Log</strong>.
+                            </p>
+                        </section>
+
                         <!-- See Also -->
                         <section id="see-also" class="doc-section">
-                            <h2 class="doc-heading">See Also</h2>
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                </svg>
+                                See Also
+                            </h2>
                             <ul class="doc-list">
                                 <li><x-link href="{{ route('marketing.docs.creating_schedules') }}">Creating Schedules</x-link> - Set up and configure your schedule</li>
                                 <li><x-link href="{{ route('marketing.docs.creating_events') }}">Creating Events</x-link> - Add and edit events on your schedule</li>

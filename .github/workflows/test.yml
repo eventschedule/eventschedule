@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -29,7 +29,7 @@ jobs:
       #  run: composer audit
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: npm security audit
         run: npm audit --omit=dev --audit-level=critical
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -92,7 +92,7 @@ jobs:
 
       - name: Install npm dependencies and build assets
         run: |
-          npm ci
+          npm ci --ignore-scripts
           npm run build
         env:
           LARAVEL_BYPASS_ENV_CHECK: 1
@@ -141,11 +141,25 @@ jobs:
           APP_ENV: local
           APP_URL: http://127.0.0.1:8000
   
-      - name: Upload Dusk Screenshots and Logs
+      - name: Upload Dusk Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: dusk-screenshots
-          path: |
-            tests/Browser/screenshots
-            storage/logs
+          path: tests/Browser/screenshots
+
+      - name: Upload Query Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: query-log
+          path: storage/logs/queries.log
+          if-no-files-found: ignore
+
+      - name: Upload Error Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-log
+          path: storage/logs/laravel.log
+          if-no-files-found: ignore

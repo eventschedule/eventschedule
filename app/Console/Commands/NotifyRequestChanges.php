@@ -61,11 +61,15 @@ class NotifyRequestChanges extends Command
                         $editor->notify(new NewRequestsNotification($role, $currentRequestCount));
                     }
 
-                    $role->last_notified_request_count = $currentRequestCount;
-                    $role->save();
-
                     $notifiedCount++;
                 }
+            }
+
+            // Sync counter to current count so future increases fire correctly,
+            // even after some pending requests are accepted/declined.
+            if ($role->last_notified_request_count !== $currentRequestCount) {
+                $role->last_notified_request_count = $currentRequestCount;
+                $role->save();
             }
         }
 

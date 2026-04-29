@@ -13,5 +13,6 @@ class RoleUser extends Pivot
         'role_id',
         'level',
         'notification_settings',
+        'google_calendar_id',
     ];
 }

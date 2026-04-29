@@ -145,7 +145,7 @@
                 </button>
 
                 {{-- New Schedule Dropdown --}}
-                @if(!is_demo_mode())
+                @if(!is_demo_mode() && $canCreateSchedule)
                 <div class="relative inline-block text-left">
                     <button type="button" data-popup-target="dashboard-new-schedule-menu" class="popup-toggle inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-[#2d2d30] border border-gray-300 dark:border-white/[0.06] rounded-lg font-semibold text-base text-gray-900 dark:text-gray-100 shadow-sm dark:shadow-none transition-all duration-200 hover:bg-gray-50 dark:hover:bg-[#252526] hover:scale-105 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800" aria-expanded="true" aria-haspopup="true">
                         {{ __('messages.new_schedule') }}
@@ -260,6 +260,7 @@
 
         {{-- Customize Dashboard Modal --}}
         <x-modal name="customize-dashboard" maxWidth="lg">
+            <template x-if="show">
             <div x-data="customizeDashboard()">
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('messages.customize_dashboard') }}</h3>
@@ -320,28 +321,24 @@
                                         </div>
 
                                         {{-- Period Selector --}}
-                                        <template x-if="panelMeta[panel.id]?.periods">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_period') }}:</span>
-                                                <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                                    <template x-for="(p, pi) in panelMeta[panel.id].periods" :key="p">
-                                                        <button type="button" x-on:click="panel.period = p" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === p ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', pi > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="p + 'd'"></button>
-                                                    </template>
-                                                </div>
+                                        <div x-show="panelMeta[panel.id]?.periods" class="flex items-center gap-2">
+                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_period') }}:</span>
+                                            <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                                <template x-for="(period, periodIdx) in (panelMeta[panel.id]?.periods || [])" :key="period">
+                                                    <button type="button" x-on:click="panel.period = period" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.period === period ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', periodIdx > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="period + 'd'"></button>
+                                                </template>
                                             </div>
-                                        </template>
+                                        </div>
 
                                         {{-- Count Selector --}}
-                                        <template x-if="panelMeta[panel.id]?.counts">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_items') }}:</span>
-                                                <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
-                                                    <template x-for="(c, ci) in panelMeta[panel.id].counts" :key="c">
-                                                        <button type="button" x-on:click="panel.count = c" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === c ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', ci > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="c"></button>
-                                                    </template>
-                                                </div>
+                                        <div x-show="panelMeta[panel.id]?.counts" class="flex items-center gap-2">
+                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('messages.panel_items') }}:</span>
+                                            <div class="inline-flex rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                                <template x-for="(count, countIdx) in (panelMeta[panel.id]?.counts || [])" :key="count">
+                                                    <button type="button" x-on:click="panel.count = count" class="px-2.5 py-1.5 text-xs font-medium transition-all duration-200" :class="[panel.count === count ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600', countIdx > 0 ? 'border-l border-gray-200 dark:border-gray-600' : '']" x-text="count"></button>
+                                                </template>
                                             </div>
-                                        </template>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -364,6 +361,7 @@
                     </div>
                 </div>
             </div>
+            </template>
         </x-modal>
 
     </div>

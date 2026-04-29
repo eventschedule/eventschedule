@@ -263,3 +263,24 @@ a.persona-card:focus-visible {
         transform: none;
     }
 }
+
+/* ========================================
+   FAQ Accordion (details/summary)
+   ======================================== */
+
+details summary {
+    list-style: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details[open] > .faq-answer {
+    animation: faq-open 0.2s ease-out;
+}
+
+@keyframes faq-open {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}

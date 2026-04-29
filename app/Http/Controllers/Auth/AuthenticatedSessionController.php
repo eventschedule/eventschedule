@@ -9,6 +9,7 @@ use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -21,6 +22,8 @@ class AuthenticatedSessionController extends Controller
         if (! config('app.hosted') && (! config('app.url') || ! User::exists())) {
             return redirect()->route('sign_up');
         }
+
+        restore_pending_action();
 
         return view('auth.login');
     }
@@ -36,16 +39,31 @@ class AuthenticatedSessionController extends Controller
 
         // Check if user has 2FA enabled
         if ($user->hasTwoFactorEnabled()) {
+            $smsToken = $request->session()->get('sms_token');
             Auth::logout();
 
             $request->session()->put('login.id', $user->id);
             $request->session()->put('login.remember', $request->boolean('remember'));
             $request->session()->put('login.expires', now()->addMinutes(5)->timestamp);
 
+            if ($smsToken) {
+                $request->session()->put('sms_token', $smsToken);
+            }
+
             return redirect()->route('two-factor.challenge');
         }
 
         AuditService::log(AuditService::AUTH_LOGIN, $user->id);
+
+        // Process SMS token if present in session (set by registration redirect)
+        $smsToken = $request->session()->pull('sms_token');
+        if ($smsToken) {
+            $smsPhone = Cache::get('sms_signup_'.$smsToken);
+            if ($smsPhone) {
+                $user->claimRolesByPhone($smsPhone);
+                Cache::forget('sms_signup_'.$smsToken);
+            }
+        }
 
         $request->session()->regenerate();
 

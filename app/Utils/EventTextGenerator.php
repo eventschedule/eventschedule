@@ -37,11 +37,14 @@ class EventTextGenerator
             $text .= $message . "\n" . $url . "\n";
         }
 
-        // Prepend Right-to-Left Mark for RTL languages so text
-        // displays correctly when pasted in apps like WhatsApp
-        if ($role->isRtl()) {
-            $text = "\u{200F}" . $text;
-        }
+        // Prepend a direction marker to every line so the message
+        // displays in the schedule's intended direction when pasted
+        // into apps like WhatsApp, which applies bidi per line.
+        // Based on the schedule's language_code, not Role::isRtl()
+        // (which is viewer-dependent).
+        $isRtlLanguage = $role->language_code == 'he' || $role->language_code == 'ar';
+        $marker = $isRtlLanguage ? "\u{200F}" : "\u{200E}";
+        $text = $marker . str_replace("\n", "\n" . $marker, $text);
 
         return $text;
     }
@@ -63,8 +66,8 @@ class EventTextGenerator
         $locale = $role->language_code ?? 'en';
         \Carbon\Carbon::setLocale($locale);
 
-        $startDate = $event->getStartDateTime(null, true);
-        $endDate = $event->getEndDateTime(null, true);
+        $startDate = $event->getStartDateTime(null, true, $role->timezone ?? 'UTC');
+        $endDate = $event->getEndDateTime(null, true, $role->timezone ?? 'UTC');
 
         // Determine time format based on role's 24h setting
         $timeFormat = $role->use_24_hour_time ? 'H:i' : 'g:i A';
@@ -104,23 +107,25 @@ class EventTextGenerator
             '{date_full_dmy}' => $startDate->format('d/m/Y'),
             '{date_full_mdy}' => $startDate->format('m/d/Y'),
             '{month}' => $startDate->format('n'),
+            '{month_pad}' => $startDate->format('m'),
             '{month_name}' => $startDate->translatedFormat('F'),
             '{month_short}' => $startDate->translatedFormat('M'),
             '{day}' => $startDate->format('j'),
+            '{day_pad}' => $startDate->format('d'),
             '{year}' => $startDate->format('Y'),
             '{time}' => $startDate->format($timeFormat),
             '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
             '{duration}' => $event->duration ?? '',
 
             // Event variables
-            '{event_name}' => $event->translatedName(),
-            '{short_description}' => $event->translatedShortDescription() ?? '',
-            '{description}' => $event->translatedDescription() ?? '',
+            '{event_name}' => $event->name,
+            '{short_description}' => $event->short_description ?? '',
+            '{description}' => $event->description_html ?? '',
             '{url}' => $eventUrl,
 
             // Venue variables
-            '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
-            '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
+            '{venue}' => $event->venue ? ($event->venue->name ?? '') : '',
+            '{city}' => $event->venue ? ($event->venue->city ?? '') : '',
             '{address}' => $event->venue ? ($event->venue->address1 ?? '') : '',
             '{state}' => $event->venue ? ($event->venue->state ?? '') : '',
             '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
@@ -196,7 +201,7 @@ class EventTextGenerator
                 });
 
                 if ($allFree) {
-                    return __('messages.free');
+                    return '';
                 }
 
                 // Return lowest price
@@ -207,7 +212,7 @@ class EventTextGenerator
         // Check for external event price (when tickets are disabled)
         if (! $event->tickets_enabled && $event->ticket_price !== null) {
             if ($event->ticket_price == 0) {
-                return __('messages.free');
+                return '';
             }
 
             return floatval($event->ticket_price);

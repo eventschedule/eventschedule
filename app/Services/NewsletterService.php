@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Utils\MarkdownUtils;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -22,7 +23,27 @@ class NewsletterService
     {
         $role = $newsletter->role;
         if (! $newsletter->isAdmin() && (! $role || ! $role->canSendNewsletter())) {
+            Log::warning('Newsletter send blocked: role cannot send', [
+                'newsletter_id' => $newsletter->id,
+                'role_id' => $newsletter->role_id,
+                'has_role' => ! is_null($role),
+            ]);
+
             return false;
+        }
+
+        if (! $newsletter->isAdmin() && $role && config('app.hosted') && ! config('app.is_testing')) {
+            if (! $role->hasEmailSettings()) {
+                $newsletterUser = $newsletter->user;
+                if (! $newsletterUser || (! $newsletterUser->isAdmin() && ! $newsletterUser->hasVerifiedPhone())) {
+                    Log::warning('Newsletter send blocked: requires SMTP or phone verification', [
+                        'newsletter_id' => $newsletter->id,
+                        'role_id' => $newsletter->role_id,
+                    ]);
+
+                    return false;
+                }
+            }
         }
 
         $sendToken = Str::random(64);
@@ -31,6 +52,10 @@ class NewsletterService
             ->update(['status' => 'sending', 'send_token' => $sendToken]);
 
         if ($updated === 0) {
+            Log::warning('Newsletter send skipped: status already changed', [
+                'newsletter_id' => $newsletter->id,
+            ]);
+
             return false;
         }
 
@@ -42,9 +67,12 @@ class NewsletterService
             : $this->resolveRecipients($newsletter->role, $segmentIds);
 
         if ($recipients->isEmpty()) {
-            $newsletter->update(['status' => 'sent', 'sent_at' => now(), 'sent_count' => 0]);
+            $newsletter->update([
+                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                'send_token' => null,
+            ]);
 
-            return true;
+            return ['no_recipients', 0];
         }
 
         // Check if sending to these recipients would exceed the email limit
@@ -53,36 +81,61 @@ class NewsletterService
             if ($limit !== null) {
                 $used = $role->newslettersSentThisMonth();
                 if ($used + $recipients->count() > $limit) {
-                    $newsletter->update(['status' => 'draft', 'send_token' => null]);
+                    $newsletter->update([
+                        'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                        'send_token' => null,
+                    ]);
 
                     return ['limit_exceeded', $recipients->count()];
                 }
             }
         }
 
-        $recipientIds = [];
-        foreach ($recipients as $recipient) {
-            $nr = NewsletterRecipient::create([
-                'newsletter_id' => $newsletter->id,
-                'user_id' => $recipient->user_id,
-                'email' => $recipient->email,
-                'name' => $recipient->name,
-                'token' => Str::random(64),
-                'status' => 'pending',
+        DB::beginTransaction();
+        try {
+            $chunk = [];
+            foreach ($recipients as $recipient) {
+                $chunk[] = [
+                    'newsletter_id' => $newsletter->id,
+                    'user_id' => $recipient->user_id,
+                    'email' => $recipient->email,
+                    'name' => $recipient->name,
+                    'token' => Str::random(64),
+                    'status' => 'pending',
+                ];
+                if (count($chunk) >= 500) {
+                    NewsletterRecipient::insert($chunk);
+                    $chunk = [];
+                }
+            }
+            if (! empty($chunk)) {
+                NewsletterRecipient::insert($chunk);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $newsletter->update([
+                'status' => $newsletter->scheduled_at ? 'scheduled' : 'draft',
+                'send_token' => null,
             ]);
-            $recipientIds[] = $nr->id;
+            report($e);
+
+            return false;
         }
 
-        $chunks = array_chunk($recipientIds, 50);
-        foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($newsletter->id, $chunk)
-                ->delay(now()->addSeconds($index * 15));
-        }
+        $batchIndex = 0;
+        NewsletterRecipient::where('newsletter_id', $newsletter->id)
+            ->where('status', 'pending')
+            ->chunkById(50, function ($recipientChunk) use ($newsletter, &$batchIndex) {
+                SendNewsletterBatch::dispatch($newsletter->id, $recipientChunk->pluck('id')->toArray())
+                    ->delay(now()->addSeconds($batchIndex * 15));
+                $batchIndex++;
+            });
 
         return true;
     }
 
-    public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false): bool
+    public function sendToRecipient(Newsletter $newsletter, NewsletterRecipient $recipient, bool $isTest = false, ?array $processedBlocks = null): bool
     {
         if (! $isTest && $this->isTestEmail($recipient->email)) {
             $recipient->update(['status' => 'skipped']);
@@ -91,11 +144,14 @@ class NewsletterService
         }
 
         try {
-            $html = $this->renderHtml($newsletter, $recipient);
+            if ($processedBlocks === null) {
+                $processedBlocks = $this->processBlocks($newsletter);
+            }
+            $html = $this->renderHtml($newsletter, $recipient, $processedBlocks);
             $html = $this->rewriteLinks($html, $recipient);
             $html = $this->insertTrackingPixel($html, $recipient);
 
-            $mailable = new NewsletterEmail($newsletter, $recipient, $html);
+            $mailable = new NewsletterEmail($newsletter, $recipient, $html, $processedBlocks);
 
             $role = $newsletter->role;
             if (config('app.hosted') && $role && $role->hasEmailSettings()) {
@@ -142,6 +198,19 @@ class NewsletterService
             $allRecipients = $allRecipients->merge($segment->resolveRecipients());
         }
 
+        // Always include schedule members (owner, admin, viewer)
+        $members = $role->members()
+            ->select('users.id', 'users.email', 'users.name', 'users.is_subscribed')
+            ->where('users.is_subscribed', true)
+            ->whereNotNull('users.email_verified_at')
+            ->get()
+            ->map(fn ($user) => (object) [
+                'user_id' => $user->id,
+                'email' => strtolower($user->email),
+                'name' => $user->name,
+            ]);
+        $allRecipients = $allRecipients->merge($members);
+
         // If no segments found and no segmentIds, fall back to followers
         if ($allRecipients->isEmpty() && empty($segmentIds)) {
             $allRecipients = $role->followers()
@@ -170,10 +239,10 @@ class NewsletterService
             ->map(fn ($email) => strtolower($email))
             ->toArray();
 
-        $excludeEmails = array_merge($unsubscribedEmails, $unsubscribedUserEmails);
+        $excludeEmails = array_flip(array_merge($unsubscribedEmails, $unsubscribedUserEmails));
 
         $allRecipients = $allRecipients->filter(function ($recipient) use ($excludeEmails) {
-            return ! in_array($recipient->email, $excludeEmails)
+            return ! isset($excludeEmails[$recipient->email])
                 && ! $this->isTestEmail($recipient->email);
         });
 
@@ -205,12 +274,14 @@ class NewsletterService
             }
 
             // Safety net: filter unsubscribed users regardless of segment implementation
-            $unsubscribedEmails = \App\Models\User::whereNotNull('admin_newsletter_unsubscribed_at')
-                ->orWhere('is_subscribed', false)
-                ->pluck('email')
-                ->map(fn ($e) => strtolower($e))
-                ->all();
-            $allRecipients = $allRecipients->reject(fn ($r) => in_array($r->email, $unsubscribedEmails));
+            $unsubscribedEmails = array_flip(
+                \App\Models\User::whereNotNull('admin_newsletter_unsubscribed_at')
+                    ->orWhere('is_subscribed', false)
+                    ->pluck('email')
+                    ->map(fn ($e) => strtolower($e))
+                    ->all()
+            );
+            $allRecipients = $allRecipients->reject(fn ($r) => isset($unsubscribedEmails[$r->email]));
         }
 
         // Deduplicate by lowercase email
@@ -227,6 +298,7 @@ class NewsletterService
     {
         $blocks = $newsletter->blocks ?? [];
         $role = $newsletter->role;
+        $allUpcomingEvents = null;
 
         foreach ($blocks as &$block) {
             $type = $block['type'] ?? '';
@@ -238,9 +310,16 @@ class NewsletterService
             if ($type === 'events') {
                 $useAll = $block['data']['useAllEvents'] ?? true;
                 $eventIds = $block['data']['eventIds'] ?? [];
-                $block['data']['resolvedEvents'] = $role
-                    ? $this->getUpcomingEvents($role, $useAll ? null : $eventIds)
-                    : collect();
+                if ($role) {
+                    if ($useAll) {
+                        $allUpcomingEvents = $allUpcomingEvents ?? $this->getUpcomingEvents($role);
+                        $block['data']['resolvedEvents'] = $allUpcomingEvents;
+                    } else {
+                        $block['data']['resolvedEvents'] = $this->getUpcomingEvents($role, $eventIds);
+                    }
+                } else {
+                    $block['data']['resolvedEvents'] = collect();
+                }
             }
 
             if ($type === 'video') {
@@ -248,6 +327,41 @@ class NewsletterService
                 if (preg_match('/(?:youtube\.com\/watch\?.*v=|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/', $videoUrl, $m)) {
                     $block['data']['videoId'] = $m[1];
                     $block['data']['thumbnailUrl'] = 'https://img.youtube.com/vi/'.$m[1].'/hqdefault.jpg';
+                }
+            }
+
+            if ($type === 'sponsors') {
+                $source = $block['data']['source'] ?? 'schedule';
+                if ($source === 'first_event' && $role) {
+                    $allUpcomingEvents = $allUpcomingEvents ?? $this->getUpcomingEvents($role);
+                    $firstEvent = $allUpcomingEvents->first();
+                    $block['data']['resolvedSponsors'] = $firstEvent
+                        ? $firstEvent->getEffectiveSponsorLogos($role)
+                        : [];
+                } elseif ($role) {
+                    $block['data']['resolvedSponsors'] = $role->getSponsorLogos();
+                } else {
+                    $block['data']['resolvedSponsors'] = [];
+                }
+                $block['data']['sponsorTitle'] = $role ? $role->translatedSponsorSectionTitle() : '';
+            }
+
+            if ($type === 'poll') {
+                $block['data']['resolvedPoll'] = null;
+                if ($role) {
+                    $allUpcomingEvents = $allUpcomingEvents ?? $this->getUpcomingEvents($role);
+                    foreach ($allUpcomingEvents as $event) {
+                        $poll = $event->activePolls()->first();
+                        if ($poll) {
+                            $block['data']['resolvedPoll'] = [
+                                'question' => $poll->question,
+                                'options' => $poll->options,
+                                'eventName' => $event->name,
+                                'eventUrl' => $event->getGuestUrl($role->subdomain, null, true),
+                            ];
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -278,10 +392,10 @@ class NewsletterService
         return empty($allEventIds) ? null : array_unique($allEventIds);
     }
 
-    public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null): string
+    public function renderHtml(Newsletter $newsletter, ?NewsletterRecipient $recipient = null, ?array $processedBlocks = null): string
     {
         $style = array_merge(Newsletter::defaultStyleSettings(), $newsletter->style_settings ?? []);
-        $blocks = $this->processBlocks($newsletter);
+        $blocks = $processedBlocks ?? $this->processBlocks($newsletter);
         $unsubscribeUrl = $recipient
             ? url('/nl/u/'.$recipient->token)
             : '#';
@@ -364,12 +478,13 @@ class NewsletterService
             return collect($eventIds)
                 ->map(fn ($id) => $events->firstWhere('id', $id))
                 ->filter()
-                ->filter(fn ($e) => ! $e->is_private && ! $e->isPasswordProtected())
+                ->filter(fn ($e) => ! $e->is_draft && ! $e->is_private && ! $e->isPasswordProtected())
                 ->values();
         }
 
         return $role->events()
             ->upcomingOrOngoing()
+            ->where('is_draft', false)
             ->where('is_private', false)
             ->whereNull('event_password')
             ->orderBy('starts_at', 'asc')
@@ -433,16 +548,18 @@ class NewsletterService
         }
 
         // Get all emails already sent in the A/B test
-        $sentEmails = NewsletterRecipient::whereIn('newsletter_id', $abTest->newsletters->pluck('id'))
-            ->pluck('email')
-            ->map(fn ($e) => strtolower($e))
-            ->toArray();
+        $sentEmails = array_flip(
+            NewsletterRecipient::whereIn('newsletter_id', $abTest->newsletters->pluck('id'))
+                ->pluck('email')
+                ->map(fn ($e) => strtolower($e))
+                ->toArray()
+        );
 
         // Resolve full recipient list and remove already-sent
         $allRecipients = $winnerNewsletter->isAdmin()
             ? $this->resolveAdminRecipients($winnerNewsletter->segment_ids ?? [])
             : $this->resolveRecipients($winnerNewsletter->role, $winnerNewsletter->segment_ids ?? []);
-        $remaining = $allRecipients->filter(fn ($r) => ! in_array($r->email, $sentEmails));
+        $remaining = $allRecipients->filter(fn ($r) => ! isset($sentEmails[$r->email]));
 
         if (! $remainderNewsletter) {
             if ($remaining->isEmpty()) {
@@ -458,35 +575,56 @@ class NewsletterService
         }
 
         // Exclude recipients already created on the remainder newsletter
-        $existingRemainderEmails = NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
-            ->pluck('email')
-            ->map(fn ($e) => strtolower($e))
-            ->toArray();
+        $existingRemainderEmails = array_flip(
+            NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
+                ->pluck('email')
+                ->map(fn ($e) => strtolower($e))
+                ->toArray()
+        );
 
-        $remaining = $remaining->filter(fn ($r) => ! in_array($r->email, $existingRemainderEmails));
+        $remaining = $remaining->filter(fn ($r) => ! isset($existingRemainderEmails[$r->email]));
 
         if ($remaining->isEmpty()) {
             return;
         }
 
-        $recipientIds = [];
-        foreach ($remaining as $recipient) {
-            $nr = NewsletterRecipient::create([
-                'newsletter_id' => $remainderNewsletter->id,
-                'user_id' => $recipient->user_id,
-                'email' => $recipient->email,
-                'name' => $recipient->name,
-                'token' => Str::random(64),
-                'status' => 'pending',
-            ]);
-            $recipientIds[] = $nr->id;
+        DB::beginTransaction();
+        try {
+            $chunk = [];
+            foreach ($remaining as $recipient) {
+                $chunk[] = [
+                    'newsletter_id' => $remainderNewsletter->id,
+                    'user_id' => $recipient->user_id,
+                    'email' => $recipient->email,
+                    'name' => $recipient->name,
+                    'token' => Str::random(64),
+                    'status' => 'pending',
+                ];
+                if (count($chunk) >= 500) {
+                    NewsletterRecipient::insert($chunk);
+                    $chunk = [];
+                }
+            }
+            if (! empty($chunk)) {
+                NewsletterRecipient::insert($chunk);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $remainderNewsletter->update(['status' => 'draft', 'send_token' => null]);
+            report($e);
+
+            throw $e;
         }
 
-        $chunks = array_chunk($recipientIds, 50);
-        foreach ($chunks as $index => $chunk) {
-            SendNewsletterBatch::dispatch($remainderNewsletter->id, $chunk)
-                ->delay(now()->addSeconds($index * 15));
-        }
+        $batchIndex = 0;
+        NewsletterRecipient::where('newsletter_id', $remainderNewsletter->id)
+            ->where('status', 'pending')
+            ->chunkById(50, function ($recipientChunk) use ($remainderNewsletter, &$batchIndex) {
+                SendNewsletterBatch::dispatch($remainderNewsletter->id, $recipientChunk->pluck('id')->toArray())
+                    ->delay(now()->addSeconds($batchIndex * 15));
+                $batchIndex++;
+            });
     }
 
     protected function configureRoleMailer(Role $role): void

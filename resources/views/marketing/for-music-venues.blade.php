@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for Music Venues | Concert Calendar</x-slot>
+    <x-slot name="title">Free Event Schedule for Music Venues | Fill Your Stage</x-slot>
     <x-slot name="description">Your venue's concert calendar without Ticketmaster fees. Let bands apply to play, sell tickets directly to fans, and email your audience. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
@@ -88,6 +88,7 @@
             "Direct fan newsletters"
         ],
         "url": "{{ url()->current() }}",
+        "keywords": "music venue calendar, concert venue schedule, venue booking requests, music venue management, free venue scheduling",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -148,7 +149,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="text-gray-900 dark:text-white font-medium">Ticketing platforms taking 15-25% of your door</div>
+                                <div class="text-gray-900 dark:text-white font-medium">Ticketing platforms eating into your door revenue</div>
                                 <div class="text-gray-600 dark:text-gray-500 text-sm">Service fees, facility fees, processing fees...</div>
                             </div>
                         </div>
@@ -749,6 +750,52 @@
         </div>
     </section>
 
+    <!-- How it Works -->
+    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    How it works
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Get your venue calendar online in three steps.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
+                        1
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create Your Calendar</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
+                        Sign up and add your venue details. Set up stages or rooms as sub-schedules if you have multiple spaces.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
+                        2
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add Your Events</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
+                        Add events manually, import from Google Calendar, or accept booking requests from performers.
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-sky-500 to-cyan-500 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-sky-500/25">
+                        3
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share & Sell</h3>
+                    <p class="text-gray-600 dark:text-gray-400 text-sm">
+                        Embed on your website, share on social, and start selling tickets with QR check-in.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Key Features -->
     <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -803,8 +850,18 @@
                     </x-slot:icon>
                 </x-feature-link-card>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all features
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
+
+    @include('marketing.partials.pricing-nudge')
 
     <!-- Related Pages -->
     <section class="bg-white dark:bg-[#0a0a0f] py-20">
@@ -848,6 +905,14 @@
                     </svg>
                 </a>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all use cases
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -863,70 +928,62 @@
                 </p>
             </div>
 
-            <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+            <div class="space-y-4">
+                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Is Event Schedule free for music venues?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Yes. Event Schedule is free forever for sharing your concert calendar, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.
                         </p>
-                    </div>
-                </div>
+                </details>
 
-                <div class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I manage multiple stages and event types?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 2" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Yes. Use sub-schedules to organize by stage, genre, or event type - main stage shows, acoustic sets, open mics, and DJ nights. Each event can have its own lineup, description, images, and ticket options.
                         </p>
-                    </div>
-                </div>
+                </details>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             How do music fans discover our shows?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Fans can follow your venue's schedule and receive email notifications for new shows. Embed your calendar on your website, share on social media, or send newsletters to subscribers with upcoming lineups.
                         </p>
-                    </div>
-                </div>
+                </details>
 
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I link performers to their own schedules?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 4" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                    </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
                             Yes. When you add a performer to your event, it can automatically appear on their schedule too. Both calendars stay in sync. This cross-linking helps fans discover your venue through the artists they follow.
                         </p>
-                    </div>
-                </div>
+                </details>
             </div>
         </div>
     </section>

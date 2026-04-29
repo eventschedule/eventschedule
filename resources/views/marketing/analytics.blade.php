@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Privacy-First Event Analytics | Track Views & Conversions - Event Schedule</x-slot>
+    <x-slot name="title">Privacy-First Event Analytics - Event Schedule</x-slot>
     <x-slot name="description">Track page views, device breakdown, traffic sources, and conversion rates. Privacy-first analytics with no external services required.</x-slot>
     <x-slot name="breadcrumbTitle">Analytics</x-slot>
 

@@ -5,6 +5,9 @@
         <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ __('messages.admin_newsletters') }}</h2>
                 <div class="flex gap-3">
+                    <x-secondary-link href="{{ route('admin.newsletters.templates') }}">
+                        {{ __('messages.templates') }}
+                    </x-secondary-link>
                     <x-secondary-link href="{{ route('admin.newsletters.segments') }}">
                         {{ __('messages.segments') }}
                     </x-secondary-link>
@@ -36,7 +39,7 @@
                             <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.sent') }}</th>
                             <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.open_rate') }}</th>
                             <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.click_rate') }}</th>
-                            <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.sent_date') }}</th>
+                            <th class="px-6 py-3 {{ is_rtl() ? 'text-right' : 'text-left' }} text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.created') }}</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
@@ -70,7 +73,7 @@
                                 {{ $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                                {{ $newsletter->sent_at ? $newsletter->sent_at->format('M j, Y') : $newsletter->created_at->format('M j, Y') }}
+                                {{ $newsletter->created_at->format('M j, Y') }}
                             </td>
                             <td class="px-6 py-4 text-sm {{ is_rtl() ? 'text-left' : 'text-right' }}">
                                 <div class="flex gap-2 {{ is_rtl() ? 'justify-start' : 'justify-end' }}">

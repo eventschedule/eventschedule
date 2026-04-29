@@ -12,10 +12,13 @@
             $otherRole = $event->getOtherRole($subdomain);
         }
         $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT;
+        $isUnverifiedRole = $role && $role->exists
+            && !($role->email && $role->email_verified_at)
+            && !($role->phone && $role->phone_verified_at);
     @endphp
 
     <x-slot name="meta">
-        @if (request()->embed || request('graphic') || (isset($event) && $event->exists && $event->is_private))
+        @if ($noIndex || request()->embed || request('graphic') || (isset($event) && $event->exists && ($event->is_private || $event->is_draft)) || $isUnverifiedRole)
             <meta name="robots" content="noindex, nofollow">
         @else
             <meta name="robots" content="index, follow">
@@ -51,7 +54,7 @@
             <meta name="twitter:image" content="{{ config('app.url') . '/images/social/home.png' }}">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
-        @elseif ($event && $event->exists)
+        @elseif ($event && $event->exists && !$event->is_draft)
             @if ($galleryMode)
                 @php
                     $galleryTitle = $event->translatedName() . ' - ' . __('messages.photo_gallery');
@@ -268,7 +271,7 @@
 
         </style>
 
-        @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
+        @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             @php
                 // Use translation if available, otherwise fall back to event methods
                 $eventName = (isset($translation) && $translation && $translation->name_translated) ? $translation->name_translated : $event->translatedName();
@@ -349,9 +352,9 @@
                     }
                 }
                 
-                // Get social links
+                // Suppressed for unverified schedules to avoid seeding structured-data backlinks.
                 $sameAs = [];
-                if ($role->social_links) {
+                if ($role->social_links && !$isUnverifiedRole) {
                     $socialLinks = json_decode($role->social_links, true);
                     if (is_array($socialLinks)) {
                         foreach ($socialLinks as $link) {
@@ -392,7 +395,7 @@
             </script>
         @endif
 
-        @if ($event && $event->exists && $event->starts_at && !($passwordGate ?? false))
+        @if ($event && $event->exists && $event->starts_at && !$event->is_draft && !($passwordGate ?? false))
             <script type="application/ld+json" {!! nonce_attr() !!}>
             {
                 "@context": "https://schema.org",

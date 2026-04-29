@@ -95,6 +95,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/decline/{request_hash}', [CarpoolController::class, 'declineRequest'])->name('carpool.decline')->middleware('throttle:10,1');
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/review', [CarpoolController::class, 'storeReview'])->name('carpool.store_review')->middleware('throttle:5,60');
         Route::post('/carpool/{event_hash}/offer/{offer_hash}/report/{user_hash}', [CarpoolController::class, 'report'])->name('carpool.report')->middleware('throttle:5,60');
+        // Static map image (must be before catch-all /{slug}/{id} routes)
+        Route::get('/map-image/{id}', [AppController::class, 'mapImage']);
+
         // Photo gallery
         Route::get('/{slug}/{id}/{date}/photos', [EventController::class, 'photoGallery'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/photos', [EventController::class, 'photoGallery'])->where(['id' => '[A-Za-z0-9+=]+']);
@@ -160,7 +163,7 @@ Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->
 Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
 Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/event', [EventController::class, 'createDefault'])->name('event.create_default');
     Route::get('/dashboard', [HomeController::class, 'home'])->name('home');
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
@@ -177,8 +180,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/tickets', [TicketController::class, 'tickets'])->name('tickets');
     Route::get('/my-carpools', [CarpoolController::class, 'myCarpools'])->name('my_carpools');
     Route::get('/sales', [TicketController::class, 'sales'])->name('sales');
+    Route::get('/sales/import', [TicketController::class, 'importAttendees'])->name('sales.import');
+    Route::post('/sales/import', [TicketController::class, 'importAttendeesStore'])->middleware('throttle:10,1')->name('sales.import_store');
     Route::get('/sales/export', [TicketController::class, 'exportSales'])->name('sales.export');
     Route::get('/sales/export-feedback', [FeedbackController::class, 'export'])->name('sales.export_feedback')->middleware('throttle:10,1');
+    Route::post('/sales/send-feedback-now', [TicketController::class, 'sendFeedbackNow'])->name('sales.send_feedback_now');
+    Route::post('/sales/cancel-feedback', [TicketController::class, 'cancelFeedback'])->name('sales.cancel_feedback');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');
@@ -213,6 +220,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/newsletter-segments/{hash}/users/{userHash}', [NewsletterController::class, 'deleteSegmentUser'])->name('newsletter.segment.user.delete');
     Route::get('/newsletter-import', [NewsletterController::class, 'importForm'])->name('newsletter.import');
     Route::post('/newsletter-import', [NewsletterController::class, 'importStore'])->name('newsletter.import.store');
+    Route::get('/newsletter-templates', [NewsletterController::class, 'templates'])->name('newsletter.templates');
+    Route::get('/newsletter-templates/create', [NewsletterController::class, 'createTemplate'])->name('newsletter.template.create');
+    Route::post('/newsletter-templates', [NewsletterController::class, 'storeTemplate'])->name('newsletter.template.store');
+    Route::get('/newsletter-templates/{hash}/edit', [NewsletterController::class, 'editTemplate'])->name('newsletter.template.edit');
+    Route::put('/newsletter-templates/{hash}', [NewsletterController::class, 'updateTemplate'])->name('newsletter.template.update');
+    Route::delete('/newsletter-templates/{hash}', [NewsletterController::class, 'deleteTemplate'])->name('newsletter.template.delete');
+    Route::post('/newsletter-templates/{hash}/preview', [NewsletterController::class, 'previewTemplate'])->name('newsletter.template.preview');
+    Route::post('/newsletters/{hash}/save-as-template', [NewsletterController::class, 'saveAsTemplate'])->name('newsletter.save_as_template');
+    Route::post('/newsletters/upload-image', [NewsletterController::class, 'uploadImage'])->name('newsletter.upload_image');
 
     // Boost routes
     Route::get('/boost', [BoostController::class, 'index'])->name('boost.index');
@@ -262,6 +278,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
     Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
+    Route::post('/google-calendar/member-sync/{subdomain}', [GoogleCalendarController::class, 'memberSync'])->name('google.calendar.member_sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
 
@@ -292,6 +309,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/unfollow', [RoleController::class, 'unfollow'])->name('role.unfollow');
     Route::put('/{subdomain}/update', [RoleController::class, 'update'])->name('role.update');
     Route::post('/{subdomain}/test-email', [RoleController::class, 'testEmail'])->name('role.test_email');
+    Route::post('/{subdomain}/test-feedback-email', [RoleController::class, 'testFeedbackEmail'])->name('role.test_feedback_email');
     Route::delete('/{subdomain}/delete', [RoleController::class, 'delete'])->name('role.delete');
     Route::delete('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
@@ -299,7 +317,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');
     Route::post('/{subdomain}/phone/send-code', [RoleController::class, 'phoneSendCode'])->name('role.phone.send_code')->middleware('throttle:5,1');
     Route::post('/{subdomain}/phone/verify-code', [RoleController::class, 'phoneVerifyCode'])->name('role.phone.verify_code')->middleware('throttle:10,1');
-    Route::get('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite');
+    Route::post('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite')->middleware('throttle:5,1');
     Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/clone-event/{hash}', [EventController::class, 'clone'])->name('event.clone');
@@ -312,6 +330,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/events-graphic/settings', [GraphicController::class, 'getSettings'])->name('event.graphic_settings');
     Route::post('/{subdomain}/events-graphic/settings', [GraphicController::class, 'saveSettings'])->name('event.save_graphic_settings');
     Route::post('/{subdomain}/events-graphic/ai-text', [GraphicController::class, 'processGraphicAIText'])->name('event.graphic_ai_text');
+    Route::get('/{subdomain}/events-graphic/ai-text/{requestId}', [GraphicController::class, 'pollGraphicAIText'])->name('event.graphic_ai_poll');
     Route::post('/{subdomain}/events-graphic/test-email', [GraphicController::class, 'sendTestEmail'])->name('event.graphic_test_email');
     Route::post('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'uploadHeaderImage'])->name('event.graphic_upload_header_image');
     Route::delete('/{subdomain}/events-graphic/header-image', [GraphicController::class, 'deleteHeaderImage'])->name('event.graphic_delete_header_image');
@@ -319,6 +338,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::post('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
+    Route::post('/{subdomain}/publish-event/{hash}', [EventController::class, 'publish'])->name('event.publish');
     Route::post('/{subdomain}/preview-link', [RoleController::class, 'previewLink'])->name('role.preview_link');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
     Route::get('/{subdomain}/team/add-member', [RoleController::class, 'createMember'])->name('role.create_member');
@@ -332,22 +352,27 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/import/eventbrite', [EventbriteController::class, 'show'])->name('event.show_import_eventbrite');
     Route::post('/{subdomain}/import/eventbrite/connect', [EventbriteController::class, 'connect'])->name('event.eventbrite_connect')->middleware('throttle:10,1');
     Route::post('/{subdomain}/import/eventbrite/import', [EventbriteController::class, 'import'])->name('event.eventbrite_import')->middleware('throttle:60,1');
-    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts')->middleware('throttle:10,1');
-    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/get-style-prompt', [RoleController::class, 'getStylePrompt'])->name('role.get_style_prompt')->middleware('throttle:30,1');
-    Route::post('/{subdomain}/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPrompt'])->name('role.get_schedule_details_prompt')->middleware('throttle:30,1');
-    Route::post('/generate-style', [RoleController::class, 'generateStyleNew'])->name('role.generate_style_new')->middleware('throttle:5,1');
-    Route::post('/generate-style-image', [RoleController::class, 'generateStyleImageNew'])->name('role.generate_style_image_new')->middleware('throttle:5,1');
-    Route::post('/generate-schedule-details', [RoleController::class, 'generateScheduleDetailsNew'])->name('role.generate_schedule_details_new')->middleware('throttle:5,1');
-    Route::post('/get-style-prompt', [RoleController::class, 'getStylePromptNew'])->name('role.get_style_prompt_new')->middleware('throttle:30,1');
-    Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new')->middleware('throttle:30,1');
-    Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt')->middleware('throttle:30,1');
+    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
+    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
+    Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer');
+    Route::get('/{subdomain}/generate-flyer/{requestId}', [EventController::class, 'pollFlyer'])->name('event.poll_flyer');
+    Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style');
+    Route::post('/{subdomain}/generate-style-image', [RoleController::class, 'generateStyleImage'])->name('role.generate_style_image');
+    Route::get('/{subdomain}/generate-style-image/{requestId}', [RoleController::class, 'pollStyleImage'])->name('role.poll_style_image');
+    Route::post('/{subdomain}/generate-schedule-details', [RoleController::class, 'generateScheduleDetails'])->name('role.generate_schedule_details');
+    Route::post('/{subdomain}/get-style-prompt', [RoleController::class, 'getStylePrompt'])->name('role.get_style_prompt');
+    Route::post('/{subdomain}/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPrompt'])->name('role.get_schedule_details_prompt');
+    Route::post('/generate-style', [RoleController::class, 'generateStyleNew'])->name('role.generate_style_new');
+    Route::post('/generate-style-image', [RoleController::class, 'generateStyleImageNew'])->name('role.generate_style_image_new');
+    Route::get('/generate-style-image/{requestId}', [RoleController::class, 'pollStyleImageNew'])->name('role.poll_style_image_new');
+    Route::post('/generate-schedule-details', [RoleController::class, 'generateScheduleDetailsNew'])->name('role.generate_schedule_details_new');
+    Route::post('/get-style-prompt', [RoleController::class, 'getStylePromptNew'])->name('role.get_style_prompt_new');
+    Route::post('/get-schedule-details-prompt', [RoleController::class, 'getScheduleDetailsPromptNew'])->name('role.get_schedule_details_prompt_new');
+    Route::post('/{subdomain}/generate-event-details', [EventController::class, 'generateEventDetails'])->name('event.generate_event_details');
+    Route::post('/{subdomain}/get-event-details-prompt', [EventController::class, 'getEventDetailsPrompt'])->name('event.get_event_details_prompt');
     Route::post('/{subdomain}/test-import', [RoleController::class, 'testImport'])->name('role.test_import');
+    Route::post('/{subdomain}/update-all-categories', [RoleController::class, 'updateAllCategories'])->name('role.update_all_categories');
+    Route::post('/{subdomain}/update-all-slugs', [RoleController::class, 'updateAllSlugs'])->name('role.update_all_slugs');
     Route::get('/{subdomain}/search-youtube', [RoleController::class, 'searchYouTube'])->name('role.search_youtube');
     Route::get('/{subdomain}/match-videos', [RoleController::class, 'getTalentRolesWithoutVideos'])->name('role.talent_roles_without_videos');
     Route::post('/{subdomain}/save-video', [RoleController::class, 'saveVideo'])->name('role.save_video');
@@ -373,6 +398,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{subdomain}/scan-agenda', [EventController::class, 'scanAgenda'])->name('event.scan_agenda')->where('subdomain', '(?!docs(?=/|$))[^/]+');
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
 
+    Route::get('/{subdomain}/audit-log', [RoleController::class, 'auditLog'])->name('role.audit_log')->where('subdomain', '(?!docs(?=/|$)|admin(?=/|$))[^/]+');
     Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
@@ -474,6 +500,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/admin/newsletter-segments/{hash}/users', [AdminNewsletterController::class, 'storeSegmentUser'])->name('admin.newsletters.segment.user.store');
         Route::delete('/admin/newsletter-segments/{hash}/users/{userHash}', [AdminNewsletterController::class, 'deleteSegmentUser'])->name('admin.newsletters.segment.user.delete');
         Route::get('/admin/users/search', [AdminNewsletterController::class, 'searchUsers'])->name('admin.users.search');
+        Route::get('/admin/newsletter-templates', [AdminNewsletterController::class, 'templates'])->name('admin.newsletters.templates');
+        Route::get('/admin/newsletter-templates/create', [AdminNewsletterController::class, 'createTemplate'])->name('admin.newsletters.template.create');
+        Route::post('/admin/newsletter-templates', [AdminNewsletterController::class, 'storeTemplate'])->name('admin.newsletters.template.store');
+        Route::get('/admin/newsletter-templates/{hash}/edit', [AdminNewsletterController::class, 'editTemplate'])->name('admin.newsletters.template.edit');
+        Route::put('/admin/newsletter-templates/{hash}', [AdminNewsletterController::class, 'updateTemplate'])->name('admin.newsletters.template.update');
+        Route::delete('/admin/newsletter-templates/{hash}', [AdminNewsletterController::class, 'deleteTemplate'])->name('admin.newsletters.template.delete');
+        Route::post('/admin/newsletter-templates/{hash}/preview', [AdminNewsletterController::class, 'previewTemplate'])->name('admin.newsletters.template.preview');
+        Route::post('/admin/newsletters/{hash}/save-as-template', [AdminNewsletterController::class, 'saveAsTemplate'])->name('admin.newsletters.save_as_template');
+        Route::post('/admin/newsletters/upload-image', [AdminNewsletterController::class, 'uploadImage'])->name('admin.newsletters.upload_image');
 
         // Admin support chat routes (hosted only)
         if (config('app.hosted')) {
@@ -500,6 +535,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::get('/tmp/event-image/{filename?}', [AppController::class, 'tempEventImage'])->name('event.tmp_image');
+Route::get('/map-image/{id}', [AppController::class, 'mapImage'])->name('map.image');
 
 // Marketing pages - only shown on the nexus (eventschedule.com)
 if (config('app.is_nexus')) {
@@ -1206,11 +1242,6 @@ if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.ho
     Route::get('/blog/feed', [BlogController::class, 'feed'])->name('blog.feed');
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }
-
-// Signed URL route for deleting blog posts via email link (no auth required, signed URL provides security)
-Route::get('/blog/delete-signed/{blogPost}', [BlogController::class, 'destroySigned'])
-    ->name('blog.destroy.signed')
-    ->middleware('signed');
 
 if (config('app.hosted') && ! config('app.is_testing')) {
     Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {

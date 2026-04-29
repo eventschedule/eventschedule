@@ -15,4 +15,15 @@ class ThrottleRequests extends BaseThrottleRequests
 
         return parent::handle($request, $next, $maxAttempts, $decayMinutes, $prefix);
     }
+
+    protected function resolveRequestSignature($request)
+    {
+        if ($user = $request->user()) {
+            $routeName = $request->route()?->getName() ?? $request->path();
+
+            return sha1($routeName.'|'.$user->getAuthIdentifier());
+        }
+
+        return parent::resolveRequestSignature($request);
+    }
 }

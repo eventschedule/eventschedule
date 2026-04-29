@@ -887,6 +887,9 @@ class BackupService
             // Recalculate ticket sold counts from actual imported SaleTickets
             foreach ($idMap['tickets'] as $newTicketId) {
                 $saleTickets = SaleTicket::where('ticket_id', $newTicketId)
+                    ->whereHas('sale', function ($q) {
+                        $q->whereIn('status', ['paid', 'unpaid', 'amount_mismatch']);
+                    })
                     ->with('sale:id,event_date')
                     ->get();
                 $sold = [];
@@ -1032,6 +1035,13 @@ class BackupService
         while (Role::where('subdomain', $subdomain)->exists()) {
             $subdomain = $baseSubdomain.'-'.$counter;
             $counter++;
+        }
+
+        if (config('app.hosted')) {
+            $user = \App\Models\User::find($userId);
+            if ($user && $user->owner()->count() >= 50) {
+                throw new \Exception(__('messages.schedule_limit'));
+            }
         }
 
         $role = new Role;

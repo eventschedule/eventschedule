@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Tools Event Schedule Replaces | All-in-One Event Management Platform</x-slot>
+    <x-slot name="title">Replace Google Forms, Mailchimp, Canva & More for Events | Event Schedule</x-slot>
     <x-slot name="description">Replace Google Forms, Mailchimp, Canva, Notion, Trello, and other general-purpose tools with Event Schedule. Purpose-built event management with ticketing, event pages, and AI features.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 
@@ -164,33 +164,33 @@
                     [
                         'label' => 'Registration & Forms',
                         'tools' => [
-                            ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms', 'desc' => 'Replace manual registration forms with built-in ticketing, payments, and automatic confirmations.', 'icon' => 'clipboard', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
-                            ['name' => 'SurveyMonkey', 'route' => 'marketing.replace_surveymonkey', 'desc' => 'Replace repurposed survey forms with purpose-built event registration, ticketing, and attendee management.', 'icon' => 'clipboard', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
-                            ['name' => 'Doodle', 'route' => 'marketing.replace_doodle', 'desc' => 'Replace date polling with a full event platform. Create, publish, and sell tickets for events in one place.', 'icon' => 'calendar', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
+                            ['name' => 'Google Forms', 'route' => 'marketing.replace_google_forms', 'desc' => 'Replace manual registration forms with built-in ticketing, payments, and automatic confirmations.', 'pricing' => 'Free (+ add-ons) vs. $5/mo', 'icon' => 'clipboard', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
+                            ['name' => 'SurveyMonkey', 'route' => 'marketing.replace_surveymonkey', 'desc' => 'Replace repurposed survey forms with purpose-built event registration, ticketing, and attendee management.', 'pricing' => '$25+/mo vs. $5/mo', 'icon' => 'clipboard', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
+                            ['name' => 'Doodle', 'route' => 'marketing.replace_doodle', 'desc' => 'Replace date polling with a full event platform. Create, publish, and sell tickets for events in one place.', 'pricing' => '$7+/mo/user vs. $5/mo', 'icon' => 'calendar', 'icon_bg' => 'bg-emerald-100 dark:bg-emerald-500/20', 'icon_color' => 'text-emerald-600 dark:text-emerald-400'],
                         ],
                     ],
                     [
                         'label' => 'Marketing & Communication',
                         'tools' => [
-                            ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp', 'desc' => 'Replace a separate email tool with built-in newsletters, A/B testing, and integrated attendee data.', 'icon' => 'mail', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
-                            ['name' => 'Canva', 'route' => 'marketing.replace_canva', 'desc' => 'Replace manual flyer design with auto-generated event graphics and AI-powered flyers.', 'icon' => 'image', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
-                            ['name' => 'Linktree', 'route' => 'marketing.replace_linktree', 'desc' => 'Replace a list of links with a schedule page that shows events, sells tickets, and collects subscribers.', 'icon' => 'link', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
+                            ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp', 'desc' => 'Replace a separate email tool with built-in newsletters, A/B testing, and integrated attendee data.', 'pricing' => '$13+/mo vs. $5/mo', 'icon' => 'mail', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
+                            ['name' => 'Canva', 'route' => 'marketing.replace_canva', 'desc' => 'Replace manual flyer design with auto-generated event graphics and AI-powered flyers.', 'pricing' => '$15/mo vs. $5/mo', 'icon' => 'image', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
+                            ['name' => 'Linktree', 'route' => 'marketing.replace_linktree', 'desc' => 'Replace a list of links with a schedule page that shows events, sells tickets, and collects subscribers.', 'pricing' => '$9/mo vs. $5/mo', 'icon' => 'link', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
                         ],
                     ],
                     [
                         'label' => 'Scheduling & Tracking',
                         'tools' => [
-                            ['name' => 'Calendly', 'route' => 'marketing.replace_calendly', 'desc' => 'Replace appointment scheduling with public event pages, ticketing, and a shareable event calendar.', 'icon' => 'calendar', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
-                            ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets', 'desc' => 'Replace spreadsheet tracking with automatic attendee management, sales dashboards, and CSV exports.', 'icon' => 'chart', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
-                            ['name' => 'QR Code Generators', 'route' => 'marketing.replace_qr_code_generators', 'desc' => 'Replace standalone QR tools with tickets that include built-in QR codes and a live check-in dashboard.', 'icon' => 'qr', 'icon_bg' => 'bg-indigo-100 dark:bg-indigo-500/20', 'icon_color' => 'text-indigo-600 dark:text-indigo-400'],
+                            ['name' => 'Calendly', 'route' => 'marketing.replace_calendly', 'desc' => 'Replace appointment scheduling with public event pages, ticketing, and a shareable event calendar.', 'pricing' => '$10/mo/user vs. $5/mo', 'icon' => 'calendar', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
+                            ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets', 'desc' => 'Replace spreadsheet tracking with automatic attendee management, sales dashboards, and CSV exports.', 'pricing' => 'Free (manual effort) vs. $5/mo', 'icon' => 'chart', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                            ['name' => 'QR Code Generators', 'route' => 'marketing.replace_qr_code_generators', 'desc' => 'Replace standalone QR tools with tickets that include built-in QR codes and a live check-in dashboard.', 'pricing' => '$5 to $15/mo vs. $5/mo', 'icon' => 'qr', 'icon_bg' => 'bg-indigo-100 dark:bg-indigo-500/20', 'icon_color' => 'text-indigo-600 dark:text-indigo-400'],
                         ],
                     ],
                     [
                         'label' => 'Planning & Websites',
                         'tools' => [
-                            ['name' => 'Squarespace', 'route' => 'marketing.replace_squarespace', 'desc' => 'Replace a full website builder with ready-made event pages, integrated ticketing, and no plugins needed.', 'icon' => 'globe', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
-                            ['name' => 'Notion', 'route' => 'marketing.replace_notion', 'desc' => 'Replace internal workspace planning with public event pages, built-in ticketing, and automatic calendar sync.', 'icon' => 'code', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
-                            ['name' => 'Trello', 'route' => 'marketing.replace_trello', 'desc' => 'Replace task boards with a full event platform. Public event pages, ticketing, and payments built in.', 'icon' => 'layout', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                            ['name' => 'Squarespace', 'route' => 'marketing.replace_squarespace', 'desc' => 'Replace a full website builder with ready-made event pages, integrated ticketing, and no plugins needed.', 'pricing' => '$16+/mo vs. $5/mo', 'icon' => 'globe', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
+                            ['name' => 'Notion', 'route' => 'marketing.replace_notion', 'desc' => 'Replace internal workspace planning with public event pages, built-in ticketing, and automatic calendar sync.', 'pricing' => '$10/mo/user vs. $5/mo', 'icon' => 'code', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
+                            ['name' => 'Trello', 'route' => 'marketing.replace_trello', 'desc' => 'Replace task boards with a full event platform. Public event pages, ticketing, and payments built in.', 'pricing' => '$6/mo/user vs. $5/mo', 'icon' => 'layout', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                         ],
                     ],
                 ];
@@ -207,7 +207,10 @@
                                         <x-marketing-icon :icon="$tool['icon']" :class="'w-5 h-5 ' . $tool['icon_color']" />
                                     </div>
                                     <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">{{ $tool['name'] }}</h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">{{ $tool['desc'] }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex-grow">{{ $tool['desc'] }}</p>
+                                    @if (!empty($tool['pricing']))
+                                        <p class="text-xs font-medium text-gray-400 dark:text-gray-500 mb-4">{{ $tool['pricing'] }}</p>
+                                    @endif
                                     <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
                                         Learn more
                                         <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

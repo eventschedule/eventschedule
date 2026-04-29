@@ -53,6 +53,7 @@ class GenerateSocialImages extends Command
         'features-embed-tickets' => '/features/embed-tickets',
         'features-availability' => '/features/availability',
         'features-feedback' => '/features/feedback',
+        'features-carpool' => '/features/carpool',
 
         // Integration pages
         'google-calendar' => '/google-calendar',

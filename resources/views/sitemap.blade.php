@@ -1,10 +1,11 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>{{ url('/') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/')])
     </url>
     @if(config('app.hosted') && $showMarketingLinks)
     <url>
@@ -12,24 +13,28 @@
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features')])
     </url>
     <url>
         <loc>{{ url('/pricing') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/pricing')])
     </url>
     <url>
         <loc>{{ url('/about') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/about')])
     </url>
     <url>
         <loc>{{ url('/examples') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/examples')])
     </url>
     {{-- TODO: Re-enable search when there are more events worldwide
     <url>
@@ -44,780 +49,903 @@
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/compare')])
     </url>
     <url>
         <loc>{{ url('/eventbrite-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/eventbrite-alternative')])
     </url>
     <url>
         <loc>{{ url('/luma-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/luma-alternative')])
     </url>
     <url>
         <loc>{{ url('/ticket-tailor-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/ticket-tailor-alternative')])
     </url>
     <url>
         <loc>{{ url('/google-calendar-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/google-calendar-alternative')])
     </url>
     <url>
         <loc>{{ url('/meetup-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/meetup-alternative')])
     </url>
     <url>
         <loc>{{ url('/dice-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/dice-alternative')])
     </url>
     <url>
         <loc>{{ url('/brown-paper-tickets-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/brown-paper-tickets-alternative')])
     </url>
     <url>
         <loc>{{ url('/splash-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/splash-alternative')])
     </url>
     <url>
         <loc>{{ url('/sched-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/sched-alternative')])
     </url>
     <url>
         <loc>{{ url('/whova-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/whova-alternative')])
     </url>
     <url>
         <loc>{{ url('/accelevents-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/accelevents-alternative')])
     </url>
     <url>
         <loc>{{ url('/tito-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/tito-alternative')])
     </url>
     <url>
         <loc>{{ url('/addevent-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/addevent-alternative')])
     </url>
     <url>
         <loc>{{ url('/pretix-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/pretix-alternative')])
     </url>
     <url>
         <loc>{{ url('/humanitix-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/humanitix-alternative')])
     </url>
     <url>
         <loc>{{ url('/eventzilla-alternative') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/eventzilla-alternative')])
     </url>
     <url>
         <loc>{{ url('/replace') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/replace')])
     </url>
     <url>
         <loc>{{ url('/google-forms-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/google-forms-replacement')])
     </url>
     <url>
         <loc>{{ url('/mailchimp-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/mailchimp-replacement')])
     </url>
     <url>
         <loc>{{ url('/canva-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/canva-replacement')])
     </url>
     <url>
         <loc>{{ url('/linktree-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/linktree-replacement')])
     </url>
     <url>
         <loc>{{ url('/google-sheets-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/google-sheets-replacement')])
     </url>
     <url>
         <loc>{{ url('/calendly-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/calendly-replacement')])
     </url>
     <url>
         <loc>{{ url('/surveymonkey-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/surveymonkey-replacement')])
     </url>
     <url>
         <loc>{{ url('/doodle-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/doodle-replacement')])
     </url>
     <url>
         <loc>{{ url('/qr-code-generator-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/qr-code-generator-replacement')])
     </url>
     <url>
         <loc>{{ url('/squarespace-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/squarespace-replacement')])
     </url>
     <url>
         <loc>{{ url('/notion-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/notion-replacement')])
     </url>
     <url>
         <loc>{{ url('/trello-replacement') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/trello-replacement')])
     </url>
     <url>
         <loc>{{ url('/faq') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/faq')])
     </url>
     <url>
         <loc>{{ url('/docs/referral-program') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/referral-program')])
     </url>
     <url>
         <loc>{{ url('/why-create-account') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/why-create-account')])
     </url>
     <url>
         <loc>{{ url('/features/ticketing') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/ticketing')])
     </url>
     <url>
         <loc>{{ url('/features/integrations') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/integrations')])
     </url>
     <url>
         <loc>{{ url('/selfhost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/selfhost')])
     </url>
     <url>
         <loc>{{ url('/features/ai') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/ai')])
     </url>
     <url>
         <loc>{{ url('/features/calendar-sync') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/calendar-sync')])
     </url>
     <url>
         <loc>{{ url('/google-calendar') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/google-calendar')])
     </url>
     <url>
         <loc>{{ url('/caldav') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/caldav')])
     </url>
     <url>
         <loc>{{ url('/stripe') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/stripe')])
     </url>
     <url>
         <loc>{{ url('/invoiceninja') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/invoiceninja')])
     </url>
     <url>
         <loc>{{ url('/features/analytics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/analytics')])
     </url>
     <url>
         <loc>{{ url('/features/custom-fields') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/custom-fields')])
     </url>
     <url>
         <loc>{{ url('/features/custom-labels') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/custom-labels')])
     </url>
     <url>
         <loc>{{ url('/features/team-scheduling') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/team-scheduling')])
     </url>
     <url>
         <loc>{{ url('/features/sub-schedules') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/sub-schedules')])
     </url>
     <url>
         <loc>{{ url('/features/online-events') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/online-events')])
     </url>
     <url>
         <loc>{{ url('/open-source') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/open-source')])
     </url>
     <url>
         <loc>{{ url('/features/newsletters') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/newsletters')])
     </url>
     <url>
         <loc>{{ url('/features/recurring-events') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/recurring-events')])
     </url>
     <url>
         <loc>{{ url('/features/embed-calendar') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/embed-calendar')])
     </url>
     <url>
         <loc>{{ url('/features/embed-tickets') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/embed-tickets')])
     </url>
     <url>
         <loc>{{ url('/features/fan-videos') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/fan-videos')])
     </url>
     <url>
         <loc>{{ url('/features/polls') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/polls')])
     </url>
     <url>
         <loc>{{ url('/features/boost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/boost')])
     </url>
     <url>
         <loc>{{ url('/features/private-events') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/private-events')])
     </url>
     <url>
         <loc>{{ url('/features/event-graphics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/event-graphics')])
     </url>
     <url>
         <loc>{{ url('/features/white-label') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/white-label')])
     </url>
     <url>
         <loc>{{ url('/features/custom-css') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/custom-css')])
     </url>
     <url>
         <loc>{{ url('/features/custom-domain') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/custom-domain')])
     </url>
     <url>
         <loc>{{ url('/features/feedback') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/feedback')])
     </url>
     <url>
         <loc>{{ url('/features/availability') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/availability')])
     </url>
     <url>
         <loc>{{ url('/features/carpool') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/carpool')])
     </url>
     <url>
         <loc>{{ url('/saas') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/saas')])
     </url>
     <url>
         <loc>{{ url('/for-talent') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-talent')])
     </url>
     <url>
         <loc>{{ url('/for-venues') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-venues')])
     </url>
     <url>
         <loc>{{ url('/for-curators') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-curators')])
     </url>
     <url>
         <loc>{{ url('/for-musicians') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-musicians')])
     </url>
     <url>
         <loc>{{ url('/for-djs') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-djs')])
     </url>
     <url>
         <loc>{{ url('/for-comedians') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-comedians')])
     </url>
     <url>
         <loc>{{ url('/for-circus-acrobatics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-circus-acrobatics')])
     </url>
     <url>
         <loc>{{ url('/for-magicians') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-magicians')])
     </url>
     <url>
         <loc>{{ url('/for-spoken-word') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-spoken-word')])
     </url>
     <url>
         <loc>{{ url('/for-bars') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-bars')])
     </url>
     <url>
         <loc>{{ url('/for-nightclubs') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-nightclubs')])
     </url>
     <url>
         <loc>{{ url('/for-music-venues') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-music-venues')])
     </url>
     <url>
         <loc>{{ url('/for-theaters') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-theaters')])
     </url>
     <url>
         <loc>{{ url('/for-dance-groups') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-dance-groups')])
     </url>
     <url>
         <loc>{{ url('/for-theater-performers') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-theater-performers')])
     </url>
     <url>
         <loc>{{ url('/for-food-trucks-and-vendors') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-food-trucks-and-vendors')])
     </url>
     <url>
         <loc>{{ url('/for-comedy-clubs') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-comedy-clubs')])
     </url>
     <url>
         <loc>{{ url('/for-restaurants') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-restaurants')])
     </url>
     <url>
         <loc>{{ url('/for-breweries-and-wineries') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-breweries-and-wineries')])
     </url>
     <url>
         <loc>{{ url('/for-art-galleries') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-art-galleries')])
     </url>
     <url>
         <loc>{{ url('/for-community-centers') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-community-centers')])
     </url>
     <url>
         <loc>{{ url('/for-fitness-and-yoga') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-fitness-and-yoga')])
     </url>
     <url>
         <loc>{{ url('/for-workshop-instructors') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-workshop-instructors')])
     </url>
     <url>
         <loc>{{ url('/for-visual-artists') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-visual-artists')])
     </url>
     <url>
         <loc>{{ url('/for-farmers-markets') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-farmers-markets')])
     </url>
     <url>
         <loc>{{ url('/for-hotels-and-resorts') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-hotels-and-resorts')])
     </url>
     <url>
         <loc>{{ url('/for-libraries') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-libraries')])
     </url>
     <url>
         <loc>{{ url('/for-webinars') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-webinars')])
     </url>
     <url>
         <loc>{{ url('/for-live-concerts') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-live-concerts')])
     </url>
     <url>
         <loc>{{ url('/for-online-classes') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-online-classes')])
     </url>
     <url>
         <loc>{{ url('/for-virtual-conferences') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-virtual-conferences')])
     </url>
     <url>
         <loc>{{ url('/for-live-qa-sessions') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-live-qa-sessions')])
     </url>
     <url>
         <loc>{{ url('/for-watch-parties') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-watch-parties')])
     </url>
     <url>
         <loc>{{ url('/for-ai-agents') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/for-ai-agents')])
     </url>
     <url>
         <loc>{{ url('/use-cases') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/use-cases')])
     </url>
     <url>
         <loc>{{ url('/contact') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/contact')])
     </url>
     <url>
         <loc>{{ url('/docs') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs')])
     </url>
     <url>
         <loc>{{ url('/docs/getting-started') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/getting-started')])
     </url>
     <url>
         <loc>{{ url('/docs/creating-schedules') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/creating-schedules')])
     </url>
 <url>
         <loc>{{ url('/docs/schedule-styling') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/schedule-styling')])
     </url>
     <url>
         <loc>{{ url('/docs/creating-events') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/creating-events')])
     </url>
     <url>
         <loc>{{ url('/docs/sharing') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/sharing')])
     </url>
     <url>
         <loc>{{ url('/docs/tickets') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/tickets')])
     </url>
     <url>
         <loc>{{ url('/docs/event-graphics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/event-graphics')])
     </url>
     <url>
         <loc>{{ url('/docs/newsletters') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/newsletters')])
     </url>
     <url>
         <loc>{{ url('/docs/analytics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/analytics')])
     </url>
     <url>
         <loc>{{ url('/docs/account-settings') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/account-settings')])
     </url>
     <url>
         <loc>{{ url('/docs/managing-schedules') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/managing-schedules')])
     </url>
     <url>
         <loc>{{ url('/docs/boost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/boost')])
     </url>
     <url>
         <loc>{{ url('/docs/ai-import') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/ai-import')])
     </url>
     <url>
         <loc>{{ url('/docs/scan-agenda') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/scan-agenda')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/installation') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/installation')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/stripe') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/stripe')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/google-calendar') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/google-calendar')])
     </url>
     <url>
         <loc>{{ url('/docs/saas') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>{{ url('/docs/saas/setup') }}</loc>
-        <lastmod>{{ $lastmod }}</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/saas')])
     </url>
     <url>
         <loc>{{ url('/docs/saas/custom-domains') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/saas/custom-domains')])
     </url>
     <url>
         <loc>{{ url('/docs/saas/twilio') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/saas/twilio')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/boost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/boost')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/admin') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/admin')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/email') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/email')])
     </url>
     <url>
         <loc>{{ url('/docs/selfhost/ai') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/ai')])
     </url>
     <url>
         <loc>{{ url('/docs/developer/api') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/developer/api')])
     </url>
     <url>
         <loc>{{ url('/docs/developer/webhooks') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/developer/webhooks')])
     </url>
     <url>
         <loc>{{ url('/privacy') }}</loc>

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Socialite\Facades\Socialite;
 
 class SocialAuthController extends Controller
@@ -46,6 +47,7 @@ class SocialAuthController extends Controller
         if ($user) {
             // User found by google_id - log them in
             Auth::login($user, true);
+            $this->processSmsClaim($user);
             AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
 
             return redirect()->intended(route('home', absolute: false));
@@ -62,6 +64,16 @@ class SocialAuthController extends Controller
                     ->withErrors(['email' => __('messages.google_account_already_linked')]);
             }
 
+            // If the existing local account has a password, we cannot safely
+            // auto-link a Google account on first SSO attempt — that would let
+            // an attacker who controls a matching Google mailbox hijack a
+            // password-protected account they never owned. Require the user to
+            // sign in with their password first and link from settings.
+            if (! $user->google_oauth_id && $user->hasPassword()) {
+                return redirect()->route('login')
+                    ->withErrors(['email' => __('messages.google_link_requires_password_login')]);
+            }
+
             // Link Google account to existing user
             $user->google_oauth_id = $googleId;
             if (! $user->profile_image_url && $googleUser->getAvatar()) {
@@ -73,6 +85,7 @@ class SocialAuthController extends Controller
             $user->save();
 
             Auth::login($user, true);
+            $this->processSmsClaim($user);
             AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
 
             return redirect()->intended(route('home', absolute: false));
@@ -143,9 +156,22 @@ class SocialAuthController extends Controller
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
 
         Auth::login($user, true);
+        $this->processSmsClaim($user);
         AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id, 'User', $user->id, null, null, 'new_account');
 
         return redirect()->intended(route('home', absolute: false));
+    }
+
+    private function processSmsClaim(User $user): void
+    {
+        $smsToken = session()->pull('sms_token');
+        if ($smsToken) {
+            $smsPhone = Cache::get('sms_signup_'.$smsToken);
+            if ($smsPhone) {
+                $user->claimRolesByPhone($smsPhone);
+                Cache::forget('sms_signup_'.$smsToken);
+            }
+        }
     }
 
     /**

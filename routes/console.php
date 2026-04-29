@@ -32,15 +32,15 @@ Schedule::call(function () {
 
 Schedule::call(function () {
     Artisan::call('app:release-tickets');
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-release-tickets')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:expire-waitlist');
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-expire-waitlist')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:translate');
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-translate')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('google:refresh-webhooks');
@@ -54,11 +54,11 @@ Schedule::call(function () {
 
 Schedule::call(function () {
     Artisan::call('app:send-graphic-emails');
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-send-graphic-emails')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('app:send-feedback-requests');
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('send-feedback-requests')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     Artisan::call('caldav:sync');
@@ -120,7 +120,7 @@ Schedule::call(function () {
 
 Schedule::call(function () {
     Artisan::call('app:send-carpool-reminders');
-})->hourly()->appendOutputTo(storage_path('logs/scheduler.log'));
+})->hourly()->name('app-send-carpool-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
     if (config('app.hosted')) {
@@ -133,3 +133,7 @@ Schedule::call(function () {
         Artisan::call('app:process-referral-credits');
     }
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('app:update-geoip');
+})->monthly()->appendOutputTo(storage_path('logs/scheduler.log'));

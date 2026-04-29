@@ -22,10 +22,17 @@
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ $feedbackUrl }}"
-               style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ __('messages.feedback_submit') }}
-            </a>
+            @if(empty($sale->id))
+                <span style="display: inline-block; background-color: #ccc; color: white; padding: 15px 30px; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    {{ __('messages.feedback_submit') }}
+                </span>
+                <p style="font-size: 12px; color: #999; margin-top: 8px;">{{ __('messages.test_email_note') }}</p>
+            @else
+                <a href="{{ $feedbackUrl }}"
+                   style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    {{ __('messages.feedback_submit') }}
+                </a>
+            @endif
         </div>
 
         @if($event->isFanContentEnabled() && $event->getGuestUrl())
@@ -38,7 +45,7 @@
             <div style="background-color: #f0f4ff; padding: 16px 20px; border-radius: 8px; margin: 20px 0;">
                 <p style="font-size: 14px; font-weight: bold; margin: 0 0 6px 0; color: #333;">{{ __('messages.feedback_share_content') }}</p>
                 <p style="font-size: 13px; margin: 0 0 8px 0; color: #555;">{{ __('messages.feedback_share_content_description', ['types' => implode(', ', $types)]) }}</p>
-                <a href="{{ $event->getGuestUrl() }}#event-media-section" style="font-size: 13px; color: #4E81FA;">{{ __('messages.feedback_share_content_link') }}</a>
+                <a href="{{ $event->getGuestUrl($role?->subdomain, null, true) }}#event-media-section" style="font-size: 13px; color: #4E81FA;">{{ __('messages.feedback_share_content_link') }}</a>
             </div>
         @endif
 

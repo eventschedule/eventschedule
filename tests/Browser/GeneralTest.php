@@ -37,8 +37,9 @@ class GeneralTest extends DuskTestCase
             $browser->clickLink('Edit Schedule')
                 ->assertPathIs('/venue/edit')
                 ->waitFor('#edit-form', 15)
-                ->click('a[data-section="section-details"]')
-                ->pause(500);
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-details\"]').click()");
+            $browser->pause(500);
             $browser->script("document.querySelector('.details-tab[data-tab=\"contact\"]').click()");
             $browser->waitFor('#website', 5)
                 ->script("document.getElementById('website').value = 'https://google.com'");
@@ -51,8 +52,9 @@ class GeneralTest extends DuskTestCase
             $browser->clickLink('Edit Schedule')
                 ->assertPathIs('/talent/edit')
                 ->waitFor('#edit-form', 15)
-                ->click('a[data-section="section-details"]')
-                ->pause(500);
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-details\"]').click()");
+            $browser->pause(500);
             $browser->script("document.querySelector('.details-tab[data-tab=\"contact\"]').click()");
             $browser->waitFor('#website', 5)
                 ->script("document.getElementById('website').value = 'https://google.com'");

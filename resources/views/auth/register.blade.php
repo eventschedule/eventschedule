@@ -54,9 +54,13 @@
                 // Hide guest option if code was already sent
                 var guestOption = document.getElementById('guest-option');
                 if (guestOption) guestOption.style.display = 'none';
-                // If email is readonly, lock it
-                if (emailInput.readOnly) {
+                // Hide "Already registered?" link
+                var alreadyRegistered = document.getElementById('already-registered');
+                if (alreadyRegistered) alreadyRegistered.style.display = 'none';
+                // Re-lock email field (code was already sent before the error redirect)
+                if (emailInput.value) {
                     lockedEmail = emailInput.value.toLowerCase();
+                    emailInput.setAttribute('readonly', 'readonly');
                     emailInput.classList.add('bg-gray-100', 'dark:bg-gray-700', 'cursor-not-allowed');
                 }
             }
@@ -142,6 +146,9 @@
                             // Hide the guest option
                             var guestOption = document.getElementById('guest-option');
                             if (guestOption) guestOption.style.display = 'none';
+                            // Hide the "Already registered?" link
+                            var alreadyRegistered = document.getElementById('already-registered');
+                            if (alreadyRegistered) alreadyRegistered.style.display = 'none';
                             // Focus on the name field and pre-fill if available
                             var nameInput = document.getElementById('name');
                             if (nameInput) {
@@ -366,6 +373,17 @@
         <input type="hidden" id="timezone" name="timezone"/>
         <input type="hidden" id="language_code" name="language_code"/>
 
+        @if ($errors->any() && ! $errors->has('database_host'))
+        <div class="mb-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-3">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <p class="text-sm text-red-700 dark:text-red-300">{{ $errors->first() }}</p>
+            </div>
+        </div>
+        @endif
+
         @if (! config('app.hosted') && ! config('app.url'))
 
             @if (!is_writable(base_path('.env')))
@@ -437,6 +455,15 @@
 
         @if (! config('app.hosted') && ! config('app.url'))
         <div id="registration-fields" style="display: none;">
+        @endif
+
+        @if(!empty($smsPhone))
+            <input type="hidden" name="sms_token" value="{{ old('sms_token', session('sms_token', request('sms_token'))) }}">
+            <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg">
+                <p class="text-sm text-green-700 dark:text-green-300">
+                    {{ __('messages.phone_will_be_verified') }}: {{ $smsPhone }}
+                </p>
+            </div>
         @endif
 
         <!-- Email Address -->
@@ -537,7 +564,7 @@
         @endif
 
         @if (config('app.hosted'))
-        <div class="mt-6">
+        <div class="mt-6" id="already-registered">
             <a class="hover:underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}">
                 {{ __('messages.already_registered') }}

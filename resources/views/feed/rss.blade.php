@@ -3,18 +3,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>{{ htmlspecialchars($role->name, ENT_XML1, 'UTF-8') }}</title>
-        <link>{{ $role->getGuestUrl() }}</link>
+        <link>{{ custom_domain_url($role->getGuestUrl()) }}</link>
         <description>{{ htmlspecialchars($role->name . ' - Event Schedule', ENT_XML1, 'UTF-8') }}</description>
         <language>{{ app()->getLocale() }}</language>
         @if($items->first())
         <lastBuildDate>{{ $items->first()['event']->getStartDateTime($items->first()['date'])->toRssString() }}</lastBuildDate>
         @endif
-        <atom:link href="{{ route('feed.rss', ['subdomain' => $role->subdomain]) }}" rel="self" type="application/rss+xml" />
+        <atom:link href="{{ custom_domain_url(route('feed.rss', ['subdomain' => $role->subdomain])) }}" rel="self" type="application/rss+xml" />
         @foreach($items as $item)
         @php
             $event = $item['event'];
             $date = $item['date'];
-            $guestUrl = $event->getGuestUrl($role->subdomain, $date);
+            $guestUrl = custom_domain_url($event->getGuestUrl($role->subdomain, $date));
             $description = $event->short_description ?: (strip_tags($event->description_html ?: '') ? \Illuminate\Support\Str::limit(strip_tags($event->description_html), 300) : '');
         @endphp
         <item>

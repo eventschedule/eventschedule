@@ -69,18 +69,28 @@ class Translate extends Command
         }
 
         if ($roleId) {
-            $this->translateRoles($roleId);
-            $this->translateCuratorEvents(null, $roleId);
-            $this->translateEventParts(null, $roleId);
+            $this->runTranslateStep(fn () => $this->translateRoles($roleId));
+            $this->runTranslateStep(fn () => $this->translateCuratorEvents(null, $roleId));
+            $this->runTranslateStep(fn () => $this->translateEventParts(null, $roleId));
         } elseif ($eventId) {
-            $this->translateEvents($eventId);
-            $this->translateCuratorEvents($eventId);
-            $this->translateEventParts($eventId);
+            $this->runTranslateStep(fn () => $this->translateEvents($eventId));
+            $this->runTranslateStep(fn () => $this->translateCuratorEvents($eventId));
+            $this->runTranslateStep(fn () => $this->translateEventParts($eventId));
         } else {
-            $this->translateRoles();
-            $this->translateEvents();
-            $this->translateCuratorEvents();
-            $this->translateEventParts();
+            $this->runTranslateStep(fn () => $this->translateRoles());
+            $this->runTranslateStep(fn () => $this->translateEvents());
+            $this->runTranslateStep(fn () => $this->translateCuratorEvents());
+            $this->runTranslateStep(fn () => $this->translateEventParts());
+        }
+    }
+
+    private function runTranslateStep(callable $step): void
+    {
+        try {
+            $step();
+        } catch (\Exception $e) {
+            $this->error("Translation step failed: {$e->getMessage()}");
+            report($e);
         }
     }
 
@@ -508,61 +518,67 @@ class Translate extends Command
                 continue;
             }
 
-            if ($debug) {
-                $this->info("\nProcessing event ID: {$event->id}, Name: {$event->name}, Language: {$event->getLanguageCode()}");
-            } else {
-                $this->info("\nTranslating event {$event->id}...");
-            }
-
-            if ($event->getLanguageCode() == 'en') {
-                $event->name_en = '';
-                $event->description_en = '';
-                $event->short_description_en = '';
-                $event->save();
-
+            try {
                 if ($debug) {
-                    $this->info("Skipping translation for English event ID: {$event->id}");
+                    $this->info("\nProcessing event ID: {$event->id}, Name: {$event->name}, Language: {$event->getLanguageCode()}");
+                } else {
+                    $this->info("\nTranslating event {$event->id}...");
                 }
 
+                if ($event->getLanguageCode() == 'en') {
+                    $event->name_en = '';
+                    $event->description_en = '';
+                    $event->short_description_en = '';
+                    $event->save();
+
+                    if ($debug) {
+                        $this->info("Skipping translation for English event ID: {$event->id}");
+                    }
+
+                    $bar->advance();
+
+                    continue;
+                }
+
+                $glossary = [];
+                if ($event->creatorRole && $event->creatorRole->name && $event->creatorRole->name_en) {
+                    $glossary[$event->creatorRole->name] = $event->creatorRole->name_en;
+                }
+
+                if ($event->name && ! $event->name_en) {
+                    $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en', $glossary);
+                    if ($debug) {
+                        $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
+                    }
+                }
+
+                if ($event->description && ! $event->description_en) {
+                    $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en', $glossary);
+                    if ($debug) {
+                        $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
+                    }
+                }
+
+                if ($event->short_description && ! $event->short_description_en) {
+                    $event->short_description_en = GeminiUtils::translate($event->short_description, $event->getLanguageCode(), 'en', $glossary);
+                    if ($debug) {
+                        $this->info("Translated short_description from {$event->getLanguageCode()} to en: '{$event->short_description}' → '{$event->short_description_en}'");
+                    }
+                }
+
+                $event->translation_attempts++;
+                $event->last_translated_at = now();
+                UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $event->creator_role_id ?? 0);
+
+                $event->save();
                 $bar->advance();
 
-                continue;
+                sleep(rand(12, 18));
+            } catch (\Exception $e) {
+                $this->error("Failed to translate event ID: {$event->id} - {$e->getMessage()}");
+                report($e);
+                $bar->advance();
             }
-
-            $glossary = [];
-            if ($event->creatorRole && $event->creatorRole->name && $event->creatorRole->name_en) {
-                $glossary[$event->creatorRole->name] = $event->creatorRole->name_en;
-            }
-
-            if ($event->name && ! $event->name_en) {
-                $event->name_en = GeminiUtils::translate($event->name, $event->getLanguageCode(), 'en', $glossary);
-                if ($debug) {
-                    $this->info("Translated name from {$event->getLanguageCode()} to en: '{$event->name}' → '{$event->name_en}'");
-                }
-            }
-
-            if ($event->description && ! $event->description_en) {
-                $event->description_en = GeminiUtils::translate($event->description, $event->getLanguageCode(), 'en', $glossary);
-                if ($debug) {
-                    $this->info("Translated description from {$event->getLanguageCode()} to en: '{$event->description}' → '{$event->description_en}'");
-                }
-            }
-
-            if ($event->short_description && ! $event->short_description_en) {
-                $event->short_description_en = GeminiUtils::translate($event->short_description, $event->getLanguageCode(), 'en', $glossary);
-                if ($debug) {
-                    $this->info("Translated short_description from {$event->getLanguageCode()} to en: '{$event->short_description}' → '{$event->short_description_en}'");
-                }
-            }
-
-            $event->translation_attempts++;
-            $event->last_translated_at = now();
-            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $event->creator_role_id ?? 0);
-
-            $event->save();
-            $bar->advance();
-
-            sleep(rand(12, 18));
         }
 
         $bar->finish();
@@ -626,69 +642,75 @@ class Translate extends Command
                 continue;
             }
 
-            if ($debug) {
-                $this->info("\nProcessing event role ID: {$eventRole->id}, Event ID: {$eventRole->event_id}, Role ID: {$eventRole->role_id}");
-                $this->info("Event language: {$eventRole->event->getLanguageCode()}, Role language: {$eventRole->role->language_code}");
-            }
+            try {
+                if ($debug) {
+                    $this->info("\nProcessing event role ID: {$eventRole->id}, Event ID: {$eventRole->event_id}, Role ID: {$eventRole->role_id}");
+                    $this->info("Event language: {$eventRole->event->getLanguageCode()}, Role language: {$eventRole->role->language_code}");
+                }
 
-            if ($eventRole->event->getLanguageCode() == $eventRole->role->language_code) {
-                $eventRole->name_translated = '';
-                $eventRole->description_translated = '';
-                $eventRole->short_description_translated = '';
+                if ($eventRole->event->getLanguageCode() == $eventRole->role->language_code) {
+                    $eventRole->name_translated = '';
+                    $eventRole->description_translated = '';
+                    $eventRole->short_description_translated = '';
+                    $eventRole->save();
+
+                    if ($debug) {
+                        $this->info("Skipping translation as languages match: {$eventRole->event->getLanguageCode()}");
+                    }
+
+                    continue;
+                }
+
+                $translationAttempted = false;
+
+                if (! $eventRole->name_translated && $eventRole->event->name) {
+                    $fromLang = $eventRole->event->getLanguageCode();
+                    $toLang = $eventRole->role->language_code;
+                    $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
+                    $translationAttempted = true;
+                    if ($debug) {
+                        $this->info("Translated event name from {$fromLang} to {$toLang}: '{$eventRole->event->name}' → '{$eventRole->name_translated}'");
+                    }
+                }
+
+                if (! $eventRole->description_translated && $eventRole->event->description) {
+                    $fromLang = $eventRole->event->getLanguageCode();
+                    $toLang = $eventRole->role->language_code;
+                    $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
+                    $translationAttempted = true;
+                    if ($eventRole->description_translated) {
+                        $eventRole->description_html_translated = \App\Utils\MarkdownUtils::convertToHtml($eventRole->description_translated);
+                    }
+                    if ($debug) {
+                        $this->info("Translated event description from {$fromLang} to {$toLang}: '{$eventRole->event->description}' → '{$eventRole->description_translated}'");
+                    }
+                }
+
+                if (! $eventRole->short_description_translated && $eventRole->event->short_description) {
+                    $fromLang = $eventRole->event->getLanguageCode();
+                    $toLang = $eventRole->role->language_code;
+                    $eventRole->short_description_translated = GeminiUtils::translate($eventRole->event->short_description, $fromLang, $toLang);
+                    $translationAttempted = true;
+                    if ($debug) {
+                        $this->info("Translated event short_description from {$fromLang} to {$toLang}: '{$eventRole->event->short_description}' → '{$eventRole->short_description_translated}'");
+                    }
+                }
+
+                if ($translationAttempted) {
+                    $eventRole->translation_attempts++;
+                    $eventRole->last_translated_at = now();
+                    UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $eventRole->role_id);
+                }
+
                 $eventRole->save();
+                $bar->advance();
 
-                if ($debug) {
-                    $this->info("Skipping translation as languages match: {$eventRole->event->getLanguageCode()}");
-                }
-
-                continue;
+                sleep(rand(12, 18));
+            } catch (\Exception $e) {
+                $this->error("Failed to translate event role ID: {$eventRole->id} - {$e->getMessage()}");
+                report($e);
+                $bar->advance();
             }
-
-            $translationAttempted = false;
-
-            if (! $eventRole->name_translated && $eventRole->event->name) {
-                $fromLang = $eventRole->event->getLanguageCode();
-                $toLang = $eventRole->role->language_code;
-                $eventRole->name_translated = GeminiUtils::translate($eventRole->event->name, $fromLang, $toLang);
-                $translationAttempted = true;
-                if ($debug) {
-                    $this->info("Translated event name from {$fromLang} to {$toLang}: '{$eventRole->event->name}' → '{$eventRole->name_translated}'");
-                }
-            }
-
-            if (! $eventRole->description_translated && $eventRole->event->description) {
-                $fromLang = $eventRole->event->getLanguageCode();
-                $toLang = $eventRole->role->language_code;
-                $eventRole->description_translated = GeminiUtils::translate($eventRole->event->description, $fromLang, $toLang);
-                $translationAttempted = true;
-                if ($eventRole->description_translated) {
-                    $eventRole->description_html_translated = \App\Utils\MarkdownUtils::convertToHtml($eventRole->description_translated);
-                }
-                if ($debug) {
-                    $this->info("Translated event description from {$fromLang} to {$toLang}: '{$eventRole->event->description}' → '{$eventRole->description_translated}'");
-                }
-            }
-
-            if (! $eventRole->short_description_translated && $eventRole->event->short_description) {
-                $fromLang = $eventRole->event->getLanguageCode();
-                $toLang = $eventRole->role->language_code;
-                $eventRole->short_description_translated = GeminiUtils::translate($eventRole->event->short_description, $fromLang, $toLang);
-                $translationAttempted = true;
-                if ($debug) {
-                    $this->info("Translated event short_description from {$fromLang} to {$toLang}: '{$eventRole->event->short_description}' → '{$eventRole->short_description_translated}'");
-                }
-            }
-
-            if ($translationAttempted) {
-                $eventRole->translation_attempts++;
-                $eventRole->last_translated_at = now();
-                UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $eventRole->role_id);
-            }
-
-            $eventRole->save();
-            $bar->advance();
-
-            sleep(rand(12, 18));
         }
 
         $bar->finish();
@@ -748,53 +770,59 @@ class Translate extends Command
                 continue;
             }
 
-            $languageCode = $part->event->getLanguageCode();
-
-            if ($debug) {
-                $this->info("\nProcessing event part ID: {$part->id}, Name: {$part->name}, Event ID: {$part->event_id}, Language: {$languageCode}");
-            }
-
-            if ($languageCode == 'en') {
-                $part->name_en = '';
-                $part->description_en = '';
-                $part->save();
+            try {
+                $languageCode = $part->event->getLanguageCode();
 
                 if ($debug) {
-                    $this->info("Skipping translation for English event part ID: {$part->id}");
+                    $this->info("\nProcessing event part ID: {$part->id}, Name: {$part->name}, Event ID: {$part->event_id}, Language: {$languageCode}");
                 }
 
+                if ($languageCode == 'en') {
+                    $part->name_en = '';
+                    $part->description_en = '';
+                    $part->save();
+
+                    if ($debug) {
+                        $this->info("Skipping translation for English event part ID: {$part->id}");
+                    }
+
+                    $bar->advance();
+
+                    continue;
+                }
+
+                $glossary = [];
+                if ($part->event->creatorRole && $part->event->creatorRole->name && $part->event->creatorRole->name_en) {
+                    $glossary[$part->event->creatorRole->name] = $part->event->creatorRole->name_en;
+                }
+
+                if ($part->name && ! $part->name_en) {
+                    $part->name_en = GeminiUtils::translate($part->name, $languageCode, 'en', $glossary);
+                    if ($debug) {
+                        $this->info("Translated name from {$languageCode} to en: '{$part->name}' → '{$part->name_en}'");
+                    }
+                }
+
+                if ($part->description && ! $part->description_en) {
+                    $part->description_en = GeminiUtils::translate($part->description, $languageCode, 'en', $glossary);
+                    if ($debug) {
+                        $this->info("Translated description from {$languageCode} to en: '{$part->description}' → '{$part->description_en}'");
+                    }
+                }
+
+                $part->translation_attempts++;
+                $part->last_translated_at = now();
+                UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $part->event->creator_role_id ?? 0);
+
+                $part->save();
                 $bar->advance();
 
-                continue;
+                sleep(rand(12, 18));
+            } catch (\Exception $e) {
+                $this->error("Failed to translate event part ID: {$part->id} - {$e->getMessage()}");
+                report($e);
+                $bar->advance();
             }
-
-            $glossary = [];
-            if ($part->event->creatorRole && $part->event->creatorRole->name && $part->event->creatorRole->name_en) {
-                $glossary[$part->event->creatorRole->name] = $part->event->creatorRole->name_en;
-            }
-
-            if ($part->name && ! $part->name_en) {
-                $part->name_en = GeminiUtils::translate($part->name, $languageCode, 'en', $glossary);
-                if ($debug) {
-                    $this->info("Translated name from {$languageCode} to en: '{$part->name}' → '{$part->name_en}'");
-                }
-            }
-
-            if ($part->description && ! $part->description_en) {
-                $part->description_en = GeminiUtils::translate($part->description, $languageCode, 'en', $glossary);
-                if ($debug) {
-                    $this->info("Translated description from {$languageCode} to en: '{$part->description}' → '{$part->description_en}'");
-                }
-            }
-
-            $part->translation_attempts++;
-            $part->last_translated_at = now();
-            UsageTrackingService::track(UsageTrackingService::GEMINI_TRANSLATE, $part->event->creator_role_id ?? 0);
-
-            $part->save();
-            $bar->advance();
-
-            sleep(rand(12, 18));
         }
 
         $bar->finish();

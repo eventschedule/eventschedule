@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $trustedProxies = env('TRUSTED_PROXIES');
         if ($trustedProxies) {
             $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : explode(',', $trustedProxies));
+        } elseif (env('IS_NEXUS')) {
+            $middleware->trustProxies(at: '*');
         }
 
         $middleware->validateCsrfTokens(except: [
@@ -52,6 +54,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->append(SecurityHeaders::class);
 
+        $middleware->authenticateSessions();
+
         $middleware->web(append: [
             CaptureUtmParameters::class,
             SetUserLanguage::class,
@@ -64,6 +68,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => RedirectIfAuthenticated::class,
             'admin' => EnsureUserIsAdmin::class,
             'throttle' => \App\Http\Middleware\ThrottleRequests::class,
+            'app_subdomain' => \App\Http\Middleware\RedirectToAppSubdomain::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

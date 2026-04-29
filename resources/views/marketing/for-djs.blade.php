@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Schedule for DJs | Share Your Sets & Pack the Dancefloor</x-slot>
+    <x-slot name="title">Free Event Schedule for DJs | Share Your Sets & Bookings</x-slot>
     <x-slot name="description">Share your DJ sets, residencies, and guest spots. Reach fans directly with no promoter middleman. Sell tickets with zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For DJs</x-slot>
 
@@ -87,6 +87,7 @@
             "Direct fan newsletters"
         ],
         "url": "{{ url()->current() }}",
+        "keywords": "DJ schedule, DJ set times, DJ booking platform, DJ event calendar, DJ gig management, free DJ scheduling",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -647,8 +648,18 @@
                     </x-slot:icon>
                 </x-feature-link-card>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all features
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
+
+    @include('marketing.partials.pricing-nudge')
 
     <!-- Related Pages -->
     <section class="bg-white dark:bg-[#0a0a0f] py-20">
@@ -692,6 +703,14 @@
                     </svg>
                 </a>
             </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    See all use cases
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -707,70 +726,62 @@
                 </p>
             </div>
 
-            <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+            <div class="space-y-4">
+                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I track both residencies and one-off bookings?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Yes. Set up recurring events for your weekly or monthly residencies and they auto-repeat on your schedule. Add guest spots and festival bookings as one-off events. Everything shows up in one clean calendar that fans can follow.
+                    </p>
+                </details>
 
-                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Does it handle late-night sets that cross midnight?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 2" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Yes. Event Schedule handles overnight events correctly. A set that starts at 11 PM Saturday and ends at 4 AM Sunday displays properly on the Saturday listing, so fans know when to show up.
+                    </p>
+                </details>
 
-                <div class="bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             What happens when a club adds me to their lineup?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings.
+                    </p>
+                </details>
 
-                <div class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                    <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I sell advance tickets to my sets?
                         </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
-                    </button>
-                    <div x-show="open === 4" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe's standard processing fees.
-                        </p>
-                    </div>
-                </div>
+                    </summary>
+                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
+                        Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe's standard processing fees.
+                    </p>
+                </details>
             </div>
         </div>
     </section>

@@ -60,7 +60,23 @@
     @endphp
 
   {{-- Status alerts (full width, fixed at top) --}}
-  @if ($eventIsAccepted === null)
+  @if ($event->is_draft)
+  <div class="fixed top-0 left-0 w-full bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-6 z-[60]">
+    <div class="container mx-auto px-5">
+      <div class="flex items-center justify-center gap-3 text-blue-800 dark:text-blue-200">
+        <span class="text-xl font-medium">{{ __('messages.event_is_draft') }}</span>
+        @if (auth()->user() && auth()->user()->isEditor($role->subdomain))
+        <form method="POST" action="{{ route('event.publish', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}">
+          @csrf
+          <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
+            {{ __('messages.publish') }}
+          </button>
+        </form>
+        @endif
+      </div>
+    </div>
+  </div>
+  @elseif ($eventIsAccepted === null)
   <div class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
@@ -78,7 +94,7 @@
   </div>
   @endif
   {{-- Spacer for fixed banner --}}
-  @if ($eventIsAccepted === null || ! $eventIsAccepted)
+  @if ($event->is_draft || $eventIsAccepted === null || ! $eventIsAccepted)
   <div class="h-[68px]"></div>
   @endif
 
@@ -254,7 +270,7 @@
                         </button>
                       </a>
                     @else
-                      <a href="{{ app_url(route('role.follow', ['subdomain' => $each->subdomain], false)) }}"
+                      <a href="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
                         class="inline-flex items-center justify-center">
                         <button type="button" name="follow"
                           style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
@@ -318,7 +334,7 @@
         @endforeach
 
         {{-- Venue card --}}
-        @if ($event->venue && $event->venue->name)
+        @if ($event->venue && ($event->venue->name || $event->venue->formatted_address))
         @php
           $hasVenueHeader = ($event->venue->header_image && $event->venue->header_image !== 'none') || $event->venue->header_image_url;
         @endphp
@@ -344,21 +360,27 @@
               <img class="w-full aspect-square object-cover rounded-xl mb-3" src="{{ $event->venue->profile_image_url }}" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>
             @endif
             <div class="flex flex-col gap-2">
-              @if ($event->venue->isClaimed())
-                @php
-                  $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
-                @endphp
-                <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
-                  <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
+              @if ($event->venue->name)
+                @if ($event->venue->isClaimed())
+                  @php
+                    $venuePanelUrl = route('role.view_guest', ['subdomain' => $event->venue->subdomain]);
+                  @endphp
+                  <a href="{{ $venuePanelUrl }}" class="group inline-flex items-center gap-2 w-fit hover:opacity-80 transition-opacity duration-200 {{ $role->isRtl() ? 'rtl' : '' }}">
+                    <span class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
+                      {{ $event->venue->translatedName() }}
+                    </span>
+                    <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                    </svg>
+                  </a>
+                @else
+                  <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
                     {{ $event->venue->translatedName() }}
-                  </span>
-                  <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
-                  </svg>
-                </a>
+                  </p>
+                @endif
               @else
-                <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $event->venue->font_family) }}', sans-serif;">
-                  {{ $event->venue->translatedName() }}
+                <p class="text-base leading-snug font-semibold text-gray-900 dark:text-gray-100">
+                  {{ $event->venue->shortAddress() }}
                 </p>
               @endif
               @if ($event->venue->translatedDescription())
@@ -414,8 +436,9 @@
               <div class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
                 @foreach (json_decode($event->venue->social_links) as $link)
                   @if ($link)
+                  @php $venueLinkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
                   <a
-                    href="{{ $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
+                    href="{{ $venueLinkPlatform !== 'website' ? $event->venue->getGuestUrl() . '/' . $venueLinkPlatform : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
                     class="w-10 h-10 rounded-full flex justify-center items-center bg-gray-100 dark:bg-gray-700 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200"
                     title="{{ App\Utils\UrlUtils::clean($link->url) }}"
                     >
@@ -429,7 +452,7 @@
               @endif
 
               {{-- Calendar links dropdown (inside venue card) --}}
-              @if ($event->tickets_enabled && $event->isPro())
+              @if (!$event->is_draft && $event->tickets_enabled && $event->isPro())
               <div class="relative mt-4">
                 <button type="button"
                     class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -477,12 +500,22 @@
                 src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $event->venue->google_place_id ? 'place_id:' . $event->venue->google_place_id : urlencode($event->venue->bestAddress()) }}">
             </iframe>
           </div>
+          @elseif ($event->venue->formatted_address && config('services.google.backend') && $event->venue->geo_lat)
+          <div class="overflow-hidden sm:rounded-b-2xl" style="height: 200px;">
+            <a href="https://www.google.com/maps/search/?api=1&query={{ $event->venue->geo_lat }},{{ $event->venue->geo_lon }}" target="_blank" rel="noopener noreferrer">
+              <img src="{{ route('map.image', ['id' => \App\Utils\UrlUtils::encodeId($event->venue->id)]) }}"
+                   alt="{{ $event->venue->bestAddress() }}"
+                   width="600" height="200"
+                   loading="lazy"
+                   style="width: 100%; height: 200px; object-fit: cover;">
+            </a>
+          </div>
           @endif
         </div>
         @endif
 
         {{-- Calendar links dropdown (fallback when no venue) --}}
-        @if (!($event->venue && $event->venue->name) && $event->tickets_enabled && $event->isPro())
+        @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled && $event->isPro())
         <div class="relative {{ $role->isRtl() ? 'rtl' : '' }}">
           <button type="button"
               class="calendar-card-toggle inline-flex justify-center gap-x-1.5 rounded-xl px-6 py-3 text-base font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -609,9 +642,21 @@
         {{-- Calendar date badge + time --}}
         @php
           $startDt = $event->getStartDateTime($date, true);
-          $endDt = $event->duration >= 24 ? (clone $startDt)->addHours($event->duration) : null;
+          $endDt = $event->isMultiDay() ? (clone $startDt)->addHours($event->duration) : null;
         @endphp
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
+          @if ($event->isMultiDay() && $endDt && $startDt->format('m') === $endDt->format('m'))
+          <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
+                      bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
+            <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
+                  style="color: {{ $accentColor }};">
+              {{ $startDt->format('M') }}
+            </span>
+            <span class="text-lg font-bold text-gray-900 dark:text-white leading-none">
+              {{ $startDt->format('j') }}-{{ $endDt->format('j') }}
+            </span>
+          </div>
+          @else
           <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
@@ -622,6 +667,7 @@
               {{ $startDt->format('j') }}
             </span>
           </div>
+          @endif
           <div class="flex flex-col">
             @if ($event->isMultiDay())
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -636,7 +682,11 @@
                 $multiEndTime = $endDt->format($timeFormat);
               @endphp
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ $multiStartTime }} - {{ $multiEndTime }}
+                @if ($startDt->format('m') === $endDt->format('m'))
+                  {{ $startDt->format('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('j') }}, {{ $multiEndTime }}
+                @else
+                  {{ $startDt->format('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('M j') }}, {{ $multiEndTime }}
+                @endif
               </span>
             @else
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -652,7 +702,7 @@
         </div>
 
         {{-- Location icon badge --}}
-        @if (($event->venue && $event->venue->name) || $event->getEventUrlDomain())
+        @if (($event->venue && ($event->venue->name || $event->venue->shortAddress())) || $event->getEventUrlDomain())
         <div>
           <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">
             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
@@ -780,7 +830,7 @@
         @endif
 
         {{-- CTA buttons --}}
-        <div style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
+        <div id="desktop-cta-buttons" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
         @if ($event->canAcceptRsvp($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
@@ -818,7 +868,7 @@
                 </button>
             </a>
           @endif
-        @elseif ($event->allTicketSalesEnded() && $event->tickets_enabled)
+        @elseif (!$event->is_draft && $event->allTicketSalesEnded() && $event->tickets_enabled)
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_sales_ended') }}</span>
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -829,7 +879,7 @@
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
               </button>
-        @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
+        @elseif (!$event->is_draft && $event->allTicketSalesNotStarted() && $event->tickets_enabled)
               <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.sales_not_started') }}</span>
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -840,7 +890,7 @@
                   <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
               </svg>
               </button>
-        @else
+        @elseif (!$event->is_draft)
               <button type="button"
                   class="calendar-popup-toggle inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
                   style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};"
@@ -902,6 +952,7 @@
         </a>
         @endif
         {{-- Share button --}}
+        @if (!$event->is_draft)
         <button type="button"
                 data-share-title="{{ $event->translatedName() }}"
                 @click="
@@ -924,12 +975,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
           </template>
         </button>
+        @endif
         </div>
 
         </div>
 
         {{-- Mobile calendar bottom sheet (outside hidden sm:block container so it's visible on mobile) --}}
-        @if (!($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registration_url))
+        @if (!$event->is_draft && !($event->canSellTickets($date) || $event->canAcceptRsvp($date) || $event->registration_url))
         <div id="calendar-mobile-sheet" class="hidden fixed inset-0 z-50 sm:hidden">
           <div class="fixed inset-0 bg-black/60" id="calendar-mobile-overlay"></div>
           <div class="gp-bottom-sheet fixed inset-x-0 bottom-0 rounded-t-2xl shadow-xl">
@@ -1005,9 +1057,50 @@
             if (!form) return;
 
             var paramKey = form.querySelector('#ticket-selector') ? 'tickets' : 'rsvp';
+            var desktopCta = document.getElementById('desktop-cta-buttons');
+            var mobileCta = document.getElementById('mobile-cta-bar');
+
+            function hideCta() {
+                if (desktopCta) { desktopCta.style.display = 'none'; }
+                if (mobileCta) { mobileCta.style.display = 'none'; }
+            }
+
+            function showCta() {
+                if (desktopCta) { desktopCta.style.display = ''; }
+                if (mobileCta) { mobileCta.style.display = ''; }
+            }
+
+            function hidePanelsBelow() {
+                var sibling = form.nextElementSibling;
+                while (sibling) {
+                    if (sibling.tagName !== 'SCRIPT') {
+                        sibling.setAttribute('data-hidden-by-form', '1');
+                        sibling.style.display = 'none';
+                    }
+                    sibling = sibling.nextElementSibling;
+                }
+            }
+
+            function showPanelsBelow() {
+                var els = form.parentNode.querySelectorAll('[data-hidden-by-form]');
+                for (var i = 0; i < els.length; i++) {
+                    var el = els[i];
+                    el.removeAttribute('data-hidden-by-form');
+                    el.style.opacity = '0';
+                    el.style.display = '';
+                }
+                requestAnimationFrame(function() {
+                    for (var i = 0; i < els.length; i++) {
+                        els[i].style.transition = 'opacity 0.2s ease';
+                        els[i].style.opacity = '1';
+                    }
+                });
+            }
 
             function showForm() {
                 form.style.display = '';
+                hideCta();
+                hidePanelsBelow();
                 requestAnimationFrame(function() {
                     form.style.opacity = '1';
                     form.style.transform = 'none';
@@ -1026,12 +1119,14 @@
             function hideForm() {
                 form.style.opacity = '0';
                 form.style.transform = 'translateY(-8px)';
-                setTimeout(function() {
-                    form.style.display = 'none';
-                }, 200);
                 var url = new URL(window.location);
                 url.searchParams.delete(paramKey);
                 history.replaceState(null, '', url);
+                setTimeout(function() {
+                    form.style.display = 'none';
+                    showCta();
+                    showPanelsBelow();
+                }, 200);
             }
 
             window.addEventListener('show-event-form', showForm);
@@ -1042,6 +1137,8 @@
                 form.style.opacity = '0';
                 form.style.transform = 'translateY(-8px)';
                 form.style.display = '';
+                hideCta();
+                hidePanelsBelow();
                 requestAnimationFrame(function() {
                     form.style.opacity = '1';
                     form.style.transform = 'none';
@@ -1818,6 +1915,50 @@
         </div>
         @endif
 
+        {{-- Public feedback / reviews --}}
+        @if ($publicFeedbacks->count() > 0)
+        <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8 {{ $role->isRtl() ? 'rtl' : '' }}">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('messages.feedback_reviews') }}</h3>
+
+          {{-- Average rating summary --}}
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center gap-1">
+              @for ($i = 1; $i <= 5; $i++)
+              <svg class="w-5 h-5 {{ $i <= round($avgRating) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}" viewBox="0 0 24 24" fill="{{ $i <= round($avgRating) ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+              @endfor
+            </div>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $avgRating }}</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">({{ trans_choice('messages.feedback_review_count', $feedbackCount, ['count' => $feedbackCount]) }})</span>
+          </div>
+
+          {{-- Individual reviews --}}
+          <div class="space-y-4">
+            @foreach ($publicFeedbacks as $fb)
+            <div class="{{ !$loop->last ? 'border-b border-gray-100 dark:border-gray-800 pb-4' : '' }}">
+              <div class="flex items-center gap-2 mb-1">
+                <div class="flex gap-0.5">
+                  @for ($i = 1; $i <= 5; $i++)
+                  <svg class="w-4 h-4 {{ $i <= $fb->rating ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600' }}" viewBox="0 0 24 24" fill="{{ $i <= $fb->rating ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                  </svg>
+                  @endfor
+                </div>
+                @if ($fb->sale?->name)
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ explode(' ', trim($fb->sale?->name ?? ''))[0] }}</span>
+                @endif
+                <span class="text-xs text-gray-400 dark:text-gray-500">{{ $fb->created_at->diffForHumans() }}</span>
+              </div>
+              @if ($fb->comment)
+              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1" dir="auto">{{ $fb->comment }}</p>
+              @endif
+            </div>
+            @endforeach
+          </div>
+        </div>
+        @endif
+
         @php
           $eventSponsors = $event->getEffectiveSponsorLogos($role);
         @endphp
@@ -1904,10 +2045,11 @@
   </main>
 
   {{-- Sticky mobile CTA --}}
-  <div x-data="{ shareState: 'idle' }"
+  <div id="mobile-cta-bar" x-data="{ shareState: 'idle' }"
        class="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-5 py-3 shadow-lg" style="font-family: sans-serif; padding-bottom: max(0.75rem, env(safe-area-inset-bottom));">
     <div class="flex items-center gap-3 {{ $role->isRtl() ? 'rtl' : '' }}">
       {{-- Mobile share button --}}
+      @if (!$event->is_draft)
       <button type="button"
               data-share-title="{{ $event->translatedName() }}"
               @click="
@@ -1929,6 +2071,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-green-600 dark:text-green-400" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
         </template>
       </button>
+      @endif
       {{-- View Ticket (if already registered) --}}
       @if ($userSale)
         <a href="{{ route('ticket.view', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $userSale->secret]) }}"
@@ -1982,7 +2125,7 @@
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.ticket_sales_ended') }}</span>
       @elseif ($event->allTicketSalesNotStarted() && $event->tickets_enabled)
         <span class="flex-1 text-center text-sm text-gray-500 dark:text-gray-400 py-3">{{ __('messages.sales_not_started') }}</span>
-      @else
+      @elseif (!$event->is_draft)
         <button type="button"
             id="mobile-calendar-cta"
             class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"

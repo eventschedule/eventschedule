@@ -14,6 +14,6 @@ class RolePolicy
 
     public function manageMembers(User $user, Role $role): bool
     {
-        return $user->id == $role->user_id;
+        return $user->isEditor($role->subdomain);
     }
 }

@@ -42,7 +42,7 @@ class DeletedEventNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-            ->replyTo($user->email, $user->name)
+            ->replyTo(config('app.support_email'))
             ->subject(__('messages.event_has_been_deleted'))
             ->line(str_replace(
                 [':name', ':venue', ':user'],

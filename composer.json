@@ -10,6 +10,7 @@
         "codedge/laravel-selfupdater": "^3.9",
         "endroid/qr-code": "^5.0",
         "ezyang/htmlpurifier": "^4.17",
+        "geoip2/geoip2": "^3.3",
         "google/apiclient": "^2.18",
         "laravel/cashier": "^15.7",
         "laravel/framework": "^11.9",

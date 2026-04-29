@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
+use App\Utils\OpenAIUtils;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -43,6 +44,7 @@ class GraphicEmailService
                     })
                     ->upcomingOrOngoing()
                     ->where('is_private', false)
+                    ->where('is_draft', false)
                     ->whereNull('event_password')
                     ->when($excludeRecurring, function ($query) {
                         $query->whereNull('days_of_week');
@@ -99,8 +101,9 @@ class GraphicEmailService
 
             // Apply AI prompt if configured (Enterprise feature)
             $aiPrompt = trim($settings['ai_prompt'] ?? '');
+            $aiModel = $settings['ai_model'] ?? '';
             if ($role->isEnterprise() && ! empty($aiPrompt) && (config('services.google.gemini_key') || config('services.openai.api_key'))) {
-                $transformedText = $this->applyAiPrompt($eventText, $aiPrompt);
+                $transformedText = $this->applyAiPrompt($eventText, $aiPrompt, $aiModel);
                 if ($transformedText) {
                     $eventText = $transformedText;
                 }
@@ -149,14 +152,24 @@ class GraphicEmailService
     /**
      * Apply AI prompt to transform the event text
      */
-    protected function applyAiPrompt(string $eventText, string $aiPrompt): ?string
+    protected function applyAiPrompt(string $eventText, string $aiPrompt, string $aiModel = ''): ?string
     {
         try {
             $prompt = "Transform the following event listing text according to these instructions: \"{$aiPrompt}\"\n\n";
             $prompt .= "Original text:\n{$eventText}\n\n";
             $prompt .= "Respond with only the transformed text, preserving the structure and URLs. Return JSON with a single 'text' field containing the result.";
 
-            $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => 'gemini-2.5-flash']);
+            // Determine model and provider from config
+            $models = config('services.ai.graphic_models', []);
+            $modelConfig = $models[$aiModel] ?? null;
+            $model = $modelConfig ? $aiModel : 'gemini-2.5-flash';
+            $provider = $modelConfig ? $modelConfig['provider'] : 'gemini';
+
+            if ($provider === 'openai') {
+                $response = OpenAIUtils::sendTextRequest($prompt, null, 'content', ['model' => $model, 'timeout' => 55]);
+            } else {
+                $response = GeminiUtils::sendPrompt($prompt, 'content', ['model' => $model, 'timeout' => 55]);
+            }
 
             if ($response && isset($response[0]['text'])) {
                 return $response[0]['text'];

@@ -8,7 +8,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 
 class ApiAuthentication
 {
@@ -94,13 +93,6 @@ class ApiAuthentication
 
     private function logFailedAttempt($ip, $reason, $apiKey = null)
     {
-        Log::warning('API authentication failed', [
-            'ip' => $ip,
-            'reason' => $reason,
-            'api_key_hash' => $apiKey ? hash('sha256', $apiKey) : null,
-            'timestamp' => now()->toISOString(),
-        ]);
-
         AuditService::log(AuditService::API_AUTH_FAILED, null, null, null, null, null, $reason);
     }
 }

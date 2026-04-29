@@ -11,8 +11,15 @@
 @elseif ($blockType === 'text' && !empty($block['data']['content']))
 {{ strip_tags($block['data']['content']) }}
 
-@elseif ($blockType === 'image' && !empty($block['data']['url']))
-[{{ !empty($block['data']['alt']) ? $block['data']['alt'] : __('messages.image') }}]
+@elseif ($blockType === 'image')
+@php
+    $textImages = isset($block['data']['url']) ? [['url' => $block['data']['url'], 'alt' => $block['data']['alt'] ?? '', 'caption' => '', 'link' => '']] : ($block['data']['images'] ?? []);
+@endphp
+@foreach ($textImages as $tImg)
+@if (!empty($tImg['url']))
+[{{ !empty($tImg['alt']) ? $tImg['alt'] : __('messages.image') }}]{{ !empty($tImg['caption']) ? ' - ' . $tImg['caption'] : '' }}{{ !empty($tImg['link']) ? ' ' . $tImg['link'] : '' }}
+@endif
+@endforeach
 
 @elseif ($blockType === 'events' && !empty($block['data']['resolvedEvents']))
 @foreach ($block['data']['resolvedEvents'] as $event)
@@ -38,7 +45,7 @@
       }
   @endphp
 {{ $dateStr }}
-  {{ $event->getGuestUrl() }}
+  {{ $event->getGuestUrl($role?->subdomain, null, true) }}
 
 @endforeach
 @elseif ($blockType === 'button' && !empty($block['data']['text']))

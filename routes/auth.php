@@ -24,13 +24,13 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:5,1');
 
     Route::post('sign_up', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:10,1');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:30,1');
 
     Route::get('reset-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

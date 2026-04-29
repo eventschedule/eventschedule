@@ -63,10 +63,10 @@
         <div class="ap-card sm:rounded-xl p-6 mb-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.add_subscriber') }}</h3>
             <form method="POST" action="{{ route('newsletter.segment.user.store', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id)]) }}"
-                class="flex flex-col sm:flex-row gap-3">
+                class="flex flex-col sm:flex-row gap-3" autocomplete="off">
                 @csrf
-                <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" />
-                <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required />
+                <x-text-input name="name" type="text" class="flex-1" :placeholder="__('messages.name')" data-1p-ignore data-lpignore="true" />
+                <x-text-input name="email" type="email" class="flex-1" :placeholder="__('messages.email')" required data-1p-ignore data-lpignore="true" />
                 <button type="submit" class="inline-flex items-center justify-center px-4 py-2 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white hover:bg-[var(--brand-button-bg-hover)] whitespace-nowrap">
                     {{ __('messages.add_subscriber') }}
                 </button>
@@ -96,27 +96,24 @@
                         <tr>
                             @if ($segment->type === 'manual')
                             <x-sortable-header column="name" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.name') }}</x-sortable-header>
-                            <x-sortable-header column="email" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.email') }}</x-sortable-header>
                             <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-4 py-3">{{ __('messages.date_added') }}</x-sortable-header>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             @else
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.name') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">{{ __('messages.email') }}</th>
                             @endif
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700" x-data="{ editingId: null }">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach ($subscriberList as $subscriber)
                         @if ($segment->type === 'manual')
                         @php $encodedId = \App\Utils\UrlUtils::encodeId($subscriber->id); @endphp
                         {{-- Display row --}}
-                        <tr x-show="editingId !== '{{ $encodedId }}'">
+                        <tr data-display-row="{{ $encodedId }}">
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->email }}</td>
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
                             <td class="px-4 py-3 text-sm text-right">
                                 <div class="flex gap-3 justify-end">
-                                    <button type="button" @click="editingId = '{{ $encodedId }}'" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</button>
+                                    <button type="button" onclick="toggleSegmentEdit('{{ $encodedId }}')" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</button>
                                     <form method="POST" action="{{ route('newsletter.segment.user.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
                                         class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                         @csrf
@@ -127,19 +124,19 @@
                             </td>
                         </tr>
                         {{-- Edit row --}}
-                        <tr x-show="editingId === '{{ $encodedId }}'" x-cloak>
-                            <td colspan="4" class="px-4 py-3">
+                        <tr data-edit-row="{{ $encodedId }}" style="display: none;">
+                            <td colspan="3" class="px-4 py-3">
                                 <form method="POST" action="{{ route('newsletter.segment.user.update', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
                                     class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                                     @csrf
                                     @method('PUT')
                                     <x-text-input name="name" type="text" class="flex-1 text-sm" :value="$subscriber->name" :placeholder="__('messages.name')" />
-                                    <x-text-input name="email" type="email" class="flex-1 text-sm" :value="$subscriber->email" :placeholder="__('messages.email')" required />
+                                    <input type="hidden" name="email" value="{{ $subscriber->email }}">
                                     <div class="flex gap-2">
                                         <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-[var(--brand-button-bg-hover)]">
                                             {{ __('messages.save_changes') }}
                                         </button>
-                                        <button type="button" @click="editingId = null" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                        <button type="button" onclick="toggleSegmentEdit(null)" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
                                             {{ __('messages.cancel') }}
                                         </button>
                                     </div>
@@ -150,7 +147,6 @@
                         {{-- Read-only row for non-manual segments --}}
                         <tr>
                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->name }}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{{ $subscriber->email }}</td>
                         </tr>
                         @endif
                         @endforeach
@@ -196,5 +192,18 @@
                 }
             }
         });
+
+        var currentEditId = null;
+        function toggleSegmentEdit(id) {
+            if (currentEditId) {
+                document.querySelector('[data-display-row="' + currentEditId + '"]').style.display = '';
+                document.querySelector('[data-edit-row="' + currentEditId + '"]').style.display = 'none';
+            }
+            currentEditId = id;
+            if (id) {
+                document.querySelector('[data-display-row="' + id + '"]').style.display = 'none';
+                document.querySelector('[data-edit-row="' + id + '"]').style.display = '';
+            }
+        }
     </script>
 </x-app-admin-layout>

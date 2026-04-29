@@ -82,7 +82,7 @@ class GeminiUtils
             CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
             CURLOPT_POSTFIELDS => json_encode($data),
             CURLOPT_CONNECTTIMEOUT => 10,
-            CURLOPT_TIMEOUT => 55,
+            CURLOPT_TIMEOUT => $options['timeout'] ?? 55,
         ]);
 
         $response = curl_exec($ch);
@@ -828,12 +828,11 @@ class GeminiUtils
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
                 ->upcomingOrOngoing()
-                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
                 ->first();
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();
                 $data[$key]['event_id'] = UrlUtils::encodeId($event->id);
-                $data[$key]['is_curated'] = $role->isCurator();
+                $data[$key]['is_curated'] = $role->isCurator() && $event->roles->contains($role->id);
             }
 
             // Check for similar events at the same time
@@ -882,7 +881,7 @@ class GeminiUtils
         return $data;
     }
 
-    public static function parseEventParts($imageData = null, $textDescription = null, $aiPrompt = null)
+    public static function parseEventParts($imageData = null, $textDescription = null, $aiPrompt = null, int $roleId = 0)
     {
         $config = config('ai_prompts.event_parts');
         $source = ($imageData && $textDescription) ? 'image and text' : ($imageData ? 'image' : 'text');
@@ -902,7 +901,7 @@ class GeminiUtils
             return [];
         }
 
-        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_PARTS);
+        UsageTrackingService::track(UsageTrackingService::GEMINI_PARSE_PARTS, $roleId);
 
         // Normalize: sendRequest wraps single objects in an array
         $parts = [];

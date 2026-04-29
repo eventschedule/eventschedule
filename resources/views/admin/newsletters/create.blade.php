@@ -14,6 +14,22 @@
         </div>
         @endif
 
+        {{-- Template Picker --}}
+        @if (!request('template_id') && ($savedTemplates ?? collect())->count())
+        <div class="ap-card sm:rounded-xl p-6 mb-2">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.start_from_template') }}</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                @foreach ($savedTemplates as $tmpl)
+                <a href="{{ route('admin.newsletters.create', ['template_id' => \App\Utils\UrlUtils::encodeId($tmpl->id)]) }}"
+                    class="border border-gray-200 dark:border-gray-600 rounded-lg p-4 text-center hover:border-[var(--brand-blue)] hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $tmpl->name }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{{ $tmpl->template }}</div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         <form method="POST" action="{{ route('admin.newsletters.store') }}">
             @csrf
             @php

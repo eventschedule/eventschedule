@@ -38,7 +38,7 @@ class DeletedUserNotification extends Notification
         $user = $this->user;
 
         return (new MailMessage)
-            ->replyTo($user->email, $user->name)
+            ->replyTo(config('app.support_email'))
             ->subject(__('messages.user_has_been_deleted'))
             ->line(str_replace(
                 ':user',
@@ -46,7 +46,7 @@ class DeletedUserNotification extends Notification
                 __('messages.user_has_been_deleted_details'))
             )
             ->withSymfonyMessage(function ($message) use ($notifiable) {
-                $encodedEmail = base64_encode($notifiable->email);
+                $encodedEmail = base64_encode($notifiable->routeNotificationFor('mail'));
                 $unsubscribeUrl = route('user.unsubscribe', ['email' => $encodedEmail, 'sig' => \App\Utils\UrlUtils::signEmail($encodedEmail)]);
                 $message->getHeaders()->addTextHeader('List-Unsubscribe', '<'.$unsubscribeUrl.'>');
                 $message->getHeaders()->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');

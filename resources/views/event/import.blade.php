@@ -62,29 +62,6 @@
         <x-gemini-setup-guide />
     </div>
 </div>
-@elseif (config('app.hosted') && ! $role->isEnterprise() && (! isset($isGuest) || ! $isGuest))
-<div class="ap-card p-4 sm:p-8 shadow-md rounded-lg">
-    <div class="max-w-xl mx-auto text-center py-8">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
-            <svg class="h-6 w-6 text-[var(--brand-blue)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17Z" />
-            </svg>
-        </div>
-
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            {{ __('messages.upgrade_feature_title_enterprise') }}
-        </h3>
-
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            {{ __('messages.upgrade_feature_description_ai_import') }}
-        </p>
-
-        <a href="{{ route('role.subscribe', ['subdomain' => $role->subdomain, 'tier' => 'enterprise']) }}"
-           class="inline-flex items-center justify-center px-4 py-2.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm transition-all duration-200 hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-            {{ __('messages.upgrade') }}
-        </a>
-    </div>
-</div>
 @else
 <form method="post"
     action="{{ isset($isGuest) && $isGuest ? route('event.guest_import.store', ['subdomain' => $role->subdomain]) : route('event.import', ['subdomain' => $role->subdomain]) }}"
@@ -236,7 +213,7 @@
             </div>
         </div>
 
-        @if($role->accept_requests && $role->request_terms)
+        @if(isset($isGuest) && $isGuest && $role->accept_requests && $role->request_terms)
         <!-- Request Terms Panel -->
         <div class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4 mt-4">
             <div class="max-w-3xl mx-auto">
@@ -482,7 +459,7 @@
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                                        @{{ venue.name || venue.address1 }}@{{ venue._matched ? ' (Matched)' : '' }}
+                                        @{{ venue.name || venue.address1 }}
                                     </option>
                                 </select>
                             </div>
@@ -918,7 +895,7 @@
                 </div>
 
                 <!-- YouTube Videos Section for Talent - Now below the form and image -->
-                <div v-if="preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
+                <div v-if="!savedEvents[idx] && preview.parsed[idx].performers && preview.parsed[idx].performers.length > 0" class="mt-6">
                     <div v-for="(performer, performerIdx) in preview.parsed[idx].performers" :key="performerIdx" class="my-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <!-- Only show YouTube video selection for the first performer when there are multiple performers -->
                         <div v-if="performerIdx === 0 && ! performer.talent_id">
@@ -1465,6 +1442,34 @@
                 }
             },
 
+            playNotificationChime() {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (ctx.state === 'suspended') ctx.resume();
+                    const playTone = (freq, startTime, duration) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.3, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                        osc.start(startTime);
+                        osc.stop(startTime + duration);
+                    };
+                    playTone(523.25, ctx.currentTime, 0.15);
+                    playTone(659.25, ctx.currentTime + 0.15, 0.2);
+                    setTimeout(() => ctx.close(), 1000);
+                } catch (e) {
+                    // Web Audio not supported
+                }
+            },
+
+            notifyParseComplete() {
+                this.playNotificationChime();
+            },
+
             async fetchPreview() {
                 if (!this.eventDetails.trim() && !this.detailsImage) {
                     this.preview = null;
@@ -1692,7 +1697,18 @@
                         initializeFlatpickr();
                         // Initialize EasyMDE editors for description fields
                         this.initDescriptionEditors();
+                        // Re-apply venue selections to searchable-select dropdowns
+                        this.eventSelectedVenues.forEach((venue, idx) => {
+                            if (venue) {
+                                const select = document.getElementById('selected_venue_' + idx);
+                                if (select) {
+                                    select.value = venue.id;
+                                }
+                            }
+                        });
                     });
+
+                    this.notifyParseComplete();
                 } catch (error) {
                     // Only show error if this is still the latest request
                     if (this.currentRequestId === requestId) {

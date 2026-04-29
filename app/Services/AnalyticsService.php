@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
+use App\Models\AnalyticsLocationsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AnalyticsSocialClicksDaily;
+use App\Models\AnalyticsUtmDaily;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\Newsletter;
@@ -15,6 +18,7 @@ use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
 use App\Models\User;
+use App\Utils\CountryUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -68,7 +72,7 @@ class AnalyticsService
     /**
      * Get top events by view count
      */
-    public function getTopEvents(User $user, int $limit, Carbon $start, Carbon $end): Collection
+    public function getTopEvents(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null): Collection
     {
         $roleIds = $this->getUserRoleIds($user);
 
@@ -77,7 +81,7 @@ class AnalyticsService
         }
 
         // Get event IDs that belong to user's roles (via pivot table)
-        $eventIds = DB::table('event_role')
+        $eventIds = $eventId ? collect([$eventId]) : DB::table('event_role')
             ->whereIn('role_id', $roleIds)
             ->pluck('event_id')
             ->unique();
@@ -107,14 +111,8 @@ class AnalyticsService
     /**
      * Get views grouped by period (daily, weekly, monthly)
      */
-    public function getViewsByPeriod(User $user, string $period, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    public function getViewsByPeriod(User $user, string $period, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): Collection
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
-
-        if ($roleIds->isEmpty()) {
-            return collect();
-        }
-
         // Use whitelisted format expressions to prevent SQL injection
         // The period parameter comes from user input, so we must validate it
         $dateFormatExpr = match ($period) {
@@ -123,6 +121,24 @@ class AnalyticsService
             'monthly' => DB::raw("DATE_FORMAT(date, '%Y-%m') as period"),
             default => DB::raw("DATE_FORMAT(date, '%Y-%m-%d') as period"),
         };
+
+        if ($eventId) {
+            return AnalyticsEventsDaily::select(
+                $dateFormatExpr,
+                DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+            )
+                ->byEvent($eventId)
+                ->inDateRange($start, $end)
+                ->groupBy('period')
+                ->orderBy('period')
+                ->get();
+        }
+
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
 
         return AnalyticsDaily::select(
             $dateFormatExpr,
@@ -138,25 +154,30 @@ class AnalyticsService
     /**
      * Get month-over-month comparison
      */
-    public function getMonthOverMonthComparison(User $user, ?int $roleId = null): array
+    public function getMonthOverMonthComparison(User $user, ?int $roleId = null, ?int $eventId = null): array
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
-
-        if ($roleIds->isEmpty()) {
-            return [
-                'this_month' => 0,
-                'last_month' => 0,
-                'percentage_change' => 0,
-            ];
-        }
-
         $thisMonthStart = now()->startOfMonth();
         $thisMonthEnd = now()->endOfMonth();
         $lastMonthStart = now()->subMonth()->startOfMonth();
         $lastMonthEnd = now()->subMonth()->endOfMonth();
 
-        $thisMonthViews = $this->getPeriodViewsForRoles($roleIds, $thisMonthStart, $thisMonthEnd);
-        $lastMonthViews = $this->getPeriodViewsForRoles($roleIds, $lastMonthStart, $lastMonthEnd);
+        if ($eventId) {
+            $thisMonthViews = $this->getPeriodViewsForEvent($eventId, $thisMonthStart, $thisMonthEnd);
+            $lastMonthViews = $this->getPeriodViewsForEvent($eventId, $lastMonthStart, $lastMonthEnd);
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+            if ($roleIds->isEmpty()) {
+                return [
+                    'this_month' => 0,
+                    'last_month' => 0,
+                    'percentage_change' => 0,
+                ];
+            }
+
+            $thisMonthViews = $this->getPeriodViewsForRoles($roleIds, $thisMonthStart, $thisMonthEnd);
+            $lastMonthViews = $this->getPeriodViewsForRoles($roleIds, $lastMonthStart, $lastMonthEnd);
+        }
 
         $percentageChange = $lastMonthViews > 0
             ? round((($thisMonthViews - $lastMonthViews) / $lastMonthViews) * 100, 1)
@@ -172,19 +193,8 @@ class AnalyticsService
     /**
      * Get period comparison based on date range
      */
-    public function getPeriodComparison(User $user, string $range, Carbon $start, Carbon $end, ?int $roleId = null): array
+    public function getPeriodComparison(User $user, string $range, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
-
-        if ($roleIds->isEmpty()) {
-            return [
-                'current_period' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'comparison_label' => '',
-            ];
-        }
-
         // Calculate previous period based on range
         [$previousStart, $previousEnd, $label] = match ($range) {
             'last_7_days' => [
@@ -224,8 +234,24 @@ class AnalyticsService
             ],
         };
 
-        $currentViews = $this->getPeriodViewsForRoles($roleIds, $start, $end);
-        $previousViews = $this->getPeriodViewsForRoles($roleIds, $previousStart, $previousEnd);
+        if ($eventId) {
+            $currentViews = $this->getPeriodViewsForEvent($eventId, $start, $end);
+            $previousViews = $this->getPeriodViewsForEvent($eventId, $previousStart, $previousEnd);
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+            if ($roleIds->isEmpty()) {
+                return [
+                    'current_period' => 0,
+                    'previous_period' => 0,
+                    'percentage_change' => 0,
+                    'comparison_label' => '',
+                ];
+            }
+
+            $currentViews = $this->getPeriodViewsForRoles($roleIds, $start, $end);
+            $previousViews = $this->getPeriodViewsForRoles($roleIds, $previousStart, $previousEnd);
+        }
 
         $percentageChange = $previousViews > 0
             ? round((($currentViews - $previousViews) / $previousViews) * 100, 1)
@@ -242,23 +268,35 @@ class AnalyticsService
     /**
      * Get device breakdown
      */
-    public function getDeviceBreakdown(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    public function getDeviceBreakdown(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): Collection
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+        if ($eventId) {
+            $result = AnalyticsEventsDaily::select(
+                DB::raw('SUM(desktop_views) as desktop'),
+                DB::raw('SUM(mobile_views) as mobile'),
+                DB::raw('SUM(tablet_views) as tablet'),
+                DB::raw('SUM(unknown_views) as unknown')
+            )
+                ->byEvent($eventId)
+                ->inDateRange($start, $end)
+                ->first();
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
-        if ($roleIds->isEmpty()) {
-            return collect();
+            if ($roleIds->isEmpty()) {
+                return collect();
+            }
+
+            $result = AnalyticsDaily::select(
+                DB::raw('SUM(desktop_views) as desktop'),
+                DB::raw('SUM(mobile_views) as mobile'),
+                DB::raw('SUM(tablet_views) as tablet'),
+                DB::raw('SUM(unknown_views) as unknown')
+            )
+                ->forRoles($roleIds)
+                ->inDateRange($start, $end)
+                ->first();
         }
-
-        $result = AnalyticsDaily::select(
-            DB::raw('SUM(desktop_views) as desktop'),
-            DB::raw('SUM(mobile_views) as mobile'),
-            DB::raw('SUM(tablet_views) as tablet'),
-            DB::raw('SUM(unknown_views) as unknown')
-        )
-            ->forRoles($roleIds)
-            ->inDateRange($start, $end)
-            ->first();
 
         if (! $result) {
             return collect();
@@ -309,6 +347,15 @@ class AnalyticsService
     }
 
     /**
+     * Get total views for a specific event (all time)
+     */
+    public function getTotalViewsForEvent(int $eventId): int
+    {
+        return (int) AnalyticsEventsDaily::byEvent($eventId)
+            ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
+    }
+
+    /**
      * Get views for given roles in a date range
      */
     protected function getPeriodViewsForRoles(Collection $roleIds, Carbon $start, Carbon $end): int
@@ -316,6 +363,40 @@ class AnalyticsService
         return (int) AnalyticsDaily::forRoles($roleIds)
             ->inDateRange($start, $end)
             ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
+    }
+
+    /**
+     * Get views for a specific event in a date range
+     */
+    protected function getPeriodViewsForEvent(int $eventId, Carbon $start, Carbon $end): int
+    {
+        return (int) AnalyticsEventsDaily::byEvent($eventId)
+            ->inDateRange($start, $end)
+            ->sum(DB::raw('desktop_views + mobile_views + tablet_views + unknown_views'));
+    }
+
+    /**
+     * Get events for the analytics filter dropdown (future + past 30 days)
+     */
+    public function getEventsForSchedule(int $roleId): Collection
+    {
+        $cutoff = now()->subDays(30)->startOfDay();
+
+        return Event::whereHas('roles', fn ($q) => $q->where('roles.id', $roleId))
+            ->where('is_draft', false)
+            ->where(function ($q) use ($cutoff) {
+                $q->where('starts_at', '>=', $cutoff)
+                    ->orWhereNull('starts_at');
+            })
+            ->orderBy('starts_at')
+            ->get()
+            ->map(fn ($event) => [
+                'id' => UrlUtils::encodeId($event->id),
+                'raw_id' => $event->id,
+                'name' => $event->translatedName(),
+                'starts_at' => $event->getShortDateRangeDisplay('D, M j, Y'),
+                'image_url' => $event->getImageUrl(),
+            ]);
     }
 
     /**
@@ -431,44 +512,40 @@ class AnalyticsService
     /**
      * Get conversion statistics (views to sales)
      */
-    public function getConversionStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
+    public function getConversionStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+        $emptyStats = [
+            'total_views' => 0,
+            'total_sales' => 0,
+            'conversion_rate' => 0,
+            'total_revenue' => 0,
+            'revenue_per_view' => 0,
+            'promo_sales' => 0,
+            'promo_discounts' => 0,
+        ];
 
-        if ($roleIds->isEmpty()) {
-            return [
-                'total_views' => 0,
-                'total_sales' => 0,
-                'conversion_rate' => 0,
-                'total_revenue' => 0,
-                'revenue_per_view' => 0,
-                'promo_sales' => 0,
-                'promo_discounts' => 0,
-            ];
+        if ($eventId) {
+            $eventIds = collect([$eventId]);
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+            if ($roleIds->isEmpty()) {
+                return $emptyStats;
+            }
+
+            // Get event IDs that belong to user's roles
+            $eventIds = DB::table('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->pluck('event_id')
+                ->unique();
         }
 
-        // Get event IDs that belong to user's roles
-        $eventIds = DB::table('event_role')
-            ->whereIn('role_id', $roleIds)
-            ->pluck('event_id')
-            ->unique();
-
         if ($eventIds->isEmpty()) {
-            return [
-                'total_views' => 0,
-                'total_sales' => 0,
-                'conversion_rate' => 0,
-                'total_revenue' => 0,
-                'revenue_per_view' => 0,
-                'promo_sales' => 0,
-                'promo_discounts' => 0,
-            ];
+            return $emptyStats;
         }
 
         $stats = AnalyticsEventsDaily::select(
             DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as total_views'),
-            DB::raw('SUM(sales_count) as total_sales'),
-            DB::raw('SUM(revenue) as total_revenue'),
             DB::raw('SUM(promo_sales_count) as promo_sales'),
             DB::raw('SUM(promo_discount_total) as promo_discounts')
         )
@@ -476,9 +553,16 @@ class AnalyticsService
             ->inDateRange($start, $end)
             ->first();
 
+        // Get actual sales data from the sales table (source of truth)
+        $salesStats = Sale::whereIn('event_id', $eventIds->toArray())
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
+            ->selectRaw('COUNT(*) as total_sales, COALESCE(SUM(payment_amount), 0) as total_revenue')
+            ->first();
+
         $totalViews = (int) ($stats->total_views ?? 0);
-        $totalSales = (int) ($stats->total_sales ?? 0);
-        $totalRevenue = (float) ($stats->total_revenue ?? 0);
+        $totalSales = (int) ($salesStats->total_sales ?? 0);
+        $totalRevenue = (float) ($salesStats->total_revenue ?? 0);
         $promoSales = (int) ($stats->promo_sales ?? 0);
         $promoDiscounts = (float) ($stats->promo_discounts ?? 0);
 
@@ -496,46 +580,71 @@ class AnalyticsService
     /**
      * Get top events by revenue
      */
-    public function getTopEventsByRevenue(User $user, int $limit, Carbon $start, Carbon $end): Collection
+    public function getTopEventsByRevenue(User $user, int $limit, Carbon $start, Carbon $end, ?int $eventId = null): Collection
     {
-        $roleIds = $this->getUserRoleIds($user);
+        if ($eventId) {
+            $eventIds = collect([$eventId]);
+        } else {
+            $roleIds = $this->getUserRoleIds($user);
 
-        if ($roleIds->isEmpty()) {
-            return collect();
+            if ($roleIds->isEmpty()) {
+                return collect();
+            }
+
+            // Get event IDs that belong to user's roles
+            $eventIds = DB::table('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->pluck('event_id')
+                ->unique();
         }
-
-        // Get event IDs that belong to user's roles
-        $eventIds = DB::table('event_role')
-            ->whereIn('role_id', $roleIds)
-            ->pluck('event_id')
-            ->unique();
 
         if ($eventIds->isEmpty()) {
             return collect();
         }
 
-        return AnalyticsEventsDaily::select(
-            'event_id',
-            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count'),
-            DB::raw('SUM(sales_count) as sales_count'),
-            DB::raw('SUM(revenue) as revenue')
-        )
-            ->forEvents($eventIds)
-            ->inDateRange($start, $end)
+        // Get top events by revenue from the sales table (source of truth)
+        $salesData = Sale::whereIn('event_id', $eventIds->toArray())
+            ->where('status', 'paid')
+            ->whereBetween('created_at', [$start, $end])
             ->groupBy('event_id')
-            ->having('revenue', '>', 0)
+            ->selectRaw('event_id, COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as revenue')
+            ->havingRaw('COALESCE(SUM(payment_amount), 0) > 0')
             ->orderByDesc('revenue')
             ->limit($limit)
-            ->with('event')
+            ->get();
+
+        if ($salesData->isEmpty()) {
+            return collect();
+        }
+
+        // Get view counts from analytics for matched events
+        $salesEventIds = $salesData->pluck('event_id');
+        $viewCounts = AnalyticsEventsDaily::select(
+            'event_id',
+            DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as view_count')
+        )
+            ->forEvents($salesEventIds)
+            ->inDateRange($start, $end)
+            ->groupBy('event_id')
             ->get()
-            ->filter(fn ($item) => $item->event !== null)
-            ->map(fn ($item) => [
-                'event' => $item->event,
-                'view_count' => (int) $item->view_count,
-                'sales_count' => (int) $item->sales_count,
-                'revenue' => (float) $item->revenue,
-                'conversion_rate' => $item->view_count > 0 ? round(($item->sales_count / $item->view_count) * 100, 2) : 0,
-            ]);
+            ->keyBy('event_id');
+
+        $events = Event::whereIn('id', $salesEventIds)->get()->keyBy('id');
+
+        return $salesData
+            ->filter(fn ($item) => isset($events[$item->event_id]))
+            ->map(function ($item) use ($viewCounts, $events) {
+                $viewCount = isset($viewCounts[$item->event_id]) ? (int) $viewCounts[$item->event_id]->view_count : 0;
+
+                return [
+                    'event' => $events[$item->event_id],
+                    'view_count' => $viewCount,
+                    'sales_count' => (int) $item->sales_count,
+                    'revenue' => (float) $item->revenue,
+                    'conversion_rate' => $viewCount > 0 ? round(($item->sales_count / $viewCount) * 100, 2) : 0,
+                ];
+            })
+            ->values();
     }
 
     /**
@@ -591,6 +700,88 @@ class AnalyticsService
             ->map(fn ($item) => [
                 'domain' => $item->domain,
                 'source' => $item->source,
+                'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
+     * Get top UTM parameter values for a given param type
+     */
+    public function getTopUtmParams(User $user, string $paramType, int $limit, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsUtmDaily::select(
+            'param_value',
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->byParamType($paramType)
+            ->groupBy('param_value')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($item) => [
+                'param_value' => $item->param_value,
+                'view_count' => (int) $item->view_count,
+            ]);
+    }
+
+    /**
+     * Get social link click stats grouped by platform
+     */
+    public function getSocialClickStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsSocialClicksDaily::select(
+            'platform',
+            DB::raw('SUM(clicks) as click_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->groupBy('platform')
+            ->orderByDesc('click_count')
+            ->get()
+            ->map(fn ($item) => [
+                'platform' => $item->platform,
+                'click_count' => (int) $item->click_count,
+            ]);
+    }
+
+    /**
+     * Get visitor location breakdown by country
+     */
+    public function getLocationBreakdown(User $user, int $limit, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    {
+        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+
+        if ($roleIds->isEmpty()) {
+            return collect();
+        }
+
+        return AnalyticsLocationsDaily::select(
+            'country_code',
+            DB::raw('SUM(views) as view_count')
+        )
+            ->forRoles($roleIds)
+            ->inDateRange($start, $end)
+            ->groupBy('country_code')
+            ->orderByDesc('view_count')
+            ->limit($limit)
+            ->get()
+            ->map(fn ($item) => [
+                'country_code' => $item->country_code,
+                'country_name' => CountryUtils::getName($item->country_code),
                 'view_count' => (int) $item->view_count,
             ]);
     }
@@ -809,18 +1000,22 @@ class AnalyticsService
     /**
      * Get per-promo-code usage breakdown
      */
-    public function getPromoCodeStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): Collection
+    public function getPromoCodeStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): Collection
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+        if ($eventId) {
+            $eventIds = collect([$eventId]);
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
-        if ($roleIds->isEmpty()) {
-            return collect();
+            if ($roleIds->isEmpty()) {
+                return collect();
+            }
+
+            $eventIds = DB::table('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->pluck('event_id')
+                ->unique();
         }
-
-        $eventIds = DB::table('event_role')
-            ->whereIn('role_id', $roleIds)
-            ->pluck('event_id')
-            ->unique();
 
         if ($eventIds->isEmpty()) {
             return collect();
@@ -857,18 +1052,22 @@ class AnalyticsService
     /**
      * Get check-in analytics stats
      */
-    public function getCheckinStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null): array
+    public function getCheckinStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
     {
-        $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
+        if ($eventId) {
+            $eventIds = collect([$eventId]);
+        } else {
+            $roleIds = $roleId ? collect([$roleId]) : $this->getUserRoleIds($user);
 
-        if ($roleIds->isEmpty()) {
-            return ['has_data' => false];
+            if ($roleIds->isEmpty()) {
+                return ['has_data' => false];
+            }
+
+            $eventIds = DB::table('event_role')
+                ->whereIn('role_id', $roleIds)
+                ->pluck('event_id')
+                ->unique();
         }
-
-        $eventIds = DB::table('event_role')
-            ->whereIn('role_id', $roleIds)
-            ->pluck('event_id')
-            ->unique();
 
         if ($eventIds->isEmpty()) {
             return ['has_data' => false];

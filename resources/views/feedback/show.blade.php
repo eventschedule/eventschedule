@@ -1,10 +1,10 @@
-<x-app-layout :title="__('messages.event_feedback') . ' | ' . $event->name">
+<x-app-guest-layout :role="$role" :event="$event" :fonts="$fonts" :noIndex="true">
 
-    <x-slot name="meta">
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot>
+    @php
+        $accentColor = $role->accent_color ?? '#4E81FA';
+    @endphp
 
-    <div class="min-h-screen bg-gray-50 dark:bg-[#1e1e1e] py-8 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8" style="font-family: '{{ str_replace('_', ' ', $role->font_family) }}', sans-serif;">
         <div class="max-w-lg mx-auto">
 
             {{-- Schedule branding --}}
@@ -28,6 +28,15 @@
             <div class="bg-white dark:bg-[#2d2d30] rounded-xl shadow-sm border border-gray-200 dark:border-[#2d2d30] p-6">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ __('messages.feedback_how_was') }}</h2>
                 <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-6">{{ __('messages.feedback_rate_event') }}</p>
+
+                @if ($role->feedback_public)
+                <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-start gap-2">
+                    <svg class="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm text-blue-700 dark:text-blue-300">{{ __('messages.feedback_public_notice') }}</p>
+                </div>
+                @endif
 
                 @if ($errors->any())
                 <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400 text-sm">
@@ -70,7 +79,7 @@
                     {{-- Submit --}}
                     <button type="submit" id="submit-btn"
                         class="w-full px-4 py-3 text-base font-medium text-white rounded-lg transition-opacity focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-[#2d2d30] opacity-50 cursor-not-allowed"
-                        style="background-color: {{ $role->accent_color ?? 'var(--brand-blue)' }}; --tw-ring-color: {{ $role->accent_color ?? 'var(--brand-blue)' }};"
+                        style="background-color: {{ $accentColor }}; --tw-ring-color: {{ $accentColor }};"
                         disabled>
                         {{ __('messages.feedback_submit') }}
                     </button>
@@ -153,4 +162,4 @@
         })();
     </script>
 
-</x-app-layout>
+</x-app-guest-layout>

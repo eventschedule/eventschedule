@@ -161,12 +161,6 @@ class ApiSaleController extends Controller
                         $sale->save();
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                        if ($sale->group_id && $sale->isPrimarySale()) {
-                            $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                            for ($i = 0; $i < $guestCount; $i++) {
-                                AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                            }
-                        }
                         if ($sale->discount_amount > 0) {
                             AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
                         }
@@ -178,20 +172,15 @@ class ApiSaleController extends Controller
             case 'refund':
                 if ($sale->status === 'paid') {
                     DB::transaction(function () use ($sale) {
+                        $analyticsDate = $sale->created_at->toDateString();
                         $sale->status = 'refunded';
                         $sale->save();
 
                         if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                                for ($i = 0; $i < $guestCount; $i++) {
-                                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                                }
-                            }
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
 
                             if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
                     });
@@ -202,25 +191,20 @@ class ApiSaleController extends Controller
             case 'cancel':
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $wasPaid = $sale->status === 'paid';
-                    DB::transaction(function () use ($sale) {
+                    DB::transaction(function () use ($sale, $wasPaid) {
                         $sale->status = 'cancelled';
                         $sale->save();
-                    });
-                    $actionPerformed = true;
 
-                    if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                        if ($sale->group_id && $sale->isPrimarySale()) {
-                            $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                            for ($i = 0; $i < $guestCount; $i++) {
-                                AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
+                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
+                            $analyticsDate = $sale->created_at->toDateString();
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
+
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
-
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
-                        }
-                    }
+                    });
+                    $actionPerformed = true;
                 }
                 break;
         }
@@ -289,23 +273,20 @@ class ApiSaleController extends Controller
         $previousStatus = $sale->status;
 
         DB::transaction(function () use ($sale) {
-            // If the sale was paid, cancel first to release ticket inventory
-            // (triggers Sale::booted hook) and decrement analytics
-            if ($sale->status === 'paid') {
+            // Cancel first to release ticket inventory (triggers Sale::booted hook)
+            if (in_array($sale->status, ['unpaid', 'paid'])) {
+                $wasPaid = $sale->status === 'paid';
                 $sale->status = 'cancelled';
                 $sale->save();
 
-                if ($sale->payment_method !== 'rsvp') {
-                    AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                    if ($sale->group_id && $sale->isPrimarySale()) {
-                        $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                        for ($i = 0; $i < $guestCount; $i++) {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                        }
-                    }
+                // Decrement analytics only for previously paid sales
+                // Skip RSVP sales - handled by Sale::booted hook
+                if ($wasPaid && $sale->payment_method !== 'rsvp') {
+                    $analyticsDate = $sale->created_at->toDateString();
+                    AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
 
                     if ($sale->discount_amount > 0) {
-                        AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                        AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                     }
                 }
             }

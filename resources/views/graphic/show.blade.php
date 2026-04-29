@@ -129,6 +129,8 @@
                 // Check desktop first, fall back to mobile
                 const aiPrompt = document.getElementById('ai_prompt')?.value ??
                                  document.getElementById('ai_prompt_mobile')?.value ?? '';
+                const aiModel = document.getElementById('ai_model')?.value ??
+                                document.getElementById('ai_model_mobile')?.value ?? '';
                 const textTemplate = document.getElementById('text_template')?.value ??
                                      document.getElementById('text_template_mobile')?.value ?? '';
                 const excludeRecurring = document.getElementById('exclude_recurring')?.checked ??
@@ -153,6 +155,7 @@
                 return {
                     direct_registration: directRegistration,
                     ai_prompt: aiPrompt,
+                    ai_model: aiModel,
                     text_template: textTemplate,
                     exclude_recurring: excludeRecurring,
                     layout: layout,
@@ -173,6 +176,13 @@
                 const aiPromptMobile = document.getElementById('ai_prompt_mobile');
                 if (aiPromptDesktop && aiPromptMobile) {
                     aiPromptMobile.value = aiPromptDesktop.value;
+                }
+
+                // Sync AI model
+                const aiModelDesktop = document.getElementById('ai_model');
+                const aiModelMobile = document.getElementById('ai_model_mobile');
+                if (aiModelDesktop && aiModelMobile) {
+                    aiModelMobile.value = aiModelDesktop.value;
                 }
 
                 // Sync text template
@@ -322,9 +332,9 @@
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
                 const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
-                const urlIncludeHttpsParam = formSettings.url_include_https ? '&url_include_https=1' : '';
-                const urlIncludeIdParam = formSettings.url_include_id ? '&url_include_id=1' : '';
-                const textShowAllParam = formSettings.text_show_all ? '&text_show_all=1' : '';
+                const urlIncludeHttpsParam = '&url_include_https=' + (formSettings.url_include_https ? '1' : '0');
+                const urlIncludeIdParam = '&url_include_id=' + (formSettings.url_include_id ? '1' : '0');
+                const textShowAllParam = '&text_show_all=' + (formSettings.text_show_all ? '1' : '0');
 
                 const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam;
 
@@ -375,17 +385,43 @@
                                 body: JSON.stringify({
                                     text: data.text,
                                     ai_prompt: formSettings.ai_prompt,
+                                    ai_model: formSettings.ai_model,
                                     exclude_recurring: formSettings.exclude_recurring,
                                     text_show_all: formSettings.text_show_all,
                                     event_count: formSettings.event_count,
                                 }),
                             })
                             .then(r => r.json())
-                            .then(aiData => {
-                                if (aiIndicator) aiIndicator.classList.add('hidden');
-                                if (aiData.text) {
-                                    textContent.value = aiData.text;
-                                    graphicData.text = aiData.text;
+                            .then(startData => {
+                                if (startData.request_id) {
+                                    const pollUrl = '{{ route("event.graphic_ai_text", ["subdomain" => $role->subdomain]) }}/' + startData.request_id;
+                                    const pollInterval = setInterval(() => {
+                                        fetch(pollUrl)
+                                            .then(r => r.json())
+                                            .then(pollData => {
+                                                if (pollData.status === 'completed') {
+                                                    clearInterval(pollInterval);
+                                                    if (aiIndicator) aiIndicator.classList.add('hidden');
+                                                    if (pollData.text) {
+                                                        textContent.value = pollData.text;
+                                                        graphicData.text = pollData.text;
+                                                    }
+                                                } else if (pollData.status === 'failed' || pollData.status === 'not_found') {
+                                                    clearInterval(pollInterval);
+                                                    if (aiIndicator) aiIndicator.classList.add('hidden');
+                                                }
+                                            })
+                                            .catch(() => {
+                                                clearInterval(pollInterval);
+                                                if (aiIndicator) aiIndicator.classList.add('hidden');
+                                            });
+                                    }, 3000);
+                                    setTimeout(() => {
+                                        clearInterval(pollInterval);
+                                        if (aiIndicator) aiIndicator.classList.add('hidden');
+                                    }, 120000);
+                                } else {
+                                    if (aiIndicator) aiIndicator.classList.add('hidden');
                                 }
                             })
                             .catch(() => {
@@ -487,6 +523,13 @@
                     const aiPrompt = document.getElementById(id);
                     if (aiPrompt) {
                         aiPrompt.value = currentSettings.ai_prompt || '';
+                    }
+                });
+
+                ['ai_model', 'ai_model_mobile'].forEach(id => {
+                    const aiModel = document.getElementById(id);
+                    if (aiModel) {
+                        aiModel.value = currentSettings.ai_model || '';
                     }
                 });
 
@@ -728,8 +771,7 @@
                             if (cb.checked) sendDays.push(parseInt(cb.value));
                         });
                     }
-                    if (sendDays.length === 0) sendDays = [1]; // Default to Monday
-                    sendDay = sendDays[0];
+                    if (sendDays.length > 0) sendDay = sendDays[0];
                 } else if (frequency === 'monthly') {
                     const monthlyDayEl = document.getElementById('monthly_day') || document.getElementById('monthly_day_mobile');
                     sendDay = monthlyDayEl ? monthlyDayEl.value : 1;
@@ -738,6 +780,7 @@
                 const emailEnabled = document.getElementById('email_enabled') || document.getElementById('email_enabled_mobile');
                 const sendHour = document.getElementById('send_hour') || document.getElementById('send_hour_mobile');
                 const aiPrompt = document.getElementById('ai_prompt') || document.getElementById('ai_prompt_mobile');
+                const aiModel = document.getElementById('ai_model') || document.getElementById('ai_model_mobile');
                 const textTemplate = document.getElementById('text_template') || document.getElementById('text_template_mobile');
                 const excludeRecurring = document.getElementById('exclude_recurring') || document.getElementById('exclude_recurring_mobile');
                 const recipientEmails = document.getElementById('recipient_emails') || document.getElementById('recipient_emails_mobile');
@@ -772,6 +815,7 @@
                     send_days: sendDays,
                     send_hour: sendHour ? parseInt(sendHour.value) : 9,
                     ai_prompt: aiPrompt ? aiPrompt.value : '',
+                    ai_model: aiModel ? aiModel.value : '',
                     text_template: textTemplate ? textTemplate.value : '',
                     layout: layoutChecked ? layoutChecked.value : 'grid',
                     exclude_recurring: excludeRecurring ? excludeRecurring.checked : false,
@@ -958,6 +1002,14 @@
                 }
             }
 
+            function toggleAiModelVisibility(promptId, containerId) {
+                const prompt = document.getElementById(promptId);
+                const container = document.getElementById(containerId);
+                if (prompt && container) {
+                    container.classList.toggle('hidden', !prompt.value.trim());
+                }
+            }
+
             function restoreTextareaHeights() {
                 const textareaIds = ['text_template', 'text_template_mobile', 'ai_prompt', 'ai_prompt_mobile'];
                 textareaIds.forEach(id => {
@@ -1128,6 +1180,17 @@
             document.addEventListener('DOMContentLoaded', function() {
                 updateSettingsUI();
                 initTextareaResize();
+
+                // Toggle AI model dropdown visibility based on prompt content
+                toggleAiModelVisibility('ai_prompt', 'ai_model_container');
+                toggleAiModelVisibility('ai_prompt_mobile', 'ai_model_container_mobile');
+                ['ai_prompt', 'ai_prompt_mobile'].forEach(id => {
+                    const prompt = document.getElementById(id);
+                    if (prompt) {
+                        const containerId = id === 'ai_prompt' ? 'ai_model_container' : 'ai_model_container_mobile';
+                        prompt.addEventListener('input', () => toggleAiModelVisibility(id, containerId));
+                    }
+                });
 
                 // Add change listeners for both desktop and mobile frequency selects
                 ['frequency', 'frequency_mobile'].forEach(id => {
@@ -1593,6 +1656,16 @@
                             <div>
                                 <textarea id="ai_prompt_mobile" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
+                                @if (count($aiGraphicModels) > 0)
+                                <div id="ai_model_container_mobile" class="mt-3 hidden">
+                                    <label for="ai_model_mobile" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ai_model') }}</label>
+                                    <select id="ai_model_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                        @foreach ($aiGraphicModels as $modelId => $modelInfo)
+                                            <option value="{{ $modelId }}" {{ $modelId === 'gemini-2.5-flash' ? 'selected' : '' }}>{{ $modelInfo['name'] }} ({{ __('messages.ai_badge_' . $modelInfo['badge']) }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @endif
                             </div>
                         </div>
                         @elseif (config('app.hosted'))
@@ -1697,7 +1770,7 @@
                                         </div>
 
                                         <div>
-                                            <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                            <label for="send_hour_mobile" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }} ({{ $role->timezone ?: 'UTC' }})</label>
                                             <select id="send_hour_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                 @for ($i = 0; $i < 24; $i++)
                                                     <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>
@@ -1920,6 +1993,16 @@
                                 <div>
                                     <textarea id="ai_prompt" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
+                                    @if (count($aiGraphicModels) > 0)
+                                    <div id="ai_model_container" class="mt-3 hidden">
+                                        <label for="ai_model" class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('messages.ai_model') }}</label>
+                                        <select id="ai_model" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                            @foreach ($aiGraphicModels as $modelId => $modelInfo)
+                                                <option value="{{ $modelId }}" {{ $modelId === 'gemini-2.5-flash' ? 'selected' : '' }}>{{ $modelInfo['name'] }} ({{ __('messages.ai_badge_' . $modelInfo['badge']) }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                             @elseif (config('app.hosted'))
@@ -2024,7 +2107,7 @@
                                             </div>
 
                                             <div>
-                                                <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }}</label>
+                                                <label for="send_hour" class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.send_at_hour') }} ({{ $role->timezone ?: 'UTC' }})</label>
                                                 <select id="send_hour" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                                     @for ($i = 0; $i < 24; $i++)
                                                         <option value="{{ $i }}">{{ sprintf('%02d:00', $i) }}</option>

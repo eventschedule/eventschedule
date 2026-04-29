@@ -28,153 +28,178 @@ class SendGraphicEmails extends Command
      */
     public function handle()
     {
-        // Get all roles with graphic email enabled
         $roles = Role::where('is_deleted', false)
             ->whereNotNull('graphic_settings')
             ->get();
 
-        $sentCount = 0;
-        $skippedCount = 0;
+        $considered = 0;
+        $sent = 0;
+        $skipped = 0;
 
         foreach ($roles as $role) {
+            $considered++;
+
             try {
-                if (! $this->shouldSendEmail($role)) {
-                    $skippedCount++;
+                $settings = $role->graphic_settings ?? [];
+
+                // Silent skip for roles where the user hasn't enabled scheduled emails -
+                // avoids log spam on instances with many roles.
+                if (empty($settings['enabled'])) {
+                    $skipped++;
 
                     continue;
                 }
 
-                // Check if Enterprise (required for this feature)
                 if (! $role->isEnterprise()) {
-                    $skippedCount++;
+                    $this->logSkip($role, 'not_enterprise');
+                    $skipped++;
 
                     continue;
                 }
 
-                // Get and validate recipient emails
-                $settings = $role->graphic_settings;
                 $recipientEmails = $settings['recipient_emails'] ?? '';
-
                 if (empty($recipientEmails)) {
-                    $skippedCount++;
+                    $this->logSkip($role, 'no_recipients');
+                    $skipped++;
 
                     continue;
                 }
 
-                // Send to all recipients in a single email (service handles parsing and validation)
+                $reason = $this->shouldSendReason($role, $settings);
+                if ($reason !== 'ok') {
+                    $this->logSkip($role, $reason);
+                    $skipped++;
+
+                    continue;
+                }
+
                 $service = new GraphicEmailService;
                 $result = $service->sendGraphicEmail($role, $recipientEmails);
 
                 if ($result) {
-                    // Update last_sent_at
                     $settings['last_sent_at'] = now()->toIso8601String();
                     $role->graphic_settings = $settings;
                     $role->save();
 
-                    $sentCount++;
+                    \Log::info('SendGraphicEmails: sent', [
+                        'role_id' => $role->id,
+                        'subdomain' => $role->subdomain,
+                        'recipient_count' => count(array_filter(array_map('trim', explode(',', $recipientEmails)))),
+                    ]);
+
+                    $sent++;
+                } else {
+                    $this->logSkip($role, 'no_flyer_events');
+                    $skipped++;
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send graphic email for role '.$role->subdomain.': '.$e->getMessage());
+                $skipped++;
             }
         }
 
+        \Log::info('SendGraphicEmails: complete', [
+            'considered' => $considered,
+            'sent' => $sent,
+            'skipped' => $skipped,
+        ]);
     }
 
     /**
-     * Check if email should be sent based on schedule settings
+     * Determine whether the role is due for a send right now.
+     *
+     * Returns 'ok' if the email should be sent, otherwise a short reason string
+     * identifying which gate blocked it. Caller is responsible for any logging
+     * (so that disabled roles can be skipped silently before this is called).
+     *
+     * Period model: each frequency defines a "period" (a calendar day for daily,
+     * a calendar day for weekly, a calendar month for monthly). At most one send
+     * is recorded per period via $settings['last_sent_at']. The gate fires once
+     * the scheduled send time inside the current period has passed and the
+     * period has not yet had a send recorded - so cron drift past the exact
+     * sendHour no longer loses sends within the same day/period.
+     *
+     * Note: if two cron processes evaluate this gate simultaneously they could
+     * both pass before either persists last_sent_at. The withoutOverlapping()
+     * lock on the scheduler plus the td_hourly cache lock in translateData()
+     * make this very unlikely in practice; row-level locking would close it
+     * fully but is deferred until observed.
      */
-    protected function shouldSendEmail(Role $role): bool
+    protected function shouldSendReason(Role $role, array $settings): string
     {
-        $settings = $role->graphic_settings;
-
-        // Check if enabled
-        if (empty($settings['enabled'])) {
-            return false;
-        }
-
-        // Check if recipient emails are set
-        if (empty($settings['recipient_emails'])) {
-            return false;
-        }
-
         $frequency = $settings['frequency'] ?? 'weekly';
-        $sendDay = $settings['send_day'] ?? 1;
-        $sendHour = $settings['send_hour'] ?? 9;
+        $sendDay = (int) ($settings['send_day'] ?? 1);
+        $sendHour = (int) ($settings['send_hour'] ?? 9);
         $lastSentAt = $settings['last_sent_at'] ?? null;
 
-        // Get current time in role's timezone or UTC
-        $timezone = $role->timezone ?? 'UTC';
+        $timezone = $role->timezone ?: 'UTC';
         $now = Carbon::now($timezone);
-        $currentHour = $now->hour;
-        $currentDayOfWeek = $now->dayOfWeek; // 0 (Sunday) - 6 (Saturday)
-        $currentDayOfMonth = $now->day;
+        $lastSent = $lastSentAt ? Carbon::parse($lastSentAt)->setTimezone($timezone) : null;
 
-        // Check if it's the right hour
-        if ($currentHour !== (int) $sendHour) {
-            return false;
-        }
-
-        // Check if it's the right day based on frequency
         switch ($frequency) {
             case 'daily':
-                // Send every day at the specified hour
-                break;
+                if ($now->hour < $sendHour) {
+                    return 'wrong_hour';
+                }
+                if ($lastSent && $lastSent->toDateString() === $now->toDateString()) {
+                    return 'already_sent_this_period';
+                }
+
+                return 'ok';
 
             case 'weekly':
-                // send_days: array of day numbers (0 = Sunday, ..., 6 = Saturday)
-                // Falls back to [send_day] for backward compatibility
-                $sendDays = $settings['send_days'] ?? [(int) $sendDay];
-                if (! in_array($currentDayOfWeek, array_map('intval', $sendDays))) {
-                    return false;
+                $sendDays = $settings['send_days'] ?? null;
+
+                // Backward compat: roles configured before send_days (plural) was added
+                // only have send_day (singular) holding the day-of-week.
+                if ($sendDays === null && isset($settings['send_day'])) {
+                    $legacyDay = (int) $settings['send_day'];
+                    if ($legacyDay >= 0 && $legacyDay <= 6) {
+                        $sendDays = [$legacyDay];
+                    }
                 }
-                break;
+
+                $sendDays = array_values(array_filter(array_map('intval', (array) ($sendDays ?? [])), fn ($d) => $d >= 0 && $d <= 6));
+
+                if (empty($sendDays)) {
+                    return 'weekly_no_days_configured';
+                }
+                if (! in_array($now->dayOfWeek, $sendDays, true)) {
+                    return 'wrong_day';
+                }
+                if ($now->hour < $sendHour) {
+                    return 'wrong_hour';
+                }
+                if ($lastSent && $lastSent->toDateString() === $now->toDateString()) {
+                    return 'already_sent_this_period';
+                }
+
+                return 'ok';
 
             case 'monthly':
-                // send_day: 1-28 (day of month)
-                if ($currentDayOfMonth !== (int) $sendDay) {
-                    return false;
+                $isScheduledDayPassed = $now->day > $sendDay
+                    || ($now->day === $sendDay && $now->hour >= $sendHour);
+
+                if (! $isScheduledDayPassed) {
+                    return $now->day === $sendDay ? 'wrong_hour' : 'wrong_day';
                 }
-                break;
+                if ($lastSent && $lastSent->year === $now->year && $lastSent->month === $now->month) {
+                    return 'already_sent_this_period';
+                }
+
+                return 'ok';
 
             default:
-                return false;
+                return 'wrong_day';
         }
+    }
 
-        // Check last_sent_at to avoid duplicate sends within the same hour
-        if ($lastSentAt) {
-            $lastSent = Carbon::parse($lastSentAt);
-            $hoursSinceLastSend = $now->diffInHours($lastSent);
-
-            // Don't send if we already sent within the last hour
-            if ($hoursSinceLastSend < 1) {
-                return false;
-            }
-
-            // Additional safeguard based on frequency
-            switch ($frequency) {
-                case 'daily':
-                    // Don't send more than once per day
-                    if ($hoursSinceLastSend < 20) {
-                        return false;
-                    }
-                    break;
-
-                case 'weekly':
-                    // Don't send more than once per day (may send on consecutive days)
-                    if ($hoursSinceLastSend < 20) {
-                        return false;
-                    }
-                    break;
-
-                case 'monthly':
-                    // Don't send more than once per month (25 days as buffer)
-                    if ($hoursSinceLastSend < 24 * 25) {
-                        return false;
-                    }
-                    break;
-            }
-        }
-
-        return true;
+    protected function logSkip(Role $role, string $reason): void
+    {
+        \Log::info('SendGraphicEmails: skipped', [
+            'role_id' => $role->id,
+            'subdomain' => $role->subdomain,
+            'reason' => $reason,
+        ]);
     }
 }

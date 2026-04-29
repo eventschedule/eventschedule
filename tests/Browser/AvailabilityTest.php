@@ -41,15 +41,15 @@ class AvailabilityTest extends DuskTestCase
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
             $this->assertTrue($isDisabled[0], 'Save button should be disabled initially');
 
-            // Click the 15th to mark it unavailable
-            $browser->click('.day-element[data-date="'.$targetDate.'"]')
-                ->pause(500);
-
-            // Verify .day-x overlay appeared on the clicked date
-            $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
+            // Wait for jQuery click handler to be attached to day elements
+            $browser->waitUntil(
+                "typeof jQuery !== 'undefined' && jQuery._data(document.querySelector('.day-element'), 'events') !== undefined",
+                10
             );
-            $this->assertTrue($hasDayX[0], 'Day-x overlay should appear after clicking');
+
+            // Click the 15th to mark it unavailable (use JS click to avoid sticky header overlay)
+            $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");
+            $browser->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Save button should now be enabled
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
@@ -68,21 +68,11 @@ class AvailabilityTest extends DuskTestCase
             // Verify persistence after reload
             $browser->visit('/talent/availability')
                 ->waitFor('#saveButton', 10)
-                ->pause(500);
+                ->waitFor('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
-            $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
-            );
-            $this->assertTrue($hasDayX[0], 'Day-x overlay should persist after reload');
-
-            // Toggle back to available
-            $browser->click('.day-element[data-date="'.$targetDate.'"]')
-                ->pause(500);
-
-            $hasDayX = $browser->script(
-                "return document.querySelector('.day-element[data-date=\"".$targetDate."\"] .day-x') !== null;"
-            );
-            $this->assertFalse($hasDayX[0], 'Day-x overlay should be removed after toggling back');
+            // Toggle back to available (use JS click to avoid sticky header overlay)
+            $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");
+            $browser->waitUntilMissing('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
             // Save again
             $browser->click('#saveButton')

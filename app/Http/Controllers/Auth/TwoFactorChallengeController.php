@@ -8,6 +8,7 @@ use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 use PragmaRX\Google2FA\Google2FA;
 
@@ -101,6 +102,17 @@ class TwoFactorChallengeController extends Controller
 
         // Complete authentication
         Auth::login($user, $remember);
+
+        // Process SMS token if present in session (set by registration redirect)
+        $smsToken = $request->session()->pull('sms_token');
+        if ($smsToken) {
+            $smsPhone = Cache::get('sms_signup_'.$smsToken);
+            if ($smsPhone) {
+                $user->claimRolesByPhone($smsPhone);
+                Cache::forget('sms_signup_'.$smsToken);
+            }
+        }
+
         $request->session()->regenerate();
 
         AuditService::log(AuditService::AUTH_LOGIN, $user->id);

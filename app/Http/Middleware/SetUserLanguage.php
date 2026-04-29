@@ -30,6 +30,8 @@ class SetUserLanguage
             if (is_valid_language_code($languageCode)) {
                 App::setLocale($languageCode);
             }
+        } elseif ($request->isMethod('GET') && is_string($request->query('lang')) && is_valid_language_code($request->query('lang'))) {
+            App::setLocale($request->query('lang'));
         } elseif (session()->has('guest_language') && is_valid_language_code(session('guest_language'))) {
             App::setLocale(session('guest_language'));
         }

@@ -15,20 +15,26 @@
 
             @if ($role)
             <div class="flex gap-3">
-                <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
-                    <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <x-secondary-link href="{{ route('newsletter.templates', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
+                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+                    </svg>
+                    {{ __('messages.templates') }}
+                </x-secondary-link>
+                <x-secondary-link href="{{ route('newsletter.segments', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
+                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>
                     </svg>
                     {{ __('messages.segments') }}
                 </x-secondary-link>
-                <x-secondary-link href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
-                    <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <x-secondary-link href="{{ route('newsletter.import', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
+                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
                     {{ __('messages.import_emails') }}
                 </x-secondary-link>
-                <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}">
-                    <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <x-brand-link href="{{ route('newsletter.create', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id)]) }}" class="!px-3 !py-2 !text-sm">
+                    <svg class="-ms-0.5 me-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
                     {{ __('messages.create_newsletter') }}
@@ -36,6 +42,10 @@
             </div>
             @endif
         </div>
+
+        @if ($role)
+        @include('newsletter.partials._verification-warning')
+        @endif
 
         @if ($role && $role->newsletterLimit() !== null)
         @php
@@ -74,7 +84,7 @@
                         <x-sortable-header column="sent_count" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.sent') }}</x-sortable-header>
                         <x-sortable-header column="open_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.open_rate') }}</x-sortable-header>
                         <x-sortable-header column="click_rate" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.click_rate') }}</x-sortable-header>
-                        <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.sent_date') }}</x-sortable-header>
+                        <x-sortable-header column="created_at" :sortBy="$sortBy" :sortDir="$sortDir" class="px-6 py-3">{{ __('messages.created') }}</x-sortable-header>
                         <th class="px-6 py-3"></th>
                     </tr>
                 </thead>
@@ -111,7 +121,7 @@
                             {{ $newsletter->sent_count > 0 ? round(($newsletter->click_count / $newsletter->sent_count) * 100, 1) . '%' : '-' }}
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
-                            {{ $newsletter->sent_at ? $newsletter->sent_at->format('M j, Y') : $newsletter->created_at->format('M j, Y') }}
+                            {{ $newsletter->created_at->format('M j, Y') }}
                         </td>
                         <td class="px-6 py-4 text-sm {{ is_rtl() ? 'text-left' : 'text-right' }}">
                             <div class="flex gap-2 {{ is_rtl() ? 'justify-start' : 'justify-end' }}">

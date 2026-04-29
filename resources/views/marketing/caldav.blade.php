@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">CalDAV Sync - Event Schedule</x-slot>
+    <x-slot name="title">CalDAV Calendar Sync - Event Schedule</x-slot>
     <x-slot name="description">Sync with any CalDAV-compatible calendar server. Works with Nextcloud, Radicale, Fastmail, iCloud, and more. Open standard, selfhosted friendly.</x-slot>
     <x-slot name="breadcrumbTitle">CalDAV</x-slot>
 
@@ -30,6 +30,46 @@
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Which CalDAV servers are supported?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Any CalDAV-compatible server works with Event Schedule, including Nextcloud, Radicale, Fastmail, iCloud, and any other server that implements the CalDAV protocol (RFC 4791)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does CalDAV sync work with selfhosted Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, CalDAV is ideal for selfhosted setups since both Event Schedule and your calendar server can run on your own infrastructure, keeping all data under your control."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How often does CalDAV sync run?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "CalDAV syncs automatically every 15 minutes via scheduled tasks. The sync uses change tokens for efficient detection, only transferring events that have actually changed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is my CalDAV password stored securely?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, all CalDAV credentials are stored encrypted in the database. Even if the database is compromised, your username and password remain secure."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -490,6 +530,106 @@
                     </span>
                 </div>
             </a>
+        </div>
+    </section>
+
+    <!-- Related Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-8 pb-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-500/20 transition-colors text-sm font-medium">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Calendar Sync Features
+                </a>
+                <a href="{{ marketing_url('/open-source') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-sm font-medium">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    Open Source
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Common questions about CalDAV sync.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Which CalDAV servers are supported?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Any CalDAV-compatible server works with Event Schedule, including Nextcloud, Radicale, Fastmail, iCloud, and any other server that implements the CalDAV protocol (RFC 4791).
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Does CalDAV sync work with selfhosted Event Schedule?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, CalDAV is ideal for selfhosted setups since both Event Schedule and your calendar server can run on your own infrastructure, keeping all data under your control.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900 dark:to-blue-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How often does CalDAV sync run?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            CalDAV syncs automatically every 15 minutes via scheduled tasks. The sync uses change tokens for efficient detection, only transferring events that have actually changed.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is my CalDAV password stored securely?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, all CalDAV credentials are stored encrypted in the database. Even if the database is compromised, your username and password remain secure.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

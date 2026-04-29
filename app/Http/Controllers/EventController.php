@@ -26,6 +26,7 @@ use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\DeletedEventNotification;
+use App\Notifications\NewRequestsNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
@@ -41,6 +42,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -186,12 +188,14 @@ class EventController extends Controller
         }
 
         // Capture webhook payload before deletion
-        $webhookPayload = [
-            'event' => 'event.deleted',
-            'timestamp' => now()->toIso8601String(),
-            'data' => $event->toApiData(),
-        ];
-        WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        if (! $event->is_draft) {
+            $webhookPayload = [
+                'event' => 'event.deleted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => $event->toApiData(),
+            ];
+            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        }
 
         $event->delete();
 
@@ -217,6 +221,8 @@ class EventController extends Controller
 
     public function create(Request $request, $subdomain)
     {
+        restore_pending_action();
+
         if (! auth()->user()->isEditor($subdomain)) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
@@ -234,6 +240,7 @@ class EventController extends Controller
 
         $event = new Event;
         $event->user_id = $user->id;
+        $event->is_draft = $role->draft_events_default;
         $selectedMembers = [];
 
         // Check if we're cloning an event
@@ -245,6 +252,7 @@ class EventController extends Controller
             }
             $event->user_id = $user->id;
             $event->creator_role_id = $role->id;
+            $event->is_draft = $role->draft_events_default;
 
             // Set cloned tickets
             $event->tickets = collect(array_map(function ($ticketData) {
@@ -306,6 +314,7 @@ class EventController extends Controller
                     foreach ($ticketData as $key => $value) {
                         $ticket->$key = $value;
                     }
+
                     return $ticket;
                 }, $defaultTickets['tickets'] ?? []);
                 $event->tickets = collect($tickets ?: [new Ticket]);
@@ -315,6 +324,7 @@ class EventController extends Controller
                         $addon->$key = $value;
                     }
                     $addon->is_addon = true;
+
                     return $addon;
                 }, $defaultTickets['addons'] ?? []);
                 $defaultPromoCodes = $defaultTickets['promo_codes'] ?? [];
@@ -324,13 +334,17 @@ class EventController extends Controller
                 $event->tickets = collect([new Ticket]);
             }
 
-            // Load the last event created by the user with a category set and set its category
-            $lastEvent = Event::where('user_id', $user->id)
-                ->whereNotNull('category_id')
-                ->orderBy('id', 'desc')
-                ->first();
-            if ($lastEvent) {
-                $event->category_id = $lastEvent->category_id;
+            // Set default category: prefer role's default, fall back to last event's category
+            if ($role->default_category_id) {
+                $event->category_id = $role->default_category_id;
+            } else {
+                $lastEvent = Event::where('user_id', $user->id)
+                    ->whereNotNull('category_id')
+                    ->orderBy('id', 'desc')
+                    ->first();
+                if ($lastEvent) {
+                    $event->category_id = $lastEvent->category_id;
+                }
             }
 
             if ($schedule) {
@@ -875,6 +889,44 @@ class EventController extends Controller
         }
     }
 
+    public function publish(Request $request, $subdomain, $hash)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $user = $request->user();
+        $event_id = UrlUtils::decodeId($hash);
+        $event = Event::with('roles')->findOrFail($event_id);
+
+        if ($user->cannot('update', $event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (! $event->is_draft) {
+            return redirect()->back();
+        }
+
+        $event->is_draft = false;
+        $event->save();
+
+        // Trigger calendar sync now that the event is published
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        if ($role->syncsToGoogle()) {
+            $event->syncToGoogleCalendar('create');
+        }
+        if ($role->syncsToCalDAV()) {
+            $event->syncToCalDAV('create');
+        }
+
+        // Dispatch webhook
+        WebhookService::dispatch('event.created', $event);
+
+        AuditService::log(AuditService::EVENT_PUBLISH, $user->id, 'Event', $event->id, null, null, $event->name);
+
+        return redirect()->back()->with('message', __('messages.event_published'));
+    }
+
     public function acceptAll(Request $request, $subdomain)
     {
         if (! auth()->user()->isEditor($subdomain)) {
@@ -1075,6 +1127,14 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        if ($event->is_draft) {
+            $user = auth()->user();
+            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+            if (! $isMemberOrAdmin) {
+                abort(404);
+            }
+        }
+
         if ($event->is_private) {
             $user = auth()->user();
             $isEventMember = $event->roles->contains(fn ($r) => $user && $user->isMember($r->subdomain));
@@ -1205,9 +1265,15 @@ class EventController extends Controller
         }
 
         if (! auth()->check() && $role->require_account) {
-            session(['pending_request' => $subdomain]);
+            $data = ['pending_request' => $subdomain];
+            if (session('guest_language')) {
+                $data['guest_language'] = session('guest_language');
+            }
 
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                $data
+            );
         }
 
         if ($request->lang) {
@@ -1254,8 +1320,8 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->isEnterprise()) {
-            return response()->json(['error' => __('messages.not_authorized')], 403);
+        if (! $role->canMakeAiParseRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()])], 422);
         }
 
         try {
@@ -1282,6 +1348,10 @@ class EventController extends Controller
 
         if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $role->canMakeAiAgendaRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiAgendaDailyLimit()])], 422);
         }
 
         $request->validate([
@@ -1321,7 +1391,7 @@ class EventController extends Controller
                 $event->save();
             }
 
-            $parts = GeminiUtils::parseEventParts($imageData, $textDescription, $aiPrompt);
+            $parts = GeminiUtils::parseEventParts($imageData, $textDescription, $aiPrompt, $role->id);
 
             $agendaImageUrl = null;
             $agendaImageFullUrl = null;
@@ -1446,64 +1516,80 @@ class EventController extends Controller
             $event->setRelation('roles', $roles->push($venueRole));
         }
 
-        try {
-            $imageData = GeminiUtils::generateEventFlyer($event, $request->input('style_instructions'), $role, $request->input('custom_prompt'));
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_flyer_{$requestId}", ['status' => 'processing'], 300);
 
-            if (! $imageData) {
-                return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
-            }
+        $styleInstructions = $request->input('style_instructions');
+        $customPrompt = $request->input('custom_prompt');
+        $roleId = $role->id;
 
-            $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
+        dispatch(function () use ($requestId, $event, $styleInstructions, $role, $customPrompt, $eventId, $roleId, $subdomain) {
+            set_time_limit(120);
 
-            if ($eventId) {
-                // Delete old flyer from storage if exists
-                if ($event->flyer_image_url) {
-                    $path = $event->getAttributes()['flyer_image_url'];
-                    if (config('filesystems.default') == 'local') {
-                        $path = 'public/'.$path;
-                    }
-                    Storage::delete($path);
+            try {
+                $imageData = GeminiUtils::generateEventFlyer($event, $styleInstructions, $role, $customPrompt);
+
+                if (! $imageData) {
+                    \Log::warning('AI flyer generation returned no image data', [
+                        'role_id' => $roleId,
+                        'event_id' => $eventId,
+                    ]);
+                    Cache::put("ai_flyer_{$requestId}", ['status' => 'failed'], 300);
+
+                    return;
                 }
 
-                $event->flyer_image_url = $filename;
-                $event->save();
+                $filename = ImageUtils::saveImageData($imageData, 'generated_flyer.png', 'flyer_');
+
+                UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $roleId);
+
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $flyerUrl = url('/storage/'.$filename);
+                } else {
+                    $flyerUrl = $filename;
+                }
+
+                $result = [
+                    'status' => 'completed',
+                    'success' => true,
+                    'flyer_image_url' => $flyerUrl,
+                    'delete_url' => route('event.delete_image', ['subdomain' => $subdomain]),
+                ];
+
+                $result['flyer_image_filename'] = $filename;
+
+                Cache::put("ai_flyer_{$requestId}", $result, 300);
+            } catch (\App\Exceptions\ContentModerationException $e) {
+                Cache::put("ai_flyer_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
+            } catch (\Exception $e) {
+                \Log::error('AI flyer generation failed: '.$e->getMessage(), [
+                    'role_id' => $roleId,
+                    'event_id' => $eventId,
+                    'exception' => get_class($e),
+                ]);
+                report($e);
+                Cache::put("ai_flyer_{$requestId}", ['status' => 'failed'], 300);
             }
+        })->afterResponse();
 
-            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_FLYER, $role->id);
+        return response()->json(['request_id' => $requestId]);
+    }
 
-            // Build full URL for the flyer
-            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-            } elseif (config('filesystems.default') == 'local') {
-                $flyerUrl = url('/storage/'.$filename);
-            } else {
-                $flyerUrl = $filename;
-            }
-
-            $response = [
-                'success' => true,
-                'flyer_image_url' => $flyerUrl,
-                'delete_url' => route('event.delete_image', ['subdomain' => $subdomain]),
-            ];
-
-            if (! $eventId) {
-                $response['flyer_image_filename'] = $filename;
-            }
-
-            return response()->json($response);
-        } catch (\App\Exceptions\ContentModerationException $e) {
-            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
-        } catch (\Exception $e) {
-            \Log::error('AI flyer generation failed: '.$e->getMessage(), [
-                'role_id' => $role->id,
-            ]);
-
-            return response()->json(['error' => __('messages.ai_flyer_generation_failed')], 500);
+    public function pollFlyer($subdomain, $requestId)
+    {
+        if (! auth()->check() || ! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
+
+        $data = Cache::get("ai_flyer_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function getEventDetailsPrompt(Request $request, $subdomain)
@@ -1582,6 +1668,10 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
 
+        if (! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
+        }
+
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -1645,8 +1735,8 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        if (! $role->isEnterprise()) {
-            return response()->json(['error' => __('messages.not_authorized')], 403);
+        if (! $role->canMakeAiParseRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiParseDailyLimit()])], 422);
         }
 
         try {
@@ -1665,8 +1755,9 @@ class EventController extends Controller
 
     public function import(Request $request, $subdomain)
     {
-        // \Log::info($request->all());
-        // return redirect()->back();
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
@@ -1717,6 +1808,9 @@ class EventController extends Controller
         if (! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
         }
+
+        // Prevent guests from injecting draft status
+        $request->request->remove('is_draft');
 
         $event = $this->eventRepo->saveEvent($role, $request, null, false);
 
@@ -1977,6 +2071,23 @@ class EventController extends Controller
             $event->roles()->attach($venue->id, ['is_accepted' => true]);
         }
 
+        if ($isAccepted === null && $role->accept_requests && $role->require_approval) {
+            $pendingCount = Event::whereHas('roles', function ($query) use ($role) {
+                $query->where('event_role.role_id', $role->id)
+                    ->whereNull('event_role.is_accepted');
+            })->count();
+
+            $editors = $role->getEditorsWantingNotification('new_request');
+            foreach ($editors as $editor) {
+                $editor->notify(new NewRequestsNotification($role, $pendingCount));
+            }
+
+            if ($editors->isNotEmpty()) {
+                $role->last_notified_request_count = $pendingCount;
+                $role->save();
+            }
+        }
+
         // Auto-curate event
         $role->autoCurateEvent($event);
 
@@ -2134,6 +2245,9 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -2146,17 +2260,18 @@ class EventController extends Controller
         }
 
         if (! auth()->check()) {
-            session()->put('pending_fan_content', [
-                'type' => 'video',
-                'subdomain' => $subdomain,
-                'event_hash' => $event_hash,
-                'youtube_url' => $youtubeUrl,
-                'event_part_id' => $request->input('event_part_id'),
-                'event_date' => $request->input('event_date'),
-                'return_url' => url()->previous(),
-            ]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_fan_content' => [
+                    'type' => 'video',
+                    'subdomain' => $subdomain,
+                    'event_hash' => $event_hash,
+                    'youtube_url' => $youtubeUrl,
+                    'event_part_id' => $request->input('event_part_id'),
+                    'event_date' => $request->input('event_date'),
+                    'return_url' => url()->previous(),
+                ]]
+            );
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -2242,6 +2357,9 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -2249,17 +2367,18 @@ class EventController extends Controller
         $comment = strip_tags(trim($request->input('comment')));
 
         if (! auth()->check()) {
-            session()->put('pending_fan_content', [
-                'type' => 'comment',
-                'subdomain' => $subdomain,
-                'event_hash' => $event_hash,
-                'comment' => $comment,
-                'event_part_id' => $request->input('event_part_id'),
-                'event_date' => $request->input('event_date'),
-                'return_url' => url()->previous(),
-            ]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_fan_content' => [
+                    'type' => 'comment',
+                    'subdomain' => $subdomain,
+                    'event_hash' => $event_hash,
+                    'comment' => $comment,
+                    'event_part_id' => $request->input('event_part_id'),
+                    'event_date' => $request->input('event_date'),
+                    'return_url' => url()->previous(),
+                ]]
+            );
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -2386,6 +2505,9 @@ class EventController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -2410,19 +2532,20 @@ class EventController extends Controller
             $tempFilename = 'photo_'.Str::random(32).'.'.$extension;
             $file->storeAs('temp', $tempFilename);
 
-            session()->put('pending_fan_content', [
-                'type' => 'photo',
-                'subdomain' => $subdomain,
-                'event_hash' => $event_hash,
-                'temp_filename' => $tempFilename,
-                'extension' => $extension,
-                'event_part_id' => $request->input('event_part_id'),
-                'event_date' => $request->input('event_date'),
-                'return_url' => url()->previous(),
-                'return_to' => $request->input('return_to'),
-            ]);
-
-            return redirect(app_url(route('sign_up', [], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', [], false)),
+                ['pending_fan_content' => [
+                    'type' => 'photo',
+                    'subdomain' => $subdomain,
+                    'event_hash' => $event_hash,
+                    'temp_filename' => $tempFilename,
+                    'extension' => $extension,
+                    'event_part_id' => $request->input('event_part_id'),
+                    'event_date' => $request->input('event_date'),
+                    'return_url' => url()->previous(),
+                    'return_to' => $request->input('return_to'),
+                ]]
+            );
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -2836,6 +2959,9 @@ class EventController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -3079,7 +3205,7 @@ class EventController extends Controller
             return response()->json(['error' => __('messages.not_authorized')], 404);
         }
 
-        if ($event->is_private) {
+        if ($event->is_draft || $event->is_private) {
             $user = auth()->user();
             $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
             if (! $isMemberOrAdmin) {
@@ -3166,6 +3292,14 @@ class EventController extends Controller
 
         if (! $event->roles()->wherePivot('role_id', $role->id)->wherePivot('is_accepted', true)->exists()) {
             return response()->json(['error' => __('messages.not_authorized')], 404);
+        }
+
+        if ($event->is_draft) {
+            $user = auth()->user();
+            $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+            if (! $isMemberOrAdmin) {
+                return response()->json(['error' => __('messages.not_authorized')], 404);
+            }
         }
 
         if ($event->is_private) {

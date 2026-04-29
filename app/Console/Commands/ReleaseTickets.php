@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Sale;
+use App\Services\AuditService;
 use Illuminate\Console\Command;
 
 class ReleaseTickets extends Command
@@ -26,20 +27,13 @@ class ReleaseTickets extends Command
      */
     public function handle()
     {
-        $connection = config('database.default');
-        $driver = config("database.connections.{$connection}.driver");
-
         $expiredSales = Sale::where('status', 'unpaid')
             ->where(function ($q) {
                 $q->whereNull('group_id')->orWhereColumn('group_id', 'id');
             })
-            ->whereHas('event', function ($query) use ($driver) {
-                $query->where('events.expire_unpaid_tickets', '>', 0);
-                if ($driver === 'sqlite') {
-                    $query->whereRaw("(strftime('%s', 'now') - strftime('%s', sales.created_at))/3600 >= events.expire_unpaid_tickets");
-                } else {
-                    $query->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= events.expire_unpaid_tickets');
-                }
+            ->whereHas('event', function ($query) {
+                $query->where('events.expire_unpaid_tickets', '>', 0)
+                    ->whereRaw('TIMESTAMPDIFF(HOUR, sales.created_at, NOW()) >= events.expire_unpaid_tickets');
             })
             ->get();
 
@@ -48,6 +42,9 @@ class ReleaseTickets extends Command
                 $sale->status = 'expired';
                 $sale->save();
             });
+
+            AuditService::log(AuditService::SALE_EXPIRED, null, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], 'auto_expire:event_id:'.$sale->event_id);
         }
     }
 }

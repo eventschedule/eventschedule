@@ -222,11 +222,17 @@
             }
 
             const eventRequestFormSection = document.getElementById('event_request_form_section');
+            const requireAccountCheckbox = document.querySelector('input[name="require_account"][type="checkbox"]');
             if (acceptRequestsCheckbox && eventRequestFormSection) {
-                eventRequestFormSection.style.display = acceptRequestsCheckbox.checked ? 'block' : 'none';
-                acceptRequestsCheckbox.addEventListener('change', function() {
-                    eventRequestFormSection.style.display = this.checked ? 'block' : 'none';
-                });
+                function toggleEventRequestForm() {
+                    const show = acceptRequestsCheckbox.checked && !(requireAccountCheckbox && requireAccountCheckbox.checked);
+                    eventRequestFormSection.style.display = show ? 'block' : 'none';
+                }
+                toggleEventRequestForm();
+                acceptRequestsCheckbox.addEventListener('change', toggleEventRequestForm);
+                if (requireAccountCheckbox) {
+                    requireAccountCheckbox.addEventListener('change', toggleEventRequestForm);
+                }
             }
 
             const requireApprovalCheckbox = document.querySelector('input[name="require_approval"][type="checkbox"]');
@@ -252,10 +258,6 @@
                         dropdown.innerHTML = '';
                     }
                 });
-            });
-
-            $('#profile_image').on('change', function() {
-                previewImage(this, 'profile_image_preview');
             });
 
             $('#header_image').on('input', function() {
@@ -348,6 +350,22 @@
             const reader = new FileReader();
 
             reader.onloadend = function () {
+                if (!reader.result) return;
+
+                // Show preview immediately
+                preview.src = reader.result;
+                preview.style.display = '';
+                if (clearBtn) {
+                    clearBtn.style.display = 'inline-block';
+                }
+                updatePreview();
+
+                if (previewId === 'background_image_preview') {
+                    $('#style_background_image img:not(#background_image_preview)').hide();
+                    $('#style_background_image a').hide();
+                }
+
+                // Check dimensions/size asynchronously (for warnings only)
                 const img = new Image();
                 img.onload = function() {
                     const width = this.width;
@@ -372,20 +390,6 @@
                             warningElement.textContent = '';
                             warningElement.style.display = 'none';
                         }
-                    }
-
-                    // Always show the preview, even with warnings
-                    preview.src = reader.result;
-                    if (clearBtn) {
-                        clearBtn.style.display = 'inline-block';
-                    } else {
-                        preview.style.display = 'block';
-                    }
-                    updatePreview();
-
-                    if (previewId === 'background_image_preview') {
-                        $('#style_background_image img:not(#background_image_preview)').hide();
-                        $('#style_background_image a').hide();
                     }
                 };
                 img.src = reader.result;
@@ -823,6 +827,8 @@
             </div>
         @endif
     </div>
+
+    @php $scheduleUrl = $role->custom_domain ?: $role->getGuestUrl(); @endphp
 
     <form method="post"
         action="{{ $role->exists ? route('role.update', ['subdomain' => $role->subdomain]) : route('role.store') }}"
@@ -1818,6 +1824,7 @@
                                 @if ($role->social_links && $role->social_links != '[]')
                                 @foreach(json_decode($role->social_links) as $link)
                                 @if ($link)
+                                @php $linkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
                                 <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
                                     <div class="flex items-center gap-4">
                                         <div class="flex-shrink-0 text-gray-500 dark:text-gray-400">
@@ -1826,10 +1833,19 @@
                                             </x-url-icon>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
-                                            </x-link>
+                                            </a>
+                                            @if ($linkPlatform !== 'website')
+                                            @php $vanityUrl = $scheduleUrl . '/' . $linkPlatform; @endphp
+                                            <div class="flex items-center gap-1.5 mt-1">
+                                                <p class="text-xs text-gray-400 dark:text-gray-500 truncate">{{ preg_replace('/^https?:\/\//', '', $vanityUrl) }}</p>
+                                                <button type="button" data-action="copy-vanity-url" class="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors" data-url="{{ $vanityUrl }}" title="{{ __('messages.copy') }}">
+                                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>
+                                                </button>
+                                            </div>
+                                            @endif
                                         </div>
                                         <button type="button"
                                             class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
@@ -1871,10 +1887,10 @@
                                             </x-url-icon>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
+                                            <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer" class="block">
                                                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ \App\Utils\UrlUtils::getBrand($link->url) }}</h4>
                                                 <p class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ \App\Utils\UrlUtils::clean($link->url) }}</p>
-                                            </x-link>
+                                            </a>
                                         </div>
                                         <button type="button"
                                             class="btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm"
@@ -2016,10 +2032,10 @@
                                             @if((is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])))
                                             <div class="mb-4" id="group-url-display-{{ is_object($group) ? $group->id : $i }}">
                                                 <p class="text-sm text-gray-500 flex items-center gap-2">
-                                                    <x-link href="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
-                                                        {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
+                                                    <x-link href="{{ $scheduleUrl }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" target="_blank" class="min-w-0 break-all">
+                                                        {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}
                                                     </x-link>
-                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $role->getGuestUrl(true) }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
+                                                    <button type="button" data-action="copy-group-url" data-copy-url="{{ $scheduleUrl }}/{{ is_object($group) ? $group->slug : $group['slug'] ?? '' }}" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                                         </svg>
@@ -2444,15 +2460,27 @@
                         <div class="mb-6" id="url-display">
                             <x-input-label :value="__('messages.schedule_url')" />
                             <p class="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                                <x-link href="{{ $role->getGuestUrl(true) }}" target="_blank" class="min-w-0 break-all">
-                                    {{ \App\Utils\UrlUtils::clean($role->getGuestUrl(true)) }}
+                                <x-link href="{{ $scheduleUrl }}" target="_blank" class="min-w-0 break-all">
+                                    {{ \App\Utils\UrlUtils::clean($scheduleUrl) }}
                                 </x-link>
                                 <button type="button" data-action="copy-role-url" class="flex-shrink-0 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" title="{{ __('messages.copy_url') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" />
                                     </svg>
                                 </button>
-                                </button>
+                                @if ($role->custom_domain && $role->custom_domain_mode === 'direct' && $role->custom_domain_status && $role->custom_domain_status !== 'active')
+                                    @if ($role->custom_domain_status === 'pending')
+                                        <span class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                            <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            {{ __('messages.domain_pending') }}
+                                        </span>
+                                    @elseif ($role->custom_domain_status === 'failed')
+                                        <span class="flex-shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            {{ __('messages.domain_failed') }}
+                                        </span>
+                                    @endif
+                                @endif
                             </p>
                             <x-secondary-button type="button" data-action="toggle-subdomain-edit" class="mt-3">
                                 {{ __('messages.edit') }}
@@ -2582,7 +2610,7 @@
                                 <x-input-label for="new_subdomain" :value="config('app.hosted') ? __('messages.subdomain') : __('messages.path')" />
                                 <x-text-input id="new_subdomain" name="new_subdomain" type="text" class="mt-1 block w-full"
                                     :value="old('new_subdomain', $role->subdomain)" x-bind:required="mode !== 'direct'" minlength="4" maxlength="50"
-                                    pattern="[a-z0-9-]+" data-action="subdomain-sanitize" />
+                                    pattern="[a-z0-9\-]+" data-action="subdomain-sanitize" />
                                 <x-input-error class="mt-2" :messages="$errors->get('new_subdomain')" />
                             </div>
 
@@ -2608,9 +2636,18 @@
                                 placeholder="{event_name}" />
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.slug_pattern_help') }}</p>
 
-                            <x-link href="{{ marketing_url('/docs/creating-schedules#settings-general') }}" target="_blank" class="text-sm mt-2">
-                                {{ __('messages.show_available_variables') }}
-                            </x-link>
+                            <div class="mt-4 flex items-start justify-between">
+                                <x-link href="{{ marketing_url('/docs/creating-schedules#url-pattern-variables') }}" target="_blank" class="text-sm">
+                                    {{ __('messages.show_available_variables') }}
+                                </x-link>
+                                <div class="flex items-center gap-2">
+                                    <span id="update-all-slugs-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                    <button type="button" id="update-all-slugs-btn" style="display: none;"
+                                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                        {{ __('messages.update_all_events_slugs') }}
+                                    </button>
+                                </div>
+                            </div>
                             <x-input-error class="mt-2" :messages="$errors->get('slug_pattern')" />
                         </div>
 
@@ -2683,6 +2720,32 @@
                         <!-- Tab Content: Advanced -->
                         <div id="settings-tab-advanced" class="settings-tab-content hidden">
                             <div class="mb-6">
+                                <x-toggle name="draft_events_default"
+                                    label="{{ __('messages.draft_events_default') }}"
+                                    checked="{{ old('draft_events_default', $role->draft_events_default) }}"
+                                    help="{{ __('messages.draft_events_default_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('draft_events_default')" />
+                            </div>
+
+                            <div class="mb-6">
+                                <x-toggle name="hide_past_events"
+                                    label="{{ __('messages.hide_past_events') }}"
+                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
+                                    help="{{ __('messages.hide_past_events_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
+                            </div>
+
+                            @if (! $role->isTalent())
+                            <div class="mb-6">
+                                <x-toggle name="hide_videos"
+                                    label="{{ __('messages.hide_videos') }}"
+                                    checked="{{ old('hide_videos', $role->hide_videos) }}"
+                                    help="{{ __('messages.hide_videos_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hide_videos')" />
+                            </div>
+                            @endif
+
+                            <div class="mb-6">
                                 <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
                                 <select name="first_day_of_week" id="first_day_of_week"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
@@ -2696,11 +2759,26 @@
                             </div>
 
                             <div class="mb-6">
-                                <x-toggle name="hide_past_events"
-                                    label="{{ __('messages.hide_past_events') }}"
-                                    checked="{{ old('hide_past_events', $role->hide_past_events) }}"
-                                    help="{{ __('messages.hide_past_events_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
+                                <x-input-label for="default_category_id" :value="__('messages.default_category')" />
+                                <select name="default_category_id" id="default_category_id"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="">{{ __('messages.none') }}</option>
+                                    @foreach(get_translated_categories() as $id => $label)
+                                        <option value="{{ $id }}" {{ old('default_category_id', $role->default_category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="mt-4 flex items-start justify-end">
+                                    @if ($role->exists && $role->subdomain)
+                                    <div class="flex items-center gap-2">
+                                        <span id="update-all-categories-result" style="display: none;" class="text-sm text-green-600 dark:text-green-400"></span>
+                                        <button type="button" id="update-all-categories-btn" style="display: none;"
+                                            class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-lg font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white transition ease-in-out duration-150">
+                                            {{ __('messages.update_all_events_category') }}
+                                        </button>
+                                    </div>
+                                    @endif
+                                </div>
+                                <x-input-error class="mt-2" :messages="$errors->get('default_category_id')" />
                             </div>
 
                         @if (isset($availableCurators) && $availableCurators->count() > 0 && !$role->isCurator())
@@ -2719,14 +2797,6 @@
                                 @endforeach
                             </div>
                         @endif
-
-                        <div class="mb-6">
-                            <x-toggle name="direct_registration"
-                                label="{{ __('messages.direct_registration') }}"
-                                checked="{{ old('direct_registration', $role->direct_registration) }}"
-                                help="{{ __('messages.direct_registration_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('direct_registration')" />
-                        </div>
 
                         @if (config('app.hosted') || config('app.is_testing'))
                         <div class="mb-6" id="import_form_fields_section">
@@ -2837,6 +2907,13 @@
                             <x-input-error class="mt-2" :messages="$errors->get('accept_requests')" />
                         </div>
                         @if (! $role->isTalent())
+                        <div class="mb-6" id="require_account_section">
+                            <x-toggle name="require_account"
+                                label="{{ __('messages.require_account') }}"
+                                checked="{{ old('require_account', $role->exists ? $role->require_account : ($role->require_account ?? $role->isCurator())) }}"
+                                help="{{ __('messages.require_account_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
+                        </div>
                         <div class="mb-6" id="event_request_form_section">
                             <x-input-label :value="__('messages.event_request_form')" />
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.event_request_form_help') }}</p>
@@ -2862,13 +2939,7 @@
                             </div>
                         </div>
                         @endif
-                        <div class="mb-6" id="require_account_section">
-                            <x-toggle name="require_account"
-                                label="{{ __('messages.require_account') }}"
-                                checked="{{ old('require_account', $role->exists ? $role->require_account : true) }}"
-                                help="{{ __('messages.require_account_help') }}" />
-                            <x-input-error class="mt-2" :messages="$errors->get('require_account')" />
-                        </div>
+                        @if (! $role->isTalent())
                         <div class="mb-6" id="require_approval_section">
                             <x-toggle name="require_approval"
                                 label="{{ __('messages.require_approval') }}"
@@ -2896,6 +2967,7 @@
                                 + {{ __('messages.add_schedule') }}
                             </button>
                         </div>
+                        @endif
                         <div class="mb-6" id="request_terms_section">
                             <x-input-label for="request_terms" :value="__('messages.request_terms')" />
                             <textarea id="request_terms" name="request_terms"
@@ -2937,6 +3009,17 @@
 
                         @php $emailDisabled = config('app.hosted') && ! $role->hasEmailSettings(); @endphp
 
+                        @if (! $role->isPro())
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.feedback_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
                         @if ($emailDisabled)
                             <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                                 <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
@@ -2951,23 +3034,44 @@
                             </div>
                         @endif
 
+                        @php $feedbackDisabled = $emailDisabled || ! $role->isPro(); @endphp
+
                         <div class="mb-6">
                             <x-toggle name="feedback_enabled"
                                 label="{{ __('messages.feedback_enabled') }}"
                                 checked="{{ old('feedback_enabled', $role->feedback_enabled) }}"
                                 help="{{ __('messages.feedback_enabled_help') }}"
-                                :disabled="$emailDisabled" />
+                                :disabled="$feedbackDisabled" />
                         </div>
 
-                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $emailDisabled ? '' : 'display: none;' }}">
+                        <div class="mb-6" id="feedback-delay-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
                             <x-input-label for="feedback_delay_hours" value="{{ __('messages.feedback_delay') }}" />
-                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $emailDisabled ? 'disabled' : '' }}>
+                            <select id="feedback_delay_hours" name="feedback_delay_hours" class="mt-1 block w-full rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]" {{ $feedbackDisabled ? 'disabled' : '' }}>
                                 @foreach ([1, 2, 6, 12, 24, 48] as $hours)
                                 <option value="{{ $hours }}" {{ old('feedback_delay_hours', $role->feedback_delay_hours ?? 24) == $hours ? 'selected' : '' }}>
                                     {{ $hours }} {{ __('messages.feedback_hours') }}
                                 </option>
                                 @endforeach
                             </select>
+                            <p id="feedback-delay-hint" class="mt-2 text-sm text-gray-500 dark:text-gray-400"></p>
+                        </div>
+
+                        <div class="mb-6" id="feedback-public-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
+                            <x-toggle name="feedback_public"
+                                label="{{ __('messages.feedback_public') }}"
+                                checked="{{ old('feedback_public', $role->feedback_public) }}"
+                                help="{{ __('messages.feedback_public_help') }}"
+                                :disabled="$feedbackDisabled" />
+                        </div>
+
+                        <div class="mb-6" id="feedback-test-wrapper" style="{{ $role->feedback_enabled && ! $feedbackDisabled ? '' : 'display: none;' }}">
+                            <button type="button" id="send-test-feedback-btn" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200">
+                                <svg class="w-4 h-4 me-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                {{ __('messages.feedback_send_test') }}
+                            </button>
+                            <div id="test-feedback-result" class="mt-2 hidden"></div>
                         </div>
 
                         </div>
@@ -3321,6 +3425,94 @@
                                 {{ __('messages.connect_google_calendar') }}
                             </x-link>
                             @endif
+
+                            @if (auth()->id() != $role->user_id)
+                            <!-- Member Personal Calendar Sync -->
+                            <div class="border-t border-gray-200 dark:border-gray-700 mt-6 pt-6">
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.sync_to_my_calendar') }}</h4>
+
+                                @if (auth()->user()->google_token)
+                                <div class="space-y-4 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                                    <div>
+                                        <x-input-label for="member-calendar-select" :value="__('messages.select_your_calendar')" />
+                                        <select id="member-calendar-select" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                            <option value="">{{ __('messages.no_sync') }}</option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <x-brand-button type="button" id="save-member-sync-btn">
+                                            {{ __('messages.save') }}
+                                        </x-brand-button>
+                                        <span id="member-sync-status" class="ms-3 text-sm text-green-600 dark:text-green-400 hidden"></span>
+                                    </div>
+                                </div>
+
+                                <script {!! nonce_attr() !!}>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var memberCalendarSelect = document.getElementById('member-calendar-select');
+                                    var memberCalendarId = @json($userCalendarId ?? '');
+
+                                    // Load calendars for member select
+                                    fetch('{{ url("/google-calendar/calendars") }}')
+                                        .then(function(response) { return response.json(); })
+                                        .then(function(data) {
+                                            memberCalendarSelect.innerHTML = '<option value="">{{ __("messages.no_sync") }}</option>';
+                                            if (data.calendars && Array.isArray(data.calendars)) {
+                                                data.calendars.forEach(function(cal) {
+                                                    var option = document.createElement('option');
+                                                    option.value = cal.id;
+                                                    option.textContent = cal.summary + (cal.primary ? ' (Primary)' : '');
+                                                    if (cal.id === memberCalendarId) {
+                                                        option.selected = true;
+                                                    }
+                                                    memberCalendarSelect.appendChild(option);
+                                                });
+                                            }
+                                        })
+                                        .catch(function() {
+                                            memberCalendarSelect.innerHTML = '<option value="">{{ __("messages.error_loading_calendars") }}</option>';
+                                        });
+
+                                    // Save member sync
+                                    document.getElementById('save-member-sync-btn').addEventListener('click', function() {
+                                        var calendarId = memberCalendarSelect.value;
+                                        var statusEl = document.getElementById('member-sync-status');
+
+                                        fetch('{{ url("/google-calendar/member-sync/" . $role->subdomain) }}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                'Content-Type': 'application/json',
+                                            },
+                                            body: JSON.stringify({ google_calendar_id: calendarId }),
+                                        })
+                                        .then(function(response) { return response.json(); })
+                                        .then(function(data) {
+                                            statusEl.textContent = data.message || data.error;
+                                            statusEl.classList.remove('hidden');
+                                            statusEl.classList.toggle('text-green-600', !data.error);
+                                            statusEl.classList.toggle('dark:text-green-400', !data.error);
+                                            statusEl.classList.toggle('text-red-600', !!data.error);
+                                            statusEl.classList.toggle('dark:text-red-400', !!data.error);
+                                            setTimeout(function() { statusEl.classList.add('hidden'); }, 3000);
+                                        })
+                                        .catch(function() {
+                                            statusEl.textContent = @json(__('messages.sync_error'));
+                                            statusEl.classList.remove('hidden');
+                                            statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                                            setTimeout(function() { statusEl.classList.add('hidden'); }, 3000);
+                                        });
+                                    });
+                                });
+                                </script>
+                                @else
+                                <x-link href="{{ route('profile.edit') }}#section-google-calendar" target="_blank">
+                                    {{ __('messages.connect_google_to_sync') }}
+                                </x-link>
+                                @endif
+                            </div>
+                            @endif
                         </div>
 
                         <!-- Tab Content: CalDAV -->
@@ -3487,6 +3679,9 @@
                             <div class="mb-8">
                                 <x-input-label for="calendar_description_template" :value="__('messages.calendar_description_template')" />
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">{{ __('messages.calendar_description_template_help') }}</p>
+                                <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-xs">
+                                    {{ __('messages.show_available_variables') }}
+                                </x-link>
                                 <textarea id="calendar_description_template" name="calendar_description_template" rows="4"
                                     class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-md shadow-sm text-sm"
                                     placeholder="{description}">{{ old('calendar_description_template', $role->calendar_description_template) }}</textarea>
@@ -3576,6 +3771,8 @@
                 if (!e.defaultPrevented) { isDirty = false; }
             });
 
+            window._markFormDirty = function() { isDirty = true; };
+
             window.addEventListener('beforeunload', function(e) {
                 if (isDirty && !window._skipUnsavedWarning) { e.preventDefault(); e.returnValue = ''; }
             });
@@ -3595,13 +3792,35 @@ var isNewSchedule = {{ $role->exists ? 'false' : 'true' }};
 var _scrollGuard = function() { window.scrollTo(0, 0); };
 window.addEventListener('scroll', _scrollGuard);
 
-// Toggle feedback delay dropdown visibility
+// Toggle feedback delay dropdown and test button visibility
 var feedbackToggle = document.querySelector('input[name="feedback_enabled"][type="checkbox"]');
 var feedbackDelayWrapper = document.getElementById('feedback-delay-wrapper');
+var feedbackTestWrapper = document.getElementById('feedback-test-wrapper');
+var feedbackPublicWrapper = document.getElementById('feedback-public-wrapper');
+var feedbackDisabled = {{ $feedbackDisabled ? 'true' : 'false' }};
 if (feedbackToggle && feedbackDelayWrapper) {
     feedbackToggle.addEventListener('change', function() {
-        feedbackDelayWrapper.style.display = this.checked ? '' : 'none';
+        feedbackDelayWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
+        if (feedbackTestWrapper) feedbackTestWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
+        if (feedbackPublicWrapper) feedbackPublicWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
     });
+}
+
+// Feedback delay hint
+var feedbackDelaySelect = document.getElementById('feedback_delay_hours');
+var feedbackDelayHint = document.getElementById('feedback-delay-hint');
+if (feedbackDelaySelect && feedbackDelayHint) {
+    function updateFeedbackHint() {
+        var hours = parseInt(feedbackDelaySelect.value);
+        var exampleEnd = new Date();
+        exampleEnd.setHours(20, 0, 0, 0);
+        var sendAt = new Date(exampleEnd.getTime() + hours * 3600000);
+        var timeStr = sendAt.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+        var dayNote = sendAt.getDate() !== exampleEnd.getDate() ? (' (+' + Math.ceil(hours / 24) + 'd)') : '';
+        feedbackDelayHint.textContent = @json(__('messages.feedback_delay_hint', ['time' => '__TIME__'])).replace('__TIME__', timeStr + dayNote);
+    }
+    updateFeedbackHint();
+    feedbackDelaySelect.addEventListener('change', updateFeedbackHint);
 }
 
 // Toggle "Required" label visibility for import fields
@@ -3726,7 +3945,7 @@ function copyHostname(button) {
 }
 
 function copyRoleUrl(button) {
-    const url = '{{ $role->exists ? $role->getGuestUrl(true) : "" }}';
+    const url = '{{ $role->exists ? $scheduleUrl : "" }}';
     navigator.clipboard.writeText(url).then(() => {
         const originalHTML = button.innerHTML;
         button.innerHTML = `
@@ -4067,7 +4286,7 @@ function loadGoogleCalendars() {
                     const option = document.createElement('option');
                     option.value = calendar.id;
                     option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
-                    if (calendar.id === '{{ $role->google_calendar_id }}') {
+                    if (calendar.id === @json($userCalendarId ?? '')) {
                         option.selected = true;
                     }
                     select.appendChild(option);
@@ -4299,6 +4518,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 testEmailResult.textContent = @json(__('messages.failed_to_send_test_email'), JSON_UNESCAPED_UNICODE);
                 testEmailResult.classList.remove('hidden');
                 console.error('Error:', error);
+            });
+        });
+    }
+});
+
+// Test feedback email functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sendTestFeedbackBtn = document.getElementById('send-test-feedback-btn');
+    const testFeedbackResult = document.getElementById('test-feedback-result');
+
+    @if ($role->exists && $role->subdomain)
+    const testFeedbackUrl = '{{ route("role.test_feedback_email", ["subdomain" => $role->subdomain]) }}';
+    @else
+    const testFeedbackUrl = null;
+    @endif
+
+    if (sendTestFeedbackBtn && testFeedbackResult && testFeedbackUrl) {
+        sendTestFeedbackBtn.addEventListener('click', function() {
+            if (!confirm(@json(__('messages.feedback_test_confirm', ['email' => auth()->user()->email])))) {
+                return;
+            }
+
+            sendTestFeedbackBtn.disabled = true;
+            sendTestFeedbackBtn.style.opacity = '0.5';
+            testFeedbackResult.classList.add('hidden');
+
+            fetch(testFeedbackUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json().then(data => ({ok: response.ok, data})))
+            .then(({ok, data}) => {
+                sendTestFeedbackBtn.disabled = false;
+                sendTestFeedbackBtn.style.opacity = '';
+
+                if (ok && data.success) {
+                    testFeedbackResult.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
+                    testFeedbackResult.textContent = data.message;
+                } else {
+                    testFeedbackResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                    testFeedbackResult.textContent = data.error || @json(__('messages.test_email_failed'));
+                }
+                testFeedbackResult.classList.remove('hidden');
+            })
+            .catch(error => {
+                sendTestFeedbackBtn.disabled = false;
+                sendTestFeedbackBtn.style.opacity = '';
+                testFeedbackResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                testFeedbackResult.textContent = @json(__('messages.test_email_failed'));
+                testFeedbackResult.classList.remove('hidden');
             });
         });
     }
@@ -5888,7 +6161,10 @@ document.addEventListener('DOMContentLoaded', function() {
             var triggerBtn = e.target.closest('[data-trigger-file-input]');
             if (triggerBtn) {
                 var fileInput = document.getElementById(triggerBtn.dataset.triggerFileInput);
-                if (fileInput) fileInput.click();
+                if (fileInput) {
+                    fileInput.value = null;
+                    fileInput.click();
+                }
                 return;
             }
 
@@ -5926,6 +6202,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'copy-group-url':
                 copyGroupUrl(btn, btn.dataset.copyUrl);
+                break;
+            case 'copy-vanity-url':
+                navigator.clipboard.writeText(btn.dataset.url).then(function() {
+                    var originalHTML = btn.innerHTML;
+                    btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 text-green-500"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
+                    setTimeout(function() { btn.innerHTML = originalHTML; }, 1500);
+                }).catch(function() {});
                 break;
             case 'toggle-subdomain-edit':
                 toggleSubdomainEdit();
@@ -6102,6 +6385,123 @@ document.addEventListener('DOMContentLoaded', function() {
         testImportBtn.addEventListener('click', function() { testImport(this); });
     }
 
+    // Default category: show/hide "Update all events" button
+    @if ($role->exists && $role->subdomain)
+    (function() {
+        var select = document.getElementById('default_category_id');
+        var btn = document.getElementById('update-all-categories-btn');
+        var resultSpan = document.getElementById('update-all-categories-result');
+        if (!select || !btn) return;
+
+        var originalValue = select.value;
+
+        select.addEventListener('change', function() {
+            if (this.value && this.value !== originalValue) {
+                btn.style.display = '';
+            } else {
+                btn.style.display = 'none';
+            }
+            resultSpan.style.display = 'none';
+        });
+
+        btn.addEventListener('click', function() {
+            var categoryId = select.value;
+            if (!categoryId) return;
+
+            btn.disabled = true;
+            var originalText = btn.textContent;
+            btn.textContent = '...';
+            resultSpan.style.display = 'none';
+
+            fetch('{{ route("role.update_all_categories", ["subdomain" => $role->subdomain]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ category_id: categoryId })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                resultSpan.textContent = data.message;
+                resultSpan.className = data.success ? 'ml-2 text-sm text-green-600 dark:text-green-400' : 'ml-2 text-sm text-red-600 dark:text-red-400';
+                resultSpan.style.display = '';
+                if (data.success) {
+                    originalValue = categoryId;
+                    btn.style.display = 'none';
+                }
+            })
+            .catch(function(error) {
+                resultSpan.textContent = error.message;
+                resultSpan.className = 'ml-2 text-sm text-red-600 dark:text-red-400';
+                resultSpan.style.display = '';
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            });
+        });
+    })();
+    @endif
+
+    @if ($role->exists && $role->subdomain)
+    // Slug pattern: show/hide "Update all slugs" button
+    (function() {
+        var input = document.getElementById('slug_pattern');
+        var btn = document.getElementById('update-all-slugs-btn');
+        var resultSpan = document.getElementById('update-all-slugs-result');
+        if (!input || !btn) return;
+
+        var originalValue = input.value;
+
+        input.addEventListener('input', function() {
+            if (this.value !== originalValue) {
+                btn.style.display = '';
+            } else {
+                btn.style.display = 'none';
+            }
+            resultSpan.style.display = 'none';
+        });
+
+        btn.addEventListener('click', function() {
+            var pattern = input.value;
+
+            btn.disabled = true;
+            var originalText = btn.textContent;
+            btn.textContent = '...';
+            resultSpan.style.display = 'none';
+
+            fetch('{{ route("role.update_all_slugs", ["subdomain" => $role->subdomain]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ slug_pattern: pattern })
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                resultSpan.textContent = data.message;
+                resultSpan.className = data.success ? 'ml-2 text-sm text-green-600 dark:text-green-400' : 'ml-2 text-sm text-red-600 dark:text-red-400';
+                resultSpan.style.display = '';
+                if (data.success) {
+                    originalValue = pattern;
+                    btn.style.display = 'none';
+                }
+            })
+            .catch(function(error) {
+                resultSpan.textContent = error.message;
+                resultSpan.className = 'ml-2 text-sm text-red-600 dark:text-red-400';
+                resultSpan.style.display = '';
+            })
+            .finally(function() {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            });
+        });
+    })();
+    @endif
+
     // Sync events button
     var syncEventsBtn = document.getElementById('sync-events-button');
     if (syncEventsBtn) {
@@ -6205,12 +6605,13 @@ document.addEventListener('DOMContentLoaded', function() {
             payment_links: JSON.parse(document.getElementById('payment_links_data').value || '[]')
         };
         var currentLinkType = '';
+        var guestUrl = @json($scheduleUrl);
 
         // Helper: update hidden input and trigger unsaved changes warning
         function updateLinkInput(linkType) {
             var input = document.getElementById(linkType + '_data');
             input.value = JSON.stringify(linkData[linkType]);
-            input.dispatchEvent(new Event('change', { bubbles: true }));
+            if (window._markFormDirty) window._markFormDirty();
         }
 
         // Helper: get tab content div from link type
@@ -6310,6 +6711,28 @@ document.addEventListener('DOMContentLoaded', function() {
             a.appendChild(p);
             content.appendChild(a);
 
+            // Show vanity URL for social links with a detected platform
+            var platform = link.platform || '';
+            if (linkType === 'social_links' && platform && platform !== 'website' && guestUrl) {
+                var fullVanityUrl = guestUrl + '/' + platform;
+                var displayUrl = fullVanityUrl.replace(/^https?:\/\//, '');
+                var vanityRow = document.createElement('div');
+                vanityRow.className = 'flex items-center gap-1.5 mt-1';
+                var vanityText = document.createElement('p');
+                vanityText.className = 'text-xs text-gray-400 dark:text-gray-500 truncate';
+                vanityText.textContent = displayUrl;
+                vanityRow.appendChild(vanityText);
+                var copyBtn = document.createElement('button');
+                copyBtn.type = 'button';
+                copyBtn.className = 'flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-[var(--brand-blue)] transition-colors';
+                copyBtn.setAttribute('data-url', fullVanityUrl);
+                copyBtn.setAttribute('data-action', 'copy-vanity-url');
+                copyBtn.title = @json(__('messages.copy'));
+                copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" /></svg>';
+                vanityRow.appendChild(copyBtn);
+                content.appendChild(vanityRow);
+            }
+
             var removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'btn-remove-link flex-shrink-0 text-red-600 hover:text-red-800 dark:text-red-400 text-sm';
@@ -6344,6 +6767,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 addLinkModal.style.display = 'none';
                 addLinkModal.classList.add('hidden');
             });
+        });
+
+        // Submit modal on Enter key
+        document.getElementById('link').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('btn-save-link').click();
+            }
         });
 
         // Save link (fetch preview, append to list)

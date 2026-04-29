@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Invoice Ninja Integration - Event Schedule</x-slot>
+    <x-slot name="title">Invoice Ninja Invoicing - Event Schedule</x-slot>
     <x-slot name="description">Generate invoices and payment links for ticket purchases. Automatic client management, QR code tickets, and payment tracking with Invoice Ninja.</x-slot>
     <x-slot name="breadcrumbTitle">Invoice Ninja</x-slot>
 
@@ -31,6 +31,46 @@
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Can I use Invoice Ninja with selfhosted Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, both Event Schedule and Invoice Ninja can be selfhosted, giving you full control over your event management and invoicing infrastructure."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Are QR code tickets generated automatically?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, when a payment is recorded in Invoice Ninja, tickets with unique QR codes are automatically generated and sent to buyers via email."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does Invoice Ninja create client records automatically?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, new clients are created automatically in Invoice Ninja when tickets are purchased. Existing clients are matched by email address to avoid duplicates."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I use both Stripe and Invoice Ninja?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "You can configure either Stripe or Invoice Ninja for each schedule, depending on whether you need instant card payments or professional B2B invoicing."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -614,6 +654,106 @@
                     </span>
                 </div>
             </a>
+        </div>
+    </section>
+
+    <!-- Related Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-8 pb-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ marketing_url('/features/ticketing') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-colors text-sm font-medium">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                    </svg>
+                    Ticketing Features
+                </a>
+                <a href="{{ marketing_url('/open-source') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-sm font-medium">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    Open Source
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Common questions about Invoice Ninja integration.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I use Invoice Ninja with selfhosted Event Schedule?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, both Event Schedule and Invoice Ninja can be selfhosted, giving you full control over your event management and invoicing infrastructure.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Are QR code tickets generated automatically?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, when a payment is recorded in Invoice Ninja, tickets with unique QR codes are automatically generated and sent to buyers via email.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900 dark:to-blue-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Does Invoice Ninja create client records automatically?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, new clients are created automatically in Invoice Ninja when tickets are purchased. Existing clients are matched by email address to avoid duplicates.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I use both Stripe and Invoice Ninja?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            You can configure either Stripe or Invoice Ninja for each schedule, depending on whether you need instant card payments or professional B2B invoicing.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

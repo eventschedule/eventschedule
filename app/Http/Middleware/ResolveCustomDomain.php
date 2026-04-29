@@ -47,6 +47,11 @@ class ResolveCustomDomain
         $request->server->set('HTTP_HOST', $newHost);
         $request->server->set('SERVER_NAME', $newHost);
 
+        // Also rewrite X-Forwarded-Host so getHost() returns the rewritten host
+        // even after TrustProxies middleware marks the request as from a trusted proxy
+        $request->headers->set('X-Forwarded-Host', $newHost);
+        $request->server->set('HTTP_X_FORWARDED_HOST', $newHost);
+
         // Clear session domain so the cookie is scoped to the custom domain origin
         // (otherwise it would be scoped to .eventschedule.com which the browser rejects)
         config(['session.domain' => null]);

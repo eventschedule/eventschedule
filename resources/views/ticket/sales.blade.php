@@ -40,6 +40,14 @@
                 </div>
 
                 <div class="flex items-center gap-3">
+                    @if ($hasPro)
+                    <x-secondary-link href="{{ route('sales.import', request()->only(['filter', 'include_past'])) }}">
+                        <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M5,20H19V18H5V20M12,3L5,10H9V16H15V10H19L12,3Z" />
+                        </svg>
+                        {{ __('messages.import') }}
+                    </x-secondary-link>
+                    @endif
                     <x-secondary-link href="#" id="export-sales">
                         <svg class="-ms-0.5 me-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />

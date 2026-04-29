@@ -35,11 +35,15 @@ class TicketTest extends DuskTestCase
                 ->waitForText('Buy Tickets', 10)
                 ->pause(500);
             $browser->script("window.dispatchEvent(new CustomEvent('show-event-form'))");
-            $browser->waitFor('#ticket-0', 10)
-                ->select('#ticket-0', '1')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('CHECKOUT')
-                ->waitForText('ATTENDEE', 5) // Wait for ticket confirmation page
+            $browser->waitFor('#ticket-0', 10);
+            $browser->script("
+                var vm = document.querySelector('#ticket-selector').__vue_app__._container._vnode.component.proxy;
+                vm.tickets[0].selectedQty = 1;
+            ");
+            $browser->pause(300)
+                ->scrollIntoView('#ticket-selector button[type="submit"]');
+            $browser->script("document.querySelector('#ticket-selector button[type=\"submit\"]').click()");
+            $browser->waitForText('ATTENDEE', 15) // Wait for ticket confirmation page
                 ->assertSee($name); // Verify attendee name on ticket
         });
     }

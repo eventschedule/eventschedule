@@ -6,8 +6,11 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Models\User;
+use App\Services\AuditService;
+use App\Services\EmailService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
+use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
@@ -95,8 +98,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
+        $didTransitionToPaid = false;
+
         // Use lockForUpdate to prevent race conditions from webhook retries
-        \DB::transaction(function () use ($sale, $payload, $invoiceId) {
+        \DB::transaction(function () use ($sale, $payload, $invoiceId, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -122,20 +127,21 @@ class InvoiceNinjaController extends Controller
                 $sale->transaction_reference = $invoiceId;
                 $sale->save();
 
+                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'invoiceninja_amount_mismatch:event_id:'.$sale->event_id);
+
                 return;
             }
 
             $sale->payment_amount = $webhookAmount;
             $sale->status = 'paid';
             $sale->save();
+            $didTransitionToPaid = true;
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -147,6 +153,10 @@ class InvoiceNinjaController extends Controller
                 }
             }
         });
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
 
         return response()->json(['status' => 'success']);
     }
@@ -170,8 +180,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Invalid webhook secret'], 400);
         }
 
+        $didTransitionToPaid = false;
+
         // Mark sale as paid with row locking
-        \DB::transaction(function () use ($sale) {
+        \DB::transaction(function () use ($sale, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -179,14 +191,12 @@ class InvoiceNinjaController extends Controller
 
             $sale->status = 'paid';
             $sale->save();
+            $didTransitionToPaid = true;
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_purchase:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -198,6 +208,10 @@ class InvoiceNinjaController extends Controller
                 }
             }
         });
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
 
         return response()->json(['status' => 'success']);
     }
@@ -246,8 +260,10 @@ class InvoiceNinjaController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
+        $didTransitionToPaid = false;
+
         // Mark sale as paid with row locking
-        \DB::transaction(function () use ($sale, $event, $payload) {
+        \DB::transaction(function () use ($sale, $event, $payload, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return;
@@ -312,38 +328,64 @@ class InvoiceNinjaController extends Controller
 
                 $sale->payment_amount = $sale->calculateTotal();
 
-                // Check if a promo code discount was applied on the IN purchase page
+                // Check if a discount was applied on the IN purchase page.
+                // The payload doesn't include the promo code string, so we can't
+                // reliably match to a specific PromoCode row - record the discount
+                // amount for reporting but leave promo_code_id null.
                 $invoiceDiscount = (float) ($payload['discount'] ?? 0);
                 if ($invoiceDiscount > 0) {
                     $isAmountDiscount = $payload['is_amount_discount'] ?? true;
                     if ($isAmountDiscount) {
                         $discountAmount = $invoiceDiscount;
                     } else {
-                        $discountAmount = round($sale->payment_amount * ($invoiceDiscount / 100), 2);
+                        $decimals = MoneyUtils::decimalsFor($event->ticket_currency_code);
+                        $discountAmount = round($sale->payment_amount * ($invoiceDiscount / 100), $decimals);
                     }
 
                     if ($discountAmount > 0) {
-                        $promoCode = $event->promoCodes()->where('is_active', true)->first();
-                        if ($promoCode) {
-                            $sale->promo_code_id = $promoCode->id;
-                            $sale->discount_amount = $discountAmount;
-                            $sale->payment_amount = max(0, $sale->payment_amount - $discountAmount);
-                            $promoCode->increment('times_used');
-                        }
+                        $sale->discount_amount = $discountAmount;
+                        $sale->payment_amount = max(0, $sale->payment_amount - $discountAmount);
                     }
                 }
+            }
+
+            // Reconcile the server-computed payment_amount against the invoice
+            // total from the webhook payload. This defends against a tampered
+            // payload (e.g. inflated discount or dropped line items) that would
+            // otherwise mark the sale paid for less than we charged.
+            $invoiceTotal = null;
+            foreach (['amount', 'total', 'balance'] as $field) {
+                if (isset($payload[$field]) && is_numeric($payload[$field])) {
+                    $invoiceTotal = (float) $payload[$field];
+                    break;
+                }
+            }
+
+            if ($invoiceTotal !== null && abs($invoiceTotal - (float) $sale->payment_amount) > 0.01) {
+                \Log::warning('Invoice Ninja event purchase webhook amount mismatch', [
+                    'sale_id' => $sale->id,
+                    'event_id' => $event->id,
+                    'expected_amount' => $sale->payment_amount,
+                    'invoice_total' => $invoiceTotal,
+                ]);
+
+                $sale->status = 'amount_mismatch';
+                $sale->save();
+
+                AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'invoiceninja_event_purchase_amount_mismatch:event_id:'.$sale->event_id);
+
+                return;
             }
 
             $sale->status = 'paid';
             $sale->save();
+            $didTransitionToPaid = true;
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_event_purchase:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -355,6 +397,10 @@ class InvoiceNinjaController extends Controller
                 }
             }
         });
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
 
         return response()->json(['status' => 'success']);
     }

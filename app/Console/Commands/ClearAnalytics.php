@@ -5,7 +5,10 @@ namespace App\Console\Commands;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
+use App\Models\AnalyticsLocationsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AnalyticsSocialClicksDaily;
+use App\Models\AnalyticsUtmDaily;
 use Illuminate\Console\Command;
 
 class ClearAnalytics extends Command
@@ -55,7 +58,19 @@ class ClearAnalytics extends Command
         AnalyticsReferrersDaily::truncate();
         $this->line("Deleted {$referrersCount} referrer analytics records.");
 
-        $total = $dailyCount + $eventsCount + $appearancesCount + $referrersCount;
+        $utmCount = AnalyticsUtmDaily::count();
+        AnalyticsUtmDaily::truncate();
+        $this->line("Deleted {$utmCount} UTM analytics records.");
+
+        $socialClicksCount = AnalyticsSocialClicksDaily::count();
+        AnalyticsSocialClicksDaily::truncate();
+        $this->line("Deleted {$socialClicksCount} social click analytics records.");
+
+        $locationsCount = AnalyticsLocationsDaily::count();
+        AnalyticsLocationsDaily::truncate();
+        $this->line("Deleted {$locationsCount} location analytics records.");
+
+        $total = $dailyCount + $eventsCount + $appearancesCount + $referrersCount + $utmCount + $socialClicksCount + $locationsCount;
         $this->info("All analytics data cleared. Total records deleted: {$total}");
 
         return 0;

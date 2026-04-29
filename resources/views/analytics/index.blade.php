@@ -1,9 +1,17 @@
 <x-app-admin-layout>
 
+    <x-slot name="head">
+        <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
+        <style {!! nonce_attr() !!}>
+            [v-cloak] { display: none !important; }
+        </style>
+    </x-slot>
+
     <div class="space-y-4">
         {{-- Schedule Selector, Date Range, and Period Toggle --}}
         <div class="flex flex-col sm:flex-row sm:justify-between gap-4">
             <div class="flex gap-2 flex-wrap items-center">
+                @if ($roles->count() > 1)
                 <div class="min-w-[200px]">
                     <select id="role-filter"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
@@ -15,6 +23,51 @@
                         @endforeach
                     </select>
                 </div>
+                @endif
+                @if ($selectedRoleId)
+                <div id="event-picker-app" class="min-w-[200px]">
+                    <div class="relative" id="event-selector-dropdown">
+                        <select @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
+                            <option>{{ $selectedEventName }}</option>
+                        </select>
+                        <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
+                            <button @click="onEventChange('')" type="button"
+                                class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
+                                :class="!selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">
+                                <span class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                                    </svg>
+                                </span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">{{ __('messages.all_events') }}</span>
+                                </span>
+                                <svg v-if="!selectedEventId" class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </button>
+                            <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
+                                class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
+                                :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">
+                                <img v-if="event.image_url" :src="event.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                                <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </span>
+                                <span class="flex-1 min-w-0">
+                                    <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">@{{ event.name }}</span>
+                                    <span v-if="event.starts_at" class="block truncate text-gray-500 dark:text-[#9ca3af] text-xs">@{{ event.starts_at }}</span>
+                                </span>
+                                <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endif
                 <div class="min-w-[180px]">
                     <select id="date-range"
                         class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base">
@@ -30,15 +83,15 @@
             </div>
             @if ($tab === 'web')
             <div class="flex gap-2 items-center">
-                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'daily', 'range' => $range]) }}"
+                <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'period' => 'daily', 'range' => $range])) }}"
                     class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'daily' ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.daily') }}
                 </a>
-                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'weekly', 'range' => $range]) }}"
+                <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'period' => 'weekly', 'range' => $range])) }}"
                     class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'weekly' ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.weekly') }}
                 </a>
-                <a href="{{ route('analytics', ['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'period' => 'monthly', 'range' => $range]) }}"
+                <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'period' => 'monthly', 'range' => $range])) }}"
                     class="px-5 py-3 rounded-lg text-base font-semibold leading-none flex items-center {{ $period === 'monthly' ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600' }}">
                     {{ __('messages.monthly') }}
                 </a>
@@ -48,15 +101,15 @@
 
         {{-- Tab Navigation --}}
         <div class="flex gap-6 border-b border-gray-200 dark:border-gray-700">
-            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'range' => $range])) }}"
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'range' => $range])) }}"
                 class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'web' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.web_analytics') }}
             </a>
-            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'range' => $range, 'tab' => 'revenue'])) }}"
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'range' => $range, 'tab' => 'revenue'])) }}"
                 class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'revenue' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.revenue') }}
             </a>
-            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'range' => $range, 'tab' => 'checkins'])) }}"
+            <a href="{{ route('analytics', array_filter(['role_id' => \App\Utils\UrlUtils::encodeId($selectedRoleId), 'event_id' => \App\Utils\UrlUtils::encodeId($selectedEventId), 'range' => $range, 'tab' => 'checkins'])) }}"
                 class="pb-3 text-base font-medium border-b-2 transition-colors {{ $tab === 'checkins' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' }}">
                 {{ __('messages.check_ins') }}
             </a>
@@ -421,7 +474,7 @@
         @endif
 
         {{-- Top Events by Revenue Chart --}}
-        @if ($topEventsByRevenue->isNotEmpty())
+        @if ($topEventsByRevenue->isNotEmpty() && ! $selectedEventId)
         <div class="ap-card rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events_by_revenue') }}</h3>
             <div class="h-64">
@@ -697,10 +750,10 @@
             </div>
 
             {{-- Bar Charts Grid --}}
-            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty())
+            @if ($topEvents->isNotEmpty() || ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1) || $topAppearances->isNotEmpty() || $topSchedulesAppearedOn->isNotEmpty() || $trafficSources->isNotEmpty() || $locationBreakdown->isNotEmpty() || $topUtmSources->isNotEmpty() || $topUtmMediums->isNotEmpty() || $topUtmCampaigns->isNotEmpty() || $socialClickStats->isNotEmpty())
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {{-- Top Events Chart --}}
-                @if ($topEvents->isNotEmpty())
+                @if ($topEvents->isNotEmpty() && ! $selectedEventId)
                 <div class="ap-card rounded-xl p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events') }}</h3>
                     <div class="h-64">
@@ -753,8 +806,18 @@
                 </div>
                 @endif
 
+                {{-- Visitor Locations Chart --}}
+                @if ($locationBreakdown->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.visitor_locations') }}</h3>
+                    <div class="h-64">
+                        <canvas id="locationsChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
                 {{-- Views by Schedule Chart --}}
-                @if ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1)
+                @if ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1 && ! $selectedEventId)
                 <div class="ap-card rounded-xl p-6">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.schedule_views') }}</h3>
                     <div class="h-64">
@@ -769,6 +832,59 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_referrers') }}</h3>
                     <div class="h-64">
                         <canvas id="topReferrersChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top UTM Sources Chart --}}
+                @if ($topUtmSources->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_sources') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topUtmSourcesChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top UTM Mediums Chart --}}
+                @if ($topUtmMediums->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_mediums') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topUtmMediumsChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Top UTM Campaigns Chart --}}
+                @if ($topUtmCampaigns->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_utm_campaigns') }}</h3>
+                    <div class="h-64">
+                        <canvas id="topUtmCampaignsChart"></canvas>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Social Link Clicks --}}
+                @if ($socialClickStats->isNotEmpty())
+                <div class="ap-card rounded-xl p-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.social_link_clicks') }}</h3>
+                    <div class="space-y-3">
+                        @foreach ($socialClickStats as $stat)
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-6 h-6">
+                                <svg class="w-6 h-6 text-gray-600 dark:text-gray-400" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="{{ \App\Utils\UrlUtils::getSocialSvgPath($stat['platform']) }}"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm text-gray-700 dark:text-gray-300 w-24 truncate">{{ \App\Utils\UrlUtils::getPlatformBrandName($stat['platform']) }}</span>
+                            <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                <div class="bg-[var(--brand-button-bg)] h-2 rounded-full" style="width: {{ $socialClickStats->max('click_count') > 0 ? ($stat['click_count'] / $socialClickStats->max('click_count')) * 100 : 0 }}%"></div>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900 dark:text-white w-16 text-end">{{ number_format($stat['click_count']) }}</span>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
                 @endif
@@ -816,15 +932,73 @@
 
     <script {!! nonce_attr() !!}>
         const brandBlue = getComputedStyle(document.documentElement).getPropertyValue('--brand-blue').trim();
-        document.getElementById('role-filter').addEventListener('change', function() {
-            var url = new URL(window.location.href);
-            if (this.value) {
-                url.searchParams.set('role_id', this.value);
-            } else {
-                url.searchParams.delete('role_id');
-            }
-            window.location.href = url.toString();
-        });
+        var roleFilter = document.getElementById('role-filter');
+        if (roleFilter) {
+            roleFilter.addEventListener('change', function() {
+                var url = new URL(window.location.href);
+                if (this.value) {
+                    url.searchParams.set('role_id', this.value);
+                } else {
+                    url.searchParams.delete('role_id');
+                }
+                url.searchParams.delete('event_id');
+                window.location.href = url.toString();
+            });
+        }
+
+        @if ($selectedRoleId)
+        (function() {
+            const { createApp } = Vue;
+
+            createApp({
+                data() {
+                    return {
+                        events: @json($events),
+                        selectedEventId: @json($selectedEventId ? \App\Utils\UrlUtils::encodeId($selectedEventId) : ''),
+                        dropdownOpen: false,
+                    };
+                },
+                computed: {
+                    selectedEvent() {
+                        if (!this.selectedEventId) return null;
+                        return this.events.find(e => e.id === this.selectedEventId) || null;
+                    },
+                },
+                methods: {
+                    toggleDropdown() {
+                        this.dropdownOpen = !this.dropdownOpen;
+                    },
+                    closeDropdown() {
+                        this.dropdownOpen = false;
+                    },
+                    onEventChange(eventId) {
+                        this.selectedEventId = eventId;
+                        this.closeDropdown();
+                        var url = new URL(window.location.href);
+                        if (eventId) {
+                            url.searchParams.set('event_id', eventId);
+                        } else {
+                            url.searchParams.delete('event_id');
+                        }
+                        window.location.href = url.toString();
+                    },
+                },
+                mounted() {
+                    document.addEventListener('click', (e) => {
+                        const el = document.getElementById('event-selector-dropdown');
+                        if (el && !el.contains(e.target)) {
+                            this.closeDropdown();
+                        }
+                    });
+                    document.addEventListener('keydown', (e) => {
+                        if (e.key === 'Escape') {
+                            this.closeDropdown();
+                        }
+                    });
+                },
+            }).mount('#event-picker-app');
+        })();
+        @endif
 
         document.getElementById('date-range').addEventListener('change', function() {
             var url = new URL(window.location.href);
@@ -1071,7 +1245,7 @@
             }
         });
 
-        @if ($topEvents->isNotEmpty())
+        @if ($topEvents->isNotEmpty() && ! $selectedEventId)
         // Top Events Chart
         const topEventsCtx = document.getElementById('topEventsChart').getContext('2d');
         new Chart(topEventsCtx, {
@@ -1117,7 +1291,7 @@
         });
         @endif
 
-        @if ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1)
+        @if ($viewsBySchedule->isNotEmpty() && $viewsBySchedule->count() > 1 && ! $selectedEventId)
         // Schedule Views Chart
         const scheduleCtx = document.getElementById('scheduleChart').getContext('2d');
         new Chart(scheduleCtx, {
@@ -1302,6 +1476,52 @@
         });
         @endif
 
+        @if ($locationBreakdown->isNotEmpty())
+        // Visitor Locations Chart
+        const locationsCtx = document.getElementById('locationsChart').getContext('2d');
+        new Chart(locationsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($locationBreakdown->pluck('country_name')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($locationBreakdown->pluck('view_count')->toArray()),
+                    backgroundColor: '#10B981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
         @if ($topReferrers->isNotEmpty())
         // Top Referrers Chart
         const topReferrersCtx = document.getElementById('topReferrersChart').getContext('2d');
@@ -1348,6 +1568,144 @@
         });
         @endif
 
+        @if ($topUtmSources->isNotEmpty())
+        // Top UTM Sources Chart
+        const utmSourcesCtx = document.getElementById('topUtmSourcesChart').getContext('2d');
+        new Chart(utmSourcesCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topUtmSources->pluck('param_value')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($topUtmSources->pluck('view_count')->toArray()),
+                    backgroundColor: '#6366F1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topUtmMediums->isNotEmpty())
+        // Top UTM Mediums Chart
+        const utmMediumsCtx = document.getElementById('topUtmMediumsChart').getContext('2d');
+        new Chart(utmMediumsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topUtmMediums->pluck('param_value')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($topUtmMediums->pluck('view_count')->toArray()),
+                    backgroundColor: '#0EA5E9'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
+        @if ($topUtmCampaigns->isNotEmpty())
+        // Top UTM Campaigns Chart
+        const utmCampaignsCtx = document.getElementById('topUtmCampaignsChart').getContext('2d');
+        new Chart(utmCampaignsCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topUtmCampaigns->pluck('param_value')->toArray()),
+                datasets: [{
+                    label: @json(__('messages.views')),
+                    data: @json($topUtmCampaigns->pluck('view_count')->toArray()),
+                    backgroundColor: '#D946EF'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor,
+                            precision: 0
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: gridColor
+                        },
+                        ticks: {
+                            color: textColor
+                        }
+                    }
+                }
+            }
+        });
+        @endif
+
         }
 
         // Initialize charts when DOM is ready
@@ -1358,7 +1716,7 @@
         }
         @endif
 
-        @if ($tab === 'revenue' && isset($topEventsByRevenue) && $topEventsByRevenue->isNotEmpty())
+        @if ($tab === 'revenue' && isset($topEventsByRevenue) && $topEventsByRevenue->isNotEmpty() && ! $selectedEventId)
         function initRevenueCharts() {
             if (typeof Chart === 'undefined') {
                 setTimeout(initRevenueCharts, 50);

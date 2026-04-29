@@ -830,7 +830,6 @@ return [
     'signup_verification_code_intro' => 'Veuillez utiliser le code suivant pour terminer votre inscription :',
     'your_verification_code' => 'Votre code de vérification',
     'signup_verification_code_expiry' => 'Ce code expirera dans 10 minutes.',
-    'signup_verification_code_ignore' => 'Si vous n\'avez pas demandé ce code, vous pouvez ignorer cet e-mail en toute sécurité.',
     'signup_verification_code_security_notice' => 'Pour votre sécurité, ne partagez jamais ce code de vérification avec qui que ce soit. Notre équipe ne vous demandera jamais ce code.',
     'send_code' => 'Envoyer le code',
     'verification_code' => 'Code de vérification',
@@ -2918,7 +2917,7 @@ return [
     'carpool_status_approved' => 'Approuvée',
     'carpool_status_declined' => 'Refusée',
     'carpool_status_cancelled' => 'Annulée',
-    
+
     // Carpool emails
     'carpool_email_ride_requested_subject' => 'Nouvelle demande de trajet pour :event',
     'carpool_email_ride_requested_heading' => 'Nouvelle demande de trajet',

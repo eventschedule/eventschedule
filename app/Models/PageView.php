@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\GeoIpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -261,7 +262,8 @@ class PageView
         }
 
         // Skip recording if IP has exceeded view limit for this role today
-        $ip = $request->ip();
+        // Prefer Cloudflare's CF-Connecting-IP header for the real client IP
+        $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
         if ($ip) {
             $ipHash = self::getIpHash($ip);
             if (self::hasExceededViewLimit($role->id, $ipHash)) {
@@ -273,6 +275,14 @@ class PageView
 
         // Increment schedule-level analytics
         AnalyticsDaily::incrementView($role->id, $deviceType);
+
+        // Track visitor location
+        if ($ip) {
+            $countryCode = app(GeoIpService::class)->lookup($ip);
+            if ($countryCode) {
+                AnalyticsLocationsDaily::incrementView($role->id, $countryCode);
+            }
+        }
 
         // Track referrer source (UTM overrides referrer categorization)
         $referrer = $request->header('referer');
@@ -286,6 +296,21 @@ class PageView
             $sourceOverride = 'promo';
         }
         AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
+
+        // Track UTM parameters
+        $utmParams = [
+            'source' => $request->query('utm_source'),
+            'medium' => $request->query('utm_medium'),
+            'campaign' => $request->query('utm_campaign'),
+            'content' => $request->query('utm_content'),
+            'term' => $request->query('utm_term'),
+        ];
+        foreach ($utmParams as $paramType => $paramValue) {
+            if ($paramValue !== null && $paramValue !== '') {
+                $paramValue = mb_substr(trim($paramValue), 0, 255);
+                AnalyticsUtmDaily::incrementView($role->id, $paramType, $paramValue);
+            }
+        }
 
         // Increment event-level analytics if event exists
         if ($event) {

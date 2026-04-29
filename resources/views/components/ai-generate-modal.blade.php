@@ -25,7 +25,7 @@
     <div class="p-6" x-data="aiGenerateModal_{{ Str::camel($name) }}">
 
         {{-- ===== SELECTION PHASE ===== --}}
-        <div x-show="!showPreview" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+        <div x-show="!showPreview">
             <div class="text-center mb-4">
                 <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 mb-3">
                     <svg class="w-6 h-6 text-[var(--brand-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,7 +293,7 @@
                                     </div>
                                     <div x-show="elementStatus[key] === 'complete'" x-cloak>
                                         <p class="text-sm text-gray-700 dark:text-gray-300" x-text="previewResults[previewConfig[key].data_key]"></p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" :style="'font-family: \'' + (previewResults[previewConfig[key].data_key] || '') + '\', sans-serif'" x-effect="if (elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]) loadPreviewFont(previewResults[previewConfig[key].data_key])">The quick brown fox jumps over the lazy dog</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" :style="'font-family: \'' + (previewResults[previewConfig[key].data_key] || '').replace(/_/g, ' ') + '\', sans-serif'" x-effect="if (elementStatus[key] === 'complete' && previewResults[previewConfig[key].data_key]) loadPreviewFont(previewResults[previewConfig[key].data_key])">The quick brown fox jumps over the lazy dog</p>
                                     </div>
                                     <div x-show="elementStatus[key] === 'error'" x-cloak class="text-sm text-red-500" x-text="elementErrors[key] || '{{ __('messages.generation_failed') }}'">
                                     </div>
@@ -481,7 +481,7 @@ document.addEventListener('alpine:init', function() {
                 var link = document.createElement('link');
                 link.id = id;
                 link.rel = 'stylesheet';
-                link.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(fontFamily) + '&display=swap';
+                link.href = 'https://fonts.googleapis.com/css?family=' + encodeURIComponent(fontFamily.replace(/_/g, ' ')) + '&display=swap';
                 document.head.appendChild(link);
             },
             retryPreviewElement: function(key) {
@@ -526,6 +526,8 @@ document.addEventListener('alpine:init', function() {
                         self.elementStatus[key] = 'error';
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
+                        } else if (err.message === 'gateway_timeout') {
+                            self.elementErrors[key] = @json(__('messages.ai_generation_timed_out'));
                         }
                     })
                     .finally(function() {
@@ -574,6 +576,25 @@ document.addEventListener('alpine:init', function() {
                 }).then(function(response) {
                     if (response.status === 429) {
                         throw new Error('rate_limit');
+                    }
+                    if (response.status === 502 || response.status === 503 || response.status === 504) {
+                        throw new Error('gateway_timeout');
+                    }
+                    var contentType = response.headers.get('content-type') || '';
+                    if (!contentType.includes('application/json')) {
+                        throw new Error('gateway_timeout');
+                    }
+                    return response.json();
+                });
+            },
+            pollRequest: function(url) {
+                return fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('poll_error');
                     }
                     return response.json();
                 });
@@ -628,9 +649,33 @@ document.addEventListener('alpine:init', function() {
                 this.customImagePrompts = JSON.parse(JSON.stringify(this.defaultImagePrompts));
             },
             @endif
+            playNotificationChime: function() {
+                try {
+                    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (ctx.state === 'suspended') ctx.resume();
+                    var playTone = function(freq, startTime, duration) {
+                        var osc = ctx.createOscillator();
+                        var gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.3, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+                        osc.start(startTime);
+                        osc.stop(startTime + duration);
+                    };
+                    playTone(523.25, ctx.currentTime, 0.15);
+                    playTone(659.25, ctx.currentTime + 0.15, 0.2);
+                    setTimeout(function() { ctx.close(); }, 1000);
+                } catch (e) {
+                    // Web Audio not supported
+                }
+            },
             checkComplete: function() {
                 if (this.pendingRequests <= 0) {
                     this.generating = false;
+                    this.playNotificationChime();
                 }
             },
             fireImageRequest: function(imageKey, extraBody) {
@@ -648,15 +693,69 @@ document.addEventListener('alpine:init', function() {
                 }
                 @endif
 
-                self.makeRequest(@json($imageEndpoint ?? ''), body)
+                var imageEndpoint = @json($imageEndpoint ?? '');
+
+                self.makeRequest(imageEndpoint, body)
                 .then(function(data) {
                     if (genId !== self.generationId) return;
-                    if (data.success) {
+                    if (data.request_id) {
+                        var pollUrl = imageEndpoint + '/' + data.request_id;
+                        var pollResolved = false;
+                        var pollInterval = setInterval(function() {
+                            if (genId !== self.generationId) {
+                                clearInterval(pollInterval);
+                                return;
+                            }
+                            self.pollRequest(pollUrl)
+                            .then(function(pollData) {
+                                if (pollResolved || genId !== self.generationId) {
+                                    clearInterval(pollInterval);
+                                    return;
+                                }
+                                if (pollData.status === 'completed') {
+                                    pollResolved = true;
+                                    clearInterval(pollInterval);
+                                    Object.assign(self.previewResults, pollData);
+                                    self.elementStatus[imageKey] = 'complete';
+                                    self.pendingRequests--;
+                                    self.checkComplete();
+                                } else if (pollData.status === 'failed') {
+                                    pollResolved = true;
+                                    clearInterval(pollInterval);
+                                    self.elementStatus[imageKey] = 'error';
+                                    if (pollData.error) self.elementErrors[imageKey] = pollData.error;
+                                    self.pendingRequests--;
+                                    self.checkComplete();
+                                }
+                            })
+                            .catch(function() {
+                                if (pollResolved) return;
+                                pollResolved = true;
+                                clearInterval(pollInterval);
+                                self.elementStatus[imageKey] = 'error';
+                                self.pendingRequests--;
+                                self.checkComplete();
+                            });
+                        }, 3000);
+                        setTimeout(function() {
+                            if (pollResolved) return;
+                            pollResolved = true;
+                            clearInterval(pollInterval);
+                            self.elementStatus[imageKey] = 'error';
+                            self.elementErrors[imageKey] = @json(__('messages.ai_generation_timed_out'));
+                            self.pendingRequests--;
+                            self.checkComplete();
+                        }, 120000);
+                    } else if (data.success) {
                         Object.assign(self.previewResults, data);
                         self.elementStatus[imageKey] = 'complete';
+                        self.pendingRequests--;
+                        self.checkComplete();
                     } else {
                         self.elementStatus[imageKey] = 'error';
                         if (data.error) self.elementErrors[imageKey] = data.error;
+                        self.pendingRequests--;
+                        self.checkComplete();
                     }
                 })
                 .catch(function(err) {
@@ -664,10 +763,9 @@ document.addEventListener('alpine:init', function() {
                     self.elementStatus[imageKey] = 'error';
                     if (err.message === 'rate_limit') {
                         alert(@json(__('messages.ai_rate_limit')));
+                    } else if (err.message === 'gateway_timeout') {
+                        self.elementErrors[imageKey] = @json(__('messages.ai_generation_timed_out'));
                     }
-                })
-                .finally(function() {
-                    if (genId !== self.generationId) return;
                     self.pendingRequests--;
                     self.checkComplete();
                 });
@@ -709,6 +807,8 @@ document.addEventListener('alpine:init', function() {
                         self.elements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
+                        } else if (err.message === 'gateway_timeout') {
+                            alert(@json(__('messages.ai_generation_timed_out')));
                         } else {
                             alert(@json($errorMessage));
                         }
@@ -717,6 +817,7 @@ document.addEventListener('alpine:init', function() {
                         if (genId !== self.generationId) return;
                         self.generating = false;
                         self.generationStarted = false;
+                        self.playNotificationChime();
                     });
                     return;
                 }
@@ -777,6 +878,8 @@ document.addEventListener('alpine:init', function() {
                         textElements.forEach(function(el) { self.elementStatus[el] = 'error'; });
                         if (err.message === 'rate_limit') {
                             alert(@json(__('messages.ai_rate_limit')));
+                        } else if (err.message === 'gateway_timeout') {
+                            textElements.forEach(function(el) { self.elementErrors[el] = @json(__('messages.ai_generation_timed_out')); });
                         }
                         if (needsSequencing) fireImages();
                     })

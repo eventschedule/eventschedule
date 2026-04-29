@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">{{ $short_name ?? $name }} Replacement for Events | Event Schedule</x-slot>
+    <x-slot name="title">Replace {{ $short_name ?? $name }} for Events | Event Schedule</x-slot>
     <x-slot name="description">{{ $description }}</x-slot>
     <x-slot name="keywords">{{ $keywords }}</x-slot>
     <x-slot name="breadcrumbTitle">{{ $short_name ?? $name }} Replacement</x-slot>
@@ -14,6 +14,11 @@
         "url": "{{ config('app.url') }}",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
+        "isSimilarTo": {
+            "@type": "SoftwareApplication",
+            "name": "{{ str_replace('"', '\\"', $name) }}",
+            "applicationCategory": "BusinessApplication"
+        },
         "offers": [
             {
                 "@type": "Offer",
@@ -137,13 +142,22 @@
             </div>
 
             <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Replace <span class="text-gradient">{{ $name }}</span><br>
-                for Events
+                Replace <span class="text-gradient">{{ $name }}</span> for Events
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
                 {{ $tagline }}
             </p>
+
+            @if (!empty($audience_hint))
+                <p class="text-base text-gray-400 dark:text-gray-500 mt-4 animate-reveal delay-300" style="opacity: 0;">
+                    {{ $audience_hint }}
+                </p>
+            @endif
+
+            <div class="mt-8 animate-reveal delay-300" style="opacity: 0;">
+                @include('marketing.partials.github-star-badge')
+            </div>
         </div>
     </section>
 
@@ -166,7 +180,7 @@
                 @foreach ($pain_points as $pain)
                     <div class="flex items-start gap-4 p-6 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10">
                         <svg aria-hidden="true" class="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                         </svg>
                         <span class="text-gray-700 dark:text-gray-300">{{ $pain }}</span>
                     </div>
@@ -174,6 +188,31 @@
             </div>
         </div>
     </section>
+
+    <!-- Pricing Comparison Visual -->
+    @if (!empty($competitor_price) && !empty($es_price))
+    <section class="bg-gray-100 dark:bg-[#0f0f14] pb-24">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                <!-- Competitor pricing -->
+                <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-8 text-center">
+                    <div class="text-sm font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-6">{{ $name }}</div>
+                    <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ $competitor_price }}</div>
+                    @if (!empty($pricing_note))
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">{{ $pricing_note }}</p>
+                    @endif
+                </div>
+
+                <!-- Event Schedule pricing -->
+                <div class="rounded-2xl border border-blue-200 dark:border-blue-500/30 bg-blue-50/50 dark:bg-blue-500/5 p-8 text-center">
+                    <div class="text-sm font-medium text-blue-500 dark:text-blue-400 uppercase tracking-wider mb-6">Event Schedule</div>
+                    <div class="text-3xl font-bold text-gradient mb-2">{{ $es_price }}</div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">Zero platform fees on ticket sales. You only pay Stripe's processing fee.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    @endif
 
     <!-- Transition -->
     <div class="section-fade-to-white h-24"></div>
@@ -183,7 +222,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    What Event Schedule gives you instead
+                    What Event Schedule gives you over {{ $name }}
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Purpose-built features that replace the workarounds.
@@ -204,11 +243,120 @@
         </div>
     </section>
 
+    <!-- Feature Comparison Table -->
+    @if (!empty($comparison_rows))
+    <section class="bg-white dark:bg-[#0a0a0f] pb-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                    {{ $name }} vs. Event Schedule
+                </h2>
+            </div>
+
+            <div class="rounded-2xl border border-gray-200 dark:border-white/10 overflow-hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-white/5">
+                            <th class="text-left text-sm font-semibold text-gray-900 dark:text-white px-6 py-4">Feature</th>
+                            <th class="text-center text-sm font-semibold text-gray-900 dark:text-white px-6 py-4">{{ $short_name ?? $name }}</th>
+                            <th class="text-center text-sm font-semibold text-blue-600 dark:text-blue-400 px-6 py-4">Event Schedule</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-white/10">
+                        @foreach ($comparison_rows as $row)
+                            <tr>
+                                <td class="text-sm text-gray-700 dark:text-gray-300 px-6 py-4">{{ $row['feature'] }}</td>
+                                <td class="text-center text-sm px-6 py-4">
+                                    @if ($row['competitor'] === true)
+                                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-500 dark:text-emerald-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    @elseif ($row['competitor'] === false)
+                                        <svg aria-hidden="true" class="w-5 h-5 text-gray-300 dark:text-gray-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    @else
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $row['competitor'] }}</span>
+                                    @endif
+                                </td>
+                                <td class="text-center text-sm px-6 py-4">
+                                    @if ($row['es'] === true)
+                                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-500 dark:text-emerald-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    @elseif ($row['es'] === false)
+                                        <svg aria-hidden="true" class="w-5 h-5 text-gray-300 dark:text-gray-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    @else
+                                        <span class="text-blue-600 dark:text-blue-400 font-medium">{{ $row['es'] }}</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    @endif
+
+    <!-- Pricing Nudge -->
+    @include('marketing.partials.pricing-nudge')
+
     <!-- Transition -->
     <div class="section-fade-to-gray h-24"></div>
 
-    <!-- About Tool -->
+    <!-- How to Switch -->
     <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    How to switch from {{ $name }} in 3 steps
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                    Get started in minutes. No migration or data import needed.
+                </p>
+            </div>
+
+            @php
+                $steps = $switch_steps ?? [
+                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
+                    ['title' => 'Add your events', 'description' => 'Paste event details for AI import or create events manually.'],
+                    ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
+                ];
+            @endphp
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                @foreach ($steps as $index => $step)
+                    <div class="text-center">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
+                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $index + 1 }}</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $step['title'] }}</h3>
+                        <p class="text-gray-500 dark:text-gray-400">{{ $step['description'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <!-- Post-steps CTA -->
+            <div class="text-center mt-12">
+                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                    Create Your Free Schedule
+                    <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+                <p class="mt-3 text-sm text-gray-400 dark:text-gray-500">No credit card required.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition -->
+    <div class="section-fade-to-white h-24"></div>
+
+    <!-- About Tool -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <!-- About the tool -->
@@ -256,43 +404,6 @@
     </section>
 
     <!-- Transition -->
-    <div class="section-fade-to-white h-24"></div>
-
-    <!-- How to Switch -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    How to switch in 3 steps
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Get started in minutes. No migration or data import needed.
-                </p>
-            </div>
-
-            @php
-                $steps = $switch_steps ?? [
-                    ['title' => 'Create your schedule', 'description' => 'Sign up free and create your first schedule in under a minute.'],
-                    ['title' => 'Add your events', 'description' => 'Paste event details for AI import or create events manually.'],
-                    ['title' => 'Share and sell', 'description' => 'Share your schedule URL and start selling tickets.'],
-                ];
-            @endphp
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                @foreach ($steps as $index => $step)
-                    <div class="text-center">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $index + 1 }}</span>
-                        </div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $step['title'] }}</h3>
-                        <p class="text-gray-500 dark:text-gray-400">{{ $step['description'] }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- Transition -->
     <div class="section-fade-to-gray h-24"></div>
 
     <!-- FAQ Section -->
@@ -300,7 +411,7 @@
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
+                    {{ $name }} to Event Schedule FAQ
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
                     Common questions about switching from {{ $name }}.
@@ -374,6 +485,9 @@
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Replace</div>
                             <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ $link['name'] }}</div>
+                            @if (!empty($link['description']))
+                                <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $link['description'] }}</div>
+                            @endif
                         </div>
                         <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

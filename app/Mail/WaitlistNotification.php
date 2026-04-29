@@ -58,7 +58,7 @@ class WaitlistNotification extends Mailable
     public function content(): Content
     {
         $isRsvp = (bool) $this->event->rsvp_enabled;
-        $eventUrl = $this->event->getGuestUrl($this->entry->subdomain, $this->entry->event_date);
+        $eventUrl = $this->event->getGuestUrl($this->entry->subdomain, $this->entry->event_date, true);
         $eventUrl .= (str_contains($eventUrl, '?') ? '&' : '?').($isRsvp ? 'rsvp=true' : 'tickets=true');
 
         return new Content(

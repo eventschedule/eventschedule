@@ -88,8 +88,8 @@ class SlugPatternUtils
 
         // Add date/time variables if event has a start date
         if ($event && $event->starts_at) {
-            $startDate = $event->getStartDateTime(null, true);
-            $endDate = $event->getEndDateTime(null, true);
+            $startDate = $event->getStartDateTime(null, true, $role->timezone ?? 'UTC');
+            $endDate = $event->getEndDateTime(null, true, $role->timezone ?? 'UTC');
 
             // Set locale for translated date formats
             $locale = $role?->language_code ?? 'en';
@@ -107,9 +107,11 @@ class SlugPatternUtils
                 '{date_full_dmy}' => $startDate->format('d-m-Y'),
                 '{date_full_mdy}' => $startDate->format('m-d-Y'),
                 '{month}' => $startDate->format('n'),
+                '{month_pad}' => $startDate->format('m'),
                 '{month_name}' => $startDate->translatedFormat('F'),
                 '{month_short}' => $startDate->translatedFormat('M'),
                 '{day}' => $startDate->format('j'),
+                '{day_pad}' => $startDate->format('d'),
                 '{year}' => $startDate->format('Y'),
                 '{time}' => $startDate->format($timeFormat),
                 '{end_time}' => $endDate ? $endDate->format($timeFormat) : '',
@@ -125,9 +127,11 @@ class SlugPatternUtils
                 '{date_full_dmy}' => '',
                 '{date_full_mdy}' => '',
                 '{month}' => '',
+                '{month_pad}' => '',
                 '{month_name}' => '',
                 '{month_short}' => '',
                 '{day}' => '',
+                '{day_pad}' => '',
                 '{year}' => '',
                 '{time}' => '',
                 '{end_time}' => '',

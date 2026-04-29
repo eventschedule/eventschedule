@@ -24,35 +24,7 @@
 
     @if (config('app.hosted') || config('app.report_errors'))
     <script {!! nonce_attr() !!}>
-        window.sentryOnLoad = function () {
-            Sentry.init({
-                beforeSend: function (event) {
-                    if (event.exception && event.exception.values) {
-                        for (var i = 0; i < event.exception.values.length; i++) {
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Script error.') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Vue failed to load') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && (
-                                event.exception.values[i].value === 'undefined' ||
-                                event.exception.values[i].value.indexOf('Non-Error promise rejection') !== -1
-                            )) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Share canceled') !== -1) {
-                                return null;
-                            }
-                            if (event.exception.values[i].value && event.exception.values[i].value.indexOf('Unexpected token') !== -1) {
-                                return null;
-                            }
-                        }
-                    }
-                    return event;
-                }
-            });
-        };
+        @include('layouts.sentry')
         window.addEventListener('load', function() {
             var s = document.createElement('script');
             s.src = "{{ config('app.sentry_js_dsn') }}";
@@ -80,8 +52,11 @@
     <link rel="canonical" href="{{ $canonicalPath }}">
     <!-- Hreflang tags -->
     <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
+    <link rel="alternate" hreflang="en" href="{{ $basePath }}">
     @foreach (array_keys(config('app.supported_languages')) as $lang)
+        @if ($lang !== 'en')
     <link rel="alternate" hreflang="{{ $lang }}" href="{{ $basePath }}?lang={{ $lang }}">
+        @endif
     @endforeach
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     @if(isset($keywords))
@@ -146,6 +121,14 @@
         "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "publisher": {
             "@id": "{{ config('app.url') }}/#organization"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ config('app.url') }}/search?search={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
         }
     }
     </script>
@@ -242,6 +225,14 @@
         } elseif (in_array($path, ['stripe', 'google-calendar', 'caldav', 'invoiceninja'])) {
             $breadcrumbs[] = ['name' => 'Integrations', 'url' => url('/features/integrations')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif ($path === 'use-cases') {
+            $breadcrumbs[] = ['name' => 'Use Cases', 'url' => url()->current()];
+        } elseif ($path === 'features') {
+            $breadcrumbs[] = ['name' => 'Features', 'url' => url()->current()];
+        } elseif ($path === 'compare') {
+            $breadcrumbs[] = ['name' => 'Compare', 'url' => url()->current()];
+        } elseif ($path === 'replace') {
+            $breadcrumbs[] = ['name' => 'Replace', 'url' => url()->current()];
         } else {
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         }

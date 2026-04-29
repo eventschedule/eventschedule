@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
+use App\Utils\UrlUtils;
 use Codedge\Updater\UpdaterManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class AppController extends Controller
 {
@@ -120,6 +123,15 @@ class AppController extends Controller
         try {
             // === EVERY CALL (every minute) ===
 
+            // Process scheduled newsletters BEFORE queue:work so newly dispatched
+            // SendNewsletterBatch jobs get processed by the queue:work below
+            try {
+                (new \App\Jobs\ProcessScheduledNewsletters)();
+            } catch (\Exception $e) {
+                \Log::error('Scheduled command ProcessScheduledNewsletters failed: '.$e->getMessage());
+                report($e);
+            }
+
             // Process queued jobs (emails, etc.)
             try {
                 \Artisan::call('queue:work', [
@@ -148,14 +160,17 @@ class AppController extends Controller
                 \Log::warning('Queue processing failed: '.$e->getMessage());
             }
 
-            (new \App\Jobs\ProcessScheduledNewsletters)();
-
             // === EVERY 5 MINUTES ===
             if (! Cache::has('td_5min')) {
                 Cache::put('td_5min', true, now()->addMinutes(5));
 
                 if (config('app.hosted')) {
-                    \Artisan::call('app:sync-domain-statuses');
+                    try {
+                        \Artisan::call('app:sync-domain-statuses');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:sync-domain-statuses failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
             }
 
@@ -163,27 +178,77 @@ class AppController extends Controller
             if (! Cache::has('td_15min')) {
                 Cache::put('td_15min', true, now()->addMinutes(15));
 
-                \Artisan::call('caldav:sync');
+                try {
+                    \Artisan::call('caldav:sync');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command caldav:sync failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (\App\Services\MetaAdsService::isBoostConfigured()) {
-                    \Artisan::call('boost:sync');
+                    try {
+                        \Artisan::call('boost:sync');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command boost:sync failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
-                \Artisan::call('boost:expire-pending');
+                try {
+                    \Artisan::call('boost:expire-pending');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command boost:expire-pending failed: '.$e->getMessage());
+                    report($e);
+                }
             }
 
             // === HOURLY ===
             if (! Cache::has('td_hourly')) {
                 Cache::put('td_hourly', true, now()->addHour());
 
-                \Artisan::call('app:release-tickets');
-                \Artisan::call('app:expire-waitlist');
-                \Artisan::call('app:translate');
-                \Artisan::call('app:send-graphic-emails');
-                \Artisan::call('app:send-feedback-requests');
-                \Artisan::call('app:send-carpool-reminders');
+                try {
+                    \Artisan::call('app:release-tickets');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:release-tickets failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:expire-waitlist');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:expire-waitlist failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:translate');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:send-graphic-emails');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:send-graphic-emails failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:send-feedback-requests');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:send-feedback-requests failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:send-carpool-reminders');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:send-carpool-reminders failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
-                    \Artisan::call('app:setup-demo');
+                    try {
+                        \Artisan::call('app:setup-demo');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:setup-demo failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
             }
 
@@ -191,29 +256,101 @@ class AppController extends Controller
             if (! Cache::has('td_daily')) {
                 Cache::put('td_daily', true, now()->endOfDay());
 
-                \Artisan::call('google:refresh-webhooks');
-                \Artisan::call('audit:prune');
-                \Artisan::call('app:cleanup-webhook-deliveries');
-                \Artisan::call('app:cleanup-backups');
+                try {
+                    \Artisan::call('google:refresh-webhooks');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command google:refresh-webhooks failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('audit:prune');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command audit:prune failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:cleanup-webhook-deliveries');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:cleanup-webhook-deliveries failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:cleanup-backups');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:cleanup-backups failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
-                    \Artisan::call('app:generate-sub-audience-blog');
-                    \Artisan::call('app:generate-daily-blog-post');
-                    \Artisan::call('app:send-subscription-reminders');
-                    \Artisan::call('app:process-referral-credits');
+                    try {
+                        \Artisan::call('app:generate-sub-audience-blog');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:generate-sub-audience-blog failed: '.$e->getMessage());
+                        report($e);
+                    }
+                    try {
+                        \Artisan::call('app:generate-daily-blog-post');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:generate-daily-blog-post failed: '.$e->getMessage());
+                        report($e);
+                    }
+                    try {
+                        \Artisan::call('app:send-subscription-reminders');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:send-subscription-reminders failed: '.$e->getMessage());
+                        report($e);
+                    }
+                    try {
+                        \Artisan::call('app:process-referral-credits');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:process-referral-credits failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
 
                 if (! config('app.hosted')) {
-                    \Artisan::call('app:import-curator-events');
+                    try {
+                        \Artisan::call('app:import-curator-events');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command app:import-curator-events failed: '.$e->getMessage());
+                        report($e);
+                    }
                 }
             }
 
             // === DAILY AT 12:00 PM UTC ===
             if (now()->hour >= 12 && ! Cache::has('notified_pending_today')) {
-                \Artisan::call('app:notify-request-changes');
-                \Artisan::call('app:notify-fan-content-changes');
-                \Artisan::call('app:notify-poll-option-changes');
+                try {
+                    \Artisan::call('app:notify-request-changes');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:notify-request-changes failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:notify-fan-content-changes');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:notify-fan-content-changes failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('app:notify-poll-option-changes');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:notify-poll-option-changes failed: '.$e->getMessage());
+                    report($e);
+                }
                 Cache::put('notified_pending_today', true, now()->endOfDay());
+            }
+
+            // === MONTHLY ===
+            if (! Cache::has('td_monthly')) {
+                Cache::put('td_monthly', true, now()->addMonth());
+
+                try {
+                    \Artisan::call('app:update-geoip');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command app:update-geoip failed: '.$e->getMessage());
+                    report($e);
+                }
             }
 
         } finally {
@@ -233,6 +370,71 @@ class AppController extends Controller
             : $disallowRules."\nSitemap: ".config('app.url')."/sitemap.xml\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
+    }
+
+    public function mapImage(Request $request)
+    {
+        $id = $request->route('id');
+
+        $apiKey = config('services.google.backend');
+        if (! $apiKey) {
+            abort(404);
+        }
+
+        $roleId = UrlUtils::decodeIdOrFail($id);
+        $role = Role::find($roleId);
+
+        if (! $role || ! $role->geo_lat || ! $role->geo_lon) {
+            abort(404);
+        }
+
+        $allowedSizes = ['600x200', '600x400'];
+        $size = request('size', '600x200');
+        if (! in_array($size, $allowedSizes)) {
+            $size = '600x200';
+        }
+
+        $cacheDir = storage_path('app/map_cache');
+        $cachePath = $cacheDir.'/'.$roleId.'_'.$size.'.png';
+        $cacheTtl = 30 * 24 * 60 * 60; // 30 days
+
+        if (file_exists($cachePath) && (time() - filemtime($cachePath)) < $cacheTtl) {
+            return response()->file($cachePath, [
+                'Content-Type' => 'image/png',
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        }
+
+        $url = 'https://maps.googleapis.com/maps/api/staticmap?'.http_build_query([
+            'center' => $role->geo_lat.','.$role->geo_lon,
+            'zoom' => 15,
+            'size' => $size,
+            'scale' => 2,
+            'markers' => 'color:red|'.$role->geo_lat.','.$role->geo_lon,
+            'key' => $apiKey,
+        ]);
+
+        try {
+            $response = Http::timeout(10)->get($url);
+
+            if (! $response->successful()) {
+                abort(404);
+            }
+
+            if (! is_dir($cacheDir)) {
+                mkdir($cacheDir, 0755, true);
+            }
+
+            file_put_contents($cachePath, $response->body());
+
+            return response($response->body(), 200, [
+                'Content-Type' => 'image/png',
+                'Cache-Control' => 'public, max-age=86400',
+            ]);
+        } catch (\Exception $e) {
+            report($e);
+            abort(404);
+        }
     }
 
     public function tempEventImage($filename = null)

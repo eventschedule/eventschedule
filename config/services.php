@@ -38,6 +38,11 @@ return [
     'ai' => [
         'text_provider' => env('AI_TEXT_PROVIDER', 'gemini'),
         'image_provider' => env('AI_IMAGE_PROVIDER', 'openai'),
+        'graphic_models' => [
+            'gemini-2.5-flash' => ['name' => 'Gemini 2.5 Flash', 'provider' => 'gemini', 'badge' => 'balanced'],
+            'gemini-2.0-flash' => ['name' => 'Gemini 2.0 Flash', 'provider' => 'gemini', 'badge' => 'fastest'],
+            'gemini-2.5-pro' => ['name' => 'Gemini 2.5 Pro', 'provider' => 'gemini', 'badge' => 'smartest'],
+        ],
     ],
 
     'google' => [

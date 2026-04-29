@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Google Calendar Sync - Event Schedule</x-slot>
+    <x-slot name="title">Google Calendar Two-Way Sync - Event Schedule</x-slot>
     <x-slot name="description">Real-time two-way sync with Google Calendar. OAuth authentication, webhook updates, and multi-calendar support for smooth event management.</x-slot>
     <x-slot name="breadcrumbTitle">Google Calendar</x-slot>
 
@@ -29,6 +29,46 @@
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Does Google Calendar sync work with selfhosted Event Schedule?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, selfhosted users can set up Google Calendar sync by configuring their own Google OAuth credentials. Full setup instructions are available in the selfhosted documentation."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is two-way sync available on the free plan?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Google Calendar sync is available on all plans, including the free plan. You can push events to Google, pull events from Google, or sync both ways at no cost."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How quickly do changes sync?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Changes sync instantly via webhooks. When you create, update, or delete an event in either Event Schedule or Google Calendar, the change appears in the other system within seconds."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I sync multiple schedules to different Google Calendars?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, each schedule can be connected to a different Google Calendar. This lets you manage work events, personal events, and different projects in separate calendars."
+                }
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -369,6 +409,106 @@
                     </span>
                 </div>
             </a>
+        </div>
+    </section>
+
+    <!-- Related Features -->
+    <section class="bg-white dark:bg-[#0a0a0f] py-8 pb-16">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors text-sm font-medium">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Calendar Sync Features
+                </a>
+                <a href="{{ marketing_url('/features/ticketing') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors text-sm font-medium">
+                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                    </svg>
+                    Ticketing
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="bg-gray-100 dark:bg-black/30 py-24">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    Frequently asked questions
+                </h2>
+                <p class="text-xl text-gray-500 dark:text-gray-400">
+                    Common questions about Google Calendar sync.
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ open: null }">
+                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Does Google Calendar sync work with selfhosted Event Schedule?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, selfhosted users can set up Google Calendar sync by configuring their own Google OAuth credentials. Full setup instructions are available in the selfhosted documentation.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Is two-way sync available on the free plan?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, Google Calendar sync is available on all plans, including the free plan. You can push events to Google, pull events from Google, or sync both ways at no cost.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            How quickly do changes sync?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 3" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Changes sync instantly via webhooks. When you create, update, or delete an event in either Event Schedule or Google Calendar, the change appears in the other system within seconds.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
+                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Can I sync multiple schedules to different Google Calendars?
+                        </h3>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div x-show="open === 4" x-collapse>
+                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
+                            Yes, each schedule can be connected to a different Google Calendar. This lets you manage work events, personal events, and different projects in separate calendars.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 

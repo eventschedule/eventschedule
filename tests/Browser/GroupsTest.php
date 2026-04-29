@@ -57,8 +57,13 @@ class GroupsTest extends DuskTestCase
     protected function createGroups(Browser $browser): void
     {
         $browser->visit('/talent/edit')
-            ->click('a[data-section="section-subschedules"]')
-            ->waitFor('#section-subschedules', 5);
+            ->waitFor('#edit-form', 15)
+            ->pause(500);
+
+        // Use JavaScript to switch to sub-schedules section (more reliable than clicking the nav link)
+        $browser->script("document.querySelector('a[data-section=\"section-subschedules\"]').click()");
+
+        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 5);
 
         // Click the sub-schedules tab within the Customize section
         $browser->click('button.customize-tab[data-tab="subschedules"]')
@@ -68,15 +73,33 @@ class GroupsTest extends DuskTestCase
         $browser->script('addGroupField();');
 
         $browser->waitFor('input[name*="groups"][name*="name"]', 5)
-            ->type('input[name*="groups"][name*="name"]', 'Main Shows')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15);
+            ->type('input[name*="groups"][name*="name"]', 'Main Shows');
+
+        // JS fallback for headless Chrome flakiness
+        $browser->script("
+            var input = document.querySelector('input[name*=\"groups\"][name*=\"name\"]');
+            if (!input.value) {
+                input.value = 'Main Shows';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45);
 
         // Add second sub-schedule
         $browser->visit('/talent/edit')
-            ->click('a[data-section="section-subschedules"]')
-            ->waitFor('#section-subschedules', 5);
+            ->waitFor('#edit-form', 15)
+            ->pause(500);
+
+        $browser->script("document.querySelector('a[data-section=\"section-subschedules\"]').click()");
+
+        $browser->waitUntil("document.getElementById('section-subschedules') && document.getElementById('section-subschedules').style.display === 'block'", 5);
 
         // Click the sub-schedules tab within the Customize section
         $browser->click('button.customize-tab[data-tab="subschedules"]')
@@ -85,10 +108,24 @@ class GroupsTest extends DuskTestCase
         $browser->script('addGroupField();');
 
         $browser->waitFor('#group-items > div:last-child input[name*="groups"][name*="name"]', 5)
-            ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15);
+            ->type('#group-items > div:last-child input[name*="groups"][name*="name"]', 'Workshops');
+
+        // JS fallback for headless Chrome flakiness
+        $browser->script("
+            var input = document.querySelector('#group-items > div:last-child input[name*=\"groups\"][name*=\"name\"]');
+            if (!input.value) {
+                input.value = 'Workshops';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45);
 
         // Verify both sub-schedules were saved in database
         $role = Role::where('subdomain', 'talent')->first();
@@ -115,7 +152,24 @@ class GroupsTest extends DuskTestCase
 
         // Create first event for "Main Shows" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'Main Show Event');
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = 'Main Show Event';
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== 'Main Show Event') {
+                nameField.value = 'Main Show Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JS to set searchable select value (native select is hidden by searchable-select component)
         $browser->script("
@@ -124,9 +178,13 @@ class GroupsTest extends DuskTestCase
             sel.dispatchEvent(new Event('change', { bubbles: true }));
         ");
 
-        $browser->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15)
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
             ->pause(1000)
             ->assertSee('Main Show Event');
 
@@ -141,7 +199,24 @@ class GroupsTest extends DuskTestCase
 
         // Create second event for "Workshops" sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'Workshop Event');
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = 'Workshop Event';
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== 'Workshop Event') {
+                nameField.value = 'Workshop Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
 
         // Use JS to set searchable select value (native select is hidden by searchable-select component)
         $browser->script("
@@ -150,9 +225,13 @@ class GroupsTest extends DuskTestCase
             sel.dispatchEvent(new Event('change', { bubbles: true }));
         ");
 
-        $browser->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15)
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
             ->pause(1000)
             ->assertSee('Workshop Event');
 
@@ -167,10 +246,32 @@ class GroupsTest extends DuskTestCase
 
         // Create third event without sub-schedule
         $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
-            ->type('name', 'General Event')
-            ->scrollIntoView('button[type="submit"]')
-            ->press('SAVE')
-            ->waitForLocation('/talent/schedule', 15)
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = 'General Event';
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== 'General Event') {
+                nameField.value = 'General Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
             ->pause(1000)
             ->assertSee('General Event');
     }

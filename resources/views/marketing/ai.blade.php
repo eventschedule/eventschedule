@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">AI-Powered Features | Generate, Create & Import - Event Schedule</x-slot>
-    <x-slot name="description">AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 11 languages, create events via WhatsApp, and automate with a full API for AI agents.</x-slot>
+    <x-slot name="title">{{ __('marketing.ai_title') }}</x-slot>
+    <x-slot name="description">{{ __('marketing.ai_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">AI Features</x-slot>
 
     <x-slot name="structuredData">
@@ -1186,4 +1186,6 @@
         }
     }
     </script>
+
+    <x-marketing.related-pages />
 </x-marketing-layout>

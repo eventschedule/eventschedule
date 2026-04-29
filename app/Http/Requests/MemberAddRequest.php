@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Role;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class MemberAddRequest extends FormRequest
 {
@@ -18,7 +16,7 @@ class MemberAddRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255'],
-            // 'subdomain' => ['required', 'string', 'max:255', Rule::unique(Role::class)],
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
         ];
     }
 }

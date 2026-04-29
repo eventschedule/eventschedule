@@ -263,6 +263,17 @@ class AdminController extends Controller
             ->whereNull('admin_newsletter_unsubscribed_at')
             ->count();
 
+        // ARR calculation
+        $monthlyPriceId = config('services.stripe_platform.price_monthly');
+        $yearlyPriceId = config('services.stripe_platform.price_yearly');
+        $enterpriseMonthlyPriceId = config('services.stripe_platform.enterprise_price_monthly');
+        $enterpriseYearlyPriceId = config('services.stripe_platform.enterprise_price_yearly');
+
+        $monthlyAmount = (float) config('services.stripe_platform.price_monthly_amount');
+        $yearlyAmount = (float) config('services.stripe_platform.price_yearly_amount');
+        $enterpriseMonthlyAmount = (float) config('services.stripe_platform.enterprise_price_monthly_amount');
+        $enterpriseYearlyAmount = (float) config('services.stripe_platform.enterprise_price_yearly_amount');
+
         // Signups by method (selected period)
         $emailUsersInPeriod = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
@@ -290,9 +301,14 @@ class AdminController extends Controller
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->orderByDesc('created_at')
             ->limit(10)
-            ->get(['name', 'created_at', 'utm_source']);
+            ->with(['referredBy:id,name'])
+            ->get([
+                'id', 'name', 'created_at',
+                'utm_source', 'utm_medium', 'referrer_url', 'landing_page',
+                'referred_by_user_id',
+            ]);
 
-        // Stripe paid count
+        // Stripe paid count (verified, non-demo roles only)
         $validSubscriptionScope = function ($sq) {
             $sq->where(function ($q) {
                 $q->active();
@@ -302,10 +318,49 @@ class AdminController extends Controller
                 $q->onGracePeriod();
             });
         };
-        $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)
+        $stripePaidCount = Role::whereNotNull('user_id')
+            ->where(function ($q) {
+                $q->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            })
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
+            ->whereHas('subscriptions', $validSubscriptionScope)
             ->count();
+
+        $activeSubscriptions = Subscription::where('type', 'default')
+            ->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->active();
+                })->orWhere(function ($q) {
+                    $q->onTrial();
+                })->orWhere(function ($q) {
+                    $q->onGracePeriod();
+                });
+            })
+            ->whereHas('owner', function ($q) {
+                $q->whereNotNull('user_id')
+                    ->where(function ($q) {
+                        $q->whereNotNull('email_verified_at')
+                            ->orWhereNotNull('phone_verified_at');
+                    })
+                    ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->where('subdomain', 'not like', 'demo-%');
+            })
+            ->pluck('stripe_price');
+
+        $arr = 0;
+        foreach ($activeSubscriptions as $priceId) {
+            if ($priceId === $monthlyPriceId) {
+                $arr += $monthlyAmount * 12;
+            } elseif ($priceId === $yearlyPriceId) {
+                $arr += $yearlyAmount;
+            } elseif ($enterpriseMonthlyPriceId && $priceId === $enterpriseMonthlyPriceId) {
+                $arr += $enterpriseMonthlyAmount * 12;
+            } elseif ($enterpriseYearlyPriceId && $priceId === $enterpriseYearlyPriceId) {
+                $arr += $enterpriseYearlyAmount;
+            }
+        }
 
         // Domains overview
         $totalCustomDomains = Role::whereNotNull('custom_domain')->count();
@@ -347,6 +402,7 @@ class AdminController extends Controller
             'hybridUsersInPeriod',
             'recentSignups',
             'stripePaidCount',
+            'arr',
             'totalCustomDomains',
             'directCount',
             'activeCount',
@@ -555,21 +611,21 @@ class AdminController extends Controller
         $endDate = $dates['end'];
 
         // Revenue & Sales Metrics
-        $totalRevenue = Sale::where('status', 'completed')->sum('payment_amount');
-        $revenueInPeriod = Sale::where('status', 'completed')
+        $totalRevenue = Sale::where('status', 'paid')->sum('payment_amount');
+        $revenueInPeriod = Sale::where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('payment_amount');
 
-        $totalSales = Sale::where('status', 'completed')->count();
-        $salesInPeriod = Sale::where('status', 'completed')
+        $totalSales = Sale::where('status', 'paid')->count();
+        $salesInPeriod = Sale::where('status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
         $refundedSales = Sale::where('status', 'refunded')->count();
         $refundRate = ($totalSales + $refundedSales) > 0 ? round(($refundedSales / ($totalSales + $refundedSales)) * 100, 1) : 0;
 
-        $pendingSales = Sale::where('status', 'pending')->count();
-        $pendingRevenue = Sale::where('status', 'pending')->sum('payment_amount');
+        $pendingSales = Sale::where('status', 'unpaid')->count();
+        $pendingRevenue = Sale::where('status', 'unpaid')->sum('payment_amount');
 
         // Boost markup revenue
         $boostMarkupTotal = BoostBillingRecord::where('type', 'charge')
@@ -732,7 +788,10 @@ class AdminController extends Controller
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%');
 
-        $googleCalendarEnabled = (clone $baseRoleQuery)->whereNotNull('google_calendar_id')->count();
+        $googleCalendarEnabled = \App\Models\RoleUser::where('level', 'owner')
+            ->whereNotNull('google_calendar_id')
+            ->whereIn('role_id', (clone $baseRoleQuery)->select('id'))
+            ->count();
         $stripeConnected = (clone $baseRoleQuery)->whereHas('user', function ($q) {
             $q->whereNotNull('stripe_account_id');
         })->count();
@@ -1406,35 +1465,31 @@ class AdminController extends Controller
         }
         $freeCount = $totalRoleCount - $proCount - $enterpriseCount;
 
-        // Active Stripe subscriptions (excluding demo roles)
-        $stripePaidCount = Role::whereHas('subscriptions', $validSubscriptionScope)
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
+        // Active Stripe subscriptions (verified, non-demo roles only)
+        $stripePaidCount = Role::where($verifiedNonDemoScope)
+            ->whereHas('subscriptions', $validSubscriptionScope)
             ->count();
 
         // Manually assigned paid plans (have plan_expires, not free, no active Stripe subscription)
-        $manualPlanCount = Role::where('plan_type', '!=', 'free')
+        $manualPlanCount = Role::where($verifiedNonDemoScope)
+            ->where('plan_type', '!=', 'free')
             ->whereNotNull('plan_expires')
             ->where('plan_expires', '>=', now()->format('Y-m-d'))
             ->whereDoesntHave('subscriptions', $validSubscriptionScope)
             ->whereNull('trial_ends_at')
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Schedules currently on trial (excluding demo roles)
-        $trialCount = Role::whereNotNull('trial_ends_at')
+        // Schedules currently on trial (verified, non-demo roles only)
+        $trialCount = Role::where($verifiedNonDemoScope)
+            ->whereNotNull('trial_ends_at')
             ->where('trial_ends_at', '>', now())
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
-        // Expiring in 30 days (excluding demo roles)
-        $expiringSoon = Role::where('plan_type', '!=', 'free')
+        // Expiring in 30 days (verified, non-demo roles only)
+        $expiringSoon = Role::where($verifiedNonDemoScope)
+            ->where('plan_type', '!=', 'free')
             ->whereNotNull('plan_expires')
             ->whereBetween('plan_expires', [now()->format('Y-m-d'), now()->addDays(30)->format('Y-m-d')])
-            ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
-            ->where('subdomain', 'not like', 'demo-%')
             ->count();
 
         // Build query for role list (excluding demo roles)
@@ -2038,7 +2093,13 @@ class AdminController extends Controller
         $failedAuthToday = AuditLog::where('action', 'like', 'auth.%fail%')->whereDate('created_at', today())->count();
         $uniqueIpsToday = AuditLog::whereDate('created_at', today())->distinct('ip_address')->count('ip_address');
 
-        $query = AuditLog::with('user')->orderBy('created_at', 'desc');
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        if (! in_array($sortBy, ['created_at', 'action', 'ip_address', 'metadata', 'user_id'])) {
+            $sortBy = 'created_at';
+        }
+
+        $query = AuditLog::with('user')->orderBy($sortBy, $sortDir);
 
         // Filter by action category
         if ($request->filled('category')) {
@@ -2071,9 +2132,9 @@ class AdminController extends Controller
 
         $logs = $query->paginate(50)->withQueryString();
 
-        $categories = ['auth', 'profile', 'api', 'schedule', 'event', 'sale', 'admin', 'stripe'];
+        $categories = ['admin', 'api', 'auth', 'boost', 'event', 'google_calendar', 'profile', 'sale', 'schedule', 'stripe', 'subscription', 'webhook'];
 
-        return view('admin.audit-log', compact('logs', 'categories', 'totalEntries', 'entriesToday', 'failedAuthToday', 'uniqueIpsToday'));
+        return view('admin.audit-log', compact('logs', 'categories', 'totalEntries', 'entriesToday', 'failedAuthToday', 'uniqueIpsToday', 'sortBy', 'sortDir'));
     }
 
     /**

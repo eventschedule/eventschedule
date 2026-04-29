@@ -54,9 +54,11 @@ class SendNewsletterBatch implements ShouldQueue
                 ->where('status', 'pending')
                 ->get();
 
+            $processedBlocks = $service->processBlocks($newsletter);
+
             foreach ($recipients as $recipient) {
                 try {
-                    $service->sendToRecipient($newsletter, $recipient);
+                    $service->sendToRecipient($newsletter, $recipient, false, $processedBlocks);
                     if ($newsletter->role_id) {
                         UsageTrackingService::track(UsageTrackingService::EMAIL_NEWSLETTER, $newsletter->role_id);
                     }
@@ -65,6 +67,12 @@ class SendNewsletterBatch implements ShouldQueue
                         'newsletter_id' => $this->newsletterId,
                         'recipient_id' => $recipient->id,
                     ]);
+                    if ($recipient->status === 'pending') {
+                        $recipient->update([
+                            'status' => 'failed',
+                            'error_message' => substr($e->getMessage(), 0, 500),
+                        ]);
+                    }
                 }
                 usleep(200000); // 200ms throttle between sends
             }
@@ -76,18 +84,39 @@ class SendNewsletterBatch implements ShouldQueue
         $this->updateNewsletterCounts($newsletter);
     }
 
-    protected function updateNewsletterCounts(Newsletter $newsletter): void
+    public function failed(\Throwable $exception): void
     {
-        $newsletter->update([
-            'sent_count' => $newsletter->recipients()->where('status', 'sent')->count(),
+        Log::error('SendNewsletterBatch permanently failed', [
+            'newsletter_id' => $this->newsletterId,
+            'recipient_ids' => $this->recipientIds,
+            'error' => $exception->getMessage(),
         ]);
 
-        // Check if all recipients have been processed
+        NewsletterRecipient::whereIn('id', $this->recipientIds)
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'failed',
+                'error_message' => substr($exception->getMessage(), 0, 500),
+            ]);
+
+        $newsletter = Newsletter::find($this->newsletterId);
+        if ($newsletter) {
+            $this->updateNewsletterCounts($newsletter);
+        }
+    }
+
+    protected function updateNewsletterCounts(Newsletter $newsletter): void
+    {
         $pendingCount = $newsletter->recipients()->where('status', 'pending')->count();
+        $sentCount = $newsletter->recipients()->where('status', 'sent')->count();
+
         if ($pendingCount === 0) {
+            // Final update: set sent_count + status in one query to avoid race
             Newsletter::where('id', $newsletter->id)
                 ->where('status', 'sending')
-                ->update(['status' => 'sent', 'sent_at' => now()]);
+                ->update(['status' => 'sent', 'sent_at' => now(), 'sent_count' => $sentCount]);
+        } else {
+            $newsletter->update(['sent_count' => $sentCount]);
         }
     }
 }

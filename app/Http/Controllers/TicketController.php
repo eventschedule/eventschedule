@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ImportAttendeesRequest;
 use App\Http\Requests\TicketCheckoutRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
@@ -243,6 +244,7 @@ class TicketController extends Controller
     {
         $user = auth()->user();
 
+        // --- Submitted feedback (existing) ---
         $sortBy = request()->get('sort_by', 'created_at');
         $sortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
         $allowedSortColumns = ['rating', 'created_at', 'event_date', 'event_name', 'attendee_name'];
@@ -273,7 +275,7 @@ class TicketController extends Controller
         $feedbacks = $feedbackQuery->paginate(50, ['*'], 'feedback_page')->withQueryString();
 
         $stats = EventFeedback::whereHas('event', fn ($q) => $q->where('user_id', $user->id))
-            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false))
+            ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'))
             ->selectRaw('COUNT(*) as feedback_count, AVG(rating) as avg_rating')
             ->first();
 
@@ -283,7 +285,7 @@ class TicketController extends Controller
         $totalEligibleSales = Sale::where('status', 'paid')
             ->where('is_deleted', false)
             ->where(function ($q) {
-                $q->whereNotNull('feedback_sent_at')
+                $q->where(fn ($q2) => $q2->whereNotNull('feedback_sent_at')->where('feedback_sent_at', '>', '2000-01-02'))
                     ->orWhereHas('feedback');
             })
             ->whereHas('event', function ($q) use ($user) {
@@ -293,7 +295,313 @@ class TicketController extends Controller
 
         $responseRate = $totalEligibleSales > 0 ? round(($feedbackCount / $totalEligibleSales) * 100) : 0;
 
-        return compact('feedbacks', 'feedbackCount', 'averageRating', 'responseRate', 'sortBy', 'sortDir');
+        // --- Pending sales (eligible but not yet sent) ---
+        // Pre-load roles by subdomain for eligibility checks (mirrors SendFeedbackRequests command)
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($r) => $r->isPro())
+            ->keyBy('subdomain');
+
+        $pendingSales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->excludeTestEmails()
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->with(['event.creatorRole'])
+            ->get();
+
+        $pendingGroups = collect();
+        $nextSendAt = null;
+
+        foreach ($pendingSales as $sale) {
+            $event = $sale->event;
+            if (! $event) {
+                continue;
+            }
+
+            // Resolve role from sale's subdomain (same as command)
+            $saleRole = $rolesBySubdomain->get($sale->subdomain);
+            if (! $saleRole) {
+                continue;
+            }
+
+            if (is_demo_role($saleRole)) {
+                continue;
+            }
+
+            // Check email sending capability (same as command)
+            if (config('app.hosted')) {
+                if (! $saleRole->hasEmailSettings()) {
+                    continue;
+                }
+            } else {
+                $mailer = config('mail.default');
+                if (in_array($mailer, ['log', 'array'])) {
+                    continue;
+                }
+            }
+
+            // Check feedback enabled using event's own setting or role fallback
+            if (! is_null($event->feedback_enabled)) {
+                if (! $event->feedback_enabled) {
+                    continue;
+                }
+            } else {
+                if (! $saleRole->feedback_enabled) {
+                    continue;
+                }
+            }
+
+            $endDateTime = $event->getEndDateTime($sale->event_date);
+            if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
+                continue;
+            }
+
+            $delayHours = (int) ($saleRole->feedback_delay_hours ?? 24);
+            $estimatedSendAt = $endDateTime->copy()->addHours($delayHours);
+
+            // Ceil to next hour boundary (cron runs hourly)
+            if ($estimatedSendAt->minute > 0 || $estimatedSendAt->second > 0) {
+                $estimatedSendAt->startOfHour()->addHour();
+            }
+
+            $groupKey = $event->id.'-'.($sale->event_date ?? 'default');
+
+            if (! $pendingGroups->has($groupKey)) {
+                $pendingGroups[$groupKey] = (object) [
+                    'event_name' => $event->name,
+                    'event_date' => $sale->event_date,
+                    'estimated_send_at' => $estimatedSendAt,
+                    'count' => 0,
+                    'sales' => collect(),
+                ];
+            }
+
+            $pendingGroups[$groupKey]->count++;
+            if ($pendingGroups[$groupKey]->sales->count() < 100) {
+                $pendingGroups[$groupKey]->sales->push($sale);
+            }
+
+            if (! $nextSendAt || $estimatedSendAt->lt($nextSendAt)) {
+                $nextSendAt = $estimatedSendAt;
+            }
+        }
+
+        $pendingGroups = $pendingGroups->sortBy('estimated_send_at')->values();
+        $pendingCount = $pendingGroups->sum('count');
+        $readyToSendCount = $pendingGroups->filter(fn ($g) => $g->estimated_send_at->isPast())->sum('count');
+
+        // --- Sent awaiting response (exclude cancelled with sentinel date) ---
+        $awaitingQuery = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNotNull('feedback_sent_at')
+            ->where('feedback_sent_at', '>', '2000-01-02')
+            ->whereDoesntHave('feedback')
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id));
+
+        $awaitingCount = $awaitingQuery->count();
+
+        $awaitingSales = (clone $awaitingQuery)
+            ->with('event')
+            ->orderByDesc('feedback_sent_at')
+            ->limit(50)
+            ->get();
+
+        // --- Excluded count (for debugging) ---
+        // Only count exclusions for events that have feedback enabled
+        $feedbackEnabledEventIds = $pendingGroups->flatMap(fn ($g) => $g->sales->pluck('event_id'))
+            ->merge($awaitingSales->pluck('event_id'))
+            ->unique();
+
+        $excludedCount = 0;
+        if ($feedbackEnabledEventIds->isNotEmpty()) {
+            $excludedCount = Sale::where('status', 'paid')
+                ->where('is_deleted', false)
+                ->whereNull('feedback_sent_at')
+                ->whereDoesntHave('feedback')
+                ->whereIn('event_id', $feedbackEnabledEventIds)
+                ->where(function ($q) {
+                    $q->whereNull('email')
+                        ->orWhere('email', '')
+                        ->orWhere('email', 'like', '%@example.com')
+                        ->orWhere('email', 'like', '%@example.org')
+                        ->orWhere('email', 'like', '%@example.net')
+                        ->orWhere('email', 'like', '%@test.com')
+                        ->orWhere('email', 'like', '%@test.org')
+                        ->orWhere('email', 'like', '%@test.net')
+                        ->orWhere('email', 'like', '%@localhost')
+                        ->orWhere(function ($q2) {
+                            $q2->whereNotNull('group_id')
+                                ->whereColumn('group_id', '!=', 'id');
+                        });
+                })
+                ->count();
+        }
+
+        return compact(
+            'feedbacks', 'feedbackCount', 'averageRating', 'responseRate', 'sortBy', 'sortDir',
+            'pendingGroups', 'pendingCount', 'readyToSendCount', 'nextSendAt',
+            'awaitingSales', 'awaitingCount',
+            'excludedCount'
+        );
+    }
+
+    public function sendFeedbackNow()
+    {
+        $user = auth()->user();
+        $count = 0;
+
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($r) => $r->isPro())
+            ->keyBy('subdomain');
+
+        $pendingSales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->excludeTestEmails()
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->with(['event'])
+            ->get();
+
+        foreach ($pendingSales as $sale) {
+            try {
+                $event = $sale->event;
+                if (! $event) {
+                    continue;
+                }
+
+                $saleRole = $rolesBySubdomain->get($sale->subdomain);
+                if (! $saleRole) {
+                    continue;
+                }
+
+                if (is_demo_role($saleRole)) {
+                    continue;
+                }
+
+                if (config('app.hosted')) {
+                    if (! $saleRole->hasEmailSettings()) {
+                        continue;
+                    }
+                } else {
+                    $mailer = config('mail.default');
+                    if (in_array($mailer, ['log', 'array'])) {
+                        continue;
+                    }
+                }
+
+                // Check feedback enabled
+                if (! is_null($event->feedback_enabled)) {
+                    if (! $event->feedback_enabled) {
+                        continue;
+                    }
+                } else {
+                    if (! $saleRole->feedback_enabled) {
+                        continue;
+                    }
+                }
+
+                $endDateTime = $event->getEndDateTime($sale->event_date);
+                if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
+                    continue;
+                }
+
+                $delayHours = (int) ($saleRole->feedback_delay_hours ?? 24);
+                if ($endDateTime->copy()->addHours($delayHours)->isFuture()) {
+                    continue;
+                }
+
+                $sale->feedback_sent_at = now();
+                $sale->save();
+
+                \App\Jobs\SendFeedbackEmail::dispatch(
+                    $sale->id,
+                    $event->id,
+                    $saleRole->id,
+                    $saleRole->language_code ?? app()->getLocale()
+                );
+
+                $count++;
+            } catch (\Exception $e) {
+                $sale->feedback_sent_at = null;
+                $sale->save();
+                report($e);
+            }
+        }
+
+        return redirect()->route('sales', ['tab' => 'feedback'])->with('message', __('messages.feedback_sent_count', ['count' => $count]));
+    }
+
+    public function cancelFeedback()
+    {
+        $user = auth()->user();
+        $count = 0;
+
+        $rolesBySubdomain = Role::where('is_deleted', false)
+            ->get()
+            ->filter(fn ($r) => $r->isPro())
+            ->keyBy('subdomain');
+
+        $pendingSales = Sale::where('status', 'paid')
+            ->where('is_deleted', false)
+            ->whereNull('feedback_sent_at')
+            ->whereDoesntHave('feedback')
+            ->where(fn ($q) => $q->whereNull('group_id')->orWhereColumn('group_id', 'id'))
+            ->excludeTestEmails()
+            ->whereHas('event', fn ($q) => $q->where('user_id', $user->id))
+            ->with(['event'])
+            ->get();
+
+        // Use a sentinel date to distinguish cancelled from actually sent
+        $cancelledAt = \Carbon\Carbon::create(2000, 1, 1);
+
+        foreach ($pendingSales as $sale) {
+            $event = $sale->event;
+            if (! $event) {
+                continue;
+            }
+
+            $saleRole = $rolesBySubdomain->get($sale->subdomain);
+            if (! $saleRole || is_demo_role($saleRole)) {
+                continue;
+            }
+
+            if (config('app.hosted')) {
+                if (! $saleRole->hasEmailSettings()) {
+                    continue;
+                }
+            } else {
+                $mailer = config('mail.default');
+                if (in_array($mailer, ['log', 'array'])) {
+                    continue;
+                }
+            }
+
+            if (! is_null($event->feedback_enabled)) {
+                if (! $event->feedback_enabled) {
+                    continue;
+                }
+            } elseif (! $saleRole->feedback_enabled) {
+                continue;
+            }
+
+            // Only cancel feedback for events that have already ended
+            $endDateTime = $event->getEndDateTime($sale->event_date);
+            if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
+                continue;
+            }
+
+            $sale->feedback_sent_at = $cancelledAt;
+            $sale->save();
+            $count++;
+        }
+
+        return redirect()->route('sales', ['tab' => 'feedback'])->with('message', __('messages.feedback_cancelled_count', ['count' => $count]));
     }
 
     public function exportSales()
@@ -460,6 +768,9 @@ class TicketController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -887,17 +1198,6 @@ class TicketController extends Controller
 
         $total = $sale->payment_amount;
 
-        // Send emails
-        if ($event->individual_tickets && $sale->group_id) {
-            $groupedSales = Sale::where('group_id', $sale->id)->get();
-            foreach ($groupedSales as $groupSale) {
-                $this->sendTicketPurchaseEmail($groupSale, $event);
-            }
-        } else {
-            $this->sendTicketPurchaseEmail($sale, $event);
-        }
-        $this->sendNewSaleNotification($sale, $event);
-
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
         // Dispatch sale.created webhook (outside transaction)
@@ -915,12 +1215,7 @@ class TicketController extends Controller
             $sale->save();
 
             // Record free ticket sale in analytics (0 revenue)
-            $analyticsCount = ($sale->group_id && $sale->isPrimarySale())
-                ? Sale::where('group_id', $sale->id)->count()
-                : 1;
-            for ($i = 0; $i < $analyticsCount; $i++) {
-                AnalyticsEventsDaily::incrementSale($event->id, 0);
-            }
+            AnalyticsEventsDaily::incrementSale($event->id, 0);
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($event->id, $sale->discount_amount);
             }
@@ -931,6 +1226,8 @@ class TicketController extends Controller
                     WebhookService::dispatch('sale.paid', $gs);
                 }
             }
+
+            (new EmailService)->sendSaleConfirmationEmails($sale);
 
             $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
             if ($isEmbed) {
@@ -1007,6 +1304,9 @@ class TicketController extends Controller
 
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
         if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
@@ -1191,26 +1491,10 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.error'));
         }
 
-        // Send confirmation email and admin notification
-        if ($event->individual_tickets && $sale->group_id) {
-            $groupedSales = Sale::where('group_id', $sale->id)->get();
-            foreach ($groupedSales as $groupSale) {
-                $this->sendTicketPurchaseEmail($groupSale, $event);
-            }
-        } else {
-            $this->sendTicketPurchaseEmail($sale, $event);
-        }
-        $this->sendNewSaleNotification($sale, $event);
-
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'rsvp:event_id:'.$event->id);
 
-        // Record in analytics (0 revenue) - count each attendee
-        $rsvpAnalyticsCount = ($sale->group_id && $sale->isPrimarySale())
-            ? Sale::where('group_id', $sale->id)->count()
-            : 1;
-        for ($i = 0; $i < $rsvpAnalyticsCount; $i++) {
-            AnalyticsEventsDaily::incrementSale($event->id, 0);
-        }
+        // Record RSVP sale in analytics (0 revenue)
+        AnalyticsEventsDaily::incrementSale($event->id, 0);
 
         // Dispatch webhooks
         WebhookService::dispatch('sale.created', $sale);
@@ -1221,6 +1505,8 @@ class TicketController extends Controller
                 WebhookService::dispatch('sale.paid', $gs);
             }
         }
+
+        (new EmailService)->sendSaleConfirmationEmails($sale);
 
         $ticketViewUrl = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
         if ($request->boolean('embed')) {
@@ -1682,16 +1968,21 @@ class TicketController extends Controller
             abort(403);
         }
 
-        $cancelled = DB::transaction(function () use ($sale) {
+        $expired = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
                 return false;
             }
-            $sale->status = 'cancelled';
+            $sale->status = 'expired';
             $sale->save();
 
             return true;
         });
+
+        if ($expired) {
+            AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], 'guest_abandon:event_id:'.$sale->event_id);
+        }
 
         $event = $sale->event;
         $cancelRedirectUrl = $event->getGuestUrl($subdomain, $sale->event_date).'?tickets=true';
@@ -1712,8 +2003,10 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
+        $didTransitionToPaid = false;
+
         // Use lockForUpdate to prevent race conditions from concurrent requests
-        DB::transaction(function () use ($sale) {
+        DB::transaction(function () use ($sale, &$didTransitionToPaid) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status === 'paid') {
                 return;
@@ -1722,14 +2015,12 @@ class TicketController extends Controller
             $sale->status = 'paid';
             $sale->transaction_reference = __('messages.manual_payment');
             $sale->save();
+            $didTransitionToPaid = true;
+
+            AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->group_id && $sale->isPrimarySale()) {
-                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                for ($i = 0; $i < $guestCount; $i++) {
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                }
-            }
             if ($sale->discount_amount > 0) {
                 AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
             }
@@ -1740,6 +2031,10 @@ class TicketController extends Controller
             foreach (Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->get() as $gs) {
                 WebhookService::dispatch('sale.paid', $gs);
             }
+        }
+
+        if ($didTransitionToPaid) {
+            (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
         }
 
         $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
@@ -1763,14 +2058,21 @@ class TicketController extends Controller
             abort(403, 'Invalid secret');
         }
 
-        DB::transaction(function () use ($sale) {
+        $expired = DB::transaction(function () use ($sale) {
             $sale = Sale::lockForUpdate()->find($sale->id);
             if ($sale->status !== 'unpaid') {
-                return;
+                return false;
             }
-            $sale->status = 'cancelled';
+            $sale->status = 'expired';
             $sale->save();
+
+            return true;
         });
+
+        if ($expired) {
+            AuditService::log(AuditService::SALE_EXPIRED, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'unpaid'], ['status' => 'expired'], 'payment_url_abandon:event_id:'.$sale->event_id);
+        }
 
         $cancelUrl = $event->getGuestUrl($sale->subdomain, $sale->event_date).'?tickets=true';
 
@@ -1936,40 +2238,29 @@ class TicketController extends Controller
                         $sale->status = 'paid';
                         $sale->transaction_reference = __('messages.manual_payment');
                         $sale->save();
+
+                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
+                        if ($sale->discount_amount > 0) {
+                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                        }
                     });
                     $actionPerformed = true;
-
-                    AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                    if ($sale->discount_amount > 0) {
-                        AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
-                    }
-                    if ($sale->group_id && $sale->isPrimarySale()) {
-                        $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                        for ($i = 0; $i < $guestCount; $i++) {
-                            AnalyticsEventsDaily::incrementSale($sale->event_id, 0);
-                        }
-                    }
                 }
                 break;
 
             case 'refund':
                 if ($sale->status === 'paid') {
                     DB::transaction(function () use ($sale) {
+                        $analyticsDate = $sale->created_at->toDateString();
                         $sale->status = 'refunded';
                         $sale->save();
 
                         // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
                         if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                                for ($i = 0; $i < $guestCount; $i++) {
-                                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                                }
-                            }
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
 
                             if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
                     });
@@ -1981,49 +2272,40 @@ class TicketController extends Controller
                 if (in_array($sale->status, ['unpaid', 'paid'])) {
                     $wasPaid = $sale->status === 'paid';
 
-                    DB::transaction(function () use ($sale) {
+                    DB::transaction(function () use ($sale, $wasPaid) {
                         $sale->status = 'cancelled';
                         $sale->save();
-                    });
-                    $actionPerformed = true;
 
-                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                    if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                        AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                        if ($sale->group_id && $sale->isPrimarySale()) {
-                            $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                            for ($i = 0; $i < $guestCount; $i++) {
-                                AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
+                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
+                            $analyticsDate = $sale->created_at->toDateString();
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
+
+                            if ($sale->discount_amount > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
-
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
-                        }
-                    }
+                    });
+                    $actionPerformed = true;
                 }
                 break;
 
             case 'delete':
                 DB::transaction(function () use ($sale) {
-                    // If the sale was paid, cancel first to release ticket inventory
-                    // (triggers Sale::booted hook) and decrement analytics
-                    if ($sale->status === 'paid') {
+                    // Cancel first to release ticket inventory (triggers Sale::booted hook)
+                    if (in_array($sale->status, ['unpaid', 'paid'])) {
+                        $wasPaid = $sale->status === 'paid';
                         $sale->status = 'cancelled';
                         $sale->save();
 
-                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                        if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->group_id && $sale->isPrimarySale()) {
-                                $guestCount = Sale::where('group_id', $sale->group_id)->where('id', '!=', $sale->id)->count();
-                                for ($i = 0; $i < $guestCount; $i++) {
-                                    AnalyticsEventsDaily::decrementSale($sale->event_id, 0);
-                                }
-                            }
+                        // Decrement analytics only for previously paid sales
+                        // Skip RSVP sales - handled by Sale::booted hook
+                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
+                            $analyticsDate = $sale->created_at->toDateString();
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
 
                             if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount);
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
                             }
                         }
                     }
@@ -2066,6 +2348,10 @@ class TicketController extends Controller
                         WebhookService::dispatch($webhookEvent, $gs);
                     }
                 }
+            }
+
+            if ($request->action === 'mark_paid') {
+                (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
             }
         }
 
@@ -2118,6 +2404,9 @@ class TicketController extends Controller
         $event = $sale->event;
 
         if ($cancelled) {
+            AuditService::log(AuditService::SALE_CANCEL, $sale->user_id, 'Sale', $sale->id,
+                ['status' => 'paid'], ['status' => 'cancelled'], 'rsvp_cancel:event_id:'.$sale->event_id);
+
             WebhookService::dispatch('sale.cancelled', $sale);
             if ($sale->group_id && $sale->isPrimarySale()) {
                 foreach (Sale::where('group_id', $sale->id)->where('id', '!=', $sale->id)->get() as $gs) {
@@ -2127,56 +2416,6 @@ class TicketController extends Controller
         }
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
-    }
-
-    /**
-     * Send ticket purchase email
-     */
-    private function sendTicketPurchaseEmail(Sale $sale, Event $event): void
-    {
-        try {
-            $role = $event->getRoleWithEmailSettings();
-
-            if (! $role) {
-                \Log::warning('No schedule found for ticket email', [
-                    'sale_id' => $sale->id,
-                    'event_id' => $event->id,
-                ]);
-
-                return;
-            }
-
-            $emailService = new EmailService;
-            $emailService->sendTicketEmail($sale, $role);
-        } catch (\Exception $e) {
-            // Log error but don't fail the sale creation
-            \Log::error('Failed to send ticket purchase email: '.$e->getMessage(), [
-                'sale_id' => $sale->id,
-                'event_id' => $event->id,
-            ]);
-        }
-    }
-
-    /**
-     * Send new sale notification to opted-in editors
-     */
-    private function sendNewSaleNotification(Sale $sale, Event $event): void
-    {
-        try {
-            $role = $event->getRoleWithEmailSettings();
-
-            if (! $role) {
-                return;
-            }
-
-            $emailService = new EmailService;
-            $emailService->sendNewSaleNotification($sale, $event, $role);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send sale notification: '.$e->getMessage(), [
-                'sale_id' => $sale->id,
-                'event_id' => $event->id,
-            ]);
-        }
     }
 
     /**
@@ -2219,5 +2458,310 @@ class TicketController extends Controller
 
             return response()->json(['error' => __('messages.failed_to_send_email')], 500);
         }
+    }
+
+    public function importAttendees(Request $request)
+    {
+        $user = auth()->user();
+
+        $roles = $user->roles()->wherePivot('level', '!=', 'follower')->get();
+
+        if ($roles->isEmpty()) {
+            abort(403);
+        }
+
+        $selectedRoleId = $request->role_id ? UrlUtils::decodeId($request->role_id) : null;
+        if ($selectedRoleId && ! $roles->pluck('id')->contains($selectedRoleId)) {
+            $selectedRoleId = null;
+        }
+        if (! $selectedRoleId) {
+            $selectedRoleId = $roles->first()->id;
+        }
+
+        $selectedRole = $selectedRoleId ? $roles->firstWhere('id', $selectedRoleId) : null;
+
+        if ($selectedRole && ! $selectedRole->isPro()) {
+            return view('ticket.import_attendees', [
+                'roles' => $roles,
+                'selectedRoleId' => $selectedRoleId,
+                'events' => collect(),
+                'event' => null,
+                'tickets' => collect(),
+                'eventDates' => [],
+                'hasEmailSettings' => false,
+                'emailSettingsRole' => null,
+                'requiresPro' => true,
+            ]);
+        }
+
+        $events = collect();
+        if ($selectedRoleId) {
+            $events = Event::whereHas('roles', fn ($q) => $q->where('roles.id', $selectedRoleId))
+                ->where('is_draft', false)
+                ->orderBy('starts_at', 'desc')
+                ->get()
+                ->map(fn ($e) => [
+                    'id' => UrlUtils::encodeId($e->id),
+                    'raw_id' => $e->id,
+                    'name' => $e->translatedName(),
+                    'starts_at' => $e->getShortDateRangeDisplay('D, M j, Y'),
+                    'image_url' => $e->getImageUrl(),
+                ]);
+        }
+
+        $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;
+        if ($selectedEventId && ! $events->pluck('raw_id')->contains($selectedEventId)) {
+            $selectedEventId = null;
+        }
+        if (! $selectedEventId && $events->isNotEmpty()) {
+            $selectedEventId = $events->first()['raw_id'];
+        }
+
+        $event = null;
+        $tickets = collect();
+        $eventDates = [];
+
+        $hasEmailSettings = false;
+        $emailSettingsRole = null;
+
+        if ($selectedEventId) {
+            $event = Event::with(['tickets', 'creatorRole', 'roles'])->find($selectedEventId);
+            if ($event) {
+                $emailSettingsRole = $event->getRoleWithEmailSettings();
+                $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
+                $tickets = $event->tickets->where('is_addon', false)->values();
+
+                if ($event->days_of_week) {
+                    $start = now()->startOfDay();
+                    $end = now()->addYear();
+                    $cursor = $start->copy();
+                    while ($cursor->lte($end) && count($eventDates) < 60) {
+                        if ($event->matchesDate($cursor)) {
+                            $eventDates[] = $cursor->format('Y-m-d');
+                        }
+                        $cursor->addDay();
+                    }
+                } elseif ($event->starts_at) {
+                    $eventDates[] = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')
+                        ->format('Y-m-d');
+                }
+            }
+        }
+
+        return view('ticket.import_attendees', [
+            'roles' => $roles,
+            'selectedRoleId' => $selectedRoleId,
+            'events' => $events,
+            'event' => $event,
+            'tickets' => $tickets,
+            'eventDates' => $eventDates,
+            'hasEmailSettings' => $hasEmailSettings,
+            'emailSettingsRole' => $emailSettingsRole,
+            'requiresPro' => false,
+        ]);
+    }
+
+    public function importAttendeesStore(ImportAttendeesRequest $request)
+    {
+        $user = auth()->user();
+
+        $event = Event::with(['tickets', 'roles', 'creatorRole'])
+            ->findOrFail(UrlUtils::decodeId($request->event_id));
+
+        if (! $user->canEditEvent($event)) {
+            abort(403);
+        }
+
+        if (! $event->isPro()) {
+            abort(403);
+        }
+
+        $subdomain = $event->creatorRole?->subdomain
+            ?? $event->roles->first()?->subdomain
+            ?? '';
+
+        $fallbackTicketId = UrlUtils::decodeId($request->ticket_id);
+        $fallbackTicket = $event->tickets->firstWhere('id', $fallbackTicketId);
+        if (! $fallbackTicket || $fallbackTicket->is_addon) {
+            return back()->withInput()->with('error', __('messages.ticket_not_found'));
+        }
+
+        $eventDate = $request->event_date;
+        $defaultStatus = $request->default_status;
+        $sendEmails = $request->boolean('send_emails');
+
+        if (! $event->matchesDate($eventDate)) {
+            return back()->withInput()->with('error', __('messages.invalid_event_date'));
+        }
+
+        $emailSettingsRole = $event->getRoleWithEmailSettings();
+        $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
+
+        $eventCustomFieldIndices = $this->customFieldIndicesFor($event->custom_fields ?? []);
+        $ticketCustomFieldIndices = [];
+        foreach ($event->tickets as $t) {
+            $ticketCustomFieldIndices[$t->id] = $this->customFieldIndicesFor($t->custom_fields ?? []);
+        }
+
+        $imported = 0;
+        $skipped = [];
+        $sentEmails = [];
+        $seenEmails = [];
+
+        try {
+            DB::transaction(function () use (
+                $request, $event, $fallbackTicket, $eventDate, $defaultStatus, $subdomain,
+                $eventCustomFieldIndices, $ticketCustomFieldIndices,
+                &$imported, &$skipped, &$sentEmails, &$seenEmails
+            ) {
+                foreach ($request->entries as $i => $entry) {
+                    $rowNum = $i + 1;
+
+                    $email = strtolower(trim($entry['email'] ?? ''));
+                    if ($email === '') {
+                        continue;
+                    }
+                    if (isset($seenEmails[$email])) {
+                        $skipped[] = __('messages.row_error', [
+                            'row' => $rowNum,
+                            'error' => __('messages.duplicate_email'),
+                        ]);
+
+                        continue;
+                    }
+
+                    $ticket = $fallbackTicket;
+                    if (! empty($entry['ticket_id'])) {
+                        $ticketId = UrlUtils::decodeId($entry['ticket_id']);
+                        $found = $event->tickets->firstWhere('id', $ticketId);
+                        if ($found && ! $found->is_addon) {
+                            $ticket = $found;
+                        }
+                    }
+
+                    $quantity = (int) ($entry['quantity'] ?? 1);
+                    if ($quantity < 1) {
+                        $quantity = 1;
+                    }
+
+                    $lockedTicket = $event->tickets()->lockForUpdate()->find($ticket->id);
+                    if ($lockedTicket->quantity > 0) {
+                        $sold = $lockedTicket->sold ? json_decode($lockedTicket->sold, true) : [];
+                        $soldCount = $sold[$eventDate] ?? 0;
+                        $remaining = $lockedTicket->quantity - $soldCount;
+                        if ($quantity > $remaining) {
+                            $skipped[] = __('messages.row_error', [
+                                'row' => $rowNum,
+                                'error' => __('messages.tickets_not_available'),
+                            ]);
+
+                            continue;
+                        }
+                    }
+
+                    $status = ! empty($entry['status']) ? strtolower($entry['status']) : $defaultStatus;
+                    if (! in_array($status, ['paid', 'unpaid'], true)) {
+                        $status = $defaultStatus;
+                    }
+
+                    $amount = isset($entry['amount']) && $entry['amount'] !== ''
+                        ? (float) $entry['amount']
+                        : (float) $ticket->price * $quantity;
+
+                    $sale = new Sale;
+                    $sale->name = trim($entry['name'] ?? '') ?: Str::before($email, '@');
+                    $sale->email = $email;
+                    $sale->phone = ! empty($entry['phone']) ? strip_tags(trim($entry['phone'])) : null;
+                    $sale->event_id = $event->id;
+                    $sale->event_date = $eventDate;
+                    $sale->subdomain = $subdomain;
+                    $sale->secret = strtolower(Str::random(32));
+                    $sale->payment_method = 'import';
+                    $sale->payment_amount = $amount;
+                    $sale->status = $status;
+
+                    $entryCustomValues = $entry['custom_values'] ?? [];
+                    foreach ($eventCustomFieldIndices as $idx) {
+                        $value = $entryCustomValues[$idx] ?? null;
+                        if ($value !== null) {
+                            $value = trim(strip_tags((string) $value));
+                            $sale->{"custom_value{$idx}"} = $value !== '' ? $value : null;
+                        }
+                    }
+
+                    $sale->save();
+
+                    $saleTicketData = [
+                        'sale_id' => $sale->id,
+                        'ticket_id' => $ticket->id,
+                        'quantity' => $quantity,
+                        'seats' => json_encode(array_fill(1, $quantity, null)),
+                    ];
+
+                    $entryTicketCustomValues = $entry['ticket_custom_values'] ?? [];
+                    foreach (($ticketCustomFieldIndices[$ticket->id] ?? []) as $idx) {
+                        $value = $entryTicketCustomValues[$idx] ?? null;
+                        if ($value !== null) {
+                            $value = trim(strip_tags((string) $value));
+                            $saleTicketData["custom_value{$idx}"] = $value !== '' ? $value : null;
+                        }
+                    }
+
+                    $sale->saleTickets()->create($saleTicketData);
+
+                    $ticket->updateSold($eventDate, $quantity);
+
+                    // Sale::booted() clears matching TicketWaitlist rows only on `updated`,
+                    // not `created` — so bulk-created paid imports must clear them inline.
+                    if ($status === 'paid') {
+                        TicketWaitlist::where('event_id', $event->id)
+                            ->where('event_date', $eventDate)
+                            ->where('email', $email)
+                            ->whereIn('status', ['waiting', 'notified'])
+                            ->update(['status' => 'purchased']);
+                    }
+
+                    $seenEmails[$email] = true;
+                    $imported++;
+                    if ($status === 'paid') {
+                        $sentEmails[] = $sale->id;
+                    }
+                }
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return back()->withInput()->with('error', __('messages.error'));
+        }
+
+        if ($sendEmails && $hasEmailSettings && ! empty($sentEmails)) {
+            $emailService = new EmailService;
+            $sales = Sale::whereIn('id', $sentEmails)->get();
+            foreach ($sales as $sale) {
+                $emailService->sendSaleConfirmationEmails($sale);
+            }
+        }
+
+        $statusMessage = __('messages.imported_n_attendees', ['count' => $imported]);
+        if (! empty($skipped)) {
+            $statusMessage .= ' '.__('messages.skipped_n_rows', ['count' => count($skipped)]);
+        }
+
+        return redirect()->route('sales')->with('status', $statusMessage);
+    }
+
+    protected function customFieldIndicesFor(array $customFields): array
+    {
+        $indices = [];
+        $fallback = 1;
+        foreach ($customFields as $fieldConfig) {
+            $idx = $fieldConfig['index'] ?? $fallback;
+            $fallback++;
+            if ($idx >= 1 && $idx <= 10) {
+                $indices[] = (int) $idx;
+            }
+        }
+
+        return array_values(array_unique($indices));
     }
 }

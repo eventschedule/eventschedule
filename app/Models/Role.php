@@ -70,7 +70,6 @@ class Role extends Model implements MustVerifyEmail
         'custom_domain_host',
         'custom_domain_status',
         'event_layout',
-        'google_calendar_id',
         'sync_direction',
         'request_terms',
         'request_terms_en',
@@ -90,6 +89,7 @@ class Role extends Model implements MustVerifyEmail
         'direct_registration',
         'feedback_enabled',
         'feedback_delay_hours',
+        'feedback_public',
         'fan_comments_enabled',
         'fan_photos_enabled',
         'fan_videos_enabled',
@@ -104,6 +104,9 @@ class Role extends Model implements MustVerifyEmail
         'ai_style_instructions',
         'ai_content_instructions',
         'hide_past_events',
+        'draft_events_default',
+        'hide_videos',
+        'default_category_id',
     ];
 
     /**
@@ -120,6 +123,7 @@ class Role extends Model implements MustVerifyEmail
         'last_translated_at' => 'datetime',
         'direct_registration' => 'boolean',
         'feedback_enabled' => 'boolean',
+        'feedback_public' => 'boolean',
         'fan_comments_enabled' => 'boolean',
         'fan_photos_enabled' => 'boolean',
         'fan_videos_enabled' => 'boolean',
@@ -135,6 +139,8 @@ class Role extends Model implements MustVerifyEmail
         'renewal_reminder_sent_at' => 'datetime',
         'custom_labels' => 'array',
         'hide_past_events' => 'boolean',
+        'draft_events_default' => 'boolean',
+        'hide_videos' => 'boolean',
     ];
 
     /**
@@ -167,6 +173,9 @@ class Role extends Model implements MustVerifyEmail
             if ($model->email) {
                 $model->email = strtolower($model->email);
             }
+            if ($model->phone) {
+                $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
+            }
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
@@ -187,6 +196,12 @@ class Role extends Model implements MustVerifyEmail
                 $model->geo_lon = null;
                 $model->formatted_address = null;
                 $model->google_place_id = null;
+
+                // Clear cached map images when address is removed
+                $cachePattern = storage_path('app/map_cache/'.$model->id.'_*');
+                foreach (glob($cachePattern) as $file) {
+                    @unlink($file);
+                }
             }
 
             if (config('services.google.backend') && $address && $address != $model->geo_address) {
@@ -210,6 +225,11 @@ class Role extends Model implements MustVerifyEmail
                             $model->geo_lat = $latitude;
                             $model->geo_lon = $longitude;
                         }
+                    }
+                    // Clear cached map images when coordinates change
+                    $cachePattern = storage_path('app/map_cache/'.$model->id.'_*');
+                    foreach (glob($cachePattern) as $file) {
+                        @unlink($file);
                     }
                 } catch (\Exception $e) {
                     \Log::warning('Geocoding failed: '.$e->getMessage());
@@ -330,7 +350,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level', 'dates_unavailable', 'notification_settings')
+            ->withPivot('level', 'dates_unavailable', 'notification_settings', 'google_calendar_id')
             ->orderBy('name');
     }
 
@@ -345,7 +365,7 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level', 'dates_unavailable', 'notification_settings')
+            ->withPivot('level', 'dates_unavailable', 'notification_settings', 'google_calendar_id')
             ->where('level', '!=', 'follower')
             ->orderBy('name');
     }
@@ -354,9 +374,21 @@ class Role extends Model implements MustVerifyEmail
     {
         return $this->belongsToMany(User::class)
             ->withTimestamps()
-            ->withPivot('level')
+            ->withPivot('level', 'google_calendar_id')
             ->where('level', 'follower')
             ->orderBy('pivot_created_at', 'desc');
+    }
+
+    /**
+     * Get non-owner members who have Google Calendar sync enabled
+     */
+    public function getMembersWithCalendarSync()
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('level', 'google_calendar_id')
+            ->whereNotNull('role_user.google_calendar_id')
+            ->where('level', '!=', 'owner')
+            ->get();
     }
 
     public function getEditorsWantingNotification(string $type): \Illuminate\Support\Collection
@@ -367,6 +399,11 @@ class Role extends Model implements MustVerifyEmail
             ->get()
             ->filter(function ($user) use ($type) {
                 $settings = json_decode($user->pivot->notification_settings ?? '{}', true);
+
+                // new_request defaults to opt-in when the user has not explicitly set a preference.
+                if ($type === 'new_request' && ! array_key_exists($type, $settings)) {
+                    return true;
+                }
 
                 return ! empty($settings[$type]);
             });
@@ -527,6 +564,15 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $this->event_request_form === 'booking';
+    }
+
+    public function getRequireApprovalAttribute($value)
+    {
+        if ($this->isTalent()) {
+            return true;
+        }
+
+        return (bool) $value;
     }
 
     public function isRegistered()
@@ -1282,7 +1328,7 @@ class Role extends Model implements MustVerifyEmail
                 ->where('status', 'sending')
                 ->where('updated_at', '>=', now()->startOfMonth())
                 ->select('id')
-        )->count();
+        )->whereIn('status', ['pending', 'sent'])->count();
 
         return $sentEmails + $sendingEmails;
     }
@@ -1342,6 +1388,93 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $this->aiImageGenerationsToday() < $limit;
+    }
+
+    public function aiParseDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        if ($this->isOnTrial()) {
+            return config('usage.ai_parse_daily_limit_trial');
+        }
+
+        if ($this->isEnterprise()) {
+            return config('usage.ai_parse_daily_limit_enterprise');
+        }
+
+        return config('usage.ai_parse_daily_limit_pro');
+    }
+
+    public function canMakeAiParseRequest(): bool
+    {
+        $limit = $this->aiParseDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->where('operation', \App\Services\UsageTrackingService::GEMINI_PARSE_EVENT)
+            ->sum('count');
+
+        return $count < $limit;
+    }
+
+    public function aiAgendaDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        return config('usage.ai_agenda_daily_limit_enterprise');
+    }
+
+    public function canMakeAiAgendaRequest(): bool
+    {
+        $limit = $this->aiAgendaDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->where('operation', \App\Services\UsageTrackingService::GEMINI_PARSE_PARTS)
+            ->sum('count');
+
+        return $count < $limit;
+    }
+
+    public function aiContentDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        return config('usage.ai_content_daily_limit_enterprise');
+    }
+
+    public function canMakeAiContentRequest(): bool
+    {
+        $limit = $this->aiContentDailyLimit();
+
+        if (is_null($limit)) {
+            return true;
+        }
+
+        $count = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+            ->where('date', now()->toDateString())
+            ->whereIn('operation', [
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_STYLE,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_SCHEDULE_DETAILS,
+                \App\Services\UsageTrackingService::GEMINI_GENERATE_EVENT_DETAILS,
+            ])
+            ->sum('count');
+
+        return $count < $limit;
     }
 
     public function photoLimit(): ?int
@@ -1486,6 +1619,7 @@ class Role extends Model implements MustVerifyEmail
             'enabled' => false,
             'frequency' => 'weekly',
             'ai_prompt' => '',
+            'ai_model' => 'gemini-2.5-flash',
             'layout' => 'grid',
             'send_day' => 1,
             'send_hour' => 9,
@@ -1532,7 +1666,11 @@ class Role extends Model implements MustVerifyEmail
      */
     public function getGoogleCalendarId()
     {
-        return $this->google_calendar_id ?: 'primary';
+        $pivot = RoleUser::where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->first();
+
+        return $pivot?->google_calendar_id ?: 'primary';
     }
 
     /**
@@ -1540,7 +1678,11 @@ class Role extends Model implements MustVerifyEmail
      */
     public function hasGoogleCalendarIntegration()
     {
-        return ! is_null($this->google_calendar_id);
+        $pivot = RoleUser::where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->first();
+
+        return ! is_null($pivot?->google_calendar_id);
     }
 
     /**

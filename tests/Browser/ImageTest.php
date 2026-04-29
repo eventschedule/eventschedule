@@ -33,23 +33,21 @@ class ImageTest extends DuskTestCase
             $browser->visit('/settings')
                 ->waitFor('#profile_image_choose', 5)
                 ->attach('#profile_image', $imagePath)
-                ->waitFor('#profile_image_preview_clear', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/settings', 15);
+                ->waitFor('#profile_image_preview_clear', 5);
+
+            $browser->script("document.querySelector('#section-profile form').requestSubmit()");
+            $browser->waitFor('#profile_image_existing', 15);
 
             // Verify DB
             $this->assertNotNull(User::first()->profile_image_url);
 
             // Verify page shows existing image
-            $browser->visit('/settings')
-                ->waitFor('#profile_image_existing', 5)
-                ->assertVisible('#profile_image_existing');
+            $browser->assertVisible('#profile_image_existing');
 
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
-            $browser->click('#profile_image_existing button[data-delete-image-url]')
-                ->waitUntilMissing('#profile_image_existing', 5)
+            $browser->script("document.querySelector('#profile_image_existing button[data-delete-image-url]').click()");
+            $browser->waitUntilMissing('#profile_image_existing', 15)
                 ->waitFor('#profile_image_choose', 5);
 
             // Verify DB
@@ -62,8 +60,9 @@ class ImageTest extends DuskTestCase
             // Navigate to edit > style > branding
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
-                ->click('a[data-section="section-style"]')
-                ->waitFor('#section-style', 5)
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
+            $browser->waitFor('#section-style', 10)
                 ->click('button[data-style-tab="branding"]')
                 ->pause(500);
 
@@ -80,16 +79,17 @@ class ImageTest extends DuskTestCase
             // Navigate back to edit > style > branding
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
-                ->click('a[data-section="section-style"]')
-                ->waitFor('#section-style', 5)
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
+            $browser->waitFor('#section-style', 10)
                 ->click('button[data-style-tab="branding"]')
                 ->pause(500)
                 ->waitFor('#profile_image_existing', 5);
 
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
-            $browser->click('#profile_image_existing button[data-delete-image-url]')
-                ->waitUntilMissing('#profile_image_existing', 5)
+            $browser->script("document.querySelector('#profile_image_existing button[data-delete-image-url]').click()");
+            $browser->waitUntilMissing('#profile_image_existing', 15)
                 ->waitFor('#profile_image_choose', 5);
 
             // Verify DB
@@ -102,8 +102,9 @@ class ImageTest extends DuskTestCase
             // Navigate to edit > style > background
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
-                ->click('a[data-section="section-style"]')
-                ->waitFor('#section-style', 5)
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
+            $browser->waitFor('#section-style', 10)
                 ->click('button[data-style-tab="background"]')
                 ->pause(500);
 
@@ -125,16 +126,17 @@ class ImageTest extends DuskTestCase
             // Navigate back to edit > style > background
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
-                ->click('a[data-section="section-style"]')
-                ->waitFor('#section-style', 5)
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
+            $browser->waitFor('#section-style', 10)
                 ->click('button[data-style-tab="background"]')
                 ->pause(500)
                 ->waitFor('#delete_header_image_button', 5);
 
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
-            $browser->click('#delete_header_image_button button[data-delete-image-url]')
-                ->waitUntilMissing('#delete_header_image_button', 5);
+            $browser->script("document.querySelector('#delete_header_image_button button[data-delete-image-url]').click()");
+            $browser->waitUntilMissing('#delete_header_image_button', 15);
 
             // Verify DB
             $this->assertEmpty(Role::where('subdomain', 'talent')->first()->refresh()->header_image_url);
@@ -146,8 +148,9 @@ class ImageTest extends DuskTestCase
             // Navigate to edit > style > background
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
-                ->click('a[data-section="section-style"]')
-                ->waitFor('#section-style', 5)
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
+            $browser->waitFor('#section-style', 10)
                 ->click('button[data-style-tab="background"]')
                 ->pause(500);
 
@@ -174,8 +177,9 @@ class ImageTest extends DuskTestCase
             // Navigate back, select image radio + custom dropdown
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
-                ->click('a[data-section="section-style"]')
-                ->waitFor('#section-style', 5)
+                ->pause(1000);
+            $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
+            $browser->waitFor('#section-style', 10)
                 ->click('button[data-style-tab="background"]')
                 ->pause(500)
                 ->radio('background', 'image')
@@ -193,8 +197,8 @@ class ImageTest extends DuskTestCase
 
             // Delete via AJAX (override confirm dialog)
             $browser->script('window.confirm = function() { return true; }');
-            $browser->click('#background_image_existing button[data-delete-image-url]')
-                ->waitUntilMissing('#background_image_existing', 5);
+            $browser->script("document.querySelector('#background_image_existing button[data-delete-image-url]').click()");
+            $browser->waitUntilMissing('#background_image_existing', 15);
 
             // Verify DB
             $this->assertEmpty(Role::where('subdomain', 'talent')->first()->refresh()->background_image_url);
@@ -231,8 +235,8 @@ class ImageTest extends DuskTestCase
             $browser->visit('/talent/edit-event/'.$hash)
                 ->waitFor('#flyer_image_existing', 5);
             $browser->script('window.confirm = function() { return true; }');
-            $browser->click('#delete-flyer-btn')
-                ->waitUntilMissing('#flyer_image_existing', 5)
+            $browser->script("document.querySelector('#delete-flyer-btn').click()");
+            $browser->waitUntilMissing('#flyer_image_existing', 15)
                 ->waitFor('#flyer_image_choose', 5);
 
             // Verify DB

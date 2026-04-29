@@ -8,13 +8,20 @@ use App\Http\Requests\RoleEmailVerificationRequest;
 use App\Http\Requests\RoleUpdateRequest;
 use App\Http\Requests\RoleVideoSaveRequest;
 use App\Http\Requests\RoleVideosSaveRequest;
+use App\Jobs\SendQueuedSms;
+use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsReferrersDaily;
+use App\Models\AnalyticsSocialClicksDaily;
+use App\Models\AnalyticsUtmDaily;
+use App\Models\AuditLog;
 use App\Models\BoostCampaign;
 use App\Models\Event;
+use App\Models\PageView;
 use App\Models\Role;
 use App\Models\RoleUser;
+use App\Models\Sale;
 use App\Models\User;
 use App\Notifications\AddedMemberNotification;
 use App\Notifications\DeletedRoleNotification;
@@ -32,6 +39,8 @@ use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
+use App\Utils\PhoneUtils;
+use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Endroid\QrCode\QrCode;
@@ -40,7 +49,11 @@ use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -289,10 +302,12 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()) {
-            session(['pending_follow' => $subdomain]);
             $lang = session()->has('translate') ? 'en' : $role->language_code;
 
-            return redirect(app_url(route('sign_up', ['lang' => $lang], false)));
+            return redirect_with_pending_action(
+                app_url(route('sign_up', ['lang' => $lang], false)),
+                ['pending_follow' => $subdomain]
+            );
         }
 
         $user = $request->user();
@@ -312,21 +327,36 @@ class RoleController extends Controller
         if ($subdomain = session('pending_request')) {
             $pendingRole = Role::whereSubdomain($subdomain)->first();
 
+            $pendingData = [
+                'pending_request' => $subdomain,
+                'pending_request_allow_guest' => session('pending_request_allow_guest', $pendingRole ? ! $pendingRole->require_account : false),
+                'pending_request_form' => session('pending_request_form', 'import'),
+            ];
+
             if ($pendingRole && $pendingRole->isTalent()) {
                 // Requesting a talent - need a venue schedule
                 if ($user->venues()->count() == 0) {
-                    return redirect(app_url(route('new', ['type' => 'venue'], false)));
+                    return redirect_with_pending_action(
+                        app_url(route('new', ['type' => 'venue'], false)),
+                        $pendingData
+                    );
                 }
                 $redirectRole = $user->venues()->first();
             } else {
                 // Requesting a venue/curator - need a talent schedule
                 if ($user->talents()->count() == 0) {
-                    return redirect(app_url(route('new', ['type' => 'talent'], false)));
+                    return redirect_with_pending_action(
+                        app_url(route('new', ['type' => 'talent'], false)),
+                        $pendingData
+                    );
                 }
                 $redirectRole = $user->talents()->first();
             }
 
-            return redirect(app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)));
+            return redirect_with_pending_action(
+                app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)),
+                $pendingData
+            );
 
         } else {
             return redirect(app_url(route('following', [], false)))
@@ -339,13 +369,13 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $user = $request->user();
 
-        if (! $role->email) {
-            $role->is_deleted = true;
-            $role->save();
-        }
-
         if ($user->isConnected($role->subdomain)) {
             $user->roles()->detach($role->id);
+
+            if (! $role->email && $role->users()->count() === 0) {
+                $role->is_deleted = true;
+                $role->save();
+            }
         }
 
         return redirect(route('following'))
@@ -360,14 +390,14 @@ class RoleController extends Controller
 
         foreach ($subdomains as $subdomain) {
             $role = Role::subdomain($subdomain)->first();
-            if ($role) {
-                if (! $role->email) {
+            if ($role && $user->isConnected($role->subdomain)) {
+                $user->roles()->detach($role->id);
+
+                if (! $role->email && $role->users()->count() === 0) {
                     $role->is_deleted = true;
                     $role->save();
                 }
-                if ($user->isConnected($role->subdomain)) {
-                    $user->roles()->detach($role->id);
-                }
+
                 $count++;
             }
         }
@@ -433,6 +463,11 @@ class RoleController extends Controller
         }
 
         if ($slug) {
+            // Check if slug is a social platform vanity URL
+            if (in_array($slug, UrlUtils::getUniquePlatforms())) {
+                return $this->handleSocialRedirect($role, $slug, $request);
+            }
+
             // Check if slug is a group slug first
             if ($role->groups) {
                 $group = $role->groups->where('slug', $slug)->first();
@@ -448,12 +483,25 @@ class RoleController extends Controller
                 $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
             }
 
-            // Fallback: allow schedule members to view pending (not yet accepted) events
+            // Fallback: allow schedule members to view pending (not yet accepted) or draft events
             if (! $event && $eventIdParam && $user && $user->isMember($subdomain)) {
-                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
+                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
                     ->where('id', $eventIdParam)
-                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
+                    ->where(function ($q) use ($role) {
+                        $q->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
+                            ->orWhere(function ($q) use ($role) {
+                                $q->where('is_draft', true)
+                                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id));
+                            });
+                    })
                     ->first();
+            }
+
+            if ($event) {
+                // Block direct URL access to draft events for non-members
+                if ($event->is_draft && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                    $event = null;
+                }
             }
 
             if ($event) {
@@ -559,11 +607,11 @@ class RoleController extends Controller
         // Get timezone from user or role
         $timezone = $user?->timezone ?? $role->timezone ?? 'UTC';
 
-        // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
+        // Calculate calendar grid start (including overflow days from previous month)
+        $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-        // Convert to UTC for database query
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $startOfGrid = $startOfMonth->copy()->startOfWeek($firstDayOfWeek);
+        $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
@@ -572,7 +620,7 @@ class RoleController extends Controller
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
             if ($role->isCurator()) {
-                $query = Event::inMonth($startOfMonthUtc)
+                $query = Event::inMonth($startOfGridUtc)
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
                             ->from('event_role')
@@ -580,6 +628,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 if (! $isMemberOrAdmin) {
+                    $query->where('is_draft', false);
                     $query->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -589,9 +638,10 @@ class RoleController extends Controller
                 }
                 $hasCalendarEvents = $query->exists();
             } else {
-                $query = Event::inMonth($startOfMonthUtc)
+                $query = Event::inMonth($startOfGridUtc)
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
+                    $query->where('is_draft', false);
                     $query->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -604,24 +654,26 @@ class RoleController extends Controller
             $events = $hasCalendarEvents ? collect([true]) : collect();
         } elseif ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
                 ->orderBy('starts_at')
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
                             ->where('is_accepted', true);
                     });
-                });
+                })
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false));
 
             $events = $events->orderBy('starts_at')->get();
         }
@@ -640,6 +692,7 @@ class RoleController extends Controller
                             ->where('role_id', $role->id)
                             ->where('is_accepted', true);
                     })
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -648,6 +701,7 @@ class RoleController extends Controller
                     ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -658,10 +712,10 @@ class RoleController extends Controller
             }
         }
 
-        // Filter private events from calendar listings for non-members
+        // Filter draft and private events from calendar listings for non-members
         if (! $isMemberOrAdmin && $events->first() instanceof Event) {
-            $events = $events->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
-            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
+            $events = $events->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
+            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -672,6 +726,9 @@ class RoleController extends Controller
         $myPendingVideos = collect();
         $myPendingComments = collect();
         $myPendingPhotos = collect();
+        $publicFeedbacks = collect();
+        $feedbackCount = 0;
+        $avgRating = 0;
         $photoLimitReached = false;
         $userSale = null;
 
@@ -742,6 +799,18 @@ class RoleController extends Controller
                     ->when($date, fn ($q, $d) => $q->where('event_date', $d))
                     ->first();
             }
+
+            if ($role->isPro() && $role->feedback_enabled && $role->feedback_public && $event->isFeedbackEnabled($role)) {
+                $query = $event->feedbacks()
+                    ->whereHas('sale', fn ($q) => $q->where('is_deleted', false)->where('status', 'paid'));
+                if ($date) {
+                    $query->where('event_date', $date);
+                }
+                $stats = (clone $query)->selectRaw('COUNT(*) as count, ROUND(AVG(rating), 1) as avg_rating')->first();
+                $feedbackCount = (int) $stats->count;
+                $avgRating = (float) ($stats->avg_rating ?? 0);
+                $publicFeedbacks = $query->with('sale')->latest()->limit(20)->get();
+            }
         }
 
         $fonts = [];
@@ -784,6 +853,9 @@ class RoleController extends Controller
                 'myPendingPhotos',
                 'photoLimitReached',
                 'userSale',
+                'publicFeedbacks',
+                'feedbackCount',
+                'avgRating',
             ));
 
         return $response;
@@ -798,6 +870,7 @@ class RoleController extends Controller
 
         $eventId = UrlUtils::decodeId($request->event_id);
         $event = Event::whereHas('roles', fn ($q) => $q->where('subdomain', $subdomain))
+            ->where('is_draft', false)
             ->find($eventId);
 
         if (! $event) {
@@ -854,6 +927,7 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -870,6 +944,7 @@ class RoleController extends Controller
                 ->whereNull('days_of_week')
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -897,6 +972,84 @@ class RoleController extends Controller
         ]);
     }
 
+    private function handleSocialRedirect(Role $role, string $platform, Request $request)
+    {
+        $socialLinks = is_string($role->social_links)
+            ? json_decode($role->social_links, true)
+            : $role->social_links;
+
+        if (is_array($socialLinks)) {
+            foreach ($socialLinks as $link) {
+                $url = $link['url'] ?? '';
+                if ($url && UrlUtils::detectPlatform($url) === $platform) {
+                    $user = auth()->user();
+                    if (! $user || (! $user->isMember($role->subdomain) && ! $user->isAdmin())) {
+                        $this->recordSocialClick($role, $platform, $request);
+                    }
+
+                    return redirect($url, 302);
+                }
+            }
+        }
+
+        return redirect($role->getGuestUrl());
+    }
+
+    private function recordSocialClick(Role $role, string $platform, Request $request): void
+    {
+        $userAgent = $request->userAgent();
+
+        if (PageView::isBot($userAgent)) {
+            return;
+        }
+
+        if (PageView::isSuspiciousRequest($request)) {
+            return;
+        }
+
+        $ip = $request->ip();
+        if ($ip) {
+            $dailySalt = config('app.key').now()->format('Y-m-d');
+            $ipHash = hash('sha256', $ip.$dailySalt);
+            $cacheKey = "social_click:{$role->id}:{$ipHash}";
+            $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
+            Cache::add($cacheKey, 0, $secondsUntilMidnight);
+            if (Cache::increment($cacheKey) > 10) {
+                return;
+            }
+        }
+
+        AnalyticsSocialClicksDaily::incrementClick($role->id, $platform);
+
+        // Track referrer source
+        $referrer = $request->header('referer');
+        $utmSource = $request->query('utm_source');
+        $sourceOverride = match ($utmSource) {
+            'boost' => 'boost',
+            'newsletter' => 'newsletter',
+            default => null,
+        };
+        if (! $sourceOverride && $request->query('promo')) {
+            $sourceOverride = 'promo';
+        }
+        AnalyticsReferrersDaily::incrementView($role->id, $referrer, $role->custom_domain, $sourceOverride);
+
+        // Track UTM parameters
+        $utmParams = [
+            'source' => $request->query('utm_source'),
+            'medium' => $request->query('utm_medium'),
+            'campaign' => $request->query('utm_campaign'),
+            'content' => $request->query('utm_content'),
+            'term' => $request->query('utm_term'),
+        ];
+        foreach ($utmParams as $paramType => $paramValue) {
+            if ($paramValue !== null && $paramValue !== '') {
+                $paramValue = mb_substr(trim($paramValue), 0, 255);
+                AnalyticsUtmDaily::incrementView($role->id, $paramType, $paramValue);
+            }
+        }
+    }
+
     private function eventToVueArray(Event $event, ?Role $role, ?string $subdomain): array
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
@@ -922,7 +1075,6 @@ class RoleController extends Controller
             'recurring_end_value' => $event->recurring_end_value,
             'start_date' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,
             'is_online' => ! empty($event->event_url),
-            'description_excerpt' => Str::words(html_entity_decode(strip_tags($event->translatedDescription())), 25, '...'),
             'duration' => $event->duration,
             'parts' => $event->parts->map(fn ($part) => [
                 'name' => $part->name,
@@ -954,7 +1106,6 @@ class RoleController extends Controller
         ];
 
         if ($event->isPasswordProtected()) {
-            $data['description_excerpt'] = null;
             $data['venue_name'] = null;
             $data['venue_profile_image'] = null;
             $data['venue_header_image'] = null;
@@ -982,16 +1133,16 @@ class RoleController extends Controller
         $user = auth()->user();
         $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
 
-        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $firstDayOfWeek = $role->first_day_of_week ?? 0;
+        $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
+        $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -999,6 +1150,7 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1010,7 +1162,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -1018,6 +1170,7 @@ class RoleController extends Controller
                     });
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                    $q->where('is_draft', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1044,6 +1197,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     })
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                        $q->where('is_draft', false);
                         $q->where(function ($q) use ($unlockedEventIds) {
                             $q->where('is_private', false);
                             if ($unlockedEventIds) {
@@ -1060,6 +1214,7 @@ class RoleController extends Controller
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
+                        $q->where('is_draft', false);
                         $q->where(function ($q) use ($unlockedEventIds) {
                             $q->where('is_private', false);
                             if ($unlockedEventIds) {
@@ -1078,7 +1233,7 @@ class RoleController extends Controller
             }
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse
@@ -1095,13 +1250,13 @@ class RoleController extends Controller
         $user = $request->user();
         $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
 
-        $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-        $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $firstDayOfWeek = $role->first_day_of_week ?? 0;
+        $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
+        $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets')
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1118,18 +1273,105 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfGridUtc)
                 ->orderBy('starts_at')
                 ->get();
         }
 
-        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $role->first_day_of_week ?? 0);
+        return $this->buildCalendarResponse($events, collect(), false, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
+    }
+
+    public function auditLog(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $request->validate([
+            'from' => 'nullable|date',
+            'to' => 'nullable|date',
+            'category' => 'nullable|string',
+            'search' => 'nullable|string|max:200',
+        ]);
+
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortDir = strtolower($request->input('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        if (! in_array($sortBy, ['created_at', 'action', 'metadata', 'user_id'])) {
+            $sortBy = 'created_at';
+        }
+
+        $eventIds = $role->events()->pluck('events.id');
+
+        $query = AuditLog::with('user')
+            ->where(function ($q) use ($eventIds, $role) {
+                // Schedule and subscription entries for this role
+                $q->where(function ($sq) use ($role) {
+                    $sq->where(function ($pq) {
+                        $pq->where('action', 'like', 'schedule.%')
+                            ->orWhere('action', 'like', 'subscription.%');
+                    })
+                        ->where('model_type', 'Role')
+                        ->where('model_id', $role->id);
+                });
+
+                // Boost entries for this role's campaigns
+                $q->orWhere(function ($sq) use ($role) {
+                    $sq->where('action', 'like', 'boost.%')
+                        ->where('metadata', 'like', '%role_id:'.$role->id);
+                });
+
+                if ($eventIds->isNotEmpty()) {
+                    // Event entries for this schedule's events
+                    $q->orWhere(function ($sq) use ($eventIds) {
+                        $sq->where('action', 'like', 'event.%')
+                            ->where('model_type', 'Event')
+                            ->whereIn('model_id', $eventIds);
+                    });
+
+                    // Sale entries scoped by event_id in metadata
+                    $q->orWhere(function ($sq) use ($eventIds) {
+                        $sq->where('action', 'like', 'sale.%')
+                            ->where(function ($ssq) use ($eventIds) {
+                                foreach ($eventIds as $eventId) {
+                                    $ssq->orWhere('metadata', 'like', '%event_id:'.$eventId);
+                                }
+                            });
+                    });
+                }
+            })
+            ->orderBy($sortBy, $sortDir);
+
+        if ($request->filled('category')) {
+            $category = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('category'));
+            $query->where('action', 'like', $category.'.%');
+        }
+
+        if ($request->filled('from')) {
+            $query->where('created_at', '>=', $request->input('from'));
+        }
+        if ($request->filled('to')) {
+            $query->where('created_at', '<=', Carbon::parse($request->input('to'))->endOfDay());
+        }
+
+        if ($request->filled('search')) {
+            $search = str_replace(['%', '_'], ['\\%', '\\_'], $request->input('search'));
+            $query->where(function ($q) use ($search) {
+                $q->where('action', 'like', "%{$search}%")
+                    ->orWhere('metadata', 'like', "%{$search}%");
+            });
+        }
+
+        $logs = $query->paginate(50)->withQueryString();
+
+        return view('role.audit-log', compact('role', 'logs', 'sortBy', 'sortDir'));
     }
 
     public function viewAdmin(Request $request, $subdomain, $tab = 'schedule')
     {
         if (! auth()->user()->isMember($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
+            return redirect()->route('home')->with('error', __('messages.not_authorized'));
         }
 
         $role = Role::subdomain($subdomain)->firstOrFail();
@@ -1194,16 +1436,15 @@ class RoleController extends Controller
             $user = $request->user();
             $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
 
-            // Calculate month boundaries in user's/role's timezone, then convert to UTC for database query
-            $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
-
-            // Convert to UTC for database query
-            $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+            // Calculate calendar grid start (including overflow days from previous month)
+            $firstDayOfWeek = $role->first_day_of_week ?? 0;
+            $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
+            $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
                     $events = Event::with('roles')
-                        ->inMonth($startOfMonthUtc)
+                        ->inMonth($startOfGridUtc)
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
@@ -1220,7 +1461,7 @@ class RoleController extends Controller
                                     ->where('is_accepted', true);
                             });
                         })
-                        ->inMonth($startOfMonthUtc)
+                        ->inMonth($startOfGridUtc)
                         ->orderBy('starts_at')
                         ->get();
 
@@ -1349,15 +1590,45 @@ class RoleController extends Controller
         $data = $request->validated();
         $user = User::whereEmail($data['email'])->first();
 
+        $userFoundByPhone = false;
+        if (! $user && ! empty($data['phone'])) {
+            $user = User::where('phone', PhoneUtils::normalize($data['phone']))->first();
+            if ($user) {
+                $userFoundByPhone = true;
+            }
+        }
+
         if ($user && $user->isMember($subdomain)) {
             return redirect()->back()->with('error', __('messages.member_already_exists'));
         }
 
+        // Update stub's email to match admin input so the invite goes to the right address
+        // (after membership check to avoid side effects on early return)
+        // Only update if the stub has no other team memberships (besides this schedule) to avoid corrupting another invite
+        $emailUpdateFailed = false;
+        if ($user && $userFoundByPhone && ! empty($data['phone']) && $user->isStub() && $user->email !== strtolower($data['email'])) {
+            if ($user->roles()->where('roles.id', '!=', $role->id)->count() === 0) {
+                try {
+                    $user->email = strtolower($data['email']);
+                    $user->saveQuietly();
+                } catch (\Illuminate\Database\QueryException $e) {
+                    report($e);
+                    $user->refresh();
+                    $emailUpdateFailed = true;
+                }
+            } else {
+                $emailUpdateFailed = true;
+            }
+        }
+
+        $isNewStub = false;
+        $phoneAssignFailed = false;
         if (! $user) {
+            $isNewStub = true;
             $user = new User;
-            $user->email = $data['email'];
+            $user->email = strtolower($data['email']);
             $user->name = $data['name'];
-            $user->password = bcrypt(Str::random(32));
+            $user->password = null;
             $user->timezone = $request->user()->timezone;
             $user->language_code = $request->user()->language_code;
 
@@ -1365,7 +1636,39 @@ class RoleController extends Controller
                 $user->email_verified_at = now();
             }
 
-            $user->save();
+            if (! empty($data['phone'])) {
+                $user->phone = $data['phone'];
+            }
+
+            try {
+                $user->save();
+            } catch (\Illuminate\Database\QueryException $e) {
+                if (! empty($data['phone'])) {
+                    report($e);
+                    $user->phone = null;
+                    try {
+                        $user->save();
+                    } catch (\Illuminate\Database\QueryException $e2) {
+                        throw $e;
+                    }
+                    $phoneAssignFailed = true;
+                } else {
+                    throw $e;
+                }
+            }
+        } elseif (! $user->phone && ! empty($data['phone'])) {
+            if (! User::where('phone', PhoneUtils::normalize($data['phone']))->where('id', '!=', $user->id)->exists()) {
+                try {
+                    $user->phone = $data['phone'];
+                    $user->save();
+                } catch (\Illuminate\Database\QueryException $e) {
+                    report($e);
+                    $user->refresh();
+                    $phoneAssignFailed = true;
+                }
+            } else {
+                $phoneAssignFailed = true;
+            }
         }
 
         $level = in_array($request->input('level'), ['admin', 'viewer']) ? $request->input('level') : 'admin';
@@ -1382,12 +1685,45 @@ class RoleController extends Controller
             $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
         }
 
-        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        $sendSms = $user->phone && SmsService::isConfigured() && config('app.hosted')
+            && ($isNewStub || $userFoundByPhone)
+            && ($isNewStub || (! $user->email_verified_at && ! $user->hasVerifiedPhone()));
+        if ($sendSms) {
+            $token = Str::random(40);
+            Cache::put('sms_signup_'.$token, $user->phone, now()->addDays(30));
+            $signupUrl = route('sign_up', ['sms_token' => $token]);
+            $safeName = str_replace(["\r", "\n"], ' ', Str::limit($role->name, 60));
+            $message = __('messages.sms_member_invite', ['name' => $safeName, 'url' => $signupUrl]);
+            SendQueuedSms::dispatch($user->phone, $message);
+        } else {
+            Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        }
 
-        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $user->email);
+        AuditService::log(AuditService::SCHEDULE_MEMBER_ADD, auth()->id(), 'Role', $role->id, null, null, $user->name);
 
-        return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']))
-            ->with('message', __('messages.member_added'));
+        $redirect = redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'team']));
+
+        if ($phoneAssignFailed) {
+            return $redirect->with('warning', __('messages.member_added_phone_failed'));
+        }
+
+        if ($sendSms) {
+            if ($emailUpdateFailed) {
+                return $redirect->with('warning', __('messages.member_added_sms_email_not_updated'));
+            }
+
+            return $redirect->with('message', __('messages.member_added_sms_sent'));
+        }
+
+        if ($emailUpdateFailed) {
+            return $redirect->with('warning', __('messages.member_added_email_failed'));
+        }
+
+        if ($userFoundByPhone && ! $user->isStub() && $user->email !== strtolower($data['email'])) {
+            return $redirect->with('warning', __('messages.member_added_different_email', ['email' => $user->email]));
+        }
+
+        return $redirect->with('message', __('messages.member_added'));
     }
 
     public function removeMember(Request $request, $subdomain, $hash)
@@ -1415,6 +1751,11 @@ class RoleController extends Controller
         if (! $roleUser) {
             return redirect()->back()->with('error', __('messages.not_found'));
         }
+
+        // Clean up member calendar sync records
+        \App\Models\CalendarSync::where('user_id', $userId)
+            ->where('role_id', $role->id)
+            ->delete();
 
         $roleUser->delete();
 
@@ -1489,10 +1830,17 @@ class RoleController extends Controller
 
         $roles = $query->orderBy($sortBy, $sortDir)->get();
 
+        // Get member calendar sync status for followed roles
+        $memberSyncCalendarIds = \App\Models\RoleUser::where('user_id', $user->id)
+            ->whereIn('role_id', $roleIds)
+            ->whereNotNull('google_calendar_id')
+            ->pluck('google_calendar_id', 'role_id');
+
         $data = [
             'roles' => $roles,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
+            'memberSyncCalendarIds' => $memberSyncCalendarIds,
         ];
 
         if (request()->ajax()) {
@@ -1504,12 +1852,19 @@ class RoleController extends Controller
 
     public function create($type)
     {
+        restore_pending_action();
+
         if (is_demo_mode()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        if (config('app.hosted') && auth()->user()->owner()->count() >= 50) {
+            return redirect()->route('home')->with('error', __('messages.schedule_limit'));
+        }
+
         $role = new Role;
         $role->type = $type;
+        $role->require_account = $type === 'curator';
         $role->font_family = 'Roboto';
         $role->font_color = '#ffffff';
         $role->accent_color = '#007BFF';
@@ -1604,6 +1959,10 @@ class RoleController extends Controller
 
         $user = $request->user();
 
+        if (config('app.hosted') && $user->owner()->count() >= 50) {
+            return redirect()->back()->with('error', __('messages.schedule_limit'));
+        }
+
         $role = new Role;
         $role->fill($request->all());
         $role->subdomain = Role::generateSubdomain($request->name);
@@ -1645,6 +2004,13 @@ class RoleController extends Controller
         }
 
         $role->save();
+
+        // Attach owner with calendar ID before handling sync
+        $user->roles()->attach($role->id, [
+            'created_at' => now(),
+            'level' => 'owner',
+            'google_calendar_id' => $request->input('google_calendar_id'),
+        ]);
 
         AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $role->id, null, null, $role->name);
 
@@ -1699,8 +2065,6 @@ class RoleController extends Controller
                 }
             }
         }
-
-        $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
         if (! $user->default_role_id) {
             $user->default_role_id = $role->id;
@@ -1874,7 +2238,7 @@ class RoleController extends Controller
 
         $pivot = $role->users()->where('user_id', auth()->id())->first()?->pivot;
         $notificationSettings = array_merge(
-            ['new_sale' => false, 'new_request' => false, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
+            ['new_sale' => false, 'new_request' => true, 'new_fan_content' => false, 'new_feedback' => false, 'new_poll_option' => false],
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 
@@ -1889,6 +2253,7 @@ class RoleController extends Controller
             'approvedSubdomainNames' => $approvedSubdomainNames,
             'availableCurators' => $availableCurators,
             'notificationSettings' => $notificationSettings,
+            'userCalendarId' => $pivot?->google_calendar_id,
         ];
 
         return view('role/edit', $data);
@@ -1911,7 +2276,7 @@ class RoleController extends Controller
                 'new_subdomain' => $role->subdomain,
                 'custom_domain' => $role->custom_domain,
                 'custom_css' => $role->custom_css,
-                'google_calendar_id' => $role->google_calendar_id,
+                'google_calendar_id' => RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first()?->google_calendar_id,
                 'sync_direction' => $role->sync_direction,
                 'caldav_sync_direction' => $role->caldav_sync_direction,
                 'email_settings' => null,
@@ -1933,6 +2298,15 @@ class RoleController extends Controller
                 'sponsor_logos' => $role->sponsor_logos,
             ]);
             $request->files->remove('new_sponsor_logos');
+        }
+
+        // Guard feedback settings behind Pro plan
+        if (! $role->isPro()) {
+            $request->merge([
+                'feedback_enabled' => $role->feedback_enabled,
+                'feedback_delay_hours' => $role->feedback_delay_hours,
+                'feedback_public' => $role->feedback_public,
+            ]);
         }
 
         // Guard carpool_enabled behind Pro plan
@@ -1959,7 +2333,8 @@ class RoleController extends Controller
         // Handle sync_direction and calendar changes and webhook management
         $oldSyncDirection = $role->sync_direction;
         $newSyncDirection = $request->input('sync_direction');
-        $oldCalendarId = $role->google_calendar_id;
+        $ownerPivot = RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first();
+        $oldCalendarId = $ownerPivot?->google_calendar_id;
         $newCalendarId = $request->input('google_calendar_id');
 
         $role->fill($request->all());
@@ -1972,6 +2347,11 @@ class RoleController extends Controller
         }
         if ($request->has('payment_links')) {
             $role->payment_links = $request->input('payment_links') ?: null;
+        }
+
+        // Save calendar ID to owner's pivot
+        if ($oldCalendarId !== $newCalendarId) {
+            $ownerPivot?->update(['google_calendar_id' => $newCalendarId ?: null]);
         }
 
         // If sync_direction or calendar changed, handle webhook management
@@ -2571,6 +2951,11 @@ class RoleController extends Controller
         }
 
         $imageElements = array_intersect($request->input('elements', []), ['profile_image', 'header_image', 'background_image']);
+        $textElements = array_diff($request->input('elements', []), $imageElements);
+
+        if (! empty($textElements) && ! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
+        }
 
         if (! empty($imageElements) && ! $role->canGenerateAiImage()) {
             return response()->json(['error' => __('messages.ai_daily_limit_reached', ['limit' => $role->aiImageDailyLimit()])], 422);
@@ -2822,8 +3207,6 @@ class RoleController extends Controller
 
     public function generateStyleImage(Request $request, $subdomain)
     {
-        set_time_limit(300);
-
         if (! auth()->user()->isEditor($subdomain)) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -2858,55 +3241,77 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
 
-        try {
-            if ($customPrompt) {
-                $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
-                $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
-            } elseif ($imageType === 'profile_image') {
-                $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
-            } elseif ($imageType === 'header_image') {
-                $imageData = GeminiUtils::generateScheduleHeaderImage($role, $accentColor, $styleInstructions);
-            } else {
-                $imageData = GeminiUtils::generateScheduleBackgroundImage($role, $accentColor, $styleInstructions);
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_style_image_{$requestId}", ['status' => 'processing'], 300);
+
+        $roleId = $role->id;
+
+        dispatch(function () use ($requestId, $role, $imageType, $accentColor, $styleInstructions, $customPrompt, $roleId) {
+            set_time_limit(120);
+
+            try {
+                if ($customPrompt) {
+                    $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
+                    $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+                } elseif ($imageType === 'profile_image') {
+                    $imageData = GeminiUtils::generateScheduleProfileImage($role, $accentColor, $styleInstructions);
+                } elseif ($imageType === 'header_image') {
+                    $imageData = GeminiUtils::generateScheduleHeaderImage($role, $accentColor, $styleInstructions);
+                } else {
+                    $imageData = GeminiUtils::generateScheduleBackgroundImage($role, $accentColor, $styleInstructions);
+                }
+
+                if (! $imageData) {
+                    Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
+
+                    return;
+                }
+
+                $prefix = str_replace('_image', '_', $imageType);
+                $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+                $result = ['status' => 'completed', 'success' => true];
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $result[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $result[$imageType.'_url'] = url('/storage/'.$filename);
+                } else {
+                    $result[$imageType.'_url'] = $filename;
+                }
+                $result[$imageType.'_filename'] = $filename;
+
+                UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE, $roleId);
+
+                Cache::put("ai_style_image_{$requestId}", $result, 300);
+            } catch (\App\Exceptions\ContentModerationException $e) {
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
+            } catch (\Exception $e) {
+                \Log::error('AI style image generation failed: '.$e->getMessage(), ['role_id' => $roleId]);
+                report($e);
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
             }
+        })->afterResponse();
 
-            if (! $imageData) {
-                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-            }
+        return response()->json(['request_id' => $requestId]);
+    }
 
-            $prefix = str_replace('_image', '_', $imageType);
-            $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
-
-            $response = ['success' => true];
-            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                $response[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-            } elseif (config('filesystems.default') == 'local') {
-                $response[$imageType.'_url'] = url('/storage/'.$filename);
-            } else {
-                $response[$imageType.'_url'] = $filename;
-            }
-            $response[$imageType.'_filename'] = $filename;
-
-            UsageTrackingService::track(UsageTrackingService::GEMINI_GENERATE_STYLE_IMAGE, $role->id);
-
-            return response()->json($response);
-        } catch (\App\Exceptions\ContentModerationException $e) {
-            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-        } catch (\Exception $e) {
-            \Log::error('AI style image generation failed: '.$e->getMessage(), ['role_id' => $role->id]);
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+    public function pollStyleImage($subdomain, $requestId)
+    {
+        if (! auth()->check() || ! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
+
+        $data = Cache::get("ai_style_image_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function generateStyleImageNew(Request $request)
     {
-        set_time_limit(300);
-
         if (is_demo_mode()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
         }
@@ -2938,47 +3343,69 @@ class RoleController extends Controller
             return response()->json(['error' => __('messages.openai_key_required')], 422);
         }
 
-        try {
-            if ($customPrompt) {
-                $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
-                $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
-            } elseif ($imageType === 'profile_image') {
-                $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
-            } elseif ($imageType === 'header_image') {
-                $imageData = GeminiUtils::generateScheduleHeaderImage($tempRole, $accentColor, $styleInstructions);
-            } else {
-                $imageData = GeminiUtils::generateScheduleBackgroundImage($tempRole, $accentColor, $styleInstructions);
+        $requestId = Str::uuid()->toString();
+        Cache::put("ai_style_image_{$requestId}", ['status' => 'processing'], 300);
+
+        dispatch(function () use ($requestId, $tempRole, $imageType, $accentColor, $styleInstructions, $customPrompt) {
+            set_time_limit(120);
+
+            try {
+                if ($customPrompt) {
+                    $aspectRatio = $imageType === 'profile_image' ? '1:1' : '16:9';
+                    $imageData = OpenAIUtils::sendImageGenerationRequest($customPrompt, $aspectRatio);
+                } elseif ($imageType === 'profile_image') {
+                    $imageData = GeminiUtils::generateScheduleProfileImage($tempRole, $accentColor, $styleInstructions);
+                } elseif ($imageType === 'header_image') {
+                    $imageData = GeminiUtils::generateScheduleHeaderImage($tempRole, $accentColor, $styleInstructions);
+                } else {
+                    $imageData = GeminiUtils::generateScheduleBackgroundImage($tempRole, $accentColor, $styleInstructions);
+                }
+
+                if (! $imageData) {
+                    Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
+
+                    return;
+                }
+
+                $prefix = str_replace('_image', '_', $imageType);
+                $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
+
+                $result = ['status' => 'completed', 'success' => true];
+                if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                    $result[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
+                } elseif (config('filesystems.default') == 'local') {
+                    $result[$imageType.'_url'] = url('/storage/'.$filename);
+                } else {
+                    $result[$imageType.'_url'] = $filename;
+                }
+                $result[$imageType.'_filename'] = $filename;
+
+                Cache::put("ai_style_image_{$requestId}", $result, 300);
+            } catch (\App\Exceptions\ContentModerationException $e) {
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed', 'error' => __('messages.ai_content_moderation_blocked')], 300);
+            } catch (\Exception $e) {
+                \Log::error('AI style image generation failed: '.$e->getMessage());
+                report($e);
+                Cache::put("ai_style_image_{$requestId}", ['status' => 'failed'], 300);
             }
+        })->afterResponse();
 
-            if (! $imageData) {
-                return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-            }
+        return response()->json(['request_id' => $requestId]);
+    }
 
-            $prefix = str_replace('_image', '_', $imageType);
-            $filename = ImageUtils::saveImageData($imageData, 'generated_style.png', $prefix);
-
-            $response = ['success' => true];
-            if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                $response[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-            } elseif (config('filesystems.default') == 'local') {
-                $response[$imageType.'_url'] = url('/storage/'.$filename);
-            } else {
-                $response[$imageType.'_url'] = $filename;
-            }
-            $response[$imageType.'_filename'] = $filename;
-
-            return response()->json($response);
-        } catch (\App\Exceptions\ContentModerationException $e) {
-            return response()->json(['error' => __('messages.ai_content_moderation_blocked')], 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            report($e);
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
-        } catch (\Exception $e) {
-            \Log::error('AI style image generation failed: '.$e->getMessage());
-
-            return response()->json(['error' => __('messages.ai_style_generation_failed')], 500);
+    public function pollStyleImageNew($requestId)
+    {
+        if (! auth()->check()) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
         }
+
+        $data = Cache::get("ai_style_image_{$requestId}");
+
+        if (! $data) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        return response()->json($data);
     }
 
     public function generateScheduleDetails(Request $request, $subdomain)
@@ -2991,6 +3418,10 @@ class RoleController extends Controller
 
         if (! $role->isEnterprise()) {
             return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (! $role->canMakeAiContentRequest()) {
+            return response()->json(['error' => __('messages.ai_text_daily_limit_reached', ['limit' => $role->aiContentDailyLimit()])], 422);
         }
 
         if (is_demo_mode()) {
@@ -3185,11 +3616,12 @@ class RoleController extends Controller
 
         $urlInfo = UrlUtils::getUrlInfo($request->url);
         if ($urlInfo === null) {
-            return response()->json(['error' => __('messages.invalid_link')], 422);
+            return response()->json(['error' => __('messages.invalid_url')], 422);
         }
 
         $urlInfo->brand = UrlUtils::getBrand($urlInfo->url);
         $urlInfo->clean_url = UrlUtils::clean($urlInfo->url);
+        $urlInfo->platform = UrlUtils::detectPlatform($urlInfo->url);
 
         return response()->json($urlInfo);
     }
@@ -3250,35 +3682,65 @@ class RoleController extends Controller
     {
         $role = Role::whereSubdomain($subdomain)->firstOrFail();
 
-        // Schedules using the booking form get the simplified booking request form
+        // Talent schedules always use the booking form (require_account does not apply)
+        if ($role->isTalent()) {
+            return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
+        }
+
+        // require_account=true → always route through the AP add-event screen
+        if ($role->require_account) {
+            if (! auth()->user()) {
+                $lang = session()->has('translate') ? 'en' : $role->language_code;
+
+                return redirect_with_pending_action(
+                    app_url(route('sign_up', ['lang' => $lang], false)),
+                    [
+                        'pending_request' => $subdomain,
+                        'pending_request_allow_guest' => false,
+                        'pending_request_form' => 'import',
+                    ]
+                );
+            }
+
+            $user = auth()->user();
+
+            // Editors of this schedule go straight to AP add-event for this schedule
+            if ($user->isEditor($subdomain)) {
+                return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
+            }
+
+            // Prevent demo account from following other roles
+            if (! DemoService::isDemoUser($user) && ! $user->isConnected($subdomain)) {
+                $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+            }
+
+            $pendingData = [
+                'pending_request' => $subdomain,
+                'pending_request_allow_guest' => false,
+                'pending_request_form' => 'import',
+            ];
+
+            // Requesting a venue/curator - need a talent schedule
+            if ($user->talents()->count() == 0) {
+                return redirect_with_pending_action(
+                    app_url(route('new', ['type' => 'talent'], false)),
+                    $pendingData
+                );
+            }
+            $redirectRole = $user->talents()->first();
+
+            return redirect_with_pending_action(
+                app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)),
+                $pendingData
+            );
+        }
+
+        // require_account=false → guest booking form OR guest AI-import form
         if ($role->usesBookingForm()) {
-            return redirect(app_url(route('event.booking_request', ['subdomain' => $role->subdomain], false)));
+            return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
         }
 
-        session(['pending_request' => $subdomain]);
-        session(['pending_request_allow_guest' => ! $role->require_account]);
-        session(['pending_request_form' => 'import']);
-
-        if (! auth()->user()) {
-            $lang = session()->has('translate') ? 'en' : $role->language_code;
-
-            return redirect(app_url(route('sign_up', ['lang' => $lang], false)));
-        }
-
-        $user = auth()->user();
-
-        // Prevent demo account from following other roles
-        if (! DemoService::isDemoUser($user) && ! $user->isConnected($subdomain)) {
-            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
-        }
-
-        // Requesting a venue/curator - need a talent schedule
-        if ($user->talents()->count() == 0) {
-            return redirect(app_url(route('new', ['type' => 'talent'], false)));
-        }
-        $redirectRole = $user->talents()->first();
-
-        return redirect(app_url(route('event.create', ['subdomain' => $redirectRole->subdomain], false)));
+        return redirect(route('event.guest_import', ['subdomain' => $role->subdomain]));
     }
 
     public function validateAddress(Request $request)
@@ -3484,11 +3946,9 @@ class RoleController extends Controller
 
     public function resendInvite(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isEditor($subdomain)) {
-            return redirect()->back()->with('error', __('messages.not_authorized'));
-        }
-
         $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $this->authorize('manageMembers', $role);
         $userId = UrlUtils::decodeId($hash);
         $user = User::findOrFail($userId);
 
@@ -3497,7 +3957,24 @@ class RoleController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        // Don't resend if user has already signed up
+        if (! $user->isStub()) {
+            return redirect()->back()->with('error', __('messages.member_already_signed_up'));
+        }
+
+        // Send SMS if user has phone and SMS is configured, otherwise send email
+        if ($request->input('via') === 'sms' && $user->phone && SmsService::isConfigured() && config('app.hosted')) {
+            $token = Str::random(40);
+            Cache::put('sms_signup_'.$token, $user->phone, now()->addDays(30));
+            $signupUrl = route('sign_up', ['sms_token' => $token]);
+            $safeName = str_replace(["\r", "\n"], ' ', Str::limit($role->name, 60));
+            $message = __('messages.sms_member_invite', ['name' => $safeName, 'url' => $signupUrl]);
+            SendQueuedSms::dispatch($user->phone, $message);
+
+            return redirect()->back()->with('message', __('messages.invite_resent'));
+        } else {
+            Notification::send($user, new AddedMemberNotification($role, $user, $request->user()));
+        }
 
         return redirect()->back()->with('message', __('messages.invite_resent'));
     }
@@ -3507,10 +3984,12 @@ class RoleController extends Controller
         $type = $request->type;
         $search = $request->search;
 
+        $normalizedPhone = PhoneUtils::normalize($search);
+
         $roles = Role::whereIn('type', $type == 'venue' ? ['venue'] : ['talent'])
-            ->where(function ($query) use ($search) {
-                $query->where('email', '=', $search);
-                // ->orWhere('phone', '=', $search)
+            ->where(function ($query) use ($search, $normalizedPhone) {
+                $query->where('email', '=', $search)
+                    ->orWhere('phone', '=', $normalizedPhone ?: $search);
                 // ->orWhere('name', 'like', "%{$search}%");
             })
             ->get([
@@ -3523,6 +4002,7 @@ class RoleController extends Controller
                 'state',
                 'postal_code',
                 'email',
+                'phone',
                 'user_id',
                 'profile_image_url',
                 'country_code',
@@ -3629,12 +4109,12 @@ class RoleController extends Controller
                 ->get();
         }
 
-        // Filter private events for non-members
+        // Filter draft and private events for non-members
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         if (! $isMemberOrAdmin) {
             $unlockedEventIds = $this->getUnlockedEventIds();
-            $events = $events->filter(fn ($e) => ! $e->is_private || in_array($e->id, $unlockedEventIds));
+            $events = $events->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
         }
 
         // Format events for frontend
@@ -3691,6 +4171,81 @@ class RoleController extends Controller
         $role->save();
 
         return redirect()->back()->with('message', __('messages.plan_changed'));
+    }
+
+    public function updateAllSlugs(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+        $pattern = $request->input('slug_pattern', '');
+
+        // Save the pattern to the role so future events use it too
+        $role->slug_pattern = $pattern;
+        $role->save();
+
+        $events = $role->events()->with('roles')->get();
+        $count = 0;
+        $usedSlugs = [];
+
+        foreach ($events as $event) {
+            $venue = $event->venue;
+            $newSlug = SlugPatternUtils::generateSlug(
+                $pattern,
+                $event->name,
+                $event->name_en,
+                $event,
+                $role,
+                $venue
+            );
+
+            // Ensure slug uniqueness within this role
+            if (isset($usedSlugs[$newSlug])) {
+                $suffix = 2;
+                while (isset($usedSlugs[$newSlug.'-'.$suffix])) {
+                    $suffix++;
+                }
+                $newSlug = $newSlug.'-'.$suffix;
+            }
+            $usedSlugs[$newSlug] = true;
+
+            if ($newSlug !== $event->slug) {
+                $event->slug = $newSlug;
+                $event->save();
+                $count++;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.events_slugs_updated', ['count' => $count]),
+        ]);
+    }
+
+    public function updateAllCategories(Request $request, $subdomain)
+    {
+        if (! auth()->user()->isEditor($subdomain)) {
+            return response()->json(['success' => false, 'message' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        $categoryId = (int) $request->input('category_id');
+        $validCategories = array_keys(config('app.event_categories', []));
+
+        if (! in_array($categoryId, $validCategories)) {
+            return response()->json(['success' => false, 'message' => __('messages.invalid_value')], 422);
+        }
+
+        $eventIds = $role->events()->pluck('events.id');
+        $count = Event::whereIn('id', $eventIds)->update(['category_id' => $categoryId]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('messages.events_category_updated', ['count' => $count]),
+        ]);
     }
 
     public function testImport(Request $request, $subdomain)
@@ -4189,6 +4744,76 @@ class RoleController extends Controller
             return response()->json([
                 'error' => __('messages.failed_to_send_test_email'),
             ], 500);
+        }
+    }
+
+    public function testFeedbackEmail(Request $request, $subdomain): JsonResponse
+    {
+        $user = auth()->user();
+
+        if (! $user->isEditor($subdomain)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! $role->isPro() || ! $role->feedback_enabled) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        if (empty($user->email)) {
+            return response()->json(['error' => __('messages.email_required')], 400);
+        }
+
+        $rateLimitKey = 'test-feedback-'.$role->id;
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 3)) {
+            return response()->json(['error' => __('messages.please_wait').'...'], 429);
+        }
+
+        $event = Event::where('creator_role_id', $role->id)->orderByDesc('id')->first();
+        if (! $event) {
+            return response()->json(['error' => __('messages.feedback_test_no_events')], 400);
+        }
+
+        $fakeSale = new Sale([
+            'name' => $user->name ?? 'Test Attendee',
+            'email' => $user->email,
+            'secret' => Str::random(32),
+            'event_id' => $event->id,
+            'event_date' => $event->starts_at ? Carbon::parse($event->starts_at)->format('Y-m-d') : now()->format('Y-m-d'),
+            'subdomain' => $role->subdomain,
+            'status' => 'paid',
+        ]);
+
+        try {
+            $mailable = new FeedbackRequest($fakeSale, $event, $role);
+
+            if (config('app.hosted') && $role->hasEmailSettings()) {
+                $emailSettings = $role->getEmailSettings();
+                $mailerName = 'role_'.$role->id;
+                Config::set("mail.mailers.{$mailerName}", [
+                    'transport' => 'smtp',
+                    'host' => $emailSettings['host'] ?? config('mail.mailers.smtp.host'),
+                    'port' => $emailSettings['port'] ?? config('mail.mailers.smtp.port'),
+                    'encryption' => $emailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
+                    'username' => $emailSettings['username'] ?? null,
+                    'password' => $emailSettings['password'] ?? null,
+                    'timeout' => null,
+                    'local_domain' => config('mail.mailers.smtp.local_domain'),
+                ]);
+                Mail::mailer($mailerName)->to($user->email)->send($mailable);
+            } else {
+                Mail::to($user->email)->send($mailable);
+            }
+
+            RateLimiter::hit($rateLimitKey, 60);
+
+            return response()->json(['success' => true, 'message' => __('messages.test_email_sent_to', ['email' => $user->email])]);
+        } catch (\Exception $e) {
+            report($e);
+            RateLimiter::hit($rateLimitKey, 60);
+
+            return response()->json(['error' => __('messages.test_email_failed')], 500);
         }
     }
 

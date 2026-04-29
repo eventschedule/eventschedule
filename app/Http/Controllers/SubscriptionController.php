@@ -6,6 +6,7 @@ use App\Http\Requests\SubscriptionStoreRequest;
 use App\Http\Requests\SubscriptionSwapRequest;
 use App\Models\Referral;
 use App\Models\Role;
+use App\Services\AuditService;
 use App\Services\UsageTrackingService;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Exceptions\IncompletePayment;
@@ -160,6 +161,9 @@ class SubscriptionController extends Controller
 
             UsageTrackingService::track(UsageTrackingService::STRIPE_SUBSCRIPTION, $role->id);
 
+            AuditService::log(AuditService::SUBSCRIPTION_CREATE, auth()->id(), 'Role', $role->id,
+                null, ['plan_type' => $tier, 'plan_term' => $request->plan], $role->subdomain);
+
             // Track referral subscription
             if (config('app.hosted')) {
                 $referral = Referral::where('referred_user_id', $role->user_id)
@@ -237,6 +241,8 @@ class SubscriptionController extends Controller
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
 
+        AuditService::log(AuditService::SUBSCRIPTION_CANCEL, auth()->id(), 'Role', $role->id, null, null, $role->subdomain);
+
         return redirect()
             ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
             ->with('message', __('messages.subscription_cancelled'));
@@ -266,6 +272,8 @@ class SubscriptionController extends Controller
 
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
+
+        AuditService::log(AuditService::SUBSCRIPTION_RESUME, auth()->id(), 'Role', $role->id, null, null, $role->subdomain);
 
         return redirect()
             ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
@@ -330,6 +338,9 @@ class SubscriptionController extends Controller
 
             return redirect()->back()->with('error', __('messages.subscription_error'));
         }
+
+        AuditService::log(AuditService::SUBSCRIPTION_SWAP, auth()->id(), 'Role', $role->id,
+            null, ['plan_type' => $tier, 'plan_term' => $request->plan], $role->subdomain);
 
         return redirect()
             ->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'plan'])
