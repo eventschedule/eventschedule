@@ -2272,7 +2272,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, 50);
+            }).slice(0, 100);
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -2306,7 +2306,7 @@ const calendarApp = createApp({
                     });
                 }
             });
-            return events.slice(0, 50);
+            return events.slice(0, 100);
         },
         flatPastEvents() {
             if (this.activeFilterCount > 0) return [];
