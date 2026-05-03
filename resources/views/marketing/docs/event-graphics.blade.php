@@ -104,7 +104,7 @@
                             <x-doc-screenshot id="event-graphics--graphic-page" alt="Event graphics page with generated graphic" loading="eager" />
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                The generated graphic displays up to 10 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
+                                The generated graphic displays up to 20 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
                             </p>
                         </section>
 

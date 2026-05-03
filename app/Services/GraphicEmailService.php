@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Controllers\GraphicController;
 use App\Mail\GraphicEmail;
 use App\Models\Event;
 use App\Models\Role;
@@ -33,8 +34,7 @@ class GraphicEmailService
             $excludeRecurring = $settings['exclude_recurring'] ?? false;
 
             // Use saved event_count setting (default 20, matching web preview)
-            $eventCountSetting = $settings['event_count'] ?? null;
-            $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
+            $eventLimit = GraphicController::resolveGraphicEventLimit($settings['event_count'] ?? null);
 
             // Build the base query for future events
             $baseQuery = function () use ($role, $excludeRecurring) {
