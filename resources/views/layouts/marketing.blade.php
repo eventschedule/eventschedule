@@ -369,8 +369,8 @@
 
 </head>
 <body class="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg">
-        Skip to main content
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-white ltr:focus:left-4 rtl:focus:right-4">
+        {{ __('accessibility.skip_to_main') }}
     </a>
 
     @include('marketing.partials.header')
@@ -380,6 +380,8 @@
     </main>
 
     @include('marketing.partials.footer')
+
+    @include('partials.accessibility-widget')
 
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

@@ -210,6 +210,25 @@
                     </div>
                 </a>
 
+                <!-- Web accessibility -->
+                <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a4 4 0 014 4v1h1a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h1V8a4 4 0 118 0z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Web accessibility</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">If you serve visitors in regulated markets, you may need your own accessibility declaration on your domain.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
+                            Read guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
                 <!-- Admin Panel -->
                 <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-card block">
                     <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-gray-100 to-slate-200 dark:from-gray-800 dark:to-slate-800">
@@ -223,6 +242,25 @@
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Monitor users, revenue, analytics, and manage platform settings from the admin panel.</p>
                         <div class="mt-auto inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400">
                             Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- All documentation -->
+                <a href="{{ route('marketing.docs') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-indigo-100 dark:bg-indigo-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">All documentation</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Browse the full docs hub for user guides, SaaS setup, developer API, and more.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                            Open docs
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>

@@ -104,6 +104,12 @@
     }
 
     if (typeof $ !== 'undefined') {
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hidePopUp();
+            }
+        });
+
         $(document).on('click', '.pop-up-menu', function(event) {
             event.stopPropagation();
         });
@@ -749,6 +755,10 @@
 </head> 
 <body class="font-sans antialiased h-full bg-gray-50 dark:bg-gray-900 overflow-x-clip">
 
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--brand-button-bg)] focus:px-4 focus:py-3 focus:text-base focus:text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] ltr:focus:left-4 rtl:focus:right-4">
+        {{ __('accessibility.skip_to_main') }}
+    </a>
+
     {{ $slot }}
 
     <div id="tooltip" class="hidden fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg pointer-events-none max-w-xs"></div>
@@ -809,6 +819,8 @@
             <div style="position:absolute;inset:0;border-radius:9999px;background:#f97316"></div>
         </div>
     @endif --}}
+
+    @include('partials.accessibility-widget')
 
 </body>
 </html>

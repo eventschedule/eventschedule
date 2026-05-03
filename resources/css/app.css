@@ -1,4 +1,5 @@
 @import 'flatpickr/dist/flatpickr.css';
+@import './accessibility-widget.css';
 
 @font-face {
     font-family: 'Inter';

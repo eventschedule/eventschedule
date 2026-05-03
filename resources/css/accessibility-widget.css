@@ -1,0 +1,31 @@
+/* Event Schedule first-party accessibility widget (classes on <html>) */
+
+html.es-a11y-font-step-1 {
+    font-size: 106.25%;
+}
+
+html.es-a11y-font-step-2 {
+    font-size: 112.5%;
+}
+
+html.es-a11y-high-contrast {
+    --es-a11y-link-weight: 600;
+}
+
+html.es-a11y-high-contrast body {
+    filter: contrast(1.08);
+}
+
+html.es-a11y-underline-links a:not(.es-a11y-ignore):not([class*='rounded-full']) {
+    text-decoration: underline !important;
+    text-underline-offset: 2px;
+}
+
+html.es-a11y-reduce-motion *,
+html.es-a11y-reduce-motion *::before,
+html.es-a11y-reduce-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}

@@ -1,5 +1,7 @@
 import './bootstrap';
 
+import { mountAccessibilityWidget } from './accessibility-widget-boot';
+
 import Alpine from 'alpinejs';
 window.Alpine = Alpine;
 Alpine.start();
@@ -154,3 +156,9 @@ window.initTinyMDE = function(element, onChange) {
 
     return easyMDE;
 };
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountAccessibilityWidget);
+} else {
+    mountAccessibilityWidget();
+}

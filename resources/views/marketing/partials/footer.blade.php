@@ -122,6 +122,11 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{ marketing_url('/accessibility') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                            {{ __('accessibility.footer_link') }}
+                        </a>
+                    </li>
+                    <li>
                         <a href="{{ marketing_url('/terms-of-service') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Terms of Service
                         </a>

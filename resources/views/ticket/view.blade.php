@@ -120,6 +120,7 @@
 
     {{-- Dark background with gradient orbs --}}
     <main
+      id="main-content"
       class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[16px] flex-1 relative z-0 overflow-y-auto p-[16px] sm:p-[24px] focus:outline-none min-h-screen bg-[#0a0a0f] print:bg-white"
       tabindex="0"
     >

@@ -79,9 +79,13 @@
 </head>
 
 <body class="font-sans text-gray-900 dark:text-gray-100 antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--brand-button-bg)] focus:px-4 focus:py-3 focus:text-base focus:text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] ltr:focus:left-4 rtl:focus:right-4">
+        {{ __('accessibility.skip_to_main') }}
+    </a>
+
     {{ isset($abovePage) ? $abovePage : '' }}
 
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
+    <div id="main-content" tabindex="-1" class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
         <a href="{{ marketing_url() }}">
             <x-application-logo class="w-20 h-20 fill-current text-gray-500 dark:text-gray-400" />
         </a>
@@ -94,6 +98,8 @@
 
         <div class="pt-20"></div>
     </div>
+
+    @include('partials.accessibility-widget')
 </body>
 
 </html>

@@ -4322,7 +4322,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusEl.textContent = @json(__('messages.syncing'), JSON_UNESCAPED_UNICODE);
                 statusEl.classList.remove('hidden');
             }
-            fetch(@json(route('google.calendar.force_sync_to_google', ['subdomain' => $role->subdomain])), {
+            fetch(@json($role->exists && $role->subdomain ? route('google.calendar.force_sync_to_google', ['subdomain' => $role->subdomain]) : ''), {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

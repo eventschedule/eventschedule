@@ -505,7 +505,7 @@
         $isRoleRtl = in_array($role->language_code, ['ar', 'he']);
     @endphp
 
-    <div class="flex-grow relative">
+    <div id="main-content" tabindex="-1" class="flex-grow relative">
         @php
             $showMobileBanner = false;
             $mobileBannerUrl = '';

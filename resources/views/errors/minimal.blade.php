@@ -30,6 +30,9 @@
                     </div>
                 </div>
             </div>
+            <div class="px-4 text-center mt-4">
+                <a href="{{ marketing_url('/accessibility') }}" class="text-sm text-gray-600 underline">{{ __('accessibility.footer_link') }}</a>
+            </div>
         </div>
     </body>
 </html>
