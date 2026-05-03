@@ -1,4 +1,4 @@
-@props(['name' => 'country_code', 'value' => '', 'id' => null, 'disabled' => false])
+@props(['name' => 'country_code', 'value' => '', 'id' => null, 'disabled' => false, 'autoInit' => true])
 
 @php
     $inputId = $id ?? $name;
@@ -46,13 +46,28 @@ window.initCountryInput = function(inputId, initialValue) {
         return window._countryInputs[inputId];
     }
 
-    // Sweep stranded .iti--country-only wrappers from prior inits (e.g. after a v-if remount)
-    var parent = telInput.parentNode;
-    if (parent) {
-        parent.querySelectorAll(':scope > .iti--country-only').forEach(function(w) {
-            if (!w.contains(telInput)) w.remove();
-        });
+    // If telInput is itself nested inside a stale .iti--country-only (e.g. a prior init
+    // wrapped it but lost its _itiInstance reference across a Vue v-if remount), unwrap it
+    // so intlTelInput below doesn't double-wrap.
+    if (telInput.parentNode && telInput.parentNode.classList &&
+        telInput.parentNode.classList.contains('iti--country-only')) {
+        var staleWrapper = telInput.parentNode;
+        var grand = staleWrapper.parentNode;
+        if (grand) {
+            grand.insertBefore(telInput, staleWrapper);
+            staleWrapper.remove();
+        }
     }
+
+    // Sweep any other stranded .iti--country-only wrappers in the document whose tel input
+    // matches our inputId but isn't the live telInput. Catches orphans regardless of where
+    // they ended up after Vue's render lifecycle.
+    document.querySelectorAll('.iti--country-only').forEach(function(w) {
+        var t = w.querySelector('input[type="tel"]');
+        if (t && t.id === inputId + '_tel' && t !== telInput) {
+            w.remove();
+        }
+    });
 
     // Stale map after Vue removed/reinserted the subtree (new tel node, old Iti in _countryInputs)
     if (window._countryInputs[inputId]) {
@@ -135,6 +150,7 @@ window.getCountryInput = function(id) {
     {{ $disabled ? 'disabled' : '' }}
     autocomplete="off" />
 
+@if ($autoInit)
 <script {!! nonce_attr() !!}>
 (function() {
     window._countryInputPending['{{ $inputId }}'] = '{{ $value }}' || 'us';
@@ -154,3 +170,4 @@ window.getCountryInput = function(id) {
     }, 0);
 })();
 </script>
+@endif

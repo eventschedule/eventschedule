@@ -1704,7 +1704,7 @@
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_country_code" :value="__('messages.country')" />
-                                        <x-country-input id="venue_country_code" name="venue_country_code" :value="$selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '')" />
+                                        <x-country-input id="venue_country_code" name="venue_country_code" :auto-init="false" :value="$selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '')" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_country_code')" />
                                     </div>
 
@@ -6215,8 +6215,14 @@
         this.destroyPhoneInput('venue_phone_input');
 
         this.$nextTick(() => {
-            var ci = window.getCountryInput('venue_country_code');
-            if (ci) ci.setCountry("{{ $role && $role->country_code ? $role->country_code : '' }}");
+            var defaultCountry = "{{ $role && $role->country_code ? $role->country_code : '' }}";
+            if (document.getElementById('venue_country_code_tel')) {
+                if (typeof window.destroyCountryInput === 'function') {
+                    window.destroyCountryInput('venue_country_code');
+                }
+                var ci = window.initCountryInput('venue_country_code', defaultCountry);
+                if (ci) ci.setCountry(defaultCountry);
+            }
             this.bindVenueCountryChange();
             this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; });
         });
@@ -6264,14 +6270,27 @@
         this.destroyPhoneInput('venue_phone_input');
         this.$nextTick(() => {
           this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+          if (document.getElementById('venue_country_code_tel')) {
+            if (typeof window.destroyCountryInput === 'function') {
+              window.destroyCountryInput('venue_country_code');
+            }
+            var ci = window.initCountryInput('venue_country_code', this.venueCountryCode);
+            if (ci) ci.setCountry(this.venueCountryCode);
+            this.bindVenueCountryChange();
+          }
         });
       },
       isInPerson(newValue) {
         this.savePreferences();
         if (newValue) {
           this.$nextTick(() => {
-            window.initCountryInput('venue_country_code', this.venueCountryCode);
-            this.bindVenueCountryChange();
+            if (document.getElementById('venue_country_code_tel')) {
+              if (typeof window.destroyCountryInput === 'function') {
+                window.destroyCountryInput('venue_country_code');
+              }
+              window.initCountryInput('venue_country_code', this.venueCountryCode);
+              this.bindVenueCountryChange();
+            }
             this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
           });
         } else {
@@ -6413,6 +6432,9 @@
       if (this.isInPerson) {
         this.$nextTick(() => {
           this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+          if (document.getElementById('venue_country_code_tel')) {
+            window.initCountryInput('venue_country_code', this.venueCountryCode);
+          }
           this.bindVenueCountryChange();
         });
       }
