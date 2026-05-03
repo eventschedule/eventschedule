@@ -946,6 +946,7 @@ return [
     'or_continue_with_email' => 'or continue with email',
     'google_auth_failed' => 'Google authentication failed. Please try again.',
     'google_account_already_linked' => 'This email is already linked to a different Google account.',
+    'google_link_requires_password_login' => 'An account already exists with this email. Please sign in with your password first, then link your Google account from settings.',
     'google_reauth_required' => 'Please verify with Google before setting a password.',
     'google_reauth_to_set_password' => 'Your account was created with Google. To add a password, please verify your identity first.',
     'google_account_mismatch' => 'The Google account does not match the one linked to your account.',
