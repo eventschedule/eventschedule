@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TicketVolumeDiscount;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ class Ticket extends Model
         'sales_start_at',
         'sales_end_at',
         'custom_fields',
+        'volume_discount',
         'is_addon',
         'image_url',
         'url',
@@ -34,6 +36,7 @@ class Ticket extends Model
 
     protected $casts = [
         'custom_fields' => 'array',
+        'volume_discount' => 'array',
         'sales_start_at' => 'datetime',
         'sales_end_at' => 'datetime',
         'is_addon' => 'boolean',
@@ -85,6 +88,39 @@ class Ticket extends Model
         });
     }
 
+    public function lineGrossSubtotal(int $quantity): float
+    {
+        return (float) $this->price * max(0, $quantity);
+    }
+
+    public function volumeDiscountAmountForQuantity(int $quantity): float
+    {
+        if ($this->is_addon) {
+            return 0.0;
+        }
+
+        return TicketVolumeDiscount::volumeDiscountAmount(
+            $this->volume_discount,
+            (float) $this->price,
+            $quantity,
+            TicketVolumeDiscount::decimalsForTicket($this)
+        );
+    }
+
+    public function lineSubtotalAfterVolumeDiscount(int $quantity): float
+    {
+        if ($this->is_addon) {
+            return $this->lineGrossSubtotal($quantity);
+        }
+
+        return TicketVolumeDiscount::lineSubtotalAfterVolume(
+            $this->volume_discount,
+            (float) $this->price,
+            $quantity,
+            TicketVolumeDiscount::decimalsForTicket($this)
+        );
+    }
+
     public function toData($date = null)
     {
         $data = [];
@@ -114,6 +150,8 @@ class Ticket extends Model
         } else {
             $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
         }
+
+        $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);
 
         return $data;
     }

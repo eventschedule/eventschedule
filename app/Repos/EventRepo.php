@@ -14,6 +14,7 @@ use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\SmsService;
+use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
@@ -912,6 +913,22 @@ class EventRepo
                 $salesStartAt = ! empty($data['sales_start_at']) ? $data['sales_start_at'] : null;
                 $salesEndAt = ! empty($data['sales_end_at']) ? $data['sales_end_at'] : null;
 
+                $volumeDiscount = null;
+                if (array_key_exists('volume_discount', $data)) {
+                    $volumeDiscountRaw = null;
+                    if (! empty($data['volume_discount'])) {
+                        $volumeDiscountRaw = is_string($data['volume_discount'])
+                            ? json_decode($data['volume_discount'], true)
+                            : $data['volume_discount'];
+                    }
+                    $volumeDiscount = TicketVolumeDiscount::normalizeRule(is_array($volumeDiscountRaw) ? $volumeDiscountRaw : null);
+                } elseif (! empty($data['id'])) {
+                    $existingVolTicket = Ticket::find($data['id']);
+                    if ($existingVolTicket && $existingVolTicket->event_id == $event->id) {
+                        $volumeDiscount = $existingVolTicket->volume_discount;
+                    }
+                }
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
@@ -924,6 +941,7 @@ class EventRepo
                             'sales_start_at' => $salesStartAt,
                             'sales_end_at' => $salesEndAt,
                             'custom_fields' => $ticketCustomFields,
+                            'volume_discount' => $volumeDiscount,
                         ]);
                     }
                 } else {
@@ -936,6 +954,7 @@ class EventRepo
                         'sales_start_at' => $salesStartAt,
                         'sales_end_at' => $salesEndAt,
                         'custom_fields' => $ticketCustomFields,
+                        'volume_discount' => $volumeDiscount,
                     ]);
                     $ticketIds[] = $ticket->id;
                 }

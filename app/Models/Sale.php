@@ -38,6 +38,7 @@ class Sale extends Model
         'newsletter_id',
         'promo_code_id',
         'discount_amount',
+        'volume_discount_amount',
         'feedback_sent_at',
         'group_id',
     ];
@@ -218,6 +219,7 @@ class Sale extends Model
         $data->status = $this->status;
         $data->payment_method = $this->payment_method;
         $data->payment_amount = (float) $this->payment_amount;
+        $data->volume_discount_amount = $this->volume_discount_amount !== null ? (float) $this->volume_discount_amount : null;
         $data->transaction_reference = $this->transaction_reference;
 
         // Include secret when explicitly requested (e.g. webhook payloads) or when the authenticated user is authorized

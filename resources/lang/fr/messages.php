@@ -123,7 +123,7 @@ return [
     'direct_registration' => 'Lien direct vers l\'inscription',
     'first_day_of_week' => 'Premier jour de la semaine',
     'hide_past_events' => 'Masquer les événements passés',
-    'hide_past_events_help' => 'Lorsqu\'activé, les événements passés ne seront pas affichés sur le calendrier public.',  
+    'hide_past_events_help' => 'Lorsqu\'activé, les événements passés ne seront pas affichés sur le calendrier public.',
     'hide_videos' => 'Masquer les vidéos',
     'hide_videos_help' => 'Lorsqu\'activé, le panneau vidéos ne sera pas affiché sur le calendrier public.',
     'draft_events_default' => 'Nouveaux événements en brouillon par défaut',
@@ -138,7 +138,7 @@ return [
     'draft_event_help' => 'Les événements brouillons ne sont visibles que par les membres du calendrier. Publiez quand vous êtes prêt à le rendre public.',
     'event_is_draft' => 'Cet événement est un brouillon et n\'est pas visible par le public',
     'event_published' => 'Événement publié',
-    'note_event_will_be_draft' => 'Votre événement sera enregistré comme brouillon',   
+    'note_event_will_be_draft' => 'Votre événement sera enregistré comme brouillon',
     'direct_registration_help' => 'Lorsqu\'activé, cliquer sur les événements du calendrier ou les graphiques d\'événements ouvrira l\'URL d\'inscription (pour les événements qui en ont une) au lieu de la page de détails de l\'événement.',
     'request_terms' => 'Conditions de demande',
     'enter_request_terms' => 'Entrez les termes et conditions pour les demandes d\'événements...',
@@ -1062,7 +1062,7 @@ return [
     'failed_to_disconnect' => 'Échec de la déconnexion',
     'fill_all_fields' => 'Veuillez remplir tous les champs requis.',
     'sync_complete' => 'Synchronisation terminée avec succès.',
-    
+
     // General integration keys
     'integrations' => 'Intégrations',
     'connection_successful' => 'Connexion réussie',
@@ -1147,7 +1147,7 @@ return [
     'everything_in_pro' => 'Tout dans Pro',
 
     'sync_direction_updated' => 'Direction de synchronisation mise à jour.',
-    
+
     // Text template
     'text_template' => 'Modèle de Texte',
     'text_template_help' => 'Personnalisez le format du texte pour chaque événement. Laissez vide pour le format par défaut.',
@@ -2303,6 +2303,14 @@ return [
     'have_a_promo_code' => 'Vous avez un code promo ?',
     'apply' => 'Appliquer',
     'discount' => 'Réduction',
+    'promo_discount' => 'Réduction promo',
+    'add_volume_discount' => 'Ajouter une remise',
+    'volume_discount' => 'Remise volume',
+    'volume_discount_help' => 'S\'applique lorsque le client sélectionne au moins ce nombre de billets de ce type. La réduction s\'applique uniquement à cette ligne (pas aux options).',
+    'volume_discount_min_quantity' => 'Quantité minimum',
+    'volume_discount_value' => 'Valeur de la réduction',
+    'remove_volume_discount' => 'Supprimer la remise volume',
+    'volume_discount_hint' => 'Lorsque vous sélectionnez :min billets ou plus de ce type, une réduction s\'applique à cette ligne.',
     'subtotal' => 'Sous-total',
     'promo_code_applied' => 'Code promo appliqué !',
     'promo_code_invalid' => 'Code promo invalide',

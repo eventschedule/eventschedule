@@ -7,6 +7,7 @@ use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\Sale;
 use App\Services\AuditService;
+use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -533,13 +534,21 @@ class ApiSaleController extends Controller
                     }
                 }
 
-                // Calculate and set payment amount
-                $total = $sale->calculateTotal();
-                $sale->payment_amount = $total;
+                // Calculate and set payment amount (volume discount applies to ticket lines only)
+                $sale->loadMissing(['saleTickets.ticket']);
+                foreach ($sale->saleTickets as $st) {
+                    if ($st->ticket) {
+                        $st->ticket->setRelation('event', $event);
+                    }
+                }
+                $volumeTotal = TicketVolumeDiscount::totalVolumeDiscountForSaleTickets($sale->saleTickets);
+                $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
+                $grossTotal = $sale->calculateTotal();
+                $sale->payment_amount = max(0, $grossTotal - $volumeTotal);
                 $sale->save();
 
                 // If total is 0, mark as paid (free tickets)
-                if ($total == 0) {
+                if ($sale->payment_amount == 0) {
                     $sale->status = 'paid';
                     $sale->save();
 

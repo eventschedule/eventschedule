@@ -445,6 +445,8 @@ class ApiEventController extends Controller
                     'quantity' => $ticket->quantity,
                     'price' => $ticket->price,
                     'description' => $ticket->description,
+                    'custom_fields' => $ticket->custom_fields,
+                    'volume_discount' => $ticket->volume_discount,
                     'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->format('Y-m-d H:i:s') : null,
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->format('Y-m-d H:i:s') : null,
                 ];

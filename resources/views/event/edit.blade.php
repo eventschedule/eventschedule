@@ -3025,13 +3025,51 @@
                                                     class="mt-1 block w-full" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && tickets.length > 1 && !ticket.type }" />
                                                 <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
                                             </div>
-                                            <div v-if="tickets.length > 1" class="flex items-end gap-3">
+                                            <div v-if="tickets.length > 1" class="flex items-end gap-3 flex-wrap">
                                                 <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
                                                     + {{ __('messages.add_field') }}
+                                                </button>
+                                                <button type="button" @click="addTicketVolumeDiscount(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
+                                                    + {{ __('messages.add_volume_discount') }}
                                                 </button>
                                                 <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
+                                            </div>
+                                        </div>
+                                        <div v-if="tickets.length === 1" class="mt-2 flex flex-wrap items-center gap-3">
+                                            <button type="button" @click="addTicketCustomField(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
+                                                + {{ __('messages.add_field') }}
+                                            </button>
+                                            <button type="button" @click="addTicketVolumeDiscount(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
+                                                + {{ __('messages.add_volume_discount') }}
+                                            </button>
+                                        </div>
+                                        <div v-if="ticket.volume_discount" class="mt-4">
+                                            <x-input-label :value="__('messages.volume_discount')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <x-input-label :value="__('messages.volume_discount_min_quantity')" class="text-xs" />
+                                                    <x-text-input type="number" min="2" step="1" v-model.number="ticket.volume_discount.min_quantity" class="mt-1 block w-full text-sm" />
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.type')" class="text-xs" />
+                                                    <select v-model="ticket.volume_discount.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="percentage">{{ __('messages.percentage') }}</option>
+                                                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.volume_discount_value')" class="text-xs" />
+                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="ticket.volume_discount.type === 'percentage' ? 100 : undefined" v-model.number="ticket.volume_discount.value" class="mt-1 block w-full text-sm" />
+                                                </div>
+                                                </div>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketVolumeDiscount(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- Ticket-level Custom Fields -->
@@ -3087,6 +3125,7 @@
                                             </div>
                                         </div>
                                         <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][volume_discount]`" :value="ticket.volume_discount ? JSON.stringify(ticket.volume_discount) : ''">
 
                                         <div class="mt-4">
                                             <x-input-label :value="__('messages.description')" />
@@ -4386,6 +4425,7 @@
         startsAt: @json($oldStartsAt ?? ''),
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
+          volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
           custom_fields: ticket.custom_fields || {},
           sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
           sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
@@ -5392,6 +5432,7 @@
             price: null,
             description: '',
             custom_fields: {},
+            volume_discount: null,
             sales_start_at_date: '',
             sales_start_at_time: '',
             sales_end_at_date: '',
@@ -5852,6 +5893,17 @@
           }
         }
         return null;
+      },
+      addTicketVolumeDiscount(ticketIndex) {
+        const ticket = this.tickets[ticketIndex];
+        ticket.volume_discount = {
+          min_quantity: 2,
+          type: 'percentage',
+          value: 10,
+        };
+      },
+      removeTicketVolumeDiscount(ticketIndex) {
+        this.tickets[ticketIndex].volume_discount = null;
       },
       addTicketCustomField(ticketIndex) {
         const ticket = this.tickets[ticketIndex];

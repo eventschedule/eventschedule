@@ -70,7 +70,8 @@ class PromoCode extends Model
                 continue;
             }
             if ($this->appliesToTicket($saleTicket->ticket_id)) {
-                $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
+                $qty = (int) $saleTicket->quantity;
+                $eligibleSubtotal += $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
             }
         }
 

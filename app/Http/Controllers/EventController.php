@@ -499,6 +499,8 @@ class EventController extends Controller
                 'quantity' => $ticket->quantity,
                 'price' => $ticket->price,
                 'description' => $ticket->description,
+                'custom_fields' => $ticket->custom_fields,
+                'volume_discount' => $ticket->volume_discount,
                 // sold is not cloned
             ];
         }
@@ -746,6 +748,7 @@ class EventController extends Controller
                         'price' => $ticket->price,
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
+                        'volume_discount' => $ticket->volume_discount,
                     ];
                 })->toArray(),
                 'addons' => $event->addons->map(function ($addon) {
@@ -1049,6 +1052,7 @@ class EventController extends Controller
                         'price' => $ticket->price,
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
+                        'volume_discount' => $ticket->volume_discount,
                     ];
                 })->toArray(),
                 'addons' => $event->addons->map(function ($addon) {

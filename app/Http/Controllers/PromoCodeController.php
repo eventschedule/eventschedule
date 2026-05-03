@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\PromoCode;
+use App\Services\TicketVolumeDiscount;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 
@@ -55,6 +56,7 @@ class PromoCodeController extends Controller
                 $decodedId = UrlUtils::decodeId($ticketId);
                 $ticket = $event->tickets->firstWhere('id', $decodedId);
                 if ($ticket) {
+                    $ticket->setRelation('event', $event);
                     $saleTickets->push((object) [
                         'ticket_id' => $decodedId,
                         'ticket' => $ticket,
@@ -71,6 +73,8 @@ class PromoCodeController extends Controller
             ]);
         }
 
+        $volumeDiscountAmount = TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $request->tickets);
+        $promoCode->setRelation('event', $event);
         $discountAmount = $promoCode->calculateDiscount($saleTickets);
 
         if ($discountAmount <= 0) {
@@ -86,6 +90,7 @@ class PromoCodeController extends Controller
         return response()->json([
             'valid' => true,
             'discount_amount' => $discountAmount,
+            'volume_discount_amount' => $volumeDiscountAmount,
             'discount_display' => $discountDisplay,
             'message' => __('messages.promo_code_applied'),
         ]);

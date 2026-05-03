@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
+use App\Services\TicketVolumeDiscount;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -1652,6 +1653,7 @@ class Event extends Model
                     'description' => $ticket->description,
                     'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->toIso8601String() : null,
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->toIso8601String() : null,
+                    'volume_discount' => TicketVolumeDiscount::toGuestPayload($ticket->volume_discount),
                 ];
             })->values();
 
