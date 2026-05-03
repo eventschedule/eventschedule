@@ -370,8 +370,10 @@ class GoogleCalendarService
 
     /**
      * Sync all events for a user to Google Calendar for a specific role
+     *
+     * @param  bool  $force  When true, removes existing calendar_sync rows for this user and role so every event is created again on Google (push-only).
      */
-    public function syncUserEvents(User $user, Role $role): array
+    public function syncUserEvents(User $user, Role $role, bool $force = false): array
     {
         $results = [
             'created' => 0,
@@ -383,6 +385,12 @@ class GoogleCalendarService
             $results['errors']++;
 
             return $results;
+        }
+
+        if ($force) {
+            \App\Models\CalendarSync::where('user_id', $user->id)
+                ->where('role_id', $role->id)
+                ->delete();
         }
 
         // Get all non-draft events for the specific role

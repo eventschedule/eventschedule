@@ -278,6 +278,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
     Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
+    Route::post('/google-calendar/force-sync-to-google/{subdomain}', [GoogleCalendarController::class, 'forceSyncToGoogle'])->name('google.calendar.force_sync_to_google')->middleware('throttle:5,1');
     Route::post('/google-calendar/member-sync/{subdomain}', [GoogleCalendarController::class, 'memberSync'])->name('google.calendar.member_sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');

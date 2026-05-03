@@ -3394,6 +3394,28 @@
                                     </div>
                                 </div>
 
+                                @if (auth()->id() === $role->user_id)
+                                <div class="space-y-4">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('messages.google_force_resync_help') }}
+                                    </p>
+                                    <div class="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                        </svg>
+                                        <p class="text-sm text-amber-800 dark:text-amber-200">
+                                            {{ __('messages.google_force_resync_warning') }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <x-brand-button type="button" id="force-google-resync-btn">
+                                            {{ __('messages.google_force_resync_to_google') }}
+                                        </x-brand-button>
+                                        <span id="force-google-resync-status" class="ms-3 text-sm text-gray-600 dark:text-gray-400 hidden"></span>
+                                    </div>
+                                </div>
+                                @endif
+
                                 @if (false)
                                 <div>
                                     <x-secondary-button type="button" id="sync-events-button">
@@ -4262,6 +4284,83 @@ document.addEventListener('DOMContentLoaded', function() {
     if (googleCalendarSelect) {
         loadGoogleCalendars();
     }
+
+    var forceGoogleResyncBtn = document.getElementById('force-google-resync-btn');
+    if (forceGoogleResyncBtn) {
+        var savedCalendarId = @json($userCalendarId ?? '');
+        var calendarSelect = document.getElementById('google-calendar-select');
+        var saveFirstTooltip = @json(__('messages.google_force_resync_save_first'), JSON_UNESCAPED_UNICODE);
+
+        function updateResyncButtonState() {
+            if (! calendarSelect) {
+                return;
+            }
+            var dirty = calendarSelect.value !== savedCalendarId;
+            forceGoogleResyncBtn.disabled = dirty;
+            forceGoogleResyncBtn.title = dirty ? saveFirstTooltip : '';
+            forceGoogleResyncBtn.classList.toggle('opacity-50', dirty);
+            forceGoogleResyncBtn.classList.toggle('cursor-not-allowed', dirty);
+        }
+
+        if (calendarSelect) {
+            // Disable until loadGoogleCalendars() finishes populating; the dropdown's
+            // transient "" value would otherwise look dirty against the saved id.
+            forceGoogleResyncBtn.disabled = true;
+            calendarSelect.addEventListener('change', updateResyncButtonState);
+            window.addEventListener('google-calendars-loaded', updateResyncButtonState);
+        }
+
+        forceGoogleResyncBtn.addEventListener('click', function() {
+            if (! confirm(@json(__('messages.google_force_resync_confirm'), JSON_UNESCAPED_UNICODE))) {
+                return;
+            }
+            var statusEl = document.getElementById('force-google-resync-status');
+            forceGoogleResyncBtn.disabled = true;
+            if (statusEl) {
+                statusEl.classList.remove('hidden', 'text-green-600', 'dark:text-green-400', 'text-red-600', 'dark:text-red-400');
+                statusEl.classList.add('text-gray-600', 'dark:text-gray-400');
+                statusEl.textContent = @json(__('messages.syncing'), JSON_UNESCAPED_UNICODE);
+                statusEl.classList.remove('hidden');
+            }
+            fetch(@json(route('google.calendar.force_sync_to_google', ['subdomain' => $role->subdomain])), {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: '{}',
+            })
+                .then(function(response) {
+                    return response.json().then(function(data) {
+                        return { ok: response.ok, data: data };
+                    });
+                })
+                .then(function(res) {
+                    if (! statusEl) {
+                        return;
+                    }
+                    statusEl.classList.remove('hidden', 'text-gray-600', 'dark:text-gray-400');
+                    if (res.ok && ! res.data.error) {
+                        statusEl.textContent = res.data.message || '';
+                        statusEl.classList.add('text-green-600', 'dark:text-green-400');
+                    } else {
+                        statusEl.textContent = (res.data && res.data.error) ? res.data.error : @json(__('messages.sync_error'), JSON_UNESCAPED_UNICODE);
+                        statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                    }
+                })
+                .catch(function() {
+                    if (statusEl) {
+                        statusEl.classList.remove('hidden', 'text-gray-600', 'dark:text-gray-400', 'text-green-600', 'dark:text-green-400');
+                        statusEl.textContent = @json(__('messages.sync_error'), JSON_UNESCAPED_UNICODE);
+                        statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                    }
+                })
+                .finally(function() {
+                    forceGoogleResyncBtn.disabled = false;
+                });
+        });
+    }
 });
 
 function loadGoogleCalendars() {
@@ -4294,6 +4393,7 @@ function loadGoogleCalendars() {
             } else {
                 select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
+            window.dispatchEvent(new CustomEvent('google-calendars-loaded'));
         })
         .catch(error => {
             console.error('Error loading calendars:', error);
