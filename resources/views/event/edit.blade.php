@@ -764,15 +764,6 @@
         }
     });
 
-    function onChangeCountry() {
-        var ci = window.getCountryInput('venue_country_code');
-        if (ci) {
-            var selected = ci.getSelectedCountryData();
-            $('#venue_country_code').val(selected.iso2);
-            app.venueCountryCode = selected.iso2;
-        }
-    }
-
     function onChangeDateType() {
         if (typeof window.vueApp === 'undefined' || !window.vueApp.event) {
             return;
@@ -1194,8 +1185,7 @@
         <x-text-input name="venue_city" type="hidden" v-model="venueCity" />                                                                
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
         <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
-        {{-- Vue sync only; submitted value comes from x-country-input in the venue section --}}
-        <x-text-input type="hidden" v-model="venueCountryCode" autocomplete="off" />
+        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" autocomplete="off" />
         <x-text-input name="venue_website" type="hidden" v-model="venueWebsite" />
 
         <div class="py-5">
@@ -4710,10 +4700,19 @@
             }
             var ci = window.initCountryInput('venue_country_code', this.venueCountryCode);
             if (ci) ci.setCountry(this.venueCountryCode);
+            this.bindVenueCountryChange();
         });
       },
       updateSelectedVenue() {
         this.showVenueAddressFields = false;
+      },
+      bindVenueCountryChange() {
+        var hidden = document.getElementById('venue_country_code');
+        if (!hidden || hidden.dataset.vueBound === '1') return;
+        hidden.addEventListener('change', () => {
+          this.venueCountryCode = hidden.value;
+        });
+        hidden.dataset.vueBound = '1';
       },
       searchVenues() {
         if (! this.venueEmail) {
@@ -6218,6 +6217,7 @@
         this.$nextTick(() => {
             var ci = window.getCountryInput('venue_country_code');
             if (ci) ci.setCountry("{{ $role && $role->country_code ? $role->country_code : '' }}");
+            this.bindVenueCountryChange();
             this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; });
         });
       },
@@ -6271,6 +6271,7 @@
         if (newValue) {
           this.$nextTick(() => {
             window.initCountryInput('venue_country_code', this.venueCountryCode);
+            this.bindVenueCountryChange();
             this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
           });
         } else {
@@ -6412,6 +6413,7 @@
       if (this.isInPerson) {
         this.$nextTick(() => {
           this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+          this.bindVenueCountryChange();
         });
       }
 
@@ -6512,14 +6514,6 @@
   if (deleteFlyerBtn) {
     deleteFlyerBtn.addEventListener('click', function() {
       deleteFlyer(this.dataset.url, this.dataset.hash, this.dataset.token, this.parentElement);
-    });
-  }
-
-  // Country select change
-  var venueCountryInput = document.getElementById('venue_country_code');
-  if (venueCountryInput) {
-    venueCountryInput.addEventListener('change', function() {
-      onChangeCountry();
     });
   }
 

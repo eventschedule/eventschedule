@@ -46,6 +46,14 @@ window.initCountryInput = function(inputId, initialValue) {
         return window._countryInputs[inputId];
     }
 
+    // Sweep stranded .iti--country-only wrappers from prior inits (e.g. after a v-if remount)
+    var parent = telInput.parentNode;
+    if (parent) {
+        parent.querySelectorAll(':scope > .iti--country-only').forEach(function(w) {
+            if (!w.contains(telInput)) w.remove();
+        });
+    }
+
     // Stale map after Vue removed/reinserted the subtree (new tel node, old Iti in _countryInputs)
     if (window._countryInputs[inputId]) {
         window.destroyCountryInput(inputId);
