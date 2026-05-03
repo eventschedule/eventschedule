@@ -1194,7 +1194,8 @@
         <x-text-input name="venue_city" type="hidden" v-model="venueCity" />                                                                
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
         <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
-        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />
+        {{-- Vue sync only; submitted value comes from x-country-input in the venue section --}}
+        <x-text-input type="hidden" v-model="venueCountryCode" autocomplete="off" />
         <x-text-input name="venue_website" type="hidden" v-model="venueWebsite" />
 
         <div class="py-5">
@@ -4664,6 +4665,9 @@
         this.showVenueAddressFields = true;
 
         this.$nextTick(() => {
+            if (typeof window.destroyCountryInput === 'function') {
+                window.destroyCountryInput('venue_country_code');
+            }
             var ci = window.initCountryInput('venue_country_code', this.venueCountryCode);
             if (ci) ci.setCountry(this.venueCountryCode);
         });

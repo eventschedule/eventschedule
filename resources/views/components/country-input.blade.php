@@ -18,6 +18,20 @@ if (!document.getElementById('iti-country-styles')) {
 window._countryInputs = window._countryInputs || {};
 window._countryInputPending = window._countryInputPending || {};
 
+window.destroyCountryInput = function(inputId) {
+    var entry = window._countryInputs[inputId];
+    if (entry && entry.iti) {
+        try {
+            entry.iti.destroy();
+        } catch (e) {}
+    }
+    delete window._countryInputs[inputId];
+    var tel = document.getElementById(inputId + '_tel');
+    if (tel) {
+        tel._itiInstance = null;
+    }
+};
+
 window.initCountryInput = function(inputId, initialValue) {
     var telInput = document.getElementById(inputId + '_tel');
     var hidden = document.getElementById(inputId);
@@ -30,6 +44,14 @@ window.initCountryInput = function(inputId, initialValue) {
             if (inst) inst.setCountry(initialValue);
         }
         return window._countryInputs[inputId];
+    }
+
+    // Stale map after Vue removed/reinserted the subtree (new tel node, old Iti in _countryInputs)
+    if (window._countryInputs[inputId]) {
+        window.destroyCountryInput(inputId);
+        telInput = document.getElementById(inputId + '_tel');
+        hidden = document.getElementById(inputId);
+        if (!telInput || !hidden) return null;
     }
 
     var iti = intlTelInput(telInput, {
