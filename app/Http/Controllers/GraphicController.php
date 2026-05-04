@@ -86,7 +86,7 @@ class GraphicController extends Controller
         $validated = $request->validate([
             'enabled' => 'boolean',
             'frequency' => 'in:daily,weekly,monthly',
-            'ai_prompt' => 'nullable|string|max:500',
+            'ai_prompt' => 'nullable|string|max:1000',
             'ai_model' => 'nullable|string|max:50',
             'text_template' => 'nullable|string|max:2000',
             'layout' => 'in:grid,list,row',
