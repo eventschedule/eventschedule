@@ -421,9 +421,10 @@ class GoogleCalendarService
                         $results['errors']++;
                     }
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 Log::error('Failed to sync event to Google Calendar', [
                     'event_id' => $event->id,
+                    'exception_class' => get_class($e),
                     'error' => $e->getMessage(),
                 ]);
                 $results['errors']++;

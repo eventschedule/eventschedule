@@ -473,14 +473,23 @@ class GoogleCalendarController extends Controller
             report($e);
 
             return response()->json(['error' => __('messages.sync_error')], 500);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            report($e);
             Log::error('Failed to force sync events to Google Calendar', [
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
                 'subdomain' => $subdomain,
+                'exception_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['error' => __('messages.sync_error')], 500);
+            $payload = ['error' => __('messages.sync_error')];
+            if (config('app.debug')) {
+                $payload['debug'] = get_class($e).': '.$e->getMessage();
+            }
+
+            return response()->json($payload, 500);
         }
     }
 

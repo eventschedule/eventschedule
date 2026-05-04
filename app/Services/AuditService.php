@@ -179,7 +179,7 @@ class AuditService
                 'metadata' => $metadata,
                 'created_at' => now(),
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             \Log::warning('Audit logging failed: '.$e->getMessage());
         }
     }
