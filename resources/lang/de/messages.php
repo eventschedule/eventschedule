@@ -783,6 +783,7 @@ return [
     'google_force_resync_warning' => 'Alte Kopien von Terminen können in deinem früheren Google Kalender bleiben. Dies löscht die gespeicherten Verknüpfungen in Event Schedule und legt neue Termine im für diesen Plan gespeicherten Kalender an.',
     'google_force_resync_confirm' => 'Alle Termine erneut in den gespeicherten Google Kalender übertragen? Es wird nur von Event Schedule zu Google übertragen; es erfolgt kein Import aus Google.',
     'google_force_resync_success' => 'Erneute Synchronisierung abgeschlossen. :created Termin(e) wurden zu Google Kalender hinzugefügt.',
+    'google_force_resync_queued' => 'Erneute Synchronisierung gestartet. Es kann einige Minuten dauern, bis sie im Google Kalender abgeschlossen ist.',
     'google_force_resync_partial_errors' => ':errors Termin(e) konnten nicht hinzugefügt werden.',
     'google_force_resync_owner_only' => 'Nur der Planinhaber kann die Synchronisierung mit Google Kalender zurücksetzen.',
     'google_force_resync_requires_push' => 'Aktiviere zuerst die Synchronisation zu Google (Zu Google Kalender oder bidirektional), bevor du erneut synchronisierst.',

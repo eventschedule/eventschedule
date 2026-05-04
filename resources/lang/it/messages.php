@@ -782,6 +782,7 @@ return [
     'google_force_resync_warning' => 'Copie vecchie degli eventi possono restare nel precedente Google Calendar. Questo cancella i collegamenti salvati in Event Schedule e crea nuovi eventi nel calendario salvato per questo programma.',
     'google_force_resync_confirm' => 'Risincronizzare tutti gli eventi con il Google Calendar salvato? Invia solo da Event Schedule a Google; non importa da Google.',
     'google_force_resync_success' => 'Risincronizzazione completata. Aggiunti :created evento/i a Google Calendar.',
+    'google_force_resync_queued' => 'Risincronizzazione avviata. Potrebbero servire alcuni minuti perché compaia in Google Calendar.',
     'google_force_resync_partial_errors' => 'Impossibile aggiungere :errors evento/i.',
     'google_force_resync_owner_only' => 'Solo il titolare del programma può risincronizzare con Google Calendar.',
     'google_force_resync_requires_push' => 'Attiva la sincronizzazione verso Google (Verso Google Calendar o bidirezionale) prima di risincronizzare.',

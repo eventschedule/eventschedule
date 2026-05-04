@@ -459,19 +459,16 @@ class GoogleCalendarController extends Controller
                 return response()->json(['error' => __('messages.google_calendar_token_refresh_failed')], 401);
             }
 
-            $results = $this->googleCalendarService->syncUserEvents($owner, $role, true);
+            // Run the actual sync on the queue — pushing every event to Google
+            // can take minutes for large schedules and would otherwise time out
+            // at the gateway.
+            \App\Jobs\ForceResyncGoogleCalendar::dispatch($owner, $role);
 
             AuditService::log(AuditService::GOOGLE_CALENDAR_SYNC, $user->id, 'Role', $role->id, null, null, 'force_to');
 
-            $message = __('messages.google_force_resync_success', ['created' => $results['created']]);
-            if (($results['errors'] ?? 0) > 0) {
-                $message .= ' '.__('messages.google_force_resync_partial_errors', ['errors' => $results['errors']]);
-            }
-
             return response()->json([
-                'message' => $message,
-                'results' => $results,
-            ]);
+                'message' => __('messages.google_force_resync_queued'),
+            ], 202);
         } catch (QueryException $e) {
             report($e);
 

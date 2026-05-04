@@ -780,6 +780,7 @@ return [
     'google_force_resync_warning' => 'Cópias antigas de eventos podem ficar no seu Google Agenda anterior. Isto apaga as ligações guardadas no Event Schedule e cria eventos novos no calendário guardado para esta agenda.',
     'google_force_resync_confirm' => 'Voltar a sincronizar todos os eventos com o Google Agenda guardado? Apenas envia do Event Schedule para o Google; não importa do Google.',
     'google_force_resync_success' => 'Nova sincronização concluída. Foram adicionados :created evento(s) ao Google Agenda.',
+    'google_force_resync_queued' => 'Nova sincronização iniciada. Pode levar alguns minutos até aparecer no Google Agenda.',
     'google_force_resync_partial_errors' => 'Não foi possível adicionar :errors evento(s).',
     'google_force_resync_owner_only' => 'Apenas o proprietário da agenda pode voltar a sincronizar com o Google Agenda.',
     'google_force_resync_requires_push' => 'Ative primeiro a sincronização para o Google (Para o Google Agenda ou bidirecional) antes de voltar a sincronizar.',

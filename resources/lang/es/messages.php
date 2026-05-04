@@ -779,6 +779,7 @@ return [
     'google_force_resync_warning' => 'Las copias antiguas de eventos pueden quedarse en tu Google Calendar anterior. Esto borra los enlaces guardados en Event Schedule y crea eventos nuevos en el calendario guardado para este plan.',
     'google_force_resync_confirm' => '¿Volver a sincronizar todos los eventos con el Google Calendar guardado? Solo envía desde Event Schedule a Google; no importa desde Google.',
     'google_force_resync_success' => 'Resincronización completada. Se añadieron :created evento(s) a Google Calendar.',
+    'google_force_resync_queued' => 'Resincronización iniciada. Puede tardar unos minutos en completarse en Google Calendar.',
     'google_force_resync_partial_errors' => 'No se pudieron añadir :errors evento(s).',
     'google_force_resync_owner_only' => 'Solo el propietario del plan puede volver a sincronizar con Google Calendar.',
     'google_force_resync_requires_push' => 'Activa la sincronización hacia Google (Hacia Google Calendar o bidireccional) antes de volver a sincronizar.',

@@ -784,6 +784,7 @@ return [
     'google_force_resync_warning' => 'D’anciennes copies d’événements peuvent rester dans votre ancien Google Agenda. Cela efface les liens enregistrés dans Event Schedule et crée de nouveaux événements dans le calendrier enregistré pour ce planning.',
     'google_force_resync_confirm' => 'Resynchroniser tous les événements vers le Google Agenda enregistré ? Envoi uniquement d’Event Schedule vers Google ; aucun import depuis Google.',
     'google_force_resync_success' => 'Resynchronisation terminée. :created événement(s) ajouté(s) à Google Agenda.',
+    'google_force_resync_queued' => 'Resynchronisation démarrée. Elle peut prendre quelques minutes avant d’apparaître dans Google Agenda.',
     'google_force_resync_partial_errors' => ':errors événement(s) n’ont pas pu être ajoutés.',
     'google_force_resync_owner_only' => 'Seul le propriétaire du planning peut resynchroniser vers Google Agenda.',
     'google_force_resync_requires_push' => 'Activez la synchronisation vers Google (Vers Google Agenda ou bidirectionnelle) avant de resynchroniser.',

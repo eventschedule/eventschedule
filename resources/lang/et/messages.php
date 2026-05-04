@@ -802,6 +802,7 @@ return [
     'google_force_resync_warning' => 'Vanad sündmuse koopiad võivad jääda eelmisse Google Kalendrisse. See kustutab Event Schedule’is salvestatud lingid ja loob uued sündmused selle ajakava salvestatud kalendris.',
     'google_force_resync_confirm' => 'Sünkroonida kõik sündmused uuesti salvestatud Google Kalendrisse? Ainult Event Schedule’st Google’isse; Google’ist ei impordita.',
     'google_force_resync_success' => 'Uuesti sünkroonimine valmis. Lisati :created sündmust Google Kalendrisse.',
+    'google_force_resync_queued' => 'Uuesti sünkroonimine alustati. Google Kalendrisse jõudmiseks võib kuluda mõni minut.',
     'google_force_resync_partial_errors' => ':errors sündmust ei saanud lisada.',
     'google_force_resync_owner_only' => 'Ainult ajakava omanik saab Google Kalendriga uuesti sünkroonida.',
     'google_force_resync_requires_push' => 'Luba enne Google’isse sünkroonimine (Google Kalendrisse või kahesuunaline), seejärel proovi uuesti.',

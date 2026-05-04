@@ -779,6 +779,7 @@ return [
     'google_force_resync_warning' => 'Oude kopieën van afspraken kunnen in je vorige Google Agenda blijven. Dit wist opgeslagen koppelingen in Event Schedule en maakt nieuwe afspraken in de agenda die voor deze planning is opgeslagen.',
     'google_force_resync_confirm' => 'Alle afspraken opnieuw synchroniseren naar je opgeslagen Google Agenda? Alleen van Event Schedule naar Google; er wordt niet geïmporteerd vanuit Google.',
     'google_force_resync_success' => 'Opnieuw synchroniseren voltooid. :created afspraak(en) toegevoegd aan Google Agenda.',
+    'google_force_resync_queued' => 'Opnieuw synchroniseren gestart. Het kan enkele minuten duren voordat het in Google Agenda zichtbaar is.',
     'google_force_resync_partial_errors' => ':errors afspraak(en) konden niet worden toegevoegd.',
     'google_force_resync_owner_only' => 'Alleen de planningseigenaar kan opnieuw synchroniseren naar Google Agenda.',
     'google_force_resync_requires_push' => 'Schakel eerst synchronisatie naar Google in (Naar Google Agenda of bidirectioneel) voordat je opnieuw synchroniseert.',

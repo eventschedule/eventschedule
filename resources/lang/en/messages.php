@@ -809,6 +809,7 @@ return [
     'google_force_resync_warning' => 'Old copies of events may stay on your previous Google calendar. This clears stored links on Event Schedule and creates fresh events on the calendar saved for this schedule.',
     'google_force_resync_confirm' => 'Resync all events to your saved Google calendar? This only pushes from Event Schedule to Google and does not import from Google.',
     'google_force_resync_success' => 'Resync complete. Added :created event(s) to Google Calendar.',
+    'google_force_resync_queued' => 'Resync started. It may take a few minutes to complete on Google Calendar.',
     'google_force_resync_partial_errors' => ':errors event(s) could not be added.',
     'google_force_resync_owner_only' => 'Only the schedule owner can resync to Google Calendar.',
     'google_force_resync_requires_push' => 'Turn on sync to Google (To Google Calendar or Bidirectional) before resyncing.',

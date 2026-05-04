@@ -810,6 +810,7 @@ return [
     'google_force_resync_warning' => 'Copii vechi ale evenimentelor pot rămâne în Google Calendarul anterior. Aceasta șterge legăturile salvate în Event Schedule și creează evenimente noi în calendarul salvat pentru acest program.',
     'google_force_resync_confirm' => 'Resincronizezi toate evenimentele cu Google Calendarul salvat? Trimite doar din Event Schedule către Google; nu importă din Google.',
     'google_force_resync_success' => 'Resincronizare finalizată. S-au adăugat :created eveniment(e) în Google Calendar.',
+    'google_force_resync_queued' => 'Resincronizarea a început. Poate dura câteva minute până să apară în Google Calendar.',
     'google_force_resync_partial_errors' => 'Nu s-au putut adăuga :errors eveniment(e).',
     'google_force_resync_owner_only' => 'Doar proprietarul programului poate resincroniza cu Google Calendar.',
     'google_force_resync_requires_push' => 'Activează mai întâi sincronizarea către Google (Către Google Calendar sau bidirecțională) înainte de a resincroniza.',

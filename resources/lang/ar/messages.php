@@ -780,6 +780,7 @@ return [
     'google_force_resync_warning' => 'قد تبقى نسخ قديمة من الأحداث في Google Calendar السابق. يمسح هذا الروابط المحفوظة في Event Schedule وينشئ أحداثاً جديدة في التقويم المحفوظ لهذا الجدول.',
     'google_force_resync_confirm' => 'إعادة مزامنة كل الأحداث إلى Google Calendar المحفوظ؟ يدفع فقط من Event Schedule إلى Google؛ لا يستورد من Google.',
     'google_force_resync_success' => 'اكتملت إعادة المزامنة. تمت إضافة :created حدث(ات) إلى Google Calendar.',
+    'google_force_resync_queued' => 'بدأت إعادة المزامنة. قد يستغرق ظهورها في Google Calendar بضع دقائق.',
     'google_force_resync_partial_errors' => 'تعذرت إضافة :errors حدث(ات).',
     'google_force_resync_owner_only' => 'مالك الجدول فقط يمكنه إعادة المزامنة إلى Google Calendar.',
     'google_force_resync_requires_push' => 'فعّل أولاً المزامنة إلى Google (إلى Google Calendar أو ثنائية الاتجاه) قبل إعادة المزامنة.',

@@ -774,6 +774,7 @@ return [
     'google_force_resync_warning' => 'עותקים ישנים של אירועים עשויים להישאר ב-Google Calendar הקודם. פעולה זו מנקה קישורים שמורים ב-Event Schedule ויוצרת אירועים חדשים ביומן השמור ללוח זה.',
     'google_force_resync_confirm' => 'לסנכרן מחדש את כל האירועים ל-Google Calendar השמור? רק דחיפה מ-Event Schedule ל-Google; לא מייבאים מ-Google.',
     'google_force_resync_success' => 'סנכרון מחדש הושלם. נוספו :created אירוע(ים) ל-Google Calendar.',
+    'google_force_resync_queued' => 'הסנכרון מחדש החל. ייתכן שיחלפו כמה דקות עד שיושלם ב-Google Calendar.',
     'google_force_resync_partial_errors' => 'לא ניתן היה להוסיף :errors אירוע(ים).',
     'google_force_resync_owner_only' => 'רק בעל הלוח יכול לבצע סנכרון מחדש ל-Google Calendar.',
     'google_force_resync_requires_push' => 'הפעל קודם סנכרון ל-Google (ל-Google Calendar או דו-כיווני) לפני סנכרון מחדש.',
