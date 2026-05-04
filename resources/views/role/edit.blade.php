@@ -4322,7 +4322,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusEl.textContent = @json(__('messages.syncing'), JSON_UNESCAPED_UNICODE);
                 statusEl.classList.remove('hidden');
             }
-            fetch(@json($role->exists && $role->subdomain ? route('google.calendar.force_sync_to_google', ['subdomain' => $role->subdomain]) : ''), {
+            var fallbackErrorMsg = @json(__('messages.sync_error'), JSON_UNESCAPED_UNICODE);
+            var fetchUrl = @json($role->exists && $role->subdomain ? route('google.calendar.force_sync_to_google', ['subdomain' => $role->subdomain]) : '');
+            var httpStatus = 0;
+            fetch(fetchUrl, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -4330,10 +4333,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Accept': 'application/json',
                 },
                 body: '{}',
+                credentials: 'same-origin',
             })
                 .then(function(response) {
-                    return response.json().then(function(data) {
-                        return { ok: response.ok, data: data };
+                    httpStatus = response.status;
+                    return response.text().then(function(text) {
+                        var data = null;
+                        try { data = text ? JSON.parse(text) : null; } catch (e) { /* not JSON */ }
+                        return { ok: response.ok, status: response.status, data: data, text: text };
                     });
                 })
                 .then(function(res) {
@@ -4341,20 +4348,37 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                     statusEl.classList.remove('hidden', 'text-gray-600', 'dark:text-gray-400');
-                    if (res.ok && ! res.data.error) {
+                    if (res.ok && res.data && ! res.data.error) {
                         statusEl.textContent = res.data.message || '';
                         statusEl.classList.add('text-green-600', 'dark:text-green-400');
                     } else {
-                        statusEl.textContent = (res.data && res.data.error) ? res.data.error : @json(__('messages.sync_error'), JSON_UNESCAPED_UNICODE);
+                        var msg;
+                        if (res.data && res.data.error) {
+                            msg = res.data.error;
+                        } else if (res.data && res.data.message) {
+                            // Laravel middleware (CSRF 419, throttle 429, auth, etc.)
+                            msg = res.data.message;
+                        } else {
+                            msg = fallbackErrorMsg;
+                        }
+                        msg += ' (HTTP ' + res.status + ')';
+                        statusEl.textContent = msg;
                         statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                        console.error('Force resync failed', {
+                            url: fetchUrl,
+                            status: res.status,
+                            ok: res.ok,
+                            responseBody: (res.text || '').slice(0, 500),
+                        });
                     }
                 })
-                .catch(function() {
+                .catch(function(err) {
                     if (statusEl) {
                         statusEl.classList.remove('hidden', 'text-gray-600', 'dark:text-gray-400', 'text-green-600', 'dark:text-green-400');
-                        statusEl.textContent = @json(__('messages.sync_error'), JSON_UNESCAPED_UNICODE);
+                        statusEl.textContent = fallbackErrorMsg + ' (network: ' + (err && err.message ? err.message : 'unknown') + ')';
                         statusEl.classList.add('text-red-600', 'dark:text-red-400');
                     }
+                    console.error('Force resync network error', { url: fetchUrl, status: httpStatus, error: err });
                 })
                 .finally(function() {
                     forceGoogleResyncBtn.disabled = false;

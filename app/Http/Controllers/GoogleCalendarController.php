@@ -257,13 +257,15 @@ class GoogleCalendarController extends Controller
                 ->first();
 
             if ($sync?->google_event_id) {
-                $googleEvent = $this->googleCalendarService->updateEvent($event, $sync->google_event_id, $role);
+                $calendarId = $sync->google_calendar_id ?: $role->getGoogleCalendarId();
+                $googleEvent = $this->googleCalendarService->updateEvent($event, $sync->google_event_id, $role, $calendarId);
             } else {
-                $googleEvent = $this->googleCalendarService->createEvent($event, $role);
+                $calendarId = $role->getGoogleCalendarId();
+                $googleEvent = $this->googleCalendarService->createEvent($event, $role, $calendarId);
                 if ($googleEvent) {
                     \App\Models\CalendarSync::updateOrCreate(
                         ['user_id' => $user->id, 'event_id' => $event->id, 'role_id' => $role->id],
-                        ['google_event_id' => $googleEvent->getId()]
+                        ['google_event_id' => $googleEvent->getId(), 'google_calendar_id' => $calendarId]
                     );
                 }
             }
@@ -328,7 +330,8 @@ class GoogleCalendarController extends Controller
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
-                $this->googleCalendarService->deleteEvent($sync->google_event_id, $role->getGoogleCalendarId(), $role->id);
+                $calendarId = $sync->google_calendar_id ?: $role->getGoogleCalendarId();
+                $this->googleCalendarService->deleteEvent($sync->google_event_id, $calendarId, $role->id);
                 $sync->delete();
             }
 

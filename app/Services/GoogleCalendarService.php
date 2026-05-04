@@ -232,9 +232,14 @@ class GoogleCalendarService
 
             return $createdEvent;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Failed to create Google Calendar event', [
                 'event_id' => $event->id,
+                'role_id' => $role->id,
+                'calendar_id' => $calendarId ?? null,
+                'exception_class' => get_class($e),
+                'http_code' => $e->getCode(),
+                'google_errors' => $e instanceof \Google\Service\Exception ? $e->getErrors() : null,
                 'error' => $e->getMessage(),
             ]);
 
@@ -379,6 +384,7 @@ class GoogleCalendarService
             'created' => 0,
             'updated' => 0,
             'errors' => 0,
+            'orphan_delete_errors' => 0,
         ];
 
         if (! $this->refreshTokenIfNeeded($user)) {
@@ -388,6 +394,31 @@ class GoogleCalendarService
         }
 
         if ($force) {
+            // Delete existing copies on the previously-selected calendar(s) so a calendar
+            // switch leaves no orphans. Skip rows where the calendar wasn't recorded
+            // (legacy NULLs) — without that id we'd no-op against the current pivot.
+            $existingSyncs = \App\Models\CalendarSync::where('user_id', $user->id)
+                ->where('role_id', $role->id)
+                ->whereNotNull('google_event_id')
+                ->whereNotNull('google_calendar_id')
+                ->get(['google_event_id', 'google_calendar_id']);
+
+            foreach ($existingSyncs as $row) {
+                try {
+                    $this->deleteEvent($row->google_event_id, $row->google_calendar_id, $role->id);
+                } catch (\Throwable $e) {
+                    $results['orphan_delete_errors']++;
+                    Log::warning('Failed to delete orphan from previous calendar', [
+                        'user_id' => $user->id,
+                        'role_id' => $role->id,
+                        'google_calendar_id' => $row->google_calendar_id,
+                        'google_event_id' => $row->google_event_id,
+                        'exception_class' => get_class($e),
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             \App\Models\CalendarSync::where('user_id', $user->id)
                 ->where('role_id', $role->id)
                 ->delete();
@@ -410,11 +441,12 @@ class GoogleCalendarService
                     continue;
                 } else {
                     // Create new event
-                    $googleEvent = $this->createEvent($event, $role);
+                    $calendarId = $role->getGoogleCalendarId();
+                    $googleEvent = $this->createEvent($event, $role, $calendarId);
                     if ($googleEvent) {
                         \App\Models\CalendarSync::updateOrCreate(
                             ['user_id' => $user->id, 'event_id' => $event->id, 'role_id' => $role->id],
-                            ['google_event_id' => $googleEvent->getId()]
+                            ['google_event_id' => $googleEvent->getId(), 'google_calendar_id' => $calendarId]
                         );
                         $results['created']++;
                     } else {
@@ -700,6 +732,7 @@ class GoogleCalendarService
             'event_id' => $event->id,
             'role_id' => $role->id,
             'google_event_id' => $googleEvent['id'],
+            'google_calendar_id' => $calendarId,
         ]);
 
         if ($googleEvent['location']) {
