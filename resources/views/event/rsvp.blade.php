@@ -67,8 +67,17 @@
                                 this.turnstileWidgetId = turnstile.render('#turnstile-rsvp-widget', {
                                     sitekey: this.turnstileSiteKey,
                                     size: 'flexible',
+                                    'retry': 'auto',
+                                    'refresh-expired': 'auto',
                                     callback: (token) => {
                                         this.turnstileToken = token;
+                                    },
+                                    'error-callback': () => {
+                                        this.turnstileToken = '';
+                                        if (this.turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+                                            turnstile.reset(this.turnstileWidgetId);
+                                        }
+                                        return true;
                                     },
                                 });
                             } else {
