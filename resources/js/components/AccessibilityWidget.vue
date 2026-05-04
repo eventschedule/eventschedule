@@ -1,5 +1,5 @@
 <template>
-  <div class="es-a11y-root pointer-events-none fixed bottom-6 z-[45] flex flex-col items-start gap-2" :class="rootAlignClass">
+  <div class="es-a11y-root pointer-events-none fixed bottom-6 z-[45] flex flex-col gap-2" :class="rootAlignClass">
     <div
       v-show="panelOpen"
       id="es-a11y-panel"
@@ -144,7 +144,7 @@ export default {
   },
   computed: {
     rootAlignClass() {
-      return this.rtl ? 'end-6 items-end' : 'start-6 items-start';
+      return this.rtl ? 'start-6 items-start' : 'end-6 items-end';
     },
     activePillClass() {
       return 'border-[var(--brand-blue)] bg-[var(--brand-blue)] text-white dark:bg-[var(--brand-blue)]';
