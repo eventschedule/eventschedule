@@ -8,63 +8,49 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\GoogleCalendarService;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Re-pushes every non-draft event of a schedule to the currently-selected
- * Google Calendar, deleting any leftover copies on previously-selected
- * calendars first.
+ * Re-pushes the schedule's events to the currently-selected Google Calendar.
  *
- * Production runs queue:work inside an HTTP request to /translate_data, so any
- * single invocation must finish well within the gateway timeout (~30-60s).
- * That makes a "process every event in one shot" job impossible for big
- * schedules. Instead, each invocation processes a small batch and dispatches
- * a follow-up if there's more to do, so the chain advances minute-by-minute
- * via the regular cron-driven worker.
+ * Production runs queue:work inside the /translate_data HTTP request, so each
+ * invocation must finish well within the gateway timeout. The job processes a
+ * small batch of events per invocation and dispatches a follow-up if more
+ * remain — the chain advances minute-by-minute via the cron-driven worker.
  *
- * Two phases run in sequence per chain:
- *   1. cleanup — for each existing CalendarSync row with a known
- *      google_calendar_id, delete the event from that (possibly previous)
- *      calendar on Google, then drop the row. Rows missing google_calendar_id
- *      (legacy data from before that column existed) are dropped without an
- *      API call since we don't know which calendar they live on.
- *   2. create — for each non-draft Event of the role with no surviving
- *      CalendarSync row, push it to the currently-selected calendar and
- *      record the new mapping.
+ * Per-event idempotency: if an event already has a CalendarSync row pointing
+ * to the currently-selected calendar, it is left untouched. Otherwise the old
+ * copy (if any) is deleted from its previous calendar and a fresh copy is
+ * pushed to the current calendar. Repeated clicks therefore only re-do work
+ * that's actually still needed — a stalled chain can be re-triggered safely.
  */
 class ForceResyncGoogleCalendar implements ShouldQueue
 {
     use Queueable;
 
-    public const PHASE_CLEANUP = 'cleanup';
-
-    public const PHASE_CREATE = 'create';
-
     public const CHUNK_SIZE = 10;
 
     public $deleteWhenMissingModels = true;
 
-    public $timeout = 90; // each chunk is small; this is just a safety net
+    public $timeout = 90;
 
-    public $tries = 1; // chunks are idempotent at the chain level; we don't auto-retry partials
+    public $tries = 1;
 
     protected User $user;
 
     protected Role $role;
 
-    // Class-level defaults so old serialized payloads (failed_jobs from a
-    // pre-chunking deploy) deserialize cleanly without the new fields.
-    protected string $phase = self::PHASE_CLEANUP;
-
+    // Class-level default so older serialized payloads (failed_jobs from
+    // pre-chunking deploys) deserialize cleanly into the new field.
     protected int $cursor = 0;
 
-    public function __construct(User $user, Role $role, string $phase = self::PHASE_CLEANUP, int $cursor = 0)
+    public function __construct(User $user, Role $role, int $cursor = 0)
     {
         $this->user = $user;
         $this->role = $role;
-        $this->phase = $phase;
         $this->cursor = $cursor;
     }
 
@@ -72,7 +58,8 @@ class ForceResyncGoogleCalendar implements ShouldQueue
     {
         return [
             (new WithoutOverlapping("force-resync-google-{$this->user->id}-{$this->role->id}"))
-                ->dontRelease(),
+                ->dontRelease()
+                ->expireAfter(120),
         ];
     }
 
@@ -81,7 +68,6 @@ class ForceResyncGoogleCalendar implements ShouldQueue
         $context = [
             'user_id' => $this->user->id,
             'role_id' => $this->role->id,
-            'phase' => $this->phase,
             'cursor' => $this->cursor,
         ];
 
@@ -92,11 +78,102 @@ class ForceResyncGoogleCalendar implements ShouldQueue
                 return;
             }
 
-            if ($this->phase === self::PHASE_CLEANUP) {
-                $this->runCleanupChunk($googleCalendarService);
-            } else {
-                $this->runCreateChunk($googleCalendarService);
+            $currentCalendarId = $this->role->getGoogleCalendarId();
+            $totalEvents = $this->eventsQuery()->count();
+            $eventsRemaining = $this->eventsQuery()->where('events.id', '>', $this->cursor)->count();
+
+            Log::info('ForceResyncGoogleCalendar chunk start', $context + [
+                'current_calendar_id' => $currentCalendarId,
+                'total_events' => $totalEvents,
+                'events_remaining' => $eventsRemaining,
+            ]);
+
+            $events = $this->eventsQuery()
+                ->where('events.id', '>', $this->cursor)
+                ->orderBy('events.id')
+                ->limit(self::CHUNK_SIZE)
+                ->get();
+
+            $skipped = 0;
+            $migrated = 0;
+            $created = 0;
+            $errors = 0;
+            $lastId = $this->cursor;
+
+            foreach ($events as $event) {
+                $lastId = $event->id;
+
+                $existing = CalendarSync::where('user_id', $this->user->id)
+                    ->where('event_id', $event->id)
+                    ->where('role_id', $this->role->id)
+                    ->first();
+
+                // Already on the right calendar — leave as-is so repeated
+                // clicks (or partial re-runs) don't churn unchanged events.
+                if ($existing?->google_event_id && $existing->google_calendar_id === $currentCalendarId) {
+                    $skipped++;
+
+                    continue;
+                }
+
+                // Was on a different calendar — delete that old copy first.
+                // Skip the API call when google_calendar_id is unknown
+                // (legacy NULLs); the orphan stays on the unknown old
+                // calendar, but the new copy will land correctly.
+                if ($existing?->google_event_id && $existing->google_calendar_id) {
+                    try {
+                        $googleCalendarService->deleteEvent(
+                            $existing->google_event_id,
+                            $existing->google_calendar_id,
+                            $this->role->id
+                        );
+                    } catch (\Throwable $e) {
+                        Log::warning('ForceResyncGoogleCalendar: old-calendar delete failed', $context + [
+                            'event_id' => $event->id,
+                            'old_calendar_id' => $existing->google_calendar_id,
+                            'old_google_event_id' => $existing->google_event_id,
+                            'exception_class' => get_class($e),
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                $googleEvent = $googleCalendarService->createEvent($event, $this->role, $currentCalendarId);
+
+                if ($googleEvent) {
+                    CalendarSync::updateOrCreate(
+                        ['user_id' => $this->user->id, 'event_id' => $event->id, 'role_id' => $this->role->id],
+                        ['google_event_id' => $googleEvent->getId(), 'google_calendar_id' => $currentCalendarId]
+                    );
+                    $existing?->google_event_id ? $migrated++ : $created++;
+                } else {
+                    $errors++;
+                }
             }
+
+            $eventsRemainingAfter = $this->eventsQuery()->where('events.id', '>', $lastId)->count();
+
+            Log::info('ForceResyncGoogleCalendar chunk done', $context + [
+                'last_id' => $lastId,
+                'processed' => $events->count(),
+                'skipped' => $skipped,
+                'migrated' => $migrated,
+                'created' => $created,
+                'errors' => $errors,
+                'events_remaining' => $eventsRemainingAfter,
+            ]);
+
+            if ($events->count() >= self::CHUNK_SIZE) {
+                self::dispatch($this->user, $this->role, $lastId);
+
+                return;
+            }
+
+            Log::info('ForceResyncGoogleCalendar completed', [
+                'user_id' => $this->user->id,
+                'role_id' => $this->role->id,
+                'total_events' => $totalEvents,
+            ]);
         } catch (\Throwable $e) {
             report($e);
             Log::error('ForceResyncGoogleCalendar chunk failed', $context + [
@@ -110,115 +187,10 @@ class ForceResyncGoogleCalendar implements ShouldQueue
         }
     }
 
-    private function runCleanupChunk(GoogleCalendarService $googleCalendarService): void
+    private function eventsQuery(): Builder
     {
-        $rows = CalendarSync::where('user_id', $this->user->id)
-            ->where('role_id', $this->role->id)
-            ->whereNotNull('google_event_id')
-            ->whereNotNull('google_calendar_id')
-            ->where('id', '>', $this->cursor)
-            ->orderBy('id')
-            ->limit(self::CHUNK_SIZE)
-            ->get();
-
-        $lastId = $this->cursor;
-
-        foreach ($rows as $row) {
-            try {
-                $googleCalendarService->deleteEvent($row->google_event_id, $row->google_calendar_id, $this->role->id);
-            } catch (\Throwable $e) {
-                Log::warning('ForceResyncGoogleCalendar: orphan delete failed', [
-                    'user_id' => $this->user->id,
-                    'role_id' => $this->role->id,
-                    'google_calendar_id' => $row->google_calendar_id,
-                    'google_event_id' => $row->google_event_id,
-                    'exception_class' => get_class($e),
-                    'error' => $e->getMessage(),
-                ]);
-            }
-            $row->delete();
-            $lastId = $row->id;
-        }
-
-        if ($rows->count() >= self::CHUNK_SIZE) {
-            // More cleanup chunks to process; advance the cursor and queue another.
-            self::dispatch($this->user, $this->role, self::PHASE_CLEANUP, $lastId);
-
-            return;
-        }
-
-        // Cleanup phase done. Drop any legacy rows missing google_calendar_id
-        // (we can't safely deletes those from Google without knowing the
-        // calendar, so the Google copies are knowingly orphaned).
-        CalendarSync::where('user_id', $this->user->id)
-            ->where('role_id', $this->role->id)
-            ->delete();
-
-        self::dispatch($this->user, $this->role, self::PHASE_CREATE, 0);
-    }
-
-    private function runCreateChunk(GoogleCalendarService $googleCalendarService): void
-    {
-        $calendarId = $this->role->getGoogleCalendarId();
-
-        $events = Event::whereHas('roles', function ($query) {
+        return Event::whereHas('roles', function ($query) {
             $query->where('roles.id', $this->role->id);
-        })
-            ->where('is_draft', false)
-            ->where('id', '>', $this->cursor)
-            ->orderBy('id')
-            ->limit(self::CHUNK_SIZE)
-            ->get();
-
-        $lastId = $this->cursor;
-        $created = 0;
-        $errors = 0;
-
-        foreach ($events as $event) {
-            $lastId = $event->id;
-
-            // Skip events that already have a sync row for this user/role —
-            // covers the case where a previous chain partially completed and
-            // we re-entered after a re-click.
-            $existing = CalendarSync::where('user_id', $this->user->id)
-                ->where('event_id', $event->id)
-                ->where('role_id', $this->role->id)
-                ->first();
-            if ($existing?->google_event_id) {
-                continue;
-            }
-
-            $googleEvent = $googleCalendarService->createEvent($event, $this->role, $calendarId);
-
-            if ($googleEvent) {
-                CalendarSync::updateOrCreate(
-                    ['user_id' => $this->user->id, 'event_id' => $event->id, 'role_id' => $this->role->id],
-                    ['google_event_id' => $googleEvent->getId(), 'google_calendar_id' => $calendarId]
-                );
-                $created++;
-            } else {
-                $errors++;
-            }
-        }
-
-        Log::info('ForceResyncGoogleCalendar create chunk', [
-            'user_id' => $this->user->id,
-            'role_id' => $this->role->id,
-            'cursor' => $this->cursor,
-            'last_id' => $lastId,
-            'created' => $created,
-            'errors' => $errors,
-        ]);
-
-        if ($events->count() >= self::CHUNK_SIZE) {
-            self::dispatch($this->user, $this->role, self::PHASE_CREATE, $lastId);
-
-            return;
-        }
-
-        Log::info('ForceResyncGoogleCalendar completed', [
-            'user_id' => $this->user->id,
-            'role_id' => $this->role->id,
-        ]);
+        })->where('is_draft', false);
     }
 }
