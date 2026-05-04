@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'Allajooni lingid',
     'toolbar_reduce_motion' => 'Vähenda liikumist',
     'toolbar_reset' => 'Lähtesta kõik',
+    'toolbar_hide_widget' => 'Peida vidin',
+    'toolbar_hide_confirm_title' => 'Peita juurdepääsetavuse vidin?',
+    'toolbar_hide_confirm_body' => 'Saate selle uuesti kuvada oma konto seadetes.',
+    'toolbar_cancel' => 'Tühista',
     'toolbar_declaration' => 'Juurdepääsetavuse avaldus',
+
+    'settings_widget_heading' => 'Juurdepääsetavuse vidin',
+    'settings_widget_hidden_note' => 'Juurdepääsetavuse vidin on selles seadmes peidetud.',
+    'settings_show_widget' => 'Näita juurdepääsetavuse vidinat',
 
     'skip_to_main' => 'Liigu põhisisu juurde',
     'footer_link' => 'Juurdepääsetavus',

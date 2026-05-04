@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'Sublinhar ligações',
     'toolbar_reduce_motion' => 'Reduzir movimento',
     'toolbar_reset' => 'Repor tudo',
+    'toolbar_hide_widget' => 'Ocultar widget',
+    'toolbar_hide_confirm_title' => 'Ocultar o widget de acessibilidade?',
+    'toolbar_hide_confirm_body' => 'Pode voltar a mostrá-lo nas definições da sua conta.',
+    'toolbar_cancel' => 'Cancelar',
     'toolbar_declaration' => 'Declaração de acessibilidade',
+
+    'settings_widget_heading' => 'Widget de acessibilidade',
+    'settings_widget_hidden_note' => 'O widget de acessibilidade está oculto neste dispositivo.',
+    'settings_show_widget' => 'Mostrar widget de acessibilidade',
 
     'skip_to_main' => 'Saltar para o conteúdo principal',
     'footer_link' => 'Acessibilidade',

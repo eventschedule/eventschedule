@@ -11,6 +11,10 @@
         'toolbarUnderlineLinks' => __('accessibility.toolbar_underline_links'),
         'toolbarReduceMotion' => __('accessibility.toolbar_reduce_motion'),
         'toolbarReset' => __('accessibility.toolbar_reset'),
+        'toolbarHideWidget' => __('accessibility.toolbar_hide_widget'),
+        'toolbarHideConfirmTitle' => __('accessibility.toolbar_hide_confirm_title'),
+        'toolbarHideConfirmBody' => __('accessibility.toolbar_hide_confirm_body'),
+        'toolbarCancel' => __('accessibility.toolbar_cancel'),
         'toolbarDeclaration' => __('accessibility.toolbar_declaration'),
     ];
     $a11yDeclarationUrl = marketing_url('/accessibility');
@@ -19,4 +23,5 @@
 <div
     id="es-a11y-widget-host"
     data-rtl="{{ is_rtl() ? '1' : '0' }}"
+    data-authenticated="{{ auth()->check() ? '1' : '0' }}"
 ></div>

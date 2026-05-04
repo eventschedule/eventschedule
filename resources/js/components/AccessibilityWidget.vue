@@ -1,5 +1,5 @@
 <template>
-  <div class="es-a11y-root pointer-events-none fixed bottom-6 z-[45] flex flex-col gap-2" :class="rootAlignClass">
+  <div v-if="!hidden" class="es-a11y-root pointer-events-none fixed bottom-6 z-[45] flex flex-col gap-2" :class="rootAlignClass">
     <div
       v-show="panelOpen"
       id="es-a11y-panel"
@@ -12,7 +12,7 @@
       @keydown="onPanelKeydown"
     >
       <div class="mb-3 flex items-center justify-between gap-2">
-        <h2 class="text-base font-semibold">{{ labelHeading }}</h2>
+        <h2 class="text-base font-semibold">{{ confirmHide ? labelHideConfirmTitle : labelHeading }}</h2>
         <button
           type="button"
           class="es-a11y-ignore rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:hover:bg-white/10 dark:hover:text-white"
@@ -25,7 +25,27 @@
         </button>
       </div>
 
-      <div class="space-y-3 text-sm">
+      <div v-if="confirmHide" class="space-y-3 text-sm">
+        <p class="text-gray-600 dark:text-gray-400">{{ labelHideConfirmBody }}</p>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="es-a11y-ignore flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+            @click="cancelHide"
+          >
+            {{ labelCancel }}
+          </button>
+          <button
+            type="button"
+            class="es-a11y-ignore flex-1 rounded-lg border border-transparent bg-[var(--brand-button-bg)] px-3 py-2 text-sm font-medium text-white hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]"
+            @click="hideWidget"
+          >
+            {{ labelHideWidget }}
+          </button>
+        </div>
+      </div>
+
+      <div v-else class="space-y-3 text-sm">
         <div>
           <div class="mb-1 font-medium text-gray-700 dark:text-gray-300">{{ labelFont }}</div>
           <div class="flex flex-wrap gap-2">
@@ -57,13 +77,23 @@
           <span>{{ labelReduceMotion }}</span>
         </label>
 
-        <button
-          type="button"
-          class="es-a11y-ignore w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
-          @click="resetAll"
-        >
-          {{ labelReset }}
-        </button>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="es-a11y-ignore flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+            @click="resetAll"
+          >
+            {{ labelReset }}
+          </button>
+          <button
+            v-if="isAuthenticated"
+            type="button"
+            class="es-a11y-ignore flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/5"
+            @click="requestHide"
+          >
+            {{ labelHideWidget }}
+          </button>
+        </div>
 
         <a
           v-if="declarationUrl"
@@ -97,6 +127,7 @@ const STORAGE = {
   contrast: 'es_a11y_high_contrast',
   underline: 'es_a11y_underline',
   motion: 'es_a11y_reduce_motion',
+  hide: 'es_a11y_hide_widget',
 };
 
 function readBool(key) {
@@ -131,6 +162,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    isAuthenticated: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -139,6 +174,8 @@ export default {
       highContrast: false,
       underlineLinks: false,
       reduceMotion: false,
+      hidden: false,
+      confirmHide: false,
       lastFocus: null,
     };
   },
@@ -176,6 +213,18 @@ export default {
     labelReset() {
       return this.i18n.toolbarReset || 'Reset';
     },
+    labelHideWidget() {
+      return this.i18n.toolbarHideWidget || 'Hide widget';
+    },
+    labelHideConfirmTitle() {
+      return this.i18n.toolbarHideConfirmTitle || 'Hide accessibility widget?';
+    },
+    labelHideConfirmBody() {
+      return this.i18n.toolbarHideConfirmBody || 'You can show it again from your account settings.';
+    },
+    labelCancel() {
+      return this.i18n.toolbarCancel || 'Cancel';
+    },
     labelDeclaration() {
       return this.i18n.toolbarDeclaration || 'Statement';
     },
@@ -192,6 +241,9 @@ export default {
     this.highContrast = readBool(STORAGE.contrast);
     this.underlineLinks = readBool(STORAGE.underline);
     this.reduceMotion = readBool(STORAGE.motion);
+    if (this.isAuthenticated && readBool(STORAGE.hide)) {
+      this.hidden = true;
+    }
     this.applyHtmlClasses();
   },
   methods: {
@@ -211,6 +263,7 @@ export default {
     },
     closePanel() {
       this.panelOpen = false;
+      this.confirmHide = false;
       if (this.lastFocus && typeof this.lastFocus.focus === 'function') {
         this.lastFocus.focus();
       }
@@ -253,6 +306,20 @@ export default {
       this.underlineLinks = false;
       this.reduceMotion = false;
       this.persist();
+    },
+    requestHide() {
+      this.confirmHide = true;
+    },
+    cancelHide() {
+      this.confirmHide = false;
+    },
+    hideWidget() {
+      try {
+        localStorage.setItem(STORAGE.hide, '1');
+      } catch (err) {}
+      this.confirmHide = false;
+      this.panelOpen = false;
+      this.hidden = true;
     },
   },
 };

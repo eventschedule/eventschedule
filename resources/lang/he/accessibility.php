@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'קו תחתון לקישורים',
     'toolbar_reduce_motion' => 'צמצום תנועה',
     'toolbar_reset' => 'איפוס הכל',
+    'toolbar_hide_widget' => 'הסתר חלונית',
+    'toolbar_hide_confirm_title' => 'להסתיר את חלונית הנגישות?',
+    'toolbar_hide_confirm_body' => 'ניתן להציג אותה שוב מהגדרות החשבון.',
+    'toolbar_cancel' => 'ביטול',
     'toolbar_declaration' => 'הצהרת נגישות',
+
+    'settings_widget_heading' => 'חלונית נגישות',
+    'settings_widget_hidden_note' => 'חלונית הנגישות מוסתרת במכשיר זה.',
+    'settings_show_widget' => 'הצג חלונית נגישות',
 
     'skip_to_main' => 'דלג לתוכן הראשי',
     'footer_link' => 'נגישות',

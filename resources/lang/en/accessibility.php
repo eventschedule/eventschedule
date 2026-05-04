@@ -57,7 +57,15 @@ return [
     'toolbar_underline_links' => 'Underline links',
     'toolbar_reduce_motion' => 'Reduce motion',
     'toolbar_reset' => 'Reset all',
+    'toolbar_hide_widget' => 'Hide widget',
+    'toolbar_hide_confirm_title' => 'Hide accessibility widget?',
+    'toolbar_hide_confirm_body' => 'You can show it again from your account settings.',
+    'toolbar_cancel' => 'Cancel',
     'toolbar_declaration' => 'Accessibility statement',
+
+    'settings_widget_heading' => 'Accessibility widget',
+    'settings_widget_hidden_note' => 'The accessibility widget is hidden on this device.',
+    'settings_show_widget' => 'Show accessibility widget',
 
     'skip_to_main' => 'Skip to main content',
     'footer_link' => 'Accessibility',

@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'Links onderstrepen',
     'toolbar_reduce_motion' => 'Beweging verminderen',
     'toolbar_reset' => 'Alles resetten',
+    'toolbar_hide_widget' => 'Widget verbergen',
+    'toolbar_hide_confirm_title' => 'Toegankelijkheidswidget verbergen?',
+    'toolbar_hide_confirm_body' => 'Je kunt deze opnieuw weergeven via je accountinstellingen.',
+    'toolbar_cancel' => 'Annuleren',
     'toolbar_declaration' => 'Toegankelijkheidsverklaring',
+
+    'settings_widget_heading' => 'Toegankelijkheidswidget',
+    'settings_widget_hidden_note' => 'De toegankelijkheidswidget is verborgen op dit apparaat.',
+    'settings_show_widget' => 'Toegankelijkheidswidget tonen',
 
     'skip_to_main' => 'Naar hoofdinhoud springen',
     'footer_link' => 'Toegankelijkheid',

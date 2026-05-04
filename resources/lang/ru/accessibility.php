@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'Подчёркивать ссылки',
     'toolbar_reduce_motion' => 'Меньше анимации',
     'toolbar_reset' => 'Сбросить всё',
+    'toolbar_hide_widget' => 'Скрыть виджет',
+    'toolbar_hide_confirm_title' => 'Скрыть виджет доступности?',
+    'toolbar_hide_confirm_body' => 'Вы сможете снова показать его в настройках аккаунта.',
+    'toolbar_cancel' => 'Отмена',
     'toolbar_declaration' => 'Заявление о доступности',
+
+    'settings_widget_heading' => 'Виджет доступности',
+    'settings_widget_hidden_note' => 'Виджет доступности скрыт на этом устройстве.',
+    'settings_show_widget' => 'Показать виджет доступности',
 
     'skip_to_main' => 'Перейти к основному содержимому',
     'footer_link' => 'Доступность',

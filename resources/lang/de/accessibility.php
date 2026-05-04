@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'Links unterstreichen',
     'toolbar_reduce_motion' => 'Bewegung reduzieren',
     'toolbar_reset' => 'Zurücksetzen',
+    'toolbar_hide_widget' => 'Widget ausblenden',
+    'toolbar_hide_confirm_title' => 'Barrierefreiheits-Widget ausblenden?',
+    'toolbar_hide_confirm_body' => 'Sie können es in Ihren Kontoeinstellungen wieder einblenden.',
+    'toolbar_cancel' => 'Abbrechen',
     'toolbar_declaration' => 'Barrierefreiheitserklärung',
+
+    'settings_widget_heading' => 'Barrierefreiheits-Widget',
+    'settings_widget_hidden_note' => 'Das Barrierefreiheits-Widget ist auf diesem Gerät ausgeblendet.',
+    'settings_show_widget' => 'Barrierefreiheits-Widget anzeigen',
 
     'skip_to_main' => 'Zum Hauptinhalt springen',
     'footer_link' => 'Barrierefreiheit',

@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'Subliniere legături',
     'toolbar_reduce_motion' => 'Reduce mișcarea',
     'toolbar_reset' => 'Resetează tot',
+    'toolbar_hide_widget' => 'Ascunde widget',
+    'toolbar_hide_confirm_title' => 'Ascunzi widgetul de accesibilitate?',
+    'toolbar_hide_confirm_body' => 'Îl poți afișa din nou din setările contului tău.',
+    'toolbar_cancel' => 'Anulează',
     'toolbar_declaration' => 'Declarație de accesibilitate',
+
+    'settings_widget_heading' => 'Widget de accesibilitate',
+    'settings_widget_hidden_note' => 'Widgetul de accesibilitate este ascuns pe acest dispozitiv.',
+    'settings_show_widget' => 'Afișează widgetul de accesibilitate',
 
     'skip_to_main' => 'Sari la conținutul principal',
     'footer_link' => 'Accesibilitate',

@@ -56,7 +56,15 @@ return [
     'toolbar_underline_links' => 'تسطير الروابط',
     'toolbar_reduce_motion' => 'تقليل الحركة',
     'toolbar_reset' => 'إعادة ضبط الكل',
+    'toolbar_hide_widget' => 'إخفاء الأداة',
+    'toolbar_hide_confirm_title' => 'إخفاء أداة إمكانية الوصول؟',
+    'toolbar_hide_confirm_body' => 'يمكنك إظهارها مرة أخرى من إعدادات حسابك.',
+    'toolbar_cancel' => 'إلغاء',
     'toolbar_declaration' => 'بيان إمكانية الوصول',
+
+    'settings_widget_heading' => 'أداة إمكانية الوصول',
+    'settings_widget_hidden_note' => 'أداة إمكانية الوصول مخفية على هذا الجهاز.',
+    'settings_show_widget' => 'إظهار أداة إمكانية الوصول',
 
     'skip_to_main' => 'تخطي إلى المحتوى الرئيسي',
     'footer_link' => 'إمكانية الوصول',
