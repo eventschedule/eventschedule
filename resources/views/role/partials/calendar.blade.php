@@ -2174,6 +2174,12 @@ const calendarApp = createApp({
                     if (lookBackDays > 0) {
                         currentDate.setDate(currentDate.getDate() - lookBackDays);
                     }
+                    if (event.start_date) {
+                        const eventStartDate = new Date(event.start_date + 'T00:00:00');
+                        if (currentDate < eventStartDate) {
+                            currentDate.setTime(eventStartDate.getTime());
+                        }
+                    }
 
                     while (currentDate <= endDate) {
                         if (this.matchesFrequency(event, currentDate)) {
