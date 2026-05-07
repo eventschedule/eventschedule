@@ -691,7 +691,7 @@
             @else
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
-                  {{ (new IntlDateFormatter(app()->getLocale(), IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, 'EEEE'))->format($startDt) }}
+                  {{ $startDt->translatedFormat('l') }}
                 </time>
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
