@@ -3022,10 +3022,15 @@ const calendarApp = createApp({
             }
         },
         formatPrice(price, currencyCode) {
+            const num = Number(price);
+            const isWhole = Number.isFinite(num) && num === Math.trunc(num);
             return new Intl.NumberFormat('{{ app()->getLocale() }}', {
                 style: 'currency',
-                currency: currencyCode
-            }).format(price);
+                currency: currencyCode,
+                currencyDisplay: 'narrowSymbol',
+                minimumFractionDigits: isWhole ? 0 : 2,
+                maximumFractionDigits: 2,
+            }).format(num);
         },
         isRoleAMember(event) {
             // This would need to be determined server-side and passed to the frontend

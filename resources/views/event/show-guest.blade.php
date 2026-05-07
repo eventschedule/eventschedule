@@ -650,7 +650,7 @@
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
                   style="color: {{ $accentColor }};">
-              {{ $startDt->format('M') }}
+              {{ $startDt->translatedFormat('M') }}
             </span>
             <span class="text-lg font-bold text-gray-900 dark:text-white leading-none">
               {{ $startDt->format('j') }}-{{ $endDt->format('j') }}
@@ -661,7 +661,7 @@
                       bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
             <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1"
                   style="color: {{ $accentColor }};">
-              {{ $startDt->format('M') }}
+              {{ $startDt->translatedFormat('M') }}
             </span>
             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none">
               {{ $startDt->format('j') }}
@@ -683,15 +683,15 @@
               @endphp
               <span class="text-sm text-gray-500 dark:text-gray-400">
                 @if ($startDt->format('m') === $endDt->format('m'))
-                  {{ $startDt->format('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('j') }}, {{ $multiEndTime }}
+                  {{ $startDt->translatedFormat('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('j') }}, {{ $multiEndTime }}
                 @else
-                  {{ $startDt->format('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('M j') }}, {{ $multiEndTime }}
+                  {{ $startDt->translatedFormat('M j') }}, {{ $multiStartTime }} - {{ $endDt->translatedFormat('M j') }}, {{ $multiEndTime }}
                 @endif
               </span>
             @else
               <span class="text-lg font-semibold text-gray-900 dark:text-white">
                 <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">
-                  {{ $startDt->format('l, F j') }}
+                  {{ (new IntlDateFormatter(app()->getLocale(), IntlDateFormatter::FULL, IntlDateFormatter::NONE, null, null, 'EEEE'))->format($startDt) }}
                 </time>
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">

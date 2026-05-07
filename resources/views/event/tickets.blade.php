@@ -276,10 +276,15 @@
                     return this.roundMoney(Math.min(discount, gross));
                 },
                 formatPrice(price) {
+                    const num = Number(price);
+                    const isWhole = Number.isFinite(num) && num === Math.trunc(num);
                     return new Intl.NumberFormat('{{ app()->getLocale() }}', {
                         style: 'currency',
-                        currency: '{{ $event->ticket_currency_code }}'
-                    }).format(price);
+                        currency: '{{ $event->ticket_currency_code }}',
+                        currencyDisplay: 'narrowSymbol',
+                        minimumFractionDigits: isWhole ? 0 : 2,
+                        maximumFractionDigits: 2,
+                    }).format(num);
                 },
                 validateForm(e) {
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {

@@ -283,6 +283,35 @@ class User extends Authenticatable implements MustVerifyEmail
             ->get();
     }
 
+    public function availableEventSchedules()
+    {
+        return $this->roles()
+            ->whereNotNull('roles.user_id')
+            ->where(function ($q) {
+                $q->whereNotNull('roles.email_verified_at')
+                    ->orWhereNotNull('roles.phone_verified_at');
+            })
+            ->where(function ($query) {
+                $query->whereIn('roles.id', function ($subquery) {
+                    $subquery->select('role_id')
+                        ->from('role_user')
+                        ->where('user_id', $this->id)
+                        ->whereIn('level', ['owner', 'admin', 'viewer']);
+                })
+                    ->orWhere(function ($q) {
+                        $q->whereIn('roles.id', function ($subquery) {
+                            $subquery->select('role_id')
+                                ->from('role_user')
+                                ->where('user_id', $this->id)
+                                ->where('level', 'follower');
+                        })
+                            ->where('accept_requests', true);
+                    });
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
     public function tickets()
     {
         return $this->hasMany(Sale::class);

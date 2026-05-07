@@ -12,8 +12,14 @@ class MoneyUtils
         'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF',
     ];
 
-    private static $displayCodeOverrides = [
-        'ILS' => 'NIS',
+    private static $displayCodeOverrides = [];
+
+    private static $displaySymbols = [
+        'ILS' => '₪',
+        'USD' => '$',
+        'EUR' => '€',
+        'GBP' => '£',
+        'JPY' => '¥',
     ];
 
     public static function decimalsFor($currencyCode): int
@@ -34,6 +40,10 @@ class MoneyUtils
 
         if ($decimals === 2 && str_ends_with($formatted, '.00')) {
             $formatted = substr($formatted, 0, -3);
+        }
+
+        if (isset(self::$displaySymbols[$upper])) {
+            return self::$displaySymbols[$upper].$formatted;
         }
 
         $displayCode = self::$displayCodeOverrides[$upper] ?? $currencyCode;

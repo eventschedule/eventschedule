@@ -692,20 +692,61 @@ class EventRepo
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
-        // If editing an existing event, preserve curators that the current user can't see
+        $existingAttachedIds = ($event && $event->exists)
+            ? $event->roles()->pluck('roles.id')->toArray()
+            : [];
+
+        $availableSchedules = $user->availableEventSchedules();
+        $userVisibleIds = $availableSchedules->pluck('id')->toArray();
+
+        // The schedules tab pre-checks every attached schedule (including the
+        // venue/talent on the event), but the dedicated venue field and members
+        // section may have been changed by the user without touching the tab.
+        // Treat those stale pre-checks as overridden by the dedicated sections.
         if ($event && $event->exists) {
-            $existingCurators = $event->roles()->where('roles.type', 'curator')->pluck('roles.id')->toArray();
-            $userCurators = $user->curators()->pluck('roles.id')->toArray();
-
-            // Find curators that exist on the event but the user can't edit
-            $preservedCurators = array_diff($existingCurators, $userCurators);
-
-            // Add preserved curators to the selected curators
-            foreach ($preservedCurators as $curatorId) {
-                if (! in_array($curatorId, $selectedCurators)) {
-                    $selectedCurators[] = $curatorId;
+            $previousVenueIds = $event->roles()
+                ->where('roles.type', 'venue')
+                ->pluck('roles.id')
+                ->toArray();
+            foreach ($previousVenueIds as $oldVenueId) {
+                if ($venue && $venue->id === $oldVenueId) {
+                    continue;
                 }
+                $selectedCurators = array_values(array_diff($selectedCurators, [$oldVenueId]));
             }
+
+            $submittedMemberRoleIds = [];
+            foreach ((array) ($request->members ?? []) as $memberId => $member) {
+                if (! $memberId || strpos($memberId, 'new_') === 0) {
+                    continue;
+                }
+                $submittedMemberRoleIds[] = UrlUtils::decodeId($memberId);
+            }
+            $previousTalentIds = $event->roles()
+                ->where('roles.type', 'talent')
+                ->pluck('roles.id')
+                ->toArray();
+            foreach ($previousTalentIds as $oldTalentId) {
+                if (in_array($oldTalentId, $submittedMemberRoleIds)) {
+                    continue;
+                }
+                $selectedCurators = array_values(array_diff($selectedCurators, [$oldTalentId]));
+            }
+        }
+
+        // Preserve attachments the user has no visibility into. Anything visible
+        // in the schedules tab is fully managed by this submission.
+        foreach ($existingAttachedIds as $attachedId) {
+            if (in_array($attachedId, $userVisibleIds)) {
+                continue;
+            }
+            if (in_array($attachedId, $roleIds)) {
+                continue;
+            }
+            if (in_array($attachedId, $selectedCurators)) {
+                continue;
+            }
+            $selectedCurators[] = $attachedId;
         }
 
         foreach ($selectedCurators as $curatorId) {
@@ -714,6 +755,31 @@ class EventRepo
                 $roles[] = $curator;
                 $roleIds[] = $curator->id;
             }
+        }
+
+        // Schedules tab is authoritative for previously-attached schedules: if a
+        // schedule was attached before this save and is visible in the tab but
+        // not in curators[], detach it even if a parallel section (talent
+        // members, venue field) still has it selected. New attachments added via
+        // those parallel sections are NOT affected.
+        if ($currentRole && ! empty($existingAttachedIds)) {
+            foreach ($availableSchedules as $schedule) {
+                if ($schedule->subdomain === $currentRole->subdomain) {
+                    continue;
+                }
+                if (! in_array($schedule->id, $existingAttachedIds)) {
+                    continue;
+                }
+                if (in_array($schedule->id, $selectedCurators)) {
+                    continue;
+                }
+                $key = array_search($schedule->id, $roleIds);
+                if ($key !== false) {
+                    unset($roleIds[$key]);
+                    $roles = array_values(array_filter($roles, fn ($r) => $r->id !== $schedule->id));
+                }
+            }
+            $roleIds = array_values(array_unique($roleIds));
         }
 
         $event->roles()->sync($roleIds);

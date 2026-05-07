@@ -1227,12 +1227,12 @@
                                 {{ __('messages.agenda') }}
                             </a>
                             @php
-                                $curatorsForNav = $user->allCurators();
-                                $curatorsForNav = $curatorsForNav->filter(function($curator) use ($subdomain) {
-                                    return $curator->subdomain !== $subdomain;
+                                $schedulesForNav = $user->availableEventSchedules();
+                                $schedulesForNav = $schedulesForNav->filter(function($schedule) use ($subdomain) {
+                                    return $schedule->subdomain !== $subdomain;
                                 });
                             @endphp
-                            @if ($curatorsForNav->count() > 0)
+                            @if ($schedulesForNav->count() > 0)
                             <a href="#section-schedules" class="section-nav-link" data-section="section-schedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -2412,13 +2412,13 @@
                 </div>
 
                 @php
-                    $curators = $user->allCurators();
-                    $curators = $curators->filter(function($curator) use ($subdomain) {
-                        return $curator->subdomain !== $subdomain;
+                    $schedules = $user->availableEventSchedules();
+                    $schedules = $schedules->filter(function($schedule) use ($subdomain) {
+                        return $schedule->subdomain !== $subdomain;
                     });
                 @endphp
 
-                @if ($curators->count() > 0)
+                @if ($schedules->count() > 0)
                 <button type="button" class="mobile-section-header" data-section="section-schedules">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2431,7 +2431,7 @@
                     </svg>
                 </button>
                 <div id="section-schedules" class="section-content lg:mt-0">
-                    <div class="max-w-xl">                                                
+                    <div class="max-w-xl">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -2440,27 +2440,27 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label class="mb-2" for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
-                            
-                            @foreach($curators as $curator)
+                            <x-input-label class="mb-2" for="curators" :value="__(count($schedules) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
+
+                            @foreach($schedules as $schedule)
                             @php
-                                $isClonedCurator = isset($clonedCurators) && $clonedCurators->contains(function($c) use ($curator) { return $c->id == $curator->id; });
-                                $isCuratorChecked = (! $event->exists && ($role->subdomain == $curator->subdomain || session('pending_request') == $curator->subdomain)) || $event->curators->contains($curator->id) || $isClonedCurator;
+                                $isClonedSchedule = isset($clonedCurators) && $clonedCurators->contains(function($c) use ($schedule) { return $c->id == $schedule->id; });
+                                $isScheduleChecked = (! $event->exists && ($role->subdomain == $schedule->subdomain || session('pending_request') == $schedule->subdomain)) || $event->curators->contains($schedule->id) || $isClonedSchedule;
                             @endphp
                             <div class="mb-4">
                                 <div class="flex items-center mb-2 h-6">
-                                    <input type="checkbox" 
-                                           id="curator_{{ $curator->encodeId() }}" 
-                                           name="curators[]" 
-                                           value="{{ $curator->encodeId() }}"
-                                           {{ $isCuratorChecked ? 'checked' : '' }}
+                                    <input type="checkbox"
+                                           id="curator_{{ $schedule->encodeId() }}"
+                                           name="curators[]"
+                                           value="{{ $schedule->encodeId() }}"
+                                           {{ $isScheduleChecked ? 'checked' : '' }}
                                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded"
-                                           @change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
-                                    <label for="curator_{{ $curator->encodeId() }}" class="ms-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {{ $curator->name }}
+                                           @change="toggleCuratorGroupSelection('{{ $schedule->encodeId() }}')">
+                                    <label for="curator_{{ $schedule->encodeId() }}" class="ms-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $schedule->name }}
                                     </label>
                                     <div class="ms-2 flex-shrink-0">
-                                        @if($curator->accept_requests && $curator->request_terms)
+                                        @if($schedule->accept_requests && $schedule->request_terms)
                                         <div class="relative group">
                                             <button type="button" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] focus:outline-none">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -2468,9 +2468,9 @@
                                                 </svg>
                                             </button>
                                             <div class="absolute bottom-full start-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
-                                                <div class="leading-relaxed" 
+                                                <div class="leading-relaxed"
                                                      dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
-                                                     style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($curator->translatedRequestTerms())) !!}</div>
+                                                     style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($schedule->translatedRequestTerms())) !!}</div>
                                                 <div class="absolute top-full start-1/2 transform -translate-x-1/2 w-0 h-0 border-s-4 border-e-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
                                             </div>
                                         </div>
@@ -2479,26 +2479,26 @@
                                         @endif
                                     </div>
                                 </div>
-                                
-                                @if($curator->groups && count($curator->groups) > 0)
-                                <div id="curator_group_{{ $curator->encodeId() }}" class="ms-6 mb-2" style="display: {{ $isCuratorChecked ? 'block' : 'none' }};">
-                                    <select id="curator_group_{{ $curator->encodeId() }}" 
-                                            name="curator_groups[{{ $curator->encodeId() }}]" 
+
+                                @if($schedule->groups && count($schedule->groups) > 0)
+                                <div id="curator_group_{{ $schedule->encodeId() }}" class="ms-6 mb-2" style="display: {{ $isScheduleChecked ? 'block' : 'none' }};">
+                                    <select id="curator_group_{{ $schedule->encodeId() }}"
+                                            name="curator_groups[{{ $schedule->encodeId() }}]"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.please_select') }}</option>
-                                        @foreach($curator->groups as $group)
+                                        @foreach($schedule->groups as $group)
                                             @php
                                                 $selectedGroupId = null;
                                                 if ($event->exists) {
-                                                    $selectedGroupId = $event->getGroupIdForSubdomain($curator->subdomain);
+                                                    $selectedGroupId = $event->getGroupIdForSubdomain($schedule->subdomain);
                                                     if ($selectedGroupId) {
                                                         $selectedGroupId = \App\Utils\UrlUtils::encodeId($selectedGroupId);
                                                     }
-                                                } elseif (isset($clonedCuratorGroups) && isset($clonedCuratorGroups[$curator->encodeId()])) {
-                                                    $selectedGroupId = $clonedCuratorGroups[$curator->encodeId()];
+                                                } elseif (isset($clonedCuratorGroups) && isset($clonedCuratorGroups[$schedule->encodeId()])) {
+                                                    $selectedGroupId = $clonedCuratorGroups[$schedule->encodeId()];
                                                 }
                                             @endphp
-                                            <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                            <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $schedule->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                         @endforeach
                                     </select>
                                 </div>
