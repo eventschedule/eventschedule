@@ -6207,6 +6207,13 @@
       },
     },
     watch: {
+      'tickets.length'() {
+        this.$nextTick(() => {
+          if (typeof window.initHtmlEditors === 'function') {
+            window.initHtmlEditors();
+          }
+        });
+      },
       venueType() {
         this.venueEmail = "";
         this.venuePhone = "";
@@ -6470,6 +6477,14 @@
 
   // Store reference for section navigation
   window.vueApp = vueInstance;
+
+  // Sync html-editor textareas now that v-model has populated their values, and
+  // initialize EasyMDE on any textareas rendered by v-for that didn't exist at DOMContentLoaded.
+  vueInstance.$nextTick(() => {
+    if (typeof window.initHtmlEditors === 'function') {
+      window.initHtmlEditors();
+    }
+  });
 
   // --- Migrated inline event handlers ---
 

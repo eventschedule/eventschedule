@@ -9,7 +9,6 @@ use App\Models\Role;
 use App\Utils\EventTextGenerator;
 use App\Utils\GeminiUtils;
 use App\Utils\OpenAIUtils;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -119,20 +118,17 @@ class GraphicEmailService
                 return false;
             }
 
-            // Send the email to all recipients in a single email
+            // Send the email to all recipients in a single email. The
+            // RoleMailerService handles the hosted / role-mailer / fallback
+            // logic, including marking the role as failed on transport
+            // errors and retrying via the default mailer.
+            $mailable = new GraphicEmail($role, $imageData, $eventText);
+            $recipients = array_values($emailList);
+
             if (config('app.hosted')) {
-                // For hosted users, only send if role has email settings
-                if ($role->hasEmailSettings()) {
-                    $this->configureRoleMailer($role);
-                    $mailerName = 'role_'.$role->id;
-                    Mail::mailer($mailerName)->to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
-                } else {
-                    // Use default mailer
-                    Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
-                }
+                app(RoleMailerService::class)->sendForRole($role, $recipients, $mailable);
             } else {
-                // For selfhost users, use system email settings
-                Mail::to(array_values($emailList))->send(new GraphicEmail($role, $imageData, $eventText));
+                Mail::to($recipients)->send($mailable);
             }
 
             UsageTrackingService::track(UsageTrackingService::EMAIL_GRAPHIC, $role->id);
@@ -181,32 +177,5 @@ class GraphicEmailService
 
             return null;
         }
-    }
-
-    /**
-     * Configure mailer with role-specific SMTP settings
-     */
-    protected function configureRoleMailer(Role $role): void
-    {
-        $emailSettings = $role->getEmailSettings();
-
-        if (empty($emailSettings)) {
-            return;
-        }
-
-        // Create a unique mailer name for this role
-        $mailerName = 'role_'.$role->id;
-
-        // Configure the mailer
-        Config::set("mail.mailers.{$mailerName}", [
-            'transport' => 'smtp',
-            'host' => $emailSettings['host'] ?? config('mail.mailers.smtp.host'),
-            'port' => $emailSettings['port'] ?? config('mail.mailers.smtp.port'),
-            'encryption' => $emailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
-            'username' => $emailSettings['username'] ?? null,
-            'password' => $emailSettings['password'] ?? null,
-            'timeout' => null,
-            'local_domain' => config('mail.mailers.smtp.local_domain'),
-        ]);
     }
 }

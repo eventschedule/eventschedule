@@ -3229,7 +3229,12 @@
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 @if (config('app.hosted'))
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="email">
-                                    {{ __('messages.email_settings') }}
+                                    <span class="inline-flex items-center gap-1.5">
+                                        {{ __('messages.email_settings') }}
+                                        @if ($role->isEmailSettingsFailureActive())
+                                        <span class="inline-block w-2 h-2 rounded-full bg-amber-500" aria-label="{{ __('messages.email_settings_failed_warning_title') }}"></span>
+                                        @endif
+                                    </span>
                                 </button>
                                 @endif
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="google">
@@ -3248,6 +3253,31 @@
                         <!-- Tab Content: Email Settings -->
                         <div id="integration-tab-email" class="integration-tab-content">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.email_settings_help') }}</p>
+
+                            @if ($role->isEmailSettingsFailureActive())
+                            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 mb-4 flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <div class="text-sm text-amber-800 dark:text-amber-200">
+                                    <p class="font-semibold mb-1">{{ __('messages.email_settings_failed_warning_title') }}</p>
+                                    <p class="mb-2">
+                                        {{ __('messages.email_settings_failed_warning_body', [
+                                            'date' => $role->email_settings_failed_at->isoFormat('LLL'),
+                                            'relative' => $role->email_settings_failed_at->diffForHumans(),
+                                            'retry_at' => $role->email_settings_failed_at->copy()->addDay()->isoFormat('LLL'),
+                                        ]) }}
+                                    </p>
+                                    <p class="mb-2">{{ __('messages.email_settings_failed_warning_hint') }}</p>
+                                    @if ($role->email_settings_failed_message)
+                                    <details>
+                                        <summary class="cursor-pointer underline">{{ __('messages.email_settings_failed_warning_show_error') }}</summary>
+                                        <pre class="mt-2 text-xs whitespace-pre-wrap break-words bg-amber-100/50 dark:bg-amber-900/30 p-2 rounded">{{ $role->email_settings_failed_message }}</pre>
+                                    </details>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
 
                             @if (is_demo_mode())
                             <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">

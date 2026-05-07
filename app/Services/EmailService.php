@@ -67,10 +67,8 @@ class EmailService
                     app()->getLocale()
                 );
             } else {
-                if (config('app.hosted') && $role && $role->hasEmailSettings()) {
-                    $this->configureRoleMailer($role);
-                    $mailerName = 'role_'.$role->id;
-                    Mail::mailer($mailerName)->to($sale->email)->send($mailable);
+                if (config('app.hosted') && $role) {
+                    app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);
                 } else {
                     Mail::to($sale->email)->send($mailable);
                 }
@@ -227,6 +225,11 @@ class EmailService
             }
 
             UsageTrackingService::track(UsageTrackingService::EMAIL_TEST, $role->id);
+
+            // Successful test send proves the credentials work, so clear any
+            // previously recorded failure flag and let queued emails resume
+            // using the role's custom SMTP.
+            $role->clearEmailSettingsFailure();
 
             return true;
         } catch (\Exception $e) {

@@ -141,6 +141,8 @@ class Role extends Model implements MustVerifyEmail
         'hide_past_events' => 'boolean',
         'draft_events_default' => 'boolean',
         'hide_videos' => 'boolean',
+        'email_settings_failed_at' => 'datetime',
+        'email_settings_failure_notified_at' => 'datetime',
     ];
 
     /**
@@ -1819,6 +1821,96 @@ class Role extends Model implements MustVerifyEmail
     public function setEmailSettings(array $settings): void
     {
         $this->email_settings = $settings;
+    }
+
+    /**
+     * Mark the role's custom SMTP credentials as having failed. Uses a
+     * targeted UPDATE so callers that have unsaved attribute changes on the
+     * model (e.g. RoleController::testEmail temporarily applying form data
+     * via setEmailSettings) don't accidentally persist them.
+     */
+    public function markEmailSettingsFailed(?string $message): void
+    {
+        $now = now();
+        $truncated = $message ? mb_substr($message, 0, 1000) : null;
+
+        static::query()->whereKey($this->id)->update([
+            'email_settings_failed_at' => $now,
+            'email_settings_failed_message' => $truncated,
+        ]);
+
+        $this->setRawColumns([
+            'email_settings_failed_at' => $now,
+            'email_settings_failed_message' => $truncated,
+        ]);
+    }
+
+    /**
+     * Record that schedule editors have been notified of the failure. Same
+     * targeted-update pattern as markEmailSettingsFailed.
+     */
+    public function markEmailSettingsFailureNotified(): void
+    {
+        $now = now();
+
+        static::query()->whereKey($this->id)->update([
+            'email_settings_failure_notified_at' => $now,
+        ]);
+
+        $this->setRawColumns([
+            'email_settings_failure_notified_at' => $now,
+        ]);
+    }
+
+    /**
+     * Clear any previously recorded email-settings failure. Called from the
+     * "Send Test Email" success path and after a successful retry through the
+     * role's custom mailer. Uses a targeted UPDATE so an in-progress
+     * pre-save test (which has unsaved email_settings on the model) does not
+     * accidentally commit those settings here.
+     */
+    public function clearEmailSettingsFailure(): void
+    {
+        if ($this->email_settings_failed_at === null
+            && $this->email_settings_failed_message === null
+            && $this->email_settings_failure_notified_at === null) {
+            return;
+        }
+
+        static::query()->whereKey($this->id)->update([
+            'email_settings_failed_at' => null,
+            'email_settings_failed_message' => null,
+            'email_settings_failure_notified_at' => null,
+        ]);
+
+        $this->setRawColumns([
+            'email_settings_failed_at' => null,
+            'email_settings_failed_message' => null,
+            'email_settings_failure_notified_at' => null,
+        ]);
+    }
+
+    /**
+     * True when a failure was recorded within the last 24 hours. While active,
+     * queued mailer paths skip the role's custom SMTP and route through the
+     * default mailer instead.
+     */
+    public function isEmailSettingsFailureActive(): bool
+    {
+        return $this->email_settings_failed_at !== null
+            && $this->email_settings_failed_at->gt(now()->subDay());
+    }
+
+    /**
+     * Reflect a targeted column update onto this in-memory model instance
+     * without disturbing other unsaved attribute changes.
+     */
+    protected function setRawColumns(array $values): void
+    {
+        foreach ($values as $key => $value) {
+            $this->setAttribute($key, $value);
+            $this->syncOriginalAttribute($key);
+        }
     }
 
     /**

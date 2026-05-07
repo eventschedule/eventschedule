@@ -3,11 +3,11 @@
 namespace App\Jobs;
 
 use App\Models\Role;
+use App\Services\RoleMailerService;
 use App\Services\UsageTrackingService;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 
 class SendQueuedEmail implements ShouldQueue
@@ -38,7 +38,11 @@ class SendQueuedEmail implements ShouldQueue
     }
 
     /**
-     * Execute the job.
+     * Execute the job. Role-mailer failures are caught and recorded inside
+     * RoleMailerService, which falls back to the platform mailer so the
+     * recipient still receives the email. A bare exception escaping this
+     * method therefore indicates the platform mailer itself failed, not the
+     * schedule's custom SMTP.
      */
     public function handle(): void
     {
@@ -49,17 +53,13 @@ class SendQueuedEmail implements ShouldQueue
                 app()->setLocale($this->locale);
             }
 
-            if ($this->roleId && config('app.hosted')) {
-                $role = Role::find($this->roleId);
+            $role = $this->roleId ? Role::find($this->roleId) : null;
 
-                if ($role && $role->hasEmailSettings()) {
-                    $this->configureRoleMailer($role);
-                    $mailerName = 'role_'.$role->id;
-                    Mail::mailer($mailerName)->to($this->recipient)->send($this->mailable);
-                    UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
+            if ($role) {
+                app(RoleMailerService::class)->sendForRole($role, $this->recipient, $this->mailable);
+                UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
 
-                    return;
-                }
+                return;
             }
 
             Mail::to($this->recipient)->send($this->mailable);
@@ -67,30 +67,5 @@ class SendQueuedEmail implements ShouldQueue
         } finally {
             app()->setLocale($originalLocale);
         }
-    }
-
-    /**
-     * Configure mailer with role-specific SMTP settings.
-     */
-    protected function configureRoleMailer(Role $role): void
-    {
-        $emailSettings = $role->getEmailSettings();
-
-        if (empty($emailSettings)) {
-            return;
-        }
-
-        $mailerName = 'role_'.$role->id;
-
-        Config::set("mail.mailers.{$mailerName}", [
-            'transport' => 'smtp',
-            'host' => $emailSettings['host'] ?? config('mail.mailers.smtp.host'),
-            'port' => $emailSettings['port'] ?? config('mail.mailers.smtp.port'),
-            'encryption' => $emailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
-            'username' => $emailSettings['username'] ?? null,
-            'password' => $emailSettings['password'] ?? null,
-            'timeout' => null,
-            'local_domain' => config('mail.mailers.smtp.local_domain'),
-        ]);
     }
 }
