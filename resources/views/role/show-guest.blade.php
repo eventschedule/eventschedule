@@ -45,6 +45,8 @@ html[data-es-view="list"] #calendar-panel-wrapper {
       border: none !important;
       padding: 0 !important;
   }
+  html[data-es-view="list"] body { background-attachment: fixed !important; }
+  html[data-es-view="calendar"] body { background-attachment: scroll !important; }
   </style>
 
   <main>
