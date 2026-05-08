@@ -124,6 +124,8 @@ return [
     'hide_past_events_help' => 'Quando ativado, os eventos passados não serão exibidos no calendário público.',
     'hide_videos' => 'Ocultar Vídeos',
     'hide_videos_help' => 'Quando ativado, o painel de vídeos não será exibido no calendário público.',
+    'show_accessibility_widget' => 'Mostrar Widget de Acessibilidade',
+    'show_accessibility_widget_help' => 'Quando ativado, um widget de acessibilidade será exibido no calendário público para que os visitantes possam ajustar o tamanho da fonte, o contraste e o movimento.',
     'draft_events_default' => 'Novos eventos como rascunho por padrão',
     'draft_events_default_help' => 'Quando ativado, novos eventos serão salvos como rascunhos. Você pode publicá-los quando estiverem prontos.',
     'default_category' => 'Categoria padrão',

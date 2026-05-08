@@ -129,6 +129,8 @@ return [
     'hide_past_events_help' => 'When enabled, past events will not be shown on the public schedule.',
     'hide_videos' => 'Hide Videos',
     'hide_videos_help' => 'When enabled, the videos panel will not be shown on the public schedule.',
+    'show_accessibility_widget' => 'Show Accessibility Widget',
+    'show_accessibility_widget_help' => 'When enabled, an accessibility widget will be shown on the public schedule so visitors can adjust font size, contrast, and motion.',
     'draft_events_default' => 'New events default to draft',
     'draft_events_default_help' => 'When enabled, new events will be saved as drafts. You can publish them when ready.',
     'default_category' => 'Default category',

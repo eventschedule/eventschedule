@@ -573,4 +573,8 @@
     </div>
     @endif
 
+    @if ($role->show_accessibility_widget)
+        @include('partials.accessibility-widget')
+    @endif
+
 </x-app-layout>

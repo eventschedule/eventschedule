@@ -381,8 +381,6 @@
 
     @include('marketing.partials.footer')
 
-    @include('partials.accessibility-widget')
-
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>
             @keyframes es-ping { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3); opacity: 0; } }

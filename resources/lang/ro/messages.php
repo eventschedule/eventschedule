@@ -129,6 +129,8 @@ return [
     'hide_past_events_help' => 'Când este activat, evenimentele trecute nu vor fi afișate în calendarul public.',
     'hide_videos' => 'Ascunde Videoclipurile',
     'hide_videos_help' => 'Când este activat, panoul de videoclipuri nu va fi afișat în calendarul public.',
+    'show_accessibility_widget' => 'Afișează Widget-ul de Accesibilitate',
+    'show_accessibility_widget_help' => 'Când este activat, un widget de accesibilitate va fi afișat în calendarul public pentru ca vizitatorii să poată ajusta dimensiunea fontului, contrastul și mișcarea.',
     'draft_events_default' => 'Evenimentele noi implicit ca ciornă',
     'draft_events_default_help' => 'Când este activat, evenimentele noi vor fi salvate ca ciorne. Le puteți publica când sunt gata.',
     'default_category' => 'Categoria implicită',

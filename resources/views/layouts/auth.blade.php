@@ -98,8 +98,6 @@
 
         <div class="pt-20"></div>
     </div>
-
-    @include('partials.accessibility-widget')
 </body>
 
 </html>

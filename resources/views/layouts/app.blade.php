@@ -820,7 +820,5 @@
         </div>
     @endif --}}
 
-    @include('partials.accessibility-widget')
-
 </body>
 </html>

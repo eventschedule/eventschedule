@@ -484,6 +484,8 @@ return [
     'hide_past_events_help' => 'Wenn aktiviert, werden vergangene Veranstaltungen nicht im öffentlichen Kalender angezeigt.',
     'hide_videos' => 'Videos ausblenden',
     'hide_videos_help' => 'Wenn aktiviert, wird der Videobereich nicht im öffentlichen Kalender angezeigt.',
+    'show_accessibility_widget' => 'Barrierefreiheits-Widget anzeigen',
+    'show_accessibility_widget_help' => 'Wenn aktiviert, wird im öffentlichen Kalender ein Barrierefreiheits-Widget angezeigt, mit dem Besucher Schriftgröße, Kontrast und Bewegung anpassen können.',
     'draft_events_default' => 'Neue Veranstaltungen standardmäßig als Entwurf',
     'draft_events_default_help' => 'Wenn aktiviert, werden neue Veranstaltungen als Entwürfe gespeichert. Sie können sie veröffentlichen, wenn sie bereit sind.',
     'default_category' => 'Standardkategorie',

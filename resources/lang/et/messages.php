@@ -129,6 +129,8 @@ return [
     'hide_past_events_help' => 'Kui see on lubatud, ei kuvata möödunud sündmusi avalikus kalendris.',
     'hide_videos' => 'Peida Videod',
     'hide_videos_help' => 'Kui see on lubatud, ei kuvata videopaneeli avalikus kalendris.',
+    'show_accessibility_widget' => 'Näita juurdepääsetavuse vidinat',
+    'show_accessibility_widget_help' => 'Kui see on lubatud, kuvatakse avalikus kalendris juurdepääsetavuse vidin, et külastajad saaksid kohandada fondisuurust, kontrasti ja liikumist.',
     'draft_events_default' => 'Uued sündmused vaikimisi mustandina',
     'draft_events_default_help' => 'Kui see on lubatud, salvestatakse uued sündmused mustanditena. Saate need avaldada, kui need on valmis.',
     'default_category' => 'Vaikekategooria',

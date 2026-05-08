@@ -2746,6 +2746,14 @@
                             @endif
 
                             <div class="mb-6">
+                                <x-toggle name="show_accessibility_widget"
+                                    label="{{ __('messages.show_accessibility_widget') }}"
+                                    checked="{{ old('show_accessibility_widget', $role->show_accessibility_widget) }}"
+                                    help="{{ __('messages.show_accessibility_widget_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_accessibility_widget')" />
+                            </div>
+
+                            <div class="mb-6">
                                 <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
                                 <select name="first_day_of_week" id="first_day_of_week"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">

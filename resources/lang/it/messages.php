@@ -126,6 +126,8 @@ return [
     'hide_past_events_help' => 'Quando abilitato, gli eventi passati non verranno mostrati nel calendario pubblico.',
     'hide_videos' => 'Nascondi Video',
     'hide_videos_help' => 'Quando abilitato, il pannello video non verrà mostrato nel calendario pubblico.',
+    'show_accessibility_widget' => 'Mostra Widget di Accessibilità',
+    'show_accessibility_widget_help' => 'Quando abilitato, un widget di accessibilità verrà mostrato nel calendario pubblico in modo che i visitatori possano regolare la dimensione del carattere, il contrasto e il movimento.',
     'draft_events_default' => 'Nuovi eventi come bozza per impostazione predefinita',
     'draft_events_default_help' => 'Quando attivato, i nuovi eventi verranno salvati come bozze. Potrai pubblicarli quando saranno pronti.',
     'default_category' => 'Categoria predefinita',

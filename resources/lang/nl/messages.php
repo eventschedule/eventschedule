@@ -123,6 +123,8 @@ return [
     'hide_past_events_help' => 'Wanneer ingeschakeld, worden afgelopen evenementen niet weergegeven op de openbare agenda.',
     'hide_videos' => 'Video\'s verbergen',
     'hide_videos_help' => 'Wanneer ingeschakeld, wordt het videopaneel niet weergegeven op de openbare agenda.',
+    'show_accessibility_widget' => 'Toegankelijkheidswidget weergeven',
+    'show_accessibility_widget_help' => 'Wanneer ingeschakeld, wordt een toegankelijkheidswidget weergegeven op de openbare agenda zodat bezoekers de tekengrootte, het contrast en de beweging kunnen aanpassen.',
     'draft_events_default' => 'Nieuwe evenementen standaard als concept',
     'draft_events_default_help' => 'Wanneer ingeschakeld, worden nieuwe evenementen opgeslagen als concepten. U kunt ze publiceren wanneer ze klaar zijn.',
     'default_category' => 'Standaardcategorie',
