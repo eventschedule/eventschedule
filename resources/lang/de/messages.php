@@ -344,7 +344,6 @@ return [
     'participants' => 'Teilnehmer',
     'event_participants' => 'Veranstaltungsteilnehmer',
     'manage' => 'Verwalten',
-    'please_select_venue_or_participant' => 'Bitte wählen Sie einen Veranstaltungsort oder Teilnehmer',
     'event_tickets' => 'Veranstaltungstickets',
     'enable_tickets' => 'Tickets aktivieren',
     'currency' => 'Währung',

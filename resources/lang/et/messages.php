@@ -416,7 +416,6 @@ return [
     'participants' => 'Osalejad',
     'event_participants' => 'Üritusest osavõtjad',
     'manage' => 'Halda',
-    'please_select_venue_or_participant' => 'Palun valige koht või osaleja',
     'please_fill_in_custom_field_names' => 'Palun täitke kõik kohandatud väljade nimed',
     'field_name_required' => 'Välja nimi on kohustuslik',
     'ticket_type_required' => 'Vajalik on pileti tüüp',

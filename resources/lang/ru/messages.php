@@ -417,7 +417,6 @@ return [
     'participants' => 'Участники',
     'event_participants' => 'Участники мероприятия',
     'manage' => 'Управлять',
-    'please_select_venue_or_participant' => 'Пожалуйста, выберите место или участника',
     'please_fill_in_custom_field_names' => 'Пожалуйста, заполните все имена настраиваемых полей.',
     'field_name_required' => 'Требуется имя поля',
     'ticket_type_required' => 'Укажите тип билета.',

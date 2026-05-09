@@ -417,7 +417,6 @@ return [
     'participants' => 'Participanți',
     'event_participants' => 'Participanți la Eveniment',
     'manage' => 'Administrează',
-    'please_select_venue_or_participant' => 'Vă rugăm selectați o locație sau un participant',
     'please_fill_in_custom_field_names' => 'Vă rugăm completați toate denumirile câmpurilor personalizate',
     'field_name_required' => 'Numele câmpului este obligatoriu',
     'ticket_type_required' => 'Tipul biletului este obligatoriu',

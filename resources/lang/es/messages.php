@@ -370,7 +370,6 @@ return [
     'participants' => 'Participantes',
     'event_participants' => 'Participantes del evento',
     'manage' => 'Gestionar',
-    'please_select_venue_or_participant' => 'Por favor, seleccione un lugar o participante',
     'event_tickets' => 'Entradas para el evento',
     'enable_tickets' => 'Habilitar entradas',
     'currency' => 'Moneda',

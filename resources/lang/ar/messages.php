@@ -337,7 +337,6 @@ return [
     'participants' => 'المشاركون',
     'event_participants' => 'مشاركون في الفعالية',
     'manage' => 'إدارة',
-    'please_select_venue_or_participant' => 'يرجى اختيار مكان أو مشارك',
     'event_tickets' => 'تذاكر الحدث',
     'enable_tickets' => 'تمكين التذاكر',
     'currency' => 'العملة',

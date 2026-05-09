@@ -5392,12 +5392,6 @@
           }
         }
 
-        if (! this.isFormValid) {
-          event.preventDefault();
-          alert(@json(__('messages.please_select_venue_or_participant')));
-          return;
-        }
-
         // Check custom fields if tickets are enabled
         if (this.event.tickets_enabled) {
           const hasInvalidEventFields = Object.values(this.eventCustomFields || {}).some(field => !field.name);
@@ -6158,11 +6152,6 @@
       },
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
-      },
-      isFormValid() {        
-        var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
-
-        return hasSubdomain;
       },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);

@@ -417,7 +417,6 @@ return [
     'participants' => 'Participants',
     'event_participants' => 'Event Participants',
     'manage' => 'Manage',
-    'please_select_venue_or_participant' => 'Please select a venue or participant',
     'please_fill_in_custom_field_names' => 'Please fill in all custom field names',
     'field_name_required' => 'Field name is required',
     'ticket_type_required' => 'Ticket type is required',

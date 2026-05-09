@@ -198,7 +198,6 @@ return [
     'participants' => 'משתתפים',
     'event_participants' => 'משתתפי האירוע',
     'manage' => 'ניהול',
-    'please_select_venue_or_participant' => 'נא לבחור מקום או משתתף',
     'event_tickets' => 'כרטיסים לאירוע',
     'enable_tickets' => 'אפשר כרטיסים',
     'currency' => 'מטבע',

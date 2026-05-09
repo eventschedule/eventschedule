@@ -207,7 +207,6 @@ return [
     'participants' => 'Partecipanti',
     'event_participants' => 'Partecipanti all\'evento',
     'manage' => 'Gestisci',
-    'please_select_venue_or_participant' => 'Seleziona una sede o un partecipante',
     'event_tickets' => 'Biglietti per l\'evento',
     'enable_tickets' => 'Abilita biglietti',
     'currency' => 'Valuta',

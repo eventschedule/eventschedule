@@ -204,7 +204,6 @@ return [
     'participants' => 'Deelnemers',
     'event_participants' => 'Evenementdeelnemers',
     'manage' => 'Beheren',
-    'please_select_venue_or_participant' => 'Selecteer een locatie of deelnemer',
     'event_tickets' => 'Evenementtickets',
     'enable_tickets' => 'Tickets inschakelen',
     'currency' => 'Valuta',

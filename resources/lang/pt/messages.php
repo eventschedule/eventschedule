@@ -205,7 +205,6 @@ return [
     'participants' => 'Participantes',
     'event_participants' => 'Participantes do evento',
     'manage' => 'Gerenciar',
-    'please_select_venue_or_participant' => 'Por favor, selecione um local ou participante',
     'event_tickets' => 'Ingressos para o evento',
     'enable_tickets' => 'Habilitar ingressos',
     'currency' => 'Moeda',
