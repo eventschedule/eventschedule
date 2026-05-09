@@ -18,6 +18,7 @@ use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\ImageUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -830,6 +831,13 @@ class EventRepo
                 }
                 Storage::delete($path);
             }
+
+            // Resize oversized flyers before storage. Graphic generation
+            // decodes these via GD, which OOMs on multi-megapixel images on
+            // small PHP-FPM workers (e.g. DigitalOcean App Platform's 128MB
+            // cap). We resize the temp file in place so storeAs() uploads
+            // the smaller version, which works for both local and S3 disks.
+            ImageUtils::resizeImageToMax($file->getRealPath(), 2000);
 
             $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);

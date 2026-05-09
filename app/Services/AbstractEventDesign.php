@@ -1045,10 +1045,11 @@ abstract class AbstractEventDesign
     /**
      * Safely decode an image from a binary string.
      *
-     * Pre-flights dimensions via getimagesizefromstring() (cheap, header-only),
-     * refuses images above the megapixel cap, and bumps memory_limit when the
-     * decode budget would exceed available headroom. Returns false on any
-     * problem so callers fall through to their placeholder paths.
+     * Refuses images that won't fit in the available memory budget. On platforms
+     * where memory_limit is locked via php_admin_value (e.g. DigitalOcean App
+     * Platform), ini_set silently fails — so we verify the bump took effect and
+     * refuse the decode if not. Returns false on any problem so callers fall
+     * through to their placeholder paths.
      */
     protected function safeImageCreateFromString(string $imageData): \GdImage|false
     {
@@ -1059,24 +1060,29 @@ abstract class AbstractEventDesign
 
         $width = (int) $info[0];
         $height = (int) $info[1];
-        $megapixels = ($width * $height) / 1_000_000;
 
-        if ($megapixels > 32) {
-            return false;
-        }
-
-        $estimatedBytes = (int) ($width * $height * 4 * 1.3);
-        $currentLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
+        // GD truecolor decode cost ≈ width × height × 4 bytes. Use 2x as a
+        // conservative multiplier covering allocator overhead and the temp
+        // image created during resampling.
+        $estimatedBytes = $width * $height * 4 * 2;
         $currentUsage = memory_get_usage(true);
-        $headroom = $currentLimit - $currentUsage;
+        $needed = $currentUsage + $estimatedBytes + (16 * 1024 * 1024);
+        $currentLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
 
-        if ($estimatedBytes > $headroom) {
-            $needed = $currentUsage + $estimatedBytes + (32 * 1024 * 1024);
+        if ($needed > $currentLimit) {
             $newLimitMb = (int) ceil($needed / (1024 * 1024));
             if ($newLimitMb > 512) {
                 return false;
             }
             @ini_set('memory_limit', $newLimitMb.'M');
+
+            // Verify the bump actually took effect. Some hosts lock memory_limit
+            // via php_admin_value (PHP_INI_SYSTEM) — ini_set returns silently
+            // but the limit doesn't change.
+            $actualLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
+            if ($actualLimit < $needed) {
+                return false;
+            }
         }
 
         return @imagecreatefromstring($imageData) ?: false;

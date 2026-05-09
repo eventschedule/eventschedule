@@ -321,6 +321,98 @@ class ImageUtils
     }
 
     /**
+     * Resize an image in place so its longest side is at most $maxDim pixels.
+     *
+     * No-op if the image is already within the limit. Preserves aspect ratio,
+     * transparency, and original format. Returns false if the image is too
+     * large to safely decode within current memory limits.
+     */
+    public static function resizeImageToMax(string $path, int $maxDim = 2000, int $quality = 85): bool
+    {
+        if (! file_exists($path)) {
+            return false;
+        }
+
+        $info = @getimagesize($path);
+        if ($info === false) {
+            return false;
+        }
+
+        [$srcWidth, $srcHeight] = $info;
+        $mimeType = $info['mime'] ?? null;
+
+        if ($srcWidth <= $maxDim && $srcHeight <= $maxDim) {
+            return true;
+        }
+
+        // Refuse pathologically large images rather than risk an OOM during
+        // decode. ~16MP * 4 bytes = 64MB; with framework overhead this is the
+        // safe ceiling on a 128MB PHP_FPM process.
+        if (($srcWidth * $srcHeight) > 16_000_000) {
+            return false;
+        }
+
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $sourceImage = @imagecreatefromjpeg($path);
+                break;
+            case 'image/png':
+                $sourceImage = @imagecreatefrompng($path);
+                break;
+            case 'image/gif':
+                $sourceImage = @imagecreatefromgif($path);
+                break;
+            case 'image/webp':
+                $sourceImage = @imagecreatefromwebp($path);
+                break;
+            default:
+                return false;
+        }
+
+        if (! $sourceImage) {
+            return false;
+        }
+
+        $scale = $maxDim / max($srcWidth, $srcHeight);
+        $dstWidth = (int) round($srcWidth * $scale);
+        $dstHeight = (int) round($srcHeight * $scale);
+
+        $destImage = imagecreatetruecolor($dstWidth, $dstHeight);
+        if (! $destImage) {
+            imagedestroy($sourceImage);
+
+            return false;
+        }
+
+        if (in_array($mimeType, ['image/png', 'image/gif', 'image/webp'], true)) {
+            imagealphablending($destImage, false);
+            imagesavealpha($destImage, true);
+            $transparent = imagecolorallocatealpha($destImage, 0, 0, 0, 127);
+            imagefill($destImage, 0, 0, $transparent);
+        }
+
+        imagecopyresampled(
+            $destImage, $sourceImage,
+            0, 0, 0, 0,
+            $dstWidth, $dstHeight,
+            $srcWidth, $srcHeight
+        );
+
+        $ok = match ($mimeType) {
+            'image/jpeg' => imagejpeg($destImage, $path, $quality),
+            'image/png' => imagepng($destImage, $path, 6),
+            'image/gif' => imagegif($destImage, $path),
+            'image/webp' => imagewebp($destImage, $path, $quality),
+            default => false,
+        };
+
+        imagedestroy($sourceImage);
+        imagedestroy($destImage);
+
+        return $ok;
+    }
+
+    /**
      * Clean up temporary file from an UploadedFile object
      *
      * @param  \Illuminate\Http\UploadedFile  $file  The uploaded file to clean up
