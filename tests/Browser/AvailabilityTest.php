@@ -55,9 +55,9 @@ class AvailabilityTest extends DuskTestCase
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
             $this->assertFalse($isDisabled[0], 'Save button should be enabled after toggling a date');
 
-            // Save
-            $browser->click('#saveButton')
-                ->waitForText('Successfully updated availability', 5);
+            // Save (full page reload - wait for navigation, then for toast)
+            $browser->clickAndWaitForReload('#saveButton', 15)
+                ->waitForText('Successfully updated availability', 10);
 
             // Verify database has the date
             $role = Role::where('subdomain', 'talent')->first();
@@ -74,9 +74,9 @@ class AvailabilityTest extends DuskTestCase
             $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");
             $browser->waitUntilMissing('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
-            // Save again
-            $browser->click('#saveButton')
-                ->waitForText('Successfully updated availability', 5);
+            // Save again (full page reload - wait for navigation, then for toast)
+            $browser->clickAndWaitForReload('#saveButton', 15)
+                ->waitForText('Successfully updated availability', 10);
 
             // Verify database no longer has the date
             $roleUser->refresh();
