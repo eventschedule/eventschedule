@@ -209,7 +209,7 @@ abstract class AbstractEventDesign
             return;
         }
 
-        $this->headerImageResource = imagecreatefromstring($imageData);
+        $this->headerImageResource = $this->safeImageCreateFromString($imageData);
         if (! $this->headerImageResource) {
             return;
         }
@@ -1002,7 +1002,7 @@ abstract class AbstractEventDesign
             }
 
             if ($imageData) {
-                $bgImage = imagecreatefromstring($imageData);
+                $bgImage = $this->safeImageCreateFromString($imageData);
                 if ($bgImage) {
                     // Resize and apply background image
                     $this->applyResizedBackground($bgImage);
@@ -1040,6 +1040,63 @@ abstract class AbstractEventDesign
         }
 
         return false;
+    }
+
+    /**
+     * Safely decode an image from a binary string.
+     *
+     * Pre-flights dimensions via getimagesizefromstring() (cheap, header-only),
+     * refuses images above the megapixel cap, and bumps memory_limit when the
+     * decode budget would exceed available headroom. Returns false on any
+     * problem so callers fall through to their placeholder paths.
+     */
+    protected function safeImageCreateFromString(string $imageData): \GdImage|false
+    {
+        $info = @getimagesizefromstring($imageData);
+        if ($info === false || empty($info[0]) || empty($info[1])) {
+            return false;
+        }
+
+        $width = (int) $info[0];
+        $height = (int) $info[1];
+        $megapixels = ($width * $height) / 1_000_000;
+
+        if ($megapixels > 32) {
+            return false;
+        }
+
+        $estimatedBytes = (int) ($width * $height * 4 * 1.3);
+        $currentLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
+        $currentUsage = memory_get_usage(true);
+        $headroom = $currentLimit - $currentUsage;
+
+        if ($estimatedBytes > $headroom) {
+            $needed = $currentUsage + $estimatedBytes + (32 * 1024 * 1024);
+            $newLimitMb = (int) ceil($needed / (1024 * 1024));
+            if ($newLimitMb > 512) {
+                return false;
+            }
+            @ini_set('memory_limit', $newLimitMb.'M');
+        }
+
+        return @imagecreatefromstring($imageData) ?: false;
+    }
+
+    private function parseMemoryLimit(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '-1' || $value === '') {
+            return PHP_INT_MAX;
+        }
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => (int) $value,
+        };
     }
 
     protected function fetchImageWithCurl(string $url): string|false
@@ -1799,6 +1856,7 @@ abstract class AbstractEventDesign
                     if ($startDate->year !== $endDate->year) {
                         return $startDate->translatedFormat('M j, Y').' - '.$endDate->translatedFormat('M j, Y');
                     }
+
                     return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
                 }
             }

@@ -359,7 +359,7 @@ class GridDesign extends AbstractEventDesign
                     }
                 }
 
-                $sourceImage = imagecreatefromstring($imageData);
+                $sourceImage = $this->safeImageCreateFromString($imageData);
             } else {
                 // Local image - try different path variations
                 $possiblePaths = [
@@ -373,7 +373,7 @@ class GridDesign extends AbstractEventDesign
                 foreach ($possiblePaths as $path) {
                     if (file_exists($path)) {
                         $imageData = file_get_contents($path);
-                        $sourceImage = imagecreatefromstring($imageData);
+                        $sourceImage = $this->safeImageCreateFromString($imageData);
 
                         if ($sourceImage) {
                             break;

@@ -318,7 +318,7 @@ class RowDesign extends AbstractEventDesign
                     }
                 }
 
-                $sourceImage = imagecreatefromstring($imageData);
+                $sourceImage = $this->safeImageCreateFromString($imageData);
             } else {
                 // Local image
                 $possiblePaths = [
@@ -331,7 +331,7 @@ class RowDesign extends AbstractEventDesign
                 foreach ($possiblePaths as $path) {
                     if (file_exists($path)) {
                         $imageData = file_get_contents($path);
-                        $sourceImage = imagecreatefromstring($imageData);
+                        $sourceImage = $this->safeImageCreateFromString($imageData);
                         if ($sourceImage) {
                             break;
                         }
