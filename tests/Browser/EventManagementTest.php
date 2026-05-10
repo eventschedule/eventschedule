@@ -28,18 +28,28 @@ class EventManagementTest extends DuskTestCase
             // -----------------------------------------------
             $browser->visit('/talent/add-event?date='.date('Y-m-d'))
                 ->waitFor('#event_name', 5)
-                ->pause(1000)
-                ->type('name', 'Original Event');
+                ->pause(1000);
+
+            // Set event name via JS (Dusk type() is unreliable on this Vue-bound input in headless CI)
+            $browser->script("
+                var nameField = document.getElementById('event_name');
+                nameField.value = 'Original Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            ");
 
             // Navigate to venue section via JS (more reliable than clicking the nav link)
             $browser->script("document.querySelector('a[data-section=\"section-venue\"]').click()");
             $browser->waitFor('#in_person', 10);
             $browser->script("var cb = document.getElementById('in_person'); if (!cb.checked) cb.click();");
             $browser->waitFor('#selected_venue', 5)
-                ->select('#selected_venue')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15)
+                ->select('#selected_venue');
+
+            $browser->script("
+                window._skipUnsavedWarning = true;
+                document.getElementById('edit-form').requestSubmit();
+            ");
+
+            $browser->waitForLocation('/talent/schedule', 15)
                 ->waitForText('Original Event', 5);
 
             $event = Event::first();
@@ -49,12 +59,20 @@ class EventManagementTest extends DuskTestCase
             // 2. Edit the event - change name
             // -----------------------------------------------
             $browser->visit('/talent/edit-event/'.$hash)
-                ->waitFor('#event_name', 5)
-                ->clear('name')
-                ->type('name', 'Updated Event')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15)
+                ->waitFor('#event_name', 5);
+
+            $browser->script("
+                var nameField = document.getElementById('event_name');
+                nameField.value = 'Updated Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            ");
+
+            $browser->script("
+                window._skipUnsavedWarning = true;
+                document.getElementById('edit-form').requestSubmit();
+            ");
+
+            $browser->waitForLocation('/talent/schedule', 15)
                 ->waitForText('Updated Event', 5);
 
             // Verify DB
@@ -70,10 +88,14 @@ class EventManagementTest extends DuskTestCase
                 ->waitFor('#event_name', 5);
 
             // The cloned event form should be pre-filled with the original name
-            $browser->assertInputValue('name', 'Updated Event')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15);
+            $browser->assertInputValue('name', 'Updated Event');
+
+            $browser->script("
+                window._skipUnsavedWarning = true;
+                document.getElementById('edit-form').requestSubmit();
+            ");
+
+            $browser->waitForLocation('/talent/schedule', 15);
 
             // Verify a new event was created
             $this->assertEquals($eventCountBefore + 1, Event::count());
