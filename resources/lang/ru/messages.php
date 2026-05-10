@@ -3061,4 +3061,13 @@ return [
     'invite_link_expired' => 'Эта ссылка-приглашение истекла или больше не действительна.',
     'invite_phone_mismatch' => 'Это приглашение было отправлено на другой номер телефона. Пожалуйста, войдите с правильной учётной записью.',
     'member_added_sms_email_not_updated' => 'Участник добавлен и SMS-приглашение отправлено, но адрес электронной почты не удалось обновить.',
+
+    'cookie_consent_banner_label' => 'Согласие на использование файлов cookie',
+    'cookie_consent_message' => 'Мы используем файлы cookie для аналитики.',
+    'cookie_consent_learn_more' => 'Подробнее',
+    'cookie_consent_accept' => 'Разрешить',
+    'cookie_consent_decline' => 'Отклонить',
+    'cookie_consent_manage' => 'Настройки файлов cookie',
+    'cookie_consent_privacy_heading' => 'Настройки файлов cookie',
+    'cookie_consent_privacy_body' => 'Вы можете изменить свой выбор файлов cookie в любое время.',
 ];

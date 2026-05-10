@@ -3081,4 +3081,13 @@ return [
     'invite_link_expired' => 'Acest link de invitație a expirat sau nu mai este valid.',
     'invite_phone_mismatch' => 'Această invitație a fost trimisă la un alt număr de telefon. Vă rugăm să vă conectați cu contul corect.',
     'member_added_sms_email_not_updated' => 'Membru adăugat și invitație SMS trimisă, dar adresa de e-mail nu a putut fi actualizată.',
+
+    'cookie_consent_banner_label' => 'Consimțământ cookie-uri',
+    'cookie_consent_message' => 'Folosim cookie-uri pentru analiză.',
+    'cookie_consent_learn_more' => 'Aflați mai multe',
+    'cookie_consent_accept' => 'Permite',
+    'cookie_consent_decline' => 'Refuză',
+    'cookie_consent_manage' => 'Preferințe cookie',
+    'cookie_consent_privacy_heading' => 'Preferințe cookie',
+    'cookie_consent_privacy_body' => 'Vă puteți modifica alegerea privind cookie-urile oricând.',
 ];

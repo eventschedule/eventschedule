@@ -3108,4 +3108,13 @@ return [
     'audit_boost_paused' => 'Boost paused',
     'audit_boost_resumed' => 'Boost resumed',
     'audit_boost_cancelled' => 'Boost cancelled',
+
+    'cookie_consent_banner_label' => 'Cookie consent',
+    'cookie_consent_message' => 'We use cookies for analytics.',
+    'cookie_consent_learn_more' => 'Learn more',
+    'cookie_consent_accept' => 'Allow',
+    'cookie_consent_decline' => 'Decline',
+    'cookie_consent_manage' => 'Cookie preferences',
+    'cookie_consent_privacy_heading' => 'Cookie preferences',
+    'cookie_consent_privacy_body' => 'You can change your cookie choice at any time.',
 ];

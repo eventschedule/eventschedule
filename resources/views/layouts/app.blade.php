@@ -41,26 +41,9 @@
     <script src="{{ asset('js/searchable-select.js') }}" defer {!! nonce_attr() !!}></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
-    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
+    @include('partials.google-analytics')
 
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            // Handle DataCloneError silently
-            console.warn('Analytics data could not be cloned:', e);
-        }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    @else
     <script {!! nonce_attr() !!}>
-    @endif
-
     function onPopUpClick(id, event) {
         if (typeof $ === 'undefined') return;
         event.stopPropagation();
@@ -808,6 +791,8 @@
             window.showLightbox = open;
         })();
     </script>
+
+    @include('partials.cookie-banner')
 
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

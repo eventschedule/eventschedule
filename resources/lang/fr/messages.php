@@ -3043,4 +3043,13 @@ return [
     'invite_link_expired' => 'Ce lien d\'invitation a expiré ou n\'est plus valide.',
     'invite_phone_mismatch' => 'Cette invitation a été envoyée à un autre numéro de téléphone. Veuillez vous connecter avec le bon compte.',
     'member_added_sms_email_not_updated' => 'Membre ajouté et invitation par SMS envoyée, mais l\'adresse e-mail n\'a pas pu être mise à jour.',
+
+    'cookie_consent_banner_label' => 'Consentement aux cookies',
+    'cookie_consent_message' => 'Nous utilisons des cookies pour l\'analyse.',
+    'cookie_consent_learn_more' => 'En savoir plus',
+    'cookie_consent_accept' => 'Autoriser',
+    'cookie_consent_decline' => 'Refuser',
+    'cookie_consent_manage' => 'Préférences des cookies',
+    'cookie_consent_privacy_heading' => 'Préférences des cookies',
+    'cookie_consent_privacy_body' => 'Vous pouvez modifier votre choix de cookies à tout moment.',
 ];

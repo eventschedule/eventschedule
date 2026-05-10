@@ -3042,4 +3042,13 @@ return [
     'invite_link_expired' => 'Questo link di invito è scaduto o non è più valido.',
     'invite_phone_mismatch' => 'Questo invito è stato inviato a un altro numero di telefono. Accedi con l\'account corretto.',
     'member_added_sms_email_not_updated' => 'Membro aggiunto e invito SMS inviato, ma l\'indirizzo e-mail non è stato aggiornato.',
+
+    'cookie_consent_banner_label' => 'Consenso ai cookie',
+    'cookie_consent_message' => 'Utilizziamo i cookie per le analisi.',
+    'cookie_consent_learn_more' => 'Scopri di più',
+    'cookie_consent_accept' => 'Consenti',
+    'cookie_consent_decline' => 'Rifiuta',
+    'cookie_consent_manage' => 'Preferenze cookie',
+    'cookie_consent_privacy_heading' => 'Preferenze cookie',
+    'cookie_consent_privacy_body' => 'Puoi modificare la tua scelta sui cookie in qualsiasi momento.',
 ];

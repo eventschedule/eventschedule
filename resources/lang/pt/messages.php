@@ -3041,4 +3041,13 @@ return [
     'invite_link_expired' => 'Este link de convite expirou ou não é mais válido.',
     'invite_phone_mismatch' => 'Este convite foi enviado para um número de telefone diferente. Por favor, faça login com a conta correta.',
     'member_added_sms_email_not_updated' => 'Membro adicionado e convite por SMS enviado, mas o endereço de e-mail não pôde ser atualizado.',
+
+    'cookie_consent_banner_label' => 'Consentimento de cookies',
+    'cookie_consent_message' => 'Usamos cookies para análises.',
+    'cookie_consent_learn_more' => 'Saiba mais',
+    'cookie_consent_accept' => 'Permitir',
+    'cookie_consent_decline' => 'Recusar',
+    'cookie_consent_manage' => 'Preferências de cookies',
+    'cookie_consent_privacy_heading' => 'Preferências de cookies',
+    'cookie_consent_privacy_body' => 'Você pode alterar sua escolha de cookies a qualquer momento.',
 ];

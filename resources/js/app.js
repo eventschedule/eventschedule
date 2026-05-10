@@ -1,4 +1,5 @@
 import './bootstrap';
+import './cookie-consent';
 
 import { mountAccessibilityWidget } from './accessibility-widget-boot';
 

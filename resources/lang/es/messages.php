@@ -3042,4 +3042,13 @@ return [
     'invite_link_expired' => 'Este enlace de invitación ha expirado o ya no es válido.',
     'invite_phone_mismatch' => 'Esta invitación fue enviada a un número de teléfono diferente. Por favor, inicia sesión con la cuenta correcta.',
     'member_added_sms_email_not_updated' => 'Miembro agregado e invitación por SMS enviada, pero no se pudo actualizar el correo electrónico.',
+
+    'cookie_consent_banner_label' => 'Consentimiento de cookies',
+    'cookie_consent_message' => 'Utilizamos cookies para análisis.',
+    'cookie_consent_learn_more' => 'Saber más',
+    'cookie_consent_accept' => 'Permitir',
+    'cookie_consent_decline' => 'Rechazar',
+    'cookie_consent_manage' => 'Preferencias de cookies',
+    'cookie_consent_privacy_heading' => 'Preferencias de cookies',
+    'cookie_consent_privacy_body' => 'Puede cambiar su elección de cookies en cualquier momento.',
 ];

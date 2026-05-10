@@ -3042,4 +3042,13 @@ return [
     'invite_link_expired' => 'رابط الدعوة هذا منتهي الصلاحية أو لم يعد صالحًا.',
     'invite_phone_mismatch' => 'تم إرسال هذه الدعوة إلى رقم هاتف مختلف. يرجى تسجيل الدخول بالحساب الصحيح.',
     'member_added_sms_email_not_updated' => 'تمت إضافة العضو وإرسال دعوة عبر رسالة نصية، لكن تعذر تحديث البريد الإلكتروني.',
+
+    'cookie_consent_banner_label' => 'موافقة ملفات تعريف الارتباط',
+    'cookie_consent_message' => 'نستخدم ملفات تعريف الارتباط للتحليلات.',
+    'cookie_consent_learn_more' => 'اعرف المزيد',
+    'cookie_consent_accept' => 'السماح',
+    'cookie_consent_decline' => 'رفض',
+    'cookie_consent_manage' => 'تفضيلات ملفات تعريف الارتباط',
+    'cookie_consent_privacy_heading' => 'تفضيلات ملفات تعريف الارتباط',
+    'cookie_consent_privacy_body' => 'يمكنك تغيير اختيار ملفات تعريف الارتباط في أي وقت.',
 ];

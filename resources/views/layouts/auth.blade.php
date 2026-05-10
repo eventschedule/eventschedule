@@ -18,24 +18,7 @@
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
 
-    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            // Handle DataCloneError silently
-            console.warn('Analytics data could not be cloned:', e);
-        }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    </script>
-    @endif
+    @include('partials.google-analytics')
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -98,6 +81,8 @@
 
         <div class="pt-20"></div>
     </div>
+
+    @include('partials.cookie-banner')
 </body>
 
 </html>

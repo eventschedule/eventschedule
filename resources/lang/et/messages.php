@@ -3058,4 +3058,13 @@ return [
     'invite_link_expired' => 'See kutselink on aegunud või ei kehti enam.',
     'invite_phone_mismatch' => 'See kutse saadeti teisele telefoninumbrile. Palun logige sisse õige kontoga.',
     'member_added_sms_email_not_updated' => 'Liige lisatud ja SMS-kutse saadetud, kuid e-posti aadressi ei saanud uuendada.',
+
+    'cookie_consent_banner_label' => 'Küpsiste nõusolek',
+    'cookie_consent_message' => 'Kasutame küpsiseid analüütikaks.',
+    'cookie_consent_learn_more' => 'Loe rohkem',
+    'cookie_consent_accept' => 'Luba',
+    'cookie_consent_decline' => 'Keeldu',
+    'cookie_consent_manage' => 'Küpsiste eelistused',
+    'cookie_consent_privacy_heading' => 'Küpsiste eelistused',
+    'cookie_consent_privacy_body' => 'Saate oma küpsiste valikut igal ajal muuta.',
 ];

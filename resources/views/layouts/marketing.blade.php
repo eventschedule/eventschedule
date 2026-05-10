@@ -256,22 +256,7 @@
     </script>
     @endif
 
-    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            console.warn('Analytics data could not be cloned:', e);
-        }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    </script>
-    @endif
+    @include('partials.google-analytics')
 
     {{ $preload ?? '' }}
 
@@ -380,6 +365,8 @@
     </main>
 
     @include('marketing.partials.footer')
+
+    @include('partials.cookie-banner')
 
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

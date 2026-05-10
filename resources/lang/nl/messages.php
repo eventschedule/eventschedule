@@ -3040,4 +3040,13 @@ return [
     'invite_link_expired' => 'Deze uitnodigingslink is verlopen of niet meer geldig.',
     'invite_phone_mismatch' => 'Deze uitnodiging is verzonden naar een ander telefoonnummer. Log in met het juiste account.',
     'member_added_sms_email_not_updated' => 'Lid toegevoegd en SMS-uitnodiging verzonden, maar het e-mailadres kon niet worden bijgewerkt.',
+
+    'cookie_consent_banner_label' => 'Cookietoestemming',
+    'cookie_consent_message' => 'Wij gebruiken cookies voor analyses.',
+    'cookie_consent_learn_more' => 'Meer informatie',
+    'cookie_consent_accept' => 'Toestaan',
+    'cookie_consent_decline' => 'Weigeren',
+    'cookie_consent_manage' => 'Cookievoorkeuren',
+    'cookie_consent_privacy_heading' => 'Cookievoorkeuren',
+    'cookie_consent_privacy_body' => 'U kunt uw cookiekeuze op elk moment wijzigen.',
 ];

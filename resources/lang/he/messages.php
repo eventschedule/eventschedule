@@ -3035,4 +3035,13 @@ return [
     'invite_link_expired' => 'קישור ההזמנה הזה פג תוקף או שאינו תקף יותר.',
     'invite_phone_mismatch' => 'הזמנה זו נשלחה למספר טלפון אחר. אנא התחבר עם החשבון הנכון.',
     'member_added_sms_email_not_updated' => 'החבר נוסף והזמנה נשלחה בהודעת SMS, אך לא ניתן היה לעדכן את כתובת הדוא"ל.',
+
+    'cookie_consent_banner_label' => 'הסכמה לעוגיות',
+    'cookie_consent_message' => 'אנו משתמשים בעוגיות לצורך ניתוח.',
+    'cookie_consent_learn_more' => 'למידע נוסף',
+    'cookie_consent_accept' => 'אישור',
+    'cookie_consent_decline' => 'דחייה',
+    'cookie_consent_manage' => 'העדפות עוגיות',
+    'cookie_consent_privacy_heading' => 'העדפות עוגיות',
+    'cookie_consent_privacy_body' => 'ניתן לשנות את הבחירה שלך בעוגיות בכל עת.',
 ];
