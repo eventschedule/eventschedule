@@ -1010,6 +1010,7 @@ class EventRepo
                         $ticket->update([
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
+                            'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
                             'sales_start_at' => $salesStartAt,
@@ -1023,6 +1024,7 @@ class EventRepo
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null,
+                        'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
                         'sales_start_at' => $salesStartAt,
@@ -1058,6 +1060,7 @@ class EventRepo
                         $addon->update([
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
+                            'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
                             'url' => $data['url'] ?? null,
@@ -1069,6 +1072,7 @@ class EventRepo
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null,
+                        'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
                         'url' => $data['url'] ?? null,

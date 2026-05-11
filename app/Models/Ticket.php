@@ -22,6 +22,7 @@ class Ticket extends Model
         'event_id',
         'type',
         'quantity',
+        'max_per_order',
         'sold',
         'price',
         'description',
@@ -129,6 +130,7 @@ class Ticket extends Model
         $data['type'] = $this->type;
         $data['is_addon'] = (bool) $this->is_addon;
         $data['quantity'] = $this->quantity;
+        $data['max_per_order'] = $this->max_per_order ?: null;
         $data['price'] = $this->price;
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
         $data['image_url'] = $this->image_url ?: null;
@@ -136,6 +138,8 @@ class Ticket extends Model
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
+
+        $perOrderCap = $this->max_per_order ?: 20;
 
         // Handle combined mode logic
         if ($this->event && ! $this->is_addon && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
@@ -146,9 +150,9 @@ class Ticket extends Model
             });
             // In combined mode, the total quantity is the same as individual quantity
             $totalQuantity = $this->event->getSameTicketQuantity();
-            $data['quantity'] = $totalQuantity > 0 ? max(0, min(20, $totalQuantity - $totalSold)) : 20;
+            $data['quantity'] = $totalQuantity > 0 ? max(0, min($perOrderCap, $totalQuantity - $totalSold)) : $perOrderCap;
         } else {
-            $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
+            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
         }
 
         $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);

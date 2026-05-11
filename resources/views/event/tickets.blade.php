@@ -304,16 +304,18 @@
                     this.isSubmitting = true;
                 },
                 getAvailableQuantity(ticket) {
+                    const perOrderCap = ticket.max_per_order && ticket.max_per_order > 0 ? ticket.max_per_order : Infinity;
+
                     if (ticket.is_addon || !this.isCombinedMode) {
-                        return ticket.quantity;
+                        return Math.min(ticket.quantity, perOrderCap);
                     }
-                    
+
                     // In combined mode, calculate available based on other selections
                     const otherSelected = this.tickets
                         .filter(t => t.id !== ticket.id)
                         .reduce((total, t) => total + t.selectedQty, 0);
-                    
-                    return Math.max(0, this.totalAvailableTickets - otherSelected);
+
+                    return Math.min(perOrderCap, Math.max(0, this.totalAvailableTickets - otherSelected));
                 },
                 updateTicketQuantities() {
                     if (this.isCombinedMode) {

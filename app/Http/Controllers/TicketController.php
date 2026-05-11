@@ -843,6 +843,12 @@ class TicketController extends Controller
                                 throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                             }
 
+                            if ($ticketModel->max_per_order && $quantity > $ticketModel->max_per_order) {
+                                throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
+                                    'max' => $ticketModel->max_per_order,
+                                ]));
+                            }
+
                             if ($ticketModel->quantity > 0) {
                                 // Handle combined mode logic
                                 if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
@@ -884,6 +890,12 @@ class TicketController extends Controller
 
                             if (! $addonModel) {
                                 throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
+                            }
+
+                            if ($addonModel->max_per_order && $addonQty > $addonModel->max_per_order) {
+                                throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
+                                    'max' => $addonModel->max_per_order,
+                                ]));
                             }
 
                             if ($addonModel->quantity > 0) {

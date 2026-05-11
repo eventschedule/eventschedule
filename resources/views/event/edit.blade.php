@@ -3022,6 +3022,9 @@
                                                 <button type="button" @click="addTicketVolumeDiscount(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
                                                     + {{ __('messages.add_volume_discount') }}
                                                 </button>
+                                                <button type="button" @click="addTicketMaxPerOrder(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                    + {{ __('messages.add_limit') }}
+                                                </button>
                                                 <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
@@ -3033,6 +3036,9 @@
                                             </button>
                                             <button type="button" @click="addTicketVolumeDiscount(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
                                                 + {{ __('messages.add_volume_discount') }}
+                                            </button>
+                                            <button type="button" @click="addTicketMaxPerOrder(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                + {{ __('messages.add_limit') }}
                                             </button>
                                         </div>
                                         <div v-if="ticket.volume_discount" class="mt-4">
@@ -3057,6 +3063,18 @@
                                                 </div>
                                                 <div class="mt-2 flex justify-end">
                                                     <button type="button" @click="removeTicketVolumeDiscount(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-if="ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">
+                                            <x-input-label :value="__('messages.max_per_order')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <x-text-input type="number" min="1" step="1" v-model.number="ticket.max_per_order" class="block w-full sm:w-48" />
+                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketMaxPerOrder(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                         {{ __('messages.remove') }}
                                                     </button>
                                                 </div>
@@ -3116,6 +3134,7 @@
                                         </div>
                                         <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
                                         <input type="hidden" v-bind:name="`tickets[${index}][volume_discount]`" :value="ticket.volume_discount ? JSON.stringify(ticket.volume_discount) : ''">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][max_per_order]`" :value="(ticket.max_per_order === null || ticket.max_per_order === undefined || ticket.max_per_order === '') ? '' : ticket.max_per_order">
 
                                         <div class="mt-4">
                                             <x-input-label :value="__('messages.description')" />
@@ -3415,9 +3434,25 @@
                                             <input type="hidden" v-if="addon.image_url && addon.image_url.startsWith('data:')" :name="`addon_image_data[${aIndex}]`" :value="addon.image_url">
                                             <input type="hidden" :name="`addons[${aIndex}][remove_image]`" :value="addon.remove_image ? 1 : 0" />
                                         </div>
+                                        <div v-if="addon.max_per_order !== null && addon.max_per_order !== undefined" class="mt-3">
+                                            <x-input-label :value="__('messages.max_per_order')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <x-text-input type="number" min="1" step="1" v-model.number="addon.max_per_order" class="block w-full sm:w-48" />
+                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeAddonMaxPerOrder(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" :name="`addons[${aIndex}][max_per_order]`" :value="(addon.max_per_order === null || addon.max_per_order === undefined || addon.max_per_order === '') ? '' : addon.max_per_order">
                                         <div class="mt-2 flex justify-between items-center">
                                             <input type="hidden" :name="`addons[${aIndex}][id]`" :value="addon.id">
-                                            <div></div>
+                                            <button type="button" @click="addAddonMaxPerOrder(aIndex)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="addon.max_per_order === null || addon.max_per_order === undefined">
+                                                + {{ __('messages.add_limit') }}
+                                            </button>
+                                            <div v-else></div>
                                             <button type="button" @click="removeAddon(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                 {{ __('messages.remove') }}
                                             </button>
@@ -4416,6 +4451,7 @@
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
           volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
+          max_per_order: ticket.max_per_order ?? null,
           custom_fields: ticket.custom_fields || {},
           sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
           sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
@@ -4476,6 +4512,7 @@
           _key: addon.id ? ('existing_' + addon.id) : ('init_' + i),
           type: addon.type || '',
           quantity: addon.quantity ?? null,
+          max_per_order: addon.max_per_order ?? null,
           price: addon.price ?? null,
           description: addon.description || '',
           image_url: addon.image_url || null,
@@ -5422,6 +5459,7 @@
             id: null,
             type: '',
             quantity: null,
+            max_per_order: null,
             price: null,
             description: '',
             custom_fields: {},
@@ -5491,6 +5529,7 @@
           _key: 'new_' + Date.now() + '_' + this.addons.length,
           type: '',
           quantity: null,
+          max_per_order: null,
           price: null,
           description: '',
           image_url: null,
@@ -5500,6 +5539,12 @@
       },
       removeAddon(index) {
         this.addons.splice(index, 1);
+      },
+      addAddonMaxPerOrder(addonIndex) {
+        this.addons[addonIndex].max_per_order = 1;
+      },
+      removeAddonMaxPerOrder(addonIndex) {
+        this.addons[addonIndex].max_per_order = null;
       },
       removeAddonImage(aIndex) {
         if (!confirm(@json(__('messages.are_you_sure')))) return;
@@ -5897,6 +5942,12 @@
       },
       removeTicketVolumeDiscount(ticketIndex) {
         this.tickets[ticketIndex].volume_discount = null;
+      },
+      addTicketMaxPerOrder(ticketIndex) {
+        this.tickets[ticketIndex].max_per_order = 1;
+      },
+      removeTicketMaxPerOrder(ticketIndex) {
+        this.tickets[ticketIndex].max_per_order = null;
       },
       addTicketCustomField(ticketIndex) {
         const ticket = this.tickets[ticketIndex];
