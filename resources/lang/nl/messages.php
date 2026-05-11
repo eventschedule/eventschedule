@@ -783,6 +783,7 @@ return [
     'google_force_resync_to_google' => 'Opnieuw synchroniseren naar Google Agenda',
     'google_force_resync_help' => 'Als je van Google-account of doelagenda bent gewisseld, sla deze pagina eerst op (de server gebruikt je opgeslagen agenda). Hiermee worden alle planningsevenementen opnieuw naar Google gestuurd. Alleen van Event Schedule naar Google; er wordt nooit geïmporteerd vanuit Google.',
     'google_force_resync_warning' => 'Oude kopieën van afspraken kunnen in je vorige Google Agenda blijven. Dit wist opgeslagen koppelingen in Event Schedule en maakt nieuwe afspraken in de agenda die voor deze planning is opgeslagen.',
+    'google_calendar_not_public_warning' => 'Om gasten via de /calendar-link van je planning toegang te geven tot deze agenda, moet je de agenda openbaar maken in de deelinstellingen van Google Agenda.',
     'google_force_resync_confirm' => 'Alle afspraken opnieuw synchroniseren naar je opgeslagen Google Agenda? Alleen van Event Schedule naar Google; er wordt niet geïmporteerd vanuit Google.',
     'google_force_resync_success' => 'Opnieuw synchroniseren voltooid. :created afspraak(en) toegevoegd aan Google Agenda.',
     'google_force_resync_queued' => 'Opnieuw synchroniseren gestart. Het kan enkele minuten duren voordat het in Google Agenda zichtbaar is.',

@@ -788,6 +788,7 @@ return [
     'google_force_resync_to_google' => 'Resynchroniser vers Google Agenda',
     'google_force_resync_help' => 'Si vous avez changé de compte Google ou de calendrier cible, enregistrez d’abord cette page (le serveur utilise le calendrier enregistré). Cela renvoie tous les événements du planning vers Google. Envoi uniquement d’Event Schedule vers Google ; aucun import depuis Google.',
     'google_force_resync_warning' => 'D’anciennes copies d’événements peuvent rester dans votre ancien Google Agenda. Cela efface les liens enregistrés dans Event Schedule et crée de nouveaux événements dans le calendrier enregistré pour ce planning.',
+    'google_calendar_not_public_warning' => 'Pour que les invités puissent accéder à ce calendrier via le lien /calendar de votre planning, vous devez définir le calendrier comme public dans les paramètres de partage de Google Agenda.',
     'google_force_resync_confirm' => 'Resynchroniser tous les événements vers le Google Agenda enregistré ? Envoi uniquement d’Event Schedule vers Google ; aucun import depuis Google.',
     'google_force_resync_success' => 'Resynchronisation terminée. :created événement(s) ajouté(s) à Google Agenda.',
     'google_force_resync_queued' => 'Resynchronisation démarrée. Elle peut prendre quelques minutes avant d’apparaître dans Google Agenda.',

@@ -784,6 +784,7 @@ return [
     'google_force_resync_to_google' => 'إعادة المزامنة إلى Google Calendar',
     'google_force_resync_help' => 'إذا غيّرت حساب Google أو التقويم المستهدف، احفظ هذه الصفحة أولاً (يستخدم الخادم التقويم المحفوظ). يعيد إرسال كل أحداث الجدول إلى Google. يدفع فقط من Event Schedule إلى Google؛ لا يستورد من Google أبداً.',
     'google_force_resync_warning' => 'قد تبقى نسخ قديمة من الأحداث في Google Calendar السابق. يمسح هذا الروابط المحفوظة في Event Schedule وينشئ أحداثاً جديدة في التقويم المحفوظ لهذا الجدول.',
+    'google_calendar_not_public_warning' => 'لكي يتمكن الضيوف من الوصول إلى هذا التقويم عبر رابط /calendar الخاص بجدولك، يجب تعيين التقويم كعام في إعدادات مشاركة Google Calendar.',
     'google_force_resync_confirm' => 'إعادة مزامنة كل الأحداث إلى Google Calendar المحفوظ؟ يدفع فقط من Event Schedule إلى Google؛ لا يستورد من Google.',
     'google_force_resync_success' => 'اكتملت إعادة المزامنة. تمت إضافة :created حدث(ات) إلى Google Calendar.',
     'google_force_resync_queued' => 'بدأت إعادة المزامنة. قد يستغرق ظهورها في Google Calendar بضع دقائق.',

@@ -806,6 +806,7 @@ return [
     'google_force_resync_to_google' => 'Sünkrooni uuesti Google Kalendrisse',
     'google_force_resync_help' => 'Kui vahetasid Google’i kontot või sihtkalendrit, salvesta esmalt see leht (server kasutab salvestatud kalendrit). Saadab kõik ajakava sündmused uuesti Google’isse. Ainult Event Schedule’st Google’isse; Google’ist ei impordita.',
     'google_force_resync_warning' => 'Vanad sündmuse koopiad võivad jääda eelmisse Google Kalendrisse. See kustutab Event Schedule’is salvestatud lingid ja loob uued sündmused selle ajakava salvestatud kalendris.',
+    'google_calendar_not_public_warning' => 'Et külalised pääseksid teie ajakava /calendar-lingi kaudu sellele kalendrile ligi, peate seadma kalendri Google Kalendri jagamisseadetes avalikuks.',
     'google_force_resync_confirm' => 'Sünkroonida kõik sündmused uuesti salvestatud Google Kalendrisse? Ainult Event Schedule’st Google’isse; Google’ist ei impordita.',
     'google_force_resync_success' => 'Uuesti sünkroonimine valmis. Lisati :created sündmust Google Kalendrisse.',
     'google_force_resync_queued' => 'Uuesti sünkroonimine alustati. Google Kalendrisse jõudmiseks võib kuluda mõni minut.',

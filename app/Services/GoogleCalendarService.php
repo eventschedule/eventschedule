@@ -342,6 +342,39 @@ class GoogleCalendarService
     }
 
     /**
+     * Check whether a Google calendar is publicly readable.
+     *
+     * Returns true/false when the ACL could be inspected, null when the
+     * token is missing/invalid or the API call failed (caller can treat
+     * null as "unknown" and leave the cached flag as-is).
+     */
+    public function isCalendarPublic(User $user, string $calendarId): ?bool
+    {
+        if (! $this->ensureValidToken($user)) {
+            return null;
+        }
+
+        try {
+            $rules = $this->calendarService->acl->listAcl($calendarId)->getItems();
+
+            foreach ($rules as $rule) {
+                $scope = $rule->getScope();
+                if ($scope
+                    && $scope->getType() === 'default'
+                    && in_array($rule->getRole(), ['reader', 'freeBusyReader'], true)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    /**
      * Get user's calendars
      */
     public function getCalendars(): array

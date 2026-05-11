@@ -786,6 +786,7 @@ return [
     'google_force_resync_to_google' => 'Risincronizza con Google Calendar',
     'google_force_resync_help' => 'Se hai cambiato account Google o calendario di destinazione, salva prima questa pagina (il server usa il calendario salvato). Invia di nuovo tutti gli eventi del programma a Google. Invia solo da Event Schedule a Google; non importa mai da Google.',
     'google_force_resync_warning' => 'Copie vecchie degli eventi possono restare nel precedente Google Calendar. Questo cancella i collegamenti salvati in Event Schedule e crea nuovi eventi nel calendario salvato per questo programma.',
+    'google_calendar_not_public_warning' => 'Affinché gli ospiti possano accedere a questo calendario tramite il link /calendar del tuo programma, devi impostare il calendario come pubblico nelle impostazioni di condivisione di Google Calendar.',
     'google_force_resync_confirm' => 'Risincronizzare tutti gli eventi con il Google Calendar salvato? Invia solo da Event Schedule a Google; non importa da Google.',
     'google_force_resync_success' => 'Risincronizzazione completata. Aggiunti :created evento/i a Google Calendar.',
     'google_force_resync_queued' => 'Risincronizzazione avviata. Potrebbero servire alcuni minuti perché compaia in Google Calendar.',

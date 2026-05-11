@@ -139,7 +139,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               {{-- Icons + Buttons together on same row (centered) --}}
               <div class="flex flex-row flex-wrap items-center justify-center gap-3">
                 {{-- Social icons --}}
-                @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
+                @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment || $role->hasPublicGoogleCalendar())
                 <div class="flex flex-row gap-3 items-center">
                     @if($hasEmail)
                     <a href="mailto:{{ $role->email }}"
@@ -185,6 +185,16 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                         </a>
                         @endif
                         @endforeach
+                    @endif
+                    @if($role->hasPublicGoogleCalendar())
+                    <a href="{{ $role->getGuestUrl() . '/calendar' }}" target="_blank" rel="noopener noreferrer nofollow"
+                       class="w-10 h-10 rounded-lg flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
+                       style="background-color: {{ $accentColor }}"
+                       data-tooltip="{{ __('messages.add_to_calendar') }}">
+                        <svg class="w-5 h-5" fill="{{ $contrastColor }}" viewBox="0 0 24 24">
+                            <path d="M19,4H17V2H15V4H9V2H7V4H5C3.89,4 3,4.89 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6C21,4.89 20.1,4 19,4M19,20H5V10H19V20M19,8H5V6H19V8M7,12H9V14H7V12M11,12H13V14H11V12M15,12H17V14H15V12M7,16H9V18H7V16M11,16H13V18H11V16M15,16H17V18H15V16Z"/>
+                        </svg>
+                    </a>
                     @endif
                     @if($hasPayment)
                         @foreach (json_decode($role->payment_links) as $link)
@@ -307,7 +317,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                   </a>
                   @endif
                   {{-- Social icons (desktop - simple monochrome style) --}}
-                  @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
+                  @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment || $role->hasPublicGoogleCalendar())
                   <div class="flex flex-row gap-4 items-center mt-3">
                       @if($hasEmail)
                       <a href="mailto:{{ $role->email }}"
@@ -349,6 +359,15 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                           </a>
                           @endif
                           @endforeach
+                      @endif
+                      @if($role->hasPublicGoogleCalendar())
+                      <a href="{{ $role->getGuestUrl() . '/calendar' }}" target="_blank" rel="noopener noreferrer nofollow"
+                         class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
+                         data-tooltip="{{ __('messages.add_to_calendar') }}">
+                          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M19,4H17V2H15V4H9V2H7V4H5C3.89,4 3,4.89 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6C21,4.89 20.1,4 19,4M19,20H5V10H19V20M19,8H5V6H19V8M7,12H9V14H7V12M11,12H13V14H11V12M15,12H17V14H15V12M7,16H9V18H7V16M11,16H13V18H11V16M15,16H17V18H15V16Z"/>
+                          </svg>
+                      </a>
                       @endif
                       @if($hasPayment)
                           @foreach (json_decode($role->payment_links) as $link)

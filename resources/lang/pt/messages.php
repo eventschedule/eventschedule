@@ -784,6 +784,7 @@ return [
     'google_force_resync_to_google' => 'Voltar a sincronizar com o Google Agenda',
     'google_force_resync_help' => 'Se mudou de conta Google ou de calendário de destino, guarde primeiro esta página (o servidor usa o calendário guardado). Isto reenvia todos os eventos da agenda para o Google. Apenas envia do Event Schedule para o Google; nunca importa do Google.',
     'google_force_resync_warning' => 'Cópias antigas de eventos podem ficar no seu Google Agenda anterior. Isto apaga as ligações guardadas no Event Schedule e cria eventos novos no calendário guardado para esta agenda.',
+    'google_calendar_not_public_warning' => 'Para que os convidados possam aceder a este calendário através da ligação /calendar da sua agenda, tem de definir o calendário como público nas definições de partilha do Google Agenda.',
     'google_force_resync_confirm' => 'Voltar a sincronizar todos os eventos com o Google Agenda guardado? Apenas envia do Event Schedule para o Google; não importa do Google.',
     'google_force_resync_success' => 'Nova sincronização concluída. Foram adicionados :created evento(s) ao Google Agenda.',
     'google_force_resync_queued' => 'Nova sincronização iniciada. Pode levar alguns minutos até aparecer no Google Agenda.',

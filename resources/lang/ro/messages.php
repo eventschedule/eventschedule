@@ -814,6 +814,7 @@ return [
     'google_force_resync_to_google' => 'Resincronizează cu Google Calendar',
     'google_force_resync_help' => 'Dacă ți-ai schimbat contul Google sau calendarul țintă, salvează mai întâi această pagină (serverul folosește calendarul salvat). Retrimite toate evenimentele programului către Google. Trimite doar din Event Schedule către Google; nu importă niciodată din Google.',
     'google_force_resync_warning' => 'Copii vechi ale evenimentelor pot rămâne în Google Calendarul anterior. Aceasta șterge legăturile salvate în Event Schedule și creează evenimente noi în calendarul salvat pentru acest program.',
+    'google_calendar_not_public_warning' => 'Pentru ca invitații să poată accesa acest calendar prin linkul /calendar al programului tău, trebuie să setezi calendarul ca public în setările de partajare ale Google Calendar.',
     'google_force_resync_confirm' => 'Resincronizezi toate evenimentele cu Google Calendarul salvat? Trimite doar din Event Schedule către Google; nu importă din Google.',
     'google_force_resync_success' => 'Resincronizare finalizată. S-au adăugat :created eveniment(e) în Google Calendar.',
     'google_force_resync_queued' => 'Resincronizarea a început. Poate dura câteva minute până să apară în Google Calendar.',

@@ -787,6 +787,7 @@ return [
     'google_force_resync_to_google' => 'Erneut mit Google Kalender synchronisieren',
     'google_force_resync_help' => 'Wenn du das Google-Konto oder den Zielkalender gewechselt hast, speichere zuerst diese Seite (der Server nutzt den gespeicherten Kalender). Dadurch werden alle Termine dieses Plans erneut zu Google gesendet. Es wird nur von Event Schedule zu Google übertragen; es erfolgt kein Import aus Google.',
     'google_force_resync_warning' => 'Alte Kopien von Terminen können in deinem früheren Google Kalender bleiben. Dies löscht die gespeicherten Verknüpfungen in Event Schedule und legt neue Termine im für diesen Plan gespeicherten Kalender an.',
+    'google_calendar_not_public_warning' => 'Damit Gäste über den /calendar-Link deines Plans auf diesen Kalender zugreifen können, musst du den Kalender in den Freigabeeinstellungen von Google Kalender als öffentlich festlegen.',
     'google_force_resync_confirm' => 'Alle Termine erneut in den gespeicherten Google Kalender übertragen? Es wird nur von Event Schedule zu Google übertragen; es erfolgt kein Import aus Google.',
     'google_force_resync_success' => 'Erneute Synchronisierung abgeschlossen. :created Termin(e) wurden zu Google Kalender hinzugefügt.',
     'google_force_resync_queued' => 'Erneute Synchronisierung gestartet. Es kann einige Minuten dauern, bis sie im Google Kalender abgeschlossen ist.',
