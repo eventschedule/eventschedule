@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Services\AnalyticsService;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
@@ -31,19 +32,32 @@ class AnalyticsController extends Controller
         // Get selected event for filtering (decode from URL-safe format)
         $selectedEventId = $request->event_id ? UrlUtils::decodeId($request->event_id) : null;
 
-        // Security: Validate that the selected event belongs to the authenticated user's roles
+        // Security: Validate that the authenticated user owns the event's data.
+        // Owner/admin on any non-curator role attached to the event grants access;
+        // a curator role only grants access for events the curator itself created.
         if ($selectedEventId) {
-            $eventRoleIds = DB::table('event_role')
-                ->where('event_id', $selectedEventId)
-                ->pluck('role_id');
+            $selectedEvent = Event::with('roles')->find($selectedEventId);
 
-            if ($eventRoleIds->intersect($roleIds)->isEmpty()) {
+            if (! $selectedEvent || ! $user->canViewEventData($selectedEvent)) {
                 abort(403, 'Unauthorized access to analytics');
             }
 
-            // If a schedule is selected, ensure the event belongs to it
-            if ($selectedRoleId && ! $eventRoleIds->contains($selectedRoleId)) {
-                $selectedEventId = null;
+            // If a schedule is selected, ensure the event belongs to it.
+            // For curators, "belongs to" means the curator created the event
+            // (curated-but-not-created events are excluded from analytics).
+            // For other roles, the event must be attached via the event_role pivot.
+            if ($selectedRoleId) {
+                $selectedRole = $roles->firstWhere('id', $selectedRoleId);
+                $belongsToRole = $selectedRole && $selectedRole->isCurator()
+                    ? $selectedEvent->creator_role_id == $selectedRoleId
+                    : DB::table('event_role')
+                        ->where('event_id', $selectedEventId)
+                        ->where('role_id', $selectedRoleId)
+                        ->exists();
+
+                if (! $belongsToRole) {
+                    $selectedEventId = null;
+                }
             }
         }
 

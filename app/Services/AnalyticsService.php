@@ -382,13 +382,24 @@ class AnalyticsService
     {
         $cutoff = now()->subDays(30)->startOfDay();
 
-        return Event::whereHas('roles', fn ($q) => $q->where('roles.id', $roleId))
+        $isCurator = Role::where('id', $roleId)->where('type', 'curator')->exists();
+
+        $query = Event::query()
             ->where('is_draft', false)
             ->where(function ($q) use ($cutoff) {
                 $q->where('starts_at', '>=', $cutoff)
                     ->orWhereNull('starts_at');
-            })
-            ->orderBy('starts_at')
+            });
+
+        // Curators only see events they created here; curated-but-not-created
+        // events are excluded so they don't leak into the analytics event picker.
+        if ($isCurator) {
+            $query->where('creator_role_id', $roleId);
+        } else {
+            $query->whereHas('roles', fn ($q) => $q->where('roles.id', $roleId));
+        }
+
+        return $query->orderBy('starts_at')
             ->get()
             ->map(fn ($event) => [
                 'id' => UrlUtils::encodeId($event->id),
@@ -407,6 +418,27 @@ class AnalyticsService
         return $user->roles()
             ->wherePivot('level', '!=', 'follower')
             ->pluck('roles.id');
+    }
+
+    /**
+     * Get IDs of events whose private data (revenue, sales, check-ins) is
+     * visible to this user, scoped to the given role set. Events attached
+     * via a curator role are excluded unless the curator also created the
+     * event — curators that only list/promote an event don't own the
+     * creator's private data.
+     */
+    protected function ownedEventIdsForRoles(User $user, Collection $roleIds): Collection
+    {
+        return DB::table('event_role')
+            ->join('roles', 'roles.id', '=', 'event_role.role_id')
+            ->join('events', 'events.id', '=', 'event_role.event_id')
+            ->whereIn('event_role.role_id', $roleIds)
+            ->where(function ($q) {
+                $q->where('roles.type', '!=', 'curator')
+                    ->orWhereColumn('events.creator_role_id', 'event_role.role_id');
+            })
+            ->pluck('event_role.event_id')
+            ->unique();
     }
 
     /**
@@ -533,11 +565,9 @@ class AnalyticsService
                 return $emptyStats;
             }
 
-            // Get event IDs that belong to user's roles
-            $eventIds = DB::table('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->pluck('event_id')
-                ->unique();
+            // Only include events the user owns the data for (created by them,
+            // or by a role they own/admin). Curated-but-not-created events are excluded.
+            $eventIds = $this->ownedEventIdsForRoles($user, $roleIds);
         }
 
         if ($eventIds->isEmpty()) {
@@ -591,11 +621,9 @@ class AnalyticsService
                 return collect();
             }
 
-            // Get event IDs that belong to user's roles
-            $eventIds = DB::table('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->pluck('event_id')
-                ->unique();
+            // Only include events the user owns the data for; excludes
+            // curated-but-not-created events.
+            $eventIds = $this->ownedEventIdsForRoles($user, $roleIds);
         }
 
         if ($eventIds->isEmpty()) {
@@ -1011,10 +1039,9 @@ class AnalyticsService
                 return collect();
             }
 
-            $eventIds = DB::table('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->pluck('event_id')
-                ->unique();
+            // Only include events the user owns the data for; excludes
+            // curated-but-not-created events.
+            $eventIds = $this->ownedEventIdsForRoles($user, $roleIds);
         }
 
         if ($eventIds->isEmpty()) {
@@ -1063,10 +1090,9 @@ class AnalyticsService
                 return ['has_data' => false];
             }
 
-            $eventIds = DB::table('event_role')
-                ->whereIn('role_id', $roleIds)
-                ->pluck('event_id')
-                ->unique();
+            // Only include events the user owns the data for; excludes
+            // curated-but-not-created events.
+            $eventIds = $this->ownedEventIdsForRoles($user, $roleIds);
         }
 
         if ($eventIds->isEmpty()) {
