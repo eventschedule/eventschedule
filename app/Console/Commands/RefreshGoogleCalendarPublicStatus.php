@@ -71,7 +71,7 @@ class RefreshGoogleCalendarPublicStatus extends Command
             }
 
             try {
-                $isPublic = $this->googleCalendarService->isCalendarPublic($owner, $pivot->google_calendar_id);
+                $isPublic = $this->googleCalendarService->isCalendarPublic($pivot->google_calendar_id);
 
                 if ($isPublic === null) {
                     $skipped++;

@@ -344,34 +344,31 @@ class GoogleCalendarService
     /**
      * Check whether a Google calendar is publicly readable.
      *
-     * Returns true/false when the ACL could be inspected, null when the
-     * token is missing/invalid or the API call failed (caller can treat
-     * null as "unknown" and leave the cached flag as-is).
+     * Probes the unauthenticated public iCal feed: 200 = public, 404 = private.
+     * Returns null on any other status/transport error; caller treats null as
+     * "unknown" and leaves the cached flag as-is. Avoids needing the broader
+     * `calendar` OAuth scope just to read one ACL bit.
      */
-    public function isCalendarPublic(User $user, string $calendarId): ?bool
+    public function isCalendarPublic(string $calendarId): ?bool
     {
-        if (! $this->ensureValidToken($user)) {
-            return null;
-        }
+        $url = 'https://calendar.google.com/calendar/ical/'
+            .rawurlencode($calendarId).'/public/basic.ics';
 
         try {
-            $rules = $this->calendarService->acl->listAcl($calendarId)->getItems();
-
-            foreach ($rules as $rule) {
-                $scope = $rule->getScope();
-                if ($scope
-                    && $scope->getType() === 'default'
-                    && in_array($rule->getRole(), ['reader', 'freeBusyReader'], true)) {
-                    return true;
-                }
-            }
-
-            return false;
+            $response = \Illuminate\Support\Facades\Http::timeout(5)->head($url);
         } catch (\Throwable $e) {
-            report($e);
-
             return null;
         }
+
+        if ($response->status() === 200) {
+            return true;
+        }
+
+        if ($response->status() === 404) {
+            return false;
+        }
+
+        return null;
     }
 
     /**

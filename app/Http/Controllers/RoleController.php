@@ -2375,7 +2375,7 @@ class RoleController extends Controller
 
             if ($ownerPivot && $newCalendarId && $newCalendarId !== 'primary' && $role->user) {
                 $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
-                $isPublic = $googleCalendarService->isCalendarPublic($role->user, $newCalendarId);
+                $isPublic = $googleCalendarService->isCalendarPublic($newCalendarId);
                 $ownerPivot->update(['google_calendar_is_public' => $isPublic]);
             } elseif ($ownerPivot) {
                 $ownerPivot->update(['google_calendar_is_public' => null]);
