@@ -265,6 +265,8 @@ return [
     'invalid_ticket_qr_code' => 'קוד QR של הכרטיס לא חוקי',
     'this_ticket_is_not_valid' => 'כרטיס זה לא חוקי',
     'this_ticket_is_not_valid_for_today' => 'כרטיס זה לא חוקי להיום',
+    'this_ticket_cannot_be_checked_in_yet' => 'הכניסה נפתחת 24 שעות לפני תחילת האירוע.',
+    'this_ticket_check_in_period_has_ended' => 'תקופת הכניסה לאירוע זה הסתיימה.',
     'you_are_not_authorized_to_scan_this_ticket' => 'אין לך הרשאה לסרוק כרטיס זה',
     'this_ticket_is_cancelled' => 'כרטיס זה בוטל',
     'this_ticket_is_refunded' => 'כרטיס זה הוחזר',

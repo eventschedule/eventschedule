@@ -437,6 +437,8 @@ return [
     'invalid_ticket_qr_code' => 'Ungültiger Ticket-QR-Code',
     'this_ticket_is_not_valid' => 'Dieses Ticket ist nicht gültig',
     'this_ticket_is_not_valid_for_today' => 'Dieses Ticket ist heute nicht gültig',
+    'this_ticket_cannot_be_checked_in_yet' => 'Der Check-in beginnt 24 Stunden vor Beginn der Veranstaltung.',
+    'this_ticket_check_in_period_has_ended' => 'Der Check-in-Zeitraum für diese Veranstaltung ist beendet.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Sie sind nicht berechtigt, dieses Ticket zu scannen',
     'this_ticket_is_cancelled' => 'Dieses Ticket wurde storniert',
     'this_ticket_is_refunded' => 'Dieses Ticket wurde erstattet',

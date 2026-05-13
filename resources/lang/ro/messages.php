@@ -519,6 +519,8 @@ return [
     'invalid_ticket_qr_code' => 'Cod QR bilet invalid',
     'this_ticket_is_not_valid' => 'Acest bilet nu este valid',
     'this_ticket_is_not_valid_for_today' => 'Acest bilet nu este valid pentru azi',
+    'this_ticket_cannot_be_checked_in_yet' => 'Check-in-ul se deschide cu 24 de ore înainte de începerea evenimentului.',
+    'this_ticket_check_in_period_has_ended' => 'Perioada de check-in pentru acest eveniment s-a încheiat.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Nu sunteți autorizat să scanați acest bilet',
     'this_ticket_is_cancelled' => 'Acest bilet este anulat',
     'this_ticket_is_refunded' => 'Acest bilet este rambursat',

@@ -512,6 +512,8 @@ return [
     'invalid_ticket_qr_code' => 'Kehtetu piletite QR-kood',
     'this_ticket_is_not_valid' => 'See pilet ei kehti',
     'this_ticket_is_not_valid_for_today' => 'See pilet täna ei kehti',
+    'this_ticket_cannot_be_checked_in_yet' => 'Sisseregistreerimine algab 24 tundi enne ürituse algust.',
+    'this_ticket_check_in_period_has_ended' => 'Selle ürituse sisseregistreerimise periood on lõppenud.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Teil ei ole õigust seda piletit skannida',
     'this_ticket_is_cancelled' => 'See pilet on tühistatud',
     'this_ticket_is_refunded' => 'See pilet tagastatakse',

@@ -300,6 +300,8 @@ return [
     'invalid_ticket_qr_code' => 'Codice QR del biglietto non valido',
     'this_ticket_is_not_valid' => 'Questo biglietto non è valido',
     'this_ticket_is_not_valid_for_today' => 'Questo biglietto non è valido per oggi',
+    'this_ticket_cannot_be_checked_in_yet' => 'Il check-in apre 24 ore prima dell\'inizio dell\'evento.',
+    'this_ticket_check_in_period_has_ended' => 'Il periodo di check-in per questo evento è terminato.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Non sei autorizzato a scansionare questo biglietto',
     'this_ticket_is_cancelled' => 'Questo biglietto è stato annullato',
     'this_ticket_is_refunded' => 'Questo biglietto è stato rimborsato',

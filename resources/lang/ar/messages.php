@@ -430,6 +430,8 @@ return [
     'invalid_ticket_qr_code' => 'رمز QR للتذكرة غير صالح',
     'this_ticket_is_not_valid' => 'هذه التذكرة غير صالحة',
     'this_ticket_is_not_valid_for_today' => 'هذه التذكرة غير صالحة لهذا اليوم',
+    'this_ticket_cannot_be_checked_in_yet' => 'يفتح تسجيل الحضور قبل 24 ساعة من بدء الفعالية.',
+    'this_ticket_check_in_period_has_ended' => 'انتهت فترة تسجيل الحضور لهذه الفعالية.',
     'you_are_not_authorized_to_scan_this_ticket' => 'غير مصرح لك بمسح هذه التذكرة',
     'this_ticket_is_cancelled' => 'تم إلغاء هذه التذكرة',
     'this_ticket_is_refunded' => 'تم استرداد هذه التذكرة',

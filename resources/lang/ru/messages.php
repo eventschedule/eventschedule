@@ -513,6 +513,8 @@ return [
     'invalid_ticket_qr_code' => 'Недействительный QR-код билета',
     'this_ticket_is_not_valid' => 'Этот билет недействителен',
     'this_ticket_is_not_valid_for_today' => 'Этот билет не действителен на сегодня',
+    'this_ticket_cannot_be_checked_in_yet' => 'Регистрация открывается за 24 часа до начала мероприятия.',
+    'this_ticket_check_in_period_has_ended' => 'Период регистрации на это мероприятие завершён.',
     'you_are_not_authorized_to_scan_this_ticket' => 'У вас нет прав для сканирования этого билета.',
     'this_ticket_is_cancelled' => 'Этот билет аннулирован',
     'this_ticket_is_refunded' => 'Этот билет подлежит возврату',

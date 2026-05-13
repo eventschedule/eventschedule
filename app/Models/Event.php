@@ -1950,6 +1950,25 @@ class Event extends Model
     }
 
     /**
+     * Calendar date (Y-m-d) in the creator schedule timezone for starts_at, for sale/RSVP event_date defaults.
+     */
+    public function saleEventDateFromStartsAt(): ?string
+    {
+        if (! $this->starts_at) {
+            return null;
+        }
+
+        $this->loadMissing('creatorRole');
+        $tz = $this->creatorRole?->timezone ?? config('app.timezone');
+
+        if (strlen($this->starts_at) === 10) {
+            return Carbon::createFromFormat('Y-m-d', $this->starts_at, 'UTC')->timezone($tz)->format('Y-m-d');
+        }
+
+        return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->timezone($tz)->format('Y-m-d');
+    }
+
+    /**
      * Get location schema data for JSON-LD
      */
     public function getSchemaLocation()

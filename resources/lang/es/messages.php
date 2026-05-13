@@ -463,6 +463,8 @@ return [
     'invalid_ticket_qr_code' => 'Código QR de entrada no válido',
     'this_ticket_is_not_valid' => 'Esta entrada no es válida',
     'this_ticket_is_not_valid_for_today' => 'Esta entrada no es válida para hoy',
+    'this_ticket_cannot_be_checked_in_yet' => 'El registro abre 24 horas antes del inicio del evento.',
+    'this_ticket_check_in_period_has_ended' => 'El período de registro de este evento ha finalizado.',
     'you_are_not_authorized_to_scan_this_ticket' => 'No estás autorizado para escanear esta entrada',
     'this_ticket_is_cancelled' => 'Esta entrada está cancelada',
     'this_ticket_is_refunded' => 'Esta entrada está reembolsada',

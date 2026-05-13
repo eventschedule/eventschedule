@@ -298,6 +298,8 @@ return [
     'invalid_ticket_qr_code' => 'Código QR do ingresso inválido',
     'this_ticket_is_not_valid' => 'Este ingresso não é válido',
     'this_ticket_is_not_valid_for_today' => 'Este ingresso não é válido para hoje',
+    'this_ticket_cannot_be_checked_in_yet' => 'O check-in abre 24 horas antes do início do evento.',
+    'this_ticket_check_in_period_has_ended' => 'O período de check-in deste evento terminou.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Você não está autorizado a escanear este ingresso',
     'this_ticket_is_cancelled' => 'Este ingresso está cancelado',
     'this_ticket_is_refunded' => 'Este ingresso foi reembolsado',

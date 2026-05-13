@@ -413,7 +413,7 @@ class ApiSaleController extends Controller
             if (! $event->starts_at) {
                 return response()->json(['error' => 'Event has no start date. Please provide event_date parameter.'], 422);
             }
-            $eventDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+            $eventDate = $event->saleEventDateFromStartsAt();
         }
 
         // Check if recurring event occurrence is in the past

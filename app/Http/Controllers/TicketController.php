@@ -823,7 +823,7 @@ class TicketController extends Controller
                     // Resolve event_date for one-time events (hidden field may be empty)
                     $eventDate = $request->event_date;
                     if (! $eventDate && $event->starts_at) {
-                        $eventDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                        $eventDate = $event->saleEventDateFromStartsAt();
                     }
 
                     foreach ($request->tickets as $ticketId => $quantity) {
@@ -938,7 +938,7 @@ class TicketController extends Controller
                 }
 
                 if (! $sale->event_date) {
-                    $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                    $sale->event_date = $event->saleEventDateFromStartsAt();
                 }
 
                 // Store event-level custom field values using stable indices
@@ -1451,7 +1451,7 @@ class TicketController extends Controller
                 }
 
                 if (! $sale->event_date) {
-                    $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                    $sale->event_date = $event->saleEventDateFromStartsAt();
                 }
 
                 // Store event-level custom field values
@@ -2165,7 +2165,7 @@ class TicketController extends Controller
     public function scanned($eventId, $secret)
     {
         $user = auth()->user();
-        $event = Event::find(UrlUtils::decodeId($eventId));
+        $event = Event::with('creatorRole')->find(UrlUtils::decodeId($eventId));
 
         if (! $event) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
@@ -2185,9 +2185,21 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
 
-        $eventTimezone = $event->creatorRole?->timezone ?? config('app.timezone');
-        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now($eventTimezone)->format('Y-m-d')) {
-            return response()->json(['error' => __('messages.this_ticket_is_not_valid_for_today')], 200);
+        if (! $event->starts_at) {
+            return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
+        }
+
+        $startUtc = $event->getStartDateTime($sale->event_date, false);
+        $endUtc = $event->getEndDateTime($sale->event_date, false);
+        $earliest = $startUtc->copy()->subHours(24);
+        $nowUtc = now('UTC');
+
+        if ($nowUtc->lt($earliest)) {
+            return response()->json(['error' => __('messages.this_ticket_cannot_be_checked_in_yet')], 200);
+        }
+
+        if ($nowUtc->gt($endUtc)) {
+            return response()->json(['error' => __('messages.this_ticket_check_in_period_has_ended')], 200);
         }
 
         if ($sale->status == 'unpaid') {

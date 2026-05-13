@@ -519,6 +519,8 @@ return [
     'invalid_ticket_qr_code' => 'Invalid ticket QR code',
     'this_ticket_is_not_valid' => 'This ticket is not valid',
     'this_ticket_is_not_valid_for_today' => 'This ticket is not valid for today',
+    'this_ticket_cannot_be_checked_in_yet' => 'Check-in opens 24 hours before the event starts.',
+    'this_ticket_check_in_period_has_ended' => 'The check-in period for this event has ended.',
     'you_are_not_authorized_to_scan_this_ticket' => 'You are not authorized to scan this ticket',
     'this_ticket_is_cancelled' => 'This ticket is cancelled',
     'this_ticket_is_refunded' => 'This ticket is refunded',

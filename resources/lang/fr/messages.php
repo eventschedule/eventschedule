@@ -467,6 +467,8 @@ return [
     'invalid_ticket_qr_code' => 'Code QR du billet invalide',
     'this_ticket_is_not_valid' => 'Ce billet n\'est pas valide',
     'this_ticket_is_not_valid_for_today' => 'Ce billet n\'est pas valide pour aujourd\'hui',
+    'this_ticket_cannot_be_checked_in_yet' => 'L\'enregistrement ouvre 24 heures avant le début de l\'événement.',
+    'this_ticket_check_in_period_has_ended' => 'La période d\'enregistrement pour cet événement est terminée.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Vous n\'êtes pas autorisé à scanner ce billet',
     'this_ticket_is_cancelled' => 'Ce billet est annulé',
     'this_ticket_is_refunded' => 'Ce billet est remboursé',

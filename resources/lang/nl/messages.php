@@ -297,6 +297,8 @@ return [
     'invalid_ticket_qr_code' => 'Ongeldige ticket-QR-code',
     'this_ticket_is_not_valid' => 'Dit ticket is niet geldig',
     'this_ticket_is_not_valid_for_today' => 'Dit ticket is niet geldig voor vandaag',
+    'this_ticket_cannot_be_checked_in_yet' => 'Inchecken opent 24 uur voor aanvang van het evenement.',
+    'this_ticket_check_in_period_has_ended' => 'De incheckperiode voor dit evenement is afgelopen.',
     'you_are_not_authorized_to_scan_this_ticket' => 'Je bent niet geautoriseerd om dit ticket te scannen',
     'this_ticket_is_cancelled' => 'Dit ticket is geannuleerd',
     'this_ticket_is_refunded' => 'Dit ticket is terugbetaald',
