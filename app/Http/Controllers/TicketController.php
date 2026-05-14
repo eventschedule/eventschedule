@@ -2189,8 +2189,17 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
-        $startUtc = $event->getStartDateTime($sale->event_date, false);
-        $endUtc = $event->getEndDateTime($sale->event_date, false);
+        // Build the UTC start moment from $sale->event_date (a schedule-TZ calendar date)
+        // and the schedule-TZ time-of-day implied by $event->starts_at.
+        $tz = $event->creatorRole?->timezone ?? config('app.timezone');
+        $startsAt = strlen($event->starts_at) === 10
+            ? Carbon::createFromFormat('Y-m-d', $event->starts_at, 'UTC')->startOfDay()
+            : Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
+        $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $sale->event_date.' '.$timeOfDay, $tz)
+            ->setTimezone('UTC');
+        $duration = $event->duration > 0 ? $event->duration : 2;
+        $endUtc = $startUtc->copy()->addHours($duration);
         $earliest = $startUtc->copy()->subHours(24);
         $nowUtc = now('UTC');
 

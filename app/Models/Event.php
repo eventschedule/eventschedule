@@ -1958,12 +1958,13 @@ class Event extends Model
             return null;
         }
 
+        // Date-only starts_at already represents the calendar date in the schedule's view.
+        if (strlen($this->starts_at) === 10) {
+            return $this->starts_at;
+        }
+
         $this->loadMissing('creatorRole');
         $tz = $this->creatorRole?->timezone ?? config('app.timezone');
-
-        if (strlen($this->starts_at) === 10) {
-            return Carbon::createFromFormat('Y-m-d', $this->starts_at, 'UTC')->timezone($tz)->format('Y-m-d');
-        }
 
         return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->timezone($tz)->format('Y-m-d');
     }
