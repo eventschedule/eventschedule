@@ -41,26 +41,9 @@
     <script src="{{ asset('js/searchable-select.js') }}" defer {!! nonce_attr() !!}></script>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/toastify.min.css') }}">
 
-    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
+    @include('partials.google-analytics')
 
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            // Handle DataCloneError silently
-            console.warn('Analytics data could not be cloned:', e);
-        }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    @else
     <script {!! nonce_attr() !!}>
-    @endif
-
     function onPopUpClick(id, event) {
         if (typeof $ === 'undefined') return;
         event.stopPropagation();
@@ -104,6 +87,12 @@
     }
 
     if (typeof $ !== 'undefined') {
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hidePopUp();
+            }
+        });
+
         $(document).on('click', '.pop-up-menu', function(event) {
             event.stopPropagation();
         });
@@ -749,6 +738,10 @@
 </head> 
 <body class="font-sans antialiased h-full bg-gray-50 dark:bg-gray-900 overflow-x-clip">
 
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--brand-button-bg)] focus:px-4 focus:py-3 focus:text-base focus:text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] ltr:focus:left-4 rtl:focus:right-4">
+        {{ __('accessibility.skip_to_main') }}
+    </a>
+
     {{ $slot }}
 
     <div id="tooltip" class="hidden fixed z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-700 rounded-lg shadow-lg pointer-events-none max-w-xs"></div>
@@ -798,6 +791,8 @@
             window.showLightbox = open;
         })();
     </script>
+
+    @include('partials.cookie-banner')
 
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

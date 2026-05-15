@@ -1,4 +1,4 @@
-@props(['name' => 'country_code', 'value' => '', 'id' => null, 'disabled' => false])
+@props(['name' => 'country_code', 'value' => '', 'id' => null, 'disabled' => false, 'autoInit' => true])
 
 @php
     $inputId = $id ?? $name;
@@ -18,6 +18,20 @@ if (!document.getElementById('iti-country-styles')) {
 window._countryInputs = window._countryInputs || {};
 window._countryInputPending = window._countryInputPending || {};
 
+window.destroyCountryInput = function(inputId) {
+    var entry = window._countryInputs[inputId];
+    if (entry && entry.iti) {
+        try {
+            entry.iti.destroy();
+        } catch (e) {}
+    }
+    delete window._countryInputs[inputId];
+    var tel = document.getElementById(inputId + '_tel');
+    if (tel) {
+        tel._itiInstance = null;
+    }
+};
+
 window.initCountryInput = function(inputId, initialValue) {
     var telInput = document.getElementById(inputId + '_tel');
     var hidden = document.getElementById(inputId);
@@ -30,6 +44,37 @@ window.initCountryInput = function(inputId, initialValue) {
             if (inst) inst.setCountry(initialValue);
         }
         return window._countryInputs[inputId];
+    }
+
+    // If telInput is itself nested inside a stale .iti--country-only (e.g. a prior init
+    // wrapped it but lost its _itiInstance reference across a Vue v-if remount), unwrap it
+    // so intlTelInput below doesn't double-wrap.
+    if (telInput.parentNode && telInput.parentNode.classList &&
+        telInput.parentNode.classList.contains('iti--country-only')) {
+        var staleWrapper = telInput.parentNode;
+        var grand = staleWrapper.parentNode;
+        if (grand) {
+            grand.insertBefore(telInput, staleWrapper);
+            staleWrapper.remove();
+        }
+    }
+
+    // Sweep any other stranded .iti--country-only wrappers in the document whose tel input
+    // matches our inputId but isn't the live telInput. Catches orphans regardless of where
+    // they ended up after Vue's render lifecycle.
+    document.querySelectorAll('.iti--country-only').forEach(function(w) {
+        var t = w.querySelector('input[type="tel"]');
+        if (t && t.id === inputId + '_tel' && t !== telInput) {
+            w.remove();
+        }
+    });
+
+    // Stale map after Vue removed/reinserted the subtree (new tel node, old Iti in _countryInputs)
+    if (window._countryInputs[inputId]) {
+        window.destroyCountryInput(inputId);
+        telInput = document.getElementById(inputId + '_tel');
+        hidden = document.getElementById(inputId);
+        if (!telInput || !hidden) return null;
     }
 
     var iti = intlTelInput(telInput, {
@@ -105,6 +150,7 @@ window.getCountryInput = function(id) {
     {{ $disabled ? 'disabled' : '' }}
     autocomplete="off" />
 
+@if ($autoInit)
 <script {!! nonce_attr() !!}>
 (function() {
     window._countryInputPending['{{ $inputId }}'] = '{{ $value }}' || 'us';
@@ -124,3 +170,4 @@ window.getCountryInput = function(id) {
     }, 0);
 })();
 </script>
+@endif

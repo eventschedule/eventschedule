@@ -87,6 +87,7 @@ class RoleUpdateRequest extends FormRequest
             'hide_past_events' => ['nullable', 'boolean'],
             'draft_events_default' => ['nullable', 'boolean'],
             'hide_videos' => ['nullable', 'boolean'],
+            'show_accessibility_widget' => ['nullable', 'boolean'],
             'default_category_id' => ['nullable', 'integer', 'in:'.implode(',', array_keys(config('app.event_categories', [])))],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'feedback_enabled' => ['nullable', 'boolean'],

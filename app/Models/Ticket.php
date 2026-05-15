@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TicketVolumeDiscount;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Database\Eloquent\Model;
@@ -21,12 +22,14 @@ class Ticket extends Model
         'event_id',
         'type',
         'quantity',
+        'max_per_order',
         'sold',
         'price',
         'description',
         'sales_start_at',
         'sales_end_at',
         'custom_fields',
+        'volume_discount',
         'is_addon',
         'image_url',
         'url',
@@ -34,6 +37,7 @@ class Ticket extends Model
 
     protected $casts = [
         'custom_fields' => 'array',
+        'volume_discount' => 'array',
         'sales_start_at' => 'datetime',
         'sales_end_at' => 'datetime',
         'is_addon' => 'boolean',
@@ -85,6 +89,39 @@ class Ticket extends Model
         });
     }
 
+    public function lineGrossSubtotal(int $quantity): float
+    {
+        return (float) $this->price * max(0, $quantity);
+    }
+
+    public function volumeDiscountAmountForQuantity(int $quantity): float
+    {
+        if ($this->is_addon) {
+            return 0.0;
+        }
+
+        return TicketVolumeDiscount::volumeDiscountAmount(
+            $this->volume_discount,
+            (float) $this->price,
+            $quantity,
+            TicketVolumeDiscount::decimalsForTicket($this)
+        );
+    }
+
+    public function lineSubtotalAfterVolumeDiscount(int $quantity): float
+    {
+        if ($this->is_addon) {
+            return $this->lineGrossSubtotal($quantity);
+        }
+
+        return TicketVolumeDiscount::lineSubtotalAfterVolume(
+            $this->volume_discount,
+            (float) $this->price,
+            $quantity,
+            TicketVolumeDiscount::decimalsForTicket($this)
+        );
+    }
+
     public function toData($date = null)
     {
         $data = [];
@@ -93,6 +130,7 @@ class Ticket extends Model
         $data['type'] = $this->type;
         $data['is_addon'] = (bool) $this->is_addon;
         $data['quantity'] = $this->quantity;
+        $data['max_per_order'] = $this->max_per_order ?: null;
         $data['price'] = $this->price;
         $data['description'] = $this->description ? UrlUtils::convertUrlsToLinks($this->description_html ?? $this->description) : null;
         $data['image_url'] = $this->image_url ?: null;
@@ -100,6 +138,8 @@ class Ticket extends Model
 
         $sold = $this->sold ? json_decode($this->sold, true) : [];
         $sold = $sold[$date] ?? 0;
+
+        $perOrderCap = $this->max_per_order ?: 20;
 
         // Handle combined mode logic
         if ($this->event && ! $this->is_addon && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
@@ -110,10 +150,12 @@ class Ticket extends Model
             });
             // In combined mode, the total quantity is the same as individual quantity
             $totalQuantity = $this->event->getSameTicketQuantity();
-            $data['quantity'] = $totalQuantity > 0 ? max(0, min(20, $totalQuantity - $totalSold)) : 20;
+            $data['quantity'] = $totalQuantity > 0 ? max(0, min($perOrderCap, $totalQuantity - $totalSold)) : $perOrderCap;
         } else {
-            $data['quantity'] = $this->quantity > 0 ? max(0, min(20, $this->quantity - $sold)) : 20;
+            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
         }
+
+        $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);
 
         return $data;
     }

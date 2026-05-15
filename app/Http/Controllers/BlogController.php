@@ -19,9 +19,13 @@ class BlogController extends Controller
     {
         $query = BlogPost::published()->orderBy('published_at', 'desc');
 
-        // Filter by tag
-        if ($request->has('tag')) {
-            $query->byTag($request->tag);
+        // Filter by tag (guard against malformed scraper input: invalid UTF-8 makes
+        // json_encode return false, producing json_contains(tags, 0))
+        if ($request->filled('tag')) {
+            $tag = (string) $request->input('tag');
+            if (mb_check_encoding($tag, 'UTF-8') && mb_strlen($tag) <= 100) {
+                $query->byTag($tag);
+            }
         }
 
         // Filter by month

@@ -278,6 +278,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/google-calendar/disconnect', [GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
     Route::get('/google-calendar/calendars', [GoogleCalendarController::class, 'getCalendars'])->name('google.calendar.calendars');
     Route::post('/google-calendar/sync/{subdomain}', [GoogleCalendarController::class, 'sync'])->name('google.calendar.sync');
+    Route::post('/google-calendar/force-sync-to-google/{subdomain}', [GoogleCalendarController::class, 'forceSyncToGoogle'])->name('google.calendar.force_sync_to_google')->middleware('throttle:5,1');
     Route::post('/google-calendar/member-sync/{subdomain}', [GoogleCalendarController::class, 'memberSync'])->name('google.calendar.member_sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
@@ -678,6 +679,7 @@ if (config('app.is_nexus')) {
         Route::get('/trello-alternative', fn () => redirect()->route('marketing.replace_trello', [], 301));
         Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
         Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
+        Route::get('/accessibility', [MarketingController::class, 'accessibility'])->name('marketing.accessibility');
         Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
         Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
         Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
@@ -714,6 +716,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
         Route::get('/docs/selfhost/email', [MarketingController::class, 'docsSelfhostEmail'])->name('marketing.docs.selfhost.email');
         Route::get('/docs/selfhost/ai', [MarketingController::class, 'docsSelfhostAi'])->name('marketing.docs.selfhost.ai');
+        Route::get('/docs/selfhost/accessibility', [MarketingController::class, 'docsSelfhostAccessibility'])->name('marketing.docs.selfhost.accessibility');
         // SaaS section
         Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
         Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
@@ -872,6 +875,7 @@ if (config('app.is_nexus')) {
             Route::get('/trello-alternative', fn () => redirect()->route('marketing.replace_trello', [], 301));
             Route::get('/contact', [MarketingController::class, 'contact'])->name('marketing.contact');
             Route::get('/privacy', [MarketingController::class, 'privacy'])->name('marketing.privacy');
+            Route::get('/accessibility', [MarketingController::class, 'accessibility'])->name('marketing.accessibility');
             Route::get('/terms-of-service', [MarketingController::class, 'terms'])->name('marketing.terms');
             Route::get('/self-hosting-terms-of-service', [MarketingController::class, 'selfHostingTerms'])->name('marketing.self_hosting_terms');
             Route::get('/selfhost', [MarketingController::class, 'selfHost'])->name('marketing.selfhost');
@@ -908,6 +912,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
             Route::get('/docs/selfhost/email', [MarketingController::class, 'docsSelfhostEmail'])->name('marketing.docs.selfhost.email');
             Route::get('/docs/selfhost/ai', [MarketingController::class, 'docsSelfhostAi'])->name('marketing.docs.selfhost.ai');
+            Route::get('/docs/selfhost/accessibility', [MarketingController::class, 'docsSelfhostAccessibility'])->name('marketing.docs.selfhost.accessibility');
             // SaaS section
             Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
             Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
@@ -1053,6 +1058,7 @@ if (config('app.is_nexus')) {
             Route::get('/why-create-account', fn () => redirect('https://eventschedule.com/why-create-account', 301));
             Route::get('/contact', fn () => redirect('https://eventschedule.com/contact', 301));
             Route::get('/privacy', fn () => redirect('https://eventschedule.com/privacy', 301));
+            Route::get('/accessibility', fn () => redirect('https://eventschedule.com/accessibility', 301));
             Route::get('/terms-of-service', fn () => redirect('https://eventschedule.com/terms-of-service', 301));
             Route::get('/self-hosting-terms-of-service', fn () => redirect('https://eventschedule.com/self-hosting-terms-of-service', 301));
             Route::get('/selfhost', fn () => redirect('https://eventschedule.com/selfhost', 301));
@@ -1088,6 +1094,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/admin', fn () => redirect('https://eventschedule.com/docs/selfhost/admin', 301));
             Route::get('/docs/selfhost/email', fn () => redirect('https://eventschedule.com/docs/selfhost/email', 301));
             Route::get('/docs/selfhost/ai', fn () => redirect('https://eventschedule.com/docs/selfhost/ai', 301));
+            Route::get('/docs/selfhost/accessibility', fn () => redirect('https://eventschedule.com/docs/selfhost/accessibility', 301));
             // SaaS section
             Route::get('/docs/saas', fn () => redirect('https://eventschedule.com/docs/saas', 301));
             Route::get('/docs/saas/custom-domains', fn () => redirect('https://eventschedule.com/docs/saas/custom-domains', 301));
@@ -1220,6 +1227,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/admin', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.admin');
     Route::get('/docs/selfhost/email', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.email');
     Route::get('/docs/selfhost/ai', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.ai');
+    Route::get('/docs/selfhost/accessibility', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.accessibility');
     // SaaS section
     Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
     Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');

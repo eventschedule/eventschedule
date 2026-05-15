@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
@@ -822,7 +823,7 @@ class TicketController extends Controller
                     // Resolve event_date for one-time events (hidden field may be empty)
                     $eventDate = $request->event_date;
                     if (! $eventDate && $event->starts_at) {
-                        $eventDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                        $eventDate = $event->saleEventDateFromStartsAt();
                     }
 
                     foreach ($request->tickets as $ticketId => $quantity) {
@@ -840,6 +841,12 @@ class TicketController extends Controller
 
                             if ($ticketModel->isSalesNotStarted()) {
                                 throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
+                            }
+
+                            if ($ticketModel->max_per_order && $quantity > $ticketModel->max_per_order) {
+                                throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
+                                    'max' => $ticketModel->max_per_order,
+                                ]));
                             }
 
                             if ($ticketModel->quantity > 0) {
@@ -885,6 +892,12 @@ class TicketController extends Controller
                                 throw new \App\Exceptions\BusinessException(__('messages.ticket_not_found'));
                             }
 
+                            if ($addonModel->max_per_order && $addonQty > $addonModel->max_per_order) {
+                                throw new \App\Exceptions\BusinessException(__('messages.exceeded_max_per_order', [
+                                    'max' => $addonModel->max_per_order,
+                                ]));
+                            }
+
                             if ($addonModel->quantity > 0) {
                                 $sold = $addonModel->sold ? json_decode($addonModel->sold, true) : [];
                                 $soldCount = $sold[$eventDate] ?? 0;
@@ -925,7 +938,7 @@ class TicketController extends Controller
                 }
 
                 if (! $sale->event_date) {
-                    $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                    $sale->event_date = $event->saleEventDateFromStartsAt();
                 }
 
                 // Store event-level custom field values using stable indices
@@ -1085,7 +1098,20 @@ class TicketController extends Controller
                         $sale->payment_amount = $subtotal;
                     }
 
-                    // Apply promo code if provided
+                    $sale->loadMissing(['saleTickets.ticket']);
+                    foreach ($sale->saleTickets as $st) {
+                        if ($st->ticket) {
+                            $st->ticket->setRelation('event', $event);
+                        }
+                    }
+
+                    $volumeTotal = $isIndividualTickets
+                        ? TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $request->tickets)
+                        : TicketVolumeDiscount::totalVolumeDiscountForSaleTickets($sale->saleTickets);
+                    $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
+                    $subtotalAfterVolume = $subtotal - $volumeTotal;
+
+                    // Apply promo code if provided (eligible subtotal is post-volume; see PromoCode::calculateDiscount)
                     if ($request->promo_code) {
                         $promoCode = PromoCode::where('event_id', $event->id)
                             ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
@@ -1095,29 +1121,34 @@ class TicketController extends Controller
                         if ($promoCode && $promoCode->isValid()) {
                             if ($isIndividualTickets) {
                                 // Calculate discount from all ticket selections
-                                $sale->load('saleTickets.ticket');
                                 $allSaleTickets = collect();
                                 foreach ($request->tickets as $ticketId => $quantity) {
                                     if ($quantity > 0) {
                                         $decodedId = UrlUtils::decodeId($ticketId);
                                         $ticketModel = $event->tickets()->find($decodedId);
-                                        $fakeSaleTicket = new \App\Models\SaleTicket(['ticket_id' => $decodedId, 'quantity' => $quantity]);
-                                        $fakeSaleTicket->setRelation('ticket', $ticketModel);
-                                        $allSaleTickets->push($fakeSaleTicket);
+                                        if ($ticketModel) {
+                                            $ticketModel->setRelation('event', $event);
+                                            $fakeSaleTicket = new \App\Models\SaleTicket(['ticket_id' => $decodedId, 'quantity' => $quantity]);
+                                            $fakeSaleTicket->setRelation('ticket', $ticketModel);
+                                            $allSaleTickets->push($fakeSaleTicket);
+                                        }
                                     }
                                 }
+                                $promoCode->setRelation('event', $event);
                                 $discountAmount = $promoCode->calculateDiscount($allSaleTickets);
                             } else {
+                                $promoCode->setRelation('event', $event);
                                 $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
                             }
                             if ($discountAmount > 0) {
                                 $sale->promo_code_id = $promoCode->id;
                                 $sale->discount_amount = $discountAmount;
-                                $sale->payment_amount = max(0, $subtotal - $discountAmount);
                                 $promoCode->increment('times_used');
                             }
                         }
                     }
+
+                    $sale->payment_amount = max(0, $subtotalAfterVolume - (float) ($sale->discount_amount ?? 0));
 
                     // Create guest sales for individual tickets
                     if ($isIndividualTickets) {
@@ -1420,7 +1451,7 @@ class TicketController extends Controller
                 }
 
                 if (! $sale->event_date) {
-                    $sale->event_date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
+                    $sale->event_date = $event->saleEventDateFromStartsAt();
                 }
 
                 // Store event-level custom field values
@@ -1549,7 +1580,13 @@ class TicketController extends Controller
             $stripeSaleTickets = $sale->saleTickets;
         }
 
-        // Calculate discount ratio for eligible tickets (exclude add-ons)
+        foreach ($stripeSaleTickets as $saleTicket) {
+            if ($saleTicket->ticket) {
+                $saleTicket->ticket->setRelation('event', $event);
+            }
+        }
+
+        // Calculate discount ratio for eligible tickets (exclude add-ons); base is post-volume line totals
         $eligibleSubtotal = 0;
         if ($promoCode && $discount > 0) {
             foreach ($stripeSaleTickets as $saleTicket) {
@@ -1557,7 +1594,7 @@ class TicketController extends Controller
                     continue;
                 }
                 if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                    $eligibleSubtotal += $saleTicket->ticket->price * $saleTicket->quantity;
+                    $eligibleSubtotal += $saleTicket->ticket->lineSubtotalAfterVolumeDiscount((int) $saleTicket->quantity);
                 }
             }
         }
@@ -1570,10 +1607,16 @@ class TicketController extends Controller
         $lastEligibleIndex = null;
 
         foreach ($stripeSaleTickets as $index => $saleTicket) {
-            $unitPrice = $saleTicket->ticket->price;
-            if ($promoCode && $discount > 0 && ! $saleTicket->ticket->is_addon && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                $unitPrice = $unitPrice * $discountRatio;
-                $lastEligibleIndex = count($lineItems);
+            $qty = (int) $saleTicket->quantity;
+            if ($saleTicket->ticket->is_addon) {
+                $unitPrice = $saleTicket->ticket->price;
+            } else {
+                $linePostVolume = $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
+                $unitPrice = $qty > 0 ? $linePostVolume / $qty : 0;
+                if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                    $unitPrice = $unitPrice * $discountRatio;
+                    $lastEligibleIndex = count($lineItems);
+                }
             }
             $unitAmountCents = (int) round($unitPrice * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
             $totalCents += $unitAmountCents * $saleTicket->quantity;
@@ -1756,6 +1799,16 @@ class TicketController extends Controller
                     'notes' => $saleTicket->ticket->description ?: ($saleTicket->ticket->type ?: ($saleTicket->ticket->is_addon ? __('messages.add_on') : __('messages.tickets'))),
                     'quantity' => $saleTicket->quantity,
                     'cost' => $saleTicket->ticket->price,
+                ];
+            }
+
+            $volumeDiscount = (float) ($sale->volume_discount_amount ?? 0);
+            if ($volumeDiscount > 0) {
+                $lineItems[] = [
+                    'product_key' => __('messages.volume_discount'),
+                    'notes' => __('messages.volume_discount'),
+                    'quantity' => 1,
+                    'cost' => -$volumeDiscount,
                 ];
             }
 
@@ -2112,7 +2165,7 @@ class TicketController extends Controller
     public function scanned($eventId, $secret)
     {
         $user = auth()->user();
-        $event = Event::find(UrlUtils::decodeId($eventId));
+        $event = Event::with('creatorRole')->find(UrlUtils::decodeId($eventId));
 
         if (! $event) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
@@ -2132,9 +2185,30 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
 
-        $eventTimezone = $event->creatorRole?->timezone ?? config('app.timezone');
-        if (Carbon::parse($sale->event_date)->format('Y-m-d') !== now($eventTimezone)->format('Y-m-d')) {
-            return response()->json(['error' => __('messages.this_ticket_is_not_valid_for_today')], 200);
+        if (! $event->starts_at) {
+            return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
+        }
+
+        // Build the UTC start moment from $sale->event_date (a schedule-TZ calendar date)
+        // and the schedule-TZ time-of-day implied by $event->starts_at.
+        $tz = $event->creatorRole?->timezone ?? config('app.timezone');
+        $startsAt = strlen($event->starts_at) === 10
+            ? Carbon::createFromFormat('Y-m-d', $event->starts_at, 'UTC')->startOfDay()
+            : Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
+        $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $sale->event_date.' '.$timeOfDay, $tz)
+            ->setTimezone('UTC');
+        $duration = $event->duration > 0 ? $event->duration : 2;
+        $endUtc = $startUtc->copy()->addHours($duration);
+        $earliest = $startUtc->copy()->subHours(24);
+        $nowUtc = now('UTC');
+
+        if ($nowUtc->lt($earliest)) {
+            return response()->json(['error' => __('messages.this_ticket_cannot_be_checked_in_yet')], 200);
+        }
+
+        if ($nowUtc->gt($endUtc)) {
+            return response()->json(['error' => __('messages.this_ticket_check_in_period_has_ended')], 200);
         }
 
         if ($sale->status == 'unpaid') {

@@ -1,4 +1,5 @@
 @import 'flatpickr/dist/flatpickr.css';
+@import './accessibility-widget.css';
 
 @font-face {
     font-family: 'Inter';
@@ -935,4 +936,16 @@ a.text-blue-600:visited { color: rgb(37 99 235); }
 }
 .dark ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.25);
+}
+
+@keyframes cookie-banner-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+[data-cookie-consent]:not([hidden]) {
+    animation: cookie-banner-in 200ms ease-out both;
+}
+[data-cookie-consent][data-state="closing"] {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
 }

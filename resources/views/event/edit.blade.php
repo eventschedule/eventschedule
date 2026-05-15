@@ -764,15 +764,6 @@
         }
     });
 
-    function onChangeCountry() {
-        var ci = window.getCountryInput('venue_country_code');
-        if (ci) {
-            var selected = ci.getSelectedCountryData();
-            $('#venue_country_code').val(selected.iso2);
-            app.venueCountryCode = selected.iso2;
-        }
-    }
-
     function onChangeDateType() {
         if (typeof window.vueApp === 'undefined' || !window.vueApp.event) {
             return;
@@ -1194,7 +1185,7 @@
         <x-text-input name="venue_city" type="hidden" v-model="venueCity" />                                                                
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
         <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
-        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" />
+        <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" autocomplete="off" />
         <x-text-input name="venue_website" type="hidden" v-model="venueWebsite" />
 
         <div class="py-5">
@@ -1236,12 +1227,12 @@
                                 {{ __('messages.agenda') }}
                             </a>
                             @php
-                                $curatorsForNav = $user->allCurators();
-                                $curatorsForNav = $curatorsForNav->filter(function($curator) use ($subdomain) {
-                                    return $curator->subdomain !== $subdomain;
+                                $schedulesForNav = $user->availableEventSchedules();
+                                $schedulesForNav = $schedulesForNav->filter(function($schedule) use ($subdomain) {
+                                    return $schedule->subdomain !== $subdomain;
                                 });
                             @endphp
-                            @if ($curatorsForNav->count() > 0)
+                            @if ($schedulesForNav->count() > 0)
                             <a href="#section-schedules" class="section-nav-link" data-section="section-schedules">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -1713,7 +1704,7 @@
 
                                     <div class="mb-6">
                                         <x-input-label for="venue_country_code" :value="__('messages.country')" />
-                                        <x-country-input id="venue_country_code" name="venue_country_code" :value="$selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '')" />
+                                        <x-country-input id="venue_country_code" name="venue_country_code" :auto-init="false" :value="$selectedVenue && $selectedVenue->country ? $selectedVenue->country : ($role && $role->country_code ? $role->country_code : '')" />
                                         <x-input-error class="mt-2" :messages="$errors->get('venue_country_code')" />
                                     </div>
 
@@ -2421,13 +2412,13 @@
                 </div>
 
                 @php
-                    $curators = $user->allCurators();
-                    $curators = $curators->filter(function($curator) use ($subdomain) {
-                        return $curator->subdomain !== $subdomain;
+                    $schedules = $user->availableEventSchedules();
+                    $schedules = $schedules->filter(function($schedule) use ($subdomain) {
+                        return $schedule->subdomain !== $subdomain;
                     });
                 @endphp
 
-                @if ($curators->count() > 0)
+                @if ($schedules->count() > 0)
                 <button type="button" class="mobile-section-header" data-section="section-schedules">
                     <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2440,7 +2431,7 @@
                     </svg>
                 </button>
                 <div id="section-schedules" class="section-content lg:mt-0">
-                    <div class="max-w-xl">                                                
+                    <div class="max-w-xl">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -2449,27 +2440,27 @@
                         </h2>
 
                         <div class="mb-6">
-                            <x-input-label class="mb-2" for="curators" :value="__(count($curators) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
-                            
-                            @foreach($curators as $curator)
+                            <x-input-label class="mb-2" for="curators" :value="__(count($schedules) > 1 ? 'messages.add_to_schedules' : 'messages.add_to_schedule')" />
+
+                            @foreach($schedules as $schedule)
                             @php
-                                $isClonedCurator = isset($clonedCurators) && $clonedCurators->contains(function($c) use ($curator) { return $c->id == $curator->id; });
-                                $isCuratorChecked = (! $event->exists && ($role->subdomain == $curator->subdomain || session('pending_request') == $curator->subdomain)) || $event->curators->contains($curator->id) || $isClonedCurator;
+                                $isClonedSchedule = isset($clonedCurators) && $clonedCurators->contains(function($c) use ($schedule) { return $c->id == $schedule->id; });
+                                $isScheduleChecked = (! $event->exists && ($role->subdomain == $schedule->subdomain || session('pending_request') == $schedule->subdomain)) || $event->curators->contains($schedule->id) || $isClonedSchedule;
                             @endphp
                             <div class="mb-4">
                                 <div class="flex items-center mb-2 h-6">
-                                    <input type="checkbox" 
-                                           id="curator_{{ $curator->encodeId() }}" 
-                                           name="curators[]" 
-                                           value="{{ $curator->encodeId() }}"
-                                           {{ $isCuratorChecked ? 'checked' : '' }}
+                                    <input type="checkbox"
+                                           id="curator_{{ $schedule->encodeId() }}"
+                                           name="curators[]"
+                                           value="{{ $schedule->encodeId() }}"
+                                           {{ $isScheduleChecked ? 'checked' : '' }}
                                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded"
-                                           @change="toggleCuratorGroupSelection('{{ $curator->encodeId() }}')">
-                                    <label for="curator_{{ $curator->encodeId() }}" class="ms-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        {{ $curator->name }}
+                                           @change="toggleCuratorGroupSelection('{{ $schedule->encodeId() }}')">
+                                    <label for="curator_{{ $schedule->encodeId() }}" class="ms-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $schedule->name }}
                                     </label>
                                     <div class="ms-2 flex-shrink-0">
-                                        @if($curator->accept_requests && $curator->request_terms)
+                                        @if($schedule->accept_requests && $schedule->request_terms)
                                         <div class="relative group">
                                             <button type="button" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] focus:outline-none">
                                                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -2477,9 +2468,9 @@
                                                 </svg>
                                             </button>
                                             <div class="absolute bottom-full start-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-gray-900 dark:bg-gray-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-[28rem] max-w-lg z-10">
-                                                <div class="leading-relaxed" 
+                                                <div class="leading-relaxed"
                                                      dir="{{ is_rtl() ? 'rtl' : 'ltr' }}"
-                                                     style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($curator->translatedRequestTerms())) !!}</div>
+                                                     style="{{ is_rtl() ? 'text-align: right;' : 'text-align: left;' }}">{!! nl2br(e($schedule->translatedRequestTerms())) !!}</div>
                                                 <div class="absolute top-full start-1/2 transform -translate-x-1/2 w-0 h-0 border-s-4 border-e-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></div>
                                             </div>
                                         </div>
@@ -2488,26 +2479,26 @@
                                         @endif
                                     </div>
                                 </div>
-                                
-                                @if($curator->groups && count($curator->groups) > 0)
-                                <div id="curator_group_{{ $curator->encodeId() }}" class="ms-6 mb-2" style="display: {{ $isCuratorChecked ? 'block' : 'none' }};">
-                                    <select id="curator_group_{{ $curator->encodeId() }}" 
-                                            name="curator_groups[{{ $curator->encodeId() }}]" 
+
+                                @if($schedule->groups && count($schedule->groups) > 0)
+                                <div id="curator_group_{{ $schedule->encodeId() }}" class="ms-6 mb-2" style="display: {{ $isScheduleChecked ? 'block' : 'none' }};">
+                                    <select id="curator_group_{{ $schedule->encodeId() }}"
+                                            name="curator_groups[{{ $schedule->encodeId() }}]"
                                             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                         <option value="">{{ __('messages.please_select') }}</option>
-                                        @foreach($curator->groups as $group)
+                                        @foreach($schedule->groups as $group)
                                             @php
                                                 $selectedGroupId = null;
                                                 if ($event->exists) {
-                                                    $selectedGroupId = $event->getGroupIdForSubdomain($curator->subdomain);
+                                                    $selectedGroupId = $event->getGroupIdForSubdomain($schedule->subdomain);
                                                     if ($selectedGroupId) {
                                                         $selectedGroupId = \App\Utils\UrlUtils::encodeId($selectedGroupId);
                                                     }
-                                                } elseif (isset($clonedCuratorGroups) && isset($clonedCuratorGroups[$curator->encodeId()])) {
-                                                    $selectedGroupId = $clonedCuratorGroups[$curator->encodeId()];
+                                                } elseif (isset($clonedCuratorGroups) && isset($clonedCuratorGroups[$schedule->encodeId()])) {
+                                                    $selectedGroupId = $clonedCuratorGroups[$schedule->encodeId()];
                                                 }
                                             @endphp
-                                            <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $curator->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
+                                            <option value="{{ \App\Utils\UrlUtils::encodeId($group->id) }}" {{ old('curator_groups.' . $schedule->encodeId(), $selectedGroupId) == \App\Utils\UrlUtils::encodeId($group->id) ? 'selected' : '' }}>{{ $group->translatedName() }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -3024,13 +3015,69 @@
                                                     class="mt-1 block w-full" v-bind:required="event.tickets_enabled" v-bind:class="{ 'border-red-500': formSubmitAttempted && tickets.length > 1 && !ticket.type }" />
                                                 <p v-if="formSubmitAttempted && tickets.length > 1 && !ticket.type" class="mt-1 text-xs text-red-600">{{ __('messages.ticket_type_required') }}</p>
                                             </div>
-                                            <div v-if="tickets.length > 1" class="flex items-end gap-3">
+                                            <div v-if="tickets.length > 1" class="flex items-end gap-3 flex-wrap">
                                                 <button type="button" @click="addTicketCustomField(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
                                                     + {{ __('messages.add_field') }}
+                                                </button>
+                                                <button type="button" @click="addTicketVolumeDiscount(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
+                                                    + {{ __('messages.add_volume_discount') }}
+                                                </button>
+                                                <button type="button" @click="addTicketMaxPerOrder(index)" class="mt-1 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                    + {{ __('messages.add_limit') }}
                                                 </button>
                                                 <button type="button" @click="removeTicket(index)" class="mt-1 text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                     {{ __('messages.remove') }}
                                                 </button>
+                                            </div>
+                                        </div>
+                                        <div v-if="tickets.length === 1" class="mt-2 flex flex-wrap items-center gap-3">
+                                            <button type="button" @click="addTicketCustomField(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="getTicketCustomFieldCount(index) < 10">
+                                                + {{ __('messages.add_field') }}
+                                            </button>
+                                            <button type="button" @click="addTicketVolumeDiscount(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="!ticket.volume_discount">
+                                                + {{ __('messages.add_volume_discount') }}
+                                            </button>
+                                            <button type="button" @click="addTicketMaxPerOrder(index)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="ticket.max_per_order === null || ticket.max_per_order === undefined">
+                                                + {{ __('messages.add_limit') }}
+                                            </button>
+                                        </div>
+                                        <div v-if="ticket.volume_discount" class="mt-4">
+                                            <x-input-label :value="__('messages.volume_discount')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div>
+                                                    <x-input-label :value="__('messages.volume_discount_min_quantity')" class="text-xs" />
+                                                    <x-text-input type="number" min="2" step="1" v-model.number="ticket.volume_discount.min_quantity" class="mt-1 block w-full text-sm" />
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.type')" class="text-xs" />
+                                                    <select v-model="ticket.volume_discount.type" class="mt-1 block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="percentage">{{ __('messages.percentage') }}</option>
+                                                        <option value="fixed">{{ __('messages.fixed_amount') }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <x-input-label :value="__('messages.volume_discount_value')" class="text-xs" />
+                                                    <x-text-input type="number" step="0.01" min="0.01" v-bind:max="ticket.volume_discount.type === 'percentage' ? 100 : undefined" v-model.number="ticket.volume_discount.value" class="mt-1 block w-full text-sm" />
+                                                </div>
+                                                </div>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketVolumeDiscount(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div v-if="ticket.max_per_order !== null && ticket.max_per_order !== undefined" class="mt-4">
+                                            <x-input-label :value="__('messages.max_per_order')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <x-text-input type="number" min="1" step="1" v-model.number="ticket.max_per_order" class="block w-full sm:w-48" />
+                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeTicketMaxPerOrder(index)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- Ticket-level Custom Fields -->
@@ -3086,6 +3133,8 @@
                                             </div>
                                         </div>
                                         <input type="hidden" v-bind:name="`tickets[${index}][custom_fields]`" :value="JSON.stringify(ticket.custom_fields || {})">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][volume_discount]`" :value="ticket.volume_discount ? JSON.stringify(ticket.volume_discount) : ''">
+                                        <input type="hidden" v-bind:name="`tickets[${index}][max_per_order]`" :value="(ticket.max_per_order === null || ticket.max_per_order === undefined || ticket.max_per_order === '') ? '' : ticket.max_per_order">
 
                                         <div class="mt-4">
                                             <x-input-label :value="__('messages.description')" />
@@ -3385,9 +3434,25 @@
                                             <input type="hidden" v-if="addon.image_url && addon.image_url.startsWith('data:')" :name="`addon_image_data[${aIndex}]`" :value="addon.image_url">
                                             <input type="hidden" :name="`addons[${aIndex}][remove_image]`" :value="addon.remove_image ? 1 : 0" />
                                         </div>
+                                        <div v-if="addon.max_per_order !== null && addon.max_per_order !== undefined" class="mt-3">
+                                            <x-input-label :value="__('messages.max_per_order')" />
+                                            <div class="mt-2 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+                                                <x-text-input type="number" min="1" step="1" v-model.number="addon.max_per_order" class="block w-full sm:w-48" />
+                                                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.max_per_order_help') }}</p>
+                                                <div class="mt-2 flex justify-end">
+                                                    <button type="button" @click="removeAddonMaxPerOrder(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                                        {{ __('messages.remove') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" :name="`addons[${aIndex}][max_per_order]`" :value="(addon.max_per_order === null || addon.max_per_order === undefined || addon.max_per_order === '') ? '' : addon.max_per_order">
                                         <div class="mt-2 flex justify-between items-center">
                                             <input type="hidden" :name="`addons[${aIndex}][id]`" :value="addon.id">
-                                            <div></div>
+                                            <button type="button" @click="addAddonMaxPerOrder(aIndex)" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]" v-if="addon.max_per_order === null || addon.max_per_order === undefined">
+                                                + {{ __('messages.add_limit') }}
+                                            </button>
+                                            <div v-else></div>
                                             <button type="button" @click="removeAddon(aIndex)" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
                                                 {{ __('messages.remove') }}
                                             </button>
@@ -4385,6 +4450,8 @@
         startsAt: @json($oldStartsAt ?? ''),
         tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
           ...ticket,
+          volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
+          max_per_order: ticket.max_per_order ?? null,
           custom_fields: ticket.custom_fields || {},
           sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
           sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
@@ -4445,6 +4512,7 @@
           _key: addon.id ? ('existing_' + addon.id) : ('init_' + i),
           type: addon.type || '',
           quantity: addon.quantity ?? null,
+          max_per_order: addon.max_per_order ?? null,
           price: addon.price ?? null,
           description: addon.description || '',
           image_url: addon.image_url || null,
@@ -4664,12 +4732,24 @@
         this.showVenueAddressFields = true;
 
         this.$nextTick(() => {
+            if (typeof window.destroyCountryInput === 'function') {
+                window.destroyCountryInput('venue_country_code');
+            }
             var ci = window.initCountryInput('venue_country_code', this.venueCountryCode);
             if (ci) ci.setCountry(this.venueCountryCode);
+            this.bindVenueCountryChange();
         });
       },
       updateSelectedVenue() {
         this.showVenueAddressFields = false;
+      },
+      bindVenueCountryChange() {
+        var hidden = document.getElementById('venue_country_code');
+        if (!hidden || hidden.dataset.vueBound === '1') return;
+        hidden.addEventListener('change', () => {
+          this.venueCountryCode = hidden.value;
+        });
+        hidden.dataset.vueBound = '1';
       },
       searchVenues() {
         if (! this.venueEmail) {
@@ -5349,12 +5429,6 @@
           }
         }
 
-        if (! this.isFormValid) {
-          event.preventDefault();
-          alert(@json(__('messages.please_select_venue_or_participant')));
-          return;
-        }
-
         // Check custom fields if tickets are enabled
         if (this.event.tickets_enabled) {
           const hasInvalidEventFields = Object.values(this.eventCustomFields || {}).some(field => !field.name);
@@ -5385,9 +5459,11 @@
             id: null,
             type: '',
             quantity: null,
+            max_per_order: null,
             price: null,
             description: '',
             custom_fields: {},
+            volume_discount: null,
             sales_start_at_date: '',
             sales_start_at_time: '',
             sales_end_at_date: '',
@@ -5453,6 +5529,7 @@
           _key: 'new_' + Date.now() + '_' + this.addons.length,
           type: '',
           quantity: null,
+          max_per_order: null,
           price: null,
           description: '',
           image_url: null,
@@ -5462,6 +5539,12 @@
       },
       removeAddon(index) {
         this.addons.splice(index, 1);
+      },
+      addAddonMaxPerOrder(addonIndex) {
+        this.addons[addonIndex].max_per_order = 1;
+      },
+      removeAddonMaxPerOrder(addonIndex) {
+        this.addons[addonIndex].max_per_order = null;
       },
       removeAddonImage(aIndex) {
         if (!confirm(@json(__('messages.are_you_sure')))) return;
@@ -5849,6 +5932,23 @@
         }
         return null;
       },
+      addTicketVolumeDiscount(ticketIndex) {
+        const ticket = this.tickets[ticketIndex];
+        ticket.volume_discount = {
+          min_quantity: 2,
+          type: 'percentage',
+          value: 10,
+        };
+      },
+      removeTicketVolumeDiscount(ticketIndex) {
+        this.tickets[ticketIndex].volume_discount = null;
+      },
+      addTicketMaxPerOrder(ticketIndex) {
+        this.tickets[ticketIndex].max_per_order = 1;
+      },
+      removeTicketMaxPerOrder(ticketIndex) {
+        this.tickets[ticketIndex].max_per_order = null;
+      },
       addTicketCustomField(ticketIndex) {
         const ticket = this.tickets[ticketIndex];
         if (!ticket.custom_fields) {
@@ -6104,11 +6204,6 @@
       filteredMembers() {
         return this.members.filter(member => !this.selectedMembers.some(selected => selected.id === member.id));
       },
-      isFormValid() {        
-        var hasSubdomain = this.venueName || this.selectedMembers.length > 0;
-
-        return hasSubdomain;
-      },
       hasLimitedPaidTickets() {
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
       },
@@ -6152,6 +6247,13 @@
       },
     },
     watch: {
+      'tickets.length'() {
+        this.$nextTick(() => {
+          if (typeof window.initHtmlEditors === 'function') {
+            window.initHtmlEditors();
+          }
+        });
+      },
       venueType() {
         this.venueEmail = "";
         this.venuePhone = "";
@@ -6160,8 +6262,15 @@
         this.destroyPhoneInput('venue_phone_input');
 
         this.$nextTick(() => {
-            var ci = window.getCountryInput('venue_country_code');
-            if (ci) ci.setCountry("{{ $role && $role->country_code ? $role->country_code : '' }}");
+            var defaultCountry = "{{ $role && $role->country_code ? $role->country_code : '' }}";
+            if (document.getElementById('venue_country_code_tel')) {
+                if (typeof window.destroyCountryInput === 'function') {
+                    window.destroyCountryInput('venue_country_code');
+                }
+                var ci = window.initCountryInput('venue_country_code', defaultCountry);
+                if (ci) ci.setCountry(defaultCountry);
+            }
+            this.bindVenueCountryChange();
             this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; });
         });
       },
@@ -6208,13 +6317,27 @@
         this.destroyPhoneInput('venue_phone_input');
         this.$nextTick(() => {
           this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+          if (document.getElementById('venue_country_code_tel')) {
+            if (typeof window.destroyCountryInput === 'function') {
+              window.destroyCountryInput('venue_country_code');
+            }
+            var ci = window.initCountryInput('venue_country_code', this.venueCountryCode);
+            if (ci) ci.setCountry(this.venueCountryCode);
+            this.bindVenueCountryChange();
+          }
         });
       },
       isInPerson(newValue) {
         this.savePreferences();
         if (newValue) {
           this.$nextTick(() => {
-            window.initCountryInput('venue_country_code', this.venueCountryCode);
+            if (document.getElementById('venue_country_code_tel')) {
+              if (typeof window.destroyCountryInput === 'function') {
+                window.destroyCountryInput('venue_country_code');
+              }
+              window.initCountryInput('venue_country_code', this.venueCountryCode);
+              this.bindVenueCountryChange();
+            }
             this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
           });
         } else {
@@ -6356,6 +6479,10 @@
       if (this.isInPerson) {
         this.$nextTick(() => {
           this.initPhoneInput('venue_phone_input', (number) => { this.venuePhone = number; }, this.venuePhone);
+          if (document.getElementById('venue_country_code_tel')) {
+            window.initCountryInput('venue_country_code', this.venueCountryCode);
+          }
+          this.bindVenueCountryChange();
         });
       }
 
@@ -6390,6 +6517,14 @@
 
   // Store reference for section navigation
   window.vueApp = vueInstance;
+
+  // Sync html-editor textareas now that v-model has populated their values, and
+  // initialize EasyMDE on any textareas rendered by v-for that didn't exist at DOMContentLoaded.
+  vueInstance.$nextTick(() => {
+    if (typeof window.initHtmlEditors === 'function') {
+      window.initHtmlEditors();
+    }
+  });
 
   // --- Migrated inline event handlers ---
 
@@ -6456,14 +6591,6 @@
   if (deleteFlyerBtn) {
     deleteFlyerBtn.addEventListener('click', function() {
       deleteFlyer(this.dataset.url, this.dataset.hash, this.dataset.token, this.parentElement);
-    });
-  }
-
-  // Country select change
-  var venueCountryInput = document.getElementById('venue_country_code');
-  if (venueCountryInput) {
-    venueCountryInput.addEventListener('change', function() {
-      onChangeCountry();
     });
   }
 

@@ -109,10 +109,33 @@
                     The above method of data purge is final, total, and irreversible.
                 </p>
 
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">How We Use Cookies</h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    A cookie is a small file which asks permission to be placed on your computer's hard drive. Cookies help us analyze web traffic and remember your preferences. They allow web applications to tailor operations to your needs by gathering and storing information about your preferences.
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Analytics &amp; Cookies</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    We use Google Analytics 4 to understand how visitors use the site. Tracking is opt-in: when you first visit, all analytics, advertising, and personalization signals are set to <em>denied</em> via Google Consent Mode v2. Nothing is read or written to your browser until you click "Allow" in the cookie banner. If you click "Decline", or never respond, we do not set any analytics cookies and only cookieless pings are sent.
                 </p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    We honor the <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">Global Privacy Control</a> signal: if your browser sends GPC, we treat that as a "Decline" automatically and the banner does not appear.
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    Your choice is stored in your browser's <code>localStorage</code> under the key <code>cookie_consent</code> (values: <code>granted</code> or <code>denied</code>). It is local to your browser; we do not store it on our servers.
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    If you accept, Google Analytics sets first-party cookies named <code>_ga</code> and <code>_ga_&lt;measurement-id&gt;</code>, used to distinguish unique visitors and sessions. We also set <code>ads_data_redaction</code> on every page so any beacons that do fire are stripped of advertising identifiers.
+                </p>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    You can withdraw consent at any time. Use the "Cookie preferences" link in the site footer, or the button in the next section, to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)).
+                </p>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">{{ __('messages.cookie_consent_privacy_heading') }}</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    {{ __('messages.cookie_consent_privacy_body') }}
+                </p>
+                @if (config('services.google.analytics'))
+                <button type="button" data-cookie-consent-reopen
+                        class="text-blue-600 dark:text-[var(--brand-blue)] hover:underline focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded-sm mb-6">
+                    {{ __('messages.cookie_consent_manage') }}
+                </button>
+                @endif
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Links to Other Websites</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">

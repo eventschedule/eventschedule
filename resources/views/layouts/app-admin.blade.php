@@ -6,15 +6,47 @@
                 const sidebar = document.getElementById('sidebar');
                 const openButton = document.getElementById('open-sidebar');
                 const closeButton = document.getElementById('close-sidebar');
+                let lastFocusBeforeOpen = null;
+
+                function closeMenu() {
+                    if (sidebar.getAttribute('data-state') !== 'open') {
+                        return;
+                    }
+                    $('#sidebar').hide();
+                    sidebar.setAttribute('data-state', 'closed');
+                    document.removeEventListener('keydown', onEscapeClose);
+                    if (lastFocusBeforeOpen && typeof lastFocusBeforeOpen.focus === 'function') {
+                        lastFocusBeforeOpen.focus();
+                    } else if (openButton) {
+                        openButton.focus();
+                    }
+                }
+
+                function openMenu() {
+                    lastFocusBeforeOpen = document.activeElement;
+                    $('#sidebar').show();
+                    sidebar.setAttribute('data-state', 'open');
+                    document.addEventListener('keydown', onEscapeClose);
+                    requestAnimationFrame(function() {
+                        if (closeButton && typeof closeButton.focus === 'function') {
+                            closeButton.focus();
+                        }
+                    });
+                }
+
+                function onEscapeClose(e) {
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        closeMenu();
+                    }
+                }
 
                 function toggleMenu() {
                     const isOpen = sidebar.getAttribute('data-state') === 'open';
                     if (isOpen) {
-                        $('#sidebar').hide();
-                        sidebar.setAttribute('data-state', 'closed');
+                        closeMenu();
                     } else {
-                        $('#sidebar').show();
-                        sidebar.setAttribute('data-state', 'open');
+                        openMenu();
                     }
                 }
 
@@ -146,7 +178,7 @@
                 </div>
             </div>
 
-            <main class="py-10">
+            <main id="main-content" tabindex="-1" class="py-10">
                 <div class="px-4 sm:px-6 lg:px-8">
 
                     @if ($errors->any())

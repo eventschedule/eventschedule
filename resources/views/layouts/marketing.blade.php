@@ -256,22 +256,7 @@
     </script>
     @endif
 
-    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            console.warn('Analytics data could not be cloned:', e);
-        }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    </script>
-    @endif
+    @include('partials.google-analytics')
 
     {{ $preload ?? '' }}
 
@@ -369,8 +354,8 @@
 
 </head>
 <body class="font-sans antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg">
-        Skip to main content
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-white ltr:focus:left-4 rtl:focus:right-4">
+        {{ __('accessibility.skip_to_main') }}
     </a>
 
     @include('marketing.partials.header')
@@ -380,6 +365,8 @@
     </main>
 
     @include('marketing.partials.footer')
+
+    @include('partials.cookie-banner')
 
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>

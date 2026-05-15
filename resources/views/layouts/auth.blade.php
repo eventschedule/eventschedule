@@ -18,24 +18,7 @@
 
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
 
-    @if (config('services.google.analytics') && (! auth()->user() || ! auth()->user()->isAdmin()))
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google.analytics') }}" {!! nonce_attr() !!}></script>
-    <script {!! nonce_attr() !!}>
-    window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-        try {
-            dataLayer.push(arguments);
-        } catch (e) {
-            // Handle DataCloneError silently
-            console.warn('Analytics data could not be cloned:', e);
-        }
-    }
-    gtag('js', new Date());
-    gtag('config', '{{ config('services.google.analytics') }}');
-    </script>
-    @endif
+    @include('partials.google-analytics')
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -79,9 +62,13 @@
 </head>
 
 <body class="font-sans text-gray-900 dark:text-gray-100 antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-[var(--brand-button-bg)] focus:px-4 focus:py-3 focus:text-base focus:text-white focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] ltr:focus:left-4 rtl:focus:right-4">
+        {{ __('accessibility.skip_to_main') }}
+    </a>
+
     {{ isset($abovePage) ? $abovePage : '' }}
 
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
+    <div id="main-content" tabindex="-1" class="min-h-screen flex flex-col sm:justify-center items-center pt-10 bg-gray-100 dark:bg-gray-900">
         <a href="{{ marketing_url() }}">
             <x-application-logo class="w-20 h-20 fill-current text-gray-500 dark:text-gray-400" />
         </a>
@@ -94,6 +81,8 @@
 
         <div class="pt-20"></div>
     </div>
+
+    @include('partials.cookie-banner')
 </body>
 
 </html>

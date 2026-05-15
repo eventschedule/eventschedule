@@ -4,7 +4,7 @@
         <meta name="robots" content="noindex, nofollow">
     </x-slot>
 
-    <div class="min-h-screen bg-gray-50 dark:bg-[#1e1e1e] py-8 px-4 sm:px-6 lg:px-8">
+    <div id="main-content" tabindex="-1" class="min-h-screen bg-gray-50 dark:bg-[#1e1e1e] py-8 px-4 sm:px-6 lg:px-8">
         <div class="max-w-2xl mx-auto">
 
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">{{ __('messages.my_carpools') }}</h1>

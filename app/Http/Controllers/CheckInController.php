@@ -56,7 +56,7 @@ class CheckInController extends Controller
             return response()->json(['error' => 'Event not found'], 404);
         }
 
-        if (! $user->canScanEvent($event)) {
+        if (! $user->canViewEventData($event)) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 

@@ -48,6 +48,7 @@
                     turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
                     turnstileToken: '',
                     turnstileWidgetId: null,
+                    currencyDecimals: @json(\App\Utils\MoneyUtils::decimalsFor($event->ticket_currency_code)),
                     promoCode: '',
                     promoCodeValid: false,
                     promoCodeMessage: '',
@@ -143,8 +144,17 @@
                                 this.turnstileWidgetId = turnstile.render('#turnstile-checkout-widget', {
                                     sitekey: this.turnstileSiteKey,
                                     size: 'flexible',
+                                    'retry': 'auto',
+                                    'refresh-expired': 'auto',
                                     callback: (token) => {
                                         this.turnstileToken = token;
+                                    },
+                                    'error-callback': () => {
+                                        this.turnstileToken = '';
+                                        if (this.turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+                                            turnstile.reset(this.turnstileWidgetId);
+                                        }
+                                        return true;
                                     },
                                 });
                             } else {
@@ -179,8 +189,15 @@
                     }, 0);
                     return ticketTotal + addonTotal;
                 },
+                volumeDiscountTotal() {
+                    var sum = 0;
+                    for (var i = 0; i < this.tickets.length; i++) {
+                        sum += this.volumeDiscountForTicketLine(this.tickets[i]);
+                    }
+                    return sum;
+                },
                 totalAmount() {
-                    return Math.max(0, this.subtotalAmount - this.discountAmount);
+                    return Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount);
                 },
                 showGuestForms() {
                     return this.individualTickets && this.totalSelectedTickets > 1;
@@ -221,11 +238,53 @@
                 }
             },
             methods: {
+                roundMoney(amount) {
+                    var m = Math.pow(10, this.currencyDecimals);
+                    return Math.round(amount * m) / m;
+                },
+                volumeDiscountHintText(ticket) {
+                    var r = ticket.volume_discount;
+                    if (!r || !r.min_quantity) {
+                        return '';
+                    }
+                    var hint = @json(__('messages.volume_discount_hint'));
+                    return hint.replace(':min', String(r.min_quantity));
+                },
+                volumeDiscountForTicketLine(ticket) {
+                    var rule = ticket.volume_discount;
+                    var qty = ticket.selectedQty || 0;
+                    if (!rule || !rule.min_quantity || qty < rule.min_quantity || qty < 1) {
+                        return 0;
+                    }
+                    var price = parseFloat(ticket.price) || 0;
+                    if (price <= 0) {
+                        return 0;
+                    }
+                    var gross = price * qty;
+                    var type = rule.type;
+                    var value = parseFloat(rule.value) || 0;
+                    if (value <= 0) {
+                        return 0;
+                    }
+                    var discount;
+                    if (type === 'percentage') {
+                        value = Math.min(value, 100);
+                        discount = gross * (value / 100);
+                    } else {
+                        discount = value;
+                    }
+                    return this.roundMoney(Math.min(discount, gross));
+                },
                 formatPrice(price) {
+                    const num = Number(price);
+                    const isWhole = Number.isFinite(num) && num === Math.trunc(num);
                     return new Intl.NumberFormat('{{ app()->getLocale() }}', {
                         style: 'currency',
-                        currency: '{{ $event->ticket_currency_code }}'
-                    }).format(price);
+                        currency: '{{ $event->ticket_currency_code }}',
+                        currencyDisplay: 'narrowSymbol',
+                        minimumFractionDigits: isWhole ? 0 : 2,
+                        maximumFractionDigits: 2,
+                    }).format(num);
                 },
                 validateForm(e) {
                     if (!this.isPaymentLinkMode && !this.tickets.some(t => t.selectedQty > 0)) {
@@ -245,16 +304,18 @@
                     this.isSubmitting = true;
                 },
                 getAvailableQuantity(ticket) {
+                    const perOrderCap = ticket.max_per_order && ticket.max_per_order > 0 ? ticket.max_per_order : Infinity;
+
                     if (ticket.is_addon || !this.isCombinedMode) {
-                        return ticket.quantity;
+                        return Math.min(ticket.quantity, perOrderCap);
                     }
-                    
+
                     // In combined mode, calculate available based on other selections
                     const otherSelected = this.tickets
                         .filter(t => t.id !== ticket.id)
                         .reduce((total, t) => total + t.selectedQty, 0);
-                    
-                    return Math.max(0, this.totalAvailableTickets - otherSelected);
+
+                    return Math.min(perOrderCap, Math.max(0, this.totalAvailableTickets - otherSelected));
                 },
                 updateTicketQuantities() {
                     if (this.isCombinedMode) {
@@ -942,6 +1003,7 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
+                    <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
                 </div>
                 <div>
                     <p v-if="ticket.sales_ended" class="text-lg font-medium text-gray-500 dark:text-gray-400">{{ __('messages.sales_ended') }}</p>
@@ -1091,17 +1153,21 @@
 
         <!-- Total -->
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
-            <div v-if="discountAmount > 0">
+            <template v-if="volumeDiscountTotal > 0 || discountAmount > 0">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
-                    <span class="text-sm text-gray-500 dark:text-gray-400 line-through">@{{ formatPrice(subtotalAmount) }}</span>
+                    <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(subtotalAmount) }}</span>
                 </div>
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.discount')</span>
+                <div v-if="volumeDiscountTotal > 0" class="flex justify-between items-center mb-1">
+                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.volume_discount')</span>
+                    <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(volumeDiscountTotal) }}</span>
+                </div>
+                <div v-if="discountAmount > 0" class="flex justify-between items-center mb-1">
+                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.promo_discount')</span>
                     <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(discountAmount) }}</span>
                 </div>
-            </div>
-            <div class="flex justify-between items-center">
+            </template>
+            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 }">
                 <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
             </div>

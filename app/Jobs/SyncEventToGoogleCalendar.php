@@ -131,20 +131,28 @@ class SyncEventToGoogleCalendar implements ShouldQueue
     }
 
     /**
-     * Get the stored Google event ID for this sync
+     * Get the existing CalendarSync row for this user/event/role
      */
-    private function getGoogleEventId(): ?string
+    private function getCalendarSync(): ?CalendarSync
     {
         return CalendarSync::where('user_id', $this->getSyncUser()->id)
             ->where('event_id', $this->event->id)
             ->where('role_id', $this->role->id)
-            ->first()?->google_event_id;
+            ->first();
     }
 
     /**
-     * Store the Google event ID for this sync
+     * Get the stored Google event ID for this sync
      */
-    private function setGoogleEventId(?string $googleEventId): void
+    private function getGoogleEventId(): ?string
+    {
+        return $this->getCalendarSync()?->google_event_id;
+    }
+
+    /**
+     * Store the Google event ID and the calendar it lives on for this sync
+     */
+    private function setGoogleEventId(?string $googleEventId, string $calendarId): void
     {
         CalendarSync::updateOrCreate(
             [
@@ -152,7 +160,10 @@ class SyncEventToGoogleCalendar implements ShouldQueue
                 'event_id' => $this->event->id,
                 'role_id' => $this->role->id,
             ],
-            ['google_event_id' => $googleEventId]
+            [
+                'google_event_id' => $googleEventId,
+                'google_calendar_id' => $calendarId,
+            ]
         );
     }
 
@@ -161,53 +172,59 @@ class SyncEventToGoogleCalendar implements ShouldQueue
      */
     private function createEvent(GoogleCalendarService $googleCalendarService): void
     {
-        $googleEvent = $googleCalendarService->createEvent($this->event, $this->role, $this->getSyncCalendarId());
+        $calendarId = $this->getSyncCalendarId();
+        $googleEvent = $googleCalendarService->createEvent($this->event, $this->role, $calendarId);
 
         if ($googleEvent) {
-            $this->setGoogleEventId($googleEvent->getId());
+            $this->setGoogleEventId($googleEvent->getId(), $calendarId);
         }
     }
 
     /**
-     * Update event in Google Calendar
+     * Update event in Google Calendar — operates on the calendar where the
+     * event was originally created, falling back to the current pivot only
+     * for legacy rows where the calendar wasn't recorded.
      */
     private function updateEvent(GoogleCalendarService $googleCalendarService): void
     {
-        $googleEventId = $this->getGoogleEventId();
+        $sync = $this->getCalendarSync();
+        $googleEventId = $sync?->google_event_id;
 
         if (! $googleEventId) {
-            // If no Google event ID, create a new event
             $this->createEvent($googleCalendarService);
 
             return;
         }
 
+        $calendarId = $sync->google_calendar_id ?: $this->getSyncCalendarId();
+
         $googleCalendarService->updateEvent(
             $this->event,
             $googleEventId,
             $this->role,
-            $this->getSyncCalendarId()
+            $calendarId
         );
     }
 
     /**
-     * Delete event from Google Calendar
+     * Delete event from Google Calendar — operates on the calendar where the
+     * event was originally created.
      */
     private function deleteEvent(GoogleCalendarService $googleCalendarService): void
     {
-        $googleEventId = $this->getGoogleEventId();
+        $sync = $this->getCalendarSync();
+        $googleEventId = $sync?->google_event_id;
 
         if (! $googleEventId) {
             return;
         }
 
-        $success = $googleCalendarService->deleteEvent($googleEventId, $this->getSyncCalendarId(), $this->role->id);
+        $calendarId = $sync->google_calendar_id ?: $this->getSyncCalendarId();
+
+        $success = $googleCalendarService->deleteEvent($googleEventId, $calendarId, $this->role->id);
 
         if ($success) {
-            CalendarSync::where('user_id', $this->getSyncUser()->id)
-                ->where('event_id', $this->event->id)
-                ->where('role_id', $this->role->id)
-                ->delete();
+            $sync->delete();
         }
     }
 }

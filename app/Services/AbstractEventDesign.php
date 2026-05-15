@@ -209,7 +209,7 @@ abstract class AbstractEventDesign
             return;
         }
 
-        $this->headerImageResource = imagecreatefromstring($imageData);
+        $this->headerImageResource = $this->safeImageCreateFromString($imageData);
         if (! $this->headerImageResource) {
             return;
         }
@@ -1002,7 +1002,7 @@ abstract class AbstractEventDesign
             }
 
             if ($imageData) {
-                $bgImage = imagecreatefromstring($imageData);
+                $bgImage = $this->safeImageCreateFromString($imageData);
                 if ($bgImage) {
                     // Resize and apply background image
                     $this->applyResizedBackground($bgImage);
@@ -1040,6 +1040,69 @@ abstract class AbstractEventDesign
         }
 
         return false;
+    }
+
+    /**
+     * Safely decode an image from a binary string.
+     *
+     * Refuses images that won't fit in the available memory budget. On platforms
+     * where memory_limit is locked via php_admin_value (e.g. DigitalOcean App
+     * Platform), ini_set silently fails — so we verify the bump took effect and
+     * refuse the decode if not. Returns false on any problem so callers fall
+     * through to their placeholder paths.
+     */
+    protected function safeImageCreateFromString(string $imageData): \GdImage|false
+    {
+        $info = @getimagesizefromstring($imageData);
+        if ($info === false || empty($info[0]) || empty($info[1])) {
+            return false;
+        }
+
+        $width = (int) $info[0];
+        $height = (int) $info[1];
+
+        // GD truecolor decode cost ≈ width × height × 4 bytes. Use 2x as a
+        // conservative multiplier covering allocator overhead and the temp
+        // image created during resampling.
+        $estimatedBytes = $width * $height * 4 * 2;
+        $currentUsage = memory_get_usage(true);
+        $needed = $currentUsage + $estimatedBytes + (16 * 1024 * 1024);
+        $currentLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
+
+        if ($needed > $currentLimit) {
+            $newLimitMb = (int) ceil($needed / (1024 * 1024));
+            if ($newLimitMb > 512) {
+                return false;
+            }
+            @ini_set('memory_limit', $newLimitMb.'M');
+
+            // Verify the bump actually took effect. Some hosts lock memory_limit
+            // via php_admin_value (PHP_INI_SYSTEM) — ini_set returns silently
+            // but the limit doesn't change.
+            $actualLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
+            if ($actualLimit < $needed) {
+                return false;
+            }
+        }
+
+        return @imagecreatefromstring($imageData) ?: false;
+    }
+
+    private function parseMemoryLimit(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '-1' || $value === '') {
+            return PHP_INT_MAX;
+        }
+        $unit = strtolower(substr($value, -1));
+        $num = (int) $value;
+
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => (int) $value,
+        };
     }
 
     protected function fetchImageWithCurl(string $url): string|false
@@ -1799,6 +1862,7 @@ abstract class AbstractEventDesign
                     if ($startDate->year !== $endDate->year) {
                         return $startDate->translatedFormat('M j, Y').' - '.$endDate->translatedFormat('M j, Y');
                     }
+
                     return $startDate->translatedFormat('M j').' - '.$endDate->translatedFormat('M j, Y');
                 }
             }

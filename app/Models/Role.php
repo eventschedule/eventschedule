@@ -106,6 +106,7 @@ class Role extends Model implements MustVerifyEmail
         'hide_past_events',
         'draft_events_default',
         'hide_videos',
+        'show_accessibility_widget',
         'default_category_id',
     ];
 
@@ -141,6 +142,9 @@ class Role extends Model implements MustVerifyEmail
         'hide_past_events' => 'boolean',
         'draft_events_default' => 'boolean',
         'hide_videos' => 'boolean',
+        'show_accessibility_widget' => 'boolean',
+        'email_settings_failed_at' => 'datetime',
+        'email_settings_failure_notified_at' => 'datetime',
     ];
 
     /**
@@ -1709,6 +1713,88 @@ class Role extends Model implements MustVerifyEmail
         return in_array($this->sync_direction, ['from', 'both']);
     }
 
+    protected ?bool $publicCalendarMemo = null;
+
+    protected ?RoleUser $ownerCalendarPivotMemo = null;
+
+    protected bool $ownerCalendarPivotLoaded = false;
+
+    /**
+     * Owner's role_user pivot row, memoized per model instance.
+     * Returns null when no pivot exists.
+     */
+    protected function getOwnerCalendarPivot(): ?RoleUser
+    {
+        if (! $this->ownerCalendarPivotLoaded) {
+            $this->ownerCalendarPivotMemo = RoleUser::where('role_id', $this->id)
+                ->where('user_id', $this->user_id)
+                ->first();
+            $this->ownerCalendarPivotLoaded = true;
+        }
+
+        return $this->ownerCalendarPivotMemo;
+    }
+
+    /**
+     * Whether this schedule has a publicly-addressable Google Calendar
+     * that we can build a shareable URL for. Requires syncing TO Google,
+     * a non-'primary' calendar ID on the owner's pivot, and a cached
+     * publicness flag of true (refreshed on save + daily).
+     *
+     * Memoized per model instance — the GP view checks this multiple times.
+     */
+    public function hasPublicGoogleCalendar(): bool
+    {
+        if ($this->publicCalendarMemo !== null) {
+            return $this->publicCalendarMemo;
+        }
+
+        if (! $this->syncsToGoogle()) {
+            return $this->publicCalendarMemo = false;
+        }
+
+        $pivot = $this->getOwnerCalendarPivot();
+
+        return $this->publicCalendarMemo = $pivot
+            && $pivot->google_calendar_id
+            && $pivot->google_calendar_id !== 'primary'
+            && $pivot->google_calendar_is_public === true;
+    }
+
+    /**
+     * AP-side check: should we surface a warning telling the schedule owner
+     * to set their Google calendar public? Triggers when sync is on and a
+     * non-primary calendar is selected but the cached public flag isn't true.
+     */
+    public function needsPublicCalendarWarning(): bool
+    {
+        if (! $this->syncsToGoogle()) {
+            return false;
+        }
+
+        $pivot = $this->getOwnerCalendarPivot();
+
+        return $pivot
+            && $pivot->google_calendar_id
+            && $pivot->google_calendar_id !== 'primary'
+            && $pivot->google_calendar_is_public !== true;
+    }
+
+    /**
+     * Build a shareable Google Calendar URL from the owner's calendar ID.
+     * Returns null when no addressable calendar is available.
+     */
+    public function getPublicGoogleCalendarUrl(): ?string
+    {
+        if (! $this->hasPublicGoogleCalendar()) {
+            return null;
+        }
+
+        $cid = rtrim(strtr(base64_encode($this->getGoogleCalendarId()), '+/', '-_'), '=');
+
+        return 'https://calendar.google.com/calendar/u/0?cid='.$cid;
+    }
+
     /**
      * Get the sync direction as a human-readable string
      */
@@ -1819,6 +1905,96 @@ class Role extends Model implements MustVerifyEmail
     public function setEmailSettings(array $settings): void
     {
         $this->email_settings = $settings;
+    }
+
+    /**
+     * Mark the role's custom SMTP credentials as having failed. Uses a
+     * targeted UPDATE so callers that have unsaved attribute changes on the
+     * model (e.g. RoleController::testEmail temporarily applying form data
+     * via setEmailSettings) don't accidentally persist them.
+     */
+    public function markEmailSettingsFailed(?string $message): void
+    {
+        $now = now();
+        $truncated = $message ? mb_substr($message, 0, 1000) : null;
+
+        static::query()->whereKey($this->id)->update([
+            'email_settings_failed_at' => $now,
+            'email_settings_failed_message' => $truncated,
+        ]);
+
+        $this->setRawColumns([
+            'email_settings_failed_at' => $now,
+            'email_settings_failed_message' => $truncated,
+        ]);
+    }
+
+    /**
+     * Record that schedule editors have been notified of the failure. Same
+     * targeted-update pattern as markEmailSettingsFailed.
+     */
+    public function markEmailSettingsFailureNotified(): void
+    {
+        $now = now();
+
+        static::query()->whereKey($this->id)->update([
+            'email_settings_failure_notified_at' => $now,
+        ]);
+
+        $this->setRawColumns([
+            'email_settings_failure_notified_at' => $now,
+        ]);
+    }
+
+    /**
+     * Clear any previously recorded email-settings failure. Called from the
+     * "Send Test Email" success path and after a successful retry through the
+     * role's custom mailer. Uses a targeted UPDATE so an in-progress
+     * pre-save test (which has unsaved email_settings on the model) does not
+     * accidentally commit those settings here.
+     */
+    public function clearEmailSettingsFailure(): void
+    {
+        if ($this->email_settings_failed_at === null
+            && $this->email_settings_failed_message === null
+            && $this->email_settings_failure_notified_at === null) {
+            return;
+        }
+
+        static::query()->whereKey($this->id)->update([
+            'email_settings_failed_at' => null,
+            'email_settings_failed_message' => null,
+            'email_settings_failure_notified_at' => null,
+        ]);
+
+        $this->setRawColumns([
+            'email_settings_failed_at' => null,
+            'email_settings_failed_message' => null,
+            'email_settings_failure_notified_at' => null,
+        ]);
+    }
+
+    /**
+     * True when a failure was recorded within the last 24 hours. While active,
+     * queued mailer paths skip the role's custom SMTP and route through the
+     * default mailer instead.
+     */
+    public function isEmailSettingsFailureActive(): bool
+    {
+        return $this->email_settings_failed_at !== null
+            && $this->email_settings_failed_at->gt(now()->subDay());
+    }
+
+    /**
+     * Reflect a targeted column update onto this in-memory model instance
+     * without disturbing other unsaved attribute changes.
+     */
+    protected function setRawColumns(array $values): void
+    {
+        foreach ($values as $key => $value) {
+            $this->setAttribute($key, $value);
+            $this->syncOriginalAttribute($key);
+        }
     }
 
     /**

@@ -11,6 +11,7 @@ class CalendarSync extends Model
         'event_id',
         'role_id',
         'google_event_id',
+        'google_calendar_id',
     ];
 
     public function user()

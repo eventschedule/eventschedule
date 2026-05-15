@@ -2746,6 +2746,14 @@
                             @endif
 
                             <div class="mb-6">
+                                <x-toggle name="show_accessibility_widget"
+                                    label="{{ __('messages.show_accessibility_widget') }}"
+                                    checked="{{ old('show_accessibility_widget', $role->show_accessibility_widget) }}"
+                                    help="{{ __('messages.show_accessibility_widget_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('show_accessibility_widget')" />
+                            </div>
+
+                            <div class="mb-6">
                                 <x-input-label for="first_day_of_week" :value="__('messages.first_day_of_week')" />
                                 <select name="first_day_of_week" id="first_day_of_week"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
@@ -3229,7 +3237,12 @@
                             <nav class="flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide" aria-label="Tabs">
                                 @if (config('app.hosted'))
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-[var(--brand-blue)] text-[var(--brand-blue)]" data-tab="email">
-                                    {{ __('messages.email_settings') }}
+                                    <span class="inline-flex items-center gap-1.5">
+                                        {{ __('messages.email_settings') }}
+                                        @if ($role->isEmailSettingsFailureActive())
+                                        <span class="inline-block w-2 h-2 rounded-full bg-amber-500" aria-label="{{ __('messages.email_settings_failed_warning_title') }}"></span>
+                                        @endif
+                                    </span>
                                 </button>
                                 @endif
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="google">
@@ -3248,6 +3261,31 @@
                         <!-- Tab Content: Email Settings -->
                         <div id="integration-tab-email" class="integration-tab-content">
                             <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.email_settings_help') }}</p>
+
+                            @if ($role->isEmailSettingsFailureActive())
+                            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 mb-4 flex items-start gap-3">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <div class="text-sm text-amber-800 dark:text-amber-200">
+                                    <p class="font-semibold mb-1">{{ __('messages.email_settings_failed_warning_title') }}</p>
+                                    <p class="mb-2">
+                                        {{ __('messages.email_settings_failed_warning_body', [
+                                            'date' => $role->email_settings_failed_at->isoFormat('LLL'),
+                                            'relative' => $role->email_settings_failed_at->diffForHumans(),
+                                            'retry_at' => $role->email_settings_failed_at->copy()->addDay()->isoFormat('LLL'),
+                                        ]) }}
+                                    </p>
+                                    <p class="mb-2">{{ __('messages.email_settings_failed_warning_hint') }}</p>
+                                    @if ($role->email_settings_failed_message)
+                                    <details>
+                                        <summary class="cursor-pointer underline">{{ __('messages.email_settings_failed_warning_show_error') }}</summary>
+                                        <pre class="mt-2 text-xs whitespace-pre-wrap break-words bg-amber-100/50 dark:bg-amber-900/30 p-2 rounded">{{ $role->email_settings_failed_message }}</pre>
+                                    </details>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
 
                             @if (is_demo_mode())
                             <div class="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded text-yellow-800 dark:text-yellow-200 text-sm">
@@ -3393,6 +3431,40 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                @if ($role->needsPublicCalendarWarning())
+                                <div class="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">
+                                        {{ __('messages.google_calendar_not_public_warning') }}
+                                        <x-link href="https://support.google.com/calendar/answer/37083" target="_blank">{{ __('messages.learn_more') }}</x-link>
+                                    </p>
+                                </div>
+                                @endif
+
+                                @if (auth()->id() === $role->user_id)
+                                <div class="space-y-4">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('messages.google_force_resync_help') }}
+                                    </p>
+                                    <div class="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                        </svg>
+                                        <p class="text-sm text-amber-800 dark:text-amber-200">
+                                            {{ __('messages.google_force_resync_warning') }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <x-brand-button type="button" id="force-google-resync-btn">
+                                            {{ __('messages.google_force_resync_to_google') }}
+                                        </x-brand-button>
+                                        <span id="force-google-resync-status" class="ms-3 text-sm text-gray-600 dark:text-gray-400 hidden"></span>
+                                    </div>
+                                </div>
+                                @endif
 
                                 @if (false)
                                 <div>
@@ -4262,6 +4334,107 @@ document.addEventListener('DOMContentLoaded', function() {
     if (googleCalendarSelect) {
         loadGoogleCalendars();
     }
+
+    var forceGoogleResyncBtn = document.getElementById('force-google-resync-btn');
+    if (forceGoogleResyncBtn) {
+        var savedCalendarId = @json($userCalendarId ?? '');
+        var calendarSelect = document.getElementById('google-calendar-select');
+        var saveFirstTooltip = @json(__('messages.google_force_resync_save_first'), JSON_UNESCAPED_UNICODE);
+
+        function updateResyncButtonState() {
+            if (! calendarSelect) {
+                return;
+            }
+            var dirty = calendarSelect.value !== savedCalendarId;
+            forceGoogleResyncBtn.disabled = dirty;
+            forceGoogleResyncBtn.title = dirty ? saveFirstTooltip : '';
+            forceGoogleResyncBtn.classList.toggle('opacity-50', dirty);
+            forceGoogleResyncBtn.classList.toggle('cursor-not-allowed', dirty);
+        }
+
+        if (calendarSelect) {
+            // Disable until loadGoogleCalendars() finishes populating; the dropdown's
+            // transient "" value would otherwise look dirty against the saved id.
+            forceGoogleResyncBtn.disabled = true;
+            calendarSelect.addEventListener('change', updateResyncButtonState);
+            window.addEventListener('google-calendars-loaded', updateResyncButtonState);
+        }
+
+        forceGoogleResyncBtn.addEventListener('click', function() {
+            if (! confirm(@json(__('messages.google_force_resync_confirm'), JSON_UNESCAPED_UNICODE))) {
+                return;
+            }
+            var statusEl = document.getElementById('force-google-resync-status');
+            forceGoogleResyncBtn.disabled = true;
+            if (statusEl) {
+                statusEl.classList.remove('hidden', 'text-green-600', 'dark:text-green-400', 'text-red-600', 'dark:text-red-400');
+                statusEl.classList.add('text-gray-600', 'dark:text-gray-400');
+                statusEl.textContent = @json(__('messages.syncing'), JSON_UNESCAPED_UNICODE);
+                statusEl.classList.remove('hidden');
+            }
+            var fallbackErrorMsg = @json(__('messages.sync_error'), JSON_UNESCAPED_UNICODE);
+            var fetchUrl = @json($role->exists && $role->subdomain ? route('google.calendar.force_sync_to_google', ['subdomain' => $role->subdomain]) : '');
+            var httpStatus = 0;
+            fetch(fetchUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: '{}',
+                credentials: 'same-origin',
+            })
+                .then(function(response) {
+                    httpStatus = response.status;
+                    return response.text().then(function(text) {
+                        var data = null;
+                        try { data = text ? JSON.parse(text) : null; } catch (e) { /* not JSON */ }
+                        return { ok: response.ok, status: response.status, data: data, text: text };
+                    });
+                })
+                .then(function(res) {
+                    if (! statusEl) {
+                        return;
+                    }
+                    statusEl.classList.remove('hidden', 'text-gray-600', 'dark:text-gray-400');
+                    if (res.ok && res.data && ! res.data.error) {
+                        statusEl.textContent = res.data.message || '';
+                        statusEl.classList.add('text-green-600', 'dark:text-green-400');
+                    } else {
+                        var msg;
+                        if (res.data && res.data.error) {
+                            msg = res.data.error;
+                        } else if (res.data && res.data.message) {
+                            // Laravel middleware (CSRF 419, throttle 429, auth, etc.)
+                            msg = res.data.message;
+                        } else {
+                            msg = fallbackErrorMsg;
+                        }
+                        msg += ' (HTTP ' + res.status + ')';
+                        statusEl.textContent = msg;
+                        statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                        console.error('Force resync failed', {
+                            url: fetchUrl,
+                            status: res.status,
+                            ok: res.ok,
+                            responseBody: (res.text || '').slice(0, 500),
+                        });
+                    }
+                })
+                .catch(function(err) {
+                    if (statusEl) {
+                        statusEl.classList.remove('hidden', 'text-gray-600', 'dark:text-gray-400', 'text-green-600', 'dark:text-green-400');
+                        statusEl.textContent = fallbackErrorMsg + ' (network: ' + (err && err.message ? err.message : 'unknown') + ')';
+                        statusEl.classList.add('text-red-600', 'dark:text-red-400');
+                    }
+                    console.error('Force resync network error', { url: fetchUrl, status: httpStatus, error: err });
+                })
+                .finally(function() {
+                    forceGoogleResyncBtn.disabled = false;
+                });
+        });
+    }
 });
 
 function loadGoogleCalendars() {
@@ -4294,6 +4467,7 @@ function loadGoogleCalendars() {
             } else {
                 select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
             }
+            window.dispatchEvent(new CustomEvent('google-calendars-loaded'));
         })
         .catch(error => {
             console.error('Error loading calendars:', error);

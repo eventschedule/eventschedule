@@ -185,7 +185,7 @@
             }
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
             min-height: 100vh;
-            background-attachment: scroll;
+            background-attachment: {{ ($role->event_layout ?? 'calendar') === 'list' ? 'fixed' : 'scroll' }};
             display: flex;
             flex-direction: column;
             @if ($event && $otherRole && $otherRole->isClaimed())
@@ -505,7 +505,7 @@
         $isRoleRtl = in_array($role->language_code, ['ar', 'he']);
     @endphp
 
-    <div class="flex-grow relative">
+    <div id="main-content" tabindex="-1" class="flex-grow relative">
         @php
             $showMobileBanner = false;
             $mobileBannerUrl = '';
@@ -571,6 +571,10 @@
             <img src="{{ url('/images/logo.webp') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">
         </a>
     </div>
+    @endif
+
+    @if ($role->show_accessibility_widget)
+        @include('partials.accessibility-widget')
     @endif
 
 </x-app-layout>

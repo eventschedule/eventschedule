@@ -6,13 +6,12 @@ use App\Mail\FeedbackRequest;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\RoleMailerService;
 use App\Services\UsageTrackingService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
 {
@@ -69,13 +68,7 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
 
             $mailable = new FeedbackRequest($sale, $event, $role);
 
-            if (config('app.hosted') && $role->hasEmailSettings()) {
-                $this->configureRoleMailer($role);
-                $mailerName = 'role_'.$role->id;
-                Mail::mailer($mailerName)->to($sale->email)->send($mailable);
-            } else {
-                Mail::to($sale->email)->send($mailable);
-            }
+            app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);
 
             UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
         } finally {
@@ -95,28 +88,6 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
         Log::error('Failed to send feedback request: '.$exception->getMessage(), [
             'sale_id' => $this->saleId,
             'event_id' => $this->eventId,
-        ]);
-    }
-
-    protected function configureRoleMailer(Role $role): void
-    {
-        $emailSettings = $role->getEmailSettings();
-
-        if (empty($emailSettings)) {
-            return;
-        }
-
-        $mailerName = 'role_'.$role->id;
-
-        Config::set("mail.mailers.{$mailerName}", [
-            'transport' => 'smtp',
-            'host' => $emailSettings['host'] ?? config('mail.mailers.smtp.host'),
-            'port' => $emailSettings['port'] ?? config('mail.mailers.smtp.port'),
-            'encryption' => $emailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
-            'username' => $emailSettings['username'] ?? null,
-            'password' => $emailSettings['password'] ?? null,
-            'timeout' => null,
-            'local_domain' => config('mail.mailers.smtp.local_domain'),
         ]);
     }
 }

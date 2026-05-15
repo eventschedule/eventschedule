@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
+use App\Services\TicketVolumeDiscount;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -1652,6 +1653,7 @@ class Event extends Model
                     'description' => $ticket->description,
                     'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->toIso8601String() : null,
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->toIso8601String() : null,
+                    'volume_discount' => TicketVolumeDiscount::toGuestPayload($ticket->volume_discount),
                 ];
             })->values();
 
@@ -1945,6 +1947,26 @@ class Event extends Model
         $duration = $this->duration > 0 ? $this->duration : 2; // Default to 2 hours if no duration
 
         return $startAt->copy()->addHours($duration);
+    }
+
+    /**
+     * Calendar date (Y-m-d) in the creator schedule timezone for starts_at, for sale/RSVP event_date defaults.
+     */
+    public function saleEventDateFromStartsAt(): ?string
+    {
+        if (! $this->starts_at) {
+            return null;
+        }
+
+        // Date-only starts_at already represents the calendar date in the schedule's view.
+        if (strlen($this->starts_at) === 10) {
+            return $this->starts_at;
+        }
+
+        $this->loadMissing('creatorRole');
+        $tz = $this->creatorRole?->timezone ?? config('app.timezone');
+
+        return Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->timezone($tz)->format('Y-m-d');
     }
 
     /**

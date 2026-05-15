@@ -891,7 +891,7 @@ class CarpoolController extends Controller
             return;
         }
 
-        if (! $recipient->carpool_notifications_enabled || $recipient->is_subscribed === false) {
+        if ($recipient->is_subscribed === false) {
             return;
         }
 

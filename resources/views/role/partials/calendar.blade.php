@@ -2174,6 +2174,12 @@ const calendarApp = createApp({
                     if (lookBackDays > 0) {
                         currentDate.setDate(currentDate.getDate() - lookBackDays);
                     }
+                    if (event.start_date) {
+                        const eventStartDate = new Date(event.start_date + 'T00:00:00');
+                        if (currentDate < eventStartDate) {
+                            currentDate.setTime(eventStartDate.getTime());
+                        }
+                    }
 
                     while (currentDate <= endDate) {
                         if (this.matchesFrequency(event, currentDate)) {
@@ -2272,7 +2278,7 @@ const calendarApp = createApp({
                     return new Date(a.local_starts_at) - new Date(b.local_starts_at);
                 }
                 return 0;
-            }).slice(0, 50);
+            }).slice(0, 100);
         },
         eventsGroupedByDate() {
             const grouped = {};
@@ -2306,7 +2312,7 @@ const calendarApp = createApp({
                     });
                 }
             });
-            return events.slice(0, 50);
+            return events.slice(0, 100);
         },
         flatPastEvents() {
             if (this.activeFilterCount > 0) return [];
@@ -3022,10 +3028,15 @@ const calendarApp = createApp({
             }
         },
         formatPrice(price, currencyCode) {
+            const num = Number(price);
+            const isWhole = Number.isFinite(num) && num === Math.trunc(num);
             return new Intl.NumberFormat('{{ app()->getLocale() }}', {
                 style: 'currency',
-                currency: currencyCode
-            }).format(price);
+                currency: currencyCode,
+                currencyDisplay: 'narrowSymbol',
+                minimumFractionDigits: isWhole ? 0 : 2,
+                maximumFractionDigits: 2,
+            }).format(num);
         },
         isRoleAMember(event) {
             // This would need to be determined server-side and passed to the frontend

@@ -86,7 +86,7 @@ class GraphicController extends Controller
         $validated = $request->validate([
             'enabled' => 'boolean',
             'frequency' => 'in:daily,weekly,monthly',
-            'ai_prompt' => 'nullable|string|max:500',
+            'ai_prompt' => 'nullable|string|max:1000',
             'ai_model' => 'nullable|string|max:50',
             'text_template' => 'nullable|string|max:2000',
             'layout' => 'in:grid,list,row',
@@ -98,7 +98,7 @@ class GraphicController extends Controller
             'recipient_emails' => 'nullable|string|max:1000',
             'exclude_recurring' => 'boolean',
             'date_position' => 'nullable|in:overlay,above',
-            'event_count' => 'nullable|integer|min:1',
+            'event_count' => 'nullable|integer|min:1|max:20',
             'max_per_row' => 'nullable|integer|min:1|max:20',
             'overlay_text' => 'nullable|string|max:200',
             'url_include_https' => 'boolean',
@@ -254,7 +254,7 @@ class GraphicController extends Controller
 
         // Get event_count from request or settings
         $eventCountSetting = $request->get('event_count', $graphicSettings['event_count'] ?? null);
-        $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20; // Default max is 20
+        $eventLimit = self::resolveGraphicEventLimit($eventCountSetting);
 
         // Base query builder for future/ongoing events belonging to this schedule
         $baseQuery = function () use ($role, $request) {
@@ -389,8 +389,7 @@ class GraphicController extends Controller
         }
 
         // Re-query events for metadata (same filters as generateGraphicData)
-        $eventCountSetting = $request->input('event_count');
-        $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
+        $eventLimit = self::resolveGraphicEventLimit($request->input('event_count'));
         $excludeRecurring = $request->boolean('exclude_recurring', false);
         $textShowAll = $request->boolean('text_show_all', false);
 
@@ -476,8 +475,7 @@ class GraphicController extends Controller
         $overlayText = $graphicSettings['overlay_text'] ?? '';
 
         // Get event_count from settings
-        $eventCountSetting = $graphicSettings['event_count'] ?? null;
-        $eventLimit = $eventCountSetting ? (int) $eventCountSetting : 20;
+        $eventLimit = self::resolveGraphicEventLimit($graphicSettings['event_count'] ?? null);
 
         $excludeRecurring = $graphicSettings['exclude_recurring'] ?? false;
 
@@ -712,5 +710,17 @@ class GraphicController extends Controller
         return response()->json([
             'success' => true,
         ]);
+    }
+
+    /**
+     * Cap for flyer/text event limits on the Event Graphics page (matches UI dropdown).
+     */
+    public static function resolveGraphicEventLimit(mixed $value): int
+    {
+        if ($value === null || $value === '') {
+            return 20;
+        }
+
+        return min(20, max(1, (int) $value));
     }
 }

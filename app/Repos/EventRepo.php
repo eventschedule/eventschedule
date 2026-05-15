@@ -14,9 +14,11 @@ use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\SmsService;
+use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
 use App\Utils\ColorUtils;
 use App\Utils\GeminiUtils;
+use App\Utils\ImageUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -691,20 +693,61 @@ class EventRepo
             return UrlUtils::decodeId($id);
         }, $selectedCurators);
 
-        // If editing an existing event, preserve curators that the current user can't see
+        $existingAttachedIds = ($event && $event->exists)
+            ? $event->roles()->pluck('roles.id')->toArray()
+            : [];
+
+        $availableSchedules = $user->availableEventSchedules();
+        $userVisibleIds = $availableSchedules->pluck('id')->toArray();
+
+        // The schedules tab pre-checks every attached schedule (including the
+        // venue/talent on the event), but the dedicated venue field and members
+        // section may have been changed by the user without touching the tab.
+        // Treat those stale pre-checks as overridden by the dedicated sections.
         if ($event && $event->exists) {
-            $existingCurators = $event->roles()->where('roles.type', 'curator')->pluck('roles.id')->toArray();
-            $userCurators = $user->curators()->pluck('roles.id')->toArray();
-
-            // Find curators that exist on the event but the user can't edit
-            $preservedCurators = array_diff($existingCurators, $userCurators);
-
-            // Add preserved curators to the selected curators
-            foreach ($preservedCurators as $curatorId) {
-                if (! in_array($curatorId, $selectedCurators)) {
-                    $selectedCurators[] = $curatorId;
+            $previousVenueIds = $event->roles()
+                ->where('roles.type', 'venue')
+                ->pluck('roles.id')
+                ->toArray();
+            foreach ($previousVenueIds as $oldVenueId) {
+                if ($venue && $venue->id === $oldVenueId) {
+                    continue;
                 }
+                $selectedCurators = array_values(array_diff($selectedCurators, [$oldVenueId]));
             }
+
+            $submittedMemberRoleIds = [];
+            foreach ((array) ($request->members ?? []) as $memberId => $member) {
+                if (! $memberId || strpos($memberId, 'new_') === 0) {
+                    continue;
+                }
+                $submittedMemberRoleIds[] = UrlUtils::decodeId($memberId);
+            }
+            $previousTalentIds = $event->roles()
+                ->where('roles.type', 'talent')
+                ->pluck('roles.id')
+                ->toArray();
+            foreach ($previousTalentIds as $oldTalentId) {
+                if (in_array($oldTalentId, $submittedMemberRoleIds)) {
+                    continue;
+                }
+                $selectedCurators = array_values(array_diff($selectedCurators, [$oldTalentId]));
+            }
+        }
+
+        // Preserve attachments the user has no visibility into. Anything visible
+        // in the schedules tab is fully managed by this submission.
+        foreach ($existingAttachedIds as $attachedId) {
+            if (in_array($attachedId, $userVisibleIds)) {
+                continue;
+            }
+            if (in_array($attachedId, $roleIds)) {
+                continue;
+            }
+            if (in_array($attachedId, $selectedCurators)) {
+                continue;
+            }
+            $selectedCurators[] = $attachedId;
         }
 
         foreach ($selectedCurators as $curatorId) {
@@ -713,6 +756,31 @@ class EventRepo
                 $roles[] = $curator;
                 $roleIds[] = $curator->id;
             }
+        }
+
+        // Schedules tab is authoritative for previously-attached schedules: if a
+        // schedule was attached before this save and is visible in the tab but
+        // not in curators[], detach it even if a parallel section (talent
+        // members, venue field) still has it selected. New attachments added via
+        // those parallel sections are NOT affected.
+        if ($currentRole && ! empty($existingAttachedIds)) {
+            foreach ($availableSchedules as $schedule) {
+                if ($schedule->subdomain === $currentRole->subdomain) {
+                    continue;
+                }
+                if (! in_array($schedule->id, $existingAttachedIds)) {
+                    continue;
+                }
+                if (in_array($schedule->id, $selectedCurators)) {
+                    continue;
+                }
+                $key = array_search($schedule->id, $roleIds);
+                if ($key !== false) {
+                    unset($roleIds[$key]);
+                    $roles = array_values(array_filter($roles, fn ($r) => $r->id !== $schedule->id));
+                }
+            }
+            $roleIds = array_values(array_unique($roleIds));
         }
 
         $event->roles()->sync($roleIds);
@@ -763,6 +831,13 @@ class EventRepo
                 }
                 Storage::delete($path);
             }
+
+            // Resize oversized flyers before storage. Graphic generation
+            // decodes these via GD, which OOMs on multi-megapixel images on
+            // small PHP-FPM workers (e.g. DigitalOcean App Platform's 128MB
+            // cap). We resize the temp file in place so storeAs() uploads
+            // the smaller version, which works for both local and S3 disks.
+            ImageUtils::resizeImageToMax($file->getRealPath(), 2000);
 
             $filename = strtolower('flyer_'.Str::random(32).'.'.$extension);
             $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
@@ -912,6 +987,22 @@ class EventRepo
                 $salesStartAt = ! empty($data['sales_start_at']) ? $data['sales_start_at'] : null;
                 $salesEndAt = ! empty($data['sales_end_at']) ? $data['sales_end_at'] : null;
 
+                $volumeDiscount = null;
+                if (array_key_exists('volume_discount', $data)) {
+                    $volumeDiscountRaw = null;
+                    if (! empty($data['volume_discount'])) {
+                        $volumeDiscountRaw = is_string($data['volume_discount'])
+                            ? json_decode($data['volume_discount'], true)
+                            : $data['volume_discount'];
+                    }
+                    $volumeDiscount = TicketVolumeDiscount::normalizeRule(is_array($volumeDiscountRaw) ? $volumeDiscountRaw : null);
+                } elseif (! empty($data['id'])) {
+                    $existingVolTicket = Ticket::find($data['id']);
+                    if ($existingVolTicket && $existingVolTicket->event_id == $event->id) {
+                        $volumeDiscount = $existingVolTicket->volume_discount;
+                    }
+                }
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
@@ -919,11 +1010,13 @@ class EventRepo
                         $ticket->update([
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
+                            'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
                             'sales_start_at' => $salesStartAt,
                             'sales_end_at' => $salesEndAt,
                             'custom_fields' => $ticketCustomFields,
+                            'volume_discount' => $volumeDiscount,
                         ]);
                     }
                 } else {
@@ -931,11 +1024,13 @@ class EventRepo
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null,
+                        'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
                         'sales_start_at' => $salesStartAt,
                         'sales_end_at' => $salesEndAt,
                         'custom_fields' => $ticketCustomFields,
+                        'volume_discount' => $volumeDiscount,
                     ]);
                     $ticketIds[] = $ticket->id;
                 }
@@ -965,6 +1060,7 @@ class EventRepo
                         $addon->update([
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
+                            'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
                             'url' => $data['url'] ?? null,
@@ -976,6 +1072,7 @@ class EventRepo
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null,
+                        'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
                         'url' => $data['url'] ?? null,

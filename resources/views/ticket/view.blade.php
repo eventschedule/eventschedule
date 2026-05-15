@@ -120,6 +120,7 @@
 
     {{-- Dark background with gradient orbs --}}
     <main
+      id="main-content"
       class="font-['Manrope'] text-[15px] font-normal leading-[1.75em] flex flex-col gap-[16px] flex-1 relative z-0 overflow-y-auto p-[16px] sm:p-[24px] focus:outline-none min-h-screen bg-[#0a0a0f] print:bg-white"
       tabindex="0"
     >
@@ -166,11 +167,56 @@
 
         {{-- Main Details Section --}}
         <div class="glass p-[20px] sm:p-[24px] relative print:bg-slate-50">
-          {{-- Status watermark for unpaid/cancelled --}}
+          @php
+            $isUnpaid = $sale->status === 'unpaid';
+          @endphp
+
+          {{-- Status banner for unpaid / cancelled / refunded / expired --}}
           @if ($sale->status !== 'paid')
-            <div class="absolute inset-0 flex items-center justify-center overflow-hidden pointer-events-none rounded-none">
-              <div class="text-white/10 print:text-gray-300/40 text-[48px] sm:text-[60px] font-extrabold rotate-[-30deg] whitespace-nowrap tracking-wider">
-                {{ strtoupper($sale->status) }}
+            @php
+              $statusLabel = strtoupper(__('messages.' . $sale->status));
+              $statusSub = match ($sale->status) {
+                  'unpaid'    => __('messages.this_ticket_is_not_paid'),
+                  'cancelled' => __('messages.this_ticket_is_cancelled'),
+                  'refunded'  => __('messages.this_ticket_is_refunded'),
+                  'expired'   => __('messages.this_reservation_has_expired'),
+                  default     => '',
+              };
+              $canShowPayNow = $isUnpaid
+                  && in_array($sale->payment_method, ['stripe', 'invoiceninja', 'payment_url'])
+                  && (!$sale->group_id || $sale->isPrimarySale());
+              $tierBg     = $isUnpaid ? 'bg-yellow-500/25 print:bg-yellow-50' : 'bg-red-500/25 print:bg-red-50';
+              $tierBorder = $isUnpaid ? 'border-yellow-400/70 print:border-yellow-300' : 'border-red-400/70 print:border-red-300';
+              $tierLabel  = $isUnpaid ? 'text-yellow-100 print:text-yellow-800' : 'text-red-100 print:text-red-800';
+              $tierSub    = $isUnpaid ? 'text-yellow-50 print:text-yellow-700' : 'text-red-50 print:text-red-700';
+              $tierIcon   = $isUnpaid ? 'fill-yellow-300 print:fill-yellow-700' : 'fill-red-300 print:fill-red-700';
+            @endphp
+            <div class="relative z-10 mb-[16px] rounded-xl border {{ $tierBorder }} {{ $tierBg }} p-[14px] sm:p-[16px]">
+              <div class="flex items-start gap-[12px]">
+                <svg width="22" height="22" viewBox="0 0 20 20" class="flex-shrink-0 mt-[2px]" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" class="{{ $tierIcon }}"/>
+                </svg>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[14px] font-bold uppercase tracking-wide {{ $tierLabel }}">
+                    {{ $statusLabel }}
+                  </p>
+                  <p class="text-[12px] mt-[2px] {{ $tierSub }}">
+                    {{ $statusSub }}
+                  </p>
+                  @if ($canShowPayNow)
+                    <a href="{{ $sale->getEventUrl() }}"
+                       class="inline-flex items-center gap-[6px] mt-[10px] px-[14px] py-[8px] rounded-lg bg-yellow-400 hover:bg-yellow-300 text-yellow-900 text-[13px] font-semibold transition-colors print:hidden">
+                      {{ __('messages.complete_payment') }}
+                      <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                      </svg>
+                    </a>
+                  @elseif ($isUnpaid && $sale->payment_method === 'cash')
+                    <p class="text-[12px] mt-[6px] {{ $tierSub }} italic">
+                      {{ __('messages.pay_at_the_door') }}
+                    </p>
+                  @endif
+                </div>
               </div>
             </div>
           @endif
@@ -238,10 +284,25 @@
 
             {{-- Right: QR Code --}}
             <div class="flex flex-col items-center">
-              <div class="bg-white rounded-2xl p-[8px] shadow-lg shadow-black/20 print:shadow-md">
-                <img class="w-[120px] h-[120px]" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
+              <div class="relative bg-white rounded-2xl p-[8px] shadow-lg shadow-black/20 print:shadow-md">
+                <img class="w-[120px] h-[120px] {{ $sale->status !== 'paid' ? 'opacity-40 grayscale' : '' }}" src="{{ route('ticket.qr_code', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" alt="QR Code" />
+                @if ($sale->status !== 'paid')
+                  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span class="rotate-[-20deg] px-[8px] py-[2px] text-[14px] font-extrabold tracking-wider rounded shadow {{ $isUnpaid ? 'bg-yellow-400 text-yellow-900' : 'bg-red-500 text-white' }}">
+                      {{ $isUnpaid ? __('messages.unpaid') : __('messages.void') }}
+                    </span>
+                  </div>
+                @endif
               </div>
-              <p class="text-[10px] text-white/40 print-text-gray mt-[8px] text-center font-medium">{{ __('messages.scan_for_entry') }}</p>
+              <p class="text-[10px] text-white/40 print-text-gray mt-[8px] text-center font-medium">
+                @if ($sale->status === 'paid')
+                  {{ __('messages.scan_for_entry') }}
+                @elseif ($isUnpaid)
+                  {{ __('messages.payment_required_to_enter') }}
+                @else
+                  {{ __('messages.this_ticket_is_not_valid') }}
+                @endif
+              </p>
             </div>
           </div>
         </div>

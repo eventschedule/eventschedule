@@ -11,7 +11,6 @@ use App\Models\NewsletterUnsubscribe;
 use App\Models\Role;
 use App\Utils\MarkdownUtils;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -154,10 +153,8 @@ class NewsletterService
             $mailable = new NewsletterEmail($newsletter, $recipient, $html, $processedBlocks);
 
             $role = $newsletter->role;
-            if (config('app.hosted') && $role && $role->hasEmailSettings()) {
-                $this->configureRoleMailer($role);
-                $mailerName = 'role_'.$role->id;
-                Mail::mailer($mailerName)->to($recipient->email)->send($mailable);
+            if (config('app.hosted') && $role) {
+                app(RoleMailerService::class)->sendForRole($role, $recipient->email, $mailable);
             } else {
                 Mail::to($recipient->email)->send($mailable);
             }
@@ -625,28 +622,6 @@ class NewsletterService
                     ->delay(now()->addSeconds($batchIndex * 15));
                 $batchIndex++;
             });
-    }
-
-    protected function configureRoleMailer(Role $role): void
-    {
-        $emailSettings = $role->getEmailSettings();
-
-        if (empty($emailSettings)) {
-            return;
-        }
-
-        $mailerName = 'role_'.$role->id;
-
-        Config::set("mail.mailers.{$mailerName}", [
-            'transport' => 'smtp',
-            'host' => $emailSettings['host'] ?? config('mail.mailers.smtp.host'),
-            'port' => $emailSettings['port'] ?? config('mail.mailers.smtp.port'),
-            'encryption' => $emailSettings['encryption'] ?? config('mail.mailers.smtp.encryption'),
-            'username' => $emailSettings['username'] ?? null,
-            'password' => $emailSettings['password'] ?? null,
-            'timeout' => null,
-            'local_domain' => config('mail.mailers.smtp.local_domain'),
-        ]);
     }
 
     protected function isTestEmail(string $email): bool

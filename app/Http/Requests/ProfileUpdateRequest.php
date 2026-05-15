@@ -27,7 +27,6 @@ class ProfileUpdateRequest extends FormRequest
             'language_code' => ['required', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages', ['en' => 'english'])))],
             'profile_image' => ['image', 'max:2500'],
             'use_24_hour_time' => ['nullable', 'boolean'],
-            'carpool_notifications_enabled' => ['nullable', 'boolean'],
             'default_role_id' => ['nullable', 'integer', 'exists:roles,id'],
         ];
     }

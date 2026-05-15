@@ -857,6 +857,22 @@ class MarketingController extends Controller
     }
 
     /**
+     * Public accessibility declaration (marketing site).
+     */
+    public function accessibility()
+    {
+        return view('marketing.accessibility');
+    }
+
+    /**
+     * Selfhost documentation: accessibility obligations for operators.
+     */
+    public function docsSelfhostAccessibility()
+    {
+        return view('marketing.docs.selfhost.accessibility');
+    }
+
+    /**
      * Terms of Service page
      */
     public function terms()
@@ -4837,6 +4853,7 @@ class MarketingController extends Controller
             'selfhost_ai' => route('marketing.docs.selfhost.ai'),
             'selfhost_admin' => route('marketing.docs.selfhost.admin'),
             'selfhost_boost' => route('marketing.docs.selfhost.boost'),
+            'selfhost_accessibility' => route('marketing.docs.selfhost.accessibility'),
             'saas_setup' => route('marketing.docs.saas.setup'),
             'saas_custom_domains' => route('marketing.docs.saas.custom_domains'),
             'saas_twilio' => route('marketing.docs.saas.twilio'),
@@ -5084,6 +5101,11 @@ class MarketingController extends Controller
             ['page' => 'AI Setup', 'section' => 'Get an OpenAI API Key', 'description' => 'Obtain an OpenAI API key for image generation.', 'url' => $r['selfhost_ai'].'#openai-api-key', 'category' => 'Selfhost', 'keywords' => 'api key openai dall-e image'],
             ['page' => 'AI Setup', 'section' => 'Configuration', 'description' => 'Set the GEMINI_API_KEY and OPENAI_API_KEY environment variables.', 'url' => $r['selfhost_ai'].'#configuration', 'category' => 'Selfhost', 'keywords' => 'configuration env variable'],
             ['page' => 'AI Setup', 'section' => 'Troubleshooting', 'description' => 'Fix AI API issues.', 'url' => $r['selfhost_ai'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix api error'],
+
+            // Web accessibility (selfhost operators)
+            ['page' => 'Web Accessibility', 'section' => 'Overview', 'description' => 'Legal context for selfhost operators and configuration keys for accessibility.', 'url' => $r['selfhost_accessibility'].'#overview', 'category' => 'Selfhost', 'keywords' => 'accessibility wcag declaration israel eu legal selfhost'],
+            ['page' => 'Web Accessibility', 'section' => 'Your declaration', 'description' => 'Publish your own accessibility statement on your domain when you serve regulated markets.', 'url' => $r['selfhost_accessibility'].'#your-declaration', 'category' => 'Selfhost', 'keywords' => 'declaration statement coordinator'],
+            ['page' => 'Web Accessibility', 'section' => 'Configuration', 'description' => 'Environment variables for contact email, SLA days, WCAG label, and last reviewed date.', 'url' => $r['selfhost_accessibility'].'#configuration', 'category' => 'Selfhost', 'keywords' => 'env accessibility contact email'],
 
             // Admin Panel (Selfhost)
             ['page' => 'Admin Panel', 'section' => 'Overview', 'description' => 'Admin panel organization and sections.', 'url' => $r['selfhost_admin'].'#overview', 'category' => 'Selfhost', 'keywords' => 'admin panel dashboard'],

@@ -463,6 +463,10 @@ class RoleController extends Controller
         }
 
         if ($slug) {
+            if ($slug === 'calendar' && $role->hasPublicGoogleCalendar()) {
+                return $this->handleCalendarRedirect($role, $request);
+            }
+
             // Check if slug is a social platform vanity URL
             if (in_array($slug, UrlUtils::getUniquePlatforms())) {
                 return $this->handleSocialRedirect($role, $slug, $request);
@@ -993,6 +997,22 @@ class RoleController extends Controller
         }
 
         return redirect($role->getGuestUrl());
+    }
+
+    private function handleCalendarRedirect(Role $role, Request $request)
+    {
+        $url = $role->getPublicGoogleCalendarUrl();
+
+        if (! $url) {
+            return redirect($role->getGuestUrl());
+        }
+
+        $user = auth()->user();
+        if (! $user || (! $user->isMember($role->subdomain) && ! $user->isAdmin())) {
+            $this->recordSocialClick($role, 'calendar', $request);
+        }
+
+        return redirect($url, 302);
     }
 
     private function recordSocialClick(Role $role, string $platform, Request $request): void
@@ -2352,6 +2372,14 @@ class RoleController extends Controller
         // Save calendar ID to owner's pivot
         if ($oldCalendarId !== $newCalendarId) {
             $ownerPivot?->update(['google_calendar_id' => $newCalendarId ?: null]);
+
+            if ($ownerPivot && $newCalendarId && $newCalendarId !== 'primary' && $role->user) {
+                $googleCalendarService = app(\App\Services\GoogleCalendarService::class);
+                $isPublic = $googleCalendarService->isCalendarPublic($newCalendarId);
+                $ownerPivot->update(['google_calendar_is_public' => $isPublic]);
+            } elseif ($ownerPivot) {
+                $ownerPivot->update(['google_calendar_is_public' => null]);
+            }
         }
 
         // If sync_direction or calendar changed, handle webhook management

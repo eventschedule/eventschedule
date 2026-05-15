@@ -27,6 +27,9 @@
             <button type="button" class="profile-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="localization">
                 {{ __('messages.localization') }}
             </button>
+            <button type="button" id="profile-tab-nav-accessibility" class="profile-tab hidden text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="accessibility">
+                {{ __('accessibility.footer_link') }}
+            </button>
         </nav>
     </div>
 
@@ -164,12 +167,6 @@
                 </div>
                 @endif
             </div>
-
-            <div>
-                <x-toggle name="carpool_notifications_enabled" label="{{ __('messages.carpool_notifications') }}"
-                    checked="{{ old('carpool_notifications_enabled', $user->carpool_notifications_enabled) }}" />
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.carpool_notifications_help') }}</p>
-            </div>
         </div>
 
         <!-- Localization Tab -->
@@ -204,7 +201,25 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4">
+        <!-- Accessibility Tab -->
+        <div id="profile-tab-accessibility" class="profile-tab-content hidden space-y-6">
+            <div>
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {{ __('accessibility.settings_widget_heading') }}
+                </h3>
+                <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                    {{ __('accessibility.settings_widget_hidden_note') }}
+                </p>
+                <div class="mt-4">
+                    <button type="button" id="accessibility-widget-show"
+                        class="inline-flex items-center px-4 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--brand-blue)] dark:focus:ring-offset-gray-800">
+                        {{ __('accessibility.settings_show_widget') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile-save-row" class="flex items-center gap-4">
             @if (is_demo_mode())
                 <button type="button"
                     data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
@@ -506,6 +521,47 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 content.classList.add('hidden');
             }
+        });
+
+        var saveRow = document.getElementById('profile-save-row');
+        if (saveRow) {
+            if (tabName === 'accessibility') {
+                saveRow.classList.add('hidden');
+            } else {
+                saveRow.classList.remove('hidden');
+            }
+        }
+    }
+});
+</script>
+
+<script {!! nonce_attr() !!}>
+document.addEventListener('DOMContentLoaded', function() {
+    var navBtn = document.getElementById('profile-tab-nav-accessibility');
+    var btn = document.getElementById('accessibility-widget-show');
+    var widgetHidden = false;
+    try {
+        widgetHidden = localStorage.getItem('es_a11y_hide_widget') === '1';
+    } catch (e) {}
+
+    if (widgetHidden && navBtn) {
+        navBtn.classList.remove('hidden');
+    } else if (!widgetHidden) {
+        try {
+            if (localStorage.getItem('profileActiveTab') === 'accessibility') {
+                localStorage.removeItem('profileActiveTab');
+            }
+        } catch (err) {}
+    }
+
+    if (btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            try {
+                localStorage.removeItem('es_a11y_hide_widget');
+                localStorage.removeItem('profileActiveTab');
+            } catch (err) {}
+            window.location.reload();
         });
     }
 });

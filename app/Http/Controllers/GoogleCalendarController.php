@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\AuditService;
 use App\Services\GoogleCalendarService;
 use App\Utils\UrlUtils;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -256,13 +257,15 @@ class GoogleCalendarController extends Controller
                 ->first();
 
             if ($sync?->google_event_id) {
-                $googleEvent = $this->googleCalendarService->updateEvent($event, $sync->google_event_id, $role);
+                $calendarId = $sync->google_calendar_id ?: $role->getGoogleCalendarId();
+                $googleEvent = $this->googleCalendarService->updateEvent($event, $sync->google_event_id, $role, $calendarId);
             } else {
-                $googleEvent = $this->googleCalendarService->createEvent($event, $role);
+                $calendarId = $role->getGoogleCalendarId();
+                $googleEvent = $this->googleCalendarService->createEvent($event, $role, $calendarId);
                 if ($googleEvent) {
                     \App\Models\CalendarSync::updateOrCreate(
                         ['user_id' => $user->id, 'event_id' => $event->id, 'role_id' => $role->id],
-                        ['google_event_id' => $googleEvent->getId()]
+                        ['google_event_id' => $googleEvent->getId(), 'google_calendar_id' => $calendarId]
                     );
                 }
             }
@@ -327,7 +330,8 @@ class GoogleCalendarController extends Controller
                     return response()->json(['error' => 'Google Calendar token invalid and refresh failed'], 401);
                 }
 
-                $this->googleCalendarService->deleteEvent($sync->google_event_id, $role->getGoogleCalendarId(), $role->id);
+                $calendarId = $sync->google_calendar_id ?: $role->getGoogleCalendarId();
+                $this->googleCalendarService->deleteEvent($sync->google_event_id, $calendarId, $role->id);
                 $sync->delete();
             }
 
@@ -421,6 +425,71 @@ class GoogleCalendarController extends Controller
             ]);
 
             return response()->json(['error' => 'Failed to sync events'], 500);
+        }
+    }
+
+    /**
+     * Clear owner outbound Google sync mappings for this schedule, then push all events to Google again (Event Schedule to Google only; never imports from Google).
+     */
+    public function forceSyncToGoogle(Request $request, string $subdomain)
+    {
+        $user = Auth::user();
+
+        try {
+            $role = \App\Models\Role::subdomain($subdomain)->firstOrFail();
+
+            if (! $role->users->contains($user)) {
+                return response()->json(['error' => __('messages.not_authorized')], 403);
+            }
+
+            if ($user->id !== $role->user_id) {
+                return response()->json(['error' => __('messages.google_force_resync_owner_only')], 403);
+            }
+
+            $owner = $role->user;
+            if (! $owner || ! $owner->google_token) {
+                return response()->json(['error' => __('messages.google_calendar_not_connected')], 400);
+            }
+
+            if (! $role->syncsToGoogle()) {
+                return response()->json(['error' => __('messages.google_force_resync_requires_push')], 400);
+            }
+
+            if (! $this->googleCalendarService->ensureValidToken($owner)) {
+                return response()->json(['error' => __('messages.google_calendar_token_refresh_failed')], 401);
+            }
+
+            // Run the actual sync on the queue — pushing every event to Google
+            // can take minutes for large schedules and would otherwise time out
+            // at the gateway.
+            \App\Jobs\ForceResyncGoogleCalendar::dispatch($owner, $role);
+
+            AuditService::log(AuditService::GOOGLE_CALENDAR_SYNC, $user->id, 'Role', $role->id, null, null, 'force_to');
+
+            return response()->json([
+                'message' => __('messages.google_force_resync_queued'),
+            ], 202);
+        } catch (QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => __('messages.sync_error')], 500);
+        } catch (\Throwable $e) {
+            report($e);
+            Log::error('Failed to force sync events to Google Calendar', [
+                'user_id' => $user?->id,
+                'subdomain' => $subdomain,
+                'exception_class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'error' => $e->getMessage(),
+            ]);
+
+            $payload = ['error' => __('messages.sync_error')];
+            if (config('app.debug')) {
+                $payload['debug'] = get_class($e).': '.$e->getMessage();
+            }
+
+            return response()->json($payload, 500);
         }
     }
 

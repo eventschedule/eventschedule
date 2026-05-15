@@ -1602,7 +1602,7 @@
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
                             <select id="event_count_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <option value="">{{ __('messages.all_available') }}</option>
-                                @for ($i = 1; $i <= 9; $i++)
+                                @for ($i = 1; $i <= 20; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                 @endfor
                             </select>
@@ -1654,7 +1654,7 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                             </div>
                             <div>
-                                <textarea id="ai_prompt_mobile" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                <textarea id="ai_prompt_mobile" rows="5" maxlength="1000" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                                 @if (count($aiGraphicModels) > 0)
                                 <div id="ai_model_container_mobile" class="mt-3 hidden">
@@ -1939,7 +1939,7 @@
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.event_count') }}</h4>
                                 <select id="event_count" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <option value="">{{ __('messages.all_available') }}</option>
-                                    @for ($i = 1; $i <= 9; $i++)
+                                    @for ($i = 1; $i <= 20; $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
@@ -1991,7 +1991,7 @@
                                     <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.ai_text_prompt') }}</h4>
                                 </div>
                                 <div>
-                                    <textarea id="ai_prompt" rows="5" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
+                                    <textarea id="ai_prompt" rows="5" maxlength="1000" dir="auto" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-y" placeholder="{{ __('messages.ai_prompt_placeholder') }}"></textarea>
                                     <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.ai_prompt_help') }}</p>
                                     @if (count($aiGraphicModels) > 0)
                                     <div id="ai_model_container" class="mt-3 hidden">

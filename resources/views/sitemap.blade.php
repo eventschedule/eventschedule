@@ -934,6 +934,13 @@
 @include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/ai')])
     </url>
     <url>
+        <loc>{{ url('/docs/selfhost/accessibility') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/accessibility')])
+    </url>
+    <url>
         <loc>{{ url('/docs/developer/api') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
@@ -952,6 +959,13 @@
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
+    </url>
+    <url>
+        <loc>{{ url('/accessibility') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.5</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/accessibility')])
     </url>
     <url>
         <loc>{{ url('/terms-of-service') }}</loc>
