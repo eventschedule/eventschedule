@@ -1798,7 +1798,7 @@ const calendarApp = createApp({
             eventsMap: @json($eventsMapForVue),
             eventIdsInViewedMonth: [],
             groups: @json($groupsForVue),
-            categories: @json(get_translated_categories()),
+            categories: @json(get_translated_categories($role ?? null)),
             startOfMonth: '{{ $startOfMonth->format('Y-m-d') }}',
             endOfMonth: '{{ $endOfMonth->format('Y-m-d') }}',
             use24Hour: {{ get_use_24_hour_time($role ?? null) ? 'true' : 'false' }},
@@ -2031,14 +2031,19 @@ const calendarApp = createApp({
                 return true;
             });
 
-            // Get unique category IDs from the group-filtered events
-            const categoryIds = [...new Set(groupFilteredEvents.map(event => event.category_id).filter(id => id))];
-            
-            // Convert to array of category objects
-            return categoryIds.map(id => ({
-                id: id,
-                name: this.categories[id] || `Category ${id}`
-            })).sort((a, b) => a.name.localeCompare(b.name));
+            // Build {id → name}, preferring the per-event resolved category_name (handles
+            // cross-schedule foreign categories not in the viewing schedule's own list).
+            const nameById = {};
+            groupFilteredEvents.forEach(event => {
+                if (!event.category_id) return;
+                if (!nameById[event.category_id]) {
+                    nameById[event.category_id] = event.category_name || this.categories[event.category_id] || `Category ${event.category_id}`;
+                }
+            });
+
+            return Object.entries(nameById)
+                .map(([id, name]) => ({ id: parseInt(id), name }))
+                .sort((a, b) => a.name.localeCompare(b.name));
         },
         uniqueVenues() {
             const venuesMap = new Map();

@@ -30,6 +30,24 @@ use Illuminate\Validation\ValidationException;
 class EventRepo
 {
     /**
+     * Resolve the default category id to apply to a new event on this schedule.
+     * Returns the role's default_category_id only if it's still in the schedule's
+     * effective enabled list; otherwise null. Use this everywhere we auto-tag
+     * imports/new-events with the schedule default.
+     */
+    public static function resolveDefaultCategoryId(?Role $role): ?int
+    {
+        if (! $role || ! $role->default_category_id) {
+            return null;
+        }
+        $enabledIds = collect($role->getEventCategories())->pluck('id')->all();
+
+        return in_array((int) $role->default_category_id, $enabledIds, true)
+            ? (int) $role->default_category_id
+            : null;
+    }
+
+    /**
      * Get UTC date range for a date in a given timezone
      */
     private function getUtcDateRange(Carbon $date): array
@@ -448,8 +466,11 @@ class EventRepo
 
         $event->fill($request->all());
 
-        if ($isNewEvent && ! $event->category_id && $currentRole && $currentRole->default_category_id) {
-            $event->category_id = $currentRole->default_category_id;
+        if ($isNewEvent && ! $event->category_id && $currentRole) {
+            $defaultId = self::resolveDefaultCategoryId($currentRole);
+            if ($defaultId) {
+                $event->category_id = $defaultId;
+            }
         }
 
         if ($currentRole && ! $currentRole->isEnterprise()) {

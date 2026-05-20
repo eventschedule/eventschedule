@@ -43,6 +43,7 @@ class Event extends Model
         'expire_unpaid_tickets',
         'registration_url',
         'category_id',
+        'category_name',
         'creator_role_id',
         'recurring_end_type',
         'recurring_end_value',
@@ -104,6 +105,14 @@ class Event extends Model
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
             $model->ticket_notes_html = MarkdownUtils::convertToHtml($model->ticket_notes);
             $model->payment_instructions_html = MarkdownUtils::convertToHtml($model->payment_instructions);
+
+            // Cache category_name whenever category_id changes (and creator_role_id is known).
+            if ($model->isDirty('category_id') && $model->creator_role_id) {
+                $creator = $model->relationLoaded('creatorRole') ? $model->creatorRole : Role::find($model->creator_role_id);
+                $model->category_name = ($creator && $model->category_id)
+                    ? $creator->getCategoryName((int) $model->category_id)
+                    : null;
+            }
 
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
                 $model->load(['tickets', 'addons', 'sales']);
@@ -434,6 +443,37 @@ class Event extends Model
     public function creatorRole()
     {
         return $this->belongsTo(Role::class, 'creator_role_id');
+    }
+
+    /**
+     * Resolve the display name for this event's category.
+     * Prefers the creator schedule's effective list (so renames are retroactive),
+     * falls back to the cached snapshot, then to system defaults.
+     */
+    public function resolveCategoryName(?string $locale = null): ?string
+    {
+        if (! $this->category_id) {
+            return null;
+        }
+
+        $creator = $this->relationLoaded('creatorRole') ? $this->creatorRole : null;
+        if (! $creator && $this->creator_role_id) {
+            $creator = Role::find($this->creator_role_id);
+        }
+        if ($creator) {
+            $name = $creator->getCategoryName((int) $this->category_id, $locale);
+            if ($name) {
+                return $name;
+            }
+        }
+
+        if ($this->category_name) {
+            return $this->category_name;
+        }
+
+        $systemDefaults = config('app.event_categories', []);
+
+        return $systemDefaults[$this->category_id] ?? null;
     }
 
     public function curator()
@@ -1612,7 +1652,7 @@ class Event extends Model
         $data->starts_at = $this->starts_at;
         $data->duration = $this->duration;
         $data->category_id = $this->category_id;
-        $data->category_name = $this->category_id ? (config('app.event_categories')[$this->category_id] ?? null) : null;
+        $data->category_name = $this->resolveCategoryName();
         $data->is_private = (bool) $this->is_private;
         $data->is_draft = (bool) $this->is_draft;
         $data->is_password_protected = $this->isPasswordProtected();

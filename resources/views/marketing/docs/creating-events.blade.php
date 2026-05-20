@@ -603,7 +603,7 @@
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>To set default sponsors for all events, configure them at the schedule level. See <a href="{{ route('marketing.docs.creating_schedules') }}#customize-sponsors" class="text-cyan-400 hover:text-cyan-300">Schedule Sponsors</a>.</p>
+                                <p>To set default sponsors for all events, configure them at the schedule level. See <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-sponsors" class="text-cyan-400 hover:text-cyan-300">Schedule Sponsors</a>.</p>
                             </div>
                         </section>
 

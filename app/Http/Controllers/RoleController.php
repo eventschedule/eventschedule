@@ -51,6 +51,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -1058,6 +1059,7 @@ class RoleController extends Controller
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
+            'category_name' => $event->resolveCategoryName(),
             'name' => $event->translatedName(),
             'venue_name' => $event->getVenueDisplayName(),
             'starts_at' => $event->starts_at,
@@ -2242,6 +2244,13 @@ class RoleController extends Controller
             json_decode($pivot?->notification_settings ?? '{}', true)
         );
 
+        $eventCategoryCounts = $role->events()
+            ->select('category_id', DB::raw('COUNT(*) as cnt'))
+            ->whereNotNull('category_id')
+            ->groupBy('category_id')
+            ->pluck('cnt', 'category_id')
+            ->all();
+
         $data = [
             'user' => auth()->user(),
             'role' => $role,
@@ -2254,6 +2263,7 @@ class RoleController extends Controller
             'availableCurators' => $availableCurators,
             'notificationSettings' => $notificationSettings,
             'userCalendarId' => $pivot?->google_calendar_id,
+            'event_category_counts' => $eventCategoryCounts,
         ];
 
         return view('role/edit', $data);
@@ -2336,6 +2346,10 @@ class RoleController extends Controller
         $ownerPivot = RoleUser::where('role_id', $role->id)->where('user_id', $role->user_id)->first();
         $oldCalendarId = $ownerPivot?->google_calendar_id;
         $newCalendarId = $request->input('google_calendar_id');
+
+        // Capture old category state for rename detection.
+        $oldEventCategories = $role->event_categories;
+        $eventCategoriesSubmitted = $request->boolean('event_categories_submitted');
 
         $role->fill($request->all());
 
@@ -2611,7 +2625,133 @@ class RoleController extends Controller
             $role->setEmailSettings($emailSettings);
         }
 
+        // Normalise event_categories: ensure stable structure, drop legacy `disabled`
+        // entries from the v1 phase, sort alphabetically by name, auto-null orphaned default_category_id.
+        if ($eventCategoriesSubmitted) {
+            $submitted = $request->input('event_categories', []);
+            if (! is_array($submitted)) {
+                $submitted = [];
+            }
+
+            // Belt-and-braces: prevent a submitted custom id (>= 100) from colliding with an id
+            // that was previously used under this role but is no longer in the saved JSON. The
+            // Blade `data-next-id` is set from `nextCustomCategoryId()` which already considers
+            // history, but a stale client tab or hand-crafted POST could still send a colliding id.
+            $previousJsonIds = collect($oldEventCategories ?? [])->pluck('id')->filter()->all();
+            $historicalCustomIds = \App\Models\Event::where('creator_role_id', $role->id)
+                ->where('category_id', '>=', 100)
+                ->distinct()
+                ->pluck('category_id')
+                ->all();
+            $reservedIds = array_unique(array_merge($previousJsonIds, $historicalCustomIds));
+            $nextSafeId = (int) max(99, ...$reservedIds) + 1;
+            $usedInPayload = [];
+
+            // Lookup of the OLD entries by id, used to preserve `name_en` across saves when the
+            // source `name` is unchanged. Skip any legacy `disabled` entries.
+            $oldEntriesById = [];
+            foreach (($oldEventCategories ?? []) as $old) {
+                if (is_array($old) && isset($old['id']) && empty($old['disabled'])) {
+                    $oldEntriesById[(int) $old['id']] = $old;
+                }
+            }
+
+            $normalised = [];
+            foreach ($submitted as $entry) {
+                if (! is_array($entry) || ! isset($entry['id'], $entry['name'])) {
+                    continue;
+                }
+                // Backward-compat: legacy v1 entries marked disabled are treated as removed.
+                if (! empty($entry['disabled'])) {
+                    continue;
+                }
+                $id = (int) $entry['id'];
+                $name = trim((string) $entry['name']);
+                if ($name === '') {
+                    continue;
+                }
+
+                // Reassign any custom id that would collide with a historical id not in the payload's
+                // previously-saved list, or with another payload entry's id.
+                if ($id >= 100 && ! in_array($id, $previousJsonIds, true)) {
+                    while (in_array($nextSafeId, $usedInPayload, true) || in_array($nextSafeId, $historicalCustomIds, true)) {
+                        $nextSafeId++;
+                    }
+                    if (in_array($id, $historicalCustomIds, true)) {
+                        $id = $nextSafeId;
+                        $nextSafeId++;
+                    }
+                }
+                $usedInPayload[] = $id;
+
+                $row = ['id' => $id, 'name' => $name];
+                if (! empty($entry['name_en'])) {
+                    // Form explicitly submitted a name_en (future-proof — no UI does this today).
+                    $row['name_en'] = trim((string) $entry['name_en']);
+                } elseif (isset($oldEntriesById[$id]) && ($oldEntriesById[$id]['name'] ?? null) === $name) {
+                    // Source name unchanged — preserve the existing English translation so the
+                    // saved JSON doesn't lose it between saves and the next nightly Translate run.
+                    if (! empty($oldEntriesById[$id]['name_en'])) {
+                        $row['name_en'] = $oldEntriesById[$id]['name_en'];
+                    }
+                }
+                // else: rename or brand-new — leave name_en absent so Translate regenerates it.
+                $normalised[] = $row;
+            }
+            usort($normalised, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+            $role->event_categories = $normalised ?: null;
+
+            // If the default_category_id is no longer present in the list, auto-null with a flash.
+            if ($role->default_category_id) {
+                $enabledIds = collect($role->getEventCategories())->pluck('id')->all();
+                if (! in_array((int) $role->default_category_id, $enabledIds, true)) {
+                    $role->default_category_id = null;
+                    session()->flash('warning', __('messages.default_category_disabled_warning'));
+                }
+            }
+        }
+
         $role->save();
+
+        // Bulk-update events.category_name for renames (always — no toggle) and
+        // emit audit log entries for adds / renames / removes.
+        if ($eventCategoriesSubmitted) {
+            $oldMap = [];
+            foreach (($oldEventCategories ?? []) as $entry) {
+                if (is_array($entry) && isset($entry['id']) && empty($entry['disabled'])) {
+                    $oldMap[(int) $entry['id']] = $entry;
+                }
+            }
+            $newMap = [];
+            foreach (($role->event_categories ?? []) as $entry) {
+                if (is_array($entry) && isset($entry['id'])) {
+                    $newMap[(int) $entry['id']] = $entry;
+                }
+            }
+
+            $renamedEventCount = 0;
+            foreach ($newMap as $id => $entry) {
+                $old = $oldMap[$id] ?? null;
+                $name = $entry['name'] ?? null;
+                if (! $old) {
+                    \App\Services\AuditService::log('category.added', auth()->id(), 'Role', $role->id, null, ['id' => $id, 'name' => $name]);
+                } elseif (($old['name'] ?? null) !== $name) {
+                    $renamedEventCount += \App\Models\Event::where('creator_role_id', $role->id)
+                        ->where('category_id', $id)
+                        ->update(['category_name' => $name]);
+                    \App\Services\AuditService::log('category.renamed', auth()->id(), 'Role', $role->id, ['name' => $old['name'] ?? null], ['name' => $name]);
+                }
+            }
+            foreach ($oldMap as $id => $entry) {
+                if (! isset($newMap[$id])) {
+                    \App\Services\AuditService::log('category.removed', auth()->id(), 'Role', $role->id, ['id' => $id, 'name' => $entry['name'] ?? null], null);
+                }
+            }
+
+            if ($renamedEventCount > 0) {
+                session()->flash('message', __('messages.categories_updated_with_events', ['count' => $renamedEventCount]));
+            }
+        }
 
         // Save notification preferences for the current user
         $notificationSettings = [
@@ -4131,6 +4271,7 @@ class RoleController extends Controller
                 'guest_url' => $event->getGuestUrl($subdomain, ''),
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
+                'category_name' => $event->resolveCategoryName(),
             ];
 
             // Strip sensitive fields from password-protected events
@@ -4233,14 +4374,18 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         $categoryId = (int) $request->input('category_id');
-        $validCategories = array_keys(config('app.event_categories', []));
+        $validCategories = collect($role->getEventCategories())->pluck('id')->all();
 
-        if (! in_array($categoryId, $validCategories)) {
+        if (! in_array($categoryId, $validCategories, true)) {
             return response()->json(['success' => false, 'message' => __('messages.invalid_value')], 422);
         }
 
+        $categoryName = $role->getCategoryName($categoryId);
         $eventIds = $role->events()->pluck('events.id');
-        $count = Event::whereIn('id', $eventIds)->update(['category_id' => $categoryId]);
+        $count = Event::whereIn('id', $eventIds)->update([
+            'category_id' => $categoryId,
+            'category_name' => $categoryName,
+        ]);
 
         return response()->json([
             'success' => true,

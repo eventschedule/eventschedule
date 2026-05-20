@@ -26,6 +26,10 @@ class RoleUpdateRequest extends FormRequest
     {
         $role = Role::subdomain(request()->subdomain)->firstOrFail();
 
+        // Default-category id must be one of this schedule's enabled categories,
+        // unless the column is null (in which case the system defaults apply).
+        $allowedDefaultIds = collect($role->getEventCategories())->pluck('id')->all();
+
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => array_merge(
@@ -88,7 +92,11 @@ class RoleUpdateRequest extends FormRequest
             'draft_events_default' => ['nullable', 'boolean'],
             'hide_videos' => ['nullable', 'boolean'],
             'show_accessibility_widget' => ['nullable', 'boolean'],
-            'default_category_id' => ['nullable', 'integer', 'in:'.implode(',', array_keys(config('app.event_categories', [])))],
+            'default_category_id' => ['nullable', 'integer', $allowedDefaultIds ? 'in:'.implode(',', $allowedDefaultIds) : 'in:'.implode(',', array_keys(config('app.event_categories', [])))],
+            'event_categories' => ['nullable', 'array', 'max:32'],
+            'event_categories.*.id' => ['required_with:event_categories', 'integer', 'min:1'],
+            'event_categories.*.name' => ['required_with:event_categories', 'string', 'max:80', 'regex:/^[^<>\n\r]+$/'],
+            'event_categories.*.name_en' => ['nullable', 'string', 'max:80', 'regex:/^[^<>\n\r]+$/'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'feedback_enabled' => ['nullable', 'boolean'],
             'feedback_public' => ['nullable', 'boolean'],
@@ -108,5 +116,26 @@ class RoleUpdateRequest extends FormRequest
             'social_links' => ['nullable', 'json'],
             'payment_links' => ['nullable', 'json'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $entries = $this->input('event_categories');
+            if (! is_array($entries)) {
+                return;
+            }
+            $seen = [];
+            foreach ($entries as $idx => $entry) {
+                if (! is_array($entry) || ! isset($entry['id'])) {
+                    continue;
+                }
+                $id = (int) $entry['id'];
+                if (isset($seen[$id])) {
+                    $validator->errors()->add("event_categories.{$idx}.id", __('messages.category_ids_must_be_unique'));
+                }
+                $seen[$id] = true;
+            }
+        });
     }
 }

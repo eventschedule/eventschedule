@@ -36,6 +36,7 @@ trait CalendarDataTrait
             'id' => UrlUtils::encodeId($event->id),
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
+            'category_name' => $event->resolveCategoryName(),
             'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
             'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
             'venue_name' => $event->getVenueDisplayName(),
@@ -198,6 +199,15 @@ trait CalendarDataTrait
         $userAdminRoleIds = $user
             ? $user->roles()->wherePivotIn('level', ['owner', 'admin'])->pluck('roles.id')->all()
             : [];
+
+        // Bulk-load creator roles so `Event::resolveCategoryName()` doesn't trigger an N+1
+        // lazy-load per event on curator schedules that surface events from many creators.
+        if (method_exists($events, 'loadMissing')) {
+            $events->loadMissing('creatorRole');
+        }
+        if (method_exists($pastEvents, 'loadMissing')) {
+            $pastEvents->loadMissing('creatorRole');
+        }
 
         $eventsForVue = [];
         foreach ($events as $event) {

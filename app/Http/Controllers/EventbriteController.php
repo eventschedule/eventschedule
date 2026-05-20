@@ -110,7 +110,7 @@ class EventbriteController extends Controller
                 $isUpcoming = false;
                 if ($startUtc) {
                     $isUpcoming = Carbon::parse($startUtc)->isFuture();
-                    if (!$isUpcoming && $duration && $duration >= 24) {
+                    if (! $isUpcoming && $duration && $duration >= 24) {
                         $isUpcoming = Carbon::parse($startUtc)->addHours($duration)->isFuture();
                     }
                 }
@@ -207,7 +207,7 @@ class EventbriteController extends Controller
             'name' => 'required|string|max:1000',
             'start_local' => 'nullable|string|max:30',
             'duration' => 'nullable|numeric|min:0|max:10080',
-            'category_id' => 'nullable|integer|min:1|max:12',
+            'category_id' => ['nullable', 'integer', 'in:'.implode(',', collect($role->getEventCategories())->pluck('id')->all() ?: array_keys(config('app.event_categories', [])))],
             'currency' => 'nullable|string|max:3',
             'image_url' => 'nullable|url|max:2048',
             'is_online' => 'nullable|boolean',

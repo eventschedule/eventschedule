@@ -87,7 +87,7 @@
                             <div class="doc-nav-group-items">
                                 <a href="#customize-subschedules" class="doc-nav-link">Sub-schedules</a>
                                 <a href="#customize-custom-fields" class="doc-nav-link">Custom Fields</a>
-                                <a href="#customize-sponsors" class="doc-nav-link">Sponsors</a>
+                                <a href="#customize-categories" class="doc-nav-link">Custom Categories</a>
                                 <a href="#customize-custom-labels" class="doc-nav-link">Custom Labels</a>
                             </div>
                         </div>
@@ -107,6 +107,7 @@
                                 <a href="#engagement-fan-content" class="doc-nav-link">Fan Content</a>
                                 <a href="#engagement-feedback" class="doc-nav-link">Feedback</a>
                                 <a href="#engagement-carpool" class="doc-nav-link">Carpool</a>
+                                <a href="#engagement-sponsors" class="doc-nav-link">Sponsors</a>
                             </div>
                         </div>
                         <a href="#auto-import" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Auto Import</a>
@@ -469,26 +470,42 @@
                                 <p>All variable values are automatically converted to URL-safe slugs: lowercase letters, numbers, and dashes only. For example, "Summer Concert" becomes "summer-concert" and "New York" becomes "new-york".</p>
                             </div>
 
-                            <!-- Sponsors -->
-                            <h3 id="customize-sponsors" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Sponsors</h3>
+                            <!-- Custom Categories -->
+                            <h3 id="customize-categories" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Categories</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Showcase your sponsors on your schedule page. Add sponsor logos, names, URLs, and assign tiers (Gold, Silver, Bronze). Sponsors are displayed in a dedicated section on your public schedule page.
+                                Tailor the event categories shown on your event form and your schedule's filter. The 12 system defaults (Art &amp; Culture, Business Networking, Community, Concerts, Education, Food &amp; Drink, Health &amp; Fitness, Parties &amp; Festivals, Personal Growth, Sports, Spirituality, Tech) are pre-loaded as editable rows. Rename or remove any of them, and add up to 20 custom categories that match how you organise events — 32 entries total.
                             </p>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Sponsors</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter a sponsor name, optional URL, tier level, and upload a logo. You can add up to 12 sponsors per schedule.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Renaming a default</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Edit the name field on any default row to change how it appears on your schedule. The old name is shown underneath for reference. Existing events tagged with that category automatically display the new name once you save.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop sponsors to change their display order on the public schedule page.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing a default</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click the X on any default to remove it from your event form and guest portal filter. Events already tagged with that category keep their badge — the original name still resolves via the system defaults. If the category is in use, you'll see a confirmation showing how many events are affected. Use "Reset to default categories" to restore the original 12.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding a custom category</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click "+ Add category" and enter a name. Custom categories appear immediately in your event form and on the schedule filter.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ordering</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Categories are always shown alphabetically — there's no manual reordering. The list re-sorts itself when you rename, add, or remove a row.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translation</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">If your schedule has translation enabled, custom category names and renamed defaults are auto-translated to English overnight by the same pipeline that translates other schedule content. English viewers see the translated name; everyone else sees the source name you typed.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reset to defaults</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Removes all customisations and restores the original 12 categories. Existing events keep the category they were assigned.</p>
                                 </div>
                             </div>
-
-                            <div class="doc-callout doc-callout-tip mt-4">
-                                <div class="doc-callout-title">Tip</div>
-                                <p>You can also override sponsors for individual events. See <a href="{{ route('marketing.docs.creating_events') }}#sponsors" class="text-cyan-400 hover:text-cyan-300">Per-Event Sponsors</a>.</p>
+                            <div class="doc-callout doc-callout-info mt-4">
+                                <div class="doc-callout-title">Cross-schedule viewing</div>
+                                <p>When a curator schedule shares an event from a talent schedule, the event's category badge shows the original name chosen by the talent. The curator's filter dropdown dynamically includes any categories present in visible events, so foreign categories remain filterable.</p>
                             </div>
+
                         </section>
 
                         <!-- Custom Labels -->
@@ -942,6 +959,27 @@
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Pro Feature</div>
                                 <p>Carpool matching is available on the <strong class="text-gray-900 dark:text-white">Pro</strong> plan and above.</p>
+                            </div>
+
+                            <!-- Sponsors -->
+                            <h3 id="engagement-sponsors" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Sponsors</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Engage your audience by showcasing your sponsors on your schedule page. Add sponsor logos, names, URLs, and assign tiers (Gold, Silver, Bronze). Sponsors are displayed in a dedicated section on your public schedule page.
+                            </p>
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Sponsors</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter a sponsor name, optional URL, tier level, and upload a logo. You can add up to 12 sponsors per schedule.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop sponsors to change their display order on the public schedule page.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip mt-4">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>You can also override sponsors for individual events. See <a href="{{ route('marketing.docs.creating_events') }}#sponsors" class="text-cyan-400 hover:text-cyan-300">Per-Event Sponsors</a>.</p>
                             </div>
                         </section>
 

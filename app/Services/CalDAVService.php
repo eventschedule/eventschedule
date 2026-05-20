@@ -705,8 +705,8 @@ class CalDAVService
                 $role
             );
 
-            if ($role->default_category_id) {
-                $event->category_id = $role->default_category_id;
+            if ($defaultCategoryId = \App\Repos\EventRepo::resolveDefaultCategoryId($role)) {
+                $event->category_id = $defaultCategoryId;
             }
 
             $event->save();

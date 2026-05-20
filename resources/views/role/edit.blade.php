@@ -1991,11 +1991,11 @@
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-fields">
                                     {{ __('messages.custom_fields') }}
                                 </button>
+                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="categories">
+                                    {{ __('messages.categories') }}
+                                </button>
                                 <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="custom-labels">
                                     {{ __('messages.custom_labels') }}
-                                </button>
-                                <button type="button" class="customize-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
-                                    {{ __('messages.sponsors') }}
                                 </button>
                             </nav>
                         </div>
@@ -2191,144 +2191,87 @@
                         </div>
                         <!-- End Tab Content: Custom Fields -->
 
-                        <!-- Tab Content: Sponsors -->
-                        <div id="customize-tab-sponsors" class="customize-tab-content hidden">
-                        @if ($role->isPro())
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
+                        <!-- Tab Content: Categories -->
+                        <div id="customize-tab-categories" class="customize-tab-content hidden">
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                                {{ __('messages.categories_help') }}
+                            </p>
 
-                            <input type="hidden" name="existing_sponsors" id="existing_sponsors_input" value="{{ $role->sponsor_logos ?? '[]' }}" />
+                            <input type="hidden" name="event_categories_submitted" value="1">
 
                             @php
-                                $existingSponsors = json_decode($role->sponsor_logos ?? '[]', true) ?: [];
+                                $effectiveCategories = $role->getEventCategories();
+                                $systemDefaults = config('app.event_categories', []);
+                                if (empty($effectiveCategories)) {
+                                    // Pre-fill from system defaults so first save materialises them as editable rows.
+                                    foreach ($systemDefaults as $id => $englishName) {
+                                        $key = str_replace(' & ', '_&_', strtolower($englishName));
+                                        $key = str_replace(' ', '_', $key);
+                                        $effectiveCategories[] = [
+                                            'id' => $id,
+                                            'name' => __("messages.{$key}"),
+                                            'is_custom' => false,
+                                        ];
+                                    }
+                                }
+                                usort($effectiveCategories, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+
+                                // 12 system defaults (alphabetised, with localised names) for the JS Reset handler.
+                                $defaultCategoriesForReset = [];
+                                foreach ($systemDefaults as $id => $englishName) {
+                                    $key = str_replace(' & ', '_&_', strtolower($englishName));
+                                    $key = str_replace(' ', '_', $key);
+                                    $defaultCategoriesForReset[] = [
+                                        'id' => $id,
+                                        'name' => __("messages.{$key}"),
+                                    ];
+                                }
+                                usort($defaultCategoriesForReset, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
                             @endphp
 
-                            <div id="sponsors-list" class="space-y-3 mb-6">
-                                @foreach ($existingSponsors as $index => $sponsor)
+                            <div id="event-categories-container"
+                                 data-next-id="{{ $role->nextCustomCategoryId() }}"
+                                 data-default-categories="{{ json_encode($defaultCategoriesForReset, JSON_UNESCAPED_UNICODE) }}">
+                                @foreach($effectiveCategories as $i => $cat)
                                 @php
-                                    $logoUrl = '';
-                                    if (!empty($sponsor['logo'])) {
-                                        if (str_starts_with($sponsor['logo'], 'demo_')) {
-                                            $logoUrl = url('/images/demo/' . $sponsor['logo']);
-                                        } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-                                            $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
-                                        } elseif (config('filesystems.default') == 'local') {
-                                            $logoUrl = url('/storage/' . $sponsor['logo']);
-                                        } else {
-                                            $logoUrl = $sponsor['logo'];
-                                        }
-                                    }
+                                    $isCustom = $cat['id'] >= 100;
+                                    $systemName = $systemDefaults[$cat['id']] ?? null;
+                                    $renamed = ! $isCustom && $systemName && $cat['name'] !== $systemName;
                                 @endphp
-                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)' data-logo-url="{{ $logoUrl }}">
-                                    <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
-                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
-                                        </svg>
-                                    </div>
-                                    <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">
-                                        @if ($logoUrl)
-                                            <img src="{{ $logoUrl }}" alt="{{ $sponsor['name'] ?? '' }}" class="max-w-full max-h-full object-contain" />
-                                        @endif
-                                    </div>
+                                <div class="mb-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item flex items-start gap-3" data-category-id="{{ $cat['id'] }}" data-is-custom="{{ $isCustom ? '1' : '0' }}">
                                     <div class="flex-1 min-w-0">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $sponsor['name'] ?? '' }}</div>
-                                        @if (!empty($sponsor['tier']))
-                                            <span class="inline-block text-xs px-1.5 py-0.5 rounded
-                                                {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
-                                                {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
-                                                {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
-                                            ">{{ __('messages.' . $sponsor['tier']) }}</span>
-                                        @endif
-                                        @if (!empty($sponsor['url']))
-                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
+                                        <input type="hidden" name="event_categories[{{ $i }}][id]" value="{{ $cat['id'] }}" class="event-category-id">
+                                        <div class="flex items-center gap-3">
+                                            <x-text-input
+                                                type="text"
+                                                name="event_categories[{{ $i }}][name]"
+                                                value="{{ $cat['name'] }}"
+                                                maxlength="80"
+                                                class="block w-full event-category-name"
+                                                data-events-count="{{ ($event_category_counts ?? [])[$cat['id']] ?? 0 }}"
+                                            />
+                                            <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 flex-shrink-0 p-1" aria-label="{{ __('messages.remove_category') }}">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                        </div>
+                                        @if($renamed)
+                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ __('messages.was_named', ['name' => $systemName]) }}</p>
                                         @endif
                                     </div>
-                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                    <button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
                                 </div>
                                 @endforeach
                             </div>
 
-                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= 12 ? '' : 'hidden' }}">
-                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
-                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
-                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        <span>{{ __('messages.max_sponsors_reached') }}</span>
-                                    </p>
-                                </div>
+                            <div class="mt-4 flex items-center justify-between">
+                                <button type="button" id="add-event-category-btn" class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                    + {{ __('messages.add_category') }}
+                                </button>
+                                <button type="button" id="reset-event-categories-btn" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                                    {{ __('messages.reset_to_defaults') }}
+                                </button>
                             </div>
-
-                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= 12 ? 'hidden' : '' }}">
-                                <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                        <div>
-                                            <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
-                                            <input type="text" id="new_sponsor_name_input" maxlength="100"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
-                                        </div>
-                                        <div>
-                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
-                                            <input type="url" id="new_sponsor_url_input" maxlength="500"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                                        <div>
-                                            <x-input-label :value="__('messages.sponsor_tier')" />
-                                            <select id="new_sponsor_tier_input"
-                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
-                                                <option value="">—</option>
-                                                <option value="gold">{{ __('messages.gold') }}</option>
-                                                <option value="silver">{{ __('messages.silver') }}</option>
-                                                <option value="bronze">{{ __('messages.bronze') }}</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
-                                            <input type="file" id="new_sponsor_logo_input" accept="image/*"
-                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]"
-                                                />
-                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
-                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
-                                            <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                            </svg>
-                                            <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
-                                        </button>
-                                        <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
-                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                                            {{ __('messages.cancel') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div id="new-sponsor-inputs-container"></div>
-                        @else
-                            <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_css') : null" :subdomain="$role->subdomain">
-                                <x-slot:icon>
-                                    <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
-                                    </svg>
-                                </x-slot:icon>
-                                {{ __('messages.upgrade_sponsor_logos') }}
-                            </x-upgrade-prompt>
-                        @endif
                         </div>
-                        <!-- End Tab Content: Sponsors -->
+                        <!-- End Tab Content: Categories -->
 
                         <!-- Tab Content: Custom Labels -->
                         <div id="customize-tab-custom-labels" class="customize-tab-content hidden">
@@ -2768,13 +2711,30 @@
 
                             <div class="mb-6">
                                 <x-input-label for="default_category_id" :value="__('messages.default_category')" />
+                                @php
+                                    $effectiveDefaultCategories = get_translated_categories($role);
+                                    $savedDefaultId = old('default_category_id', $role->default_category_id);
+                                    $defaultIsOrphaned = $savedDefaultId && ! isset($effectiveDefaultCategories[$savedDefaultId]);
+                                @endphp
                                 <select name="default_category_id" id="default_category_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                                     <option value="">{{ __('messages.none') }}</option>
-                                    @foreach(get_translated_categories() as $id => $label)
-                                        <option value="{{ $id }}" {{ old('default_category_id', $role->default_category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
+                                    @foreach($effectiveDefaultCategories as $id => $label)
+                                        <option value="{{ $id }}" {{ $savedDefaultId == $id ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
+                                    @if($defaultIsOrphaned)
+                                        @php
+                                            $orphanName = $role->getCategoryName((int) $savedDefaultId) ?? '';
+                                        @endphp
+                                        <option value="{{ $savedDefaultId }}" selected disabled>{{ $orphanName }} ({{ __('messages.removed') }})</option>
+                                    @endif
                                 </select>
+                                @if($defaultIsOrphaned)
+                                <div class="mt-2 flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"/></svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.default_category_disabled_warning') }}</p>
+                                </div>
+                                @endif
                                 <div class="mt-4 flex items-start justify-end">
                                     @if ($role->exists && $role->subdomain)
                                     <div class="flex items-center gap-2">
@@ -2898,6 +2858,9 @@
                                 </button>
                                 <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="carpool">
                                     {{ __('messages.carpool') }}
+                                </button>
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
+                                    {{ __('messages.sponsors') }}
                                 </button>
                             </nav>
                         </div>
@@ -3110,6 +3073,145 @@
 
                         </div>
                         <!-- End Tab Content: Carpool -->
+
+                        <!-- Tab Content: Sponsors -->
+                        <div id="engagement-tab-sponsors" class="engagement-tab-content hidden">
+                        @if ($role->isPro())
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.sponsor_logos_help') }}</p>
+
+                            <input type="hidden" name="existing_sponsors" id="existing_sponsors_input" value="{{ $role->sponsor_logos ?? '[]' }}" />
+
+                            @php
+                                $existingSponsors = json_decode($role->sponsor_logos ?? '[]', true) ?: [];
+                            @endphp
+
+                            <div id="sponsors-list" class="space-y-3 mb-6">
+                                @foreach ($existingSponsors as $index => $sponsor)
+                                @php
+                                    $logoUrl = '';
+                                    if (!empty($sponsor['logo'])) {
+                                        if (str_starts_with($sponsor['logo'], 'demo_')) {
+                                            $logoUrl = url('/images/demo/' . $sponsor['logo']);
+                                        } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+                                            $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
+                                        } elseif (config('filesystems.default') == 'local') {
+                                            $logoUrl = url('/storage/' . $sponsor['logo']);
+                                        } else {
+                                            $logoUrl = $sponsor['logo'];
+                                        }
+                                    }
+                                @endphp
+                                <div class="sponsor-item flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg" data-sponsor='@json($sponsor)' data-logo-url="{{ $logoUrl }}">
+                                    <div class="drag-handle cursor-grab text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-shrink-0 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden" style="width: 120px; height: 80px;">
+                                        @if ($logoUrl)
+                                            <img src="{{ $logoUrl }}" alt="{{ $sponsor['name'] ?? '' }}" class="max-w-full max-h-full object-contain" />
+                                        @endif
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $sponsor['name'] ?? '' }}</div>
+                                        @if (!empty($sponsor['tier']))
+                                            <span class="inline-block text-xs px-1.5 py-0.5 rounded
+                                                {{ $sponsor['tier'] === 'gold' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : '' }}
+                                                {{ $sponsor['tier'] === 'silver' ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300' : '' }}
+                                                {{ $sponsor['tier'] === 'bronze' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' : '' }}
+                                            ">{{ __('messages.' . $sponsor['tier']) }}</span>
+                                        @endif
+                                        @if (!empty($sponsor['url']))
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $sponsor['url'] }}</div>
+                                        @endif
+                                    </div>
+                                    <button type="button" data-action="edit-sponsor" class="flex-shrink-0 text-gray-400 hover:text-[var(--brand-blue)] transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" data-action="remove-sponsor" class="flex-shrink-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                @endforeach
+                            </div>
+
+                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= 12 ? '' : 'hidden' }}">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>{{ __('messages.max_sponsors_reached') }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= 12 ? 'hidden' : '' }}">
+                                <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label for="new_sponsor_name_input" :value="__('messages.sponsor_name')" />
+                                            <input type="text" id="new_sponsor_name_input" maxlength="100"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="new_sponsor_url_input" :value="__('messages.sponsor_url')" />
+                                            <input type="url" id="new_sponsor_url_input" maxlength="500"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                                        <div>
+                                            <x-input-label :value="__('messages.sponsor_tier')" />
+                                            <select id="new_sponsor_tier_input"
+                                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                                <option value="">—</option>
+                                                <option value="gold">{{ __('messages.gold') }}</option>
+                                                <option value="silver">{{ __('messages.silver') }}</option>
+                                                <option value="bronze">{{ __('messages.bronze') }}</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label id="sponsor-logo-label" :value="__('messages.logo') . ' *'" />
+                                            <input type="file" id="new_sponsor_logo_input" accept="image/*"
+                                                class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--brand-button-bg)] file:text-white hover:file:bg-[var(--brand-button-bg-hover)]"
+                                                />
+                                            <img id="sponsor_logo_preview" src="#" alt="Logo Preview" style="max-height:120px; display:none;" class="mt-2 rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" data-action="add-sponsor" id="sponsor-action-btn"
+                                            class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[var(--brand-button-bg)] rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
+                                            <svg id="sponsor-action-icon" class="w-4 h-4 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                            <span id="sponsor-action-text">{{ __('messages.add_sponsor') }}</span>
+                                        </button>
+                                        <button type="button" data-action="cancel-edit-sponsor" id="cancel-edit-sponsor-btn"
+                                            class="hidden inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            {{ __('messages.cancel') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="new-sponsor-inputs-container"></div>
+                        @else
+                            <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_css') : null" :subdomain="$role->subdomain">
+                                <x-slot:icon>
+                                    <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+                                    </svg>
+                                </x-slot:icon>
+                                {{ __('messages.upgrade_sponsor_logos') }}
+                            </x-upgrade-prompt>
+                        @endif
+                        </div>
+                        <!-- End Tab Content: Sponsors -->
                     </div>
                 </div>
 
@@ -6269,6 +6371,116 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             },
         });
+    }
+
+    // --- Categories editor: alphabetical sort + add/remove/reset ---
+    var categoriesList = document.getElementById('event-categories-container');
+    if (categoriesList) {
+        function buildCategoryRowHtml(id, name, isCustom) {
+            return `
+                <div class="mb-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item flex items-start gap-3" data-category-id="${id}" data-is-custom="${isCustom ? '1' : '0'}">
+                    <div class="flex-1 min-w-0">
+                        <input type="hidden" name="event_categories[][id]" value="${id}" class="event-category-id">
+                        <div class="flex items-center gap-3">
+                            <input type="text" name="event_categories[][name]" value="${escapeHtml(name)}" maxlength="80" class="block w-full event-category-name border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" data-events-count="0">
+                            <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 flex-shrink-0 p-1" aria-label="@json(__('messages.remove_category'))"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        // Add category button
+        var addCategoryBtn = document.getElementById('add-event-category-btn');
+        if (addCategoryBtn) {
+            addCategoryBtn.addEventListener('click', function() {
+                var name = (window.prompt(@json(__('messages.add_category')) + ':', '') || '').trim();
+                if (!name) return;
+                if (name.length > 80 || /[<>\n\r]/.test(name)) {
+                    alert(@json(__('messages.category_name_invalid')));
+                    return;
+                }
+                var nextId = parseInt(categoriesList.dataset.nextId || '100');
+                categoriesList.dataset.nextId = String(nextId + 1);
+                categoriesList.insertAdjacentHTML('beforeend', buildCategoryRowHtml(nextId, name, true));
+                sortAndReindex();
+            });
+        }
+
+        // Delegated click handler for remove
+        categoriesList.addEventListener('click', function(e) {
+            var btn = e.target.closest('button');
+            if (!btn) return;
+            var item = btn.closest('.event-category-item');
+            if (!item) return;
+            if (btn.dataset.action === 'remove-event-category') {
+                var input = item.querySelector('.event-category-name');
+                var count = input ? parseInt(input.dataset.eventsCount || '0') : 0;
+                var name = input ? input.value : '';
+                if (count > 0) {
+                    // Replace :count first — count is numeric so it can't contain :name; doing :name first
+                    // would clobber the :count placeholder if the user-typed name happens to contain ":count".
+                    var msg = @json(__('messages.remove_category_in_use_confirm'))
+                        .replace(':count', count)
+                        .replace(':name', name);
+                    if (!confirm(msg)) return;
+                }
+                item.remove();
+                sortAndReindex();
+            }
+        });
+
+        // Re-sort when a name input loses focus (only if its value changed alphabetical position).
+        categoriesList.addEventListener('blur', function(e) {
+            if (e.target.classList && e.target.classList.contains('event-category-name')) {
+                sortAndReindex();
+            }
+        }, true);
+
+        // Reset to defaults — rebuild the 12 default rows immediately in the DOM.
+        var resetBtn = document.getElementById('reset-event-categories-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function() {
+                if (!confirm(@json(__('messages.reset_categories_confirm')))) return;
+                var defaults = [];
+                try {
+                    defaults = JSON.parse(categoriesList.dataset.defaultCategories || '[]');
+                } catch (err) {
+                    defaults = [];
+                }
+                categoriesList.querySelectorAll('.event-category-item').forEach(function(el) { el.remove(); });
+                // Note: do NOT reset dataset.nextId to 100 — the server-allocated value already accounts
+                // for any historical events.category_id, so resetting it backward could allow a future
+                // Add to allocate an id that collides with orphaned historical events.
+                defaults.forEach(function(d) {
+                    categoriesList.insertAdjacentHTML('beforeend', buildCategoryRowHtml(d.id, d.name, false));
+                });
+                sortAndReindex();
+            });
+        }
+
+        function sortAndReindex() {
+            var items = Array.from(categoriesList.querySelectorAll('.event-category-item'));
+            items.sort(function(a, b) {
+                var an = (a.querySelector('.event-category-name')?.value || '').toLocaleLowerCase();
+                var bn = (b.querySelector('.event-category-name')?.value || '').toLocaleLowerCase();
+                return an.localeCompare(bn);
+            });
+            items.forEach(function(item, i) {
+                categoriesList.appendChild(item);
+                item.querySelectorAll('input[name^="event_categories["]').forEach(function(input) {
+                    input.name = input.name.replace(/event_categories\[[^\]]*\]/, 'event_categories[' + i + ']');
+                });
+            });
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        // Initial reindex on load so server-rendered rows have proper sequential indices.
+        sortAndReindex();
     }
 
     // --- Initialize SortableJS for sponsor logos ---

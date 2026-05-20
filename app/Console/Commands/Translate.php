@@ -447,6 +447,44 @@ class Translate extends Command
                 }
             }
 
+            // Translate custom event categories (name → name_en)
+            if (is_array($role->event_categories)) {
+                $categories = $role->event_categories;
+                $catsNeedingTranslation = [];
+                foreach ($categories as $idx => $cat) {
+                    if (! empty($cat['name']) && empty($cat['name_en'])) {
+                        $catsNeedingTranslation[$idx] = $cat['name'];
+                    }
+                }
+
+                if (! empty($catsNeedingTranslation)) {
+                    if ($debug) {
+                        $this->info('Translating '.count($catsNeedingTranslation).' event categories');
+                    }
+
+                    try {
+                        $translations = GeminiUtils::translateCustomFieldNames(
+                            array_values($catsNeedingTranslation),
+                            $role->language_code
+                        );
+
+                        foreach ($catsNeedingTranslation as $idx => $name) {
+                            if (isset($translations[$name])) {
+                                $categories[$idx]['name_en'] = $translations[$name];
+                                $translationAttempted = true;
+                                if ($debug) {
+                                    $this->info("Translated category '{$name}' → '{$translations[$name]}'");
+                                }
+                            }
+                        }
+
+                        $role->event_categories = $categories;
+                    } catch (\Exception $e) {
+                        $this->error('Failed to translate event categories: '.$e->getMessage());
+                    }
+                }
+            }
+
             if ($translationAttempted) {
                 $role->translation_attempts++;
                 $role->last_translated_at = now();

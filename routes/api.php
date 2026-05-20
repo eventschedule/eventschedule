@@ -36,8 +36,9 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     Route::put('/events/{id}', [ApiEventController::class, 'update']);
     Route::delete('/events/{id}', [ApiEventController::class, 'destroy']);
 
-    // Categories
+    // Categories (global system defaults, and per-schedule effective list)
     Route::get('/categories', [ApiEventController::class, 'categories']);
+    Route::get('/categories/{subdomain}', [ApiEventController::class, 'categories']);
 
     // Sales
     Route::get('/sales', [ApiSaleController::class, 'index']);

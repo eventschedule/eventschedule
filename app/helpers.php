@@ -33,10 +33,21 @@ if (! function_exists('nonce_attr')) {
 
 if (! function_exists('get_translated_categories')) {
     /**
-     * Get translated category names
+     * Returns an [id => translated name] map of categories.
+     * With a Role, returns that schedule's effective enabled list
+     * (custom categories included). Without, returns the 12 system defaults.
      */
-    function get_translated_categories(): array
+    function get_translated_categories(?\App\Models\Role $role = null, ?string $locale = null): array
     {
+        if ($role) {
+            $out = [];
+            foreach ($role->getEventCategories($locale) as $entry) {
+                $out[$entry['id']] = $entry['name'];
+            }
+
+            return $out;
+        }
+
         $categories = config('app.event_categories', []);
         $translatedCategories = [];
 
@@ -46,7 +57,7 @@ if (! function_exists('get_translated_categories')) {
             $key = strtolower($englishName);
             $key = str_replace(' & ', '_&_', $key);
             $key = str_replace(' ', '_', $key);
-            $translatedCategories[$id] = __("messages.{$key}");
+            $translatedCategories[$id] = $locale ? __("messages.{$key}", [], $locale) : __("messages.{$key}");
         }
 
         return $translatedCategories;

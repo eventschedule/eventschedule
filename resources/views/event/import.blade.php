@@ -606,7 +606,7 @@
                                 v-model="preview.parsed[idx].category_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
-                                @foreach(get_translated_categories() as $catId => $catName)
+                                @foreach(get_translated_categories($role ?? null) as $catId => $catName)
                                 <option value="{{ $catId }}">{{ $catName }}</option>
                                 @endforeach
                             </select>

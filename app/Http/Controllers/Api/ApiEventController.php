@@ -198,6 +198,8 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
+        $allowedCategoryIds = collect($role->getEventCategories())->pluck('id')->all();
+
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -212,7 +214,7 @@ class ApiEventController extends Controller
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:255',
-                'category_id' => 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
+                'category_id' => $allowedCategoryIds ? 'nullable|integer|in:'.implode(',', $allowedCategoryIds) : 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
                 'category' => 'nullable|string|max:255',
                 'tickets_enabled' => 'nullable|boolean',
                 'ticket_currency_code' => 'nullable|string|size:3',
@@ -317,6 +319,11 @@ class ApiEventController extends Controller
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
         }
 
+        $currentRoleForUpdate = $event->creatorRole ?? $event->roles->first();
+        $allowedCategoryIdsForUpdate = $currentRoleForUpdate
+            ? collect($currentRoleForUpdate->getEventCategories())->pluck('id')->all()
+            : array_keys(config('app.event_categories', []));
+
         try {
             $request->validate([
                 'name' => 'sometimes|required|string|max:255',
@@ -331,7 +338,7 @@ class ApiEventController extends Controller
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:255',
-                'category_id' => 'nullable|integer|in:'.implode(',', array_keys(config('app.event_categories', []))),
+                'category_id' => 'nullable|integer|in:'.implode(',', $allowedCategoryIdsForUpdate),
                 'category' => 'nullable|string|max:255',
                 'tickets_enabled' => 'nullable|boolean',
                 'ticket_currency_code' => 'nullable|string|size:3',
@@ -592,10 +599,22 @@ class ApiEventController extends Controller
         ], 200, [], JSON_PRETTY_PRINT);
     }
 
-    public function categories()
+    public function categories($subdomain = null)
     {
-        $categories = config('app.event_categories', []);
+        if ($subdomain) {
+            $role = Role::subdomain($subdomain)->where('is_deleted', false)->first();
+            if (! $role) {
+                return response()->json(['error' => 'Schedule not found'], 404);
+            }
+            $data = array_map(
+                fn ($entry) => ['id' => $entry['id'], 'name' => $entry['name']],
+                $role->getEventCategories()
+            );
 
+            return response()->json(['data' => $data], 200, [], JSON_PRETTY_PRINT);
+        }
+
+        $categories = config('app.event_categories', []);
         $data = [];
         foreach ($categories as $id => $name) {
             $data[] = ['id' => $id, 'name' => $name];
@@ -693,14 +712,13 @@ class ApiEventController extends Controller
             }
         }
 
-        // Handle category name to category_id conversion
+        // Handle category name to category_id conversion against this schedule's effective list.
         if ($request->has('category') && ! $request->has('category_id')) {
             $categorySlug = Str::slug($request->category);
-            $categories = config('app.event_categories', []);
 
-            foreach ($categories as $id => $name) {
-                if (Str::slug($name) === $categorySlug) {
-                    $request->merge(['category_id' => $id]);
+            foreach ($role->getEventCategories() as $entry) {
+                if (Str::slug($entry['name']) === $categorySlug) {
+                    $request->merge(['category_id' => $entry['id']]);
                     break;
                 }
             }

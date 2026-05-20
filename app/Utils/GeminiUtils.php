@@ -275,8 +275,12 @@ class GeminiUtils
             }
         }
 
-        // Get available categories
-        $categories = config('app.event_categories', []);
+        // Get available categories from the target schedule's effective list (custom + defaults).
+        $roleCategories = $role->getEventCategories();
+        $categories = collect($roleCategories)->pluck('name', 'id')->all();
+        if (empty($categories)) {
+            $categories = config('app.event_categories', []);
+        }
         $categoryNames = array_values($categories);
         $categoryIds = array_keys($categories);
 
@@ -1407,10 +1411,8 @@ class GeminiUtils
             $prompt .= "Description: {$event->short_description}\n";
         }
 
-        $categories = config('app.event_categories', []);
-        $categoryName = null;
-        if ($event->category_id && isset($categories[$event->category_id])) {
-            $categoryName = $categories[$event->category_id];
+        $categoryName = $event->resolveCategoryName();
+        if ($categoryName) {
             $prompt .= "Category: {$categoryName}\n";
         }
 
@@ -1688,7 +1690,7 @@ class GeminiUtils
 
         $categories = $role->events()->wherePivot('is_accepted', true)->pluck('category_id')->filter()->unique()->values();
         if ($categories->isNotEmpty()) {
-            $categoryNames = $categories->map(fn ($id) => config('app.event_categories.'.$id))->filter()->implode(', ');
+            $categoryNames = $categories->map(fn ($id) => $role->getCategoryName((int) $id))->filter()->implode(', ');
             if ($categoryNames) {
                 $prompt .= str_replace(':categories', $categoryNames, $config['categories_line']);
             }
@@ -1792,7 +1794,7 @@ class GeminiUtils
         $categoryNames = [];
         $accents = [];
         foreach ($categories as $id) {
-            $name = config('app.event_categories.'.$id);
+            $name = $role->getCategoryName((int) $id);
             if ($name) {
                 $categoryNames[] = $name;
             }

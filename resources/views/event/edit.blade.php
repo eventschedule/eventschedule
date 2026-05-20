@@ -1411,7 +1411,7 @@
                             <x-input-label for="category_id" :value="__('messages.category')" />
                             <select id="category_id" name="category_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm {{ rtl_class($role, 'rtl', '', true) }}">
                                 <option value="">{{ __('messages.please_select') }}</option>
-                                @foreach(get_translated_categories() as $id => $label)
+                                @foreach($event_categories as $id => $label)
                                     <option value="{{ $id }}" {{ old('category_id', $event->category_id) == $id ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
                             </select>

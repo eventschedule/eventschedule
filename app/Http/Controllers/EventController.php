@@ -334,9 +334,10 @@ class EventController extends Controller
                 $event->tickets = collect([new Ticket]);
             }
 
-            // Set default category: prefer role's default, fall back to last event's category
-            if ($role->default_category_id) {
-                $event->category_id = $role->default_category_id;
+            // Set default category: prefer role's default (only if still enabled),
+            // fall back to last event's category.
+            if ($defaultCategoryId = EventRepo::resolveDefaultCategoryId($role)) {
+                $event->category_id = $defaultCategoryId;
             } else {
                 $lastEvent = Event::where('user_id', $user->id)
                     ->whereNotNull('category_id')
@@ -427,7 +428,7 @@ class EventController extends Controller
             'selectedMembers' => $selectedMembers,
             'members' => $members,
             'currencies' => $currencies,
-            'event_categories' => get_translated_categories(),
+            'event_categories' => get_translated_categories($role ?? null),
             'clonedCurators' => $clonedCurators,
             'clonedCuratorGroups' => $clonedCuratorGroups,
             'isCloned' => $isCloned,
@@ -651,7 +652,7 @@ class EventController extends Controller
             'selectedMembers' => $selectedMembers,
             'members' => $members,
             'currencies' => $currencies,
-            'event_categories' => get_translated_categories(),
+            'event_categories' => get_translated_categories($effectiveRole ?? $role),
             'pendingVideos' => $pendingVideos,
             'approvedVideos' => $approvedVideos,
             'pendingComments' => $pendingComments,

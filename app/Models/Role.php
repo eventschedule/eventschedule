@@ -108,6 +108,7 @@ class Role extends Model implements MustVerifyEmail
         'hide_videos',
         'show_accessibility_widget',
         'default_category_id',
+        'event_categories',
     ];
 
     /**
@@ -145,6 +146,7 @@ class Role extends Model implements MustVerifyEmail
         'show_accessibility_widget' => 'boolean',
         'email_settings_failed_at' => 'datetime',
         'email_settings_failure_notified_at' => 'datetime',
+        'event_categories' => 'array',
     ];
 
     /**
@@ -559,6 +561,126 @@ class Role extends Model implements MustVerifyEmail
     public function isCurator()
     {
         return $this->type == 'curator';
+    }
+
+    /**
+     * Returns the schedule's effective ordered category list.
+     *
+     * Each entry: ['id' => int, 'name' => string, 'is_custom' => bool].
+     * Removed categories are simply absent from the stored array.
+     * For English viewers, `name_en` is preferred when present.
+     *
+     * Defensively skips any legacy entries that carry `disabled === true`
+     * (left over from the early-build phase before the toggle was removed),
+     * so they don't silently re-appear after the refinement deploys.
+     */
+    public function getEventCategories(?string $locale = null): array
+    {
+        $stored = $this->event_categories;
+        $systemDefaults = config('app.event_categories', []);
+
+        // Null column → use system defaults verbatim (translated via existing helper).
+        if (is_null($stored)) {
+            $list = [];
+            foreach ($systemDefaults as $id => $englishName) {
+                $key = str_replace(' & ', '_&_', strtolower($englishName));
+                $key = str_replace(' ', '_', $key);
+                $list[] = [
+                    'id' => $id,
+                    'name' => $locale ? __("messages.{$key}", [], $locale) : __("messages.{$key}"),
+                    'is_custom' => false,
+                ];
+            }
+            usort($list, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+
+            return $list;
+        }
+
+        $list = [];
+        foreach ($stored as $entry) {
+            if (! is_array($entry) || ! isset($entry['id'])) {
+                continue;
+            }
+            // Backward-compat: legacy v1 entries marked disabled are treated as removed.
+            if (! empty($entry['disabled'])) {
+                continue;
+            }
+
+            // Prefer name_en for English viewers (matches sponsor_logos / event_custom_fields pattern).
+            $name = null;
+            if ($locale === 'en' && ! empty($entry['name_en'])) {
+                $name = $entry['name_en'];
+            }
+            if ($name === null) {
+                $name = $entry['name'] ?? null;
+            }
+            // Final fallback: system default (only valid for ids ≤ 12).
+            if (($name === null || $name === '') && isset($systemDefaults[$entry['id']])) {
+                $name = $systemDefaults[$entry['id']];
+            }
+            if ($name === null || $name === '') {
+                continue;
+            }
+
+            $list[] = [
+                'id' => (int) $entry['id'],
+                'name' => $name,
+                'is_custom' => $entry['id'] >= 100,
+            ];
+        }
+        usort($list, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+
+        return $list;
+    }
+
+    /**
+     * Returns the display name for a category id in this schedule's context.
+     * Falls back to the system-default config for ids ≤ 12 even when the entry
+     * has been removed from the schedule's list, so historical events always
+     * have a name to render. Returns null for unknown custom ids (≥ 100);
+     * the caller (typically `Event::resolveCategoryName`) then uses the cached
+     * `events.category_name`.
+     */
+    public function getCategoryName(int $categoryId, ?string $locale = null): ?string
+    {
+        foreach ($this->getEventCategories($locale) as $entry) {
+            if ($entry['id'] === $categoryId) {
+                return $entry['name'];
+            }
+        }
+
+        $systemDefaults = config('app.event_categories', []);
+        if (isset($systemDefaults[$categoryId])) {
+            $englishName = $systemDefaults[$categoryId];
+            $key = str_replace(' & ', '_&_', strtolower($englishName));
+            $key = str_replace(' ', '_', $key);
+
+            return $locale ? __("messages.{$key}", [], $locale) : __("messages.{$key}");
+        }
+
+        return null;
+    }
+
+    /**
+     * Allocate a fresh custom category id (≥ 100). Must be called inside a transaction
+     * that has acquired `lockForUpdate()` on the role to avoid races.
+     * Ids are never reused — also considers historical events.category_id values
+     * created under this role, so deleting a custom category never recycles its id.
+     */
+    public function nextCustomCategoryId(): int
+    {
+        $max = 99;
+        foreach (($this->event_categories ?? []) as $entry) {
+            if (is_array($entry) && isset($entry['id'])) {
+                $max = max($max, (int) $entry['id']);
+            }
+        }
+        $historicalMax = (int) Event::where('creator_role_id', $this->id)
+            ->where('category_id', '>=', 100)
+            ->max('category_id');
+        $max = max($max, $historicalMax);
+
+        return $max + 1;
     }
 
     public function usesBookingForm()
