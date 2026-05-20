@@ -41,6 +41,7 @@ class UrlUtils
         'twitch.tv' => 'twitch',
         'github.com' => 'github',
         'bandcamp.com' => 'bandcamp',
+        'calendar.google.com' => 'calendar',
     ];
 
     private const PLATFORM_SVG_PATHS = [
@@ -63,6 +64,7 @@ class UrlUtils
         'twitch' => 'M11.64 5.93H13.07V10.21H11.64M16.5 5.93H17.93V10.21H16.5M7 2L3.43 5.57V18.43H7.71V22L11.29 18.43H14.14L20.57 12V2M19.14 11.29L16.29 14.14H13.43L10.93 16.64V14.14H7.71V3.43H19.14Z',
         'github' => 'M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z',
         'bandcamp' => 'M0 18.75l7.437-13.5H24l-7.438 13.5z',
+        'calendar' => 'M19,4H17V2H15V4H9V2H7V4H5C3.89,4 3,4.89 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6C21,4.89 20.1,4 19,4M19,20H5V10H19V20M19,8H5V6H19V8M7,12H9V14H7V12M11,12H13V14H11V12M15,12H17V14H15V12M7,16H9V18H7V16M11,16H13V18H11V16M15,16H17V18H15V16Z',
         'website' => 'M20 4H4A2 2 0 0 0 2 6V18A2 2 0 0 0 4 20H20A2 2 0 0 0 22 18V6A2 2 0 0 0 20 4M20 11H4V8H20Z',
     ];
 
@@ -186,6 +188,7 @@ class UrlUtils
         'twitch' => 'Twitch',
         'github' => 'GitHub',
         'bandcamp' => 'Bandcamp',
+        'calendar' => 'Calendar',
     ];
 
     public static function getUniquePlatforms(): array
@@ -249,6 +252,10 @@ class UrlUtils
 
     public static function getHandle($url)
     {
+        if (self::detectPlatform($url) === 'calendar') {
+            return '';
+        }
+
         $platform = self::getSubdomainPlatform($url);
         if ($platform) {
             $cleaned = self::clean($url);

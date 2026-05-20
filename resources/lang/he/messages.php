@@ -780,7 +780,6 @@ return [
     'google_force_resync_to_google' => 'סנכרון מחדש ל-Google Calendar',
     'google_force_resync_help' => 'אם החלפת חשבון Google או יעד יומן, שמור קודם את העמוד (השרת משתמש ביומן השמור). פעולה זו שולחת שוב את כל האירועים ל-Google. רק דחיפה מ-Event Schedule ל-Google; לעולם לא מייבאים מ-Google.',
     'google_force_resync_warning' => 'עותקים ישנים של אירועים עשויים להישאר ב-Google Calendar הקודם. פעולה זו מנקה קישורים שמורים ב-Event Schedule ויוצרת אירועים חדשים ביומן השמור ללוח זה.',
-    'google_calendar_not_public_warning' => 'כדי שאורחים יוכלו לגשת ליומן זה דרך הקישור /calendar של לוח הזמנים, יש להגדיר את היומן כציבורי בהגדרות השיתוף של Google Calendar.',
     'google_force_resync_confirm' => 'לסנכרן מחדש את כל האירועים ל-Google Calendar השמור? רק דחיפה מ-Event Schedule ל-Google; לא מייבאים מ-Google.',
     'google_force_resync_success' => 'סנכרון מחדש הושלם. נוספו :created אירוע(ים) ל-Google Calendar.',
     'google_force_resync_queued' => 'הסנכרון מחדש החל. ייתכן שיחלפו כמה דקות עד שיושלם ב-Google Calendar.',

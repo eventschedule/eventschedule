@@ -263,12 +263,6 @@ class AppController extends Controller
                     report($e);
                 }
                 try {
-                    \Artisan::call('google:refresh-public-status');
-                } catch (\Exception $e) {
-                    \Log::error('Scheduled command google:refresh-public-status failed: '.$e->getMessage());
-                    report($e);
-                }
-                try {
                     \Artisan::call('audit:prune');
                 } catch (\Exception $e) {
                     \Log::error('Scheduled command audit:prune failed: '.$e->getMessage());

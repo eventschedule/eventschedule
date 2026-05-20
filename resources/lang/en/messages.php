@@ -815,7 +815,6 @@ return [
     'google_force_resync_to_google' => 'Resync to Google Calendar',
     'google_force_resync_help' => 'If you switched Google accounts or the target calendar, save this page first (the server uses your saved calendar). This sends every schedule event to Google again. It only pushes from Event Schedule to Google; it never imports from Google.',
     'google_force_resync_warning' => 'Old copies of events may stay on your previous Google calendar. This clears stored links on Event Schedule and creates fresh events on the calendar saved for this schedule.',
-    'google_calendar_not_public_warning' => 'For guests to access this calendar via your schedule\'s /calendar link, you must set the calendar to public in Google Calendar\'s sharing settings.',
     'google_force_resync_confirm' => 'Resync all events to your saved Google calendar? This only pushes from Event Schedule to Google and does not import from Google.',
     'google_force_resync_success' => 'Resync complete. Added :created event(s) to Google Calendar.',
     'google_force_resync_queued' => 'Resync started. It may take a few minutes to complete on Google Calendar.',

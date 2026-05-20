@@ -342,36 +342,6 @@ class GoogleCalendarService
     }
 
     /**
-     * Check whether a Google calendar is publicly readable.
-     *
-     * Probes the unauthenticated public iCal feed: 200 = public, 404 = private.
-     * Returns null on any other status/transport error; caller treats null as
-     * "unknown" and leaves the cached flag as-is. Avoids needing the broader
-     * `calendar` OAuth scope just to read one ACL bit.
-     */
-    public function isCalendarPublic(string $calendarId): ?bool
-    {
-        $url = 'https://calendar.google.com/calendar/ical/'
-            .rawurlencode($calendarId).'/public/basic.ics';
-
-        try {
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->head($url);
-        } catch (\Throwable $e) {
-            return null;
-        }
-
-        if ($response->status() === 200) {
-            return true;
-        }
-
-        if ($response->status() === 404) {
-            return false;
-        }
-
-        return null;
-    }
-
-    /**
      * Get user's calendars
      */
     public function getCalendars(): array

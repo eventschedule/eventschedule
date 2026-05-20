@@ -785,7 +785,6 @@ return [
     'google_force_resync_to_google' => 'Volver a sincronizar con Google Calendar',
     'google_force_resync_help' => 'Si cambiaste de cuenta de Google o de calendario de destino, guarda primero esta página (el servidor usa el calendario guardado). Esto vuelve a enviar todos los eventos del plan a Google. Solo envía desde Event Schedule a Google; nunca importa desde Google.',
     'google_force_resync_warning' => 'Las copias antiguas de eventos pueden quedarse en tu Google Calendar anterior. Esto borra los enlaces guardados en Event Schedule y crea eventos nuevos en el calendario guardado para este plan.',
-    'google_calendar_not_public_warning' => 'Para que los invitados puedan acceder a este calendario a través del enlace /calendar de tu agenda, debes configurar el calendario como público en los ajustes de uso compartido de Google Calendar.',
     'google_force_resync_confirm' => '¿Volver a sincronizar todos los eventos con el Google Calendar guardado? Solo envía desde Event Schedule a Google; no importa desde Google.',
     'google_force_resync_success' => 'Resincronización completada. Se añadieron :created evento(s) a Google Calendar.',
     'google_force_resync_queued' => 'Resincronización iniciada. Puede tardar unos minutos en completarse en Google Calendar.',

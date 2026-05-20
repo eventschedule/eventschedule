@@ -14,10 +14,5 @@ class RoleUser extends Pivot
         'level',
         'notification_settings',
         'google_calendar_id',
-        'google_calendar_is_public',
-    ];
-
-    protected $casts = [
-        'google_calendar_is_public' => 'boolean',
     ];
 }
