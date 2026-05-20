@@ -711,6 +711,21 @@ class Role extends Model implements MustVerifyEmail
         return ($this->email_verified_at != null || $this->phone_verified_at != null) && $this->user_id != null;
     }
 
+    public function isEditableBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->isEditor($this->subdomain)) {
+            return true;
+        }
+
+        // Unclaimed roles can be cleaned up by anyone who follows them.
+        // Mirrors the rule already used in GeminiUtils for venue_is_editable.
+        return ! $this->isClaimed() && $user->isFollowing($this->subdomain);
+    }
+
     public function autoCurateEvent(Event $event): void
     {
         $curatorIds = $this->default_curator_ids;

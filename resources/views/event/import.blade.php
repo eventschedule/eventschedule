@@ -459,9 +459,12 @@
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
                                     <option v-for="venue in venues" :key="venue.id" :value="venue.id">
-                                        @{{ venue.name || venue.address1 }}
+                                        @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
                                     </option>
                                 </select>
+                                <p v-if="preview.parsed[idx].matched_venue_name" class="mt-1 text-sm text-green-600 dark:text-green-400">
+                                    ✓ {{ __('messages.matched_venue_label') }}: @{{ preview.parsed[idx].matched_venue_name }}
+                                </p>
                             </div>
                             @endauth
 

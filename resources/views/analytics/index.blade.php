@@ -31,10 +31,25 @@
                             class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
                             <option>{{ $selectedEventName }}</option>
                         </select>
-                        <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-72 overflow-y-auto" style="min-width: 280px">
-                            <button @click="onEventChange('')" type="button"
+                        <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-96 overflow-y-auto" style="min-width: 280px">
+                            <div v-if="events.length > 0" class="sticky top-0 bg-white dark:bg-[#1e1e1e] p-2 border-b border-gray-200 dark:border-[#2d2d30]">
+                                <input type="text" ref="searchInput" v-model="searchQuery"
+                                    @keydown.down.prevent="moveHighlight(1)"
+                                    @keydown.up.prevent="moveHighlight(-1)"
+                                    @keydown.enter.prevent="selectHighlighted"
+                                    @keydown.escape.prevent="closeDropdown"
+                                    placeholder="{{ __('messages.search_events') }}"
+                                    class="w-full px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]">
+                            </div>
+                            <button v-if="!searchQuery" @click="onEventChange('')"
+                                @mouseenter="highlightedIndex = -1"
+                                :data-event-idx="-1"
+                                type="button"
                                 class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
-                                :class="!selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">
+                                :class="[
+                                    !selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : '',
+                                    highlightedIndex === -1 ? 'bg-gray-100 dark:bg-[#2d2d30]' : '',
+                                ]">
                                 <span class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -47,23 +62,33 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                             </button>
-                            <button v-for="event in events" :key="event.id" @click="onEventChange(event.id)" type="button"
+                            <button v-for="(event, idx) in filteredEvents" :key="event.id"
+                                :data-event-idx="idx"
+                                @click="onEventChange(event.id)"
+                                @mouseenter="highlightedIndex = idx"
+                                type="button"
                                 class="w-full flex items-center gap-3 px-3 py-2 text-start hover:bg-gray-100 dark:hover:bg-[#2d2d30] transition-colors"
-                                :class="event.id === selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : ''">
-                                <img v-if="event.image_url" :src="event.image_url" class="w-10 h-10 rounded object-cover flex-shrink-0">
+                                :class="[
+                                    event.id === selectedEventId ? 'bg-gray-50 dark:bg-[#2d2d30]/50' : '',
+                                    idx === highlightedIndex ? 'bg-gray-100 dark:bg-[#2d2d30]' : '',
+                                ]">
+                                <img v-if="event.image_url" :src="event.image_url" loading="lazy" class="w-10 h-10 rounded object-cover flex-shrink-0">
                                 <span v-else class="w-10 h-10 rounded bg-gray-100 dark:bg-[#2d2d30] flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                 </span>
                                 <span class="flex-1 min-w-0">
-                                    <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium">@{{ event.name }}</span>
+                                    <span class="block truncate text-gray-900 dark:text-gray-100 text-sm font-medium" :title="event.name" v-html="highlightMatch(event.name)"></span>
                                     <span v-if="event.starts_at" class="block truncate text-gray-500 dark:text-[#9ca3af] text-xs">@{{ event.starts_at }}</span>
                                 </span>
                                 <svg v-if="event.id === selectedEventId" class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                             </button>
+                            <div v-if="events.length > 0 && filteredEvents.length === 0" class="px-3 py-4 text-sm text-gray-500 dark:text-[#9ca3af] text-center">
+                                {{ __('messages.no_events_found') }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -956,6 +981,8 @@
                         events: @json($events),
                         selectedEventId: @json($selectedEventId ? \App\Utils\UrlUtils::encodeId($selectedEventId) : ''),
                         dropdownOpen: false,
+                        searchQuery: '',
+                        highlightedIndex: 0,
                     };
                 },
                 computed: {
@@ -963,13 +990,88 @@
                         if (!this.selectedEventId) return null;
                         return this.events.find(e => e.id === this.selectedEventId) || null;
                     },
+                    filteredEvents() {
+                        if (!this.searchQuery) return this.events;
+                        const q = this.normalize(this.searchQuery).trim();
+                        if (!q) return this.events;
+                        const startsWith = [];
+                        const contains = [];
+                        for (const e of this.events) {
+                            const i = this.normalize(e.name).indexOf(q);
+                            if (i === 0) startsWith.push(e);
+                            else if (i > 0) contains.push(e);
+                        }
+                        return [...startsWith, ...contains];
+                    },
+                },
+                watch: {
+                    searchQuery(val) {
+                        this.highlightedIndex = val ? 0 : (this.selectedEventId ? 0 : -1);
+                    },
                 },
                 methods: {
+                    normalize(s) {
+                        return (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+                    },
+                    highlightMatch(name) {
+                        const safe = (name || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+                        if (!this.searchQuery) return safe;
+                        const nName = this.normalize(name);
+                        const nQuery = this.normalize(this.searchQuery).trim();
+                        if (!nQuery) return safe;
+                        const idx = nName.indexOf(nQuery);
+                        if (idx < 0 || idx + nQuery.length > safe.length) return safe;
+                        return safe.substring(0, idx) +
+                            '<mark class="bg-yellow-200 dark:bg-yellow-500/30 text-inherit rounded-sm px-0.5">' +
+                            safe.substring(idx, idx + nQuery.length) +
+                            '</mark>' +
+                            safe.substring(idx + nQuery.length);
+                    },
+                    scrollHighlightedIntoView() {
+                        this.$nextTick(() => {
+                            const el = document.querySelector(
+                                '#event-selector-dropdown [data-event-idx="' + this.highlightedIndex + '"]'
+                            );
+                            if (el && typeof el.scrollIntoView === 'function') {
+                                el.scrollIntoView({ block: 'nearest' });
+                            }
+                        });
+                    },
+                    moveHighlight(delta) {
+                        const minIdx = this.searchQuery ? 0 : -1;
+                        const total = (this.searchQuery ? 0 : 1) + this.filteredEvents.length;
+                        if (total === 0) return;
+                        const shifted = ((this.highlightedIndex - minIdx) + delta + total) % total;
+                        this.highlightedIndex = shifted + minIdx;
+                        this.scrollHighlightedIntoView();
+                    },
+                    selectHighlighted() {
+                        if (!this.searchQuery && this.highlightedIndex === -1) {
+                            this.onEventChange('');
+                            return;
+                        }
+                        const ev = this.filteredEvents[this.highlightedIndex];
+                        if (ev) this.onEventChange(ev.id);
+                    },
                     toggleDropdown() {
-                        this.dropdownOpen = !this.dropdownOpen;
+                        if (this.dropdownOpen) {
+                            this.closeDropdown();
+                            return;
+                        }
+                        this.dropdownOpen = true;
+                        this.searchQuery = '';
+                        const selIdx = this.events.findIndex(e => e.id === this.selectedEventId);
+                        this.highlightedIndex = selIdx >= 0 ? selIdx : (this.selectedEventId ? 0 : -1);
+                        this.$nextTick(() => {
+                            if (this.$refs.searchInput) {
+                                this.$refs.searchInput.focus();
+                            }
+                            this.scrollHighlightedIntoView();
+                        });
                     },
                     closeDropdown() {
                         this.dropdownOpen = false;
+                        this.searchQuery = '';
                     },
                     onEventChange(eventId) {
                         this.selectedEventId = eventId;

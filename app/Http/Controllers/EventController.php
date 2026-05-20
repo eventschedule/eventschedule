@@ -1230,16 +1230,38 @@ class EventController extends Controller
 
         if ($user = $request->user()) {
             $roles = $user->roles()->get();
-            $venues = $roles->filter(function ($item) {
+            $venueRoles = $roles->filter(function ($item) {
                 if ($item->pivot->level == 'follower' && ! $item->acceptEventRequests()) {
                     return false;
                 }
 
                 return $item->isVenue();
-            })->map(function ($item) {
-                return $item->toData();
             });
-            $venues = array_values($venues->sortBy('name')->toArray());
+
+            // Sort venues by most-recently-used in this curator's events first,
+            // then alphabetically. The recently-picked venue is far more likely
+            // to be the right choice than the alphabetical first.
+            $venueIds = $venueRoles->pluck('id');
+            $latestEventByVenue = [];
+            if ($venueIds->isNotEmpty()) {
+                $latestEventByVenue = \DB::table('event_role')
+                    ->join('events', 'events.id', '=', 'event_role.event_id')
+                    ->whereIn('event_role.role_id', $venueIds)
+                    ->where('events.is_deleted', false)
+                    ->groupBy('event_role.role_id')
+                    ->selectRaw('event_role.role_id as id, MAX(events.starts_at) as latest_at')
+                    ->pluck('latest_at', 'id')
+                    ->all();
+            }
+
+            $venueRoles = $venueRoles->sortBy([
+                fn ($a, $b) => strcmp($latestEventByVenue[$b->id] ?? '', $latestEventByVenue[$a->id] ?? ''),
+                fn ($a, $b) => strcasecmp($a->name ?? '', $b->name ?? ''),
+            ]);
+
+            $venues = array_values($venueRoles->map(function ($item) {
+                return $item->toData();
+            })->toArray());
         }
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));

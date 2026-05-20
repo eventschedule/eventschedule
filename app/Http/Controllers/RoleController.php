@@ -407,6 +407,187 @@ class RoleController extends Controller
             ->with('message', str_replace(':count', $count, __('messages.unfollowed_roles_count')));
     }
 
+    public function mergePreview(Request $request, $subdomain)
+    {
+        $source = Role::subdomain($subdomain)->where('is_deleted', false)->firstOrFail();
+        $targetSubdomain = $request->input('target_subdomain');
+
+        if (! $targetSubdomain) {
+            return response()->json(['error' => __('messages.not_authorized')], 422);
+        }
+
+        $target = Role::subdomain($targetSubdomain)->where('is_deleted', false)->firstOrFail();
+        $user = auth()->user();
+
+        if (! $this->canMergeRoles($source, $target, $user)) {
+            return response()->json(['error' => __('messages.not_authorized')], 403);
+        }
+
+        $totalEvents = DB::table('event_role')->where('role_id', $source->id)->count();
+        $targetEventIds = DB::table('event_role')->where('role_id', $target->id)->pluck('event_id');
+        $overlapCount = $targetEventIds->isEmpty()
+            ? 0
+            : DB::table('event_role')
+                ->where('role_id', $source->id)
+                ->whereIn('event_id', $targetEventIds)
+                ->count();
+
+        return response()->json([
+            'source_name' => $source->getDisplayName(false),
+            'target_name' => $target->getDisplayName(false),
+            'event_count' => $totalEvents,
+            'overlap_count' => $overlapCount,
+        ]);
+    }
+
+    public function mergeInto(Request $request, $subdomain)
+    {
+        $source = Role::subdomain($subdomain)->where('is_deleted', false)->firstOrFail();
+        $targetSubdomain = $request->input('target_subdomain');
+
+        if (! $targetSubdomain) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $target = Role::subdomain($targetSubdomain)->where('is_deleted', false)->firstOrFail();
+        $user = auth()->user();
+
+        if (! $this->canMergeRoles($source, $target, $user)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $eventCount = 0;
+        DB::transaction(function () use ($source, $target, &$eventCount) {
+            // Move event_role pivot rows from source to target, skipping any
+            // (event_id, target_id) pair that already exists.
+            $existingEventIds = DB::table('event_role')
+                ->where('role_id', $target->id)
+                ->pluck('event_id')
+                ->all();
+
+            $movedQuery = DB::table('event_role')
+                ->where('role_id', $source->id);
+
+            if (! empty($existingEventIds)) {
+                $movedQuery->whereNotIn('event_id', $existingEventIds);
+            }
+
+            $eventCount = $movedQuery->update(['role_id' => $target->id]);
+
+            // For overlapping (event_id) rows on source and target, backfill
+            // non-empty source pivot fields onto the target row when the
+            // target's field is empty. Prevents silent data loss on merge.
+            if (! empty($existingEventIds)) {
+                $overlappingSourceRows = DB::table('event_role')
+                    ->where('role_id', $source->id)
+                    ->whereIn('event_id', $existingEventIds)
+                    ->get();
+
+                $pivotFields = [
+                    'name_translated',
+                    'description_translated',
+                    'description_html_translated',
+                    'is_accepted',
+                    'group_id',
+                    'google_event_id',
+                    'caldav_event_uid',
+                    'caldav_event_etag',
+                ];
+
+                foreach ($overlappingSourceRows as $sourceRow) {
+                    $targetRow = DB::table('event_role')
+                        ->where('role_id', $target->id)
+                        ->where('event_id', $sourceRow->event_id)
+                        ->first();
+
+                    if (! $targetRow) {
+                        continue;
+                    }
+
+                    $updates = [];
+                    foreach ($pivotFields as $field) {
+                        if (empty($targetRow->{$field}) && ! empty($sourceRow->{$field})) {
+                            $updates[$field] = $sourceRow->{$field};
+                        }
+                    }
+
+                    if (! empty($updates)) {
+                        DB::table('event_role')
+                            ->where('role_id', $target->id)
+                            ->where('event_id', $sourceRow->event_id)
+                            ->update($updates);
+                    }
+                }
+            }
+
+            // Drop the now-merged source pivot rows for overlapping events.
+            DB::table('event_role')->where('role_id', $source->id)->delete();
+
+            // Move role_user (followers/owners) that don't already exist on target.
+            $targetUserIds = DB::table('role_user')
+                ->where('role_id', $target->id)
+                ->pluck('user_id')
+                ->all();
+
+            DB::table('role_user')
+                ->where('role_id', $source->id)
+                ->when(! empty($targetUserIds), function ($q) use ($targetUserIds) {
+                    $q->whereNotIn('user_id', $targetUserIds);
+                })
+                ->update(['role_id' => $target->id]);
+
+            DB::table('role_user')->where('role_id', $source->id)->delete();
+
+            // Soft-delete the source.
+            $source->is_deleted = true;
+            $source->save();
+        });
+
+        $message = str_replace(
+            [':count', ':target'],
+            [$eventCount, $target->getDisplayName(false)],
+            __('messages.merged_into_count')
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'event_count' => $eventCount, 'message' => $message]);
+        }
+
+        return redirect(route('following'))->with('message', $message);
+    }
+
+    private function canMergeRoles(Role $source, Role $target, $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($source->id === $target->id) {
+            return false;
+        }
+
+        if ($source->type !== $target->type) {
+            return false;
+        }
+
+        if (! $source->isEditableBy($user)) {
+            return false;
+        }
+
+        // Target requires actual editor access (not the broader isEditableBy)
+        // so a user cannot push events into a follower-only venue.
+        if (! $user->isEditor($target->subdomain)) {
+            return false;
+        }
+
+        // Source must be unclaimed to prevent destroying someone else's verified record.
+        if ($source->isClaimed()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function viewGuest(Request $request, $subdomain, $slug = '', $id = null, $date = null)
     {
         $translation = null;
@@ -1838,11 +2019,38 @@ class RoleController extends Controller
             ->whereNotNull('google_calendar_id')
             ->pluck('google_calendar_id', 'role_id');
 
+        // Detect possible duplicate venues among followed roles. Group by
+        // normalized name+city+country; any group with >1 unclaimed entry is
+        // a candidate for the merge tool.
+        $duplicateVenueCount = 0;
+        $allFollowedVenues = Role::whereIn('id', $roleIds)
+            ->where('type', 'venue')
+            ->where('is_deleted', false)
+            ->get(['id', 'name', 'city', 'country_code', 'email_verified_at', 'phone_verified_at', 'user_id']);
+
+        $grouped = [];
+        foreach ($allFollowedVenues as $v) {
+            $normName = \App\Utils\GeminiUtils::normalizeForMatch($v->name);
+            if ($normName === '') {
+                continue;
+            }
+            $normCity = \App\Utils\GeminiUtils::normalizeForMatch($v->city);
+            $country = $v->country_code ? strtolower($v->country_code) : '';
+            $key = $normName.'|'.$normCity.'|'.$country;
+            $grouped[$key][] = $v;
+        }
+        foreach ($grouped as $group) {
+            if (count($group) > 1) {
+                $duplicateVenueCount += count($group);
+            }
+        }
+
         $data = [
             'roles' => $roles,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
             'memberSyncCalendarIds' => $memberSyncCalendarIds,
+            'duplicateVenueCount' => $duplicateVenueCount,
         ];
 
         if (request()->ajax()) {
@@ -2251,6 +2459,44 @@ class RoleController extends Controller
             ->pluck('cnt', 'category_id')
             ->all();
 
+        // Merge candidates: other venues the user is an editor of, surfaced
+        // when the source venue is mergeable (unclaimed). canMergeRoles
+        // requires editor access on the target, so showing follow-only
+        // candidates would lead to silent 403s on submit.
+        $mergeCandidates = collect();
+        $mergeSuggestion = null;
+        if ($role->isVenue() && ! $role->isClaimed()) {
+            $candidateIds = auth()->user()
+                ->editor()
+                ->where('roles.id', '!=', $role->id)
+                ->where('roles.type', 'venue')
+                ->where('roles.is_deleted', false)
+                ->pluck('roles.id');
+
+            $mergeCandidates = Role::whereIn('id', $candidateIds)
+                ->orderBy('name')
+                ->get(['id', 'subdomain', 'name', 'city', 'country_code']);
+
+            $normName = \App\Utils\GeminiUtils::normalizeForMatch($role->name);
+            $normCity = \App\Utils\GeminiUtils::normalizeForMatch($role->city);
+            $roleCountry = $role->country_code ? strtolower($role->country_code) : null;
+
+            if ($normName !== '') {
+                $mergeSuggestion = $mergeCandidates->first(function ($candidate) use ($normName, $normCity, $roleCountry) {
+                    if (\App\Utils\GeminiUtils::normalizeForMatch($candidate->name) !== $normName) {
+                        return false;
+                    }
+                    if ($normCity !== '' && \App\Utils\GeminiUtils::normalizeForMatch($candidate->city) !== $normCity) {
+                        return false;
+                    }
+                    if ($roleCountry && $candidate->country_code && strtolower($candidate->country_code) !== $roleCountry) {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+
         $data = [
             'user' => auth()->user(),
             'role' => $role,
@@ -2264,6 +2510,8 @@ class RoleController extends Controller
             'notificationSettings' => $notificationSettings,
             'userCalendarId' => $pivot?->google_calendar_id,
             'event_category_counts' => $eventCategoryCounts,
+            'mergeCandidates' => $mergeCandidates,
+            'mergeSuggestion' => $mergeSuggestion,
         ];
 
         return view('role/edit', $data);

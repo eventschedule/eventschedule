@@ -1230,6 +1230,108 @@
 
                     </div>
                 </div>
+
+                @if (! $role->isClaimed() && isset($mergeCandidates) && $mergeCandidates->count() > 0)
+                <button type="button" class="mobile-section-header" data-section="section-merge">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                        </svg>
+                        {{ __('messages.merge_venue') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-merge" class="section-content lg:mt-0">
+                    <div class="max-w-xl">
+
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                            </svg>
+                            {{ __('messages.merge_venue') }}
+                        </h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">{{ __('messages.merge_venue_help') }}</p>
+
+                        @if ($mergeSuggestion)
+                        <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-3">
+                            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                            <div class="text-sm text-gray-800 dark:text-gray-200">
+                                {!! str_replace(':name', '<strong>'.e($mergeSuggestion->getDisplayName(false)).'</strong>', __('messages.possible_duplicate_venue')) !!}
+                            </div>
+                        </div>
+                        @endif
+
+                        <form id="merge-venue-form" action="{{ route('role.merge', ['subdomain' => $role->subdomain]) }}" method="POST">
+                            @csrf
+                            <div class="mb-6">
+                                <x-input-label for="merge_target_subdomain" :value="__('messages.merge_into')" />
+                                <select id="merge_target_subdomain"
+                                        name="target_subdomain"
+                                        data-searchable
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="">{{ __('messages.please_select') }}</option>
+                                    @foreach ($mergeCandidates as $candidate)
+                                    <option value="{{ $candidate->subdomain }}" {{ $mergeSuggestion && $mergeSuggestion->id === $candidate->id ? 'selected' : '' }}>
+                                        {{ $candidate->name }}@if ($candidate->city), {{ $candidate->city }}@endif
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <x-danger-button id="merge-venue-button" type="button">{{ __('messages.merge_venue') }}</x-danger-button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script {!! nonce_attr() !!}>
+                (function() {
+                    var form = document.getElementById('merge-venue-form');
+                    var button = document.getElementById('merge-venue-button');
+                    var select = document.getElementById('merge_target_subdomain');
+                    if (!form || !button || !select) return;
+
+                    button.addEventListener('click', function() {
+                        var targetSubdomain = select.value;
+                        if (!targetSubdomain) {
+                            alert(@json(__('messages.please_select')));
+                            return;
+                        }
+
+                        var previewUrl = '{{ route('role.merge_preview', ['subdomain' => $role->subdomain]) }}?target_subdomain=' + encodeURIComponent(targetSubdomain);
+                        fetch(previewUrl, {
+                            headers: { 'Accept': 'application/json' },
+                        })
+                        .then(function(res) { return res.json().then(function(body) { return { ok: res.ok, body: body }; }); })
+                        .then(function(result) {
+                            if (!result.ok) {
+                                alert(result.body.error || @json(__('messages.an_error_occurred')));
+                                return;
+                            }
+                            var msg = @json(__('messages.confirm_merge_venue'))
+                                .replace(':count', result.body.event_count)
+                                .replace(':source', result.body.source_name)
+                                .replace(':target', result.body.target_name);
+                            if (result.body.overlap_count > 0) {
+                                msg += '\n\n' + @json(__('messages.merge_overlap_warning'))
+                                    .replace(':count', result.body.overlap_count);
+                            }
+                            if (confirm(msg)) {
+                                form.submit();
+                            }
+                        })
+                        .catch(function() {
+                            alert(@json(__('messages.an_error_occurred')));
+                        });
+                    });
+                })();
+                </script>
+                @endif
                 @endif
 
                 <button type="button" class="mobile-section-header" data-section="section-style">

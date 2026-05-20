@@ -151,7 +151,7 @@ class EventRepo
         $creatorRoleId = $currentRole ? $currentRole->id : null;
 
         if ($request->venue_id) {
-            $venue = Role::findOrFail(UrlUtils::decodeId($request->venue_id));
+            $venue = Role::where('is_deleted', false)->findOrFail(UrlUtils::decodeId($request->venue_id));
         }
 
         if (! $user) {
@@ -159,6 +159,39 @@ class EventRepo
         }
 
         if ($request->venue_name || $request->venue_address1 || $request->venue_address2 || $request->venue_city || $request->venue_state || $request->venue_postal_code || $request->venue_email || $request->venue_phone || $request->venue_website) {
+            // Safety-net dedup: if no venue was selected, try a normalized lookup
+            // before creating a new record. Catches dups regardless of how the
+            // request arrived (AI import, manual create, guest import).
+            $matchedExisting = false;
+            if (! $venue && $request->venue_name) {
+                $normName = GeminiUtils::normalizeForMatch($request->venue_name);
+                $normCity = GeminiUtils::normalizeForMatch($request->venue_city);
+                $countryCode = $request->venue_country_code
+                    ? strtolower($request->venue_country_code)
+                    : ($currentRole && $currentRole->country_code ? strtolower($currentRole->country_code) : null);
+
+                if ($normName !== '') {
+                    $venue = Role::where('type', 'venue')
+                        ->where('is_deleted', false)
+                        ->whereRaw('LOWER(TRIM(name)) = ?', [$normName])
+                        ->when($normCity !== '', function ($q) use ($normCity) {
+                            $q->whereRaw('LOWER(TRIM(city)) = ?', [$normCity]);
+                        })
+                        ->when($countryCode, function ($q) use ($countryCode) {
+                            $q->where('country_code', $countryCode);
+                        })
+                        ->withCount(['events' => fn ($q) => $q->where('events.is_deleted', false)])
+                        ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
+                        ->orderBy('events_count', 'desc')
+                        ->orderBy('id', 'asc')
+                        ->first();
+
+                    if ($venue) {
+                        $matchedExisting = true;
+                    }
+                }
+            }
+
             if (! $venue) {
                 $venue = new Role;
                 $venue->name = $request->venue_name ?? null;
@@ -216,21 +249,14 @@ class EventRepo
                 if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {
                     $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
-            } elseif ($venue && ! $venue->isClaimed()) {
-                if ($request->venue_email) {
-                    $venue->email = $request->venue_email;
+            } elseif ($matchedExisting && $followNewRoles) {
+                // Venue was found via the normalized safety-net lookup (not via
+                // a user-picked venue_id). Attach as follower so it appears in
+                // the user's dropdown for future imports.
+                $alreadyFollows = $user->roles()->where('roles.id', $venue->id)->exists();
+                if (! $alreadyFollows) {
+                    $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
-                $venue->phone = $request->venue_phone ?: null;
-
-                $venue->name = $request->venue_name ?? null;
-                $venue->address1 = $request->venue_address1;
-                $venue->address2 = $request->venue_address2;
-                $venue->city = $request->venue_city;
-                $venue->state = $request->venue_state;
-                $venue->postal_code = $request->venue_postal_code;
-                $venue->country_code = $request->venue_country_code ? strtolower($request->venue_country_code) : null;
-                $venue->website = $request->venue_website;
-                $venue->save();
             }
         }
 

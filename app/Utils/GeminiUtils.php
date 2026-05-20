@@ -9,6 +9,11 @@ use Carbon\Carbon;
 
 class GeminiUtils
 {
+    public static function normalizeForMatch(?string $value): string
+    {
+        return mb_strtolower(trim($value ?? ''));
+    }
+
     private static function sendRequest($prompt, $imageData = null, $purpose = 'content', $options = [])
     {
         $textProvider = config('services.ai.text_provider', 'gemini');
@@ -683,39 +688,50 @@ class GeminiUtils
             } elseif (! empty($item['venue_name']) || ! empty($item['venue_name_en']) || ! empty($item['event_address'])) {
                 $venue = null;
 
-                // First: Try stricter matching (requires city + country + name/address)
-                if (! empty($item['event_city'])) {
-                    $eventCountry = $item['event_country_code'] ?? $role->country_code;
+                $normName = self::normalizeForMatch($item['venue_name'] ?? null);
+                $normNameEn = self::normalizeForMatch($item['venue_name_en'] ?? null);
+                $normCity = self::normalizeForMatch($item['event_city'] ?? null);
+                $normAddress = self::normalizeForMatch($item['event_address'] ?? null);
+                $normAddressEn = self::normalizeForMatch($item['event_address_en'] ?? null);
+                $countryCode = ! empty($item['event_country_code'])
+                    ? strtolower($item['event_country_code'])
+                    : ($role->country_code ? strtolower($role->country_code) : null);
+
+                // First: Try stricter matching (requires city + name/address; country if available)
+                if ($normCity !== '') {
                     $venue = Role::where('is_deleted', false)
-                        ->where('country_code', $eventCountry)
-                        ->where('city', $item['event_city'])
-                        ->where(function ($query) use ($item) {
-                            // Match by name OR by address
-                            $query->where(function ($q) use ($item) {
-                                $q->when(! empty($item['venue_name']), function ($q2) use ($item) {
-                                    $q2->where('name', $item['venue_name']);
+                        ->where('type', 'venue')
+                        ->when($countryCode, function ($q) use ($countryCode) {
+                            $q->where('country_code', $countryCode);
+                        })
+                        ->whereRaw('LOWER(TRIM(city)) = ?', [$normCity])
+                        ->where(function ($query) use ($normName, $normNameEn, $normAddress, $normAddressEn) {
+                            $query->where(function ($q) use ($normName, $normNameEn) {
+                                $q->when($normName !== '', function ($q2) use ($normName) {
+                                    $q2->whereRaw('LOWER(TRIM(name)) = ?', [$normName]);
                                 })
-                                    ->when(! empty($item['venue_name_en']), function ($q2) use ($item) {
-                                        $q2->orWhere('name_en', $item['venue_name_en']);
+                                    ->when($normNameEn !== '', function ($q2) use ($normNameEn) {
+                                        $q2->orWhereRaw('LOWER(TRIM(name_en)) = ?', [$normNameEn]);
                                     });
                             })
-                                ->orWhere(function ($q) use ($item) {
-                                    $q->when(! empty($item['event_address']), function ($q2) use ($item) {
-                                        $q2->where('address1', $item['event_address']);
+                                ->orWhere(function ($q) use ($normAddress, $normAddressEn) {
+                                    $q->when($normAddress !== '', function ($q2) use ($normAddress) {
+                                        $q2->whereRaw('LOWER(TRIM(address1)) = ?', [$normAddress]);
                                     })
-                                        ->when(! empty($item['event_address_en']), function ($q2) use ($item) {
-                                            $q2->orWhere('address1_en', $item['event_address_en']);
+                                        ->when($normAddressEn !== '', function ($q2) use ($normAddressEn) {
+                                            $q2->orWhereRaw('LOWER(TRIM(address1_en)) = ?', [$normAddressEn]);
                                         });
                                 });
                         })
-                        ->where('type', 'venue')
+                        ->withCount(['events' => fn ($q) => $q->where('events.is_deleted', false)])
                         ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
-                        ->orderBy('id', 'desc')
+                        ->orderBy('events_count', 'desc')
+                        ->orderBy('id', 'asc')
                         ->first();
                 }
 
-                // Fallback: Try connected venues (name match only)
-                if (! $venue && (! empty($item['venue_name']) || ! empty($item['venue_name_en']))) {
+                // Fallback: Try connected venues (normalized name or address match)
+                if (! $venue && ($normName !== '' || $normNameEn !== '' || $normAddress !== '' || $normAddressEn !== '')) {
                     $connectedVenueIds = \DB::table('event_role as er1')
                         ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
                         ->join('roles', 'er2.role_id', '=', 'roles.id')
@@ -727,16 +743,24 @@ class GeminiUtils
 
                     if ($connectedVenueIds->isNotEmpty()) {
                         $venue = Role::whereIn('id', $connectedVenueIds)
-                            ->where(function ($query) use ($item) {
-                                $query->when(! empty($item['venue_name']), function ($q) use ($item) {
-                                    $q->where('name', $item['venue_name']);
+                            ->where(function ($query) use ($normName, $normNameEn, $normAddress, $normAddressEn) {
+                                $query->when($normName !== '', function ($q) use ($normName) {
+                                    $q->whereRaw('LOWER(TRIM(name)) = ?', [$normName]);
                                 })
-                                    ->when(! empty($item['venue_name_en']), function ($q) use ($item) {
-                                        $q->orWhere('name_en', $item['venue_name_en']);
+                                    ->when($normNameEn !== '', function ($q) use ($normNameEn) {
+                                        $q->orWhereRaw('LOWER(TRIM(name_en)) = ?', [$normNameEn]);
+                                    })
+                                    ->when($normAddress !== '', function ($q) use ($normAddress) {
+                                        $q->orWhereRaw('LOWER(TRIM(address1)) = ?', [$normAddress]);
+                                    })
+                                    ->when($normAddressEn !== '', function ($q) use ($normAddressEn) {
+                                        $q->orWhereRaw('LOWER(TRIM(address1_en)) = ?', [$normAddressEn]);
                                     });
                             })
+                            ->withCount(['events' => fn ($q) => $q->where('events.is_deleted', false)])
                             ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
-                            ->orderBy('id', 'desc')
+                            ->orderBy('events_count', 'desc')
+                            ->orderBy('id', 'asc')
                             ->first();
                     }
                 }

@@ -95,6 +95,19 @@
                                          x-cloak
                                          aria-orientation="vertical">
 
+                                        @if(auth()->user()->isEditor($role->subdomain))
+                                        <a href="{{ route('role.edit', ['subdomain' => $role->subdomain]) }}"
+                                                class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
+                                                role="menuitem">
+                                            <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                            <span>{{ __('messages.edit') }}</span>
+                                        </a>
+
+                                        <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                        @endif
+
                                         @if($role->isClaimed())
                                         <button @click="open = false; copyFeedUrl('{{ route('feed.ical', ['subdomain' => $role->subdomain]) }}', $el)"
                                                 class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-start transition-colors duration-150"
@@ -147,7 +160,7 @@
                                             <svg class="w-4 h-4 me-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                             </svg>
-                                            <span>{{ $role->email ? __('messages.unfollow') : __('messages.delete') }}</span>
+                                            <span>{{ __('messages.unfollow') }}</span>
                                         </button>
                                     </div>
                                 </div>
