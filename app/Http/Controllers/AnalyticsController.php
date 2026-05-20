@@ -13,8 +13,8 @@ class AnalyticsController extends Controller
     public function index(Request $request, AnalyticsService $analytics)
     {
         $user = auth()->user();
-        $roleIds = $user->roles()->wherePivot('level', '!=', 'follower')->pluck('roles.id');
-        $roles = $user->roles()->wherePivot('level', '!=', 'follower')->get();
+        $roleIds = $user->editor()->pluck('roles.id');
+        $roles = $user->editor()->get();
 
         // Get selected role for filtering (decode from URL-safe format)
         // Auto-select when user has only one schedule

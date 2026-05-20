@@ -411,13 +411,11 @@ class AnalyticsService
     }
 
     /**
-     * Get the role IDs that a user owns/manages (excluding followers)
+     * Get the role IDs of schedules the user owns or administers.
      */
     protected function getUserRoleIds(User $user): Collection
     {
-        return $user->roles()
-            ->wherePivot('level', '!=', 'follower')
-            ->pluck('roles.id');
+        return $user->editor()->pluck('roles.id');
     }
 
     /**
