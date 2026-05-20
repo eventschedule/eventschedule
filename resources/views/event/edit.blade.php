@@ -6518,9 +6518,11 @@
   // Store reference for section navigation
   window.vueApp = vueInstance;
 
-  // Sync html-editor textareas now that v-model has populated their values, and
-  // initialize EasyMDE on any textareas rendered by v-for that didn't exist at DOMContentLoaded.
-  vueInstance.$nextTick(() => {
+  // Initialize EasyMDE on .html-editor textareas inside #app. app.js's own
+  // DOMContentLoaded handler skips these because Vue's template compile would
+  // clobber the EasyMDE wrapper; defer to DOMContentLoaded so the deferred
+  // app.js module has loaded and window.initHtmlEditors is defined.
+  document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.initHtmlEditors === 'function') {
       window.initHtmlEditors();
     }
