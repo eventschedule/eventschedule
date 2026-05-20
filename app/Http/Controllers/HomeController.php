@@ -74,7 +74,7 @@ class HomeController extends Controller
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
 
-        $roleIds = $user->roles()->pluck('roles.id');
+        $roleIds = $user->editor()->pluck('roles.id');
 
         // Events will be loaded via Ajax in the calendar partial
         if (request()->graphic) {
@@ -239,7 +239,7 @@ class HomeController extends Controller
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
 
-        $roleIds = $user->roles()->pluck('roles.id');
+        $roleIds = $user->editor()->pluck('roles.id');
 
         $events = Event::with('roles', 'parts', 'tickets')
             ->where(function ($query) use ($roleIds, $user) {
