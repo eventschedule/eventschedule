@@ -2893,7 +2893,7 @@ class RoleController extends Controller
                 ->pluck('category_id')
                 ->all();
             $reservedIds = array_unique(array_merge($previousJsonIds, $historicalCustomIds));
-            $nextSafeId = (int) max(99, ...$reservedIds) + 1;
+            $nextSafeId = (int) max([99, ...$reservedIds]) + 1;
             $usedInPayload = [];
 
             // Lookup of the OLD entries by id, used to preserve `name_en` across saves when the
