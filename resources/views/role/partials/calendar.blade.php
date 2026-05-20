@@ -12,6 +12,8 @@
     .dark .gp-month-nav .gp-month-btn { color: #9ca3af; }
     .dark .gp-month-nav .gp-month-btn:hover { background-color: rgba(255,255,255,0.1); color: #d1d5db; }
     .dark .gp-month-separator { background-color: rgba(255,255,255,0.08); }
+    .es-date-month { color: var(--es-date-month); }
+    .dark .es-date-month { color: var(--es-date-month-dark); }
 </style>
 <div class="flex h-full flex-col" id="calendar-app">
 @php
@@ -232,10 +234,13 @@
         $accentColor = '#4E81FA';
         $contrastColor = '#ffffff';
     }
+
+    $dateMonthColorLight = \App\Utils\ColorUtils::readableAccentColor($accentColor, '#ffffff', '#111827');
+    $dateMonthColorDark = \App\Utils\ColorUtils::readableAccentColor($accentColor, '#1e1e1e', '#ffffff');
 @endphp
 
 {{-- Panel wrapper --}}
-<div style="--es-accent: {{ $accentColor }}; --es-contrast: {{ $contrastColor }}">
+<div style="--es-accent: {{ $accentColor }}; --es-contrast: {{ $contrastColor }}; --es-date-month: {{ $dateMonthColorLight }}; --es-date-month-dark: {{ $dateMonthColorDark }}">
 
 @if (! request()->graphic)
 <header class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}"
@@ -700,7 +705,7 @@
                                         {{-- Date Badge --}}
                                         <div v-if="event.occurrenceDate" class="flex items-center gap-4">
                                             <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
-                                                <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
+                                                <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1 es-date-month" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                                 <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                             </div>
                                             <div class="flex flex-col">
@@ -1055,7 +1060,7 @@
                                     {{-- Date Badge --}}
                                     <div v-if="event.occurrenceDate" class="flex items-center gap-4">
                                         <div class="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col items-center justify-center shadow-sm">
-                                            <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1" style="color: {{ $accentColor }}" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
+                                            <span class="text-[11px] font-bold uppercase tracking-wider leading-none pt-1 es-date-month" v-text="getMonthAbbr(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                             <span class="text-2xl font-bold text-gray-900 dark:text-white leading-none" v-text="getDayNum(event._originalOccurrenceDate || event.occurrenceDate)"></span>
                                         </div>
                                         <div class="flex flex-col">

@@ -57,4 +57,25 @@ class ColorUtils
 
         return $luminance > 0.25 ? '#000000' : '#ffffff';
     }
+
+    public static function getContrastRatio(string $colorA, string $colorB): float
+    {
+        $a = self::getLuminance($colorA);
+        $b = self::getLuminance($colorB);
+        $light = max($a, $b);
+        $dark = min($a, $b);
+
+        return ($light + 0.05) / ($dark + 0.05);
+    }
+
+    /**
+     * Pick a readable color for accent text rendered on $background.
+     * Falls back to $fallback when accent contrast vs background is below WCAG 3:1.
+     */
+    public static function readableAccentColor(string $accentColor, string $background, string $fallback): string
+    {
+        return self::getContrastRatio($accentColor, $background) >= 3.0
+            ? $accentColor
+            : $fallback;
+    }
 }
