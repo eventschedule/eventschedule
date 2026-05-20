@@ -2259,6 +2259,14 @@
                                                 class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                             <label for="event_field_required_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_required') }}</label>
                                         </div>
+                                        <div class="flex items-center" title="{{ __('messages.field_private_help') }}">
+                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][private]"
+                                                id="event_field_private_{{ $fieldKey }}"
+                                                value="1"
+                                                {{ !empty($field['private']) ? 'checked' : '' }}
+                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="event_field_private_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_private') }}</label>
+                                        </div>
                                         <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
                                         @if(!empty($field['index']))
                                         <span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_{{ $field['index'] }}}</span>
@@ -5890,6 +5898,13 @@ function addEventCustomField() {
                             value="1"
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="event_field_required_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_required') !!}</label>
+                    </div>
+                    <div class="flex items-center" title="{!! __('messages.field_private_help') !!}">
+                        <input type="checkbox" name="event_custom_fields[${fieldKey}][private]"
+                            id="event_field_private_${fieldKey}"
+                            value="1"
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                        <label for="event_field_private_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_private') !!}</label>
                     </div>
                     <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}

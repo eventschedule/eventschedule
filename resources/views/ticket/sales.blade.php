@@ -374,9 +374,12 @@ function handleAction(saleId, action) {
         },
         body: JSON.stringify({ action: action })
     })
-    .then(response => {
-        if (!response.ok) throw new Error('Request failed');
-        return response.json();
+    .then(async response => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(data.error || 'HTTP ' + response.status);
+        }
+        return data;
     })
     .then(data => {
         if (data.error) {
@@ -411,7 +414,7 @@ function handleAction(saleId, action) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert(@json(__("messages.an_error_occurred")));
+        alert(error.message || @json(__("messages.an_error_occurred")));
     });
 }
 

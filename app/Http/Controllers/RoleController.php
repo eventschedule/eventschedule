@@ -2720,6 +2720,7 @@ class RoleController extends Controller
                     'name' => $fieldData['name'],
                     'type' => $fieldData['type'] ?? 'string',
                     'required' => ! empty($fieldData['required']),
+                    'private' => ! empty($fieldData['private']),
                     'options' => implode(',', array_map('trim', explode(',', $fieldData['options'] ?? ''))),
                     'ai_prompt' => $fieldData['ai_prompt'] ?? '',
                     'index' => $fieldIndex,

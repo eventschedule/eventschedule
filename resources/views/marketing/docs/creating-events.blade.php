@@ -525,7 +525,7 @@
                                 <li>Save your settings</li>
                             </ol>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event creation and edit forms. You can define up to 10 custom fields per schedule.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, custom fields appear on the event edit form under <strong class="text-gray-900 dark:text-white">Details &rarr; Custom Fields</strong>. You can define up to 10 custom fields per schedule.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -535,6 +535,10 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Field Types</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400"><strong class="text-gray-900 dark:text-white">String:</strong> Single-line text input. <strong class="text-gray-900 dark:text-white">Multiline String:</strong> Multi-line text area. <strong class="text-gray-900 dark:text-white">Switch:</strong> On/off toggle. <strong class="text-gray-900 dark:text-white">Date:</strong> Date picker. <strong class="text-gray-900 dark:text-white">Dropdown:</strong> Single select from predefined options. <strong class="text-gray-900 dark:text-white">Multiselect:</strong> Multiple selections from predefined options.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Private Fields</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Toggle <strong class="text-gray-900 dark:text-white">Private</strong> on a field's definition to hide its value from the guest portal. Private fields display a small lock icon next to their label on the event edit form. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code>{custom_N}</code>.</p>
                                 </div>
                             </div>
                         </section>

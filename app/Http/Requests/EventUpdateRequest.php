@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ValidatesEventCustomFields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventUpdateRequest extends FormRequest
 {
+    use ValidatesEventCustomFields;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -13,7 +16,7 @@ class EventUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        return array_merge([
             'flyer_image_url' => ['image', 'max:2500'],
             'slug' => ['nullable', 'string', 'max:255'],
 
@@ -40,6 +43,11 @@ class EventUpdateRequest extends FormRequest
             'event_sponsor_tiers.*' => ['nullable', 'string', 'in:gold,silver,bronze'],
 
             'existing_event_sponsors' => ['nullable', 'string', 'json'],
-        ];
+        ], $this->eventCustomFieldRules());
+    }
+
+    public function attributes(): array
+    {
+        return $this->eventCustomFieldAttributes();
     }
 }

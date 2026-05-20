@@ -118,7 +118,11 @@ trait CalendarDataTrait
             ])->values()->toArray() : [],
             'poll_count' => (isset($role) && $role->isPro()) ? ($event->polls_count ?? 0) : 0,
             'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
-            'custom_field_values' => $event->custom_field_values ?? [],
+            'custom_field_values' => (function () use ($event, $role) {
+                $owner = $event->creatorRole ?? $role;
+
+                return $owner ? $owner->filterPublicCustomFieldValues($event->custom_field_values ?? []) : [];
+            })(),
             'fan_comments_enabled' => $event->isFanCommentsEnabled(),
             'fan_photos_enabled' => $event->isFanPhotosEnabled(),
             'fan_videos_enabled' => $event->isFanVideosEnabled(),

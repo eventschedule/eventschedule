@@ -982,6 +982,7 @@ class TicketController extends Controller
 
                         // Build flat list of ticket assignments for guests
                         $ticketAssignments = [];
+                        $seatPrices = [];
                         $subtotal = 0;
                         foreach ($request->tickets as $ticketId => $quantity) {
                             if ($quantity > 0) {
@@ -990,6 +991,7 @@ class TicketController extends Controller
                                 $subtotal += $ticketModel->price * $quantity;
                                 for ($i = 0; $i < $quantity; $i++) {
                                     $ticketAssignments[] = $decodedId;
+                                    $seatPrices[] = (float) $ticketModel->price;
                                 }
                             }
                         }
@@ -1031,7 +1033,7 @@ class TicketController extends Controller
                         $sale->saleTickets()->create($primarySaleTicketData);
 
                         $sale->group_id = $sale->id;
-                        $sale->payment_amount = $subtotal;
+                        // payment_amount allocated per-seat after volume + promo below
                     } else {
                         // Standard flow: create SaleTickets with full quantities
                         $ticketCustomValues = $request->input('ticket_custom_values', []);
@@ -1073,9 +1075,13 @@ class TicketController extends Controller
                         $sale->payment_amount = $subtotal;
                     }
 
+                    // Capture seat-only subtotal (before add-ons) for per-seat allocation
+                    $seatsSubtotal = $isIndividualTickets ? $subtotal : 0;
+
                     // Create SaleTickets for add-ons (attach to primary sale only)
                     $addonSelections = $request->input('addons', []);
                     $hasAddons = false;
+                    $addonTotal = 0;
                     foreach ($addonSelections as $addonId => $addonQty) {
                         $addonQty = (int) $addonQty;
                         if ($addonQty > 0) {
@@ -1095,6 +1101,8 @@ class TicketController extends Controller
                         $addonTotal = $sale->saleTickets->filter(fn ($st) => $st->ticket->is_addon)
                             ->sum(fn ($st) => $st->ticket->price * $st->quantity);
                         $subtotal += $addonTotal;
+                    }
+                    if (! $isIndividualTickets) {
                         $sale->payment_amount = $subtotal;
                     }
 
@@ -1108,10 +1116,11 @@ class TicketController extends Controller
                     $volumeTotal = $isIndividualTickets
                         ? TicketVolumeDiscount::totalVolumeDiscountForTicketQuantities($event, $request->tickets)
                         : TicketVolumeDiscount::totalVolumeDiscountForSaleTickets($sale->saleTickets);
-                    $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
                     $subtotalAfterVolume = $subtotal - $volumeTotal;
 
                     // Apply promo code if provided (eligible subtotal is post-volume; see PromoCode::calculateDiscount)
+                    $promoCodeId = null;
+                    $discountTotal = 0;
                     if ($request->promo_code) {
                         $promoCode = PromoCode::where('event_id', $event->id)
                             ->whereRaw('LOWER(code) = ?', [strtolower($request->promo_code)])
@@ -1141,14 +1150,50 @@ class TicketController extends Controller
                                 $discountAmount = $promoCode->calculateDiscount($sale->saleTickets);
                             }
                             if ($discountAmount > 0) {
-                                $sale->promo_code_id = $promoCode->id;
-                                $sale->discount_amount = $discountAmount;
+                                $promoCodeId = $promoCode->id;
+                                $discountTotal = (float) $discountAmount;
                                 $promoCode->increment('times_used');
                             }
                         }
                     }
 
-                    $sale->payment_amount = max(0, $subtotalAfterVolume - (float) ($sale->discount_amount ?? 0));
+                    // Per-seat allocation for individual tickets, group total for standard flow
+                    if ($isIndividualTickets) {
+                        $seatCount = count($ticketAssignments);
+                        $seatVolumeShares = array_fill(0, $seatCount, 0.0);
+                        $seatPromoShares = array_fill(0, $seatCount, 0.0);
+
+                        if ($seatsSubtotal > 0 && $seatCount > 0) {
+                            $volumeAccum = 0.0;
+                            $promoAccum = 0.0;
+                            for ($i = 0; $i < $seatCount - 1; $i++) {
+                                $share = $seatPrices[$i] / $seatsSubtotal;
+                                $seatVolumeShares[$i] = round((float) $volumeTotal * $share, 2);
+                                $seatPromoShares[$i] = round($discountTotal * $share, 2);
+                                $volumeAccum += $seatVolumeShares[$i];
+                                $promoAccum += $seatPromoShares[$i];
+                            }
+                            // Last seat absorbs rounding residual so group totals reconcile exactly
+                            $seatVolumeShares[$seatCount - 1] = round((float) $volumeTotal - $volumeAccum, 2);
+                            $seatPromoShares[$seatCount - 1] = round($discountTotal - $promoAccum, 2);
+                        }
+
+                        // Primary holds seat[0] + all add-ons
+                        $primaryNet = $seatPrices[0] - $seatVolumeShares[0] - $seatPromoShares[0] + $addonTotal;
+                        $sale->payment_amount = max(0, $primaryNet);
+                        $sale->volume_discount_amount = $seatVolumeShares[0] > 0 ? $seatVolumeShares[0] : null;
+                        $sale->discount_amount = $seatPromoShares[0] > 0 ? $seatPromoShares[0] : null;
+                        if ($promoCodeId) {
+                            $sale->promo_code_id = $promoCodeId;
+                        }
+                    } else {
+                        $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
+                        if ($promoCodeId) {
+                            $sale->promo_code_id = $promoCodeId;
+                            $sale->discount_amount = $discountTotal;
+                        }
+                        $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal);
+                    }
 
                     // Create guest sales for individual tickets
                     if ($isIndividualTickets) {
@@ -1164,9 +1209,18 @@ class TicketController extends Controller
                             $guestSale->user_id = null;
                             $guestSale->secret = strtolower(Str::random(32));
                             $guestSale->payment_method = $sale->payment_method;
-                            $guestSale->payment_amount = 0;
+                            $guestSale->payment_amount = max(0, $seatPrices[$g] - $seatVolumeShares[$g] - $seatPromoShares[$g]);
                             $guestSale->status = $sale->status ?? 'unpaid';
                             $guestSale->group_id = $sale->id;
+                            if ($promoCodeId) {
+                                $guestSale->promo_code_id = $promoCodeId;
+                            }
+                            if ($seatPromoShares[$g] > 0) {
+                                $guestSale->discount_amount = $seatPromoShares[$g];
+                            }
+                            if ($seatVolumeShares[$g] > 0) {
+                                $guestSale->volume_discount_amount = $seatVolumeShares[$g];
+                            }
 
                             // Copy event-level custom values from primary sale
                             for ($cv = 1; $cv <= 10; $cv++) {
@@ -1634,8 +1688,9 @@ class TicketController extends Controller
             ];
         }
 
-        // Fix rounding difference to match payment_amount exactly
-        $expectedCents = (int) round($sale->payment_amount * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
+        // Fix rounding difference to match payment_amount exactly (group total when primary, else own per-seat amount)
+        $expectedTotal = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+        $expectedCents = (int) round($expectedTotal * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
         if ($totalCents !== $expectedCents && $lastEligibleIndex !== null) {
             $diff = $expectedCents - $totalCents;
             $lastItem = &$lineItems[$lastEligibleIndex];
@@ -1802,7 +1857,11 @@ class TicketController extends Controller
                 ];
             }
 
-            $volumeDiscount = (float) ($sale->volume_discount_amount ?? 0);
+            // For grouped primaries, sum discounts across the whole group; otherwise use this sale's own values
+            $isGroupedPrimary = $sale->group_id && $sale->isPrimarySale();
+            $volumeDiscount = $isGroupedPrimary
+                ? (float) Sale::where('group_id', $sale->group_id)->sum('volume_discount_amount')
+                : (float) ($sale->volume_discount_amount ?? 0);
             if ($volumeDiscount > 0) {
                 $lineItems[] = [
                     'product_key' => __('messages.volume_discount'),
@@ -1812,12 +1871,15 @@ class TicketController extends Controller
                 ];
             }
 
-            if ($sale->discount_amount > 0 && $sale->promoCode) {
+            $promoDiscount = $isGroupedPrimary
+                ? $sale->groupTotalDiscount()
+                : (float) ($sale->discount_amount ?? 0);
+            if ($promoDiscount > 0 && $sale->promoCode) {
                 $lineItems[] = [
                     'product_key' => __('messages.discount'),
                     'notes' => $sale->promoCode->code,
                     'quantity' => 1,
-                    'cost' => -$sale->discount_amount,
+                    'cost' => -$promoDiscount,
                 ];
             }
 
@@ -1825,7 +1887,10 @@ class TicketController extends Controller
             $invoice = $invoiceNinja->createInvoice($client['id'], $lineItems, $qrCodeUrl, $sendEmail);
 
             $sale->transaction_reference = $invoice['id'];
-            $sale->payment_amount = $invoice['amount'];
+            // Preserve per-seat payment_amount on grouped primaries; only overwrite for ungrouped sales
+            if (! $isGroupedPrimary) {
+                $sale->payment_amount = $invoice['amount'];
+            }
             $sale->save();
 
             if ($sendEmail) {
@@ -2073,9 +2138,11 @@ class TicketController extends Controller
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'payment_url:event_id:'.$sale->event_id);
 
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->discount_amount > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
+            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            if ($promoTotal > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }
         });
 
@@ -2309,13 +2376,16 @@ class TicketController extends Controller
             case 'mark_paid':
                 if ($sale->status === 'unpaid') {
                     DB::transaction(function () use ($sale) {
+                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+
                         $sale->status = 'paid';
                         $sale->transaction_reference = __('messages.manual_payment');
                         $sale->save();
 
-                        AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                        AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
+                        if ($promoTotal > 0) {
+                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
                         }
                     });
                     $actionPerformed = true;
@@ -2326,15 +2396,18 @@ class TicketController extends Controller
                 if ($sale->status === 'paid') {
                     DB::transaction(function () use ($sale) {
                         $analyticsDate = $sale->created_at->toDateString();
+                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+
                         $sale->status = 'refunded';
                         $sale->save();
 
                         // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
                         if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $analyticsAmount, $analyticsDate);
 
-                            if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
+                            if ($promoTotal > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $promoTotal, $analyticsDate);
                             }
                         }
                     });
@@ -2347,16 +2420,19 @@ class TicketController extends Controller
                     $wasPaid = $sale->status === 'paid';
 
                     DB::transaction(function () use ($sale, $wasPaid) {
+                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+
                         $sale->status = 'cancelled';
                         $sale->save();
 
                         // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
                         if ($wasPaid && $sale->payment_method !== 'rsvp') {
                             $analyticsDate = $sale->created_at->toDateString();
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $analyticsAmount, $analyticsDate);
 
-                            if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
+                            if ($promoTotal > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $promoTotal, $analyticsDate);
                             }
                         }
                     });
@@ -2369,6 +2445,9 @@ class TicketController extends Controller
                     // Cancel first to release ticket inventory (triggers Sale::booted hook)
                     if (in_array($sale->status, ['unpaid', 'paid'])) {
                         $wasPaid = $sale->status === 'paid';
+                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+
                         $sale->status = 'cancelled';
                         $sale->save();
 
@@ -2376,10 +2455,10 @@ class TicketController extends Controller
                         // Skip RSVP sales - handled by Sale::booted hook
                         if ($wasPaid && $sale->payment_method !== 'rsvp') {
                             $analyticsDate = $sale->created_at->toDateString();
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $sale->payment_amount, $analyticsDate);
+                            AnalyticsEventsDaily::decrementSale($sale->event_id, $analyticsAmount, $analyticsDate);
 
-                            if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $sale->discount_amount, $analyticsDate);
+                            if ($promoTotal > 0) {
+                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $promoTotal, $analyticsDate);
                             }
                         }
                     }

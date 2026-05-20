@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ValidatesEventCustomFields;
 use Illuminate\Foundation\Http\FormRequest;
 
 class EventCreateRequest extends FormRequest
 {
+    use ValidatesEventCustomFields;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -13,7 +16,7 @@ class EventCreateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        return array_merge([
             'flyer_image_url' => ['image', 'max:2500'],
 
             'addons.*.url' => ['nullable', 'url', 'max:2000'],
@@ -21,6 +24,11 @@ class EventCreateRequest extends FormRequest
 
             'venue_phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
             'members.*.phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
-        ];
+        ], $this->eventCustomFieldRules());
+    }
+
+    public function attributes(): array
+    {
+        return $this->eventCustomFieldAttributes();
     }
 }

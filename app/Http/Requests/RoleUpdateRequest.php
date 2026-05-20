@@ -83,6 +83,7 @@ class RoleUpdateRequest extends FormRequest
             'event_custom_fields.*.type' => ['required_with:event_custom_fields', 'string', 'in:string,multiline_string,switch,date,dropdown,multiselect'],
             'event_custom_fields.*.options' => ['nullable', 'string', 'max:500'],
             'event_custom_fields.*.required' => ['nullable'],
+            'event_custom_fields.*.private' => ['nullable'],
             'event_custom_fields.*.ai_prompt' => ['nullable', 'string', 'max:500'],
             'short_description' => ['nullable', 'string', 'max:200'],
             'slug_pattern' => ['nullable', 'string', 'max:500'],

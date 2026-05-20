@@ -42,6 +42,14 @@
         $eventGroupIds = [];
         $eventCategoryIds = [];
 
+        // Eager-load creator role so custom-field privacy can be resolved without N+1 queries.
+        if (method_exists($events, 'loadMissing')) {
+            $events->loadMissing('creatorRole');
+        }
+        if (isset($pastEvents) && method_exists($pastEvents, 'loadMissing')) {
+            $pastEvents->loadMissing('creatorRole');
+        }
+
         $eventsMap = [];
         foreach ($events as $event) {
             $checkDate = $startOfMonth->copy();
@@ -159,7 +167,10 @@
                 ])->values()->toArray() : [],
                 'poll_count' => (isset($role) && $role->isPro()) ? ($event->polls_count ?? 0) : 0,
                 'vote_poll_url' => (isset($role) && $role->isPro()) ? route('event.vote_poll', ['subdomain' => $role->subdomain, 'event_hash' => \App\Utils\UrlUtils::encodeId($event->id), 'poll_hash' => 'POLL_HASH']) : null,
-                'custom_field_values' => $event->custom_field_values ?? [],
+                'custom_field_values' => (function () use ($event, $role) {
+                    $owner = $event->creatorRole ?? $role;
+                    return $owner ? $owner->filterPublicCustomFieldValues($event->custom_field_values ?? []) : [];
+                })(),
                 'fan_comments_enabled' => $event->isFanCommentsEnabled(),
                 'fan_photos_enabled' => $event->isFanPhotosEnabled(),
                 'fan_videos_enabled' => $event->isFanVideosEnabled(),
@@ -208,6 +219,7 @@
     $dropdownCustomFields = [];
     if (isset($role) && $role->event_custom_fields) {
         foreach ($role->getEventCustomFields() as $key => $field) {
+            if (!empty($field['private'])) continue;
             if (in_array($field['type'] ?? '', ['dropdown', 'multiselect']) && !empty($field['options'])) {
                 $originalOptions = array_values(array_filter(array_map('trim', explode(',', $field['options']))));
                 $optionsMap = new \stdClass();

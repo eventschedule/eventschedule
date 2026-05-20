@@ -109,8 +109,8 @@ class InvoiceNinjaController extends Controller
 
             $webhookAmount = $payload['paymentables'][0]['amount'];
 
-            // Validate that the webhook amount matches the expected sale amount
-            $expectedAmount = $sale->payment_amount;
+            // For grouped purchases (individual tickets) the buyer pays the group total in one invoice.
+            $expectedAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
             $amountDifference = abs($webhookAmount - $expectedAmount);
 
             // Allow small tolerance for floating point differences (e.g., 0.01)
@@ -133,7 +133,10 @@ class InvoiceNinjaController extends Controller
                 return;
             }
 
-            $sale->payment_amount = $webhookAmount;
+            // Preserve per-seat payment_amount on grouped primaries; only overwrite for ungrouped sales
+            if (! $sale->isPrimarySale()) {
+                $sale->payment_amount = $webhookAmount;
+            }
             $sale->status = 'paid';
             $sale->save();
             $didTransitionToPaid = true;
@@ -142,8 +145,9 @@ class InvoiceNinjaController extends Controller
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja:event_id:'.$sale->event_id);
 
             AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-            if ($sale->discount_amount > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            if ($promoTotal > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }
 
             WebhookService::dispatch('sale.paid', $sale);
@@ -196,9 +200,11 @@ class InvoiceNinjaController extends Controller
             AuditService::log(AuditService::SALE_PAID, $sale->user_id, 'Sale', $sale->id,
                 ['status' => 'unpaid'], ['status' => 'paid'], 'invoiceninja_purchase:event_id:'.$sale->event_id);
 
-            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-            if ($sale->discount_amount > 0) {
-                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+            $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
+            AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
+            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            if ($promoTotal > 0) {
+                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
             }
 
             WebhookService::dispatch('sale.paid', $sale);

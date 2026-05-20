@@ -158,8 +158,8 @@ class StripeController extends Controller
                         $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
                         $webhookAmount = $paymentIntent->amount / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
-                        // Validate that the webhook amount matches the expected sale amount
-                        $expectedAmount = $sale->payment_amount;
+                        // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
+                        $expectedAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
                         $amountDifference = abs($webhookAmount - $expectedAmount);
 
                         // Allow small tolerance for floating point/rounding differences
@@ -182,7 +182,10 @@ class StripeController extends Controller
                             return;
                         }
 
-                        $sale->payment_amount = $webhookAmount;
+                        // Preserve per-seat payment_amount on grouped primaries; only overwrite for ungrouped sales
+                        if (! $sale->isPrimarySale()) {
+                            $sale->payment_amount = $webhookAmount;
+                        }
                         $sale->status = 'paid';
                         $sale->transaction_reference = $paymentIntent->id;
                         $sale->save();
@@ -192,8 +195,9 @@ class StripeController extends Controller
                             ['status' => 'unpaid'], ['status' => 'paid'], 'stripe:event_id:'.$sale->event_id);
 
                         AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
-                        if ($sale->discount_amount > 0) {
-                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                        if ($promoTotal > 0) {
+                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
                         }
                         UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 
@@ -244,8 +248,8 @@ class StripeController extends Controller
                             $currencyCode = $sale->event?->ticket_currency_code ?? 'USD';
                             $webhookAmount = $session->amount_total / MoneyUtils::getSmallestUnitMultiplier($currencyCode);
 
-                            // Validate that the webhook amount matches the expected sale amount
-                            $expectedAmount = $sale->payment_amount;
+                            // For grouped purchases (individual tickets) the buyer pays the group total in one charge.
+                            $expectedAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
                             $amountDifference = abs($webhookAmount - $expectedAmount);
 
                             // Allow small tolerance for floating point/rounding differences
@@ -268,7 +272,10 @@ class StripeController extends Controller
                                 return;
                             }
 
-                            $sale->payment_amount = $webhookAmount;
+                            // Preserve per-seat payment_amount on grouped primaries; only overwrite for ungrouped sales
+                            if (! $sale->isPrimarySale()) {
+                                $sale->payment_amount = $webhookAmount;
+                            }
                             $sale->status = 'paid';
                             $sale->transaction_reference = $session->payment_intent;
                             $sale->save();
@@ -280,13 +287,14 @@ class StripeController extends Controller
                             UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
 
                             // Record sale in analytics
-                            AnalyticsEventsDaily::incrementSale($sale->event_id, $sale->payment_amount);
-                            if ($sale->discount_amount > 0) {
-                                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $sale->discount_amount);
+                            AnalyticsEventsDaily::incrementSale($sale->event_id, $webhookAmount);
+                            $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                            if ($promoTotal > 0) {
+                                AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
                             }
 
                             // Send conversion event to Meta CAPI if event has active boost
-                            $this->sendMetaConversion($sale, $sale->payment_amount);
+                            $this->sendMetaConversion($sale, $webhookAmount);
 
                             WebhookService::dispatch('sale.paid', $sale);
                             if ($sale->group_id && $sale->isPrimarySale()) {

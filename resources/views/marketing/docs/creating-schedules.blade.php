@@ -400,6 +400,10 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Mark a field as required so that events cannot be saved without providing a value.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Private</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Hide the field's value from the guest portal. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code>{custom_N}</code>. Public dropdown and multiselect fields become guest-portal filters; mark them private to remove the filter chip.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop fields to change the order they appear on event forms.</p>
                                 </div>

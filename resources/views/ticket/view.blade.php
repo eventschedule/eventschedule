@@ -277,7 +277,7 @@
                 </div>
                 <div>
                   <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.guests') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $sale->isRsvp() ? 1 : $sale->quantity() }}</p>
+                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $sale->isRsvp() ? 1 : ($sale->isPrimarySale() ? $sale->groupTotalQuantity() : $sale->quantity()) }}</p>
                 </div>
               </div>
             </div>
@@ -327,8 +327,27 @@
 
         {{-- Ticket Types Section --}}
         @php
-            $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
-            $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
+            // For a grouped primary buyer, aggregate seats across the whole group so they see what they paid for
+            if ($sale->isPrimarySale() && $sale->group_id) {
+                $groupSaleTickets = \App\Models\SaleTicket::whereIn('sale_id',
+                    \App\Models\Sale::where('group_id', $sale->group_id)->where('is_deleted', false)->pluck('id')
+                )->with('ticket')->get();
+                $aggregated = [];
+                foreach ($groupSaleTickets as $st) {
+                    if (! $st->ticket) continue;
+                    $key = $st->ticket_id;
+                    if (! isset($aggregated[$key])) {
+                        $aggregated[$key] = (object) ['ticket' => $st->ticket, 'quantity' => 0];
+                    }
+                    $aggregated[$key]->quantity += $st->quantity;
+                }
+                $aggregatedCollection = collect(array_values($aggregated));
+                $regularTickets = $aggregatedCollection->filter(fn($st) => ! $st->ticket->is_addon);
+                $addonTickets = $aggregatedCollection->filter(fn($st) => $st->ticket->is_addon);
+            } else {
+                $regularTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && !$st->ticket->is_addon);
+                $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket->is_addon);
+            }
         @endphp
         @if ($regularTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
@@ -343,11 +362,14 @@
               </div>
             @endforeach
           </div>
-          @if ($sale->discount_amount > 0)
+          @php
+            $ticketDiscountTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+          @endphp
+          @if ($ticketDiscountTotal > 0)
             <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200">
               <div class="flex items-center justify-between">
                 <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">{{ __('messages.discount') }}@if ($sale->promoCode) ({{ $sale->promoCode->code }})@endif</span>
-                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($sale->discount_amount, 2) }} {{ $event->ticket_currency_code }}</span>
+                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($ticketDiscountTotal, 2) }} {{ $event->ticket_currency_code }}</span>
               </div>
             </div>
           @endif

@@ -174,6 +174,42 @@ class Sale extends Model
         return $this->group_id && $this->group_id === $this->id;
     }
 
+    public function groupTotalPayment()
+    {
+        if (! $this->group_id) {
+            return (float) $this->payment_amount;
+        }
+
+        return (float) Sale::where('group_id', $this->group_id)
+            ->where('is_deleted', false)
+            ->sum('payment_amount');
+    }
+
+    public function groupTotalQuantity()
+    {
+        if (! $this->group_id) {
+            return $this->quantity();
+        }
+
+        return (int) Sale::where('sales.group_id', $this->group_id)
+            ->where('sales.is_deleted', false)
+            ->join('sale_tickets', 'sales.id', '=', 'sale_tickets.sale_id')
+            ->join('tickets', 'sale_tickets.ticket_id', '=', 'tickets.id')
+            ->where('tickets.is_addon', false)
+            ->sum('sale_tickets.quantity');
+    }
+
+    public function groupTotalDiscount()
+    {
+        if (! $this->group_id) {
+            return (float) ($this->discount_amount ?? 0);
+        }
+
+        return (float) Sale::where('group_id', $this->group_id)
+            ->where('is_deleted', false)
+            ->sum('discount_amount');
+    }
+
     public function isRsvp()
     {
         return $this->payment_method === 'rsvp';
@@ -218,8 +254,25 @@ class Sale extends Model
         $data->event_date = $this->event_date;
         $data->status = $this->status;
         $data->payment_method = $this->payment_method;
-        $data->payment_amount = (float) $this->payment_amount;
-        $data->volume_discount_amount = $this->volume_discount_amount !== null ? (float) $this->volume_discount_amount : null;
+        // Webhook contract: primary holds the group totals; guest rows zero them out so external subscribers
+        // iterating a group don't double-count. Standalone (non-grouped) sales report their own values.
+        if ($this->isPrimarySale()) {
+            $data->payment_amount = $this->groupTotalPayment();
+            $groupVolume = (float) Sale::where('group_id', $this->group_id)
+                ->where('is_deleted', false)
+                ->sum('volume_discount_amount');
+            $data->volume_discount_amount = $groupVolume > 0 ? $groupVolume : null;
+            $groupDiscount = $this->groupTotalDiscount();
+            $data->discount_amount = $groupDiscount > 0 ? $groupDiscount : null;
+        } elseif ($this->group_id) {
+            $data->payment_amount = 0.0;
+            $data->volume_discount_amount = null;
+            $data->discount_amount = null;
+        } else {
+            $data->payment_amount = (float) $this->payment_amount;
+            $data->volume_discount_amount = $this->volume_discount_amount !== null ? (float) $this->volume_discount_amount : null;
+            $data->discount_amount = $this->discount_amount !== null ? (float) $this->discount_amount : null;
+        }
         $data->transaction_reference = $this->transaction_reference;
 
         // Include secret when explicitly requested (e.g. webhook payloads) or when the authenticated user is authorized
@@ -247,6 +300,8 @@ class Sale extends Model
                 ];
             })->values();
 
+        // total_quantity stays per-row (same as before Fix 1 — primary's SaleTicket was already qty=1 then);
+        // subscribers can still sum across the group to get the group total, matching the old contract.
         $data->total_quantity = $this->quantity();
         $data->group_id = $this->group_id ? UrlUtils::encodeId($this->group_id) : null;
         $data->is_primary = $this->isPrimarySale();

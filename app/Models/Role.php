@@ -1662,6 +1662,77 @@ class Role extends Model implements MustVerifyEmail
         return $this->event_custom_fields ?? [];
     }
 
+    public function isEventCustomFieldPrivate(string $fieldKey): bool
+    {
+        $field = $this->getEventCustomFields()[$fieldKey] ?? null;
+        if (! $field) {
+            return true;
+        }
+
+        return ! empty($field['private']);
+    }
+
+    public function filterPublicCustomFieldValues(?array $values): array
+    {
+        if (empty($values)) {
+            return [];
+        }
+
+        return array_filter(
+            $values,
+            fn ($key) => ! $this->isEventCustomFieldPrivate((string) $key),
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    public function getEventCustomFieldValidationRules(): array
+    {
+        $rules = [];
+        foreach ($this->getEventCustomFields() as $fieldKey => $field) {
+            $type = $field['type'] ?? 'string';
+            $required = ! empty($field['required']);
+            $key = "custom_field_values.{$fieldKey}";
+            $fieldRules = [$required ? 'required' : 'nullable'];
+
+            if (in_array($type, ['string', 'multiline_string'], true)) {
+                $fieldRules[] = 'string';
+                $fieldRules[] = 'max:5000';
+            } elseif ($type === 'switch') {
+                $fieldRules[] = 'in:0,1';
+            } elseif ($type === 'date') {
+                $fieldRules[] = 'date';
+            } elseif ($type === 'dropdown') {
+                $options = array_values(array_filter(array_map('trim', explode(',', $field['options'] ?? ''))));
+                if (! empty($options)) {
+                    $fieldRules[] = \Illuminate\Validation\Rule::in($options);
+                }
+            } elseif ($type === 'multiselect') {
+                $fieldRules[] = 'array';
+                $options = array_values(array_filter(array_map('trim', explode(',', $field['options'] ?? ''))));
+                if (! empty($options)) {
+                    $rules["{$key}.*"] = ['string', \Illuminate\Validation\Rule::in($options)];
+                }
+            }
+
+            $rules[$key] = $fieldRules;
+        }
+
+        return $rules;
+    }
+
+    public function getEventCustomFieldValidationAttributes(): array
+    {
+        $attrs = [];
+        foreach ($this->getEventCustomFields() as $fieldKey => $field) {
+            $name = (app()->getLocale() === 'en' && ! empty($field['name_en']))
+                ? $field['name_en']
+                : ($field['name'] ?? $fieldKey);
+            $attrs["custom_field_values.{$fieldKey}"] = $name;
+        }
+
+        return $attrs;
+    }
+
     /**
      * Get the import configuration as an array
      */
