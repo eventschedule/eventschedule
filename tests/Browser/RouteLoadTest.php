@@ -14,11 +14,30 @@ class RouteLoadTest extends DuskTestCase
 
     /**
      * Assert a page loads without a 500 Server Error.
+     *
+     * Checks for both the production 500 page (rendered when APP_DEBUG=false)
+     * and the debug stack-trace page (rendered when APP_DEBUG=true), since CI
+     * runs with APP_DEBUG=true and would otherwise hide the failure.
      */
     protected function assertPageLoads(Browser $browser, string $url): void
     {
         $browser->visit($url);
-        $browser->assertSourceMissing('<title>Server Error</title>');
+
+        $source = $browser->driver->getPageSource();
+
+        $errorMarkers = [
+            '<title>Server Error</title>',           // production 500 view
+            'Whoops, looks like something went wrong', // Laravel/Ignition debug page
+            'SQLSTATE[',                              // any DB error in the trace
+            'PDOException',
+            'QueryException',
+        ];
+
+        foreach ($errorMarkers as $marker) {
+            if (str_contains($source, $marker)) {
+                $this->fail("Page {$url} returned a server error (matched '{$marker}').");
+            }
+        }
     }
 
     /**

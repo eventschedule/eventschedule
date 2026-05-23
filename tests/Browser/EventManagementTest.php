@@ -108,7 +108,7 @@ class EventManagementTest extends DuskTestCase
 
             $browser->visit('/talent/edit-event/'.$newestHash)
                 ->waitFor('#event_name', 10)
-                ->waitFor('#event-delete-form', 10);
+                ->waitUntil("document.getElementById('event-delete-form') !== null", 10);
 
             $browser->script("
                 window._skipUnsavedWarning = true;
@@ -139,6 +139,63 @@ class EventManagementTest extends DuskTestCase
 
             // Verify role was deleted
             $this->assertNull(Role::where('subdomain', 'talent')->first());
+        });
+    }
+
+    /**
+     * Create an event by typing a brand-new venue name (no #selected_venue dropdown).
+     *
+     * This exercises the venue-matching branch in EventRepo::saveEvent() which runs a
+     * `Role::where('type', 'venue')->withCount('events')` query. A previous regression
+     * added an `events.is_deleted` clause to that withCount, which does not exist as a
+     * column on the events table and 500'd in production. The standard event-creation
+     * test always picks a venue from the dropdown, so this path was uncovered.
+     */
+    public function test_event_creation_with_new_venue(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser);
+            $this->createTestVenue($browser);
+            $this->createTestTalent($browser);
+
+            $venueCountBefore = Role::where('type', 'venue')->count();
+            $eventCountBefore = Event::count();
+
+            $browser->visit('/talent/add-event?date='.date('Y-m-d'))
+                ->waitFor('#event_name', 10)
+                ->pause(1000);
+
+            $browser->script("
+                var nameField = document.getElementById('event_name');
+                nameField.value = 'New Venue Event';
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            ");
+
+            // Force the create-new venue path with a name that does NOT match any existing
+            // venue, so saveEvent() walks the matching query and then inserts a new Role.
+            $browser->script("
+                window.vueApp.isInPerson = true;
+                window.vueApp.selectedVenue = '';
+                window.vueApp.venueType = 'create_new';
+                window.vueApp.venueName = 'Brand New Venue';
+                window.vueApp.venueCity = 'Newtown';
+            ");
+
+            $browser->pause(500);
+
+            $browser->script("
+                window._skipUnsavedWarning = true;
+                document.getElementById('edit-form').requestSubmit();
+            ");
+
+            $browser->waitForLocation('/talent/schedule', 15)
+                ->waitForText('New Venue Event', 10);
+
+            $this->assertSame($eventCountBefore + 1, Event::count());
+            $this->assertSame($venueCountBefore + 1, Role::where('type', 'venue')->count());
+            $this->assertNotNull(
+                Role::where('type', 'venue')->where('name', 'Brand New Venue')->first()
+            );
         });
     }
 }
