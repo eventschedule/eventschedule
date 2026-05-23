@@ -107,7 +107,8 @@ class EventManagementTest extends DuskTestCase
             $newestHash = UrlUtils::encodeId($newestEvent->id);
 
             $browser->visit('/talent/edit-event/'.$newestHash)
-                ->waitFor('#event-delete-form', 5);
+                ->waitFor('#event_name', 10)
+                ->waitFor('#event-delete-form', 10);
 
             $browser->script("
                 window._skipUnsavedWarning = true;
