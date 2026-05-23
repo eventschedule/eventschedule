@@ -1241,6 +1241,7 @@ class RoleController extends Controller
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
             'category_name' => $event->resolveCategoryName(),
+            'category_color' => $event->resolveCategoryColor(),
             'name' => $event->translatedName(),
             'venue_name' => $event->getVenueDisplayName(),
             'starts_at' => $event->starts_at,
@@ -2492,6 +2493,7 @@ class RoleController extends Controller
                     if ($roleCountry && $candidate->country_code && strtolower($candidate->country_code) !== $roleCountry) {
                         return false;
                     }
+
                     return true;
                 });
             }
@@ -2934,17 +2936,29 @@ class RoleController extends Controller
                 $usedInPayload[] = $id;
 
                 $row = ['id' => $id, 'name' => $name];
-                if (! empty($entry['name_en'])) {
-                    // Form explicitly submitted a name_en (future-proof — no UI does this today).
-                    $row['name_en'] = trim((string) $entry['name_en']);
+                if (array_key_exists('name_en', $entry)) {
+                    // Form submitted name_en (possibly empty) — user has explicit control.
+                    // Empty = clear so Translate.php regenerates next nightly run.
+                    $nameEn = trim((string) $entry['name_en']);
+                    if ($nameEn !== '') {
+                        $row['name_en'] = $nameEn;
+                    }
                 } elseif (isset($oldEntriesById[$id]) && ($oldEntriesById[$id]['name'] ?? null) === $name) {
-                    // Source name unchanged — preserve the existing English translation so the
-                    // saved JSON doesn't lose it between saves and the next nightly Translate run.
+                    // No name_en key submitted (e.g. English-only schedule whose UI hides the field, or API client).
+                    // Source name unchanged — preserve the existing English translation.
                     if (! empty($oldEntriesById[$id]['name_en'])) {
                         $row['name_en'] = $oldEntriesById[$id]['name_en'];
                     }
                 }
-                // else: rename or brand-new — leave name_en absent so Translate regenerates it.
+                // else: rename or brand-new with no submitted name_en — leave absent so Translate regenerates it.
+
+                // Color is independent of name_en: an empty/missing color in the submitted payload
+                // means the user cleared it, so do NOT inherit from $oldEntriesById.
+                $color = trim((string) ($entry['color'] ?? ''));
+                if ($color !== '' && preg_match('/^#[0-9A-Fa-f]{6}$/', $color)) {
+                    $row['color'] = $color;
+                }
+
                 $normalised[] = $row;
             }
             usort($normalised, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
@@ -4521,6 +4535,7 @@ class RoleController extends Controller
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
                 'category_name' => $event->resolveCategoryName(),
+                'category_color' => $event->resolveCategoryColor(),
             ];
 
             // Strip sensitive fields from password-protected events

@@ -589,6 +589,8 @@ class Role extends Model implements MustVerifyEmail
                     'id' => $id,
                     'name' => $locale ? __("messages.{$key}", [], $locale) : __("messages.{$key}"),
                     'is_custom' => false,
+                    'color' => null,
+                    'name_en' => null,
                 ];
             }
             usort($list, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
@@ -626,11 +628,28 @@ class Role extends Model implements MustVerifyEmail
                 'id' => (int) $entry['id'],
                 'name' => $name,
                 'is_custom' => $entry['id'] >= 100,
+                'color' => $entry['color'] ?? null,
+                'name_en' => $entry['name_en'] ?? null,
             ];
         }
         usort($list, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
 
         return $list;
+    }
+
+    /**
+     * Returns the assigned hex color for a category id, or null if unset.
+     * System defaults never carry a color; only stored entries can.
+     */
+    public function getCategoryColor(int $categoryId): ?string
+    {
+        foreach (($this->event_categories ?? []) as $entry) {
+            if (is_array($entry) && (int) ($entry['id'] ?? 0) === $categoryId) {
+                return $entry['color'] ?? null;
+            }
+        }
+
+        return null;
     }
 
     /**

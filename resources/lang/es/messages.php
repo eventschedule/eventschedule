@@ -3070,7 +3070,7 @@ return [
     'cookie_consent_privacy_body' => 'Puede cambiar su elección de cookies en cualquier momento.',
 
     'categories' => 'Categorías',
-    'categories_help' => 'Personaliza las categorías que aparecen en tu formulario de evento y en el filtro del calendario. Las categorías predeterminadas pueden renombrarse u ocultarse. Añade hasta 20 categorías personalizadas.',
+    'categories_help' => 'Personaliza las categorías que aparecen en tu formulario de evento y en el filtro del calendario. Las categorías predeterminadas pueden renombrarse u ocultarse.',
     'add_category' => 'Añadir categoría',
     'show_on_schedule' => 'Mostrar en el calendario',
     'reset_to_defaults' => 'Restablecer categorías predeterminadas',

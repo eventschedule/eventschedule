@@ -3069,7 +3069,7 @@ return [
     'cookie_consent_privacy_body' => 'Você pode alterar sua escolha de cookies a qualquer momento.',
 
     'categories' => 'Categorias',
-    'categories_help' => 'Personalize as categorias exibidas no seu formulário de evento e no filtro do calendário. As categorias padrão podem ser renomeadas ou ocultadas. Adicione até 20 categorias personalizadas.',
+    'categories_help' => 'Personalize as categorias exibidas no seu formulário de evento e no filtro do calendário. As categorias padrão podem ser renomeadas ou ocultadas.',
     'add_category' => 'Adicionar categoria',
     'show_on_schedule' => 'Mostrar no calendário',
     'reset_to_defaults' => 'Restaurar categorias padrão',

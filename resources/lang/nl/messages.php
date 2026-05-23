@@ -3068,7 +3068,7 @@ return [
     'cookie_consent_privacy_body' => 'U kunt uw cookiekeuze op elk moment wijzigen.',
 
     'categories' => 'Categorieën',
-    'categories_help' => 'Pas de categorieën aan die in je evenementformulier en kalenderfilter verschijnen. Standaardcategorieën kunnen hernoemd of verborgen worden. Voeg tot 20 eigen categorieën toe.',
+    'categories_help' => 'Pas de categorieën aan die in je evenementformulier en kalenderfilter verschijnen. Standaardcategorieën kunnen hernoemd of verborgen worden.',
     'add_category' => 'Categorie toevoegen',
     'show_on_schedule' => 'Tonen in kalender',
     'reset_to_defaults' => 'Terugzetten naar standaardcategorieën',

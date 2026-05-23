@@ -3109,7 +3109,7 @@ return [
     'cookie_consent_privacy_body' => 'Vă puteți modifica alegerea privind cookie-urile oricând.',
 
     'categories' => 'Categorii',
-    'categories_help' => 'Personalizați categoriile afișate pe formularul de eveniment și în filtrul calendarului. Categoriile implicite pot fi redenumite sau ascunse. Adăugați până la 20 de categorii personalizate.',
+    'categories_help' => 'Personalizați categoriile afișate pe formularul de eveniment și în filtrul calendarului. Categoriile implicite pot fi redenumite sau ascunse.',
     'add_category' => 'Adaugă categorie',
     'show_on_schedule' => 'Afișează în calendar',
     'reset_to_defaults' => 'Resetează la categoriile implicite',

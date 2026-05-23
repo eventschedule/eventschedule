@@ -32,10 +32,11 @@ class ScheduleCategoriesTest extends DuskTestCase
             $browser->script("document.querySelector('button.customize-tab[data-tab=\"categories\"]').click()");
             $browser->waitFor('#event-categories-container', 5);
 
-            // Add-category button reads the name via window.prompt(); stub it for headless Chrome.
+            // Add-category button inserts a blank row at the bottom; type the name directly into it.
             $browser->script("
-                window.prompt = function() { return 'Workshop'; };
                 document.getElementById('add-event-category-btn').click();
+                var row = document.querySelector('#event-categories-container').lastElementChild;
+                row.querySelector('.event-category-name').value = 'Workshop';
             ");
             $browser->pause(300);
 
@@ -48,6 +49,8 @@ class ScheduleCategoriesTest extends DuskTestCase
 
             $this->assertNotNull($custom, 'Expected a custom event_category named "Workshop" in the saved JSON');
             $this->assertGreaterThanOrEqual(100, (int) $custom['id']);
+            $this->assertArrayNotHasKey('color', $custom,
+                'Custom category saved without a color should omit the color key entirely');
         });
     }
 }

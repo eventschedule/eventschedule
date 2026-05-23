@@ -3136,7 +3136,7 @@ return [
     'cookie_consent_privacy_body' => 'You can change your cookie choice at any time.',
 
     'categories' => 'Categories',
-    'categories_help' => 'Customise the categories shown on your event form and schedule filter. Defaults can be renamed or hidden. Add up to 20 custom categories to match how you organise events.',
+    'categories_help' => 'Customise the categories shown on your event form and schedule filter. Defaults can be renamed or hidden.',
     'add_category' => 'Add category',
     'show_on_schedule' => 'Show on schedule',
     'reset_to_defaults' => 'Reset to default categories',

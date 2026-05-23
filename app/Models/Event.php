@@ -476,6 +476,24 @@ class Event extends Model
         return $systemDefaults[$this->category_id] ?? null;
     }
 
+    /**
+     * Resolve the assigned color for this event's category, via the creator schedule.
+     * Returns null when no color is set or no creator schedule is known.
+     */
+    public function resolveCategoryColor(): ?string
+    {
+        if (! $this->category_id) {
+            return null;
+        }
+
+        $creator = $this->relationLoaded('creatorRole') ? $this->creatorRole : null;
+        if (! $creator && $this->creator_role_id) {
+            $creator = Role::find($this->creator_role_id);
+        }
+
+        return $creator ? $creator->getCategoryColor((int) $this->category_id) : null;
+    }
+
     public function curator()
     {
         // Return the creator role if it's a curator, otherwise return null
@@ -1653,6 +1671,7 @@ class Event extends Model
         $data->duration = $this->duration;
         $data->category_id = $this->category_id;
         $data->category_name = $this->resolveCategoryName();
+        $data->category_color = $this->resolveCategoryColor();
         $data->is_private = (bool) $this->is_private;
         $data->is_draft = (bool) $this->is_draft;
         $data->is_password_protected = $this->isPasswordProtected();

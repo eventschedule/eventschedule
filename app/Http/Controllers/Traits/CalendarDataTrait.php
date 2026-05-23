@@ -37,6 +37,7 @@ trait CalendarDataTrait
             'group_id' => $groupId ? UrlUtils::encodeId($groupId) : null,
             'category_id' => $event->category_id,
             'category_name' => $event->resolveCategoryName(),
+            'category_color' => $event->resolveCategoryColor(),
             'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
             'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
             'venue_name' => $event->getVenueDisplayName(),

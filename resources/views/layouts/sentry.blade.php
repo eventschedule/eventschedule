@@ -6,6 +6,7 @@ window.sentryOnLoad = function () {
                 'Script error.',
                 'Vue failed to load',
                 'Non-Error promise rejection',
+                '`) captured as promise rejection',
                 'Share canceled',
                 'Unexpected token',
                 'ResizeObserver loop',

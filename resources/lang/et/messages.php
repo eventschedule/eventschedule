@@ -3086,7 +3086,7 @@ return [
     'cookie_consent_privacy_body' => 'Saate oma küpsiste valikut igal ajal muuta.',
 
     'categories' => 'Kategooriad',
-    'categories_help' => 'Kohanda kategooriaid, mida kuvatakse sündmuse vormil ja kalendri filtris. Vaikekategooriaid saab ümber nimetada või peita. Lisa kuni 20 kohandatud kategooriat.',
+    'categories_help' => 'Kohanda kategooriaid, mida kuvatakse sündmuse vormil ja kalendri filtris. Vaikekategooriaid saab ümber nimetada või peita.',
     'add_category' => 'Lisa kategooria',
     'show_on_schedule' => 'Näita kalendris',
     'reset_to_defaults' => 'Taasta vaikekategooriad',

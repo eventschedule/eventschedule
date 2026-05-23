@@ -98,6 +98,7 @@ class RoleUpdateRequest extends FormRequest
             'event_categories.*.id' => ['required_with:event_categories', 'integer', 'min:1'],
             'event_categories.*.name' => ['required_with:event_categories', 'string', 'max:80', 'regex:/^[^<>\n\r]+$/'],
             'event_categories.*.name_en' => ['nullable', 'string', 'max:80', 'regex:/^[^<>\n\r]+$/'],
+            'event_categories.*.color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'first_day_of_week' => ['nullable', 'integer', 'min:0', 'max:6'],
             'feedback_enabled' => ['nullable', 'boolean'],
             'feedback_public' => ['nullable', 'boolean'],

@@ -2321,12 +2321,14 @@
                                             'id' => $id,
                                             'name' => __("messages.{$key}"),
                                             'is_custom' => false,
+                                            'color' => null,
                                         ];
                                     }
                                 }
                                 usort($effectiveCategories, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
 
                                 // 12 system defaults (alphabetised, with localised names) for the JS Reset handler.
+                                // events_count preserves the in-use confirmation gate after Reset rebuilds the row.
                                 $defaultCategoriesForReset = [];
                                 foreach ($systemDefaults as $id => $englishName) {
                                     $key = str_replace(' & ', '_&_', strtolower($englishName));
@@ -2334,6 +2336,7 @@
                                     $defaultCategoriesForReset[] = [
                                         'id' => $id,
                                         'name' => __("messages.{$key}"),
+                                        'events_count' => ($event_category_counts ?? [])[$id] ?? 0,
                                     ];
                                 }
                                 usort($defaultCategoriesForReset, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
@@ -2348,25 +2351,48 @@
                                     $systemName = $systemDefaults[$cat['id']] ?? null;
                                     $renamed = ! $isCustom && $systemName && $cat['name'] !== $systemName;
                                 @endphp
-                                <div class="mb-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item flex items-start gap-3" data-category-id="{{ $cat['id'] }}" data-is-custom="{{ $isCustom ? '1' : '0' }}">
-                                    <div class="flex-1 min-w-0">
-                                        <input type="hidden" name="event_categories[{{ $i }}][id]" value="{{ $cat['id'] }}" class="event-category-id">
-                                        <div class="flex items-center gap-3">
-                                            <x-text-input
-                                                type="text"
-                                                name="event_categories[{{ $i }}][name]"
-                                                value="{{ $cat['name'] }}"
-                                                maxlength="80"
-                                                class="block w-full event-category-name"
-                                                data-events-count="{{ ($event_category_counts ?? [])[$cat['id']] ?? 0 }}"
-                                            />
-                                            <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 flex-shrink-0 p-1" aria-label="{{ __('messages.remove_category') }}">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                            </button>
-                                        </div>
-                                        @if($renamed)
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ __('messages.was_named', ['name' => $systemName]) }}</p>
-                                        @endif
+                                {{-- Keep data-action="remove-event-category" (not the generic remove-parent-item) so the in-use confirmation dialog still runs via data-events-count. --}}
+                                <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item" data-category-id="{{ $cat['id'] }}" data-is-custom="{{ $isCustom ? '1' : '0' }}">
+                                    <input type="hidden" name="event_categories[{{ $i }}][id]" value="{{ $cat['id'] }}" class="event-category-id">
+                                    <div class="mb-4">
+                                        <x-input-label :value="__('messages.name') . ' *'" />
+                                        <x-text-input
+                                            type="text"
+                                            name="event_categories[{{ $i }}][name]"
+                                            value="{{ $cat['name'] }}"
+                                            maxlength="80"
+                                            class="mt-1 block w-full event-category-name"
+                                            data-events-count="{{ ($event_category_counts ?? [])[$cat['id']] ?? 0 }}"
+                                        />
+                                    </div>
+                                    @if($renamed)
+                                    <p class="-mt-2 mb-3 text-xs text-gray-400 dark:text-gray-500 font-mono">{{ __('messages.was_named', ['name' => $systemName]) }}</p>
+                                    @endif
+                                    @if($role->language_code !== 'en' || app()->getLocale() !== 'en')
+                                    <div class="mb-4">
+                                        <x-input-label :value="__('messages.english_name')" />
+                                        <x-text-input
+                                            type="text"
+                                            name="event_categories[{{ $i }}][name_en]"
+                                            :value="$cat['name_en'] ?? ''"
+                                            maxlength="80"
+                                            class="mt-1 block w-full"
+                                        />
+                                    </div>
+                                    @endif
+                                    <div class="mb-4">
+                                        <x-input-label :value="__('messages.color')" />
+                                        <div class="vue-color-picker" data-props="{{ json_encode([
+                                            'name' => 'event_categories[' . $i . '][color]',
+                                            'initialColor' => $cat['color'] ?? '',
+                                            'colors' => ['#EF4444','#F97316','#EAB308','#84CC16','#22C55E','#14B8A6','#06B6D4','#0EA5E9','#3B82F6','#6366F1','#A855F7','#EC4899','#F43F5E','#6B7280'],
+                                            'clearLabel' => __('messages.clear'),
+                                        ]) }}"></div>
+                                    </div>
+                                    <div class="flex gap-4 items-center justify-end">
+                                        <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">
+                                            {{ __('messages.remove') }}
+                                        </button>
                                     </div>
                                 </div>
                                 @endforeach
@@ -6490,40 +6516,66 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Categories editor: alphabetical sort + add/remove/reset ---
+    // --- Categories editor: blank-row Add, in-use confirm Remove, Reset to defaults ---
+    // Sort happens only server-side on save; we never reorder while editing.
     var categoriesList = document.getElementById('event-categories-container');
     if (categoriesList) {
-        function buildCategoryRowHtml(id, name, isCustom) {
+        var showNameEnField = @json($role->language_code !== 'en' || app()->getLocale() !== 'en');
+
+        // formKey must be a unique string per row; all sub-fields share it so PHP groups them
+        // into one outer entry. Empty `[]` brackets would scatter sub-keys into separate entries.
+        function buildCategoryRowHtml(id, name, eventsCount, isCustom, formKey) {
+            var colorPickerProps = JSON.stringify({
+                name: "event_categories[" + formKey + "][color]",
+                initialColor: "",
+                colors: ["#EF4444","#F97316","#EAB308","#84CC16","#22C55E","#14B8A6","#06B6D4","#0EA5E9","#3B82F6","#6366F1","#A855F7","#EC4899","#F43F5E","#6B7280"],
+                clearLabel: @json(__('messages.clear')),
+            });
+            var nameEnBlock = showNameEnField
+                ? `<div class="mb-4">
+                       <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.english_name') }}</label>
+                       <input type="text" name="event_categories[${formKey}][name_en]" maxlength="80" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                   </div>`
+                : '';
             return `
-                <div class="mb-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item flex items-start gap-3" data-category-id="${id}" data-is-custom="${isCustom ? '1' : '0'}">
-                    <div class="flex-1 min-w-0">
-                        <input type="hidden" name="event_categories[][id]" value="${id}" class="event-category-id">
-                        <div class="flex items-center gap-3">
-                            <input type="text" name="event_categories[][name]" value="${escapeHtml(name)}" maxlength="80" class="block w-full event-category-name border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" data-events-count="0">
-                            <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 flex-shrink-0 p-1" aria-label="@json(__('messages.remove_category'))"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-                        </div>
+                <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-category-item" data-category-id="${id}" data-is-custom="${isCustom ? '1' : '0'}">
+                    <input type="hidden" name="event_categories[${formKey}][id]" value="${id}" class="event-category-id">
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} *</label>
+                        <input type="text" name="event_categories[${formKey}][name]" value="${escapeHtml(name)}" maxlength="80" class="mt-1 block w-full event-category-name border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" data-events-count="${eventsCount || 0}">
+                    </div>
+                    ${nameEnBlock}
+                    <div class="mb-4">
+                        <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.color') }}</label>
+                        <div class="vue-color-picker" data-props='${colorPickerProps.replace(/'/g, "&#39;")}'></div>
+                    </div>
+                    <div class="flex gap-4 items-center justify-end">
+                        <button type="button" data-action="remove-event-category" class="text-red-600 hover:text-red-800 dark:text-red-400 text-sm">{{ __('messages.remove') }}</button>
                     </div>
                 </div>`;
         }
 
-        // Add category button
+        function mountPickersUnder(rootEl) {
+            if (typeof window.mountColorPicker !== 'function' || !rootEl) return;
+            rootEl.querySelectorAll('.vue-color-picker').forEach(window.mountColorPicker);
+        }
+
+        // Add category button — inserts a blank row at the bottom and focuses its name input.
         var addCategoryBtn = document.getElementById('add-event-category-btn');
         if (addCategoryBtn) {
             addCategoryBtn.addEventListener('click', function() {
-                var name = (window.prompt(@json(__('messages.add_category')) + ':', '') || '').trim();
-                if (!name) return;
-                if (name.length > 80 || /[<>\n\r]/.test(name)) {
-                    alert(@json(__('messages.category_name_invalid')));
-                    return;
-                }
                 var nextId = parseInt(categoriesList.dataset.nextId || '100');
                 categoriesList.dataset.nextId = String(nextId + 1);
-                categoriesList.insertAdjacentHTML('beforeend', buildCategoryRowHtml(nextId, name, true));
-                sortAndReindex();
+                categoriesList.insertAdjacentHTML('beforeend', buildCategoryRowHtml(nextId, '', 0, true, 'new_' + nextId));
+                var newRow = categoriesList.lastElementChild;
+                mountPickersUnder(newRow);
+                newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                var nameInput = newRow.querySelector('.event-category-name');
+                if (nameInput) nameInput.focus();
             });
         }
 
-        // Delegated click handler for remove
+        // Delegated click handler for remove (preserves the in-use confirmation gate).
         categoriesList.addEventListener('click', function(e) {
             var btn = e.target.closest('button');
             if (!btn) return;
@@ -6542,18 +6594,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!confirm(msg)) return;
                 }
                 item.remove();
-                sortAndReindex();
             }
         });
 
-        // Re-sort when a name input loses focus (only if its value changed alphabetical position).
-        categoriesList.addEventListener('blur', function(e) {
-            if (e.target.classList && e.target.classList.contains('event-category-name')) {
-                sortAndReindex();
-            }
-        }, true);
-
-        // Reset to defaults — rebuild the 12 default rows immediately in the DOM.
+        // Reset to defaults — rebuild the 12 default rows in alphabetical order (server-pre-sorted).
         var resetBtn = document.getElementById('reset-event-categories-btn');
         if (resetBtn) {
             resetBtn.addEventListener('click', function() {
@@ -6569,24 +6613,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // for any historical events.category_id, so resetting it backward could allow a future
                 // Add to allocate an id that collides with orphaned historical events.
                 defaults.forEach(function(d) {
-                    categoriesList.insertAdjacentHTML('beforeend', buildCategoryRowHtml(d.id, d.name, false));
+                    categoriesList.insertAdjacentHTML('beforeend', buildCategoryRowHtml(d.id, d.name, d.events_count || 0, false, 'd_' + d.id));
+                    mountPickersUnder(categoriesList.lastElementChild);
                 });
-                sortAndReindex();
-            });
-        }
-
-        function sortAndReindex() {
-            var items = Array.from(categoriesList.querySelectorAll('.event-category-item'));
-            items.sort(function(a, b) {
-                var an = (a.querySelector('.event-category-name')?.value || '').toLocaleLowerCase();
-                var bn = (b.querySelector('.event-category-name')?.value || '').toLocaleLowerCase();
-                return an.localeCompare(bn);
-            });
-            items.forEach(function(item, i) {
-                categoriesList.appendChild(item);
-                item.querySelectorAll('input[name^="event_categories["]').forEach(function(input) {
-                    input.name = input.name.replace(/event_categories\[[^\]]*\]/, 'event_categories[' + i + ']');
-                });
+                categoriesList.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
 
@@ -6595,9 +6625,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
             });
         }
-
-        // Initial reindex on load so server-rendered rows have proper sequential indices.
-        sortAndReindex();
     }
 
     // --- Initialize SortableJS for sponsor logos ---

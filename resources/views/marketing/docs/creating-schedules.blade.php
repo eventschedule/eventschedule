@@ -493,6 +493,10 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Click "+ Add category" and enter a name. Custom categories appear immediately in your event form and on the schedule filter.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Color</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Each category can be assigned a color from the 14-color palette. The category's color appears as a small dot beside every event tagged with that category on your schedule, making event types easy to scan at a glance. Categories without a color fall back to the sub-schedule color if one is set.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ordering</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Categories are always shown alphabetically — there's no manual reordering. The list re-sorts itself when you rename, add, or remove a row.</p>
                                 </div>

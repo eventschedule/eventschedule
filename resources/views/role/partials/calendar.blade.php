@@ -87,6 +87,7 @@
                 'id' => \App\Utils\UrlUtils::encodeId($event->id),
                 'group_id' => $groupId ? \App\Utils\UrlUtils::encodeId($groupId) : null,
                 'category_id' => $event->category_id,
+                'category_color' => $event->resolveCategoryColor(),
                 'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
                 'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
                 'venue_name' => $event->getVenueDisplayName(),
@@ -469,7 +470,7 @@
                                 @click.stop @if (isset($embed) && $embed) target="_blank" @endif>
                                 <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                     <span class="flex items-start gap-1.5">
-                                        <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                        <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                         <span :class="getEventsForDate(day.date).filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
                                           class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                         </span>
@@ -553,7 +554,7 @@
                                     @click.stop {{ ($route != 'guest' || (isset($embed) && $embed)) ? "target='_blank'" : '' }}>
                                     <p class="flex-auto font-medium text-gray-900 dark:text-gray-100 {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }} truncate">
                                         <span class="flex items-start gap-1.5">
-                                            <span v-if="getEventGroupColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                            <span v-if="getEventDotColor(event)" class="inline-block w-2 h-2 rounded-full flex-shrink-0 mt-1.5" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                             <span :class="getEventsForDate('{{ $currentDate->format('Y-m-d') }}').filter(e => isEventVisible(e)).length == 1 ? 'line-clamp-2' : 'line-clamp-1'"
                                               class="hover:underline truncate" dir="auto" v-text="getEventDisplayName(event)">
                                             </span>
@@ -705,7 +706,7 @@
                                     <div class="md:flex-1 md:min-w-0 px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
                                         {{-- Event Title --}}
                                         <div class="flex items-start gap-2">
-                                            <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                            <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                             <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
                                                 <span v-html="commaBreak(event.name)"></span>
                                                 <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
@@ -1060,7 +1061,7 @@
                                 <div class="px-5 py-6 md:px-8 lg:px-16 md:py-8 flex flex-col gap-5">
                                     {{-- Event Title --}}
                                     <div class="flex items-start gap-2">
-                                        <span v-if="getEventGroupColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventGroupColor(event) }"></span>
+                                        <span v-if="getEventDotColor(event)" class="inline-block w-3 h-3 rounded-full flex-shrink-0 mt-2" :style="{ backgroundColor: getEventDotColor(event) }"></span>
                                         <h2 class="font-bold text-2xl md:text-3xl leading-snug line-clamp-2 text-gray-900 dark:text-gray-100" dir="auto">
                                             <span v-html="commaBreak(event.name)"></span>
                                             <svg v-if="event.is_password_protected" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline-block w-6 h-6 text-gray-400 ms-2 align-middle"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
@@ -1565,14 +1566,18 @@
         {{-- Category Filter --}}
         <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
-            <select v-model="selectedCategory" style="font-family: sans-serif"
-                    class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
-                <option v-for="category in availableCategories" :key="category.id" :value="category.id">
-                    @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
-                </option>
-            </select>
+            <div class="relative">
+                <span v-if="selectedCategoryColor"
+                      class="absolute start-3 top-1/2 -translate-y-1/2 inline-block w-2.5 h-2.5 rounded-full pointer-events-none z-10"
+                      :style="{ backgroundColor: selectedCategoryColor }"></span>
+                <select v-model="selectedCategory" style="font-family: sans-serif"
+                        :class="['w-full py-2.5 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm', selectedCategoryColor ? 'ps-8' : 'ps-3']">
+                    <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                    <option v-for="category in availableCategories" :key="category.id" :value="category.id">
+                        @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
+                    </option>
+                </select>
+            </div>
         </div>
 
         {{-- Venue Filter --}}
@@ -1680,14 +1685,18 @@
             {{-- Category Filter --}}
             <div v-if="availableCategories.length > 1" class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $label('category') }}</label>
-                <select v-model="selectedCategory" style="font-family: sans-serif"
-                        class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                               bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
-                    <option v-for="category in availableCategories" :key="category.id" :value="category.id">
-                        @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
-                    </option>
-                </select>
+                <div class="relative">
+                    <span v-if="selectedCategoryColor"
+                          class="absolute start-3 top-1/2 -translate-y-1/2 inline-block w-2.5 h-2.5 rounded-full pointer-events-none z-10"
+                          :style="{ backgroundColor: selectedCategoryColor }"></span>
+                    <select v-model="selectedCategory" style="font-family: sans-serif"
+                            :class="['w-full py-2.5 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm', selectedCategoryColor ? 'ps-8' : 'ps-3']">
+                        <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                        <option v-for="category in availableCategories" :key="category.id" :value="category.id">
+                            @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
+                        </option>
+                    </select>
+                </div>
             </div>
 
             {{-- Venue Filter --}}
@@ -2056,6 +2065,11 @@ const calendarApp = createApp({
             return Object.entries(nameById)
                 .map(([id, name]) => ({ id: parseInt(id), name }))
                 .sort((a, b) => a.name.localeCompare(b.name));
+        },
+        selectedCategoryColor() {
+            if (!this.selectedCategory) return null;
+            const ev = this.eventsForFilters.find(e => e.category_id == this.selectedCategory && e.category_color);
+            return ev ? ev.category_color : null;
         },
         uniqueVenues() {
             const venuesMap = new Map();
@@ -2675,7 +2689,8 @@ const calendarApp = createApp({
 
             return Math.max(0, count);
         },
-        getEventGroupColor(event) {
+        getEventDotColor(event) {
+            if (event.category_color) return event.category_color;
             if (!event.group_id) return null;
             const group = this.groups.find(g => g.id === event.group_id);
             return group && group.color ? group.color : null;

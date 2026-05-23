@@ -3074,7 +3074,7 @@ return [
     'cookie_consent_privacy_body' => 'Sie können Ihre Cookie-Auswahl jederzeit ändern.',
 
     'categories' => 'Kategorien',
-    'categories_help' => 'Passen Sie die Kategorien an, die in Ihrem Veranstaltungsformular und im Kalenderfilter angezeigt werden. Standardkategorien können umbenannt oder ausgeblendet werden. Fügen Sie bis zu 20 eigene Kategorien hinzu.',
+    'categories_help' => 'Passen Sie die Kategorien an, die in Ihrem Veranstaltungsformular und im Kalenderfilter angezeigt werden. Standardkategorien können umbenannt oder ausgeblendet werden.',
     'add_category' => 'Kategorie hinzufügen',
     'show_on_schedule' => 'Im Kalender anzeigen',
     'reset_to_defaults' => 'Auf Standardkategorien zurücksetzen',
