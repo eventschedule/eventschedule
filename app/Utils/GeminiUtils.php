@@ -723,7 +723,7 @@ class GeminiUtils
                                         });
                                 });
                         })
-                        ->withCount(['events' => fn ($q) => $q->where('events.is_deleted', false)])
+                        ->withCount('events')
                         ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
                         ->orderBy('events_count', 'desc')
                         ->orderBy('id', 'asc')
@@ -757,7 +757,7 @@ class GeminiUtils
                                         $q->orWhereRaw('LOWER(TRIM(address1_en)) = ?', [$normAddressEn]);
                                     });
                             })
-                            ->withCount(['events' => fn ($q) => $q->where('events.is_deleted', false)])
+                            ->withCount('events')
                             ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
                             ->orderBy('events_count', 'desc')
                             ->orderBy('id', 'asc')

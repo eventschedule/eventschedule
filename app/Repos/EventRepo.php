@@ -180,7 +180,7 @@ class EventRepo
                         ->when($countryCode, function ($q) use ($countryCode) {
                             $q->where('country_code', $countryCode);
                         })
-                        ->withCount(['events' => fn ($q) => $q->where('events.is_deleted', false)])
+                        ->withCount('events')
                         ->orderByRaw('CASE WHEN email IS NOT NULL THEN 0 ELSE 1 END')
                         ->orderBy('events_count', 'desc')
                         ->orderBy('id', 'asc')

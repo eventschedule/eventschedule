@@ -1247,7 +1247,6 @@ class EventController extends Controller
                 $latestEventByVenue = \DB::table('event_role')
                     ->join('events', 'events.id', '=', 'event_role.event_id')
                     ->whereIn('event_role.role_id', $venueIds)
-                    ->where('events.is_deleted', false)
                     ->groupBy('event_role.role_id')
                     ->selectRaw('event_role.role_id as id, MAX(events.starts_at) as latest_at')
                     ->pluck('latest_at', 'id')
