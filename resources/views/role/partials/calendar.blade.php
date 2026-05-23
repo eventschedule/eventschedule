@@ -2777,35 +2777,37 @@ const calendarApp = createApp({
             const contrastColor = (listBtn && listBtn.dataset.contrast) || (calBtn && calBtn.dataset.contrast) || '{{ $contrastColor ?? "#FFFFFF" }}';
             if (listBtn) {
                 listBtn.style.borderColor = accentColor;
-                if (view === 'list') {
+                if (view !== 'list') {
                     listBtn.style.backgroundColor = accentColor;
                     listBtn.style.color = contrastColor;
                     listBtn.className = listBtn.className.replace(/\btext-gray-900\b/g, '').replace(/\bdark:text-white\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                    if (!listBtn.className.includes('hover:scale-105')) {
+                        listBtn.className += ' hover:scale-105 hover:shadow-md';
+                    }
                 } else {
                     listBtn.style.backgroundColor = '';
                     listBtn.style.color = '';
+                    listBtn.className = listBtn.className.replace(/\bhover:scale-105\b/g, '').replace(/\bhover:shadow-md\b/g, '');
                     if (!listBtn.className.includes('text-gray-900')) {
                         listBtn.className += ' text-gray-900 dark:text-white';
-                    }
-                    if (!listBtn.className.includes('hover:bg-gray-50')) {
-                        listBtn.className += ' hover:bg-gray-50 dark:hover:bg-gray-700';
                     }
                 }
             }
             if (calBtn) {
                 calBtn.style.borderColor = accentColor;
-                if (view === 'calendar') {
+                if (view !== 'calendar') {
                     calBtn.style.backgroundColor = accentColor;
                     calBtn.style.color = contrastColor;
                     calBtn.className = calBtn.className.replace(/\btext-gray-900\b/g, '').replace(/\bdark:text-white\b/g, '').replace(/\bhover:bg-gray-50\b/g, '').replace(/\bdark:hover:bg-gray-700\b/g, '');
+                    if (!calBtn.className.includes('hover:scale-105')) {
+                        calBtn.className += ' hover:scale-105 hover:shadow-md';
+                    }
                 } else {
                     calBtn.style.backgroundColor = '';
                     calBtn.style.color = '';
+                    calBtn.className = calBtn.className.replace(/\bhover:scale-105\b/g, '').replace(/\bhover:shadow-md\b/g, '');
                     if (!calBtn.className.includes('text-gray-900')) {
                         calBtn.className += ' text-gray-900 dark:text-white';
-                    }
-                    if (!calBtn.className.includes('hover:bg-gray-50')) {
-                        calBtn.className += ' hover:bg-gray-50 dark:hover:bg-gray-700';
                     }
                 }
             }

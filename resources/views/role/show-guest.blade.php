@@ -31,10 +31,10 @@
   html[data-es-view] [data-view-width] { transition: none !important; }
   html[data-es-view="calendar"] [data-view-width] { max-width: 200rem !important; }
   html[data-es-view="list"] [data-view-width] { max-width: 56rem !important; }
-  html[data-es-view="list"] #toggle-list-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
-  html[data-es-view="list"] #toggle-calendar-btn { background-color: transparent !important; color: inherit !important; }
-  html[data-es-view="calendar"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
-  html[data-es-view="calendar"] #toggle-list-btn { background-color: transparent !important; color: inherit !important; }
+  html[data-es-view="list"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
+  html[data-es-view="list"] #toggle-list-btn { background-color: transparent !important; color: inherit !important; }
+  html[data-es-view="calendar"] #toggle-list-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
+  html[data-es-view="calendar"] #toggle-calendar-btn { background-color: transparent !important; color: inherit !important; }
   html[data-es-view="list"] #month-year-title { display: none !important; }
 html[data-es-view="list"] #month-nav-controls { display: none !important; }
 html[data-es-view="list"] #calendar-panel-wrapper {
@@ -435,19 +435,19 @@ html[data-es-view="list"] #calendar-panel-wrapper {
 
                 {{-- Calendar/List View Toggle (desktop only) --}}
                 @if(!$event)
-                <div class="hidden md:flex items-center rounded-md shadow-sm flex-shrink-0 transition-all duration-200 hover:scale-105 hover:shadow-md">
+                <div class="hidden md:flex items-center rounded-md shadow-sm flex-shrink-0">
                     <button id="toggle-list-btn"
                             data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-11 h-11 flex items-center justify-center rounded-s-md border-2 transition-colors {{ ($role->event_layout ?? 'calendar') === 'list' ? '' : 'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700' }}"
-                            style="border-color: {{ $accentColor }}; {{ ($role->event_layout ?? 'calendar') === 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
+                            class="w-11 h-11 flex items-center justify-center rounded-s-md border-2 transition-all duration-200 {{ ($role->event_layout ?? 'calendar') !== 'list' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
+                            style="border-color: {{ $accentColor }}; {{ ($role->event_layout ?? 'calendar') !== 'list' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M3,4H7V8H3V4M9,5V7H21V5H9M3,10H7V14H3V10M9,11V13H21V11H9M3,16H7V20H3V16M9,17V19H21V17H9"/>
                         </svg>
                     </button>
                     <button id="toggle-calendar-btn"
                             data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
-                            class="w-11 h-11 flex items-center justify-center rounded-e-md border-2 border-s-0 transition-colors {{ ($role->event_layout ?? 'calendar') === 'calendar' ? '' : 'text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700' }}"
-                            style="border-color: {{ $accentColor }}; {{ ($role->event_layout ?? 'calendar') === 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
+                            class="w-11 h-11 flex items-center justify-center rounded-e-md border-2 border-s-0 transition-all duration-200 {{ ($role->event_layout ?? 'calendar') !== 'calendar' ? 'hover:scale-105 hover:shadow-md' : 'text-gray-900 dark:text-white' }}"
+                            style="border-color: {{ $accentColor }}; {{ ($role->event_layout ?? 'calendar') !== 'calendar' ? 'background-color: ' . $accentColor . '; color: ' . $contrastColor : '' }}">
                         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9,10V12H7V10H9M13,10V12H11V10H13M17,10V12H15V10H17M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5C3.89,21 3,20.1 3,19V5A2,2 0 0,1 5,3H6V1H8V3H16V1H18V3H19M19,19V8H5V19H19M9,14V16H7V14H9M13,14V16H11V14H13M17,14V16H15V14H17Z"/>
                         </svg>
