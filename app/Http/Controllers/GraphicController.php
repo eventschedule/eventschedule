@@ -86,7 +86,7 @@ class GraphicController extends Controller
         $validated = $request->validate([
             'enabled' => 'boolean',
             'frequency' => 'in:daily,weekly,monthly',
-            'ai_prompt' => 'nullable|string|max:1000',
+            'ai_prompt' => 'nullable|string|max:2000',
             'ai_model' => 'nullable|string|max:50',
             'text_template' => 'nullable|string|max:2000',
             'layout' => 'in:grid,list,row',
@@ -582,7 +582,7 @@ class GraphicController extends Controller
             // wrap it in an explicit untrusted-input delimiter so the model
             // treats it as data rather than as overriding instructions.
             $safePrompt = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', (string) $aiPrompt);
-            $safePrompt = mb_substr($safePrompt, 0, 1000);
+            $safePrompt = mb_substr($safePrompt, 0, 2000);
 
             $prompt = "You are transforming an event list text according to a user-supplied instruction.\n"
                 ."\n"
