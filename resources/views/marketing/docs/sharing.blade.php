@@ -217,7 +217,7 @@
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Privacy</div>
-                                <p>Follower emails are only used for event notifications. We never share or sell email addresses.</p>
+                                <p>When users follow your schedule, you can see their name and email address in the followers tab so you can keep them informed. Their email is shared only with you, the schedule owner, and is never sold or shared with third parties.</p>
                             </div>
                         </section>
 

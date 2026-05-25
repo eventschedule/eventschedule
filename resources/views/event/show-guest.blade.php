@@ -270,14 +270,17 @@
                         </button>
                       </a>
                     @else
-                      <a href="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
-                        class="inline-flex items-center justify-center">
-                        <button type="button" name="follow"
-                          style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                          class="inline-flex items-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
-                          {{ __('messages.follow') }}
-                        </button>
-                      </a>
+                      <button type="button"
+                        data-follow-trigger
+                        data-follow-url="{{ route('role.follow', ['subdomain' => $each->subdomain]) }}"
+                        data-schedule-name="{{ $each->name }}"
+                        data-schedule-image="{{ $each->profile_image_url }}"
+                        data-accent-color="{{ $accentColor }}"
+                        data-contrast-color="{{ $contrastColor }}"
+                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                        class="inline-flex items-center justify-center rounded-md px-4 py-2 transition-all duration-200 hover:scale-105 hover:shadow-md text-xs font-semibold shadow-sm">
+                        {{ __('messages.follow') }}
+                      </button>
                     @endif
                   @elseif (auth()->user() && auth()->user()->id === $event->user_id && $each->youtube_links)
                     <button type="button"
@@ -2323,5 +2326,9 @@
     }
     @endif
   </script>
+
+@if (! is_demo_mode())
+    @include('partials.follow-consent-modal')
+@endif
 
 </x-app-guest-layout>

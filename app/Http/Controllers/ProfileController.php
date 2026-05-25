@@ -88,6 +88,9 @@ class ProfileController extends Controller
 
         $validated = $request->validated();
         $validated['use_24_hour_time'] = $request->input('use_24_hour_time') ? true : null;
+        if ($request->has('ask_before_following')) {
+            $validated['follow_consent_dismissed'] = ! $request->boolean('ask_before_following');
+        }
 
         // Validate default_role_id - user must be editor of the selected role
         if (! empty($validated['default_role_id'])) {

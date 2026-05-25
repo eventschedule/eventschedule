@@ -142,6 +142,11 @@
                     Our website may contain links to other sites. Once you leave our site via these links, we have no control over that other website. We are not responsible for the protection and privacy of any information you provide on those sites, and they are not governed by this privacy policy or our terms of service.
                 </p>
 
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Follower &amp; Engagement Data Visibility</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    When you follow a schedule, purchase a ticket from a schedule, or submit content (such as a comment, photo, or video) to an event, the schedule owner can see your name and email address so they can keep you informed and reach out if needed. This data is shared only with the specific schedule owner you interact with; it is never sold or shared with third parties. You can stop following a schedule at any time from your "Following" page.
+                </p>
+
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Newsletter & Removal</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
                     We periodically send newsletters announcing new features to the email address registered with your account. You can request your email address purged from newsletters by contacting <a href="mailto:privacy@eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline">privacy@eventschedule.com</a> or clicking the "unsubscribe" link in any newsletter. Note that we may still send legally required notifications to your registered email.

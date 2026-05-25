@@ -115,6 +115,8 @@ class TwoFactorChallengeController extends Controller
 
         $request->session()->regenerate();
 
+        $request->session()->forget('pending_follow_consent_dismissed');
+
         AuditService::log(AuditService::AUTH_LOGIN, $user->id);
 
         return redirect()->intended(route('home', absolute: false));

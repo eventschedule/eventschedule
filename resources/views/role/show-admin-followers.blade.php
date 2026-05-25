@@ -51,6 +51,7 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <x-sortable-header column="name" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'" class="py-3.5 ps-4 pe-3 sm:ps-6">{{ __('messages.name') }}</x-sortable-header>
+                                <x-sortable-header column="email" :sortBy="$sortBy ?? ''" :sortDir="$sortDir ?? 'desc'">{{ __('messages.email') }}</x-sortable-header>
                                 <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">
                                     {{ __('messages.schedule') }}
                                 </th>
@@ -66,6 +67,9 @@
                                     @else
                                         <span class="italic text-gray-400 dark:text-gray-500">{{ __('messages.no_name') }}</span>
                                     @endif
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ $follower->email }}
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
                                     @if($follower->roles->isNotEmpty())

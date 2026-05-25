@@ -199,6 +199,11 @@
                 <x-toggle name="use_24_hour_time" label="{{ __('messages.use_24_hour_time_format') }}"
                     checked="{{ old('use_24_hour_time', $user->use_24_hour_time) }}" />
             </div>
+
+            <div>
+                <x-toggle name="ask_before_following" label="{{ __('messages.ask_before_following') }}"
+                    checked="{{ old('ask_before_following', ! $user->follow_consent_dismissed) }}" />
+            </div>
         </div>
 
         <!-- Accessibility Tab -->

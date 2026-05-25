@@ -227,18 +227,19 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                       ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
                       (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
                   ))
-                  <a
-                    href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center justify-center"
+                  <button
+                    type="button"
+                    data-follow-trigger
+                    data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
+                    data-schedule-name="{{ $role->name }}"
+                    data-schedule-image="{{ $role->profile_image_url }}"
+                    data-accent-color="{{ $accentColor }}"
+                    data-contrast-color="{{ $contrastColor }}"
+                    style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                    class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                   >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ $role->customLabel('follow') }}
-                    </button>
-                  </a>
+                    {{ $role->customLabel('follow') }}
+                  </button>
                   @endif
                   @if (auth()->user() && auth()->user()->isMember($role->subdomain))
                   <a
@@ -388,18 +389,19 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                       ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
                       (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
                   ))
-                  <a
-                    href="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
-                    class="inline-flex items-center justify-center flex-shrink-0"
+                  <button
+                    type="button"
+                    data-follow-trigger
+                    data-follow-url="{{ route('role.follow', ['subdomain' => $role->subdomain]) }}"
+                    data-schedule-name="{{ $role->name }}"
+                    data-schedule-image="{{ $role->profile_image_url }}"
+                    data-accent-color="{{ $accentColor }}"
+                    data-contrast-color="{{ $contrastColor }}"
+                    style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+                    class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 flex-shrink-0"
                   >
-                    <button
-                      type="button"
-                      style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
-                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      {{ $role->customLabel('follow') }}
-                    </button>
-                  </a>
+                    {{ $role->customLabel('follow') }}
+                  </button>
                   @endif
                   @if (auth()->user() && auth()->user()->isMember($role->subdomain))
                   <a
@@ -1054,5 +1056,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+@if (! is_demo_mode())
+    @include('partials.follow-consent-modal')
+@endif
 
 </x-app-guest-layout>

@@ -308,7 +308,10 @@ class RoleController extends Controller
 
             return redirect_with_pending_action(
                 app_url(route('sign_up', ['lang' => $lang], false)),
-                ['pending_follow' => $subdomain]
+                [
+                    'pending_follow' => $subdomain,
+                    'pending_follow_consent_dismissed' => $request->boolean('follow_consent_dismissed'),
+                ]
             );
         }
 
@@ -318,6 +321,10 @@ class RoleController extends Controller
         if (DemoService::isDemoUser($user)) {
             return redirect(app_url(route('following', [], false)))
                 ->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        if ($request->boolean('follow_consent_dismissed') && ! $user->follow_consent_dismissed) {
+            $user->update(['follow_consent_dismissed' => true]);
         }
 
         if (! $user->isConnected($role->subdomain)) {
@@ -2024,7 +2031,7 @@ class RoleController extends Controller
         } elseif ($tab == 'followers') {
             $followerSortBy = request()->get('sort_by', 'pivot_created_at');
             $followerSortDir = strtolower(request()->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-            $allowedFollowerSortColumns = ['name', 'pivot_created_at'];
+            $allowedFollowerSortColumns = ['name', 'email', 'pivot_created_at'];
             if (! in_array($followerSortBy, $allowedFollowerSortColumns)) {
                 $followerSortBy = 'pivot_created_at';
             }

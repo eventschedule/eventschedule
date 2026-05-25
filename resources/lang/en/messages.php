@@ -3171,4 +3171,12 @@ return [
     'category_name_invalid' => 'Category names cannot contain &lt;, &gt; or line breaks.',
     'move_up' => 'Move up',
     'move_down' => 'Move down',
+
+    'follow_consent_title' => 'Follow',
+    'follow_consent_body' => 'can send you updates about new events and reach out directly. They\'ll see your name and email address.',
+    'follow_consent_body_privacy' => 'Your email is only shared with this schedule - we never sell or share it with third parties. You can unfollow at any time.',
+    'follow_consent_body_guest' => 'After you sign up, you\'ll automatically follow this schedule.',
+    'follow_consent_dont_ask_again' => 'Don\'t ask me again when I follow other schedules',
+    'follow_consent_signup_button' => 'Sign up and follow',
+    'ask_before_following' => 'Ask me before I follow a new schedule',
 ];

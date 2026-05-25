@@ -65,6 +65,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'dashboard_config',
         'carpool_agreed_at',
         'carpool_notifications_enabled',
+        'follow_consent_dismissed',
     ];
 
     /**
@@ -171,6 +172,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'dashboard_config' => 'array',
             'carpool_agreed_at' => 'datetime',
             'carpool_notifications_enabled' => 'boolean',
+            'follow_consent_dismissed' => 'boolean',
         ];
     }
 

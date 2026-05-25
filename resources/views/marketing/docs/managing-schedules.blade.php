@@ -255,7 +255,7 @@
                             </p>
 
                             <ul class="doc-list mb-6">
-                                <li>View a list of all your <strong>current followers</strong></li>
+                                <li>View a list of all your <strong>current followers</strong>, including their name and email address</li>
                                 <li>Share your schedule's <strong>follow link</strong> to grow your audience</li>
                                 <li>Generate a <strong>QR code</strong> for your follow link to share in print or at events</li>
                             </ul>

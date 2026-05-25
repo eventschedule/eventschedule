@@ -395,6 +395,11 @@ class RegisteredUserController extends Controller
             $user->save();
         }
 
+        if (session()->pull('pending_follow_consent_dismissed')) {
+            $user->follow_consent_dismissed = true;
+            $user->save();
+        }
+
         // Process SMS signup token - auto-verify phone and claim matching roles
         $smsToken = $request->sms_token ?? session('sms_token');
         if ($smsToken) {

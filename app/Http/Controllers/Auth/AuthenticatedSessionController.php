@@ -67,6 +67,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $request->session()->forget('pending_follow_consent_dismissed');
+
         return redirect()->intended(route('home', absolute: false));
     }
 
