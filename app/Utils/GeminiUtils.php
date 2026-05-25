@@ -697,8 +697,28 @@ class GeminiUtils
                     ? strtolower($item['event_country_code'])
                     : ($role->country_code ? strtolower($role->country_code) : null);
 
-                // First: Try stricter matching (requires city + name/address; country if available)
-                if ($normCity !== '') {
+                // First: if the importing user owns a venue with this name, that's the match.
+                // No city/country needed - owner identity is the strongest signal.
+                $authUser = auth()->user();
+                if ($authUser && ($normName !== '' || $normNameEn !== '')) {
+                    $venue = $authUser->owner()
+                        ->where('roles.type', 'venue')
+                        ->where('roles.is_deleted', false)
+                        ->where(function ($q) use ($normName, $normNameEn) {
+                            $q->when($normName !== '', function ($q2) use ($normName) {
+                                $q2->whereRaw('LOWER(TRIM(roles.name)) = ?', [$normName]);
+                            })->when($normNameEn !== '', function ($q2) use ($normNameEn) {
+                                $q2->orWhereRaw('LOWER(TRIM(roles.name_en)) = ?', [$normNameEn]);
+                            });
+                        })
+                        ->withCount('events')
+                        ->orderBy('events_count', 'desc')
+                        ->orderBy('roles.id', 'asc')
+                        ->first();
+                }
+
+                // Next: Try stricter matching (requires city + name/address; country if available)
+                if (! $venue && $normCity !== '') {
                     $venue = Role::where('is_deleted', false)
                         ->where('type', 'venue')
                         ->when($countryCode, function ($q) use ($countryCode) {
@@ -856,6 +876,7 @@ class GeminiUtils
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
                 ->upcomingOrOngoing()
+                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
                 ->first();
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();

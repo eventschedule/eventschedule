@@ -458,7 +458,16 @@
                                         @change="onVenueSelect(idx, $event.target.value ? venues.find(v => v.id === $event.target.value) : null)"
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                    <option v-for="venue in venues" :key="venue.id" :value="venue.id">
+                                    <template v-if="memberVenues.length && followingVenues.length">
+                                        <option disabled>── {{ __('messages.member') }} ──</option>
+                                    </template>
+                                    <option v-for="venue in memberVenues" :key="venue.id" :value="venue.id">
+                                        @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
+                                    </option>
+                                    <template v-if="memberVenues.length && followingVenues.length">
+                                        <option disabled>── {{ __('messages.following') }} ──</option>
+                                    </template>
+                                    <option v-for="venue in followingVenues" :key="venue.id" :value="venue.id">
                                         @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
                                     </option>
                                 </select>
@@ -526,6 +535,18 @@
                                         placeholder="{{ $role->isCurator() ? $role->city : '' }}"
                                         autocomplete="off" />
                                 </div>
+
+                                @auth
+                                <div class="mt-4 flex items-center">
+                                    <input :id="'claim_venue_' + idx" type="checkbox"
+                                        v-model="eventClaimVenue[idx]"
+                                        v-bind:disabled="savedEvents[idx]"
+                                        class="h-4 w-4 rounded border-gray-300 text-[var(--brand-blue)] focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]/50">
+                                    <label :for="'claim_venue_' + idx" class="ms-2 text-sm text-gray-700 dark:text-gray-300">
+                                        {{ __('messages.claim_new_venue_ownership') }}
+                                    </label>
+                                </div>
+                                @endauth
                             </div>
                         </div>
 
@@ -1065,6 +1086,7 @@
                 venues: @json($venues ?? []),
                 eventVenueTypes: [],      // 'use_existing' | 'create_new' per event
                 eventSelectedVenues: [],  // selected venue object per event
+                eventClaimVenue: [],      // bool per event: claim ownership of newly created venue
                 // Time picker dropdown
                 activeTimeDropdown: null,
                 highlightedTimeIndex: {},
@@ -1085,7 +1107,15 @@
             canSubmit() {
                 return this.eventDetails.trim() || this.detailsImage;
             },
-            
+
+            memberVenues() {
+                return this.venues.filter(v => v.is_member);
+            },
+
+            followingVenues() {
+                return this.venues.filter(v => !v.is_member);
+            },
+
             canCreateAccount() {
                 // Always check event fields regardless of createAccount status
                 const eventFieldsValid = this.preview?.parsed?.every(event => {
@@ -1578,6 +1608,7 @@
                         // Initialize venue selection arrays
                         this.eventVenueTypes = [];
                         this.eventSelectedVenues = [];
+                        this.eventClaimVenue = [];
 
                         // Split event_date_time into separate date, start time, end time fields
                         this.preview.parsed.forEach((event) => {
@@ -1650,6 +1681,7 @@
                                 this.eventVenueTypes[idx] = 'create_new';
                                 this.eventSelectedVenues[idx] = null;
                             }
+                            this.eventClaimVenue[idx] = false;
                         });
 
                     // Initialize video properties for performers and automatically search for videos
@@ -1894,6 +1926,7 @@
                             venue_country_code: parsed.event_country_code || '{{ $role->country_code }}',
                             venue_id: venueId,
                             venue_language_code: '{{ $role->language_code }}',
+                            claim_venue_ownership: !!this.eventClaimVenue[idx],
                             members: members,
                             name: eventName,
                             name_en: parsed.event_name_en,
@@ -2017,6 +2050,7 @@
                 this.savingEvents = [];
                 this.eventVenueTypes = [];
                 this.eventSelectedVenues = [];
+                this.eventClaimVenue = [];
                 this.errorMessage = null;
 
                 // Focus on the textarea

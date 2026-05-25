@@ -1259,7 +1259,9 @@ class EventController extends Controller
             ]);
 
             $venues = array_values($venueRoles->map(function ($item) {
-                return $item->toData();
+                return array_merge($item->toData(), [
+                    'is_member' => in_array($item->pivot->level, ['owner', 'admin', 'viewer'], true),
+                ]);
             })->toArray());
         }
 
@@ -1809,7 +1811,11 @@ class EventController extends Controller
         $venueData = null;
         $venue = $event->venue;
         if ($venue) {
-            $venueData = $venue->toData();
+            $isMember = false;
+            if ($user = $request->user()) {
+                $isMember = $user->member()->where('roles.id', $venue->id)->exists();
+            }
+            $venueData = array_merge($venue->toData(), ['is_member' => $isMember]);
         }
 
         return response()->json([

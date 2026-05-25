@@ -219,7 +219,33 @@ class EventRepo
 
                 $matchingUser = false;
 
-                if ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
+                if ($request->boolean('claim_venue_ownership') && $request->user()) {
+                    // Authenticated user explicitly claimed ownership via the AI import checkbox.
+                    // Wins over email/phone auto-match below. Gated on $request->user() (not the
+                    // schedule-owner fallback) so a crafted guest request can't grant ownership.
+                    // Overwrite the AI-parsed venue contact with the auth user's own verified
+                    // contact so isClaimed() returns true and the editability gate locks out
+                    // unrelated followers.
+                    $authUser = $request->user();
+                    $matchingUser = $authUser;
+                    $venue->user_id = $authUser->id;
+                    if ($authUser->email) {
+                        $venue->email = $authUser->email;
+                        $venue->email_verified_at = $authUser->email_verified_at;
+                    }
+                    if ($authUser->phone) {
+                        $venue->phone = $authUser->phone;
+                        $venue->phone_verified_at = $authUser->phone_verified_at;
+                    }
+                    $venue->save();
+
+                    $authUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
+
+                    if (! $authUser->default_role_id) {
+                        $authUser->default_role_id = $venue->id;
+                        $authUser->save();
+                    }
+                } elseif ($venue->email && $matchingUser = User::whereEmail($venue->email)->first()) {
                     $venue->user_id = $matchingUser->id;
                     $venue->email_verified_at = $matchingUser->email_verified_at;
                     if ($venue->phone && $matchingUser->phone === $venue->phone) {

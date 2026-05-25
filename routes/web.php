@@ -315,6 +315,10 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::delete('/{subdomain}/delete-image', [RoleController::class, 'deleteImage'])->name('role.delete_image');
     Route::get('/{subdomain}/merge-preview', [RoleController::class, 'mergePreview'])->name('role.merge_preview');
     Route::post('/{subdomain}/merge', [RoleController::class, 'mergeInto'])->name('role.merge');
+    Route::get('/{subdomain}/merge-venues', [RoleController::class, 'mergeVenues'])->name('role.merge_venues');
+    Route::get('/{subdomain}/merge-venues/preview', [RoleController::class, 'mergeVenuesGroupPreview'])->name('role.merge_venues_preview');
+    Route::post('/{subdomain}/merge-venues', [RoleController::class, 'mergeVenuesGroup'])->name('role.merge_venues_group');
+    Route::post('/{subdomain}/merge-venues/dismiss', [RoleController::class, 'dismissVenueMergeSuggestion'])->name('role.merge_venues_dismiss');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
     Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');
