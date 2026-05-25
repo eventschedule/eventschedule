@@ -1189,9 +1189,11 @@ return [
     'event_count' => 'Number of Events',
     'all_available' => 'All available',
     'event_count_help' => 'Choose how many upcoming events to include',
-    'max_per_row' => 'Max Flyers Per Row',
-    'no_limit' => 'No limit',
-    'max_per_row_help' => 'Limit flyers per row, wrap to multiple rows',
+    'max_per_row' => 'Flyers Per Row',
+    'no_limit' => 'Auto',
+    'max_per_row_help' => 'Number of flyers per row before wrapping to the next row',
+    'number_events' => 'Add Event Numbers',
+    'number_events_help' => 'Add a numbered badge to each flyer. Use {number} in your text template to display the matching number alongside each event.',
 
     // CalDAV Calendar Integration
     'caldav_calendar' => 'CalDAV Calendar',

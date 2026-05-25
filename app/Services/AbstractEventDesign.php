@@ -19,7 +19,7 @@ abstract class AbstractEventDesign
     protected array $c = [];
 
     // Common configuration
-    protected const MAX_EVENTS = 9;
+    protected const MAX_EVENTS = 20;
 
     protected const MARGIN = 18;
 
@@ -1330,12 +1330,57 @@ abstract class AbstractEventDesign
     }
 
     /**
+     * Draw a numbered badge in a flyer corner.
+     * Top-right for LTR, top-left for RTL (opposite of the QR code in bottom-left).
+     */
+    protected function addNumberBadge(int $flyerX, int $flyerY, int $number, ?int $flyerWidth = null): void
+    {
+        $flyerWidth = $flyerWidth ?? 400;
+        $diameter = (int) max(28, min(48, $flyerWidth * 0.12));
+        $inset = 12;
+        $radius = (int) ($diameter / 2);
+
+        $cx = $this->rtl
+            ? $flyerX + $inset + $radius
+            : $flyerX + $flyerWidth - $inset - $radius;
+        $cy = $flyerY + $inset + $radius;
+
+        $accentColor = $this->c['accent'];
+        $whiteColor = $this->c['white'];
+
+        $shadowColor = imagecolorallocatealpha($this->im, 0, 0, 0, 90);
+        imagefilledellipse($this->im, $cx + 2, $cy + 2, $diameter, $diameter, $shadowColor);
+        imagefilledellipse($this->im, $cx, $cy, $diameter, $diameter, $accentColor);
+
+        $text = (string) $number;
+        $fontSize = (int) max(11, min(20, $diameter * 0.45));
+        $fontPath = $this->getSmartFontPath($text, 'bold');
+
+        if (function_exists('imagettfbbox') && file_exists($fontPath)
+            && ($bbox = imagettfbbox($fontSize, 0, $fontPath, $text)) !== false) {
+            // addText() treats $y as the TOP of the text-box and internally adds
+            // $textHeight to reach the baseline (see addTextWithTTF). Mirror that
+            // height formula so the badge stays centered on (cx, cy).
+            $textWidth = $bbox[4] - $bbox[0];
+            $textHeight = $bbox[1] - $bbox[7];
+            $textX = (int) ($cx - $textWidth / 2 - $bbox[0]);
+            $textY = (int) ($cy - $textHeight / 2);
+        } else {
+            $textWidth = $this->getTextWidth($text, $fontSize, $fontPath);
+            $textX = (int) ($cx - $textWidth / 2);
+            $textY = (int) ($cy - $fontSize / 2);
+        }
+
+        $this->addText($text, $textX, $textY, $fontSize, $whiteColor, 'bold');
+    }
+
+    /**
      * Check if text contains RTL characters
      */
     protected function containsRTLCharacters(string $text): bool
     {
-        // Check for Hebrew, Arabic, and other RTL characters
-        return preg_match('/[\x{0590}-\x{05FF}\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text);
+        // Check for Hebrew (incl. Hebrew Presentation Forms FB1D-FB4F), Arabic, and other RTL characters
+        return preg_match('/[\x{0590}-\x{05FF}\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB1D}-\x{FB4F}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text);
     }
 
     /**
@@ -1645,7 +1690,8 @@ abstract class AbstractEventDesign
      */
     protected function isHebrewCharacter(string $char): bool
     {
-        return preg_match('/[\x{0590}-\x{05FF}]/u', $char);
+        // Hebrew block + Hebrew Presentation Forms (alef-lamed ligature, shin-with-dot variants, etc.)
+        return preg_match('/[\x{0590}-\x{05FF}\x{FB1D}-\x{FB4F}]/u', $char);
     }
 
     /**

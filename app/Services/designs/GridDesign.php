@@ -17,7 +17,7 @@ class GridDesign extends AbstractEventDesign
     // Text configuration for grid flyers
     protected const TITLE_FONT_SIZE = 16;
 
-    protected const DATE_FONT_SIZE = 14;
+    protected const DATE_FONT_SIZE = 18;
 
     protected const TEXT_PADDING = 15;
 
@@ -61,13 +61,13 @@ class GridDesign extends AbstractEventDesign
                 // For RTL languages, position flyers from right to left
                 $displayCol = $this->rtl ? ($this->gridCols - 1 - $col) : $col;
 
-                $this->generateSingleFlyer($event, $row, $displayCol);
+                $this->generateSingleFlyer($event, $row, $displayCol, $eventIndex + 1);
                 $eventIndex++;
             }
         }
     }
 
-    protected function generateSingleFlyer(Event $event, int $row, int $col): void
+    protected function generateSingleFlyer(Event $event, int $row, int $col, int $eventNumber = 0): void
     {
         $datePosition = $this->getOption('date_position');
 
@@ -97,6 +97,11 @@ class GridDesign extends AbstractEventDesign
 
         // Add QR code to the bottom left corner of the flyer
         $this->addEventQRCode($event, $x, $flyerY);
+
+        // Add number badge if enabled
+        if ($eventNumber > 0 && $this->getOption('number_events')) {
+            $this->addNumberBadge($x, $flyerY, $eventNumber, self::FLYER_WIDTH);
+        }
     }
 
     /**
@@ -758,6 +763,15 @@ class GridDesign extends AbstractEventDesign
     protected function calculateGridDimensions(): void
     {
         $eventCount = $this->events->count();
+
+        // User-overridden column count (Flyers Per Row); empty/0 falls back to auto-balance.
+        $maxPerRow = (int) $this->getOption('max_per_row', 0);
+        if ($maxPerRow > 0 && $eventCount > 0) {
+            $this->gridCols = min($maxPerRow, $eventCount);
+            $this->gridRows = (int) ceil($eventCount / $this->gridCols);
+
+            return;
+        }
 
         if ($eventCount === 0) {
             $this->gridCols = 1;

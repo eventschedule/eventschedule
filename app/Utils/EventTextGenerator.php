@@ -17,8 +17,11 @@ class EventTextGenerator
             $template = self::getDefaultTemplate();
         }
 
-        foreach ($events as $event) {
-            $text .= self::parseTemplate($template, $event, $role, $directRegistration, $urlSettings);
+        // Normalize to 0-based sequential keys so {number} reflects position regardless of how the caller built the collection.
+        $events = collect($events)->values();
+
+        foreach ($events as $i => $event) {
+            $text .= self::parseTemplate($template, $event, $role, $directRegistration, $urlSettings, $i + 1);
             $text .= "\n\n";
         }
 
@@ -28,13 +31,13 @@ class EventTextGenerator
             $message = trans('messages.want_to_see_your_event_here', [], $lang);
 
             if ($role->custom_domain && ($role->custom_domain_mode !== 'direct' || $role->custom_domain_status === 'active')) {
-                $url = $role->custom_domain . '/request';
+                $url = $role->custom_domain.'/request';
             } else {
                 $url = route('role.request', ['subdomain' => $role->subdomain]);
             }
             $url = preg_replace('#^https?://#', '', $url);
 
-            $text .= $message . "\n" . $url . "\n";
+            $text .= $message."\n".$url."\n";
         }
 
         // Prepend a direction marker to every line so the message
@@ -44,7 +47,7 @@ class EventTextGenerator
         // (which is viewer-dependent).
         $isRtlLanguage = $role->language_code == 'he' || $role->language_code == 'ar';
         $marker = $isRtlLanguage ? "\u{200F}" : "\u{200E}";
-        $text = $marker . str_replace("\n", "\n" . $marker, $text);
+        $text = $marker.str_replace("\n", "\n".$marker, $text);
 
         return $text;
     }
@@ -60,7 +63,7 @@ class EventTextGenerator
     /**
      * Parse a template string with event data
      */
-    public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [])
+    public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [], $eventNumber = null)
     {
         // Set Carbon locale for translated date formats
         $locale = $role->language_code ?? 'en';
@@ -118,6 +121,7 @@ class EventTextGenerator
             '{duration}' => $event->duration ?? '',
 
             // Event variables
+            '{number}' => $eventNumber !== null ? (string) $eventNumber : '',
             '{event_name}' => $event->name,
             '{short_description}' => $event->short_description ?? '',
             '{description}' => $event->description_html ?? '',

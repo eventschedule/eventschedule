@@ -151,6 +151,8 @@
                                      document.getElementById('url_include_id_mobile')?.checked ?? false;
                 const textShowAll = document.getElementById('text_show_all')?.checked ??
                                     document.getElementById('text_show_all_mobile')?.checked ?? false;
+                const numberEvents = document.getElementById('number_events')?.checked ??
+                                     document.getElementById('number_events_mobile')?.checked ?? false;
 
                 return {
                     direct_registration: directRegistration,
@@ -165,7 +167,8 @@
                     overlay_text: overlayText,
                     url_include_https: urlIncludeHttps,
                     url_include_id: urlIncludeId,
-                    text_show_all: textShowAll
+                    text_show_all: textShowAll,
+                    number_events: numberEvents
                 };
             }
 
@@ -298,6 +301,13 @@
                 if (textShowAllDesktop && textShowAllMobile) {
                     textShowAllMobile.checked = textShowAllDesktop.checked;
                 }
+
+                // Sync number events
+                const numberEventsDesktop = document.getElementById('number_events');
+                const numberEventsMobile = document.getElementById('number_events_mobile');
+                if (numberEventsDesktop && numberEventsMobile) {
+                    numberEventsMobile.checked = numberEventsDesktop.checked;
+                }
             }
 
             function loadGraphic() {
@@ -335,8 +345,9 @@
                 const urlIncludeHttpsParam = '&url_include_https=' + (formSettings.url_include_https ? '1' : '0');
                 const urlIncludeIdParam = '&url_include_id=' + (formSettings.url_include_id ? '1' : '0');
                 const textShowAllParam = '&text_show_all=' + (formSettings.text_show_all ? '1' : '0');
+                const numberEventsParam = '&number_events=' + (formSettings.number_events ? '1' : '0');
 
-                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam;
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam;
 
                 let hasError = false;
 
@@ -389,6 +400,7 @@
                                     exclude_recurring: formSettings.exclude_recurring,
                                     text_show_all: formSettings.text_show_all,
                                     event_count: formSettings.event_count,
+                                    number_events: formSettings.number_events,
                                 }),
                             })
                             .then(r => r.json())
@@ -631,6 +643,14 @@
                         textShowAll.checked = currentSettings.text_show_all || false;
                     }
                 });
+
+                // Update number events checkboxes
+                ['number_events', 'number_events_mobile'].forEach(id => {
+                    const numberEvents = document.getElementById(id);
+                    if (numberEvents) {
+                        numberEvents.checked = currentSettings.number_events || false;
+                    }
+                });
             }
 
             function toggleDatePositionVisibility() {
@@ -655,11 +675,11 @@
                 const layout = document.querySelector('input[name="layout"]:checked')?.value ||
                                document.querySelector('input[name="layout_mobile"]:checked')?.value || 'grid';
 
-                // Show max per row only for row layout
+                // Show flyers per row for grid and row layouts
                 ['max_per_row_container', 'max_per_row_container_mobile'].forEach(id => {
                     const container = document.getElementById(id);
                     if (container) {
-                        if (layout === 'row') {
+                        if (layout === 'grid' || layout === 'row') {
                             container.classList.remove('hidden');
                         } else {
                             container.classList.add('hidden');
@@ -808,6 +828,9 @@
                 // Get text show all option
                 const textShowAll = document.getElementById('text_show_all') || document.getElementById('text_show_all_mobile');
 
+                // Get number events option
+                const numberEvents = document.getElementById('number_events') || document.getElementById('number_events_mobile');
+
                 return {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
@@ -826,7 +849,8 @@
                     overlay_text: overlayText ? overlayText.value : '',
                     url_include_https: urlIncludeHttps ? urlIncludeHttps.checked : false,
                     url_include_id: urlIncludeId ? urlIncludeId.checked : false,
-                    text_show_all: textShowAll ? textShowAll.checked : false
+                    text_show_all: textShowAll ? textShowAll.checked : false,
+                    number_events: numberEvents ? numberEvents.checked : false
                 };
             }
 
@@ -1322,7 +1346,7 @@
                 }
 
                 // syncFormFields checkboxes
-                ['url_include_https', 'url_include_https_mobile', 'url_include_id', 'url_include_id_mobile', 'exclude_recurring', 'exclude_recurring_mobile'].forEach(id => {
+                ['url_include_https', 'url_include_https_mobile', 'url_include_id', 'url_include_id_mobile', 'exclude_recurring', 'exclude_recurring_mobile', 'number_events', 'number_events_mobile'].forEach(id => {
                     const checkbox = document.getElementById(id);
                     if (checkbox) {
                         checkbox.addEventListener('change', function() {
@@ -1585,16 +1609,22 @@
                             </div>
                         </div>
 
-                        <!-- Max Per Row (only for row layout) -->
+                        <!-- Flyers Per Row (grid and row layouts) -->
                         <div id="max_per_row_container_mobile" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700 hidden">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_row') }}</h4>
                             <select id="max_per_row_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                 <option value="">{{ __('messages.no_limit') }}</option>
-                                @for ($i = 2; $i <= 10; $i++)
+                                @for ($i = 1; $i <= 10; $i++)
                                     <option value="{{ $i }}">{{ $i }}</option>
                                 @endfor
                             </select>
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.max_per_row_help') }}</p>
+                        </div>
+
+                        <!-- Number Events -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <x-toggle name="number_events_mobile" label="{{ __('messages.number_events') }}" />
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.number_events_help') }}</p>
                         </div>
 
                         <!-- Event Count -->
@@ -1922,16 +1952,22 @@
                                 </div>
                             </div>
 
-                            <!-- Max Per Row (only for row layout) -->
+                            <!-- Flyers Per Row (grid and row layouts) -->
                             <div id="max_per_row_container" class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700 hidden">
                                 <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.max_per_row') }}</h4>
                                 <select id="max_per_row" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
                                     <option value="">{{ __('messages.no_limit') }}</option>
-                                    @for ($i = 2; $i <= 10; $i++)
+                                    @for ($i = 1; $i <= 10; $i++)
                                         <option value="{{ $i }}">{{ $i }}</option>
                                     @endfor
                                 </select>
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.max_per_row_help') }}</p>
+                            </div>
+
+                            <!-- Number Events -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <x-toggle name="number_events" label="{{ __('messages.number_events') }}" />
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.number_events_help') }}</p>
                             </div>
 
                             <!-- Event Count -->

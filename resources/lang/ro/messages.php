@@ -1190,9 +1190,11 @@ return [
     'event_count' => 'Număr de Evenimente',
     'all_available' => 'Toate disponibile',
     'event_count_help' => 'Alege câte evenimente viitoare să includă',
-    'max_per_row' => 'Maxim Afișe pe Rând',
-    'no_limit' => 'Fără limită',
-    'max_per_row_help' => 'Limitează afișele pe rând, continuă pe mai multe rânduri',
+    'max_per_row' => 'Afișe pe Rând',
+    'no_limit' => 'Automat',
+    'max_per_row_help' => 'Numărul de afișe pe rând înainte de a trece la rândul următor',
+    'number_events' => 'Adaugă Numere la Evenimente',
+    'number_events_help' => 'Adaugă o insignă numerotată pe fiecare afiș. Folosește {number} în șablonul tău de text pentru a afișa numărul corespunzător lângă fiecare eveniment.',
 
     // CalDAV Calendar Integration
     'caldav_calendar' => 'Calendar CalDAV',

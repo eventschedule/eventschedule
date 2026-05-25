@@ -25,7 +25,7 @@ class RowDesign extends AbstractEventDesign
 
     protected const DATE_OVERLAY_HEIGHT = 36;
 
-    protected const DATE_FONT_SIZE = 14;
+    protected const DATE_FONT_SIZE = 18;
 
     // Cache for calculated flyer dimensions
     protected array $flyerDimensions = [];
@@ -246,14 +246,14 @@ class RowDesign extends AbstractEventDesign
                 // Scale the width to fill the row
                 $scaledWidth = (int) ($dims['width'] * $scaleFactor);
 
-                $this->generateSingleFlyer($event, $currentX, $currentY, $scaledWidth, $dims['height']);
+                $this->generateSingleFlyer($event, $currentX, $currentY, $scaledWidth, $dims['height'], $eventIndex + 1);
 
                 $currentX += $scaledWidth + (int) (self::MARGIN * $scaleFactor);
             }
         }
     }
 
-    protected function generateSingleFlyer(Event $event, int $x, int $y, int $width, int $height): void
+    protected function generateSingleFlyer(Event $event, int $x, int $y, int $width, int $height, int $eventNumber = 0): void
     {
         $datePosition = $this->getOption('date_position');
 
@@ -274,6 +274,11 @@ class RowDesign extends AbstractEventDesign
 
         // Add QR code to the bottom left corner
         $this->addEventQRCode($event, $x, $flyerY, $width, $height);
+
+        // Add number badge if enabled
+        if ($eventNumber > 0 && $this->getOption('number_events')) {
+            $this->addNumberBadge($x, $flyerY, $eventNumber, $width);
+        }
     }
 
     protected function addEventFlyerImage(Event $event, int $x, int $y, int $width, int $height): void

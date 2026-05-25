@@ -323,6 +323,11 @@ https://example.com/event/summer-concert</code></pre>
                                     </thead>
                                     <tbody>
                                         <tr>
+                                            <td><code class="doc-inline-code">{number}</code></td>
+                                            <td>1-based position in the list (matches the badge on the flyer when Number Events is enabled). Specific to the Event Graphics text panel; has no value in calendar description templates.</td>
+                                            <td>1</td>
+                                        </tr>
+                                        <tr>
                                             <td><code class="doc-inline-code">{event_name}</code></td>
                                             <td>Event Name</td>
                                             <td>Summer Concert</td>

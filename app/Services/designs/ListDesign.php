@@ -26,7 +26,7 @@ class ListDesign extends AbstractEventDesign
 
     protected const VENUE_FONT_SIZE = 14;
 
-    protected const DATE_FONT_SIZE = 14;
+    protected const DATE_FONT_SIZE = 18;
 
     protected const LINE_HEIGHT = 25;
 

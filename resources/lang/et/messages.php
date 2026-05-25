@@ -1181,9 +1181,11 @@ return [
     'event_count' => 'Sündmuste arv',
     'all_available' => 'Kõik saadaval',
     'event_count_help' => 'Valige, mitu eelseisvat sündmust kaasata',
-    'max_per_row' => 'Max flaierid rea kohta',
-    'no_limit' => 'Piiramata',
-    'max_per_row_help' => 'Piirake flaiereid rea kohta, mähkige mitmele reale',
+    'max_per_row' => 'Flaiereid rea kohta',
+    'no_limit' => 'Automaatne',
+    'max_per_row_help' => 'Flaierite arv rea kohta enne järgmisele reale liikumist',
+    'number_events' => 'Lisa sündmuste numbrid',
+    'number_events_help' => 'Lisa igale flaierile nummerdatud märk. Kasuta oma tekstimallis {number}, et kuvada vastav number iga sündmuse kõrval.',
 
     // CalDAV Calendar Integration
     'caldav_calendar' => 'Callup Calendar',

@@ -62,11 +62,18 @@ class GraphicEmailService
                 return false;
             }
 
-            // Determine text events: use all events if text_show_all is enabled
+            $numberEvents = (bool) ($settings['number_events'] ?? false);
+
+            // Determine text events: when numbering is on, the text must match
+            // the flyer-only list so badges and {number} stay in sync.
             $textShowAll = $settings['text_show_all'] ?? false;
-            $textEvents = $textShowAll
-                ? $baseQuery()->orderBy('starts_at')->get()
-                : $baseQuery()->orderBy('starts_at')->limit($eventLimit)->get();
+            if ($numberEvents) {
+                $textEvents = $events;
+            } elseif ($textShowAll) {
+                $textEvents = $baseQuery()->orderBy('starts_at')->get();
+            } else {
+                $textEvents = $baseQuery()->orderBy('starts_at')->limit($eventLimit)->get();
+            }
 
             // Build options array for the generator (matching web preview)
             $datePosition = $settings['date_position'] ?? null;
@@ -74,7 +81,7 @@ class GraphicEmailService
                 $datePosition = null;
             }
             $maxPerRow = $settings['max_per_row'] ?? null;
-            if ($layout !== 'row') {
+            if (! in_array($layout, ['grid', 'row'])) {
                 $maxPerRow = null;
             }
             $overlayText = $settings['overlay_text'] ?? '';
@@ -84,6 +91,7 @@ class GraphicEmailService
                 'max_per_row' => $maxPerRow,
                 'overlay_text' => $overlayText,
                 'header_image_url' => $settings['header_image_url'] ?? null,
+                'number_events' => $numberEvents,
             ];
 
             // Generate the graphic image
