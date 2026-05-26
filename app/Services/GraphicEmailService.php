@@ -91,6 +91,8 @@ class GraphicEmailService
                 'max_per_row' => $maxPerRow,
                 'overlay_text' => $overlayText,
                 'header_image_url' => $settings['header_image_url'] ?? null,
+                'header_text' => $settings['header_text'] ?? '',
+                'footer_text' => $settings['footer_text'] ?? '',
                 'number_events' => $numberEvents,
             ];
 

@@ -70,6 +70,7 @@
                     <nav class="lg:sticky lg:top-8 space-y-1">
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
+                        <a href="#header-footer-text" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Header &amp; Footer Text</a>
                         <a href="#text-template" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Text Template</a>
                         <a href="#quick-reference" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Quick Reference</a>
                         <a href="#variables" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">All Variables</a>
@@ -106,6 +107,53 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The generated graphic displays up to 20 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
                             </p>
+                        </section>
+
+                        <!-- Header & Footer Text -->
+                        <section id="header-footer-text" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                                </svg>
+                                Header &amp; Footer Text
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Brand your event graphic with a short headline at the top and a sign-off at the bottom. Header text is bold and sized to fit; footer text is softer and can span up to two lines. Both are optional and styled automatically to match your schedule's color theme and language direction.
+                            </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                The header text can be used together with a header image (image on top, text directly below) for a logo + tagline layout.
+                            </p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Schedule Variables</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Header and footer text support a small set of schedule-wide variables. Unlike the per-event variables used in <a href="#text-template" class="text-rose-400 hover:text-rose-300">Text Template</a> or overlay text, these reflect the schedule or generation context as a whole, not any single event.
+                            </p>
+                            <div class="overflow-x-auto mb-6">
+                                <table class="min-w-full text-sm text-left text-gray-600 dark:text-gray-300">
+                                    <thead class="text-xs uppercase text-gray-500 dark:text-gray-400">
+                                        <tr>
+                                            <th class="py-2 pr-4">Variable</th>
+                                            <th class="py-2">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-white/5">
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{schedule_name}</code></td><td class="py-2">The schedule's display name</td></tr>
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{month_name}</code></td><td class="py-2">Current month (e.g. "May"), translated</td></tr>
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{month_short}</code></td><td class="py-2">Current month abbreviation (e.g. "May")</td></tr>
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{year}</code></td><td class="py-2">Current year (e.g. "2026")</td></tr>
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{day_name}</code></td><td class="py-2">Current weekday (e.g. "Wednesday"), translated</td></tr>
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{first_event_date}</code></td><td class="py-2">Date of the earliest event in the graphic (e.g. "May 3")</td></tr>
+                                        <tr><td class="py-2 pr-4"><code class="doc-inline-code">{last_event_date}</code></td><td class="py-2">Date of the latest event in the graphic (e.g. "May 28")</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Examples</h3>
+                            <ul class="doc-list mb-4">
+                                <li><code class="doc-inline-code">Spring Lineup {month_name} {year}</code></li>
+                                <li><code class="doc-inline-code">{schedule_name} - Upcoming Events</code></li>
+                                <li><code class="doc-inline-code">{first_event_date} to {last_event_date}</code></li>
+                            </ul>
                         </section>
 
                         <!-- Text Template -->

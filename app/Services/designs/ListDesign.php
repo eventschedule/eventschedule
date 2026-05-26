@@ -50,7 +50,7 @@ class ListDesign extends AbstractEventDesign
 
     protected function generateEventLayout(): void
     {
-        $y = self::MARGIN + $this->headerHeight;
+        $y = self::MARGIN + $this->headerHeight + $this->headerTextHeight;
 
         foreach ($this->events as $event) {
             $this->generateEventListItem($event, $y);

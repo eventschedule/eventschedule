@@ -101,6 +101,8 @@ class GraphicController extends Controller
             'event_count' => 'nullable|integer|min:1|max:20',
             'max_per_row' => 'nullable|integer|min:1|max:20',
             'overlay_text' => 'nullable|string|max:200',
+            'header_text' => 'nullable|string|max:200',
+            'footer_text' => 'nullable|string|max:300',
             'url_include_https' => 'boolean',
             'url_include_id' => 'boolean',
             'text_show_all' => 'boolean',
@@ -253,6 +255,14 @@ class GraphicController extends Controller
         // Get overlay_text from request or settings (for custom text on flyers)
         $overlayText = $request->get('overlay_text', $graphicSettings['overlay_text'] ?? '');
 
+        // Get header_text / footer_text from request or settings (live-editable schedule-wide text)
+        $headerText = $request->has('header_text')
+            ? $request->get('header_text', '')
+            : ($graphicSettings['header_text'] ?? '');
+        $footerText = $request->has('footer_text')
+            ? $request->get('footer_text', '')
+            : ($graphicSettings['footer_text'] ?? '');
+
         // Get number_events from request or settings
         $numberEvents = $request->has('number_events')
             ? $request->boolean('number_events')
@@ -293,6 +303,8 @@ class GraphicController extends Controller
             'max_per_row' => $maxPerRow,
             'overlay_text' => $overlayText,
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
+            'header_text' => $headerText,
+            'footer_text' => $footerText,
             'number_events' => $numberEvents,
         ];
 
@@ -546,6 +558,8 @@ class GraphicController extends Controller
             'max_per_row' => $maxPerRow,
             'overlay_text' => $overlayText,
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
+            'header_text' => $graphicSettings['header_text'] ?? '',
+            'footer_text' => $graphicSettings['footer_text'] ?? '',
             'number_events' => $numberEvents,
         ];
 

@@ -78,7 +78,7 @@ class GridDesign extends AbstractEventDesign
         }
 
         $x = self::MARGIN + ($col * (self::FLYER_WIDTH + self::MARGIN));
-        $y = self::MARGIN + $this->headerHeight + ($row * ($flyerCellHeight + self::MARGIN));
+        $y = self::MARGIN + $this->headerHeight + $this->headerTextHeight + ($row * ($flyerCellHeight + self::MARGIN));
 
         // If date is above, add date bar first and offset the flyer
         $flyerY = $y;

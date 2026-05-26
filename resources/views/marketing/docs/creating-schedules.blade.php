@@ -1418,6 +1418,16 @@ example.eventschedule.com/summer-concert</code></pre>
                                 </div>
                             @endif
 
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4 my-6">
+                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                    The variables above resolve per-event. For the schedule-wide <strong>header</strong> and <strong>footer text</strong> on
+                                    <a href="{{ route('marketing.docs.event_graphics') }}#header-footer-text" class="text-cyan-500 dark:text-cyan-400 hover:text-cyan-300">event graphics</a>,
+                                    a smaller set of context-free variables is available instead - <code class="doc-inline-code">{schedule_name}</code>,
+                                    <code class="doc-inline-code">{month_name}</code>, <code class="doc-inline-code">{year}</code>,
+                                    <code class="doc-inline-code">{first_event_date}</code>, and <code class="doc-inline-code">{last_event_date}</code>.
+                                </p>
+                            </div>
+
                             <hr class="border-gray-200 dark:border-gray-700 my-8">
 
                             <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Feeds</h4>

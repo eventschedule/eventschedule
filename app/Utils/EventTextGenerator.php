@@ -188,6 +188,57 @@ class EventTextGenerator
     }
 
     /**
+     * Parse schedule-level variables for header/footer text.
+     *
+     * Unlike parseTemplate(), these tokens are context-free (no specific event).
+     * Date tokens reflect "now" in the schedule's timezone; {first_event_date}
+     * and {last_event_date} use the supplied events collection if provided.
+     */
+    public static function parseScheduleVariables(Role $role, string $text, $events = null): string
+    {
+        if ($text === '' || strpos($text, '{') === false) {
+            return $text;
+        }
+
+        $locale = $role->language_code ?? 'en';
+        \Carbon\Carbon::setLocale($locale);
+
+        $tz = $role->timezone ?? 'UTC';
+        $now = \Carbon\Carbon::now($tz);
+
+        $firstEventDate = '';
+        $lastEventDate = '';
+        if ($events !== null) {
+            $collection = collect($events);
+            if ($collection->isNotEmpty()) {
+                $first = $collection->first();
+                $last = $collection->last();
+                if ($first && method_exists($first, 'getStartDateTime')) {
+                    $firstEventDate = $first->getStartDateTime(null, true, $tz)->translatedFormat('M j');
+                }
+                if ($last && method_exists($last, 'getStartDateTime')) {
+                    $lastEventDate = $last->getStartDateTime(null, true, $tz)->translatedFormat('M j');
+                }
+            }
+        }
+
+        $replacements = [
+            '{schedule_name}' => $role->name ?? '',
+            '{year}' => $now->format('Y'),
+            '{month}' => $now->format('n'),
+            '{month_pad}' => $now->format('m'),
+            '{month_name}' => $now->translatedFormat('F'),
+            '{month_short}' => $now->translatedFormat('M'),
+            '{day_name}' => $now->translatedFormat('l'),
+            '{day_short}' => $now->translatedFormat('D'),
+            '{first_event_date}' => $firstEventDate,
+            '{last_event_date}' => $lastEventDate,
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $text);
+    }
+
+    /**
      * Get the formatted price for an event
      */
     public static function getPrice($event)

@@ -5009,6 +5009,7 @@ class MarketingController extends Controller
 
             // Event Graphics
             ['page' => 'Event Graphics', 'section' => 'Overview', 'description' => 'Generate shareable images for social media.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'graphics images social media flyer'],
+            ['page' => 'Event Graphics', 'section' => 'Header & Footer Text', 'description' => 'Add a headline above and a sign-off below the events.', 'url' => $r['event_graphics'].'#header-footer-text', 'category' => 'User Guide', 'keywords' => 'header footer text headline tagline branding signoff'],
             ['page' => 'Event Graphics', 'section' => 'Text Template', 'description' => 'Customize text formatting for event graphics.', 'url' => $r['event_graphics'].'#text-template', 'category' => 'User Guide', 'keywords' => 'template text format'],
             ['page' => 'Event Graphics', 'section' => 'Quick Reference', 'description' => 'Essential template variables at a glance.', 'url' => $r['event_graphics'].'#quick-reference', 'category' => 'User Guide', 'keywords' => 'variables reference cheatsheet'],
             ['page' => 'Event Graphics', 'section' => 'All Template Variables', 'description' => 'Complete list of available template variables.', 'url' => $r['event_graphics'].'#variables', 'category' => 'User Guide', 'keywords' => 'variables placeholders tokens'],

@@ -46,7 +46,25 @@ abstract class AbstractEventDesign
 
     protected const FOOTER_FONT_SIZE = 13;
 
+    protected const FOOTER_LINE_GAP = 6;
+
+    // Vertical gap between footer text band and the bottom-right branding watermark
+    protected const FOOTER_BRANDING_CLEARANCE = 20;
+
     protected int $footerHeight = 0;
+
+    // Header text band (rendered below the header image when both are present)
+    protected const HEADER_TEXT_HEIGHT = 60;
+
+    protected const HEADER_TEXT_FONT_SIZE_MAX = 26;
+
+    protected const HEADER_TEXT_FONT_SIZE_MIN = 16;
+
+    protected int $headerTextHeight = 0;
+
+    protected string $headerTextParsed = '';
+
+    protected array $footerTextLines = [];
 
     // Language and layout
     protected string $lang;
@@ -100,7 +118,10 @@ abstract class AbstractEventDesign
         // Prepare header image (uses totalWidth, adds to totalHeight)
         $this->prepareHeaderImage();
 
-        // Prepare footer (adds to totalHeight if schedule accepts requests)
+        // Prepare optional header text band (rendered below image if both present)
+        $this->prepareHeaderText();
+
+        // Prepare optional footer text band (clears branding watermark)
         $this->prepareFooter();
 
         // Create image
@@ -132,6 +153,9 @@ abstract class AbstractEventDesign
 
         // Render header image after background
         $this->renderHeaderImage();
+
+        // Render header text band (sits below header image, above events)
+        $this->renderHeaderText();
 
         // Generate event layout based on design type
         $this->generateEventLayout();
@@ -261,14 +285,147 @@ abstract class AbstractEventDesign
     }
 
     /**
-     * Prepare footer - adds height if schedule accepts event requests
+     * Prepare optional header text band - parses tokens and reserves vertical space
+     * below the header image (or at the top of the canvas if no image is set).
      */
-    protected function prepareFooter(): void {}
+    protected function prepareHeaderText(): void
+    {
+        $raw = trim((string) $this->getOption('header_text', ''));
+        if ($raw === '') {
+            return;
+        }
+
+        $this->headerTextParsed = EventTextGenerator::parseScheduleVariables($this->role, $raw, $this->events);
+
+        if ($this->headerTextParsed === '') {
+            return;
+        }
+
+        $this->headerTextHeight = self::HEADER_TEXT_HEIGHT;
+        $this->totalHeight += $this->headerTextHeight;
+    }
 
     /**
-     * Render footer with "Want to see your event here?" message
+     * Prepare optional footer text band - parses tokens (incl. {first_event_date} /
+     * {last_event_date}) and reserves vertical space above the branding watermark.
      */
-    protected function renderFooter(): void {}
+    protected function prepareFooter(): void
+    {
+        $raw = trim((string) $this->getOption('footer_text', ''));
+        if ($raw === '') {
+            return;
+        }
+
+        $parsed = EventTextGenerator::parseScheduleVariables($this->role, $raw, $this->events);
+
+        if ($parsed === '') {
+            return;
+        }
+
+        // Normalize line breaks, cap at 2 lines, drop empties
+        $lines = preg_split('/\r?\n/', $parsed);
+        $lines = array_values(array_filter(array_map('trim', $lines), fn ($l) => $l !== ''));
+        $lines = array_slice($lines, 0, 2);
+
+        if (empty($lines)) {
+            return;
+        }
+
+        $this->footerTextLines = $lines;
+
+        $band = self::FOOTER_HEIGHT;
+        if (count($lines) > 1) {
+            $band += self::FOOTER_FONT_SIZE + self::FOOTER_LINE_GAP;
+        }
+
+        $this->footerHeight = $band;
+        $this->totalHeight += $band + self::FOOTER_BRANDING_CLEARANCE;
+    }
+
+    /**
+     * Render the header text band, horizontally centered, vertically centered
+     * inside the reserved band. Auto-shrinks font size to fit canvas width.
+     */
+    protected function renderHeaderText(): void
+    {
+        if ($this->headerTextHeight === 0 || $this->headerTextParsed === '') {
+            return;
+        }
+
+        $text = $this->sanitizeText($this->headerTextParsed);
+        $maxWidth = $this->totalWidth - (self::MARGIN * 2);
+
+        $fontPath = $this->getSmartFontPath($text, 'bold');
+
+        // Auto-shrink to fit
+        $fontSize = self::HEADER_TEXT_FONT_SIZE_MAX;
+        while ($fontSize > self::HEADER_TEXT_FONT_SIZE_MIN) {
+            $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+            $textWidth = abs($bbox[2] - $bbox[0]);
+            if ($textWidth <= $maxWidth) {
+                break;
+            }
+            $fontSize--;
+        }
+
+        // If still too wide at the minimum, truncate with ellipsis
+        $bbox = imagettfbbox($fontSize, 0, $fontPath, $text);
+        $textWidth = abs($bbox[2] - $bbox[0]);
+        if ($textWidth > $maxWidth) {
+            while (strlen($text) > 1 && $textWidth > $maxWidth) {
+                $text = mb_substr($text, 0, mb_strlen($text) - 1);
+                $bbox = imagettfbbox($fontSize, 0, $fontPath, $text.'…');
+                $textWidth = abs($bbox[2] - $bbox[0]);
+            }
+            $text = $text.'…';
+        }
+
+        $textHeight = abs($bbox[7] - $bbox[1]);
+
+        // Band sits directly below the header image (or below the top margin if no image)
+        $bandTop = self::MARGIN + $this->headerHeight;
+        $x = (int) (($this->totalWidth - $textWidth) / 2);
+        $y = (int) ($bandTop + (($this->headerTextHeight + $textHeight) / 2));
+
+        $this->addText($text, $x, $y, $fontSize, $this->c['font'], 'bold');
+    }
+
+    /**
+     * Render footer text band above the branding watermark.
+     * Uses a softer color (alpha ~38, ~70% opacity) so it feels secondary to the events.
+     */
+    protected function renderFooter(): void
+    {
+        if ($this->footerHeight === 0 || empty($this->footerTextLines)) {
+            return;
+        }
+
+        $fontSize = self::FOOTER_FONT_SIZE;
+
+        // Build a softened version of the role's font color for the footer
+        $base = $this->c['font'];
+        $r = ($base >> 16) & 0xFF;
+        $g = ($base >> 8) & 0xFF;
+        $b = $base & 0xFF;
+        $softColor = imagecolorallocatealpha($this->im, $r, $g, $b, 38); // ~70% opacity
+
+        $bandTop = $this->totalHeight - self::FOOTER_BRANDING_CLEARANCE - $this->footerHeight;
+        $lineCount = count($this->footerTextLines);
+        $lineHeight = $fontSize + self::FOOTER_LINE_GAP;
+        $totalTextHeight = ($lineCount * $fontSize) + (($lineCount - 1) * self::FOOTER_LINE_GAP);
+        $startY = (int) ($bandTop + (($this->footerHeight - $totalTextHeight) / 2) + $fontSize);
+
+        foreach ($this->footerTextLines as $i => $line) {
+            $line = $this->sanitizeText($line);
+            $fontPath = $this->getSmartFontPath($line, 'regular');
+            $bbox = imagettfbbox($fontSize, 0, $fontPath, $line);
+            $textWidth = abs($bbox[2] - $bbox[0]);
+            $x = (int) (($this->totalWidth - $textWidth) / 2);
+            $y = $startY + ($i * $lineHeight);
+
+            $this->addText($line, $x, $y, $fontSize, $softColor, 'regular');
+        }
+    }
 
     /**
      * Render subtle "eventschedule.com" branding watermark (hosted only)

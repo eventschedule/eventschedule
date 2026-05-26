@@ -145,6 +145,10 @@
                                   document.getElementById('max_per_row_mobile')?.value ?? '';
                 const overlayText = document.getElementById('overlay_text')?.value ??
                                     document.getElementById('overlay_text_mobile')?.value ?? '';
+                const headerText = document.getElementById('header_text')?.value ??
+                                   document.getElementById('header_text_mobile')?.value ?? '';
+                const footerText = document.getElementById('footer_text')?.value ??
+                                   document.getElementById('footer_text_mobile')?.value ?? '';
                 const urlIncludeHttps = document.getElementById('url_include_https')?.checked ??
                                         document.getElementById('url_include_https_mobile')?.checked ?? false;
                 const urlIncludeId = document.getElementById('url_include_id')?.checked ??
@@ -165,6 +169,8 @@
                     event_count: eventCount,
                     max_per_row: maxPerRow,
                     overlay_text: overlayText,
+                    header_text: headerText,
+                    footer_text: footerText,
                     url_include_https: urlIncludeHttps,
                     url_include_id: urlIncludeId,
                     text_show_all: textShowAll,
@@ -281,6 +287,18 @@
                     overlayTextMobile.value = overlayTextDesktop.value;
                 }
 
+                // Sync header / footer text
+                const headerTextDesktop = document.getElementById('header_text');
+                const headerTextMobile = document.getElementById('header_text_mobile');
+                if (headerTextDesktop && headerTextMobile) {
+                    headerTextMobile.value = headerTextDesktop.value;
+                }
+                const footerTextDesktop = document.getElementById('footer_text');
+                const footerTextMobile = document.getElementById('footer_text_mobile');
+                if (footerTextDesktop && footerTextMobile) {
+                    footerTextMobile.value = footerTextDesktop.value;
+                }
+
                 // Sync URL include HTTPS
                 const urlIncludeHttpsDesktop = document.getElementById('url_include_https');
                 const urlIncludeHttpsMobile = document.getElementById('url_include_https_mobile');
@@ -342,12 +360,14 @@
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
                 const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
+                const headerTextParam = '&header_text=' + encodeURIComponent(formSettings.header_text || '');
+                const footerTextParam = '&footer_text=' + encodeURIComponent(formSettings.footer_text || '');
                 const urlIncludeHttpsParam = '&url_include_https=' + (formSettings.url_include_https ? '1' : '0');
                 const urlIncludeIdParam = '&url_include_id=' + (formSettings.url_include_id ? '1' : '0');
                 const textShowAllParam = '&text_show_all=' + (formSettings.text_show_all ? '1' : '0');
                 const numberEventsParam = '&number_events=' + (formSettings.number_events ? '1' : '0');
 
-                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam;
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam;
 
                 let hasError = false;
 
@@ -620,6 +640,20 @@
                 });
                 toggleOverlayTextVisibility();
 
+                // Update header / footer text inputs
+                ['header_text', 'header_text_mobile'].forEach(id => {
+                    const headerText = document.getElementById(id);
+                    if (headerText) {
+                        headerText.value = currentSettings.header_text || '';
+                    }
+                });
+                ['footer_text', 'footer_text_mobile'].forEach(id => {
+                    const footerText = document.getElementById(id);
+                    if (footerText) {
+                        footerText.value = currentSettings.footer_text || '';
+                    }
+                });
+
                 // Update URL include HTTPS checkboxes
                 ['url_include_https', 'url_include_https_mobile'].forEach(id => {
                     const urlIncludeHttps = document.getElementById(id);
@@ -821,6 +855,10 @@
                 // Get overlay text
                 const overlayText = document.getElementById('overlay_text') || document.getElementById('overlay_text_mobile');
 
+                // Get header / footer text
+                const headerText = document.getElementById('header_text') || document.getElementById('header_text_mobile');
+                const footerText = document.getElementById('footer_text') || document.getElementById('footer_text_mobile');
+
                 // Get URL formatting options
                 const urlIncludeHttps = document.getElementById('url_include_https') || document.getElementById('url_include_https_mobile');
                 const urlIncludeId = document.getElementById('url_include_id') || document.getElementById('url_include_id_mobile');
@@ -847,6 +885,8 @@
                     event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null,
                     max_per_row: maxPerRow && maxPerRow.value ? parseInt(maxPerRow.value) : null,
                     overlay_text: overlayText ? overlayText.value : '',
+                    header_text: headerText ? headerText.value : '',
+                    footer_text: footerText ? footerText.value : '',
                     url_include_https: urlIncludeHttps ? urlIncludeHttps.checked : false,
                     url_include_id: urlIncludeId ? urlIncludeId.checked : false,
                     text_show_all: textShowAll ? textShowAll.checked : false,
@@ -1292,6 +1332,43 @@
                     }
                 });
 
+                // Two-way sync for header / footer text between desktop and mobile
+                [
+                    ['header_text', 'header_text_mobile'],
+                    ['footer_text', 'footer_text_mobile'],
+                ].forEach(([a, b]) => {
+                    [a, b].forEach(id => {
+                        const input = document.getElementById(id);
+                        if (!input) return;
+                        input.addEventListener('input', function() {
+                            const otherId = id === a ? b : a;
+                            const otherInput = document.getElementById(otherId);
+                            if (otherInput) otherInput.value = this.value;
+                        });
+                    });
+                });
+
+                // Schedule-variable chip click handler (delegated, CSP-safe)
+                document.addEventListener('click', function(e) {
+                    const chip = e.target.closest('.schedule-token-chip');
+                    if (!chip) return;
+                    e.preventDefault();
+                    const token = chip.dataset.token;
+                    const targetId = chip.dataset.target;
+                    const target = document.getElementById(targetId);
+                    if (!target || !token) return;
+
+                    const start = target.selectionStart ?? target.value.length;
+                    const end = target.selectionEnd ?? target.value.length;
+                    target.value = target.value.slice(0, start) + token + target.value.slice(end);
+                    const cursor = start + token.length;
+                    target.focus();
+                    if (typeof target.setSelectionRange === 'function') {
+                        target.setSelectionRange(cursor, cursor);
+                    }
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+
                 // Add change listeners for event count selects
                 ['event_count', 'event_count_mobile'].forEach(id => {
                     const select = document.getElementById(id);
@@ -1655,6 +1732,36 @@
                             <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_help') }}</p>
                         </div>
 
+                        <!-- Header Text -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_header_text') }}</h4>
+                            <input type="text" id="header_text_mobile" maxlength="200"
+                                placeholder="{{ __('messages.graphic_header_text_placeholder') }}"
+                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm rtl:text-right">
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                @foreach (['{schedule_name}', '{month_name}', '{year}', '{first_event_date}', '{last_event_date}'] as $token)
+                                    <button type="button" data-token="{{ $token }}" data-target="header_text_mobile"
+                                        class="schedule-token-chip px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-700 dark:text-gray-300 transition-colors">{{ $token }}</button>
+                                @endforeach
+                            </div>
+                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_text_help') }}</p>
+                        </div>
+
+                        <!-- Footer Text -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_footer_text') }}</h4>
+                            <textarea id="footer_text_mobile" rows="2" maxlength="300"
+                                placeholder="{{ __('messages.graphic_footer_text_placeholder') }}"
+                                class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-none rtl:text-right"></textarea>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                @foreach (['{schedule_name}', '{month_name}', '{year}', '{first_event_date}', '{last_event_date}'] as $token)
+                                    <button type="button" data-token="{{ $token }}" data-target="footer_text_mobile"
+                                        class="schedule-token-chip px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-700 dark:text-gray-300 transition-colors">{{ $token }}</button>
+                                @endforeach
+                            </div>
+                            <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_footer_text_help') }}</p>
+                        </div>
+
                     </div>
 
                     <!-- Text Tab Content -->
@@ -1996,6 +2103,36 @@
                                 </div>
                                 <div id="header_image_preview" class="mt-3 hidden"></div>
                                 <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_help') }}</p>
+                            </div>
+
+                            <!-- Header Text -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_header_text') }}</h4>
+                                <input type="text" id="header_text" maxlength="200"
+                                    placeholder="{{ __('messages.graphic_header_text_placeholder') }}"
+                                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm rtl:text-right">
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    @foreach (['{schedule_name}', '{month_name}', '{year}', '{first_event_date}', '{last_event_date}'] as $token)
+                                        <button type="button" data-token="{{ $token }}" data-target="header_text"
+                                            class="schedule-token-chip px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-700 dark:text-gray-300 transition-colors">{{ $token }}</button>
+                                    @endforeach
+                                </div>
+                                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_header_text_help') }}</p>
+                            </div>
+
+                            <!-- Footer Text -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_footer_text') }}</h4>
+                                <textarea id="footer_text" rows="2" maxlength="300"
+                                    placeholder="{{ __('messages.graphic_footer_text_placeholder') }}"
+                                    class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm resize-none rtl:text-right"></textarea>
+                                <div class="flex flex-wrap gap-1 mt-2">
+                                    @foreach (['{schedule_name}', '{month_name}', '{year}', '{first_event_date}', '{last_event_date}'] as $token)
+                                        <button type="button" data-token="{{ $token }}" data-target="footer_text"
+                                            class="schedule-token-chip px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded text-gray-700 dark:text-gray-300 transition-colors">{{ $token }}</button>
+                                    @endforeach
+                                </div>
+                                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_footer_text_help') }}</p>
                             </div>
 
                         </div>
