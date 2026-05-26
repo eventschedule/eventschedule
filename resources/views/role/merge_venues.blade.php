@@ -90,7 +90,7 @@
                                             @endif
                                         </div>
                                         <div class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                                            @if ($venue->city){{ $venue->city }}@endif@if ($venue->city && $venue->country_code), @endif@if ($venue->country_code){{ strtoupper($venue->country_code) }}@endif
+                                            {{ implode(', ', array_filter([$venue->city, $venue->country_code ? strtoupper($venue->country_code) : null])) }}
                                             <span class="ms-2">{{ str_replace(':count', $venue->future_event_count, __('messages.merge_venues_future_events_count')) }}</span>
                                         </div>
                                     </div>
