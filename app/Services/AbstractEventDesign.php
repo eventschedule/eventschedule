@@ -42,11 +42,11 @@ abstract class AbstractEventDesign
     protected $headerImageResource = null;
 
     // Footer configuration
-    protected const FOOTER_HEIGHT = 50;
+    protected const FOOTER_HEIGHT = 70;
 
-    protected const FOOTER_FONT_SIZE = 13;
+    protected const FOOTER_FONT_SIZE = 22;
 
-    protected const FOOTER_LINE_GAP = 6;
+    protected const FOOTER_LINE_GAP = 10;
 
     // Vertical gap between footer text band and the bottom-right branding watermark
     protected const FOOTER_BRANDING_CLEARANCE = 20;
@@ -54,11 +54,11 @@ abstract class AbstractEventDesign
     protected int $footerHeight = 0;
 
     // Header text band (rendered below the header image when both are present)
-    protected const HEADER_TEXT_HEIGHT = 60;
+    protected const HEADER_TEXT_HEIGHT = 130;
 
-    protected const HEADER_TEXT_FONT_SIZE_MAX = 26;
+    protected const HEADER_TEXT_FONT_SIZE_MAX = 36;
 
-    protected const HEADER_TEXT_FONT_SIZE_MIN = 16;
+    protected const HEADER_TEXT_FONT_SIZE_MIN = 22;
 
     protected int $headerTextHeight = 0;
 
@@ -382,10 +382,12 @@ abstract class AbstractEventDesign
 
         $textHeight = abs($bbox[7] - $bbox[1]);
 
-        // Band sits directly below the header image (or below the top margin if no image)
+        // Band sits directly below the header image (or below the top margin if no image).
+        // addText() treats $y as the TOP of the text box (it adds textHeight internally to
+        // reach the baseline), so center the text-box vertically inside the reserved band.
         $bandTop = self::MARGIN + $this->headerHeight;
         $x = (int) (($this->totalWidth - $textWidth) / 2);
-        $y = (int) ($bandTop + (($this->headerTextHeight + $textHeight) / 2));
+        $y = (int) ($bandTop + ($this->headerTextHeight - $textHeight) / 2);
 
         $this->addText($text, $x, $y, $fontSize, $this->c['font'], 'bold');
     }
@@ -402,28 +404,30 @@ abstract class AbstractEventDesign
 
         $fontSize = self::FOOTER_FONT_SIZE;
 
-        // Build a softened version of the role's font color for the footer
+        // Slightly softened version of the role's font color so the footer
+        // stays a touch quieter than the events themselves.
         $base = $this->c['font'];
         $r = ($base >> 16) & 0xFF;
         $g = ($base >> 8) & 0xFF;
         $b = $base & 0xFF;
-        $softColor = imagecolorallocatealpha($this->im, $r, $g, $b, 38); // ~70% opacity
+        $softColor = imagecolorallocatealpha($this->im, $r, $g, $b, 20); // ~84% opacity
 
         $bandTop = $this->totalHeight - self::FOOTER_BRANDING_CLEARANCE - $this->footerHeight;
         $lineCount = count($this->footerTextLines);
         $lineHeight = $fontSize + self::FOOTER_LINE_GAP;
         $totalTextHeight = ($lineCount * $fontSize) + (($lineCount - 1) * self::FOOTER_LINE_GAP);
-        $startY = (int) ($bandTop + (($this->footerHeight - $totalTextHeight) / 2) + $fontSize);
+        // addText() treats $y as the TOP of the text box, so pass the top of the centered block.
+        $startY = (int) ($bandTop + ($this->footerHeight - $totalTextHeight) / 2);
 
         foreach ($this->footerTextLines as $i => $line) {
             $line = $this->sanitizeText($line);
-            $fontPath = $this->getSmartFontPath($line, 'regular');
+            $fontPath = $this->getSmartFontPath($line, 'bold');
             $bbox = imagettfbbox($fontSize, 0, $fontPath, $line);
             $textWidth = abs($bbox[2] - $bbox[0]);
             $x = (int) (($this->totalWidth - $textWidth) / 2);
             $y = $startY + ($i * $lineHeight);
 
-            $this->addText($line, $x, $y, $fontSize, $softColor, 'regular');
+            $this->addText($line, $x, $y, $fontSize, $softColor, 'bold');
         }
     }
 
