@@ -772,11 +772,7 @@ class TicketController extends Controller
         if ($event->is_draft && ! $isMemberOrAdmin) {
             abort(404);
         }
-        if ($event->is_private
-            && $role->isEnterprise()
-            && ! $isMemberOrAdmin
-            && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id))
-        ) {
+        if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
 
@@ -1396,11 +1392,7 @@ class TicketController extends Controller
         if ($event->is_draft && ! $isMemberOrAdmin) {
             abort(404);
         }
-        if ($event->is_private
-            && $role->isEnterprise()
-            && ! $isMemberOrAdmin
-            && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id))
-        ) {
+        if ($event->is_private && ! $isMemberOrAdmin) {
             abort(404);
         }
 

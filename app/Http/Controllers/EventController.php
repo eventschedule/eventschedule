@@ -2868,7 +2868,7 @@ class EventController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
-        if ($event->is_private && $role->isEnterprise() && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+        if ($event->is_private && ! $isMemberOrAdmin) {
             return redirect($role->getGuestUrl());
         }
 

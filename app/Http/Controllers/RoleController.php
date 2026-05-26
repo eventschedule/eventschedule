@@ -606,6 +606,13 @@ class RoleController extends Controller
 
         DB::table('role_user')->where('role_id', $source->id)->delete();
 
+        // Re-point carpool_offers.role_id so offers attached to the source venue
+        // continue to surface against the merged-into venue. Source is only
+        // soft-deleted, so the FK's nullOnDelete wouldn't fire on its own.
+        DB::table('carpool_offers')
+            ->where('role_id', $source->id)
+            ->update(['role_id' => $target->id]);
+
         // Soft-delete the source.
         $source->is_deleted = true;
         $source->save();
@@ -759,6 +766,10 @@ class RoleController extends Controller
 
     public function mergeVenues($subdomain)
     {
+        if (is_demo_mode()) {
+            return redirect()->route('home')->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
@@ -793,6 +804,10 @@ class RoleController extends Controller
 
     public function mergeVenuesGroupPreview(Request $request, $subdomain)
     {
+        if (is_demo_mode()) {
+            return response()->json(['error' => __('messages.demo_mode_restriction')], 403);
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
@@ -833,6 +848,11 @@ class RoleController extends Controller
 
     public function mergeVenuesGroup(Request $request, $subdomain)
     {
+        if (is_demo_mode()) {
+            return redirect()->route('role.merge_venues', ['subdomain' => $subdomain])
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
@@ -906,6 +926,11 @@ class RoleController extends Controller
 
     public function dismissVenueMergeSuggestion(Request $request, $subdomain)
     {
+        if (is_demo_mode()) {
+            return redirect()->route('role.merge_venues', ['subdomain' => $subdomain])
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
@@ -1034,9 +1059,8 @@ class RoleController extends Controller
             }
 
             if ($event) {
-                // Block direct URL access to private events for non-members
-                // Only enforce if the schedule still has Enterprise access
-                if ($event->is_private && $role->isEnterprise() && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                // Block direct URL access to private events for non-members.
+                if ($event->is_private && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
                     $event = null;
                 }
             }
