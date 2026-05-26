@@ -657,19 +657,24 @@ class RoleController extends Controller
             return false;
         }
 
-        // Target requires actual editor access (not the broader isEditableBy)
-        // so a user cannot push events into a follower-only venue.
+        // Mirror isEditableBy(): owner/admin always, plus follower on an unclaimed
+        // target. An unclaimed venue has no verified operator to protect from a
+        // curator consolidating their own duplicates.
         if ($allowDeletedTarget && $target->is_deleted) {
+            $allowedLevels = $target->isClaimed()
+                ? ['owner', 'admin']
+                : ['owner', 'admin', 'follower'];
+
             $hasDirectTargetEditor = DB::table('role_user')
                 ->where('role_id', $target->id)
                 ->where('user_id', $user->id)
-                ->whereIn('level', ['owner', 'admin'])
+                ->whereIn('level', $allowedLevels)
                 ->exists();
 
             if (! $hasDirectTargetEditor) {
                 return false;
             }
-        } elseif (! $user->isEditor($target->subdomain)) {
+        } elseif (! $target->isEditableBy($user)) {
             return false;
         }
 
@@ -2839,9 +2844,9 @@ class RoleController extends Controller
             ->all();
 
         // Merge candidates: other venues the user is an editor of, surfaced
-        // when the source venue is mergeable (unclaimed). canMergeRoles
-        // requires editor access on the target, so showing follow-only
-        // candidates would lead to silent 403s on submit.
+        // when the source venue is mergeable (unclaimed). canMergeRoles also
+        // accepts follower-of-unclaimed targets, but the venue-settings picker
+        // stays editor-only to keep the list focused on venues the user owns.
         $mergeCandidates = collect();
         $mergeSuggestion = null;
         if ($role->isVenue() && ! $role->isClaimed()) {
