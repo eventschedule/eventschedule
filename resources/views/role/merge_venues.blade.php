@@ -46,11 +46,14 @@
 
                 <div class="ap-card rounded-xl p-5" id="group-{{ $groupHash }}">
 
-                    <div class="mb-4 text-sm text-gray-700 dark:text-gray-300">
+                    <div class="mb-4 text-sm text-gray-700 dark:text-gray-300 flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span class="font-medium">{{ __('messages.merge_venues_will_merge_into') }}</span>
-                        <span class="font-semibold text-gray-900 dark:text-gray-100" data-target-label="{{ $groupHash }}">
-                            {{ $defaultTarget->getDisplayName(false) }}@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif
+                        <span class="font-semibold text-gray-900 dark:text-gray-100" data-target-name="{{ $groupHash }}">{{ $defaultTarget->getDisplayName(false) }}</span>
+                        <span class="text-xs text-gray-500 dark:text-gray-400" data-target-subdomain="{{ $groupHash }}">/{{ $defaultTarget->subdomain }}</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-[#2d2d30] dark:text-gray-300" data-target-deleted="{{ $groupHash }}" {{ $defaultTarget->is_deleted ? '' : 'hidden' }}>
+                            {{ __('messages.deleted_tag') }}
                         </span>
+                        <span data-target-city="{{ $groupHash }}" {{ $defaultTarget->city ? '' : 'hidden' }}>@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif</span>
                     </div>
 
                     <form method="POST" action="{{ route('role.merge_venues_group', ['subdomain' => $role->subdomain]) }}"
@@ -68,7 +71,11 @@
                                 <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-[#2d2d30] hover:bg-gray-50 dark:hover:bg-[#2d2d30] cursor-pointer transition-colors">
                                     <input type="radio" name="target_choice_{{ $groupHash }}" value="{{ $venue->id }}"
                                            data-group-radio="{{ $groupHash }}"
-                                           data-venue-label="{{ $venue->getDisplayName(false) }}@if ($venue->city), {{ $venue->city }}@endif"
+                                           data-venue-name="{{ $venue->getDisplayName(false) }}"
+                                           data-venue-subdomain="{{ $venue->subdomain }}"
+                                           data-venue-city="{{ $venue->city }}"
+                                           data-venue-deleted="{{ $venue->is_deleted ? '1' : '0' }}"
+                                           data-future-events="{{ $venue->future_event_count }}"
                                            class="mt-1 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)]"
                                            {{ $venue->id === $defaultTarget->id ? 'checked' : '' }}>
                                     <div class="flex-1 min-w-0">
@@ -98,17 +105,19 @@
                             @endforeach
                         </div>
 
-                        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-4">
-                            <button type="button" class="dismiss-group-btn px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d30] rounded-lg transition-colors"
-                                    data-group-hash="{{ $groupHash }}">
-                                {{ __('messages.merge_venues_not_duplicates_button') }}
-                            </button>
-                            <x-brand-button type="button" class="merge-group-btn" data-group-hash="{{ $groupHash }}"
-                                            data-source-count="{{ count($group) - 1 }}">
-                                <span data-merge-btn-label="{{ $groupHash }}">
-                                    {{ str_replace([':count', ':target'], [count($group) - 1, $defaultTarget->getDisplayName(false)], __('messages.merge_venues_merge_button_count')) }}
-                                </span>
-                            </x-brand-button>
+                        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2 mt-4">
+                            <div class="text-sm text-gray-600 dark:text-gray-400" data-merge-summary="{{ $groupHash }}">
+                                {{ str_replace([':venues', ':events'], [count($group) - 1, collect($group)->where('id', '!=', $defaultTarget->id)->sum('future_event_count')], __('messages.merge_venues_summary')) }}
+                            </div>
+                            <div class="flex flex-col-reverse sm:flex-row gap-2">
+                                <button type="button" class="dismiss-group-btn px-4 py-3 text-base text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2d2d30] rounded-lg transition-colors"
+                                        data-group-hash="{{ $groupHash }}">
+                                    {{ __('messages.merge_venues_not_duplicates_button') }}
+                                </button>
+                                <x-brand-button type="button" class="merge-group-btn" data-group-hash="{{ $groupHash }}">
+                                    {{ __('messages.merge_venues_merge_button') }}
+                                </x-brand-button>
+                            </div>
                         </div>
                     </form>
 
@@ -127,13 +136,13 @@
 
     <script {!! nonce_attr() !!}>
     (function() {
-        var mergeButtonTemplate = @json(__('messages.merge_venues_merge_button_count'));
+        var summaryTemplate = @json(__('messages.merge_venues_summary'));
         var previewSummaryTemplate = @json(__('messages.merge_venues_preview_summary'));
         var reviveSuffixTemplate = @json(__('messages.merge_venues_preview_revive_suffix'));
         var errorMsg = @json(__('messages.an_error_occurred'));
         var previewUrl = @json(route('role.merge_venues_preview', ['subdomain' => $role->subdomain]));
 
-        // Sync radio selection -> hidden target_id, hidden source_ids, header label, and merge button label.
+        // Sync radio selection -> hidden target_id, hidden source_ids, header pieces, and summary line.
         document.querySelectorAll('[data-group-radio]').forEach(function (radio) {
             radio.addEventListener('change', function () {
                 var hash = radio.getAttribute('data-group-radio');
@@ -143,8 +152,10 @@
                 var targetInput = form.querySelector('[data-target-input="' + hash + '"]');
                 if (targetInput) targetInput.value = radio.value;
 
-                // Rebuild source_ids[] from all non-selected radios in this group.
+                // Rebuild source_ids[] from all non-selected radios in this group, and tally source events.
                 form.querySelectorAll('input[name="source_ids[]"]').forEach(function (el) { el.remove(); });
+                var totalSourceEvents = 0;
+                var sourceCount = 0;
                 document.querySelectorAll('[data-group-radio="' + hash + '"]').forEach(function (other) {
                     if (other.value !== radio.value) {
                         var hidden = document.createElement('input');
@@ -152,20 +163,34 @@
                         hidden.name = 'source_ids[]';
                         hidden.value = other.value;
                         form.appendChild(hidden);
+                        totalSourceEvents += parseInt(other.getAttribute('data-future-events') || '0', 10);
+                        sourceCount += 1;
                     }
                 });
 
-                var label = radio.getAttribute('data-venue-label');
-                var headerEl = document.querySelector('[data-target-label="' + hash + '"]');
-                if (headerEl) headerEl.textContent = label;
+                // Update header pieces.
+                var nameEl = document.querySelector('[data-target-name="' + hash + '"]');
+                if (nameEl) nameEl.textContent = radio.getAttribute('data-venue-name') || '';
 
-                var btnLabelEl = document.querySelector('[data-merge-btn-label="' + hash + '"]');
-                var btn = document.querySelector('.merge-group-btn[data-group-hash="' + hash + '"]');
-                if (btnLabelEl && btn) {
-                    var count = btn.getAttribute('data-source-count');
-                    btnLabelEl.textContent = mergeButtonTemplate
-                        .replace(':count', count)
-                        .replace(':target', label);
+                var subdomainEl = document.querySelector('[data-target-subdomain="' + hash + '"]');
+                if (subdomainEl) subdomainEl.textContent = '/' + (radio.getAttribute('data-venue-subdomain') || '');
+
+                var deletedEl = document.querySelector('[data-target-deleted="' + hash + '"]');
+                if (deletedEl) deletedEl.hidden = radio.getAttribute('data-venue-deleted') !== '1';
+
+                var city = radio.getAttribute('data-venue-city') || '';
+                var cityEl = document.querySelector('[data-target-city="' + hash + '"]');
+                if (cityEl) {
+                    cityEl.textContent = city ? ', ' + city : '';
+                    cityEl.hidden = ! city;
+                }
+
+                // Update summary line.
+                var summaryEl = document.querySelector('[data-merge-summary="' + hash + '"]');
+                if (summaryEl) {
+                    summaryEl.textContent = summaryTemplate
+                        .replace(':venues', sourceCount)
+                        .replace(':events', totalSourceEvents);
                 }
             });
         });
