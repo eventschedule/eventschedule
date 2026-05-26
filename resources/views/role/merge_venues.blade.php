@@ -50,10 +50,10 @@
                         <span class="font-medium">{{ __('messages.merge_venues_will_merge_into') }}</span>
                         <span class="font-semibold text-gray-900 dark:text-gray-100" data-target-name="{{ $groupHash }}">{{ $defaultTarget->getDisplayName(false) }}</span>
                         <span class="text-xs text-gray-500 dark:text-gray-400" data-target-subdomain="{{ $groupHash }}">/{{ $defaultTarget->subdomain }}</span>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-[#2d2d30] dark:text-gray-300" data-target-deleted="{{ $groupHash }}" {{ $defaultTarget->is_deleted ? '' : 'hidden' }}>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-[#2d2d30] dark:text-gray-300" data-target-deleted="{{ $groupHash }}" @if(! $defaultTarget->is_deleted) style="display:none" @endif>
                             {{ __('messages.deleted_tag') }}
                         </span>
-                        <span data-target-city="{{ $groupHash }}" {{ $defaultTarget->city ? '' : 'hidden' }}>@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif</span>
+                        <span data-target-city="{{ $groupHash }}" @if(! $defaultTarget->city) style="display:none" @endif>@if ($defaultTarget->city), {{ $defaultTarget->city }}@endif</span>
                     </div>
 
                     <form method="POST" action="{{ route('role.merge_venues_group', ['subdomain' => $role->subdomain]) }}"
@@ -176,13 +176,15 @@
                 if (subdomainEl) subdomainEl.textContent = '/' + (radio.getAttribute('data-venue-subdomain') || '');
 
                 var deletedEl = document.querySelector('[data-target-deleted="' + hash + '"]');
-                if (deletedEl) deletedEl.hidden = radio.getAttribute('data-venue-deleted') !== '1';
+                if (deletedEl) {
+                    deletedEl.style.display = radio.getAttribute('data-venue-deleted') === '1' ? '' : 'none';
+                }
 
                 var city = radio.getAttribute('data-venue-city') || '';
                 var cityEl = document.querySelector('[data-target-city="' + hash + '"]');
                 if (cityEl) {
                     cityEl.textContent = city ? ', ' + city : '';
-                    cityEl.hidden = ! city;
+                    cityEl.style.display = city ? '' : 'none';
                 }
 
                 // Update summary line.
