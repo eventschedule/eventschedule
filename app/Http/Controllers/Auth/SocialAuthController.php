@@ -46,7 +46,9 @@ class SocialAuthController extends Controller
 
         if ($user) {
             // User found by google_id - log them in
-            session()->forget('pending_follow_consent_dismissed');
+            if (session()->pull('pending_follow_consent_dismissed') && ! $user->follow_consent_dismissed) {
+                $user->update(['follow_consent_dismissed' => true]);
+            }
             Auth::login($user, true);
             $this->processSmsClaim($user);
             AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
@@ -85,7 +87,9 @@ class SocialAuthController extends Controller
             }
             $user->save();
 
-            session()->forget('pending_follow_consent_dismissed');
+            if (session()->pull('pending_follow_consent_dismissed') && ! $user->follow_consent_dismissed) {
+                $user->update(['follow_consent_dismissed' => true]);
+            }
             Auth::login($user, true);
             $this->processSmsClaim($user);
             AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id);
