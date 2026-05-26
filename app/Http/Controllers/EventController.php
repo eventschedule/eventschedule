@@ -2868,13 +2868,13 @@ class EventController extends Controller
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
 
-        if ($event->is_private && ! $isMemberOrAdmin) {
+        if ($event->is_private && ! $event->isPasswordProtected() && ! $isMemberOrAdmin) {
             return redirect($role->getGuestUrl());
         }
 
         // Password gate
         $bypassPassword = $isMemberOrAdmin || session()->has('event_password_'.$event->id);
-        if ($event->isPasswordProtected() && $role->isEnterprise() && ! $bypassPassword) {
+        if ($event->isPasswordProtected() && ! $bypassPassword) {
             return redirect($event->getGuestUrl($subdomain, $date));
         }
 

@@ -1060,7 +1060,8 @@ class RoleController extends Controller
 
             if ($event) {
                 // Block direct URL access to private events for non-members.
-                if ($event->is_private && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
+                // Password-protected private events fall through to the password gate below.
+                if ($event->is_private && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
                     $event = null;
                 }
             }
@@ -1292,7 +1293,7 @@ class RoleController extends Controller
             // Password check for embed mode
             $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
                 || session()->has('event_password_'.$event->id);
-            if ($event->isPasswordProtected() && $role->isEnterprise() && ! $bypassPassword) {
+            if ($event->isPasswordProtected() && ! $bypassPassword) {
                 abort(404);
             }
             $view = 'event/show-guest-ticket-embed';
@@ -1304,7 +1305,7 @@ class RoleController extends Controller
             $bypassPassword = ($user && ($user->isAdmin() || $user->isMember($subdomain)))
                 || session()->has('event_password_'.$event->id);
 
-            if ($event->isPasswordProtected() && $role->isEnterprise() && ! $bypassPassword) {
+            if ($event->isPasswordProtected() && ! $bypassPassword) {
                 $fonts = [];
                 if ($event->venue) {
                     $fonts[] = $event->venue->font_family;
