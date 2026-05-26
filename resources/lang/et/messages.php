@@ -253,7 +253,7 @@ return [
     'merge_venues_empty_state' => 'Selles ajakavas duplikaatkohti ei leitud.',
     'merge_venues_not_duplicates_button' => 'Pole duplikaadid',
     'merge_venues_banner' => ':count gruppi kohti sinu ajakavas näevad välja nagu duplikaadid. Ühenda need.',
-    'merge_venues_preview_summary' => 'Ühenda :sources kohta sihtmärgiga :target. :events sündmust mõjutatakse, :overlap kattumist. Jätkata?',
+    'merge_venues_preview_summary' => 'Liiguta :events sündmust :sources kohast kohta :target (:overlap juba kohas :target). Jätkata?',
     'merge_venues_preview_revive_suffix' => 'Samuti taastatakse :target.',
     'merge_venues_partial_result' => 'Ühendati :done :total kohast sihtmärgiga :target. :skipped jäeti vahele (ei saa enam ühendada).',
     'deleted_tag' => 'Kustutatud',

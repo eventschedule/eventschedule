@@ -208,7 +208,7 @@ return [
     'merge_venues_empty_state' => 'Keine doppelten Veranstaltungsorte in diesem Zeitplan gefunden.',
     'merge_venues_not_duplicates_button' => 'Keine Duplikate',
     'merge_venues_banner' => ':count Gruppen von Veranstaltungsorten in Ihrem Zeitplan sehen wie Duplikate aus. Führen Sie sie zusammen.',
-    'merge_venues_preview_summary' => ':sources Veranstaltungsorte in :target zusammenführen. :events Veranstaltungen betroffen, :overlap Überschneidungen. Fortfahren?',
+    'merge_venues_preview_summary' => ':events Veranstaltungen aus :sources Veranstaltungsorten in :target verschieben (:overlap bereits in :target). Fortfahren?',
     'merge_venues_preview_revive_suffix' => ':target wird ebenfalls wiederhergestellt.',
     'merge_venues_partial_result' => ':done von :total Veranstaltungsorten in :target zusammengeführt. :skipped übersprungen (nicht mehr zusammenführbar).',
     'deleted_tag' => 'Gelöscht',

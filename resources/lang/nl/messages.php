@@ -529,7 +529,7 @@ return [
     'merge_venues_empty_state' => 'Geen dubbele locaties gevonden in deze planning.',
     'merge_venues_not_duplicates_button' => 'Geen duplicaten',
     'merge_venues_banner' => ':count groepen locaties in je planning lijken duplicaten. Voeg ze samen.',
-    'merge_venues_preview_summary' => ':sources locaties samenvoegen in :target. :events evenementen getroffen, :overlap overlap. Doorgaan?',
+    'merge_venues_preview_summary' => 'Verplaats :events evenementen van :sources locaties naar :target (:overlap al in :target). Doorgaan?',
     'merge_venues_preview_revive_suffix' => ':target wordt ook hersteld.',
     'merge_venues_partial_result' => ':done van :total locaties samengevoegd in :target. :skipped overgeslagen (niet meer samen te voegen).',
     'deleted_tag' => 'Verwijderd',

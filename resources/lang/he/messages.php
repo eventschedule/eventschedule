@@ -669,7 +669,7 @@ return [
     'merge_venues_empty_state' => 'לא נמצאו מקומות כפולים בלוח זמנים זה.',
     'merge_venues_not_duplicates_button' => 'לא כפילויות',
     'merge_venues_banner' => ':count קבוצות של מקומות בלוח הזמנים שלך נראות ככפילויות. מזג אותן.',
-    'merge_venues_preview_summary' => 'מזג :sources מקומות לתוך :target. :events אירועים מושפעים, :overlap חפיפה. להמשיך?',
+    'merge_venues_preview_summary' => 'העבר :events אירועים מ-:sources מקומות אל :target (:overlap כבר ב-:target). להמשיך?',
     'merge_venues_preview_revive_suffix' => 'גם :target ישוחזר.',
     'merge_venues_partial_result' => 'מוזגו :done מתוך :total מקומות לתוך :target. :skipped דולגו (לא ניתנים יותר למיזוג).',
     'deleted_tag' => 'נמחק',

@@ -253,7 +253,7 @@ return [
     'merge_venues_empty_state' => 'Дубликаты мест в этом расписании не найдены.',
     'merge_venues_not_duplicates_button' => 'Не дубликаты',
     'merge_venues_banner' => ':count групп мест в вашем расписании выглядят как дубликаты. Объедините их.',
-    'merge_venues_preview_summary' => 'Объединить :sources мест в :target. :events мероприятий затронуто, :overlap пересечений. Продолжить?',
+    'merge_venues_preview_summary' => 'Переместить :events мероприятий из :sources мест в :target (:overlap уже в :target). Продолжить?',
     'merge_venues_preview_revive_suffix' => ':target также будет восстановлен.',
     'merge_venues_partial_result' => 'Объединено :done из :total мест в :target. :skipped пропущено (больше не могут быть объединены).',
     'deleted_tag' => 'Удалено',

@@ -233,7 +233,7 @@ return [
     'merge_venues_empty_state' => 'Aucun lieu en double trouvé sur ce calendrier.',
     'merge_venues_not_duplicates_button' => 'Pas des doublons',
     'merge_venues_banner' => ':count groupes de lieux sur votre calendrier semblent être des doublons. Fusionnez-les.',
-    'merge_venues_preview_summary' => 'Fusionner :sources lieux dans :target. :events événements affectés, :overlap chevauchement. Continuer ?',
+    'merge_venues_preview_summary' => 'Déplacer :events événements de :sources lieux vers :target (:overlap déjà dans :target). Continuer ?',
     'merge_venues_preview_revive_suffix' => ':target sera également restauré.',
     'merge_venues_partial_result' => 'Fusionné :done lieux sur :total dans :target. :skipped ignorés (plus fusionnables).',
     'deleted_tag' => 'Supprimé',

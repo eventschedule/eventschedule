@@ -253,7 +253,7 @@ return [
     'merge_venues_empty_state' => 'Nu au fost găsite locații duplicate în acest program.',
     'merge_venues_not_duplicates_button' => 'Nu sunt duplicate',
     'merge_venues_banner' => ':count grupuri de locații din programul tău par a fi duplicate. Combină-le.',
-    'merge_venues_preview_summary' => 'Combină :sources locații în :target. :events evenimente afectate, :overlap suprapunere. Continuați?',
+    'merge_venues_preview_summary' => 'Mută :events evenimente din :sources locații în :target (:overlap deja în :target). Continuați?',
     'merge_venues_preview_revive_suffix' => ':target va fi de asemenea restaurat.',
     'merge_venues_partial_result' => 'Combinate :done din :total locații în :target. :skipped au fost omise (nu mai pot fi combinate).',
     'deleted_tag' => 'Șters',

@@ -537,7 +537,7 @@ return [
     'merge_venues_empty_state' => 'Nessuna sede duplicata trovata in questa pianificazione.',
     'merge_venues_not_duplicates_button' => 'Non duplicati',
     'merge_venues_banner' => ':count gruppi di sedi nella tua pianificazione sembrano essere duplicati. Uniscili.',
-    'merge_venues_preview_summary' => 'Unisci :sources sedi in :target. :events eventi interessati, :overlap sovrapposizione. Continuare?',
+    'merge_venues_preview_summary' => 'Sposta :events eventi da :sources sedi in :target (:overlap già in :target). Continuare?',
     'merge_venues_preview_revive_suffix' => 'Anche :target sarà ripristinato.',
     'merge_venues_partial_result' => 'Unite :done sedi su :total in :target. :skipped saltate (non più unibili).',
     'deleted_tag' => 'Eliminato',

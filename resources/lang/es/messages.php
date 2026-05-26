@@ -228,7 +228,7 @@ return [
     'merge_venues_empty_state' => 'No se encontraron lugares duplicados en esta programación.',
     'merge_venues_not_duplicates_button' => 'No son duplicados',
     'merge_venues_banner' => ':count grupos de lugares en tu programación parecen ser duplicados. Combínalos.',
-    'merge_venues_preview_summary' => 'Combinar :sources lugares en :target. :events eventos afectados, :overlap superposición. ¿Continuar?',
+    'merge_venues_preview_summary' => 'Mover :events eventos de :sources lugares a :target (:overlap ya en :target). ¿Continuar?',
     'merge_venues_preview_revive_suffix' => 'También se restaurará :target.',
     'merge_venues_partial_result' => 'Se combinaron :done de :total lugares en :target. :skipped se omitieron (ya no se pueden combinar).',
     'deleted_tag' => 'Eliminado',

@@ -253,7 +253,7 @@ return [
     'merge_venues_empty_state' => 'No duplicate venues found on this schedule.',
     'merge_venues_not_duplicates_button' => 'Not duplicates',
     'merge_venues_banner' => ':count groups of venues on your schedule look like duplicates. Merge them.',
-    'merge_venues_preview_summary' => 'Merge :sources venues into :target. :events events affected, :overlap overlap. Continue?',
+    'merge_venues_preview_summary' => 'Move :events events from :sources venues into :target (:overlap already on :target). Continue?',
     'merge_venues_preview_revive_suffix' => 'This will also restore :target.',
     'merge_venues_partial_result' => 'Merged :done of :total venues into :target. :skipped were skipped (no longer mergeable).',
     'deleted_tag' => 'Deleted',

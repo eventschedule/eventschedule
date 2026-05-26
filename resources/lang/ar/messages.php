@@ -206,7 +206,7 @@ return [
     'merge_venues_empty_state' => 'لم يتم العثور على أماكن مكررة في هذا الجدول.',
     'merge_venues_not_duplicates_button' => 'ليست مكررة',
     'merge_venues_banner' => ':count مجموعات من الأماكن في جدولك تبدو وكأنها مكررة. قم بدمجها.',
-    'merge_venues_preview_summary' => 'دمج :sources أماكن في :target. :events أحداث متأثرة، :overlap تداخل. هل تريد المتابعة؟',
+    'merge_venues_preview_summary' => 'نقل :events أحداث من :sources أماكن إلى :target (:overlap موجودة بالفعل في :target). هل تريد المتابعة؟',
     'merge_venues_preview_revive_suffix' => 'سيتم أيضًا استعادة :target.',
     'merge_venues_partial_result' => 'تم دمج :done من أصل :total أماكن في :target. تم تخطي :skipped (لم تعد قابلة للدمج).',
     'deleted_tag' => 'محذوف',

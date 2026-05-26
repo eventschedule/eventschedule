@@ -535,7 +535,7 @@ return [
     'merge_venues_empty_state' => 'Nenhum local duplicado encontrado nesta programação.',
     'merge_venues_not_duplicates_button' => 'Não são duplicados',
     'merge_venues_banner' => ':count grupos de locais em sua programação parecem ser duplicados. Mescle-os.',
-    'merge_venues_preview_summary' => 'Mesclar :sources locais em :target. :events eventos afetados, :overlap sobreposição. Continuar?',
+    'merge_venues_preview_summary' => 'Mover :events eventos de :sources locais para :target (:overlap já em :target). Continuar?',
     'merge_venues_preview_revive_suffix' => ':target também será restaurado.',
     'merge_venues_partial_result' => 'Mescladas :done de :total locais em :target. :skipped foram ignorados (não podem mais ser mesclados).',
     'deleted_tag' => 'Excluído',
