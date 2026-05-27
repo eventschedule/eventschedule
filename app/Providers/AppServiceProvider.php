@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(\App\Services\GeoIpService::class);
+
+        $this->callAfterResolving('translator', function ($translator) {
+            $translator->getLoader()->addPath(storage_path('app/lang'));
+        });
     }
 
     /**

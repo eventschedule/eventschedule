@@ -686,9 +686,9 @@
               @endphp
               <span class="text-sm text-gray-500 dark:text-gray-400">
                 @if ($startDt->format('m') === $endDt->format('m'))
-                  {{ $startDt->translatedFormat('M j') }}, {{ $multiStartTime }} - {{ $endDt->format('j') }}, {{ $multiEndTime }}
+                  {{ $startDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->format('j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
                 @else
-                  {{ $startDt->translatedFormat('M j') }}, {{ $multiStartTime }} - {{ $endDt->translatedFormat('M j') }}, {{ $multiEndTime }}
+                  {{ $startDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiStartTime }}</bdi> - {{ $endDt->translatedFormat('M j') }}, <bdi dir="ltr">{{ $multiEndTime }}</bdi>
                 @endif
               </span>
             @else
@@ -698,7 +698,7 @@
                 </time>
               </span>
               <span class="text-sm text-gray-500 dark:text-gray-400">
-                <time datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
+                <time dir="ltr" datetime="{{ $startDt->format('Y-m-d\TH:i:sP') }}">{{ $event->getStartEndTime($date, get_use_24_hour_time($role)) }}</time>
               </span>
             @endif
           </div>

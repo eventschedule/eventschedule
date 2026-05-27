@@ -5109,6 +5109,9 @@ class MarketingController extends Controller
             ['page' => 'Web Accessibility', 'section' => 'Your declaration', 'description' => 'Publish your own accessibility statement on your domain when you serve regulated markets.', 'url' => $r['selfhost_accessibility'].'#your-declaration', 'category' => 'Selfhost', 'keywords' => 'declaration statement coordinator'],
             ['page' => 'Web Accessibility', 'section' => 'Configuration', 'description' => 'Environment variables for contact email, SLA days, WCAG label, and last reviewed date.', 'url' => $r['selfhost_accessibility'].'#configuration', 'category' => 'Selfhost', 'keywords' => 'env accessibility contact email'],
 
+            ['page' => 'Installation', 'section' => 'Custom translations', 'description' => 'Rename Talent to Artist or any other UI term. Overrides live in storage/app/lang/ and survive upgrades.', 'url' => $r['selfhost_installation'].'#translations', 'category' => 'Selfhost', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
+            ['page' => 'SaaS Setup', 'section' => 'Custom translations', 'description' => 'Override UI strings in storage/app/lang/ across every tenant. Survives upgrades.', 'url' => $r['saas_setup'].'#translations', 'category' => 'SaaS', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
+
             // Admin Panel (Selfhost)
             ['page' => 'Admin Panel', 'section' => 'Overview', 'description' => 'Admin panel organization and sections.', 'url' => $r['selfhost_admin'].'#overview', 'category' => 'Selfhost', 'keywords' => 'admin panel dashboard'],
             ['page' => 'Admin Panel', 'section' => 'Accessing /admin', 'description' => 'How to access the admin panel.', 'url' => $r['selfhost_admin'].'#accessing', 'category' => 'Selfhost', 'keywords' => 'access login admin url'],

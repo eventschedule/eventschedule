@@ -1831,6 +1831,11 @@ const calendarApp = createApp({
             embed: {{ isset($embed) && $embed ? 'true' : 'false' }},
             directRegistration: {{ isset($role) && $role->direct_registration ? 'true' : 'false' }},
             isRtl: {{ $isAdminRoute ? (auth()->check() && auth()->user()->isRtl() ? 'true' : 'false') : (isset($role) && $role->isRtl() ? 'true' : 'false') }},
+            durationLabels: {
+                h: @json(__('messages.duration_hour_short')),
+                d: @json(__('messages.duration_day_short')),
+                m: @json(__('messages.duration_minute_short')),
+            },
             languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null,
@@ -2823,18 +2828,19 @@ const calendarApp = createApp({
         },
         formatDuration(hours) {
             if (!hours) return '';
+            const labels = this.durationLabels;
             if (hours >= 24) {
                 const days = Math.floor(hours / 24);
                 const remainingHours = Math.round(hours % 24);
-                if (remainingHours > 0) return days + 'd ' + remainingHours + 'h';
-                return days + 'd';
+                if (remainingHours > 0) return `${days} ${labels.d} ${remainingHours} ${labels.h}`;
+                return `${days} ${labels.d}`;
             }
             const totalMinutes = Math.round(hours * 60);
             const h = Math.floor(totalMinutes / 60);
             const m = totalMinutes % 60;
-            if (h > 0 && m > 0) return h + 'h ' + m + 'm';
-            if (h > 0) return h + 'h';
-            return m + 'm';
+            if (h > 0 && m > 0) return `${h} ${labels.h} ${m} ${labels.m}`;
+            if (h > 0) return `${h} ${labels.h}`;
+            return `${m} ${labels.m}`;
         },
         clearFilters() {
             this.selectedGroup = '';

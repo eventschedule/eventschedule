@@ -76,6 +76,7 @@
                         <a href="#environment" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">4. Configure Environment</a>
                         <a href="#cron" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">5. Set Up Cron Job</a>
                         <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification</a>
+                        <a href="#translations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom translations</a>
                     </nav>
                 </aside>
 
@@ -350,6 +351,35 @@
                                 <li>Configure email settings for notifications</li>
                                 <li>Customize your branding and appearance</li>
                             </ul>
+                        </section>
+
+                        <!-- Custom translations -->
+                        <section id="translations" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+                                </svg>
+                                Custom translations
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms (for example "Talent" to "Artist", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Drop a PHP file in:</p>
+                            <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>storage/app/lang/{locale}/{file}.php</code></pre>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The three files you can override are <code class="doc-inline-code">messages.php</code> (UI strings), <code class="doc-inline-code">accessibility.php</code>, and <code class="doc-inline-code">marketing.php</code>. List the keys you want to change and nothing else; the bundled translations fill in the rest:</p>
+                            <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>&lt;?php
+// storage/app/lang/en/messages.php
+return [
+    'talent' =&gt; 'Artist',
+    'talents' =&gt; 'Artists',
+    'curator' =&gt; 'Event Planner',
+    'curators' =&gt; 'Event Planners',
+];</code></pre>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Create one directory per locale you want to override (<code class="doc-inline-code">en</code>, <code class="doc-inline-code">es</code>, <code class="doc-inline-code">fr</code>, &hellip;). The full list of supported locales lives in <code class="doc-inline-code">config/app.php</code> under <code class="doc-inline-code">supported_languages</code>.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Why this works</div>
+                                <p>Changes apply on the next request, no cache clear is required. <code class="doc-inline-code">storage/app/</code> is gitignored, so your overrides survive <code class="doc-inline-code">php artisan app:update</code>, <code class="doc-inline-code">git pull</code>, and fresh checkouts. New keys added in future releases continue to show their bundled English (or translated) value until you override them.</p>
+                            </div>
                         </section>
                     </div>
                 </div>
