@@ -43,7 +43,6 @@ class UrlUtils
         'bandcamp.com' => 'bandcamp',
         'calendar.google.com' => 'calendar',
         'charidy.com' => 'charidy',
-        'n99.co.il' => 'n99',
     ];
 
     private const PLATFORM_SVG_PATHS = [
@@ -68,8 +67,7 @@ class UrlUtils
         'bandcamp' => 'M0 18.75l7.437-13.5H24l-7.438 13.5z',
         'calendar' => 'M19,4H17V2H15V4H9V2H7V4H5C3.89,4 3,4.89 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6C21,4.89 20.1,4 19,4M19,20H5V10H19V20M19,8H5V6H19V8M7,12H9V14H7V12M11,12H13V14H11V12M15,12H17V14H15V12M7,16H9V18H7V16M11,16H13V18H11V16M15,16H17V18H15V16Z',
         'charidy' => 'M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z',
-        'n99' => 'M20 5V19H4V5H20M20 3H4C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3M18 15H6V17H18V15M10 7H6V13H10V7M12 9H18V7H12V9M18 11H12V13H18V11Z',
-        'website' => 'M20 4H4A2 2 0 0 0 2 6V18A2 2 0 0 0 4 20H20A2 2 0 0 0 22 18V6A2 2 0 0 0 20 4M20 11H4V8H20Z',
+        'website' => 'M20 5V19H4V5H20M20 3H4C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3M18 15H6V17H18V15M10 7H6V13H10V7M12 9H18V7H12V9M18 11H12V13H18V11Z',
     ];
 
     private static ?Sqids $sqids = null;
@@ -194,7 +192,6 @@ class UrlUtils
         'bandcamp' => 'Bandcamp',
         'calendar' => 'Calendar',
         'charidy' => 'Charidy',
-        'n99' => 'N99',
     ];
 
     public static function getUniquePlatforms(): array
