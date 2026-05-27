@@ -1540,7 +1540,12 @@
     <div class="fixed inset-x-0 bottom-0 bg-white dark:bg-gray-800 rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
         {{-- Header --}}
         <div class="px-6 pt-5 pb-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" aria-live="polite">
+                    @{{ filteredEventsForView.length }} {{ $label('events') }}
+                </p>
+            </div>
             <button v-if="activeFilterCount > 0"
                     @click="clearFilters"
                     class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] font-medium">
@@ -1555,7 +1560,7 @@
             <select v-model="selectedGroup" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                <option value="">{{ $label('show_all') }} (@{{ eventCountByGroup[''] }})</option>
+                <option value="">{{ $label('show_all') }}</option>
                 <option v-for="group in groups" :key="group.slug" :value="group.slug">
                     @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                 </option>
@@ -1572,7 +1577,7 @@
                       :style="{ backgroundColor: selectedCategoryColor }"></span>
                 <select v-model="selectedCategory" style="font-family: sans-serif"
                         :class="['w-full py-2.5 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm', selectedCategoryColor ? 'ps-8' : 'ps-3']">
-                    <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                    <option value="">{{ $label('show_all') }}</option>
                     <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                         @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                     </option>
@@ -1586,7 +1591,7 @@
             <select v-model="selectedVenue" style="font-family: sans-serif"
                     class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                            bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                <option value="">{{ $label('show_all') }} (@{{ eventCountByVenue[''] }})</option>
+                <option value="">{{ $label('show_all') }}</option>
                 <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                     @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                 </option>
@@ -1603,7 +1608,7 @@
                 <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ $label('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                    <option value="">{{ $label('show_all') }}</option>
                     <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                         @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                     </option>
@@ -1659,7 +1664,12 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md max-h-[80vh] overflow-y-auto pointer-events-auto {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Header --}}
             <div class="px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $label('filters') }}</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" aria-live="polite">
+                        @{{ filteredEventsForView.length }} {{ $label('events') }}
+                    </p>
+                </div>
                 <button v-if="activeFilterCount > 0"
                         @click="clearFilters"
                         class="text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] font-medium">
@@ -1674,7 +1684,7 @@
                 <select v-model="selectedGroup" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
-                    <option value="">{{ $label('show_all') }} (@{{ eventCountByGroup[''] }})</option>
+                    <option value="">{{ $label('show_all') }}</option>
                     <option v-for="group in groups" :key="group.slug" :value="group.slug">
                         @{{ group.name }} (@{{ eventCountByGroup[group.slug] || 0 }})
                     </option>
@@ -1691,7 +1701,7 @@
                           :style="{ backgroundColor: selectedCategoryColor }"></span>
                     <select v-model="selectedCategory" style="font-family: sans-serif"
                             :class="['w-full py-2.5 pe-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm', selectedCategoryColor ? 'ps-8' : 'ps-3']">
-                        <option value="">{{ $label('show_all') }} (@{{ eventCountByCategory[''] }})</option>
+                        <option value="">{{ $label('show_all') }}</option>
                         <option v-for="category in availableCategories" :key="category.id" :value="category.id">
                             @{{ category.name }} (@{{ eventCountByCategory[category.id] || 0 }})
                         </option>
@@ -1705,7 +1715,7 @@
                 <select v-model="selectedVenue" style="font-family: sans-serif"
                         class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                    <option value="">{{ $label('show_all') }} (@{{ eventCountByVenue[''] }})</option>
+                    <option value="">{{ $label('show_all') }}</option>
                     <option v-for="venue in uniqueVenues" :key="venue.subdomain" :value="venue.subdomain">
                         @{{ venue.name }} (@{{ eventCountByVenue[venue.subdomain] || 0 }})
                     </option>
@@ -1722,7 +1732,7 @@
                     <select v-model="selectedCustomFields[field.key]" style="font-family: sans-serif"
                             class="w-full py-2.5 px-3 border-gray-300 dark:border-gray-600 rounded-md shadow-sm
                                    bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm">
-                        <option value="">{{ $label('show_all') }} (@{{ (eventCountByCustomField[field.key] || {})[''] || 0 }})</option>
+                        <option value="">{{ $label('show_all') }}</option>
                         <option v-for="opt in availableCustomFieldOptions[field.key]" :key="opt" :value="opt">
                             @{{ field.optionsMap[opt] || opt }} (@{{ (eventCountByCustomField[field.key] || {})[opt] || 0 }})
                         </option>
@@ -2038,6 +2048,35 @@ const calendarApp = createApp({
                     if (!value) continue;
                     const eventValue = (event.custom_field_values || {})[key] || '';
                     // Support multiselect: check if the filter value is one of the comma-separated values
+                    const eventValues = eventValue.split(',').map(v => v.trim());
+                    if (!eventValues.includes(value)) return false;
+                }
+                return true;
+            });
+        },
+        filteredEventsForView() {
+            return this.eventsForFilters.filter(event => {
+                if (this.selectedGroup) {
+                    const selectedGroupObj = this.groups.find(group => group.slug === this.selectedGroup);
+                    if (selectedGroupObj && event.group_id !== selectedGroupObj.id) {
+                        return false;
+                    }
+                }
+                if (this.selectedCategory && event.category_id != this.selectedCategory) {
+                    return false;
+                }
+                if (this.showOnlineOnly && !event.is_online) {
+                    return false;
+                }
+                if (this.selectedVenue && event.venue_subdomain !== this.selectedVenue) {
+                    return false;
+                }
+                if (this.showFreeOnly && !event.is_free) {
+                    return false;
+                }
+                for (const [key, value] of Object.entries(this.selectedCustomFields)) {
+                    if (!value) continue;
+                    const eventValue = (event.custom_field_values || {})[key] || '';
                     const eventValues = eventValue.split(',').map(v => v.trim());
                     if (!eventValues.includes(value)) return false;
                 }
