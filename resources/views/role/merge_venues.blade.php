@@ -220,9 +220,9 @@
                             .replace(':sources', result.body.source_count)
                             .replace(':events', result.body.total_events)
                             .replace(':overlap', result.body.overlap_events)
-                            .replace(':target', result.body.target_name);
+                            .replace(/:target/g, result.body.target_name);
                         if (result.body.target_is_deleted) {
-                            msg += ' ' + reviveSuffixTemplate.replace(':target', result.body.target_name);
+                            msg += ' ' + reviveSuffixTemplate.replace(/:target/g, result.body.target_name);
                         }
                         if (confirm(msg)) {
                             form.submit();

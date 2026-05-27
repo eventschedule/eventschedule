@@ -712,10 +712,12 @@ class RoleController extends Controller
             return [];
         }
 
-        // Per-venue future-event count on this schedule.
+        // Per-venue future-event count on this schedule. Use DISTINCT event_id
+        // because event_role has one row per (event, venue, group), so an event
+        // associated with multiple sub-schedules would otherwise be counted twice.
         $countsByVenue = DB::table('event_role')
             ->whereIn('event_id', $futureEventIds)
-            ->select('role_id', DB::raw('COUNT(*) as future_event_count'))
+            ->select('role_id', DB::raw('COUNT(DISTINCT event_id) as future_event_count'))
             ->groupBy('role_id')
             ->pluck('future_event_count', 'role_id');
 
@@ -834,13 +836,32 @@ class RoleController extends Controller
 
         $target = Role::where('id', $targetId)->where('type', 'venue')->firstOrFail();
 
+        // Scope counts to this curator's future, accepted events so the dialog
+        // matches the per-venue totals shown on the page. The merge itself still
+        // re-points every event_role row (past + future); this only changes what
+        // the preview reports to the user.
+        $curatorEventIds = DB::table('event_role')
+            ->where('role_id', $role->id)
+            ->where('is_accepted', true)
+            ->pluck('event_id');
+
+        $futureCuratorEventIds = Event::whereIn('id', $curatorEventIds)
+            ->upcomingOrOngoing()
+            ->pluck('id');
+
         $sourceEventIds = DB::table('event_role')
             ->whereIn('role_id', $sourceIds)
-            ->pluck('event_id');
-        $totalEvents = $sourceEventIds->unique()->count();
+            ->whereIn('event_id', $futureCuratorEventIds)
+            ->pluck('event_id')
+            ->unique();
+        $totalEvents = $sourceEventIds->count();
 
-        $targetEventIds = DB::table('event_role')->where('role_id', $target->id)->pluck('event_id');
-        $overlapEvents = $sourceEventIds->intersect($targetEventIds)->unique()->count();
+        $targetEventIds = DB::table('event_role')
+            ->where('role_id', $target->id)
+            ->whereIn('event_id', $futureCuratorEventIds)
+            ->pluck('event_id')
+            ->unique();
+        $overlapEvents = $sourceEventIds->intersect($targetEventIds)->count();
 
         return response()->json([
             'source_count' => count($sourceIds),
@@ -883,11 +904,29 @@ class RoleController extends Controller
         $target = Role::where('id', $targetId)->where('type', 'venue')->firstOrFail();
         $sources = Role::whereIn('id', $sourceIds)->where('type', 'venue')->get();
 
-        // Split: validate each source independently so a single bad row doesn't
-        // abort the whole batch (e.g. someone claimed a venue between page
-        // render and submit).
-        [$validated, $skipped] = $sources->partition(function ($source) use ($target, $user) {
-            return $this->canMergeRoles($source, $target, $user, true, true);
+        // Curator-driven merge: the screen guard above requires the user to be
+        // an editor of the curator schedule, and idsBelongToSingleGroup() above
+        // proves every venue in this request is part of this curator's duplicate
+        // set. Venue-level access (canMergeRoles -> isEditableBy) is the wrong
+        // gate here because curator-imported venues frequently have no role_user
+        // row for the curator's editors - EventRepo::saveEvent's followNewRoles
+        // flag is false for Eventbrite, WhatsApp, and guest-submission paths.
+        // Structural checks only; partition so a single bad row (e.g. someone
+        // claimed a venue between page render and submit) doesn't abort the batch.
+        [$validated, $skipped] = $sources->partition(function ($source) use ($target) {
+            if ($source->id === $target->id) {
+                return false;
+            }
+            if ($source->type !== $target->type) {
+                return false;
+            }
+
+            // Never destroy a claimed venue's verified record.
+            if ($source->isClaimed()) {
+                return false;
+            }
+
+            return true;
         });
 
         if ($validated->isEmpty()) {
