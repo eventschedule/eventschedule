@@ -27,7 +27,7 @@ class NewPollOptionsNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $subject = __('messages.new_poll_options_notification_subject', ['name' => $this->role->name, 'count' => $this->optionCount]);
-        $actionUrl = route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'events']);
+        $actionUrl = route('role.view_admin', ['subdomain' => $this->role->subdomain, 'tab' => 'schedule']);
         $unsubscribeUrl = route('role.unsubscribe', ['subdomain' => $this->role->subdomain]);
 
         return (new MailMessage)

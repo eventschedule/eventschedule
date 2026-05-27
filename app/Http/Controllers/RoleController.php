@@ -780,7 +780,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
-            return redirect()->route('role.view_admin', ['subdomain' => $subdomain])
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
                 ->with('error', __('messages.not_authorized'));
         }
 
@@ -882,7 +882,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
-            return redirect()->route('role.view_admin', ['subdomain' => $subdomain])
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
                 ->with('error', __('messages.not_authorized'));
         }
 
@@ -963,7 +963,7 @@ class RoleController extends Controller
         $remaining = count($this->venueDuplicateGroups($role, $user->id));
         $next = $remaining > 0
             ? route('role.merge_venues', ['subdomain' => $subdomain])
-            : route('role.view_admin', ['subdomain' => $subdomain]);
+            : route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']);
 
         return redirect($next)->with('message', $message);
     }
@@ -978,7 +978,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
-            return redirect()->route('role.view_admin', ['subdomain' => $subdomain])
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
                 ->with('error', __('messages.not_authorized'));
         }
 
