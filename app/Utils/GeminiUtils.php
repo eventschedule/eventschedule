@@ -6,12 +6,80 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\UsageTrackingService;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class GeminiUtils
 {
     public static function normalizeForMatch(?string $value): string
     {
-        return mb_strtolower(trim($value ?? ''));
+        if ($value === null) {
+            return '';
+        }
+
+        $v = (string) $value;
+
+        // Smart quotes / dashes / NBSP / zero-width / directional control marks → ASCII equivalents (or removed).
+        $v = strtr($v, [
+            "\u{2018}" => "'",
+            "\u{2019}" => "'",
+            "\u{201A}" => "'",
+            "\u{201B}" => "'",
+            "\u{201C}" => '"',
+            "\u{201D}" => '"',
+            "\u{201E}" => '"',
+            "\u{201F}" => '"',
+            "\u{2013}" => '-',
+            "\u{2014}" => '-',
+            "\u{2015}" => '-',
+            "\u{00A0}" => ' ',
+            "\u{200B}" => '',
+            "\u{200C}" => '',
+            "\u{200D}" => '',
+            "\u{200E}" => '',
+            "\u{200F}" => '',
+            "\u{202A}" => '',
+            "\u{202B}" => '',
+            "\u{202C}" => '',
+            "\u{202D}" => '',
+            "\u{202E}" => '',
+            "\u{2066}" => '',
+            "\u{2067}" => '',
+            "\u{2068}" => '',
+            "\u{2069}" => '',
+            "\u{FEFF}" => '',
+            // Hebrew geresh / gershayim — fold to ASCII apostrophe/quote so the
+            // later quote-strip pass treats them the same as the ASCII forms.
+            "\u{05F3}" => "'",
+            "\u{05F4}" => '"',
+        ]);
+
+        // Strip Unicode combining marks (Hebrew nikud, Arabic harakat, Devanagari
+        // signs, etc.) so vocalized text matches its un-vocalized form.
+        $v = preg_replace('/\p{Mn}+/u', '', $v);
+
+        // Transliterate diacritics to ASCII (Café → Cafe, Église → Eglise). For
+        // non-Latin scripts (Hebrew, CJK, Thai…) Str::ascii strips the content
+        // entirely — detect that and fall back to the original so those venues
+        // still match each other.
+        $origLetters = preg_match_all('/\p{L}/u', $v);
+        $ascii = Str::ascii($v);
+        $asciiLetters = preg_match_all('/[a-z]/i', $ascii);
+        $base = ($asciiLetters === 0 && $origLetters > 0) ? $v : $ascii;
+        $v = mb_strtolower(trim($base));
+
+        // Strip apostrophes/quotes entirely so "Mary's" matches "Marys"
+        // (rather than splitting into "mary s").
+        $v = str_replace(["'", '"', '`'], '', $v);
+
+        // Replace any run of non-letter/non-digit chars with a single space.
+        // Unicode-aware so Hebrew/CJK letters survive in the fallback path.
+        $v = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $v);
+        $v = trim($v);
+
+        // Strip a single leading article (whole word) so "the foo" matches "foo".
+        $v = preg_replace('/^(the|la|le|el|il|der|die|das|het|los|las|a|an) /', '', $v);
+
+        return $v;
     }
 
     private static function sendRequest($prompt, $imageData = null, $purpose = 'content', $options = [])
@@ -706,9 +774,9 @@ class GeminiUtils
                         ->where('roles.is_deleted', false)
                         ->where(function ($q) use ($normName, $normNameEn) {
                             $q->when($normName !== '', function ($q2) use ($normName) {
-                                $q2->whereRaw('LOWER(TRIM(roles.name)) = ?', [$normName]);
+                                $q2->where('roles.name_normalized', $normName);
                             })->when($normNameEn !== '', function ($q2) use ($normNameEn) {
-                                $q2->orWhereRaw('LOWER(TRIM(roles.name_en)) = ?', [$normNameEn]);
+                                $q2->orWhere('roles.name_en_normalized', $normNameEn);
                             });
                         })
                         ->withCount('events')
@@ -724,22 +792,22 @@ class GeminiUtils
                         ->when($countryCode, function ($q) use ($countryCode) {
                             $q->where('country_code', $countryCode);
                         })
-                        ->whereRaw('LOWER(TRIM(city)) = ?', [$normCity])
+                        ->where('city_normalized', $normCity)
                         ->where(function ($query) use ($normName, $normNameEn, $normAddress, $normAddressEn) {
                             $query->where(function ($q) use ($normName, $normNameEn) {
                                 $q->when($normName !== '', function ($q2) use ($normName) {
-                                    $q2->whereRaw('LOWER(TRIM(name)) = ?', [$normName]);
+                                    $q2->where('name_normalized', $normName);
                                 })
                                     ->when($normNameEn !== '', function ($q2) use ($normNameEn) {
-                                        $q2->orWhereRaw('LOWER(TRIM(name_en)) = ?', [$normNameEn]);
+                                        $q2->orWhere('name_en_normalized', $normNameEn);
                                     });
                             })
                                 ->orWhere(function ($q) use ($normAddress, $normAddressEn) {
                                     $q->when($normAddress !== '', function ($q2) use ($normAddress) {
-                                        $q2->whereRaw('LOWER(TRIM(address1)) = ?', [$normAddress]);
+                                        $q2->where('address1_normalized', $normAddress);
                                     })
                                         ->when($normAddressEn !== '', function ($q2) use ($normAddressEn) {
-                                            $q2->orWhereRaw('LOWER(TRIM(address1_en)) = ?', [$normAddressEn]);
+                                            $q2->orWhere('address1_en_normalized', $normAddressEn);
                                         });
                                 });
                         })
@@ -765,16 +833,16 @@ class GeminiUtils
                         $venue = Role::whereIn('id', $connectedVenueIds)
                             ->where(function ($query) use ($normName, $normNameEn, $normAddress, $normAddressEn) {
                                 $query->when($normName !== '', function ($q) use ($normName) {
-                                    $q->whereRaw('LOWER(TRIM(name)) = ?', [$normName]);
+                                    $q->where('name_normalized', $normName);
                                 })
                                     ->when($normNameEn !== '', function ($q) use ($normNameEn) {
-                                        $q->orWhereRaw('LOWER(TRIM(name_en)) = ?', [$normNameEn]);
+                                        $q->orWhere('name_en_normalized', $normNameEn);
                                     })
                                     ->when($normAddress !== '', function ($q) use ($normAddress) {
-                                        $q->orWhereRaw('LOWER(TRIM(address1)) = ?', [$normAddress]);
+                                        $q->orWhere('address1_normalized', $normAddress);
                                     })
                                     ->when($normAddressEn !== '', function ($q) use ($normAddressEn) {
-                                        $q->orWhereRaw('LOWER(TRIM(address1_en)) = ?', [$normAddressEn]);
+                                        $q->orWhere('address1_en_normalized', $normAddressEn);
                                     });
                             })
                             ->withCount('events')

@@ -183,6 +183,15 @@ class Role extends Model implements MustVerifyEmail
                 $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
             }
 
+            // Recompute the *_normalized columns used by the venue dedup lookup
+            // whenever the source field changes (or on initial create).
+            foreach (['name', 'name_en', 'city', 'address1', 'address1_en'] as $source) {
+                if (! $model->exists || $model->isDirty($source)) {
+                    $normalized = \App\Utils\GeminiUtils::normalizeForMatch($model->{$source});
+                    $model->{$source.'_normalized'} = $normalized === '' ? null : $normalized;
+                }
+            }
+
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
 

@@ -173,9 +173,9 @@ class EventRepo
                 if ($normName !== '') {
                     $venue = Role::where('type', 'venue')
                         ->where('is_deleted', false)
-                        ->whereRaw('LOWER(TRIM(name)) = ?', [$normName])
+                        ->where('name_normalized', $normName)
                         ->when($normCity !== '', function ($q) use ($normCity) {
-                            $q->whereRaw('LOWER(TRIM(city)) = ?', [$normCity]);
+                            $q->where('city_normalized', $normCity);
                         })
                         ->when($countryCode, function ($q) use ($countryCode) {
                             $q->where('country_code', $countryCode);
