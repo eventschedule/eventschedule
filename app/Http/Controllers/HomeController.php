@@ -199,6 +199,12 @@ class HomeController extends Controller
         $venues = $allRoles->where('type', 'venue')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
         $curators = $allRoles->where('type', 'curator')->whereIn('pivot.level', ['owner', 'admin', 'viewer']);
 
+        // Default currency for empty-state revenue display (no sales yet): use the first
+        // role's country to guess. Falls back to USD if no roles have a country set.
+        $defaultCurrency = \App\Utils\MoneyUtils::getCurrencyForCountry(
+            $allRoles->firstWhere(fn ($r) => ! empty($r->country_code))->country_code ?? null
+        );
+
         return view('home', compact(
             'events',
             'month',
@@ -224,6 +230,7 @@ class HomeController extends Controller
             'schedules',
             'venues',
             'curators',
+            'defaultCurrency',
         ));
     }
 

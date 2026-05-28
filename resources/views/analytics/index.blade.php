@@ -158,7 +158,15 @@
                     </div>
                     <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('messages.total_revenue') }}</p>
                 </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-green-600 dark:text-green-400 text-center">{{ number_format($conversionStats['total_revenue'], 2) }}</p>
+                @if ($conversionStats['currency_count'] > 1)
+                    <div class="dashboard-stat-value text-2xl font-bold text-green-600 dark:text-green-400 text-center space-y-1">
+                        @foreach ($conversionStats['total_revenue_by_currency'] as $entry)
+                            <p>{{ \App\Utils\MoneyUtils::format($entry['amount'], $entry['currency_code']) }}</p>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="dashboard-stat-value text-3xl font-bold text-green-600 dark:text-green-400 text-center">{{ \App\Utils\MoneyUtils::format($conversionStats['total_revenue'], $conversionStats['primary_currency'] ?? 'USD') }}</p>
+                @endif
             </div>
             {{-- Conversion Rate --}}
             <div class="ap-card rounded-xl p-6 flex flex-col items-center">
@@ -204,7 +212,11 @@
                         </span>
                     </p>
                 </div>
-                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ number_format($conversionStats['revenue_per_view'], 2) }}</p>
+                @if (! is_null($conversionStats['revenue_per_view']))
+                    <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ \App\Utils\MoneyUtils::format($conversionStats['revenue_per_view'], $conversionStats['primary_currency'] ?? 'USD') }}</p>
+                @else
+                    <p class="dashboard-stat-value text-3xl font-bold text-gray-400 dark:text-gray-500 text-center">—</p>
+                @endif
             </div>
         </div>
         @endif
@@ -225,7 +237,15 @@
                 </div>
                 <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.total_discounts') }}</p>
-                    <p class="text-xl font-bold text-orange-600 dark:text-orange-400">{{ number_format($conversionStats['promo_discounts'], 2) }}</p>
+                    @if (count($conversionStats['promo_discounts_by_currency']) > 1)
+                        <div class="text-base font-bold text-orange-600 dark:text-orange-400 space-y-0.5">
+                            @foreach ($conversionStats['promo_discounts_by_currency'] as $entry)
+                                <p>{{ \App\Utils\MoneyUtils::format($entry['amount'], $entry['currency_code']) }}</p>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-xl font-bold text-orange-600 dark:text-orange-400">{{ \App\Utils\MoneyUtils::format($conversionStats['promo_discounts'], $conversionStats['promo_discounts_by_currency'][0]['currency_code'] ?? $conversionStats['primary_currency'] ?? 'USD') }}</p>
+                    @endif
                 </div>
             </div>
 
@@ -249,11 +269,11 @@
                                 @if ($stat['type'] === 'percentage')
                                     {{ rtrim(rtrim(number_format($stat['value'], 3), '0'), '.') }}%
                                 @else
-                                    {{ rtrim(rtrim(number_format($stat['value'], 3), '0'), '.') }}
+                                    {{ \App\Utils\MoneyUtils::format($stat['value'], $stat['currency_code'] ?? 'USD') }}
                                 @endif
                             </td>
                             <td class="py-2 text-gray-900 dark:text-white text-end">{{ number_format($stat['sales_count']) }}</td>
-                            <td class="py-2 text-orange-600 dark:text-orange-400 text-end">{{ number_format($stat['total_discount'], 2) }}</td>
+                            <td class="py-2 text-orange-600 dark:text-orange-400 text-end">{{ \App\Utils\MoneyUtils::format($stat['total_discount'], $stat['currency_code'] ?? 'USD') }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -328,14 +348,26 @@
             </div>
 
             {{-- ROAS highlight --}}
-            @if ($boostStats['boost_revenue'] > 0)
-            <div class="flex items-center gap-4 mb-6 p-3 rounded-lg {{ $boostStats['roas'] >= 1 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20' }}">
+            @if (! empty($boostStats['boost_revenue_by_currency']))
+            @php
+                $boostRoas = $boostStats['roas'] ?? null;
+                $boostRoasGood = ! is_null($boostRoas) && $boostRoas >= 1;
+                $boostBg = is_null($boostRoas) ? 'bg-gray-50 dark:bg-gray-700/40' : ($boostRoasGood ? 'bg-green-50 dark:bg-green-900/20' : 'bg-amber-50 dark:bg-amber-900/20');
+                $boostFg = is_null($boostRoas) ? 'text-gray-700 dark:text-gray-300' : ($boostRoasGood ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300');
+                $boostFgMuted = is_null($boostRoas) ? 'text-gray-500 dark:text-gray-400' : ($boostRoasGood ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400');
+            @endphp
+            <div class="flex items-center gap-4 mb-6 p-3 rounded-lg {{ $boostBg }}">
                 <div>
-                    <p class="text-sm font-medium {{ $boostStats['roas'] >= 1 ? 'text-green-800 dark:text-green-300' : 'text-amber-800 dark:text-amber-300' }}">
-                        {{ __('messages.roas') }}: {{ number_format($boostStats['roas'], 1) }}x
-                    </p>
-                    <p class="text-xs {{ $boostStats['roas'] >= 1 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400' }}">
-                        ${{ number_format($boostStats['boost_revenue'], 2) }} {{ __('messages.revenue') }} / ${{ number_format($boostStats['total_spend'], 2) }} {{ __('messages.spend') }}
+                    @if (! is_null($boostRoas))
+                        <p class="text-sm font-medium {{ $boostFg }}">
+                            {{ __('messages.roas') }}: {{ number_format($boostRoas, 1) }}x
+                        </p>
+                    @endif
+                    <p class="text-xs {{ $boostFgMuted }}">
+                        @foreach ($boostStats['boost_revenue_by_currency'] as $i => $entry)
+                            {{ \App\Utils\MoneyUtils::format($entry['amount'], $entry['currency_code']) }}@if ($i < count($boostStats['boost_revenue_by_currency']) - 1) + @endif
+                        @endforeach
+                        {{ __('messages.revenue') }} / ${{ number_format($boostStats['total_spend'], 2) }} {{ __('messages.spend') }}
                     </p>
                 </div>
             </div>
@@ -446,8 +478,11 @@
                     <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('messages.sales') }}</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ number_format($newsletterStats['newsletter_sales']) }}</p>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        @if ($newsletterStats['newsletter_revenue'] > 0)
-                            ${{ number_format($newsletterStats['newsletter_revenue'], 2) }} {{ __('messages.revenue') }}
+                        @if (! empty($newsletterStats['newsletter_revenue_by_currency']))
+                            @foreach ($newsletterStats['newsletter_revenue_by_currency'] as $i => $entry)
+                                {{ \App\Utils\MoneyUtils::format($entry['amount'], $entry['currency_code']) }}@if ($i < count($newsletterStats['newsletter_revenue_by_currency']) - 1) + @endif
+                            @endforeach
+                            {{ __('messages.revenue') }}
                         @endif
                     </p>
                 </div>
@@ -498,13 +533,40 @@
         </div>
         @endif
 
-        {{-- Top Events by Revenue Chart --}}
+        {{-- Top Events by Revenue --}}
         @if ($topEventsByRevenue->isNotEmpty() && ! $selectedEventId)
+        @php
+            $topEventsCurrencyCount = $topEventsByRevenue->pluck('currency_code')->unique()->count();
+        @endphp
         <div class="ap-card rounded-xl p-6">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">{{ __('messages.top_events_by_revenue') }}</h3>
-            <div class="h-64">
-                <canvas id="topEventsByRevenueChart"></canvas>
-            </div>
+            @if ($topEventsCurrencyCount > 1)
+                {{-- Multi-currency: cross-currency bar lengths are misleading; show a table. --}}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                <th class="pb-2 font-medium">{{ __('messages.event') }}</th>
+                                <th class="pb-2 font-medium text-end">{{ __('messages.sales') }}</th>
+                                <th class="pb-2 font-medium text-end">{{ __('messages.revenue') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            @foreach ($topEventsByRevenue as $row)
+                            <tr>
+                                <td class="py-2 text-gray-900 dark:text-white">{{ $row['event']->translatedName() }}</td>
+                                <td class="py-2 text-gray-700 dark:text-gray-300 text-end">{{ number_format($row['sales_count']) }}</td>
+                                <td class="py-2 text-green-600 dark:text-green-400 text-end">{{ \App\Utils\MoneyUtils::format($row['revenue'], $row['currency_code']) }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="h-64">
+                    <canvas id="topEventsByRevenueChart"></canvas>
+                </div>
+            @endif
         </div>
         @endif
 
@@ -1818,7 +1880,7 @@
         }
         @endif
 
-        @if ($tab === 'revenue' && isset($topEventsByRevenue) && $topEventsByRevenue->isNotEmpty() && ! $selectedEventId)
+        @if ($tab === 'revenue' && isset($topEventsByRevenue) && $topEventsByRevenue->isNotEmpty() && ! $selectedEventId && $topEventsByRevenue->pluck('currency_code')->unique()->count() === 1)
         function initRevenueCharts() {
             if (typeof Chart === 'undefined') {
                 setTimeout(initRevenueCharts, 50);
@@ -1833,12 +1895,17 @@
 
             // Top Events by Revenue Chart
             const topEventsByRevenueCtx = document.getElementById('topEventsByRevenueChart').getContext('2d');
+            const revenueCurrencyCode = @json($topEventsByRevenue->first()['currency_code'] ?? 'USD');
+            const revenueFormatter = (value) => {
+                const fmt = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value);
+                return revenueCurrencyCode + ' ' + fmt;
+            };
             new Chart(topEventsByRevenueCtx, {
                 type: 'bar',
                 data: {
                     labels: @json($topEventsByRevenue->pluck('event.name')->toArray()),
                     datasets: [{
-                        label: @json(__('messages.revenue')),
+                        label: @json(__('messages.revenue')) + ' (' + revenueCurrencyCode + ')',
                         data: @json($topEventsByRevenue->pluck('revenue')->toArray()),
                         backgroundColor: '#10B981'
                     }]
@@ -1850,6 +1917,11 @@
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => revenueFormatter(ctx.parsed.x)
+                            }
                         }
                     },
                     scales: {
@@ -1859,7 +1931,8 @@
                                 color: gridColor
                             },
                             ticks: {
-                                color: textColor
+                                color: textColor,
+                                callback: (value) => revenueFormatter(value)
                             }
                         },
                         y: {

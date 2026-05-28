@@ -20,6 +20,11 @@ class MoneyUtils
         'EUR' => '€',
         'GBP' => '£',
         'JPY' => '¥',
+        'ZAR' => 'R',
+        'INR' => '₹',
+        'AUD' => 'A$',
+        'CAD' => 'C$',
+        'BRL' => 'R$',
     ];
 
     public static function decimalsFor($currencyCode): int

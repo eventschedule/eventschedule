@@ -791,7 +791,7 @@ class Role extends Model implements MustVerifyEmail
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
-        } elseif (config('filesystems.default') == 'local') {
+        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
             return url('/storage/'.$value);
         } else {
             return $value;
@@ -811,7 +811,7 @@ class Role extends Model implements MustVerifyEmail
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
-        } elseif (config('filesystems.default') == 'local') {
+        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
             return url('/storage/'.$value);
         } else {
             return $value;
@@ -831,7 +831,7 @@ class Role extends Model implements MustVerifyEmail
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
-        } elseif (config('filesystems.default') == 'local') {
+        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
             return url('/storage/'.$value);
         } else {
             return $value;
@@ -1268,7 +1268,7 @@ class Role extends Model implements MustVerifyEmail
                     $sponsor['logo_url'] = url('/images/demo/'.$filename);
                 } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                     $sponsor['logo_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                } elseif (config('filesystems.default') == 'local') {
+                } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                     $sponsor['logo_url'] = url('/storage/'.$filename);
                 } else {
                     $sponsor['logo_url'] = $filename;

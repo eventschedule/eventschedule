@@ -6,7 +6,18 @@
         <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('messages.panel_revenue') }}</span>
     </div>
     <div class="flex-1 flex items-center justify-center">
-        <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white">${{ number_format($revenueStats['total_revenue'] ?? 0, 2) }}</p>
+        @php
+            $revenueByCurrency = $revenueStats['total_revenue_by_currency'] ?? [];
+        @endphp
+        @if (count($revenueByCurrency) > 1)
+            <div class="text-center space-y-1">
+                @foreach ($revenueByCurrency as $entry)
+                    <p class="dashboard-stat-value text-xl font-bold text-gray-900 dark:text-white">{{ \App\Utils\MoneyUtils::format($entry['amount'], $entry['currency_code']) }}</p>
+                @endforeach
+            </div>
+        @else
+            <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white">{{ \App\Utils\MoneyUtils::format($revenueByCurrency[0]['amount'] ?? 0, $revenueByCurrency[0]['currency_code'] ?? ($revenueStats['primary_currency'] ?? ($defaultCurrency ?? 'USD'))) }}</p>
+        @endif
     </div>
     <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">{{ number_format($revenueStats['total_sales'] ?? 0) }} {{ strtolower(__('messages.sales')) }} ({{ $panelSettings['revenue']['period'] ?? 30 }}d)</p>
 </div>

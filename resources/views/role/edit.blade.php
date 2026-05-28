@@ -3230,7 +3230,7 @@
                                             $logoUrl = url('/images/demo/' . $sponsor['logo']);
                                         } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                                             $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $sponsor['logo'];
-                                        } elseif (config('filesystems.default') == 'local') {
+                                        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                                             $logoUrl = url('/storage/' . $sponsor['logo']);
                                         } else {
                                             $logoUrl = $sponsor['logo'];

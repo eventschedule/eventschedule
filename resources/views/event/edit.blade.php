@@ -4395,7 +4395,7 @@
                 $logoUrl = url('/images/demo/' . $s['logo']);
             } elseif (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                 $logoUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $s['logo'];
-            } elseif (config('filesystems.default') == 'local') {
+            } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                 $logoUrl = url('/storage/' . $s['logo']);
             } else {
                 $logoUrl = $s['logo'];

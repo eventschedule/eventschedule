@@ -1450,7 +1450,7 @@ class EventController extends Controller
 
                 if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                     $agendaImageFullUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                } elseif (config('filesystems.default') == 'local') {
+                } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                     $agendaImageFullUrl = url('/storage/'.$filename);
                 } else {
                     $agendaImageFullUrl = $filename;
@@ -1573,7 +1573,7 @@ class EventController extends Controller
 
                 if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                     $flyerUrl = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                } elseif (config('filesystems.default') == 'local') {
+                } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                     $flyerUrl = url('/storage/'.$filename);
                 } else {
                     $flyerUrl = $filename;

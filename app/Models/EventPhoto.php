@@ -26,7 +26,7 @@ class EventPhoto extends Model
             $path = $photo->getAttributes()['photo_url'];
             if ($path) {
                 if (config('filesystems.default') == 'local') {
-                    $path = 'public/' . $path;
+                    $path = 'public/'.$path;
                 }
                 Storage::delete($path);
             }
@@ -40,9 +40,9 @@ class EventPhoto extends Model
         }
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
-            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/' . $value;
-        } elseif (config('filesystems.default') == 'local') {
-            return url('/storage/' . $value);
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
+            return url('/storage/'.$value);
         } else {
             return $value;
         }

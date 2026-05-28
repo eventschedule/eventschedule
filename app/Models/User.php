@@ -537,7 +537,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
             return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
-        } elseif (config('filesystems.default') == 'local') {
+        } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
             return url('/storage/'.$value);
         } else {
             return $value;

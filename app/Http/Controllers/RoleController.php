@@ -545,6 +545,7 @@ class RoleController extends Controller
                         if ((bool) $merged !== (bool) $targetRow->is_accepted) {
                             $updates['is_accepted'] = (bool) $merged;
                         }
+
                         continue;
                     }
                     if (empty($targetRow->{$field}) && ! empty($sourceRow->{$field})) {
@@ -3835,7 +3836,7 @@ class RoleController extends Controller
                     $filename = $results[$imageField];
                     if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                         $response[$imageField.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                    } elseif (config('filesystems.default') == 'local') {
+                    } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                         $response[$imageField.'_url'] = url('/storage/'.$filename);
                     } else {
                         $response[$imageField.'_url'] = $filename;
@@ -4098,7 +4099,7 @@ class RoleController extends Controller
                 $result = ['status' => 'completed', 'success' => true];
                 if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                     $result[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                } elseif (config('filesystems.default') == 'local') {
+                } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                     $result[$imageType.'_url'] = url('/storage/'.$filename);
                 } else {
                     $result[$imageType.'_url'] = $filename;
@@ -4198,7 +4199,7 @@ class RoleController extends Controller
                 $result = ['status' => 'completed', 'success' => true];
                 if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                     $result[$imageType.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                } elseif (config('filesystems.default') == 'local') {
+                } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                     $result[$imageType.'_url'] = url('/storage/'.$filename);
                 } else {
                     $result[$imageType.'_url'] = $filename;
@@ -4352,7 +4353,7 @@ class RoleController extends Controller
                     $filename = $results[$imageField];
                     if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
                         $response[$imageField.'_url'] = 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$filename;
-                    } elseif (config('filesystems.default') == 'local') {
+                    } elseif (in_array(config('filesystems.default'), ['local', 'public'])) {
                         $response[$imageField.'_url'] = url('/storage/'.$filename);
                     } else {
                         $response[$imageField.'_url'] = $filename;

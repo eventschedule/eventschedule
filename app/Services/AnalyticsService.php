@@ -540,6 +540,42 @@ class AnalyticsService
     }
 
     /**
+     * Group paid sales by the linked event's currency.
+     * Returns a list of records [['currency_code' => 'USD', 'sales_count' => 2, 'amount' => 100.5], ...]
+     * sorted by amount desc, with zero-amount currencies filtered out.
+     */
+    private function salesByCurrency(Collection $eventIds, Carbon $start, Carbon $end, string $column = 'payment_amount', ?callable $modifier = null): array
+    {
+        if (! in_array($column, ['payment_amount', 'discount_amount'], true)) {
+            throw new \InvalidArgumentException("Invalid column: $column");
+        }
+
+        $query = DB::table('sales')
+            ->join('events', 'sales.event_id', '=', 'events.id')
+            ->whereIn('sales.event_id', $eventIds->toArray())
+            ->where('sales.status', 'paid')
+            ->whereBetween('sales.created_at', [$start, $end]);
+
+        if ($modifier) {
+            $modifier($query);
+        }
+
+        return $query
+            ->groupBy('events.ticket_currency_code')
+            ->selectRaw('events.ticket_currency_code as currency_code, COUNT(*) as sales_count, COALESCE(SUM(sales.'.$column.'), 0) as amount')
+            ->orderByDesc('amount')
+            ->get()
+            ->map(fn ($row) => [
+                'currency_code' => $row->currency_code ?: 'USD',
+                'sales_count' => (int) $row->sales_count,
+                'amount' => (float) $row->amount,
+            ])
+            ->filter(fn ($row) => $row['amount'] > 0)
+            ->values()
+            ->all();
+    }
+
+    /**
      * Get conversion statistics (views to sales)
      */
     public function getConversionStats(User $user, Carbon $start, Carbon $end, ?int $roleId = null, ?int $eventId = null): array
@@ -549,9 +585,13 @@ class AnalyticsService
             'total_sales' => 0,
             'conversion_rate' => 0,
             'total_revenue' => 0,
-            'revenue_per_view' => 0,
+            'total_revenue_by_currency' => [],
+            'currency_count' => 0,
+            'primary_currency' => null,
+            'revenue_per_view' => null,
             'promo_sales' => 0,
             'promo_discounts' => 0,
+            'promo_discounts_by_currency' => [],
         ];
 
         if ($eventId) {
@@ -574,34 +614,49 @@ class AnalyticsService
 
         $stats = AnalyticsEventsDaily::select(
             DB::raw('SUM(desktop_views + mobile_views + tablet_views + unknown_views) as total_views'),
-            DB::raw('SUM(promo_sales_count) as promo_sales'),
-            DB::raw('SUM(promo_discount_total) as promo_discounts')
+            DB::raw('SUM(promo_sales_count) as promo_sales')
         )
             ->forEvents($eventIds)
             ->inDateRange($start, $end)
             ->first();
 
-        // Get actual sales data from the sales table (source of truth)
-        $salesStats = Sale::whereIn('event_id', $eventIds->toArray())
+        $revenueByCurrency = $this->salesByCurrency($eventIds, $start, $end, 'payment_amount');
+        $discountsByCurrency = $this->salesByCurrency($eventIds, $start, $end, 'discount_amount',
+            fn ($q) => $q->whereNotNull('sales.promo_code_id')
+        );
+
+        // Count all paid sales separately so zero-payment sales (e.g. 100%-off promos)
+        // aren't dropped along with their currency group in $revenueByCurrency.
+        $totalSales = (int) Sale::whereIn('event_id', $eventIds->toArray())
             ->where('status', 'paid')
             ->whereBetween('created_at', [$start, $end])
-            ->selectRaw('COUNT(*) as total_sales, COALESCE(SUM(payment_amount), 0) as total_revenue')
-            ->first();
+            ->count();
 
         $totalViews = (int) ($stats->total_views ?? 0);
-        $totalSales = (int) ($salesStats->total_sales ?? 0);
-        $totalRevenue = (float) ($salesStats->total_revenue ?? 0);
+        $totalRevenue = (float) array_sum(array_column($revenueByCurrency, 'amount'));
+        $totalDiscounts = (float) array_sum(array_column($discountsByCurrency, 'amount'));
         $promoSales = (int) ($stats->promo_sales ?? 0);
-        $promoDiscounts = (float) ($stats->promo_discounts ?? 0);
+
+        $currencyCount = count($revenueByCurrency);
+        $primaryCurrency = $revenueByCurrency[0]['currency_code'] ?? null;
+
+        // Revenue-per-view is only meaningful when revenue is in a single currency.
+        $revenuePerView = ($totalViews > 0 && $currencyCount === 1)
+            ? round($totalRevenue / $totalViews, 2)
+            : null;
 
         return [
             'total_views' => $totalViews,
             'total_sales' => $totalSales,
             'conversion_rate' => $totalViews > 0 ? round(($totalSales / $totalViews) * 100, 2) : 0,
             'total_revenue' => $totalRevenue,
-            'revenue_per_view' => $totalViews > 0 ? round($totalRevenue / $totalViews, 2) : 0,
+            'total_revenue_by_currency' => $revenueByCurrency,
+            'currency_count' => $currencyCount,
+            'primary_currency' => $primaryCurrency,
+            'revenue_per_view' => $revenuePerView,
             'promo_sales' => $promoSales,
-            'promo_discounts' => $promoDiscounts,
+            'promo_discounts' => $totalDiscounts,
+            'promo_discounts_by_currency' => $discountsByCurrency,
         ];
     }
 
@@ -661,12 +716,14 @@ class AnalyticsService
             ->filter(fn ($item) => isset($events[$item->event_id]))
             ->map(function ($item) use ($viewCounts, $events) {
                 $viewCount = isset($viewCounts[$item->event_id]) ? (int) $viewCounts[$item->event_id]->view_count : 0;
+                $event = $events[$item->event_id];
 
                 return [
-                    'event' => $events[$item->event_id],
+                    'event' => $event,
                     'view_count' => $viewCount,
                     'sales_count' => (int) $item->sales_count,
                     'revenue' => (float) $item->revenue,
+                    'currency_code' => $event->ticket_currency_code ?: 'USD',
                     'conversion_rate' => $viewCount > 0 ? round(($item->sales_count / $viewCount) * 100, 2) : 0,
                 ];
             })
@@ -833,20 +890,28 @@ class AnalyticsService
             ->pluck('event_id')
             ->unique();
 
+        $empty = [
+            'sales' => 0,
+            'revenue' => 0,
+            'revenue_by_currency' => [],
+            'currency_count' => 0,
+            'primary_currency' => null,
+        ];
+
         if ($eventIds->isEmpty()) {
-            return ['sales' => 0, 'revenue' => 0];
+            return $empty;
         }
 
-        $result = Sale::whereIn('event_id', $eventIds)
-            ->whereNotNull('boost_campaign_id')
-            ->where('status', 'paid')
-            ->whereBetween('created_at', [$start, $end])
-            ->selectRaw('COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as total_revenue')
-            ->first();
+        $byCurrency = $this->salesByCurrency($eventIds, $start, $end, 'payment_amount',
+            fn ($q) => $q->whereNotNull('sales.boost_campaign_id')
+        );
 
         return [
-            'sales' => (int) ($result->sales_count ?? 0),
-            'revenue' => (float) ($result->total_revenue ?? 0),
+            'sales' => (int) array_sum(array_column($byCurrency, 'sales_count')),
+            'revenue' => (float) array_sum(array_column($byCurrency, 'amount')),
+            'revenue_by_currency' => $byCurrency,
+            'currency_count' => count($byCurrency),
+            'primary_currency' => $byCurrency[0]['currency_code'] ?? null,
         ];
     }
 
@@ -926,7 +991,13 @@ class AnalyticsService
 
         $costPerView = $boostViews > 0 ? round((float) $totalSpend / $boostViews, 2) : 0;
         $costPerSale = $boostSalesStats['sales'] > 0 ? round((float) $totalSpend / $boostSalesStats['sales'], 2) : 0;
-        $roas = (float) $totalSpend > 0 ? round($boostSalesStats['revenue'] / (float) $totalSpend, 2) : 0;
+        // ROAS (revenue / spend) only makes sense when boost revenue is also in USD,
+        // since spend is always USD (Event Schedule's own billing). Hide otherwise.
+        $roas = ((float) $totalSpend > 0
+                && $boostSalesStats['currency_count'] === 1
+                && $boostSalesStats['primary_currency'] === 'USD')
+            ? round($boostSalesStats['revenue'] / (float) $totalSpend, 2)
+            : null;
 
         return [
             'has_data' => true,
@@ -940,6 +1011,9 @@ class AnalyticsService
             'boost_views' => $boostViews,
             'boost_sales' => $boostSalesStats['sales'],
             'boost_revenue' => $boostSalesStats['revenue'],
+            'boost_revenue_by_currency' => $boostSalesStats['revenue_by_currency'],
+            'currency_count' => $boostSalesStats['currency_count'],
+            'primary_currency' => $boostSalesStats['primary_currency'],
             'cost_per_view' => $costPerView,
             'cost_per_sale' => $costPerSale,
             'roas' => $roas,
@@ -976,20 +1050,28 @@ class AnalyticsService
             ->pluck('event_id')
             ->unique();
 
+        $empty = [
+            'sales' => 0,
+            'revenue' => 0,
+            'revenue_by_currency' => [],
+            'currency_count' => 0,
+            'primary_currency' => null,
+        ];
+
         if ($eventIds->isEmpty()) {
-            return ['sales' => 0, 'revenue' => 0];
+            return $empty;
         }
 
-        $result = Sale::whereIn('event_id', $eventIds)
-            ->whereNotNull('newsletter_id')
-            ->where('status', 'paid')
-            ->whereBetween('created_at', [$start, $end])
-            ->selectRaw('COUNT(*) as sales_count, COALESCE(SUM(payment_amount), 0) as total_revenue')
-            ->first();
+        $byCurrency = $this->salesByCurrency($eventIds, $start, $end, 'payment_amount',
+            fn ($q) => $q->whereNotNull('sales.newsletter_id')
+        );
 
         return [
-            'sales' => (int) ($result->sales_count ?? 0),
-            'revenue' => (float) ($result->total_revenue ?? 0),
+            'sales' => (int) array_sum(array_column($byCurrency, 'sales_count')),
+            'revenue' => (float) array_sum(array_column($byCurrency, 'amount')),
+            'revenue_by_currency' => $byCurrency,
+            'currency_count' => count($byCurrency),
+            'primary_currency' => $byCurrency[0]['currency_code'] ?? null,
         ];
     }
 
@@ -1046,16 +1128,19 @@ class AnalyticsService
             return collect();
         }
 
-        $stats = Sale::select(
-            'promo_code_id',
-            DB::raw('COUNT(*) as sales_count'),
-            DB::raw('SUM(discount_amount) as total_discount')
-        )
-            ->whereIn('event_id', $eventIds)
-            ->whereNotNull('promo_code_id')
-            ->where('status', 'paid')
-            ->whereBetween('created_at', [$start, $end])
-            ->groupBy('promo_code_id')
+        $stats = DB::table('sales')
+            ->join('events', 'sales.event_id', '=', 'events.id')
+            ->select(
+                'sales.promo_code_id',
+                DB::raw('events.ticket_currency_code as currency_code'),
+                DB::raw('COUNT(*) as sales_count'),
+                DB::raw('SUM(sales.discount_amount) as total_discount')
+            )
+            ->whereIn('sales.event_id', $eventIds)
+            ->whereNotNull('sales.promo_code_id')
+            ->where('sales.status', 'paid')
+            ->whereBetween('sales.created_at', [$start, $end])
+            ->groupBy('sales.promo_code_id', 'events.ticket_currency_code')
             ->orderByDesc('sales_count')
             ->get();
 
@@ -1069,6 +1154,7 @@ class AnalyticsService
             'code' => $promoCodes[$row->promo_code_id]->code ?? '—',
             'type' => $promoCodes[$row->promo_code_id]->type ?? null,
             'value' => $promoCodes[$row->promo_code_id]->value ?? null,
+            'currency_code' => $row->currency_code ?: 'USD',
             'sales_count' => (int) $row->sales_count,
             'total_discount' => (float) $row->total_discount,
         ]);
@@ -1247,6 +1333,9 @@ class AnalyticsService
             'newsletter_views' => $newsletterViews,
             'newsletter_sales' => $newsletterSalesStats['sales'],
             'newsletter_revenue' => $newsletterSalesStats['revenue'],
+            'newsletter_revenue_by_currency' => $newsletterSalesStats['revenue_by_currency'],
+            'currency_count' => $newsletterSalesStats['currency_count'],
+            'primary_currency' => $newsletterSalesStats['primary_currency'],
             'campaigns' => $newsletters->map(fn ($n) => [
                 'hash' => UrlUtils::encodeId($n->id),
                 'subject' => $n->subject,
