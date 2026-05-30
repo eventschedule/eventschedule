@@ -2146,7 +2146,7 @@
                                             </div>
                                             <div class="mb-4 {{ (is_object($group) && $group->slug) || (is_array($group) && !empty($group['slug'])) ? 'hidden' : '' }}" id="group-slug-edit-{{ is_object($group) ? $group->id : $i }}">
                                                 <x-input-label for="group_slug_{{ is_object($group) ? $group->id : $i }}" :value="__('messages.slug')" />
-                                                <x-text-input name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
+                                                <x-text-input id="group_slug_{{ is_object($group) ? $group->id : $i }}" name="groups[{{ is_object($group) ? $group->id : $i }}][slug]" type="text" class="mt-1 block w-full" :value="is_object($group) ? $group->slug : $group['slug'] ?? ''" />
                                             </div>
                                             <div class="flex gap-4 items-center justify-between">
                                                 <div class="flex gap-4 items-center">
@@ -4309,7 +4309,10 @@ function toggleGroupSlugEdit(groupId) {
         if (editButton) {
             editButton.classList.add('hidden');
         }
-        document.getElementById(`group_slug_${groupId}`).focus();
+        const slugInput = document.getElementById(`group_slug_${groupId}`);
+        if (slugInput) {
+            slugInput.focus();
+        }
     }
 }
 
