@@ -40,34 +40,20 @@
 
     <!-- SEO Meta Tags -->
     @php
+        // Marketing pages are English-only for SEO. The page bodies are not translated,
+        // so we canonicalize every ?lang= variant onto the clean English URL and do not
+        // emit hreflang language alternates. The ?lang= switcher still works for users.
         $path = request()->path();
         $basePath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
-        $canonicalPath = $basePath;
-        $langParam = request()->get('lang');
-        $validLangs = config('app.supported_languages');
-        if ($langParam && array_key_exists($langParam, $validLangs)) {
-            $canonicalPath = $basePath . '?lang=' . $langParam;
-        }
     @endphp
-    <link rel="canonical" href="{{ $canonicalPath }}">
-    <!-- Hreflang tags -->
-    <link rel="alternate" hreflang="x-default" href="{{ $basePath }}">
-    <link rel="alternate" hreflang="en" href="{{ $basePath }}">
-    @foreach (array_keys(config('app.supported_languages')) as $lang)
-        @if ($lang !== 'en')
-    <link rel="alternate" hreflang="{{ $lang }}" href="{{ $basePath }}?lang={{ $lang }}">
-        @endif
-    @endforeach
+    <link rel="canonical" href="{{ $basePath }}">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
-    @if(isset($keywords))
-    <meta name="keywords" content="{{ $keywords }}">
-    @endif
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
-    <meta property="og:url" content="{{ $canonicalPath }}">
+    <meta property="og:url" content="{{ $basePath }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     @php
@@ -95,15 +81,10 @@
         $currentOgLocale = $ogLocaleMap[app()->getLocale()] ?? 'en_US';
     @endphp
     <meta property="og:locale" content="{{ $currentOgLocale }}">
-    @foreach($ogLocaleMap as $lang => $ogLocale)
-        @if($ogLocale !== $currentOgLocale)
-    <meta property="og:locale:alternate" content="{{ $ogLocale }}">
-        @endif
-    @endforeach
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ $canonicalPath }}">
+    <meta name="twitter:url" content="{{ $basePath }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
@@ -111,6 +92,7 @@
     <meta name="twitter:site" content="@ScheduleEvent">
 
     <!-- Structured Data -->
+    {{-- WebSite SearchAction (Sitelinks Searchbox) intentionally omitted: the /search endpoint is disabled. Re-add a "potentialAction" SearchAction here when search is re-enabled. --}}
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
@@ -121,14 +103,6 @@
         "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "publisher": {
             "@id": "{{ config('app.url') }}/#organization"
-        },
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "{{ config('app.url') }}/search?search={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
         }
     }
     </script>
