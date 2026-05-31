@@ -75,6 +75,7 @@
 
     <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Vue === 'undefined') return;
         const { createApp, ref, computed } = Vue;
 
         const app = createApp({

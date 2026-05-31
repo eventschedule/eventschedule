@@ -1817,7 +1817,7 @@
 @endif
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
 <script {!! nonce_attr() !!}>
-if (typeof Vue === 'undefined') { throw new Error('Vue failed to load'); }
+if (typeof Vue !== 'undefined') {
 const { createApp } = Vue;
 
 const calendarApp = createApp({
@@ -3807,6 +3807,7 @@ function updateHeroFiltersButton() {
 updateHeroFiltersButton();
 calendarAppInstance.$watch('dynamicFilterCount', updateHeroFiltersButton);
 calendarAppInstance.$watch('activeFilterCount', updateHeroFiltersButton);
+}
 </script>
 
 <script {!! nonce_attr() !!}>

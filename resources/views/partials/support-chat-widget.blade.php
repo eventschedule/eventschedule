@@ -122,6 +122,7 @@
 <script {!! nonce_attr() !!}>window.Vue || document.write('<script src="{{ asset('js/vue.global.prod.js') }}"{!! nonce_attr() !!}><\/script>')</script>
 <script {!! nonce_attr() !!}>
     document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Vue === 'undefined') return;
         Vue.createApp({
             data() {
                 return {
