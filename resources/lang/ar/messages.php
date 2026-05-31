@@ -3116,4 +3116,10 @@ return [
     'category_name_invalid' => 'لا يمكن أن تحتوي أسماء الفئات على &lt; أو &gt; أو فواصل أسطر.',
     'move_up' => 'تحريك لأعلى',
     'move_down' => 'تحريك لأسفل',
+    'needs_attention' => 'بحاجة إلى انتباه',
+    'pending_action_requests' => '{1} :count طلب فعالية|[2,*] :count طلبات فعاليات',
+    'pending_action_fan_content' => '{1} :count مساهمة للمراجعة|[2,*] :count مساهمات للمراجعة',
+    'pending_action_poll_options' => '{1} :count اقتراح للاستطلاع|[2,*] :count اقتراحات للاستطلاع',
+    'pending_action_carpool_reports' => '{1} :count بلاغ مشاركة ركوب للمراجعة|[2,*] :count بلاغات مشاركة ركوب للمراجعة',
+    'pending_action_show_more' => 'عرض :count إضافية',
 ];

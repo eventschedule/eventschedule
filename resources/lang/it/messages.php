@@ -3116,4 +3116,10 @@ return [
     'category_name_invalid' => 'I nomi di categoria non possono contenere &lt;, &gt; né interruzioni di riga.',
     'move_up' => 'Sposta su',
     'move_down' => 'Sposta giù',
+    'needs_attention' => 'Richiede attenzione',
+    'pending_action_requests' => '{1} :count richiesta di evento|[2,*] :count richieste di evento',
+    'pending_action_fan_content' => '{1} :count contenuto da revisionare|[2,*] :count contenuti da revisionare',
+    'pending_action_poll_options' => '{1} :count suggerimento per il sondaggio|[2,*] :count suggerimenti per il sondaggio',
+    'pending_action_carpool_reports' => '{1} :count segnalazione di condivisione passaggi da rivedere|[2,*] :count segnalazioni di condivisione passaggi da rivedere',
+    'pending_action_show_more' => 'Mostra altri :count',
 ];

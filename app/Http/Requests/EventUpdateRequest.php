@@ -33,6 +33,7 @@ class EventUpdateRequest extends FormRequest
             'addons.*.url' => ['nullable', 'url', 'max:2000'],
             'addon_image_data.*' => ['nullable', 'string', 'max:3500000'],
 
+            'venue_email' => ['nullable', 'email', 'max:255'],
             'venue_phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
             'members.*.phone' => ['nullable', 'string', 'max:20', 'regex:/^\+[1-9]\d{1,14}$/'],
 

@@ -242,6 +242,11 @@
         </div>
         @endif
 
+        {{-- Needs attention: pending items to handle across all editable schedules. Only shown when there are any. --}}
+        @if($pendingActionItems->isNotEmpty())
+            @include('home.partials.needs-attention')
+        @endif
+
         {{-- Configurable Dashboard Panels --}}
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
             @foreach($dashboardConfig['panels'] as $panel)

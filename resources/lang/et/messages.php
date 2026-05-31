@@ -3132,4 +3132,10 @@ return [
     'category_name_invalid' => 'Kategooria nimi ei tohi sisaldada märke &lt;, &gt; ega reavahetusi.',
     'move_up' => 'Liiguta üles',
     'move_down' => 'Liiguta alla',
+    'needs_attention' => 'Vajab tähelepanu',
+    'pending_action_requests' => '{1} :count ürituse taotlus|[2,*] :count ürituse taotlust',
+    'pending_action_fan_content' => '{1} :count esitis ülevaatamiseks|[2,*] :count esitist ülevaatamiseks',
+    'pending_action_poll_options' => '{1} :count küsitluse ettepanek|[2,*] :count küsitluse ettepanekut',
+    'pending_action_carpool_reports' => '{1} :count sõidujagamise teade ülevaatamiseks|[2,*] :count sõidujagamise teadet ülevaatamiseks',
+    'pending_action_show_more' => 'Näita veel :count',
 ];

@@ -275,14 +275,51 @@ class EventRepo
                 if ($followNewRoles && (! $matchingUser || $matchingUser->id != $user->id)) {
                     $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
                 }
-            } elseif ($matchedExisting && $followNewRoles) {
+            } elseif ($matchedExisting) {
                 // Venue was found via the normalized safety-net lookup (not via
                 // a user-picked venue_id). Attach as follower so it appears in
                 // the user's dropdown for future imports.
-                $alreadyFollows = $user->roles()->where('roles.id', $venue->id)->exists();
-                if (! $alreadyFollows) {
-                    $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
+                if ($followNewRoles) {
+                    $alreadyFollows = $user->roles()->where('roles.id', $venue->id)->exists();
+                    if (! $alreadyFollows) {
+                        $user->roles()->attach($venue->id, ['level' => 'follower', 'created_at' => now()]);
+                    }
                 }
+            } elseif (! $venue->user_id) {
+                // Venue was explicitly selected via venue_id and has no owner:
+                // persist the edits the event form allows for unclaimed venues.
+                // (The UI only shows these fields when !selectedVenue.user_id, so
+                // mirror that gate here.) Each field is guarded by filled() so a
+                // blank value never wipes shared venue data, and an unchanged
+                // re-select stays non-dirty (a true no-op, no verification email).
+                if ($request->filled('venue_name')) {
+                    $venue->name = $request->venue_name;
+                }
+                if ($request->filled('venue_email')) {
+                    $venue->email = $request->venue_email;
+                }
+                if ($request->filled('venue_phone')) {
+                    $venue->phone = $request->venue_phone;
+                }
+                if ($request->filled('venue_website')) {
+                    $venue->website = $request->venue_website;
+                }
+                if ($request->filled('venue_address1')) {
+                    $venue->address1 = $request->venue_address1;
+                }
+                if ($request->filled('venue_city')) {
+                    $venue->city = $request->venue_city;
+                }
+                if ($request->filled('venue_state')) {
+                    $venue->state = $request->venue_state;
+                }
+                if ($request->filled('venue_postal_code')) {
+                    $venue->postal_code = $request->venue_postal_code;
+                }
+                if ($request->filled('venue_country_code')) {
+                    $venue->country_code = strtolower($request->venue_country_code);
+                }
+                $venue->save();
             }
         }
 

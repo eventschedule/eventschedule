@@ -4497,7 +4497,13 @@
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
         activeSettingsTab: @json($role->isPro() ? 'sponsors' : 'privacy'),
-        activeEngagementTab: 'fan_content',
+        activeEngagementTab: (function() {
+          // Deep-link support: the dashboard "Needs attention" list links here with
+          // ?engagement=<tab> (plus #section-engagement, which the section nav already
+          // opens on load) to land on the right Engagement sub-tab.
+          var requested = new URLSearchParams(window.location.search).get('engagement');
+          return ['fan_content', 'polls', 'feedback', 'carpool'].includes(requested) ? requested : 'fan_content';
+        })(),
         sponsorForm: { name: '', url: '', tier: '' },
         sponsorLogoPreview: null,
         sponsorLogoFile: null,

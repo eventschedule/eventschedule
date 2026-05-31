@@ -3117,4 +3117,10 @@ return [
     'category_name_invalid' => 'Les noms de catégorie ne peuvent pas contenir &lt;, &gt; ni de sauts de ligne.',
     'move_up' => 'Monter',
     'move_down' => 'Descendre',
+    'needs_attention' => 'À traiter',
+    'pending_action_requests' => '{1} :count demande d\'événement|[2,*] :count demandes d\'événement',
+    'pending_action_fan_content' => '{1} :count contribution à examiner|[2,*] :count contributions à examiner',
+    'pending_action_poll_options' => '{1} :count suggestion de sondage|[2,*] :count suggestions de sondage',
+    'pending_action_carpool_reports' => '{1} :count signalement de covoiturage à examiner|[2,*] :count signalements de covoiturage à examiner',
+    'pending_action_show_more' => 'Afficher :count de plus',
 ];

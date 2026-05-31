@@ -3109,4 +3109,10 @@ return [
     'category_name_invalid' => 'שמות קטגוריות לא יכולים להכיל &lt;, &gt; או מעברי שורה.',
     'move_up' => 'הזז למעלה',
     'move_down' => 'הזז למטה',
+    'needs_attention' => 'דורש טיפול',
+    'pending_action_requests' => '{1} :count בקשת אירוע|[2,*] :count בקשות אירוע',
+    'pending_action_fan_content' => '{1} :count הגשה לבדיקה|[2,*] :count הגשות לבדיקה',
+    'pending_action_poll_options' => '{1} :count הצעה לסקר|[2,*] :count הצעות לסקר',
+    'pending_action_carpool_reports' => '{1} :count דיווח שיתוף נסיעות לבדיקה|[2,*] :count דיווחי שיתוף נסיעות לבדיקה',
+    'pending_action_show_more' => 'הצג :count נוספים',
 ];

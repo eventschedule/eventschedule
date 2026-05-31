@@ -3120,4 +3120,10 @@ return [
     'category_name_invalid' => 'Kategorienamen dürfen kein &lt;, &gt; oder Zeilenumbrüche enthalten.',
     'move_up' => 'Nach oben',
     'move_down' => 'Nach unten',
+    'needs_attention' => 'Erfordert Aufmerksamkeit',
+    'pending_action_requests' => '{1} :count Veranstaltungsanfrage|[2,*] :count Veranstaltungsanfragen',
+    'pending_action_fan_content' => '{1} :count Einreichung zur Prüfung|[2,*] :count Einreichungen zur Prüfung',
+    'pending_action_poll_options' => '{1} :count Umfragevorschlag|[2,*] :count Umfragevorschläge',
+    'pending_action_carpool_reports' => '{1} :count Fahrgemeinschaftsmeldung zu prüfen|[2,*] :count Fahrgemeinschaftsmeldungen zu prüfen',
+    'pending_action_show_more' => 'Noch :count weitere anzeigen',
 ];

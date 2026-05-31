@@ -3135,4 +3135,10 @@ return [
     'category_name_invalid' => 'Имена категорий не могут содержать &lt;, &gt; или переносы строк.',
     'move_up' => 'Переместить вверх',
     'move_down' => 'Переместить вниз',
+    'needs_attention' => 'Требует внимания',
+    'pending_action_requests' => '{1} :count запрос на событие|[2,*] :count запросов на событие',
+    'pending_action_fan_content' => '{1} :count материал на проверку|[2,*] :count материалов на проверку',
+    'pending_action_poll_options' => '{1} :count предложение для опроса|[2,*] :count предложений для опроса',
+    'pending_action_carpool_reports' => '{1} :count жалоба на совместную поездку на проверку|[2,*] :count жалоб на совместную поездку на проверку',
+    'pending_action_show_more' => 'Показать ещё :count',
 ];

@@ -3114,4 +3114,10 @@ return [
     'category_name_invalid' => 'Categorienamen mogen geen &lt;, &gt; of regeleinden bevatten.',
     'move_up' => 'Omhoog',
     'move_down' => 'Omlaag',
+    'needs_attention' => 'Vereist aandacht',
+    'pending_action_requests' => '{1} :count evenementaanvraag|[2,*] :count evenementaanvragen',
+    'pending_action_fan_content' => '{1} :count inzending om te beoordelen|[2,*] :count inzendingen om te beoordelen',
+    'pending_action_poll_options' => '{1} :count enquêtesuggestie|[2,*] :count enquêtesuggesties',
+    'pending_action_carpool_reports' => '{1} :count carpoolmelding om te beoordelen|[2,*] :count carpoolmeldingen om te beoordelen',
+    'pending_action_show_more' => 'Toon :count meer',
 ];

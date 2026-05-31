@@ -3190,4 +3190,10 @@ return [
     'follow_consent_dont_ask_again' => 'Don\'t ask me again when I follow other schedules',
     'follow_consent_signup_button' => 'Sign up and follow',
     'ask_before_following' => 'Ask me before I follow a new schedule',
+    'needs_attention' => 'Needs attention',
+    'pending_action_requests' => '{1} :count event request|[2,*] :count event requests',
+    'pending_action_fan_content' => '{1} :count submission to review|[2,*] :count submissions to review',
+    'pending_action_poll_options' => '{1} :count poll suggestion|[2,*] :count poll suggestions',
+    'pending_action_carpool_reports' => '{1} :count carpool report to review|[2,*] :count carpool reports to review',
+    'pending_action_show_more' => 'Show :count more',
 ];

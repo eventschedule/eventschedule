@@ -7,6 +7,7 @@ use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventComment;
 use App\Models\EventPhoto;
+use App\Models\EventPoll;
 use App\Models\EventVideo;
 use App\Models\Newsletter;
 use App\Models\Role;
@@ -205,6 +206,11 @@ class HomeController extends Controller
             $allRoles->firstWhere(fn ($r) => ! empty($r->country_code))->country_code ?? null
         );
 
+        // Pending items the user needs to act on, aggregated across every schedule
+        // they can edit. Rendered as a "Needs attention" to-do list at the top of the
+        // dashboard, and only shown when something is pending.
+        $pendingActionItems = $this->getPendingActionItems($roleIds);
+
         return view('home', compact(
             'events',
             'month',
@@ -231,7 +237,179 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
+            'pendingActionItems',
         ));
+    }
+
+    /**
+     * Aggregate the pending items a user needs to act on across every schedule they
+     * can edit (owner/admin), as a flat, sorted collection of to-do rows. Each row is
+     * an array: type, count, title, subtitle, url, color. Mirrors the count logic used
+     * by the NotifyRequestChanges / NotifyFanContentChanges / NotifyPollOptionChanges
+     * commands. Returns an empty collection when there is nothing to handle.
+     */
+    private function getPendingActionItems($roleIds)
+    {
+        $items = collect();
+
+        if ($roleIds->isEmpty()) {
+            return $items;
+        }
+
+        $rolesById = app('userRoles')->keyBy('id');
+
+        // 1) Pending event requests (per schedule) - event_role.is_accepted IS NULL.
+        // count(distinct event_id) mirrors the Requests tab's whereHas (distinct-event)
+        // semantics exactly, regardless of how many pivot rows an event has per role.
+        $requestCounts = DB::table('event_role')
+            ->whereIn('role_id', $roleIds)
+            ->whereNull('is_accepted')
+            ->select('role_id', DB::raw('count(distinct event_id) as cnt'))
+            ->groupBy('role_id')
+            ->pluck('cnt', 'role_id');
+
+        foreach ($requestCounts as $roleId => $cnt) {
+            $role = $rolesById->get($roleId);
+            if (! $role) {
+                continue;
+            }
+            $items->push([
+                'type' => 'requests',
+                'count' => (int) $cnt,
+                'title' => trans_choice('messages.pending_action_requests', $cnt, ['count' => $cnt]),
+                'subtitle' => $role->name,
+                'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']),
+                'color' => 'blue',
+            ]);
+        }
+
+        // Per-event queries below are scoped to events on the user's editable schedules
+        // via a subquery (avoids pulling every event id into PHP on each dashboard load).
+        $eventScope = fn ($query) => $query->select('event_id')
+            ->from('event_role')
+            ->whereIn('role_id', $roleIds);
+
+        // 2) Pending fan submissions (videos + comments + photos) combined per event.
+        $fanContentByEvent = collect();
+        foreach ([
+            EventVideo::class,
+            EventComment::class,
+            EventPhoto::class,
+        ] as $model) {
+            $counts = $model::whereIn('event_id', $eventScope)
+                ->where('is_approved', false)
+                ->select('event_id', DB::raw('count(*) as cnt'))
+                ->groupBy('event_id')
+                ->pluck('cnt', 'event_id');
+            foreach ($counts as $eventId => $cnt) {
+                $fanContentByEvent[$eventId] = ($fanContentByEvent[$eventId] ?? 0) + (int) $cnt;
+            }
+        }
+
+        // 3) Pending poll suggestions per event - sum of pending_options across polls.
+        $pollByEvent = EventPoll::whereIn('event_id', $eventScope)
+            ->whereNotNull('pending_options')
+            ->get()
+            ->groupBy('event_id')
+            ->map(fn ($polls) => $polls->sum(fn ($poll) => count($poll->pending_options ?? [])))
+            ->filter(fn ($cnt) => $cnt > 0);
+
+        // 4) Carpool reports the admin must review per event - all reports on the event's
+        // active offers, scoped to editable events (matches the edit page's report list
+        // and the event-based dismiss authorization, EventPolicy::update). Carpool
+        // *requests* are intentionally excluded: they are approved by the ride's driver
+        // (CarpoolController::approveRequest aborts unless the offer creator), not the
+        // schedule admin. Dismissing a report deletes it, so every row here is pending.
+        $carpoolByEvent = DB::table('carpool_reports')
+            ->join('carpool_offers', 'carpool_reports.carpool_offer_id', '=', 'carpool_offers.id')
+            ->whereIn('carpool_offers.event_id', $eventScope)
+            ->where('carpool_offers.status', 'active')
+            ->select('carpool_offers.event_id as event_id', DB::raw('count(*) as cnt'))
+            ->groupBy('carpool_offers.event_id')
+            ->pluck('cnt', 'event_id');
+
+        // Resolve names + a deep-link subdomain once for every event referenced above.
+        $referencedEventIds = collect()
+            ->merge($fanContentByEvent->keys())
+            ->merge($pollByEvent->keys())
+            ->merge($carpoolByEvent->keys())
+            ->unique()
+            ->values();
+
+        if ($referencedEventIds->isEmpty()) {
+            return $this->sortPendingActionItems($items);
+        }
+
+        $events = Event::whereIn('id', $referencedEventIds)
+            ->with(['roles' => fn ($query) => $query->whereIn('roles.id', $roleIds)])
+            ->get()
+            ->keyBy('id');
+
+        $eventRow = function ($eventId, $cnt, $type, $transKey, $color, $engagement) use ($events) {
+            $event = $events->get($eventId);
+            $role = $event ? $event->roles->first() : null;
+            if (! $event || ! $role) {
+                return null;
+            }
+
+            return [
+                'type' => $type,
+                'count' => (int) $cnt,
+                'title' => trans_choice("messages.{$transKey}", $cnt, ['count' => $cnt]),
+                'subtitle' => $event->translatedName().' · '.$role->name,
+                'url' => route('event.edit', [
+                    'subdomain' => $role->subdomain,
+                    'hash' => UrlUtils::encodeId($event->id),
+                ]).'?engagement='.$engagement.'#section-engagement',
+                'color' => $color,
+            ];
+        };
+
+        foreach ($fanContentByEvent as $eventId => $cnt) {
+            if ($row = $eventRow($eventId, $cnt, 'fan_content', 'pending_action_fan_content', 'purple', 'fan_content')) {
+                $items->push($row);
+            }
+        }
+        foreach ($pollByEvent as $eventId => $cnt) {
+            if ($row = $eventRow($eventId, $cnt, 'polls', 'pending_action_poll_options', 'green', 'polls')) {
+                $items->push($row);
+            }
+        }
+        // Carpool rows link to a carpool-enabled editable role (the Carpool tab is gated
+        // by $role->carpool_enabled); skip events where the user has no such role.
+        foreach ($carpoolByEvent as $eventId => $cnt) {
+            $event = $events->get($eventId);
+            $carpoolRole = $event ? $event->roles->firstWhere('carpool_enabled', true) : null;
+            if (! $carpoolRole) {
+                continue;
+            }
+            $items->push([
+                'type' => 'carpool',
+                'count' => (int) $cnt,
+                'title' => trans_choice('messages.pending_action_carpool_reports', $cnt, ['count' => $cnt]),
+                'subtitle' => $event->translatedName().' · '.$carpoolRole->name,
+                'url' => route('event.edit', [
+                    'subdomain' => $carpoolRole->subdomain,
+                    'hash' => UrlUtils::encodeId($event->id),
+                ]).'?engagement=carpool#section-engagement',
+                'color' => 'amber',
+            ]);
+        }
+
+        return $this->sortPendingActionItems($items);
+    }
+
+    /**
+     * Sort pending action items by type priority (requests, fan content, polls,
+     * carpool), then by count descending within each type.
+     */
+    private function sortPendingActionItems($items)
+    {
+        $priority = ['requests' => 0, 'fan_content' => 1, 'polls' => 2, 'carpool' => 3];
+
+        return $items
+            ->sortBy(fn ($item) => sprintf('%d-%010d', $priority[$item['type']] ?? 9, 1_000_000_000 - $item['count']))
+            ->values();
     }
 
     public function calendarEvents(Request $request): JsonResponse

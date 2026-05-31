@@ -3155,4 +3155,10 @@ return [
     'category_name_invalid' => 'Numele categoriilor nu pot conține &lt;, &gt; sau întreruperi de linie.',
     'move_up' => 'Mută sus',
     'move_down' => 'Mută jos',
+    'needs_attention' => 'Necesită atenție',
+    'pending_action_requests' => '{1} :count cerere de eveniment|[2,*] :count cereri de eveniment',
+    'pending_action_fan_content' => '{1} :count contribuție de examinat|[2,*] :count contribuții de examinat',
+    'pending_action_poll_options' => '{1} :count sugestie de sondaj|[2,*] :count sugestii de sondaj',
+    'pending_action_carpool_reports' => '{1} :count raportare carpooling de examinat|[2,*] :count raportări carpooling de examinat',
+    'pending_action_show_more' => 'Afișează încă :count',
 ];

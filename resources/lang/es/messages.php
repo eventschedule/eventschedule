@@ -3116,4 +3116,10 @@ return [
     'category_name_invalid' => 'Los nombres de categoría no pueden contener &lt;, &gt; ni saltos de línea.',
     'move_up' => 'Mover arriba',
     'move_down' => 'Mover abajo',
+    'needs_attention' => 'Requiere atención',
+    'pending_action_requests' => '{1} :count solicitud de evento|[2,*] :count solicitudes de evento',
+    'pending_action_fan_content' => '{1} :count envío para revisar|[2,*] :count envíos para revisar',
+    'pending_action_poll_options' => '{1} :count sugerencia de encuesta|[2,*] :count sugerencias de encuesta',
+    'pending_action_carpool_reports' => '{1} :count reporte de viaje compartido por revisar|[2,*] :count reportes de viaje compartido por revisar',
+    'pending_action_show_more' => 'Mostrar :count más',
 ];

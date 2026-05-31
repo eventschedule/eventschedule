@@ -3115,4 +3115,10 @@ return [
     'category_name_invalid' => 'Nomes de categoria não podem conter &lt;, &gt; nem quebras de linha.',
     'move_up' => 'Mover para cima',
     'move_down' => 'Mover para baixo',
+    'needs_attention' => 'Requer atenção',
+    'pending_action_requests' => '{1} :count solicitação de evento|[2,*] :count solicitações de evento',
+    'pending_action_fan_content' => '{1} :count envio para revisar|[2,*] :count envios para revisar',
+    'pending_action_poll_options' => '{1} :count sugestão de enquete|[2,*] :count sugestões de enquete',
+    'pending_action_carpool_reports' => '{1} :count denúncia de carona para revisar|[2,*] :count denúncias de carona para revisar',
+    'pending_action_show_more' => 'Mostrar mais :count',
 ];
