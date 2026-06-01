@@ -1235,6 +1235,16 @@ class Role extends Model implements MustVerifyEmail
         return $this->language_code == 'ar' || $this->language_code == 'he';
     }
 
+    /**
+     * Direction of the schedule's authored content, independent of the viewer's
+     * translate state. Mirrors EventTextGenerator's he/ar check, unlike isRtl()
+     * which flips to false in translate/English-view mode.
+     */
+    public function isContentRtl(): bool
+    {
+        return in_array($this->language_code, ['ar', 'he']);
+    }
+
     public function translatedName()
     {
         $value = $this->name;

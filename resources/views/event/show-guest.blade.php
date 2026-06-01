@@ -244,7 +244,7 @@
                           }
                         @endphp
                       @endif
-                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}">
+                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir($each, (session()->has('translate') || request()->lang == 'en') && (bool)$each->name_en) }}">
                         <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
                           {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
                           <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
@@ -253,7 +253,7 @@
                         </span>
                       </a>
                     @else
-                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;">
+                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir($each, (session()->has('translate') || request()->lang == 'en') && (bool)$each->name_en) }}">
                         {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
                       </p>
                     @endif
@@ -625,9 +625,17 @@
           @endif
         </nav>
 
+        @php
+            $translateMode = session()->has('translate') || request()->lang == 'en';
+            // When a curator translation is shown, its own role's language governs
+            // direction; otherwise the event's schedule does.
+            $contentRole = ($translation && $translation->role) ? $translation->role : $role;
+        @endphp
+
         {{-- Event title --}}
         <h1
           class="text-gray-900 dark:text-gray-100 text-[28px] sm:text-[36px] lg:text-[44px] leading-snug font-bold {{ $role->isRtl() ? 'rtl text-right' : '' }}"
+          dir="{{ content_dir($contentRole, !$translation && $translateMode && (bool)$event->name_en) }}"
         >
           {!! str_replace(' , ', '<br>', e($translation ? $translation->name_translated : $event->translatedName())) !!}
           @if ($event->isPasswordProtected())
@@ -637,7 +645,8 @@
 
         {{-- Short description --}}
         @if ($event->short_description)
-        <p class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}">
+        <p class="text-gray-600 dark:text-gray-400 text-lg mt-2 {{ $role->isRtl() ? 'rtl text-right' : '' }}"
+          dir="{{ content_dir($contentRole, !$translation && $translateMode && (bool)$event->short_description_en) }}">
           {{ $translation && $translation->short_description_translated ? $translation->short_description_translated : $event->translatedShortDescription() }}
         </p>
         @endif
@@ -743,13 +752,13 @@
                       }
                     @endphp
                     <a href="{{ $venueUrl }}" class="group inline-flex items-center gap-1 w-fit">
-                      <span class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
+                      <span dir="{{ content_dir($event->venue, $translateMode && (bool)$event->venue->name_en) }}" class="text-lg font-semibold text-gray-900 dark:text-white group-hover:underline">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
                       <svg class="w-5 h-5 fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity {{ $role->isRtl() ? 'scale-x-[-1]' : '' }}" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
                       </svg>
                     </a>
                   @else
-                    <span class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
+                    <span dir="{{ content_dir($event->venue, $translateMode && (bool)$event->venue->name_en) }}" class="text-lg font-semibold text-gray-900 dark:text-white">{!! str_replace(' , ', '<br>', e($event->venue->translatedName())) !!}</span>
                   @endif
                 @else
                   <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ $event->getEventUrlDomain() }}</span>
@@ -1168,7 +1177,7 @@
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ $role->customLabel('about') }}
           </h2>
-          <div class="{{ $role->isRtl() || ($translation && $translation->role?->isRtl()) ? 'rtl' : '' }}">
+          <div class="{{ $role->isRtl() || ($translation && $translation->role?->isRtl()) ? 'rtl' : '' }}" dir="{{ content_dir($contentRole, !$translation && $translateMode && (bool)$event->description_html_en) }}">
             <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
               {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription()) !!}
             </div>
@@ -1204,7 +1213,7 @@
                     {{ $part->start_time }}@if ($part->end_time) - {{ $part->end_time }}@endif
                   </span>
                   @endif
-                  <span class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
+                  <span dir="{{ content_dir($role, $translateMode && (bool)$part->name_en) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
                   @if ($part->translatedDescription())
                   <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
@@ -1391,7 +1400,7 @@
               <div class="flex items-start gap-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 {{ $role->isRtl() ? 'rtl' : '' }}">
                 <span class="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style="background-color: {{ $accentColor }};">{{ $index + 1 }}</span>
                 <div class="flex-1">
-                  <span class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
+                  <span dir="{{ content_dir($role, $translateMode && (bool)$part->name_en) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
                   @if ($part->translatedDescription())
                   <div class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
@@ -1600,7 +1609,7 @@
           <div class="space-y-4 mb-6" x-data="pollsComponent()">
               @foreach ($event->polls as $poll)
               <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                  <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ $poll->question }}</h4>
+                  <h4 dir="{{ content_dir($role) }}" class="font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ $poll->question }}</h4>
 
                   @auth
                       @php

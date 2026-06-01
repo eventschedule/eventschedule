@@ -39,6 +39,7 @@ trait CalendarDataTrait
             'category_name' => $event->resolveCategoryName(),
             'category_color' => $event->resolveCategoryColor(),
             'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
+            'dir' => content_dir($role, ! $curatorTranslation && (session()->has('translate') || request()->lang == 'en') && (bool) $event->name_en),
             'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
             'venue_name' => $event->getVenueDisplayName(),
             'venue_subdomain' => $event->venue?->subdomain ?: null,

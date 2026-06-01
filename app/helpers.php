@@ -127,6 +127,29 @@ if (! function_exists('rtl_class')) {
     }
 }
 
+if (! function_exists('content_dir')) {
+    /**
+     * Base direction ('rtl'|'ltr') for schedule-authored content.
+     *
+     * Uses the schedule's language (viewer-independent, via isContentRtl) so that
+     * mixed Latin/Hebrew text keeps the schedule's intended base direction, matching
+     * the WhatsApp export. Unlike is_rtl()/rtl_class(), it does not depend on the
+     * viewer's translate state. Pass $showingEnglish = true to force LTR when a real
+     * English value is the one actually being displayed.
+     *
+     * @param  object|null  $role  The schedule whose language governs the content
+     * @param  bool  $showingEnglish  True when a genuine English value is shown
+     */
+    function content_dir(?object $role, bool $showingEnglish = false): string
+    {
+        if ($showingEnglish) {
+            return 'ltr';
+        }
+
+        return ($role && method_exists($role, 'isContentRtl') && $role->isContentRtl()) ? 'rtl' : 'ltr';
+    }
+}
+
 if (! function_exists('marketing_url')) {
     /**
      * Generate a URL for marketing pages

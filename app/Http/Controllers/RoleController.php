@@ -1660,6 +1660,7 @@ class RoleController extends Controller
             'category_name' => $event->resolveCategoryName(),
             'category_color' => $event->resolveCategoryColor(),
             'name' => $event->translatedName(),
+            'dir' => content_dir($role, (session()->has('translate') || request()->lang == 'en') && (bool) $event->name_en),
             'venue_name' => $event->getVenueDisplayName(),
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
