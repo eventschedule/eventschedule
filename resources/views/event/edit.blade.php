@@ -1483,7 +1483,7 @@
                         <x-input-label :value="__('messages.flyer_image')" />
                         <input id="flyer_image" name="flyer_image" type="file" class="hidden"
                                 accept="image/png, image/jpeg" />
-                            <div id="flyer_image_choose" style="{{ $event->flyer_image_url ? 'display:none' : '' }}">
+                            <div id="flyer_image_choose" style="{{ ($event->flyer_image_url || ($clonedFlyerImage ?? null)) ? 'display:none' : '' }}">
                                 <div class="mt-1 flex items-center gap-3">
                                     <button type="button" id="flyer-choose-btn"
                                         class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
@@ -1505,13 +1505,22 @@
                                 <button type="button" id="clear-flyer-preview-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
 
-                            @if ($event->flyer_image_url)
+                            @php
+                                $clonedFlyerImage = $clonedFlyerImage ?? null;
+                                $clonedFlyerImageUrl = $clonedFlyerImageUrl ?? null;
+                                // For a clone the event isn't saved yet (no id), so the preview shows the
+                                // source image with an empty hash, routing the delete button into
+                                // deleteFlyer()'s client-side branch instead of a server call.
+                                $flyerPreviewUrl = $event->flyer_image_url ?: $clonedFlyerImageUrl;
+                                $flyerDeleteHash = $event->id ? \App\Utils\UrlUtils::encodeId($event->id) : '';
+                            @endphp
+                            @if ($flyerPreviewUrl)
                             <div id="flyer_image_existing" class="relative inline-block mt-4 pt-1">
-                                <img src="{{ $event->flyer_image_url }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" data-lightbox-src="{{ $event->flyer_image_url }}" />
+                                <img src="{{ $flyerPreviewUrl }}" alt="{{ __('messages.flyer_image') }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" id="flyer_preview" data-lightbox-src="{{ $flyerPreviewUrl }}" />
                                 <button type="button"
                                     id="delete-flyer-btn"
                                     data-url="{{ route('event.delete_image', ['subdomain' => $subdomain]) }}"
-                                    data-hash="{{ \App\Utils\UrlUtils::encodeId($event->id) }}"
+                                    data-hash="{{ $flyerDeleteHash }}"
                                     data-token="{{ csrf_token() }}"
                                     style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
                                     class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
@@ -1520,6 +1529,9 @@
                                     </svg>
                                 </button>
                             </div>
+                            @endif
+                            @if ($clonedFlyerImage)
+                            <input type="hidden" name="clone_flyer_image" id="clone_flyer_image" value="{{ $clonedFlyerImage }}" />
                             @endif
                         </div>
 
@@ -7054,6 +7066,8 @@ function deleteFlyer(url, hash, token, element) {
         element.remove();
         var aiInput = document.getElementById('ai_flyer_image');
         if (aiInput) aiInput.remove();
+        var cloneInput = document.getElementById('clone_flyer_image');
+        if (cloneInput) cloneInput.remove();
         var chooseSection = document.getElementById('flyer_image_choose');
         if (chooseSection) chooseSection.style.display = '';
         return;

@@ -242,6 +242,8 @@ class EventController extends Controller
         $event->user_id = $user->id;
         $event->is_draft = $role->draft_events_default;
         $selectedMembers = [];
+        $clonedFlyerImage = null;
+        $clonedFlyerImageUrl = null;
 
         // Check if we're cloning an event
         $clonedData = session('cloned_event');
@@ -287,6 +289,12 @@ class EventController extends Controller
 
             // Set cloned members
             $selectedMembers = $clonedData['selected_members'] ?? [];
+
+            // Resolve the cloned flyer for preview. The new event keeps a null
+            // flyer_image_url; the raw filename rides along in clone_flyer_image and
+            // is copied to a fresh file in EventRepo::saveEvent() on submit.
+            $clonedFlyerImage = $clonedData['flyer_image_filename'] ?? null;
+            $clonedFlyerImageUrl = $clonedFlyerImage ? $event->getFlyerImageUrlAttribute($clonedFlyerImage) : null;
 
             // Clear cloned data from session
             session()->forget('cloned_event');
@@ -433,6 +441,8 @@ class EventController extends Controller
             'clonedCuratorGroups' => $clonedCuratorGroups,
             'isCloned' => $isCloned,
             'clonedParts' => $clonedParts,
+            'clonedFlyerImage' => $clonedFlyerImage,
+            'clonedFlyerImageUrl' => $clonedFlyerImageUrl,
             'polls' => collect(),
             'defaultPromoCodes' => $defaultPromoCodes ?? [],
         ]);
@@ -491,6 +501,12 @@ class EventController extends Controller
         // Reset fields that shouldn't be cloned
         $clonedEventData['flyer_image_url'] = null;
         $clonedEventData['sponsor_logos'] = null;
+
+        // Capture the source flyer's raw filename (not the accessor URL) so it can be
+        // copied to a new physical file when the clone is saved. Demo flyers live in
+        // public/images/demo/ (not in Storage), so they're skipped.
+        $rawFlyer = $event->getAttributes()['flyer_image_url'] ?? null;
+        $clonedFlyer = ($rawFlyer && ! str_starts_with($rawFlyer, 'demo_')) ? $rawFlyer : null;
 
         // Clone tickets (reset sold quantities)
         $clonedTickets = [];
@@ -563,6 +579,7 @@ class EventController extends Controller
                 'curators' => $curatorIds,
                 'curator_groups' => $curatorGroups,
                 'parts' => $clonedParts,
+                'flyer_image_filename' => $clonedFlyer,
             ],
         ]);
 

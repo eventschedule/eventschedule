@@ -971,6 +971,29 @@ class EventRepo
             }
         }
 
+        // Cloned events carry the source flyer's raw filename. Copy it to a fresh file so the
+        // clone's flyer is independent: deleting or replacing it never touches the original's
+        // file. Lowest priority - skipped if the user uploaded or AI-generated a flyer instead.
+        // Read + re-write (not Storage::copy) so the destination inherits the disk's default
+        // public visibility - the same write path as a normal upload. Storage::copy() would
+        // instead retain the source ACL, which is unreliable on S3/Spaces and could 403.
+        if (! $request->hasFile('flyer_image') && ! $request->input('ai_flyer_image') && $request->input('clone_flyer_image')) {
+            $cloneFilename = $request->input('clone_flyer_image');
+            if (is_string($cloneFilename) && preg_match('/^flyer_[a-z0-9]+\.(jpg|jpeg|png|gif|webp)$/', $cloneFilename)) {
+                $sourcePath = config('filesystems.default') == 'local' ? 'public/'.$cloneFilename : $cloneFilename;
+                if (Storage::exists($sourcePath)) {
+                    $extension = strtolower(pathinfo($cloneFilename, PATHINFO_EXTENSION));
+                    $newFilename = strtolower('flyer_'.Str::random(32).'.'.$extension);
+                    $newPath = config('filesystems.default') == 'local' ? 'public/'.$newFilename : $newFilename;
+                    $contents = Storage::get($sourcePath);
+                    if ($contents !== null && Storage::put($newPath, $contents)) {
+                        $event->flyer_image_url = $newFilename;
+                        $event->save();
+                    }
+                }
+            }
+        }
+
         if (config('app.hosted') && ! $event->is_draft) {
             $sendEmailToMembers = $request->input('send_email_to_members', []);
             $sendSmsToMembers = $request->input('send_sms_to_members', []);
