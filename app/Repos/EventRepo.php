@@ -286,34 +286,41 @@ class EventRepo
                     }
                 }
             } elseif (! $venue->user_id) {
-                // Venue was explicitly selected via venue_id and has no owner:
-                // persist the edits the event form allows for unclaimed venues.
-                // (The UI only shows these fields when !selectedVenue.user_id, so
-                // mirror that gate here.) Each field is guarded by filled() so a
-                // blank value never wipes shared venue data, and an unchanged
-                // re-select stays non-dirty (a true no-op, no verification email).
+                // Venue was explicitly selected via venue_id and has no owner: persist the edits the
+                // event edit form allows for unclaimed venues. The interactive form pre-loads each
+                // field from the selected venue, so when it sets venue_details_editable (only while
+                // the address fields are shown) a blank is an intentional clear -> has(). Programmatic
+                // callers (API, the import preview, WhatsApp/curator AI imports) never set the flag and
+                // may send partial/blank fields parsed from a source that merely matched this venue via
+                // venue_id, so they keep filled() and a blank never wipes shared venue data. venue_name
+                // (shared identity) and venue_country_code (the country selector cannot be cleared via
+                // the UI) always stay on filled(). Unchanged values stay non-dirty (a true no-op, no
+                // verification email) via Eloquent dirty checking.
+                $clearBlanks = $request->boolean('venue_details_editable');
+                $shouldSet = fn ($field) => $clearBlanks ? $request->has($field) : $request->filled($field);
+
                 if ($request->filled('venue_name')) {
                     $venue->name = $request->venue_name;
                 }
-                if ($request->filled('venue_email')) {
+                if ($shouldSet('venue_email')) {
                     $venue->email = $request->venue_email;
                 }
-                if ($request->filled('venue_phone')) {
+                if ($shouldSet('venue_phone')) {
                     $venue->phone = $request->venue_phone;
                 }
-                if ($request->filled('venue_website')) {
+                if ($shouldSet('venue_website')) {
                     $venue->website = $request->venue_website;
                 }
-                if ($request->filled('venue_address1')) {
+                if ($shouldSet('venue_address1')) {
                     $venue->address1 = $request->venue_address1;
                 }
-                if ($request->filled('venue_city')) {
+                if ($shouldSet('venue_city')) {
                     $venue->city = $request->venue_city;
                 }
-                if ($request->filled('venue_state')) {
+                if ($shouldSet('venue_state')) {
                     $venue->state = $request->venue_state;
                 }
-                if ($request->filled('venue_postal_code')) {
+                if ($shouldSet('venue_postal_code')) {
                     $venue->postal_code = $request->venue_postal_code;
                 }
                 if ($request->filled('venue_country_code')) {
@@ -810,6 +817,11 @@ class EventRepo
         $availableSchedules = $user->availableEventSchedules();
         $userVisibleIds = $availableSchedules->pluck('id')->toArray();
 
+        // Roles owned by the dedicated venue field / members section. Empty for a brand-new
+        // event; populated from the existing attachments just below.
+        $previousVenueIds = [];
+        $previousTalentIds = [];
+
         // The schedules tab pre-checks every attached schedule (including the
         // venue/talent on the event), but the dedicated venue field and members
         // section may have been changed by the user without touching the tab.
@@ -845,6 +857,13 @@ class EventRepo
             }
         }
 
+        // Only the interactive event form submits these flags; the API and importers never do, so
+        // they fall through to the preservation below and never wipe attachments they did not
+        // manage. When the form's participants section / venue field IS submitted, a previously-
+        // attached talent/venue that is absent from this request was removed there on purpose.
+        $membersSubmitted = $request->boolean('members_submitted');
+        $venueSubmitted = $request->boolean('venue_submitted');
+
         // Preserve attachments the user has no visibility into. Anything visible
         // in the schedules tab is fully managed by this submission.
         foreach ($existingAttachedIds as $attachedId) {
@@ -855,6 +874,16 @@ class EventRepo
                 continue;
             }
             if (in_array($attachedId, $selectedCurators)) {
+                continue;
+            }
+            // Talents/venue the user removed in their dedicated form section (only when that
+            // section was actually submitted) must not be resurrected here; otherwise preserve
+            // them so programmatic callers that omit the section never lose attachments they did
+            // not manage.
+            if ($membersSubmitted && in_array($attachedId, $previousTalentIds)) {
+                continue;
+            }
+            if ($venueSubmitted && in_array($attachedId, $previousVenueIds)) {
                 continue;
             }
             $selectedCurators[] = $attachedId;

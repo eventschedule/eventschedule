@@ -1710,6 +1710,10 @@
                         </div>
 
                         <x-text-input name="venue_id" v-bind:value="selectedVenue.id" type="hidden" />
+                        {{-- Marks that the venue field was submitted, so the backend treats a previously-attached
+                             venue absent from this request as an intentional removal. Absent from API/import
+                             submissions, which therefore preserve the existing venue. --}}
+                        <input type="hidden" name="venue_submitted" value="1">
 
                         <div v-if="isInPerson">
                             <div v-if="!selectedVenue || showVenueAddressFields" class="mb-6">
@@ -1744,6 +1748,10 @@
                                 </div>
 
                                 <div v-if="showAddressFields()">
+                                    {{-- Signals that the venue fields were submitted from the editable form, so a blank is an
+                                         intentional clear (EventRepo honors blanks via has() only when this is set). Absent from
+                                         programmatic callers/imports, which keep filled() so a blank never wipes shared venue data. --}}
+                                    <input type="hidden" name="venue_details_editable" value="1">
                                     <div class="mb-6">
                                         <x-input-label for="venue_name" :value="__('messages.name')" />
                                         <x-text-input id="venue_name" name="venue_name" type="text"
@@ -1914,6 +1922,10 @@
                     </svg>
                 </button>
                 <div id="section-participants" class="section-content lg:mt-0">
+                    {{-- Marks that the participants section was submitted, so the backend treats a
+                         previously-attached talent absent from members[] as an intentional removal.
+                         Absent from API/import submissions, which therefore preserve existing talents. --}}
+                    <input type="hidden" name="members_submitted" value="1">
                     <div class="max-w-xl">                                                
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
