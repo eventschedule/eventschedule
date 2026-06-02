@@ -26,6 +26,7 @@ use App\Models\Ticket;
 use App\Models\TicketWaitlist;
 use App\Utils\CssUtils;
 use App\Utils\MarkdownUtils;
+use App\Utils\UrlUtils;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -1430,13 +1431,16 @@ class BackupService
         $partRefId = $data['_event_part_ref_id'] ?? null;
         $partId = $partRefId ? ($idMap['parts'][$partRefId] ?? null) : null;
 
-        EventVideo::withoutEvents(function () use ($event, $partId, $data) {
+        $youtubeUrl = $data['youtube_url'] ?? '';
+        $youtubeUrl = UrlUtils::getCanonicalYouTubeUrl($youtubeUrl) ?? $youtubeUrl;
+
+        EventVideo::withoutEvents(function () use ($event, $partId, $data, $youtubeUrl) {
             EventVideo::create([
                 'event_id' => $event->id,
                 'event_part_id' => $partId,
                 'event_date' => $data['event_date'] ?? null,
                 'user_id' => null,
-                'youtube_url' => $data['youtube_url'] ?? '',
+                'youtube_url' => $youtubeUrl,
                 'is_approved' => $data['is_approved'] ?? true,
             ]);
         });

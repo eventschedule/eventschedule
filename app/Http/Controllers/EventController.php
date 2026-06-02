@@ -2308,6 +2308,9 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.invalid_youtube_url'));
         }
 
+        // Store only the canonical watch URL so no guest-controlled query string is persisted
+        $youtubeUrl = UrlUtils::getCanonicalYouTubeUrl($youtubeUrl);
+
         if (! auth()->check()) {
             return redirect_with_pending_action(
                 app_url(route('sign_up', [], false)),

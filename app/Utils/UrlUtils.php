@@ -347,6 +347,17 @@ class UrlUtils
         return false;
     }
 
+    public static function getCanonicalYouTubeUrl($url)
+    {
+        $videoId = self::extractYouTubeVideoId($url);
+
+        if ($videoId) {
+            return 'https://www.youtube.com/watch?v='.$videoId;
+        }
+
+        return null;
+    }
+
     public static function getBackUrl()
     {
         $previous = url()->previous();

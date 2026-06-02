@@ -691,6 +691,7 @@ class HomeController extends Controller
             return [
                 'type' => 'follower',
                 'description' => $user ? trim(($user->first_name ?? '').' '.($user->last_name ?? '')) : '',
+                'email' => $user->email ?? '',
                 'date' => Carbon::parse($follow->created_at),
             ];
         });
@@ -789,6 +790,9 @@ class HomeController extends Controller
             if (! $embedUrl) {
                 return $returnUrl;
             }
+
+            // Store only the canonical watch URL so no guest-controlled query string is persisted
+            $youtubeUrl = UrlUtils::getCanonicalYouTubeUrl($youtubeUrl);
 
             // Check for duplicate
             $submittedVideoId = basename(parse_url($embedUrl, PHP_URL_PATH));

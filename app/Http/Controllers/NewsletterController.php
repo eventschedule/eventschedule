@@ -552,7 +552,7 @@ class NewsletterController extends Controller
 
         $sortBy = $request->get('sort_by', 'opened_at');
         $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-        $allowedSortColumns = ['name', 'status', 'opened_at', 'clicked_at'];
+        $allowedSortColumns = ['name', 'email', 'status', 'opened_at', 'clicked_at'];
         if (! in_array($sortBy, $allowedSortColumns)) {
             $sortBy = 'opened_at';
         }
@@ -769,7 +769,7 @@ class NewsletterController extends Controller
         if ($segment->type === 'manual') {
             $sortBy = $request->get('sort_by', 'created_at');
             $sortDir = strtolower($request->get('sort_dir', 'desc')) === 'asc' ? 'asc' : 'desc';
-            $allowedSortColumns = ['name', 'created_at'];
+            $allowedSortColumns = ['name', 'email', 'created_at'];
             if (! in_array($sortBy, $allowedSortColumns)) {
                 $sortBy = 'created_at';
             }

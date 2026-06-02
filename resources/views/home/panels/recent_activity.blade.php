@@ -25,6 +25,11 @@
                 <p class="text-sm text-gray-700 dark:text-gray-300">
                     @if($activity['description'])
                     <span class="font-medium text-gray-900 dark:text-white">{{ $activity['description'] }}</span>
+                    @if(!empty($activity['email']))
+                    <span class="text-gray-500 dark:text-gray-400">({{ $activity['email'] }})</span>
+                    @endif
+                    @elseif(!empty($activity['email']))
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $activity['email'] }}</span>
                     @endif
                     {{ __('messages.started_following') }}
                 </p>
