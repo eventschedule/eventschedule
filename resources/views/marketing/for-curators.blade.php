@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Curators | Multi-Venue Events</x-slot>
-    <x-slot name="description">Build the ultimate local guide. Use AI-powered import, aggregate events from multiple sources, and grow your following. Built for bloggers, community orgs, and event aggregators.</x-slot>
+    <x-slot name="description">Build the ultimate local guide. Use AI import to aggregate events from multiple sources and grow your following. For bloggers, orgs, and event aggregators.</x-slot>
     <x-slot name="breadcrumbTitle">For Curators</x-slot>
 
     <x-slot name="structuredData">

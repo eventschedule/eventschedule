@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Performers & Artists | Share Your Shows</x-slot>
-    <x-slot name="description">Free event scheduling for performers and artists of every kind. Share your shows, sell tickets, sync with Google Calendar, and let venues add you to their schedule. Zero platform fees.</x-slot>
+    <x-slot name="description">Free event scheduling for performers and artists. Share your shows, sell tickets with zero platform fees, and let venues add you to their own schedules.</x-slot>
     <x-slot name="breadcrumbTitle">For Talent</x-slot>
 
     <x-slot name="structuredData">

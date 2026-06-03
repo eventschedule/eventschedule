@@ -103,7 +103,7 @@
                     Built for everyone with events
                 </h2>
                 <p class="text-xl text-gray-500 dark:text-gray-400">
-                    No matter how you share your time, Event Schedule works for all of them.
+                    However you share your events, Event Schedule is built to work for you.
                 </p>
             </div>
 

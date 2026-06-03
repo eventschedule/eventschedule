@@ -985,7 +985,7 @@
                 <span class="text-gradient">your schedule?</span>
             </h2>
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
-                Start sharing your schedule with your audience today.
+                Create your event page, sell tickets with zero platform fees, and email your audience directly. All in one free platform.
             </p>
             <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center px-12 py-6 text-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/30">
                 <span class="relative z-10 flex items-center gap-3">

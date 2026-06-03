@@ -399,7 +399,7 @@
                 </div>
 
                 <!-- Check-in Dashboard -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900 border border-rose-200 dark:border-white/10 p-8">
+                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900 dark:to-orange-900 border border-rose-200 dark:border-white/10 p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300 text-sm font-medium mb-4">
                         <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -416,7 +416,7 @@
                                 <span class="text-rose-600 dark:text-rose-300 font-semibold">67%</span>
                             </div>
                             <div class="w-full h-3 bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-                                <div class="h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-full" style="width: 67%"></div>
+                                <div class="h-full bg-gradient-to-r from-rose-500 to-orange-500 rounded-full" style="width: 67%"></div>
                             </div>
                             <div class="text-gray-500 dark:text-gray-400 text-xs mt-1">67 / 100 attendees</div>
                         </div>
@@ -424,10 +424,10 @@
                 </div>
 
                 <!-- Sales Export (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-indigo-100 dark:from-slate-900 dark:to-indigo-900 border border-slate-200 dark:border-white/10 p-8 lg:p-10">
+                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-blue-100 dark:from-slate-900 dark:to-blue-900 border border-slate-200 dark:border-white/10 p-8 lg:p-10">
                     <div class="grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4">
                                 <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -791,7 +791,7 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-slate-100 to-indigo-100 dark:from-slate-900 dark:to-indigo-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-br from-slate-100 to-blue-100 dark:from-slate-900 dark:to-blue-900 rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
                     <button @click="open = open === 8 ? null : 8" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I export my sales data?

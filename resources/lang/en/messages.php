@@ -1845,7 +1845,7 @@ return [
 
     // Why create account page
     'why_create_account_title' => 'Why Create an Account?',
-    'why_create_account_description' => 'Discover the benefits of creating a free Event Schedule account.',
+    'why_create_account_description' => 'See what a free Event Schedule account unlocks: unlimited event calendars, ticketing, newsletters, and tools to grow your audience. No credit card required.',
     'why_create_account_hero_badge' => 'Free Account',
     'why_create_account_hero_headline' => 'Unlock powerful features',
     'why_create_account_hero_subtitle' => 'Create an account to manage your events, customize your profile, and access all the tools you need - completely free.',

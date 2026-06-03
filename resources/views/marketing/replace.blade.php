@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Replace Google Forms, Mailchimp, Canva & More for Events | Event Schedule</x-slot>
-    <x-slot name="description">Replace Google Forms, Mailchimp, Canva, Notion, Trello, and other general-purpose tools with Event Schedule. Purpose-built event management with ticketing, event pages, and AI features.</x-slot>
+    <x-slot name="description">Replace Google Forms, Mailchimp, Canva, Notion, and Trello with Event Schedule: purpose-built event management with ticketing, event pages, and AI.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 
     <x-slot name="structuredData">
@@ -172,7 +172,7 @@
                     [
                         'label' => 'Marketing & Communication',
                         'tools' => [
-                            ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp', 'desc' => 'Replace a separate email tool with built-in newsletters, A/B testing, and integrated attendee data.', 'pricing' => '$13+/mo vs. $5/mo', 'icon' => 'mail', 'icon_bg' => 'bg-violet-100 dark:bg-violet-500/20', 'icon_color' => 'text-violet-600 dark:text-violet-400'],
+                            ['name' => 'Mailchimp', 'route' => 'marketing.replace_mailchimp', 'desc' => 'Replace a separate email tool with built-in newsletters, A/B testing, and integrated attendee data.', 'pricing' => '$13+/mo vs. $5/mo', 'icon' => 'mail', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                             ['name' => 'Canva', 'route' => 'marketing.replace_canva', 'desc' => 'Replace manual flyer design with auto-generated event graphics and AI-powered flyers.', 'pricing' => '$15/mo vs. $5/mo', 'icon' => 'image', 'icon_bg' => 'bg-amber-100 dark:bg-amber-500/20', 'icon_color' => 'text-amber-600 dark:text-amber-400'],
                             ['name' => 'Linktree', 'route' => 'marketing.replace_linktree', 'desc' => 'Replace a list of links with a schedule page that shows events, sells tickets, and collects subscribers.', 'pricing' => '$9/mo vs. $5/mo', 'icon' => 'link', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
                         ],
@@ -182,7 +182,7 @@
                         'tools' => [
                             ['name' => 'Calendly', 'route' => 'marketing.replace_calendly', 'desc' => 'Replace appointment scheduling with public event pages, ticketing, and a shareable event calendar.', 'pricing' => '$10/mo/user vs. $5/mo', 'icon' => 'calendar', 'icon_bg' => 'bg-rose-100 dark:bg-rose-500/20', 'icon_color' => 'text-rose-600 dark:text-rose-400'],
                             ['name' => 'Google Sheets', 'route' => 'marketing.replace_google_sheets', 'desc' => 'Replace spreadsheet tracking with automatic attendee management, sales dashboards, and CSV exports.', 'pricing' => 'Free (manual effort) vs. $5/mo', 'icon' => 'chart', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
-                            ['name' => 'QR Code Generators', 'route' => 'marketing.replace_qr_code_generators', 'desc' => 'Replace standalone QR tools with tickets that include built-in QR codes and a live check-in dashboard.', 'pricing' => '$5 to $15/mo vs. $5/mo', 'icon' => 'qr', 'icon_bg' => 'bg-indigo-100 dark:bg-indigo-500/20', 'icon_color' => 'text-indigo-600 dark:text-indigo-400'],
+                            ['name' => 'QR Code Generators', 'route' => 'marketing.replace_qr_code_generators', 'desc' => 'Replace standalone QR tools with tickets that include built-in QR codes and a live check-in dashboard.', 'pricing' => '$5 to $15/mo vs. $5/mo', 'icon' => 'qr', 'icon_bg' => 'bg-blue-100 dark:bg-blue-500/20', 'icon_color' => 'text-blue-600 dark:text-blue-400'],
                         ],
                     ],
                     [
