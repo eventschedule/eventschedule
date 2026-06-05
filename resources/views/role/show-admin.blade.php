@@ -575,11 +575,11 @@ document.addEventListener('DOMContentLoaded', function() {
 @include('components.embed-modal')
 
 @if(config('app.hosted'))
-<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
+<x-upgrade-modal name="upgrade-scan-agenda" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/ai')">
     {{ __('messages.upgrade_feature_description_scan_agenda') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.availability') }}">
+<x-upgrade-modal name="upgrade-availability" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/availability')">
     {{ __('messages.upgrade_feature_description_availability') }}
 </x-upgrade-modal>
 @endif

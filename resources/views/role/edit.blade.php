@@ -2289,7 +2289,7 @@
                             {{ __('messages.event_custom_fields_graphic_help') }}
                         </p>
                         @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_fields') : null" :subdomain="$role->subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/custom-fields')" :subdomain="$role->subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -2472,7 +2472,7 @@
                             @endforeach
                         </div>
                         @else
-                        <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_labels') : null" :subdomain="$role->subdomain">
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/custom-labels')" :subdomain="$role->subdomain">
                             <x-slot:icon>
                                 <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
@@ -3337,7 +3337,7 @@
 
                             <div id="new-sponsor-inputs-container"></div>
                         @else
-                            <x-upgrade-prompt tier="pro" :learnMoreUrl="config('app.hosted') ? route('marketing.custom_css') : null" :subdomain="$role->subdomain">
+                            <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/features/custom-css')" :subdomain="$role->subdomain">
                                 <x-slot:icon>
                                     <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.41a2.25 2.25 0 013.182 0l2.909 2.91M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
@@ -7570,7 +7570,7 @@ window.handleAiStyleResults = function(data) {
 @endif
 
 @if(config('app.hosted'))
-<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
+<x-upgrade-modal name="upgrade-ai-style" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/ai')">
     {{ __('messages.upgrade_feature_description_ai_style') }}
 </x-upgrade-modal>
 @endif
@@ -7642,19 +7642,19 @@ window.handleAiScheduleDetailsResults = function(data) {
 @endif
 
 @if(config('app.hosted'))
-<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.ai') }}">
+<x-upgrade-modal name="upgrade-ai-details" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/ai')">
     {{ __('messages.upgrade_feature_description_ai_details') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-custom-css" tier="pro" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.custom_css') }}">
+<x-upgrade-modal name="upgrade-custom-css" tier="pro" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/custom-css')">
     {{ __('messages.upgrade_feature_description_custom_css') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-custom-fields" tier="pro" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.custom_fields') }}">
+<x-upgrade-modal name="upgrade-custom-fields" tier="pro" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/custom-fields')">
     {{ __('messages.upgrade_feature_description_custom_fields') }}
 </x-upgrade-modal>
 
-<x-upgrade-modal name="upgrade-custom-domain" tier="enterprise" :subdomain="$role->subdomain" learnMoreUrl="{{ route('marketing.custom_domain') }}">
+<x-upgrade-modal name="upgrade-custom-domain" tier="enterprise" :subdomain="$role->subdomain" :learnMoreUrl="marketing_url('/features/custom-domain')">
     {{ __('messages.upgrade_feature_description_custom_domain') }}
 </x-upgrade-modal>
 @endif
