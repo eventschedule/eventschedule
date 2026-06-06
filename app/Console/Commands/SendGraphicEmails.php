@@ -89,7 +89,11 @@ class SendGraphicEmails extends Command
 
                     $sent++;
                 } else {
-                    $this->logSkip($role, 'no_flyer_events');
+                    // A false result means either no flyer events or that the
+                    // schedule's custom SMTP is failing (send skipped, not retried
+                    // via the platform). Log the accurate reason.
+                    $reason = $role->isEmailSettingsFailureActive() ? 'email_settings_failed' : 'no_flyer_events';
+                    $this->logSkip($role, $reason);
                     $skipped++;
                 }
             } catch (\Exception $e) {

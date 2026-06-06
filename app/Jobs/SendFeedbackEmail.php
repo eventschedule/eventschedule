@@ -68,9 +68,9 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
 
             $mailable = new FeedbackRequest($sale, $event, $role);
 
-            app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);
-
-            UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
+            if (app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable)) {
+                UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
+            }
         } finally {
             app()->setLocale($originalLocale);
         }

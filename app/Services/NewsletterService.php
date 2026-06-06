@@ -154,7 +154,22 @@ class NewsletterService
 
             $role = $newsletter->role;
             if (config('app.hosted') && $role) {
-                app(RoleMailerService::class)->sendForRole($role, $recipient->email, $mailable);
+                if (! app(RoleMailerService::class)->sendForRole($role, $recipient->email, $mailable)) {
+                    // The schedule's custom SMTP is failing; the message was not
+                    // sent and we do not fall back to the platform mailer. Mark
+                    // the recipient as failed rather than sent.
+                    $recipient->update([
+                        'status' => 'failed',
+                        'error_message' => substr(
+                            $role->email_settings_failed_message
+                                ?: __('messages.email_settings_failed_warning_title'),
+                            0,
+                            500
+                        ),
+                    ]);
+
+                    return false;
+                }
             } else {
                 Mail::to($recipient->email)->send($mailable);
             }

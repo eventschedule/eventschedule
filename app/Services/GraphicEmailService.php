@@ -128,15 +128,18 @@ class GraphicEmailService
                 return false;
             }
 
-            // Send the email to all recipients in a single email. The
-            // RoleMailerService handles the hosted / role-mailer / fallback
-            // logic, including marking the role as failed on transport
-            // errors and retrying via the default mailer.
+            // Send the email to all recipients in a single email. When the
+            // schedule's custom SMTP is failing, RoleMailerService marks the
+            // role as failed, notifies the owner once, and returns false
+            // without sending (it does not fall back to the platform mailer);
+            // treat that as "not sent".
             $mailable = new GraphicEmail($role, $imageData, $eventText);
             $recipients = array_values($emailList);
 
             if (config('app.hosted')) {
-                app(RoleMailerService::class)->sendForRole($role, $recipients, $mailable);
+                if (! app(RoleMailerService::class)->sendForRole($role, $recipients, $mailable)) {
+                    return false;
+                }
             } else {
                 Mail::to($recipients)->send($mailable);
             }

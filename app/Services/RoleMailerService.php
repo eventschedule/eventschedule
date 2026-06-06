@@ -15,24 +15,38 @@ use Throwable;
 class RoleMailerService
 {
     /**
-     * Send a Mailable for a role, using its custom SMTP credentials when
-     * available and healthy, otherwise falling back to the default mailer.
+     * Send a Mailable for a role using its custom SMTP credentials.
      *
-     * On a transport-layer failure of the role's custom SMTP, the role is
-     * marked as failed (so subsequent calls within 24h skip the broken
-     * credentials) and the same message is immediately retried via the
-     * default mailer so the recipient still receives it.
+     * When the schedule has no custom SMTP (or this is a selfhosted install)
+     * the platform's default mailer is used. When the schedule's custom SMTP
+     * is configured but failing, the message is NOT sent: we never fall back
+     * to the platform mailer (that would send from the schedule's unverified
+     * address and be rejected), and instead mark the role as failed and notify
+     * the owner once with the error. The custom SMTP is retried automatically
+     * after 24h.
      *
      * @param  Role  $role  The schedule whose custom SMTP we may use.
      * @param  string|array  $recipients  Recipient address(es) for ->to(...).
      * @param  Mailable  $mailable  The message to send.
+     * @return bool True if the message was sent, false if skipped because the
+     *              schedule's email configuration is currently failing.
      */
-    public function sendForRole(Role $role, string|array $recipients, Mailable $mailable): void
+    public function sendForRole(Role $role, string|array $recipients, Mailable $mailable): bool
     {
         if (! $this->shouldUseRoleMailer($role)) {
+            // The schedule has its own SMTP configured but it is currently
+            // failing (we are inside the 24h failure window): do NOT fall back
+            // to the platform mailer - the message would be sent from the
+            // schedule's unverified address and rejected, and the owner has
+            // already been notified once. Otherwise (no custom SMTP, or a
+            // selfhosted install) the default mailer is the intended sender.
+            if (config('app.hosted') && $role->hasEmailSettings()) {
+                return false;
+            }
+
             Mail::to($recipients)->send($mailable);
 
-            return;
+            return true;
         }
 
         $mailerName = $this->configureRoleMailer($role);
@@ -45,9 +59,15 @@ class RoleMailerService
             if ($role->email_settings_failed_at !== null) {
                 $role->clearEmailSettingsFailure();
             }
+
+            return true;
         } catch (MailerExceptionInterface $e) {
+            // The schedule's own SMTP rejected the message (invalid config,
+            // e.g. an unverified sender). Record it and notify the owner once
+            // with the error; do NOT fall back to the platform mailer.
             $this->markFailed($role, $e);
-            Mail::to($recipients)->send($mailable);
+
+            return false;
         }
     }
 

@@ -39,10 +39,11 @@ class SendQueuedEmail implements ShouldQueue
 
     /**
      * Execute the job. Role-mailer failures are caught and recorded inside
-     * RoleMailerService, which falls back to the platform mailer so the
-     * recipient still receives the email. A bare exception escaping this
-     * method therefore indicates the platform mailer itself failed, not the
-     * schedule's custom SMTP.
+     * RoleMailerService: when a schedule's custom SMTP is failing the message
+     * is intentionally not sent (sendForRole returns false) rather than
+     * falling back to the platform mailer, so we only track usage when the
+     * message was actually sent. A bare exception escaping this method
+     * therefore indicates the platform mailer itself failed.
      */
     public function handle(): void
     {
@@ -56,8 +57,9 @@ class SendQueuedEmail implements ShouldQueue
             $role = $this->roleId ? Role::find($this->roleId) : null;
 
             if ($role) {
-                app(RoleMailerService::class)->sendForRole($role, $this->recipient, $this->mailable);
-                UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
+                if (app(RoleMailerService::class)->sendForRole($role, $this->recipient, $this->mailable)) {
+                    UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
+                }
 
                 return;
             }

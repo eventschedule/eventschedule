@@ -2140,8 +2140,9 @@ class Role extends Model implements MustVerifyEmail
 
     /**
      * True when a failure was recorded within the last 24 hours. While active,
-     * queued mailer paths skip the role's custom SMTP and route through the
-     * default mailer instead.
+     * the role's custom SMTP is skipped and its outgoing emails are not sent
+     * (we do not fall back to the platform mailer); the custom SMTP is retried
+     * automatically once this window expires.
      */
     public function isEmailSettingsFailureActive(): bool
     {

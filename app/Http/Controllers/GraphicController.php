@@ -201,9 +201,16 @@ class GraphicController extends Controller
             $result = $service->sendGraphicEmail($role, $recipientEmails);
 
             if (! $result) {
+                // sendGraphicEmail returns false both when there are no events to
+                // send and when the schedule's custom SMTP is failing (the send is
+                // skipped, not retried via the platform). Report the right cause.
+                $message = $role->isEmailSettingsFailureActive()
+                    ? __('messages.email_settings_failed_warning_title')
+                    : __('messages.no_events_found');
+
                 return response()->json([
                     'success' => false,
-                    'message' => __('messages.no_events_found'),
+                    'message' => $message,
                 ], 400);
             }
 
