@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tickets', function (Blueprint $table) {
-            $table->boolean('is_pass')->default(false)->after('is_addon');
+            $table->boolean('is_pass')->default(false)->after('is_deleted');
         });
 
         Schema::table('sale_tickets', function (Blueprint $table) {
