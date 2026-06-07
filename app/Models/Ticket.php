@@ -31,6 +31,7 @@ class Ticket extends Model
         'custom_fields',
         'volume_discount',
         'is_addon',
+        'is_pass',
         'image_url',
         'url',
     ];
@@ -41,6 +42,7 @@ class Ticket extends Model
         'sales_start_at' => 'datetime',
         'sales_end_at' => 'datetime',
         'is_addon' => 'boolean',
+        'is_pass' => 'boolean',
     ];
 
     public function isSalesNotStarted()
@@ -78,12 +80,33 @@ class Ticket extends Model
         }
     }
 
+    /**
+     * The key under which this ticket's sold count is tracked. Passes are not
+     * per-date (one QR covers the whole recurring series), so their inventory
+     * lives in a single bucket rather than per occurrence date.
+     */
+    public function soldKey($date)
+    {
+        return $this->is_pass ? 'pass' : $date;
+    }
+
+    /**
+     * Number sold for a given occurrence date (or the whole pass pool for passes).
+     */
+    public function soldCountFor($date): int
+    {
+        $sold = $this->sold ? json_decode($this->sold, true) : [];
+
+        return (int) ($sold[$this->soldKey($date)] ?? 0);
+    }
+
     public function updateSold($date, $quantity)
     {
         \DB::transaction(function () use ($date, $quantity) {
             $ticket = Ticket::lockForUpdate()->find($this->id);
+            $key = $ticket->soldKey($date);
             $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-            $sold[$date] = max(0, ($sold[$date] ?? 0) + $quantity);
+            $sold[$key] = max(0, ($sold[$key] ?? 0) + $quantity);
             $ticket->sold = json_encode($sold);
             $ticket->save();
         });
@@ -129,6 +152,7 @@ class Ticket extends Model
         $data['event_id'] = UrlUtils::encodeId($this->event_id);
         $data['type'] = $this->type;
         $data['is_addon'] = (bool) $this->is_addon;
+        $data['is_pass'] = (bool) $this->is_pass;
         $data['quantity'] = $this->quantity;
         $data['max_per_order'] = $this->max_per_order ?: null;
         $data['price'] = $this->price;
@@ -136,17 +160,14 @@ class Ticket extends Model
         $data['image_url'] = $this->image_url ?: null;
         $data['url'] = $this->url ?: null;
 
-        $sold = $this->sold ? json_decode($this->sold, true) : [];
-        $sold = $sold[$date] ?? 0;
+        $sold = $this->soldCountFor($date);
 
         $perOrderCap = $this->max_per_order ?: 20;
 
-        // Handle combined mode logic
-        if ($this->event && ! $this->is_addon && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
-            $totalSold = $this->event->tickets->sum(function ($ticket) use ($date) {
-                $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-
-                return $ticketSold[$date] ?? 0;
+        // Handle combined mode logic (passes always use their own pool, never combined)
+        if ($this->event && ! $this->is_addon && ! $this->is_pass && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
+            $totalSold = $this->event->tickets->filter(fn ($ticket) => ! $ticket->is_pass)->sum(function ($ticket) use ($date) {
+                return $ticket->soldCountFor($date);
             });
             // In combined mode, the total quantity is the same as individual quantity
             $totalQuantity = $this->event->getSameTicketQuantity();

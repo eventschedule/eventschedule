@@ -3228,6 +3228,20 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <!-- Season pass toggle (recurring events only) -->
+                                        <div v-if="isRecurring" class="mt-4">
+                                            <label class="flex items-start gap-3 cursor-pointer">
+                                                <button type="button" role="switch" :aria-checked="ticket.is_pass ? 'true' : 'false'" @click="ticket.is_pass = !ticket.is_pass"
+                                                    :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.is_pass ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
+                                                    <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.is_pass ? 'translate-x-5' : 'translate-x-0.5']"></span>
+                                                </button>
+                                                <span>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.pass_toggle_label') }}</span>
+                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_toggle_help') }}</span>
+                                                </span>
+                                            </label>
+                                            <input type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="ticket.is_pass ? 1 : 0">
+                                        </div>
                                         <!-- Ticket-level Custom Fields -->
                                         <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
                                             <x-input-label :value="__('messages.custom_fields') . ' (' . __('messages.per_ticket') . ')'" />
@@ -4497,6 +4511,7 @@
           ...ticket,
           volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
           max_per_order: ticket.max_per_order ?? null,
+          is_pass: !!ticket.is_pass,
           custom_fields: ticket.custom_fields || {},
           sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
           sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
@@ -5515,6 +5530,7 @@
             description: '',
             custom_fields: {},
             volume_discount: null,
+            is_pass: false,
             sales_start_at_date: '',
             sales_start_at_time: '',
             sales_end_at_date: '',

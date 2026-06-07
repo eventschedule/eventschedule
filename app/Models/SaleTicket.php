@@ -12,6 +12,7 @@ class SaleTicket extends Model
         'sale_id',
         'ticket_id',
         'seats',
+        'pass_checkins',
         'quantity',
         'custom_value1',
         'custom_value2',
@@ -23,6 +24,10 @@ class SaleTicket extends Model
         'custom_value8',
         'custom_value9',
         'custom_value10',
+    ];
+
+    protected $casts = [
+        'pass_checkins' => 'array',
     ];
 
     protected static function booted()

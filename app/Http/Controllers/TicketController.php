@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImportAttendeesRequest;
 use App\Http\Requests\TicketCheckoutRequest;
+use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\EventFeedback;
@@ -15,7 +16,9 @@ use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Services\RoleMailerService;
 use App\Services\TicketVolumeDiscount;
+use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
@@ -829,6 +832,17 @@ class TicketController extends Controller
                         $eventDate = $event->saleEventDateFromStartsAt();
                     }
 
+                    // A season pass (valid for all dates) can't be combined with single-date
+                    // tickets in one order - the scan window would otherwise be ambiguous.
+                    $selectedTicketIds = collect($request->tickets ?? [])
+                        ->filter(fn ($q) => (int) $q > 0)
+                        ->keys()
+                        ->map(fn ($id) => UrlUtils::decodeId($id));
+                    $selectedTickets = $event->tickets->whereIn('id', $selectedTicketIds);
+                    if ($selectedTickets->contains(fn ($t) => $t->is_pass) && $selectedTickets->contains(fn ($t) => ! $t->is_pass)) {
+                        throw new \App\Exceptions\BusinessException(__('messages.pass_cannot_combine'));
+                    }
+
                     foreach ($request->tickets as $ticketId => $quantity) {
                         if ($quantity > 0) {
                             // Lock the ticket row to prevent concurrent modifications
@@ -853,14 +867,12 @@ class TicketController extends Controller
                             }
 
                             if ($ticketModel->quantity > 0) {
-                                // Handle combined mode logic
-                                if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
+                                // Handle combined mode logic (passes always use their own pool, never combined)
+                                if (! $ticketModel->is_pass && $event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
                                     // Lock all tickets for combined mode
                                     $lockedTickets = $event->tickets()->lockForUpdate()->get();
-                                    $totalSold = $lockedTickets->sum(function ($ticket) use ($eventDate) {
-                                        $ticketSold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-
-                                        return $ticketSold[$eventDate] ?? 0;
+                                    $totalSold = $lockedTickets->filter(fn ($ticket) => ! $ticket->is_pass)->sum(function ($ticket) use ($eventDate) {
+                                        return $ticket->soldCountFor($eventDate);
                                     });
                                     // In combined mode, the total quantity is the same as individual quantity
                                     $totalQuantity = $event->getSameTicketQuantity();
@@ -872,8 +884,7 @@ class TicketController extends Controller
                                         throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                                     }
                                 } else {
-                                    $sold = json_decode($ticketModel->sold, true);
-                                    $soldCount = $sold[$eventDate] ?? 0;
+                                    $soldCount = $ticketModel->soldCountFor($eventDate);
                                     $remainingTickets = $ticketModel->quantity - $soldCount;
 
                                     if ($quantity > $remainingTickets) {
@@ -902,8 +913,7 @@ class TicketController extends Controller
                             }
 
                             if ($addonModel->quantity > 0) {
-                                $sold = $addonModel->sold ? json_decode($addonModel->sold, true) : [];
-                                $soldCount = $sold[$eventDate] ?? 0;
+                                $soldCount = $addonModel->soldCountFor($eventDate);
                                 $remaining = $addonModel->quantity - $soldCount;
 
                                 if ($addonQty > $remaining) {
@@ -2262,6 +2272,90 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
+        // Season passes are valid for every occurrence of a recurring event and are
+        // checked in once per occurrence, so they bypass the single-date window and
+        // per-seat logic below. A valid pass must never read as invalid/fraud: only
+        // payment problems are returned as `error` (red); everything else is a
+        // neutral/positive `pass_status` the scanner styles accordingly.
+        if ($sale->isPass()) {
+            if ($sale->status == 'unpaid') {
+                return response()->json(['error' => __('messages.this_ticket_is_not_paid')], 200);
+            } elseif ($sale->status == 'cancelled') {
+                return response()->json(['error' => __('messages.this_ticket_is_cancelled')], 200);
+            } elseif ($sale->status == 'refunded') {
+                return response()->json(['error' => __('messages.this_ticket_is_refunded')], 200);
+            }
+
+            $tz = $event->creatorRole?->timezone ?? config('app.timezone');
+            $todayCarbon = now($tz)->startOfDay();
+            $today = $todayCarbon->format('Y-m-d');
+
+            $passTicket = $sale->saleTickets->first(fn ($st) => $st->ticket?->is_pass);
+            $checkins = $passTicket?->pass_checkins ?? [];
+
+            $data = new \stdClass;
+            $data->attendee = $sale->name;
+            $data->event = $event->name;
+            $data->is_pass = true;
+            $data->pass_checkin_count = count($checkins);
+
+            // Is today a valid occurrence of the recurring series?
+            if (! $event->matchesDate($todayCarbon->copy())) {
+                $next = $this->nextOccurrenceDate($event, $today);
+                $data->pass_status = 'no_event_today';
+                $data->date = $next ? $event->localStartsAt(true, $next) : null;
+                $data->next_event = $data->date;
+
+                return response()->json($data);
+            }
+
+            $data->date = $event->localStartsAt(true, $today);
+
+            // Build today's occurrence window in UTC (schedule-TZ time-of-day applied to today).
+            $startsAt = strlen($event->starts_at) === 10
+                ? Carbon::createFromFormat('Y-m-d', $event->starts_at, 'UTC')->startOfDay()
+                : Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
+            $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
+            $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $today.' '.$timeOfDay, $tz)->setTimezone('UTC');
+            $duration = $event->duration > 0 ? $event->duration : 2;
+            $endUtc = $startUtc->copy()->addHours($duration);
+            $earliest = $startUtc->copy()->subHours(24);
+            $nowUtc = now('UTC');
+
+            if ($nowUtc->lt($earliest)) {
+                $data->pass_status = 'too_early';
+                $data->check_in_opens = $startUtc->copy()->setTimezone($tz)->format('g:i A');
+
+                return response()->json($data);
+            }
+
+            if ($nowUtc->gt($endUtc)) {
+                $data->pass_status = 'event_over';
+
+                return response()->json($data);
+            }
+
+            // Entry allowed - once per occurrence.
+            if (isset($checkins[$today])) {
+                $data->pass_status = 'already_today';
+                $data->checked_in_at = Carbon::createFromTimestamp($checkins[$today], $tz)->format('g:i A');
+
+                return response()->json($data);
+            }
+
+            $checkins[$today] = time();
+            if ($passTicket) {
+                $passTicket->pass_checkins = $checkins;
+                $passTicket->save();
+            }
+            $data->pass_status = 'valid';
+            $data->pass_checkin_count = count($checkins);
+
+            WebhookService::dispatch('ticket.scanned', $sale);
+
+            return response()->json($data);
+        }
+
         // Build the UTC start moment from $sale->event_date (a schedule-TZ calendar date)
         // and the schedule-TZ time-of-day implied by $event->starts_at.
         $tz = $event->creatorRole?->timezone ?? config('app.timezone');
@@ -2325,6 +2419,23 @@ class TicketController extends Controller
         WebhookService::dispatch('ticket.scanned', $sale);
 
         return response()->json($data);
+    }
+
+    /**
+     * Find the next occurrence date (Y-m-d) on/after $fromDate for a recurring
+     * event, scanning forward up to a year. Returns null if none.
+     */
+    protected function nextOccurrenceDate(Event $event, string $fromDate): ?string
+    {
+        $date = Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay();
+        for ($i = 0; $i < 366; $i++) {
+            if ($event->matchesDate($date->copy())) {
+                return $date->format('Y-m-d');
+            }
+            $date->addDay();
+        }
+
+        return null;
     }
 
     public function qrCode($eventId, $secret)
@@ -2619,6 +2730,83 @@ class TicketController extends Controller
         }
     }
 
+    /**
+     * Resend a post-event feedback request email to a single attendee.
+     */
+    public function resendFeedbackEmail($sale_id): JsonResponse
+    {
+        $sale = Sale::findOrFail(UrlUtils::decodeId($sale_id));
+        $user = auth()->user();
+
+        if (! $sale->event || ! $user->canEditEvent($sale->event)) {
+            return response()->json(['error' => __('messages.unauthorized')], 403);
+        }
+
+        // Don't re-ask someone who already submitted feedback (page may be stale)
+        if ($sale->feedback()->exists()) {
+            return response()->json(['error' => __('messages.feedback_already_responded')], 422);
+        }
+
+        // Defensive: an awaiting row should always have a real email, but guard anyway
+        if (! $sale->email) {
+            return response()->json(['error' => __('messages.email_not_configured')], 422);
+        }
+
+        try {
+            $event = $sale->event;
+
+            // Resolve the role the same way the feedback pipeline does (by subdomain) so the
+            // from-address, branding, and List-Unsubscribe header match the original send.
+            // (getRoleWithEmailSettings() is venue-first and picks the wrong schedule for curator events.)
+            $role = Role::where('subdomain', $sale->subdomain)->where('is_deleted', false)->first();
+
+            // Feedback is Pro-gated; mirror the bulk-send eligibility (SendFeedbackRequests / sendFeedbackNow).
+            // isPro() is always true on selfhosted, so this does not block selfhosted resends.
+            if (! $role || ! $role->isPro()) {
+                return response()->json(['error' => __('messages.email_not_configured')], 422);
+            }
+            if (config('app.hosted')) {
+                if (! $role->hasEmailSettings()) {
+                    return response()->json(['error' => __('messages.email_not_configured')], 422);
+                }
+            } elseif (in_array(config('mail.default'), ['log', 'array'])) {
+                return response()->json(['error' => __('messages.email_not_configured')], 422);
+            }
+
+            $originalLocale = app()->getLocale();
+
+            try {
+                app()->setLocale($role->language_code ?? $originalLocale);
+
+                $mailable = new FeedbackRequest($sale, $event, $role);
+                $sent = app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);
+            } finally {
+                app()->setLocale($originalLocale);
+            }
+
+            if (! $sent) {
+                return response()->json(['error' => __('messages.email_not_configured')], 422);
+            }
+
+            UsageTrackingService::track(UsageTrackingService::EMAIL_TICKET, $role->id);
+
+            // Refresh the timestamp so the column reflects the latest send and the
+            // row re-sorts to the top on reload (matches the bulk-send semantics).
+            $sale->feedback_sent_at = now();
+            $sale->save();
+
+            return response()->json(['success' => true, 'message' => __('messages.email_sent_successfully')]);
+        } catch (\Exception $e) {
+            // Never leak raw exception text to the user; report and return a generic message.
+            report($e);
+            \Log::error('Resend feedback email failed: '.$e->getMessage(), [
+                'sale_id' => $sale->id ?? null,
+            ]);
+
+            return response()->json(['error' => __('messages.failed_to_send_email')], 500);
+        }
+    }
+
     public function importAttendees(Request $request)
     {
         $user = auth()->user();
@@ -2749,7 +2937,7 @@ class TicketController extends Controller
         $defaultStatus = $request->default_status;
         $sendEmails = $request->boolean('send_emails');
 
-        if (! $event->matchesDate($eventDate)) {
+        if ($eventDate && ! $event->matchesDate(Carbon::parse($eventDate))) {
             return back()->withInput()->with('error', __('messages.invalid_event_date'));
         }
 
@@ -2805,8 +2993,7 @@ class TicketController extends Controller
 
                     $lockedTicket = $event->tickets()->lockForUpdate()->find($ticket->id);
                     if ($lockedTicket->quantity > 0) {
-                        $sold = $lockedTicket->sold ? json_decode($lockedTicket->sold, true) : [];
-                        $soldCount = $sold[$eventDate] ?? 0;
+                        $soldCount = $lockedTicket->soldCountFor($eventDate);
                         $remaining = $lockedTicket->quantity - $soldCount;
                         if ($quantity > $remaining) {
                             $skipped[] = __('messages.row_error', [

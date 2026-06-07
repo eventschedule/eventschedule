@@ -255,6 +255,57 @@ function bindFeedbackPagination() {
         });
     });
 }
+
+function resendFeedbackEmail(saleId, btn) {
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    fetch(`{{ url('/sales/resend-feedback') }}/${saleId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        if (!response.ok && response.status !== 422) throw new Error('Request failed');
+        return response.json();
+    })
+    .then(data => {
+        Toastify({
+            text: data.error || data.message || @json(__("messages.email_sent_successfully")),
+            duration: 3000,
+            position: 'center',
+            stopOnFocus: true,
+            style: { background: data.error ? '#FF0000' : '#4BB543' }
+        }).showToast();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Toastify({
+            text: @json(__("messages.failed_to_send_email")),
+            duration: 3000,
+            position: 'center',
+            stopOnFocus: true,
+            style: { background: '#FF0000' }
+        }).showToast();
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    });
+}
+
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-resend-feedback]');
+    if (!btn) return;
+    e.preventDefault();
+    resendFeedbackEmail(btn.getAttribute('data-resend-feedback'), btn);
+});
 @endif
 
 // Auto-switch to tab from URL parameter

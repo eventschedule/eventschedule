@@ -355,7 +355,12 @@
           <div class="space-y-[8px]">
             @foreach ($regularTickets as $saleTicket)
               <div class="flex items-center justify-between">
-                <span class="text-[14px] text-white print-text-dark font-medium">{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</span>
+                <span class="text-[14px] text-white print-text-dark font-medium">
+                  {{ $saleTicket->ticket->type ?: __('messages.ticket') }}
+                  @if ($saleTicket->ticket->is_pass)
+                  <span class="ms-1 inline-block px-[8px] py-[2px] rounded-full bg-blue-500/20 print:bg-blue-100 text-blue-300 print:text-blue-700 text-[11px] font-semibold">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</span>
+                  @endif
+                </span>
                 <span class="px-[12px] py-[4px] rounded-full bg-violet-500/20 print:bg-violet-100 text-violet-300 print:text-violet-700 text-[12px] font-semibold">
                   x{{ $saleTicket->quantity }}
                 </span>

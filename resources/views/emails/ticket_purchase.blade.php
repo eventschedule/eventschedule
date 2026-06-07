@@ -36,6 +36,9 @@
                 <p style="margin: 10px 0;">
                     <strong>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</strong>
                     x {{ $saleTicket->quantity }}
+                    @if ($saleTicket->ticket->is_pass)
+                    <br><span style="display: inline-block; margin-top: 4px; font-size: 12px; color: #4E81FA;">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</span>
+                    @endif
                 </p>
             @endforeach
         </div>

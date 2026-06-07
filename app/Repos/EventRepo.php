@@ -1165,6 +1165,9 @@ class EventRepo
                     }
                 }
 
+                // Season pass is only meaningful for recurring events.
+                $isPass = ! empty($event->days_of_week) ? (bool) ($data['is_pass'] ?? false) : false;
+
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
@@ -1179,6 +1182,7 @@ class EventRepo
                             'sales_end_at' => $salesEndAt,
                             'custom_fields' => $ticketCustomFields,
                             'volume_discount' => $volumeDiscount,
+                            'is_pass' => $isPass,
                         ]);
                     }
                 } else {
@@ -1193,6 +1197,7 @@ class EventRepo
                         'sales_end_at' => $salesEndAt,
                         'custom_fields' => $ticketCustomFields,
                         'volume_discount' => $volumeDiscount,
+                        'is_pass' => $isPass,
                     ]);
                     $ticketIds[] = $ticket->id;
                 }

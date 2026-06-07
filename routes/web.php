@@ -188,6 +188,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/sales/cancel-feedback', [TicketController::class, 'cancelFeedback'])->name('sales.cancel_feedback');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
+    Route::post('/sales/resend-feedback/{sale_id}', [TicketController::class, 'resendFeedbackEmail'])->name('sales.resend_feedback')->middleware('throttle:30,1');
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');
     Route::post('/waitlist/remove/{id}', [WaitlistController::class, 'remove'])->name('waitlist.remove');
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');

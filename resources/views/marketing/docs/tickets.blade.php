@@ -281,6 +281,16 @@
                                 <li><strong class="text-gray-900 dark:text-white">Sales start date:</strong> Schedule when a ticket type becomes available for purchase</li>
                                 <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Set a per-ticket-type cutoff to stop selling at a specific time</li>
                                 <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
+                                <li><strong class="text-gray-900 dark:text-white">Season pass:</strong> On recurring events, mark a ticket type as a pass valid for all dates (see below)</li>
+                            </ul>
+
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Season Passes (Subscriptions)</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">On a <strong class="text-gray-900 dark:text-white">recurring</strong> event you can turn any ticket type into a <strong class="text-gray-900 dark:text-white">season pass</strong> by enabling <strong class="text-gray-900 dark:text-white">"Season pass - valid for all dates"</strong>. A pass is a one-time purchase that lets the holder attend every occurrence of the series with a single QR code - ideal for selling subscriptions.</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">One QR, every date:</strong> The same ticket QR is scanned at each occurrence - no need to buy a ticket per date.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Once per occurrence:</strong> Each date can be checked in once; a second scan the same day shows "already checked in today".</li>
+                                <li><strong class="text-gray-900 dark:text-white">Shared inventory:</strong> The quantity is a single limit across the whole series, not per date.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Separate purchase:</strong> A pass is bought on its own and cannot be combined with single-date tickets in the same order.</li>
                             </ul>
                         </section>
 
@@ -775,6 +785,7 @@
                                 <li><strong class="text-gray-900 dark:text-white">Summary card</strong> with average rating, total responses, and response rate</li>
                                 <li><strong class="text-gray-900 dark:text-white">Feedback table</strong> listing each response with attendee name, event, date, star rating, comment, and submission time</li>
                             </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The tab also shows a <strong class="text-gray-900 dark:text-white">Sent - Awaiting Response</strong> list of attendees who were emailed but have not replied yet. If a request was missed or landed in spam, click <strong class="text-gray-900 dark:text-white">Resend</strong> next to an attendee to send the feedback request again.</p>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Exporting Feedback</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Click <strong class="text-gray-900 dark:text-white">Export Feedback</strong> on the Feedback tab to download a CSV file with all feedback data.</p>

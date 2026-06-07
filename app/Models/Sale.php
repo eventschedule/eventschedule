@@ -143,6 +143,17 @@ class Sale extends Model
         return $this->hasMany(SaleTicket::class);
     }
 
+    /**
+     * Whether this sale includes a season-pass ticket (valid for all dates of
+     * a recurring event, scanned once per occurrence).
+     */
+    public function isPass(): bool
+    {
+        $this->loadMissing('saleTickets.ticket');
+
+        return $this->saleTickets->contains(fn ($saleTicket) => $saleTicket->ticket?->is_pass);
+    }
+
     public function boostCampaign()
     {
         return $this->belongsTo(BoostCampaign::class);

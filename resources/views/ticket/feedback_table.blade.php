@@ -245,6 +245,7 @@
                         <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.event') }}</th>
                         <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.date') }}</th>
                         <th scope="col" class="px-3 py-3.5 text-start text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.feedback_sent') }}</th>
+                        <th scope="col" class="px-3 py-3.5 text-end text-sm font-semibold text-gray-900 dark:text-gray-100"><span class="sr-only">{{ __('messages.feedback_resend') }}</span></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
@@ -254,6 +255,15 @@
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $sale->event->name ?? '' }}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $sale->event_date ?? '' }}</td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $sale->feedback_sent_at->format('M j, Y g:i A') }}</td>
+                        <td class="whitespace-nowrap px-3 py-4 text-end text-sm">
+                            <button type="button" data-resend-feedback="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}"
+                                class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] transition-colors duration-200">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                {{ __('messages.feedback_resend') }}
+                            </button>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -272,6 +282,15 @@
                 @if ($sale->event_date)
                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $sale->event_date }}</p>
                 @endif
+                <div class="mt-3">
+                    <button type="button" data-resend-feedback="{{ \App\Utils\UrlUtils::encodeId($sale->id) }}"
+                        class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] transition-colors duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {{ __('messages.feedback_resend') }}
+                    </button>
+                </div>
             </div>
             @endforeach
         </div>

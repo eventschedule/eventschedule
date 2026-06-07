@@ -1002,6 +1002,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">@{{ ticket.type }}</h3>
+                    <span v-if="ticket.is_pass" class="inline-flex items-center gap-1 mt-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-0.5 text-xs font-semibold text-[var(--brand-blue)]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
+                        {{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}
+                    </span>
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                     <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>
