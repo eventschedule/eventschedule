@@ -1288,6 +1288,8 @@ return [
     'url_include_id' => 'Kaasa sündmuse ID',
     'text_show_all_events' => 'Kaasa kõik tulevased sündmused',
     'text_show_all_events_help' => 'Kui lubatud, sisaldab tekst kõiki tulevasi sündmusi, mitte ainult graafikal kuvatavaid.',
+    'force_english_text' => 'Loo tekst inglise keeles',
+    'force_english_text_help' => 'Kasutab loodud tekstis ja graafikal kuupäevade ning sündmuste üksikasjade jaoks inglise keelt ajakava keele asemel. Võimalusel kasutatakse sündmuste ja toimumiskohtade nimede ingliskeelseid tõlkeid.',
     'no_events_with_flyers' => 'Ühelgi eelseisval sündmusel pole flaieripilte. Laadige oma sündmustele flaieripildid üles, et luua graafika.',
     'ai_prompt_custom_field' => 'AI viip',
     'eg' => 'nt',

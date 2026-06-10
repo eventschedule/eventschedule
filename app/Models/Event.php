@@ -1654,6 +1654,21 @@ class Event extends Model
         return $value;
     }
 
+    public function englishName()
+    {
+        return $this->name_en ?: $this->name;
+    }
+
+    public function englishDescriptionHtml()
+    {
+        return $this->description_html_en ?: $this->description_html;
+    }
+
+    public function englishShortDescription()
+    {
+        return $this->short_description_en ?: $this->short_description;
+    }
+
     public function toApiData()
     {
         $data = new \stdClass;

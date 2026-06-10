@@ -527,9 +527,13 @@ class ListDesign extends AbstractEventDesign
 
     protected function addEventDetails(Event $event, int $x, int $y): void
     {
+        // Resolve the short description once so the panel height and the rendered
+        // text agree (the forced-English value can differ from the raw column).
+        $shortDesc = $this->forceEnglish ? $event->englishShortDescription() : $event->short_description;
+
         // Calculate text panel dimensions
         $panelWidth = 520; // Slightly wider for better text spacing
-        $panelHeight = $event->short_description ? 135 : 110; // Taller if short description present
+        $panelHeight = $shortDesc ? 135 : 110; // Taller if short description present
         $panelY = $y + (int) ((self::ITEM_HEIGHT - $panelHeight) / 2);
 
         if ($this->rtl) {
@@ -551,7 +555,7 @@ class ListDesign extends AbstractEventDesign
         $isRtl = $this->rtl ? true : null;
 
         // Event title - use bold font with black color
-        $title = $event->name ?? 'Untitled Event';
+        $title = ($this->forceEnglish ? $event->englishName() : $event->name) ?? 'Untitled Event';
 
         // Truncate long titles
         if (mb_strlen($title) > 35) {
@@ -562,8 +566,7 @@ class ListDesign extends AbstractEventDesign
         $textStartY += self::LINE_HEIGHT;
 
         // Short description
-        if ($event->short_description) {
-            $shortDesc = $event->short_description;
+        if ($shortDesc) {
             // Truncate to fit layout
             if (mb_strlen($shortDesc) > 80) {
                 $shortDesc = mb_substr($shortDesc, 0, 80).'...';
@@ -574,7 +577,7 @@ class ListDesign extends AbstractEventDesign
 
         // Venue
         if ($event->venue) {
-            $venue = $event->venue->shortVenue();
+            $venue = $event->venue->shortVenue(true, $this->forceEnglish);
             $this->addText($venue, $textStartX, $textStartY, self::VENUE_FONT_SIZE, $this->c['black'], 'regular', $isRtl);
             $textStartY += self::LINE_HEIGHT;
         }
@@ -678,7 +681,7 @@ class ListDesign extends AbstractEventDesign
     protected function formatEventDateTime(Event $event): string
     {
         try {
-            Carbon::setLocale($this->lang);
+            Carbon::setLocale($this->contentLocale());
             $startDate = $event->getStartDateTime(null, true);
             $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
 

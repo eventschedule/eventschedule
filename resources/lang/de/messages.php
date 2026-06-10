@@ -1251,6 +1251,8 @@ return [
     'url_include_id' => 'Event-ID einschließen',
     'text_show_all_events' => 'Alle zukünftigen Veranstaltungen einbeziehen',
     'text_show_all_events_help' => 'Wenn aktiviert, enthält der Text alle zukünftigen Veranstaltungen, nicht nur die auf der Grafik angezeigten.',
+    'force_english_text' => 'Text auf Englisch generieren',
+    'force_english_text_help' => 'Verwendet Englisch für Datumsangaben und Veranstaltungsdetails im generierten Text und auf der Grafik anstelle der Sprache des Zeitplans. Englische Übersetzungen der Namen von Veranstaltungen und Veranstaltungsorten werden verwendet, sofern verfügbar.',
     'no_events_with_flyers' => 'Keine kommenden Veranstaltungen haben Flyerbilder. Laden Sie Flyerbilder zu Ihren Veranstaltungen hoch, um eine Grafik zu erstellen.',
     'ai_prompt_custom_field' => 'KI-Prompt',
     'eg' => 'z.B.',

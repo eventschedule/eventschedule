@@ -86,6 +86,9 @@ class GraphicEmailService
             }
             $overlayText = $settings['overlay_text'] ?? '';
 
+            // Generate output in English instead of the schedule language (no-op for English schedules)
+            $forceEnglish = ! $role->isEnglish() && (bool) ($settings['force_english'] ?? false);
+
             $options = [
                 'date_position' => $datePosition,
                 'max_per_row' => $maxPerRow,
@@ -94,6 +97,7 @@ class GraphicEmailService
                 'header_text' => $settings['header_text'] ?? '',
                 'footer_text' => $settings['footer_text'] ?? '',
                 'number_events' => $numberEvents,
+                'force_english' => $forceEnglish,
             ];
 
             // Generate the graphic image
@@ -106,7 +110,7 @@ class GraphicEmailService
                 'url_include_https' => $settings['url_include_https'] ?? false,
                 'url_include_id' => $settings['url_include_id'] ?? false,
             ];
-            $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings);
+            $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings, $forceEnglish);
 
             // Apply AI prompt if configured (Enterprise feature)
             $aiPrompt = trim($settings['ai_prompt'] ?? '');

@@ -1248,6 +1248,8 @@ return [
     'url_include_id' => 'Incluir ID do evento',
     'text_show_all_events' => 'Incluir todos os eventos futuros',
     'text_show_all_events_help' => 'Quando ativado, o texto inclui todos os eventos futuros, não apenas os exibidos no gráfico.',
+    'force_english_text' => 'Gerar o texto em inglês',
+    'force_english_text_help' => 'Usa inglês para as datas e os detalhes dos eventos no texto gerado e no gráfico, em vez do idioma da agenda. As traduções em inglês dos nomes de eventos e locais são usadas quando disponíveis.',
     'no_events_with_flyers' => 'Nenhum evento próximo possui imagens de flyer. Carregue imagens de flyer nos seus eventos para gerar um gráfico.',
     'ai_prompt_custom_field' => 'Prompt de IA',
     'eg' => 'ex.,',

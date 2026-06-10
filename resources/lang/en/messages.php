@@ -1296,6 +1296,8 @@ return [
     'url_include_id' => 'Include Event ID',
     'text_show_all_events' => 'Include all future events',
     'text_show_all_events_help' => 'When enabled, the text includes all future events, not just those shown on the graphic.',
+    'force_english_text' => 'Generate text in English',
+    'force_english_text_help' => 'Use English for dates and event details in the generated text and on the graphic, instead of the schedule language. English translations of event and venue names are used when available.',
     'no_events_with_flyers' => 'No upcoming events have flyer images. Upload flyer images to your events to generate a graphic.',
     'ai_prompt_custom_field' => 'AI prompt',
     'eg' => 'e.g.,',

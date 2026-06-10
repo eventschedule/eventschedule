@@ -542,6 +542,7 @@ https://example.com/event/summer-concert</code></pre>
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Localization</div>
                                 <p>Date and time variables like <code class="doc-inline-code">{day_name}</code>, <code class="doc-inline-code">{month_name}</code>, and <code class="doc-inline-code">{time}</code> are automatically translated to your schedule's language and respect its 24-hour time setting.</p>
+                                <p class="mt-2">If your schedule uses a non-English language, you can enable <strong>Generate text in English</strong> in the Text settings tab to produce the text - and the dates and event details on the graphic itself - in English instead. English translations of event and venue names are used when available, falling back to the original values.</p>
                             </div>
                         </section>
 

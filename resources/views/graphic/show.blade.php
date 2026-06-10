@@ -157,6 +157,8 @@
                                     document.getElementById('text_show_all_mobile')?.checked ?? false;
                 const numberEvents = document.getElementById('number_events')?.checked ??
                                      document.getElementById('number_events_mobile')?.checked ?? false;
+                const forceEnglish = document.getElementById('force_english')?.checked ??
+                                     document.getElementById('force_english_mobile')?.checked ?? false;
 
                 return {
                     direct_registration: directRegistration,
@@ -174,7 +176,8 @@
                     url_include_https: urlIncludeHttps,
                     url_include_id: urlIncludeId,
                     text_show_all: textShowAll,
-                    number_events: numberEvents
+                    number_events: numberEvents,
+                    force_english: forceEnglish
                 };
             }
 
@@ -326,6 +329,13 @@
                 if (numberEventsDesktop && numberEventsMobile) {
                     numberEventsMobile.checked = numberEventsDesktop.checked;
                 }
+
+                // Sync force English
+                const forceEnglishDesktop = document.getElementById('force_english');
+                const forceEnglishMobile = document.getElementById('force_english_mobile');
+                if (forceEnglishDesktop && forceEnglishMobile) {
+                    forceEnglishMobile.checked = forceEnglishDesktop.checked;
+                }
             }
 
             function loadGraphic() {
@@ -366,8 +376,9 @@
                 const urlIncludeIdParam = '&url_include_id=' + (formSettings.url_include_id ? '1' : '0');
                 const textShowAllParam = '&text_show_all=' + (formSettings.text_show_all ? '1' : '0');
                 const numberEventsParam = '&number_events=' + (formSettings.number_events ? '1' : '0');
+                const forceEnglishParam = '&force_english=' + (formSettings.force_english ? '1' : '0');
 
-                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam;
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam + forceEnglishParam;
 
                 let hasError = false;
 
@@ -398,6 +409,7 @@
                         textSpinner.classList.add('hidden');
                         textContent.classList.remove('hidden');
                         textContent.value = data.text;
+                        textContent.dir = formSettings.force_english ? 'ltr' : '{{ $role->isRtl() ? "rtl" : "ltr" }}';
                         graphicData = graphicData || {};
                         graphicData.text = data.text;
                         graphicData.download_url = data.download_url;
@@ -421,6 +433,7 @@
                                     text_show_all: formSettings.text_show_all,
                                     event_count: formSettings.event_count,
                                     number_events: formSettings.number_events,
+                                    force_english: formSettings.force_english,
                                 }),
                             })
                             .then(r => r.json())
@@ -685,6 +698,14 @@
                         numberEvents.checked = currentSettings.number_events || false;
                     }
                 });
+
+                // Update force English checkboxes
+                ['force_english', 'force_english_mobile'].forEach(id => {
+                    const forceEnglish = document.getElementById(id);
+                    if (forceEnglish) {
+                        forceEnglish.checked = currentSettings.force_english || false;
+                    }
+                });
             }
 
             function toggleDatePositionVisibility() {
@@ -869,6 +890,9 @@
                 // Get number events option
                 const numberEvents = document.getElementById('number_events') || document.getElementById('number_events_mobile');
 
+                // Get force English option
+                const forceEnglish = document.getElementById('force_english') || document.getElementById('force_english_mobile');
+
                 return {
                     enabled: emailEnabled ? emailEnabled.checked : false,
                     frequency: frequency,
@@ -890,7 +914,8 @@
                     url_include_https: urlIncludeHttps ? urlIncludeHttps.checked : false,
                     url_include_id: urlIncludeId ? urlIncludeId.checked : false,
                     text_show_all: textShowAll ? textShowAll.checked : false,
-                    number_events: numberEvents ? numberEvents.checked : false
+                    number_events: numberEvents ? numberEvents.checked : false,
+                    force_english: forceEnglish ? forceEnglish.checked : false
                 };
             }
 
@@ -1289,6 +1314,20 @@
                             const otherCheckbox = document.getElementById(otherId);
                             if (otherCheckbox) otherCheckbox.checked = this.checked;
                             toggleEmailOptions();
+                        });
+                    }
+                });
+
+                // Add change listeners for force English checkboxes (two-way so the
+                // mobile toggle isn't reverted by the hidden desktop panel's state)
+                ['force_english', 'force_english_mobile'].forEach(id => {
+                    const checkbox = document.getElementById(id);
+                    if (checkbox) {
+                        checkbox.addEventListener('change', function() {
+                            // Sync to other form
+                            const otherId = id === 'force_english' ? 'force_english_mobile' : 'force_english';
+                            const otherCheckbox = document.getElementById(otherId);
+                            if (otherCheckbox) otherCheckbox.checked = this.checked;
                         });
                     }
                 });
@@ -1831,6 +1870,14 @@
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
                         </div>
 
+                        @if (! $role->isEnglish())
+                        <!-- Generate Text in English -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <x-toggle name="force_english_mobile" label="{{ __('messages.force_english_text') }}" />
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.force_english_text_help') }}</p>
+                        </div>
+                        @endif
+
                         <!-- URL Format Section -->
                         <div class="mb-5">
                             <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.url_format') }}</h4>
@@ -2203,6 +2250,14 @@
                                 <x-toggle name="text_show_all" label="{{ __('messages.text_show_all_events') }}" />
                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.text_show_all_events_help') }}</p>
                             </div>
+
+                            @if (! $role->isEnglish())
+                            <!-- Generate Text in English -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <x-toggle name="force_english" label="{{ __('messages.force_english_text') }}" />
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.force_english_text_help') }}</p>
+                            </div>
+                            @endif
 
                             <!-- URL Format Section -->
                             <div class="mb-5">

@@ -71,6 +71,9 @@ abstract class AbstractEventDesign
 
     protected bool $rtl;
 
+    // Force English for dates and event details (keeps $lang/$rtl for fonts and layout)
+    protected bool $forceEnglish = false;
+
     // Font configuration
     protected array $fonts = [];
 
@@ -108,6 +111,11 @@ abstract class AbstractEventDesign
 
         // RTL layout is determined by role language (Hebrew/Arabic = RTL)
         $this->rtl = in_array($this->lang, ['ar', 'he'], true);
+
+        // Force English only switches date locale and _en field access;
+        // $lang/$rtl stay untouched so untranslated RTL strings keep the
+        // correct fonts and the layout direction is unchanged.
+        $this->forceEnglish = (bool) ($options['force_english'] ?? false);
 
         // Initialize fonts
         $this->initializeFonts();
@@ -208,6 +216,14 @@ abstract class AbstractEventDesign
     }
 
     /**
+     * Locale for dates and other generated content on the graphic
+     */
+    protected function contentLocale(): string
+    {
+        return $this->forceEnglish ? 'en' : $this->lang;
+    }
+
+    /**
      * Prepare header image - fetch and measure before canvas creation
      * This adds headerHeight to totalHeight after calculateDimensions()
      */
@@ -295,7 +311,7 @@ abstract class AbstractEventDesign
             return;
         }
 
-        $this->headerTextParsed = EventTextGenerator::parseScheduleVariables($this->role, $raw, $this->events);
+        $this->headerTextParsed = EventTextGenerator::parseScheduleVariables($this->role, $raw, $this->events, $this->forceEnglish);
 
         if ($this->headerTextParsed === '') {
             return;
@@ -316,7 +332,7 @@ abstract class AbstractEventDesign
             return;
         }
 
-        $parsed = EventTextGenerator::parseScheduleVariables($this->role, $raw, $this->events);
+        $parsed = EventTextGenerator::parseScheduleVariables($this->role, $raw, $this->events, $this->forceEnglish);
 
         if ($parsed === '') {
             return;
@@ -1973,7 +1989,7 @@ abstract class AbstractEventDesign
     protected function parseOverlayText(string $template, Event $event): string
     {
         try {
-            Carbon::setLocale($this->lang);
+            Carbon::setLocale($this->contentLocale());
             $startDate = $event->getStartDateTime(null, true);
             $endDate = $event->duration > 0 ? $event->getEndDateTime(null, true) : null;
 
@@ -1998,15 +2014,15 @@ abstract class AbstractEventDesign
                 '{duration}' => $event->duration ?? '',
 
                 // Event variables
-                '{event_name}' => $event->translatedName() ?? $event->name ?? '',
-                '{short_description}' => $event->translatedShortDescription() ?? '',
-                '{description}' => strip_tags($event->translatedDescription() ?? ''),
+                '{event_name}' => ($this->forceEnglish ? $event->englishName() : ($event->translatedName() ?? $event->name)) ?? '',
+                '{short_description}' => ($this->forceEnglish ? $event->englishShortDescription() : $event->translatedShortDescription()) ?? '',
+                '{description}' => strip_tags(($this->forceEnglish ? $event->englishDescriptionHtml() : $event->translatedDescription()) ?? ''),
 
                 // Venue variables
-                '{venue}' => $event->venue ? ($event->venue->translatedName() ?? '') : '',
-                '{city}' => $event->venue ? ($event->venue->translatedCity() ?? '') : '',
-                '{address}' => $event->venue ? ($event->venue->address1 ?? '') : '',
-                '{state}' => $event->venue ? ($event->venue->state ?? '') : '',
+                '{venue}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishName() : $event->venue->translatedName()) ?? '') : '',
+                '{city}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishCity() : $event->venue->translatedCity()) ?? '') : '',
+                '{address}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
+                '{state}' => $event->venue ? (($this->forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
                 '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
 
                 // Ticket variables
@@ -2028,7 +2044,8 @@ abstract class AbstractEventDesign
                 if ($index >= 1 && $index <= 10) {
                     $value = $customFieldValues[$fieldKey] ?? '';
                     if (($fieldConfig['type'] ?? '') === 'switch') {
-                        $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');
+                        $isOn = $value === '1' || $value === 1 || $value === true;
+                        $value = trans($isOn ? 'messages.yes' : 'messages.no', [], $this->forceEnglish ? 'en' : null);
                     }
                     $replacements['{custom_'.$index.'}'] = $value;
                 }
@@ -2058,7 +2075,7 @@ abstract class AbstractEventDesign
     protected function formatEventDate(Event $event): string
     {
         try {
-            Carbon::setLocale($this->lang);
+            Carbon::setLocale($this->contentLocale());
             $startDate = $event->getStartDateTime(null, true);
 
             if ($event->duration > 0 && $event->duration >= 24) {

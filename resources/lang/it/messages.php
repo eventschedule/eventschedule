@@ -1250,6 +1250,8 @@ return [
     'url_include_id' => 'Includi ID evento',
     'text_show_all_events' => 'Includi tutti gli eventi futuri',
     'text_show_all_events_help' => 'Quando attivato, il testo include tutti gli eventi futuri, non solo quelli mostrati nella grafica.',
+    'force_english_text' => 'Genera il testo in inglese',
+    'force_english_text_help' => 'Usa l\'inglese per le date e i dettagli degli eventi nel testo generato e nella grafica, invece della lingua del calendario. Quando disponibili, vengono usate le traduzioni in inglese dei nomi di eventi e luoghi.',
     'no_events_with_flyers' => 'Nessun evento in programma ha immagini flyer. Carica immagini flyer nei tuoi eventi per generare una grafica.',
     'ai_prompt_custom_field' => 'Prompt IA',
     'eg' => 'es.',

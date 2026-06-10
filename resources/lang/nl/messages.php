@@ -1247,6 +1247,8 @@ return [
     'url_include_id' => 'Evenement-ID opnemen',
     'text_show_all_events' => 'Alle toekomstige evenementen opnemen',
     'text_show_all_events_help' => 'Wanneer ingeschakeld, bevat de tekst alle toekomstige evenementen, niet alleen die op de afbeelding worden getoond.',
+    'force_english_text' => 'Tekst in het Engels genereren',
+    'force_english_text_help' => 'Gebruikt Engels voor datums en evenementdetails in de gegenereerde tekst en op de afbeelding, in plaats van de taal van het schema. Engelse vertalingen van namen van evenementen en locaties worden gebruikt indien beschikbaar.',
     'no_events_with_flyers' => 'Geen aankomende evenementen hebben flyerafbeeldingen. Upload flyerafbeeldingen bij uw evenementen om een afbeelding te genereren.',
     'ai_prompt_custom_field' => 'AI-prompt',
     'eg' => 'bijv.',

@@ -107,6 +107,7 @@ class GraphicController extends Controller
             'url_include_id' => 'boolean',
             'text_show_all' => 'boolean',
             'number_events' => 'boolean',
+            'force_english' => 'boolean',
         ]);
 
         // Merge with existing settings to preserve defaults
@@ -304,6 +305,12 @@ class GraphicController extends Controller
             ? $request->boolean('text_show_all')
             : ($graphicSettings['text_show_all'] ?? false);
 
+        // Generate output in English instead of the schedule language (no-op for English schedules)
+        $forceEnglish = ! $role->isEnglish()
+            && ($request->has('force_english')
+                ? $request->boolean('force_english')
+                : (bool) ($graphicSettings['force_english'] ?? false));
+
         // Build options array for the generator
         $options = [
             'date_position' => $datePosition,
@@ -313,6 +320,7 @@ class GraphicController extends Controller
             'header_text' => $headerText,
             'footer_text' => $footerText,
             'number_events' => $numberEvents,
+            'force_english' => $forceEnglish,
         ];
 
         // Allow fetching text and image independently to avoid timeouts
@@ -377,7 +385,7 @@ class GraphicController extends Controller
             ];
 
             // Generate event text content
-            $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings);
+            $eventText = EventTextGenerator::generate($role, $textEvents, $directRegistration, $textTemplate, $urlSettings, $forceEnglish);
 
             // Check if AI processing is available (handled separately to avoid timeouts)
             $aiPrompt = $request->has('ai_prompt')
@@ -413,6 +421,7 @@ class GraphicController extends Controller
         $aiPrompt = trim($request->input('ai_prompt', ''));
         $aiModel = $request->input('ai_model', '');
         $numberEvents = $request->boolean('number_events', false);
+        $forceEnglish = ! $role->isEnglish() && $request->boolean('force_english', false);
 
         if (empty($aiPrompt) || empty($text)) {
             return response()->json(['error' => 'Missing text or AI prompt']);
@@ -451,10 +460,10 @@ class GraphicController extends Controller
 
         $roleId = $role->id;
 
-        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel, $roleId, $numberEvents) {
+        dispatch(function () use ($requestId, $text, $aiPrompt, $events, $aiModel, $roleId, $numberEvents, $forceEnglish) {
             set_time_limit(120);
 
-            $result = $this->processTextWithAI($text, $aiPrompt, $events, $aiModel, $numberEvents);
+            $result = $this->processTextWithAI($text, $aiPrompt, $events, $aiModel, $numberEvents, $forceEnglish);
 
             if ($result) {
                 Cache::put("ai_text_{$requestId}", ['status' => 'completed', 'text' => $result], 300);
@@ -568,6 +577,8 @@ class GraphicController extends Controller
             'header_text' => $graphicSettings['header_text'] ?? '',
             'footer_text' => $graphicSettings['footer_text'] ?? '',
             'number_events' => $numberEvents,
+            'force_english' => ! $role->isEnglish()
+                && (bool) ($graphicSettings['force_english'] ?? false),
         ];
 
         // Use the service to generate the graphic with the specified layout and options
@@ -586,7 +597,7 @@ class GraphicController extends Controller
             ->header('Expires', '0');
     }
 
-    private function processTextWithAI($text, $aiPrompt, $events, $aiModel = '', $numberEvents = false)
+    private function processTextWithAI($text, $aiPrompt, $events, $aiModel = '', $numberEvents = false, $forceEnglish = false)
     {
         try {
             // Build structured metadata so the AI can reference event properties
@@ -594,12 +605,12 @@ class GraphicController extends Controller
             $eventIndex = 1;
             foreach ($events as $event) {
                 $fields = [
-                    'name' => $event->name,
-                    'short_description' => $event->short_description ?? '',
-                    'venue' => $event->venue ? ($event->venue->name ?? '') : '',
-                    'city' => $event->venue ? ($event->venue->city ?? '') : '',
-                    'address' => $event->venue ? ($event->venue->address1 ?? '') : '',
-                    'state' => $event->venue ? ($event->venue->state ?? '') : '',
+                    'name' => $forceEnglish ? $event->englishName() : $event->name,
+                    'short_description' => ($forceEnglish ? $event->englishShortDescription() : $event->short_description) ?? '',
+                    'venue' => $event->venue ? (($forceEnglish ? $event->venue->englishName() : $event->venue->name) ?? '') : '',
+                    'city' => $event->venue ? (($forceEnglish ? $event->venue->englishCity() : $event->venue->city) ?? '') : '',
+                    'address' => $event->venue ? (($forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
+                    'state' => $event->venue ? (($forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
                     'country' => $event->venue ? ($event->venue->country ?? '') : '',
                     'price' => EventTextGenerator::getPrice($event),
                     'currency' => $event->ticket_currency_code ?? '',

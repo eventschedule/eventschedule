@@ -9,7 +9,7 @@ class EventTextGenerator
     /**
      * Generate event text content for a collection of events
      */
-    public static function generate($role, $events, $directRegistration = false, $template = null, $urlSettings = [])
+    public static function generate($role, $events, $directRegistration = false, $template = null, $urlSettings = [], $forceEnglish = false)
     {
         $text = '';
 
@@ -21,13 +21,13 @@ class EventTextGenerator
         $events = collect($events)->values();
 
         foreach ($events as $i => $event) {
-            $text .= self::parseTemplate($template, $event, $role, $directRegistration, $urlSettings, $i + 1);
+            $text .= self::parseTemplate($template, $event, $role, $directRegistration, $urlSettings, $i + 1, $forceEnglish);
             $text .= "\n\n";
         }
 
         // Append "Want to see your event here?" message if schedule accepts event requests
         if ($role->acceptEventRequests()) {
-            $lang = strtolower($role->language_code ?? 'en');
+            $lang = $forceEnglish ? 'en' : strtolower($role->language_code ?? 'en');
             $message = trans('messages.want_to_see_your_event_here', [], $lang);
 
             if ($role->custom_domain && ($role->custom_domain_mode !== 'direct' || $role->custom_domain_status === 'active')) {
@@ -44,8 +44,8 @@ class EventTextGenerator
         // displays in the schedule's intended direction when pasted
         // into apps like WhatsApp, which applies bidi per line.
         // Based on the schedule's language_code, not Role::isRtl()
-        // (which is viewer-dependent).
-        $isRtlLanguage = $role->language_code == 'he' || $role->language_code == 'ar';
+        // (which is viewer-dependent). Forced-English text is LTR.
+        $isRtlLanguage = ! $forceEnglish && ($role->language_code == 'he' || $role->language_code == 'ar');
         $marker = $isRtlLanguage ? "\u{200F}" : "\u{200E}";
         $text = $marker.str_replace("\n", "\n".$marker, $text);
 
@@ -63,10 +63,10 @@ class EventTextGenerator
     /**
      * Parse a template string with event data
      */
-    public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [], $eventNumber = null)
+    public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [], $eventNumber = null, $forceEnglish = false)
     {
         // Set Carbon locale for translated date formats
-        $locale = $role->language_code ?? 'en';
+        $locale = $forceEnglish ? 'en' : ($role->language_code ?? 'en');
         \Carbon\Carbon::setLocale($locale);
 
         $startDate = $event->getStartDateTime(null, true, $role->timezone ?? 'UTC');
@@ -122,16 +122,16 @@ class EventTextGenerator
 
             // Event variables
             '{number}' => $eventNumber !== null ? (string) $eventNumber : '',
-            '{event_name}' => $event->name,
-            '{short_description}' => $event->short_description ?? '',
-            '{description}' => $event->description_html ?? '',
+            '{event_name}' => $forceEnglish ? $event->englishName() : $event->name,
+            '{short_description}' => ($forceEnglish ? $event->englishShortDescription() : $event->short_description) ?? '',
+            '{description}' => ($forceEnglish ? $event->englishDescriptionHtml() : $event->description_html) ?? '',
             '{url}' => $eventUrl,
 
             // Venue variables
-            '{venue}' => $event->venue ? ($event->venue->name ?? '') : '',
-            '{city}' => $event->venue ? ($event->venue->city ?? '') : '',
-            '{address}' => $event->venue ? ($event->venue->address1 ?? '') : '',
-            '{state}' => $event->venue ? ($event->venue->state ?? '') : '',
+            '{venue}' => $event->venue ? (($forceEnglish ? $event->venue->englishName() : $event->venue->name) ?? '') : '',
+            '{city}' => $event->venue ? (($forceEnglish ? $event->venue->englishCity() : $event->venue->city) ?? '') : '',
+            '{address}' => $event->venue ? (($forceEnglish ? $event->venue->englishAddress1() : $event->venue->address1) ?? '') : '',
+            '{state}' => $event->venue ? (($forceEnglish ? $event->venue->englishState() : $event->venue->state) ?? '') : '',
             '{country}' => $event->venue ? ($event->venue->country ?? '') : '',
 
             // Ticket variables
@@ -156,7 +156,8 @@ class EventTextGenerator
                 $value = $customFieldValues[$fieldKey] ?? '';
                 // Convert boolean values to Yes/No for switch type
                 if (($fieldConfig['type'] ?? '') === 'switch') {
-                    $value = ($value === '1' || $value === 1 || $value === true) ? __('messages.yes') : __('messages.no');
+                    $isOn = $value === '1' || $value === 1 || $value === true;
+                    $value = trans($isOn ? 'messages.yes' : 'messages.no', [], $forceEnglish ? 'en' : null);
                 }
                 $replacements['{custom_'.$index.'}'] = $value;
             }
@@ -194,13 +195,13 @@ class EventTextGenerator
      * Date tokens reflect "now" in the schedule's timezone; {first_event_date}
      * and {last_event_date} use the supplied events collection if provided.
      */
-    public static function parseScheduleVariables(Role $role, string $text, $events = null): string
+    public static function parseScheduleVariables(Role $role, string $text, $events = null, bool $forceEnglish = false): string
     {
         if ($text === '' || strpos($text, '{') === false) {
             return $text;
         }
 
-        $locale = $role->language_code ?? 'en';
+        $locale = $forceEnglish ? 'en' : ($role->language_code ?? 'en');
         \Carbon\Carbon::setLocale($locale);
 
         $tz = $role->timezone ?? 'UTC';
@@ -223,7 +224,7 @@ class EventTextGenerator
         }
 
         $replacements = [
-            '{schedule_name}' => $role->name ?? '',
+            '{schedule_name}' => ($forceEnglish ? $role->englishName() : $role->name) ?? '',
             '{year}' => $now->format('Y'),
             '{month}' => $now->format('n'),
             '{month_pad}' => $now->format('m'),

@@ -476,11 +476,17 @@ class Role extends Model implements MustVerifyEmail
      * 3. Address (else if address has value)
      * 4. City (else)
      */
-    public function shortVenue($translate = true)
+    public function shortVenue($translate = true, $forceEnglish = false)
     {
-        $name = $translate ? $this->translatedName() : $this->name;
-        $city = $translate ? $this->translatedCity() : $this->city;
-        $address = $translate ? $this->translatedAddress1() : $this->address1;
+        if ($forceEnglish) {
+            $name = $this->englishName();
+            $city = $this->englishCity();
+            $address = $this->englishAddress1();
+        } else {
+            $name = $translate ? $this->translatedName() : $this->name;
+            $city = $translate ? $this->translatedCity() : $this->city;
+            $address = $translate ? $this->translatedAddress1() : $this->address1;
+        }
 
         if ($name && $city) {
             return $name.' | '.$city;
@@ -1245,6 +1251,16 @@ class Role extends Model implements MustVerifyEmail
         return in_array($this->language_code, ['ar', 'he']);
     }
 
+    /**
+     * Whether the schedule's authored content language is English.
+     * Used to gate the "generate graphics text in English" option, which
+     * is a no-op (and hidden) for English schedules.
+     */
+    public function isEnglish(): bool
+    {
+        return strtolower($this->language_code ?? 'en') === 'en';
+    }
+
     public function translatedName()
     {
         $value = $this->name;
@@ -1422,6 +1438,26 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $value;
+    }
+
+    public function englishName()
+    {
+        return $this->name_en ?: $this->name;
+    }
+
+    public function englishAddress1()
+    {
+        return $this->address1_en ?: $this->address1;
+    }
+
+    public function englishCity()
+    {
+        return $this->city_en ?: $this->city;
+    }
+
+    public function englishState()
+    {
+        return $this->state_en ?: $this->state;
     }
 
     public function translatedRequestTerms()

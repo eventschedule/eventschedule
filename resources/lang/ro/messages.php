@@ -1297,6 +1297,8 @@ return [
     'url_include_id' => 'Include ID Eveniment',
     'text_show_all_events' => 'Include toate evenimentele viitoare',
     'text_show_all_events_help' => 'Când este activat, textul include toate evenimentele viitoare, nu doar cele afișate pe grafic.',
+    'force_english_text' => 'Generează textul în engleză',
+    'force_english_text_help' => 'Folosește engleza pentru date și detaliile evenimentelor în textul generat și pe grafic, în locul limbii programului. Traducerile în engleză ale numelor de evenimente și locații sunt folosite când sunt disponibile.',
     'no_events_with_flyers' => 'Niciun eveniment viitor nu are imagini de flyer. Încărcați imagini de flyer la evenimentele dvs. pentru a genera o grafică.',
     'ai_prompt_custom_field' => 'Prompt AI',
     'eg' => 'ex:',

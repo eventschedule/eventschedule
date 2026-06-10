@@ -1249,6 +1249,8 @@ return [
     'url_include_id' => 'Inclure l\'ID de l\'événement',
     'text_show_all_events' => 'Inclure tous les événements à venir',
     'text_show_all_events_help' => 'Lorsque activé, le texte inclut tous les événements à venir, pas seulement ceux affichés sur le graphique.',
+    'force_english_text' => 'Générer le texte en anglais',
+    'force_english_text_help' => 'Utilise l\'anglais pour les dates et les détails des événements dans le texte généré et sur le graphique, au lieu de la langue du planning. Les traductions anglaises des noms d\'événements et de lieux sont utilisées lorsqu\'elles sont disponibles.',
     'no_events_with_flyers' => 'Aucun événement à venir n\'a d\'images de flyer. Téléchargez des images de flyer sur vos événements pour générer un graphique.',
     'ai_prompt_custom_field' => 'Invite IA',
     'eg' => 'ex. :',
