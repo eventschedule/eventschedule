@@ -3503,7 +3503,7 @@
                                                 </label>
                                             </div>
                                             <div v-if="promoCode.ticket_ids && promoCode.ticket_ids.length > 0" class="mt-2 ms-6 space-y-1">
-                                                <label v-for="ticket in tickets" :key="ticket.id" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+                                                <label v-for="ticket in tickets" :key="ticket.uid" class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
                                                     <input type="checkbox" :value="ticket.id" v-model="promoCode.ticket_ids" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                                     <span v-text="ticket.type || '{{ __('messages.ticket') }}'"></span>
                                                 </label>
