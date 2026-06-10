@@ -1546,6 +1546,7 @@ return [
     'test_send' => 'Invio di prova',
     'send_a_test' => 'Invia un Test',
     'test_email_sent' => 'E-mail di prova inviata',
+    'test_email_sent_fallback' => 'Email di prova inviata dalla nostra piattaforma perché le impostazioni email personalizzate non funzionano al momento. Controlla le tue impostazioni email.',
     'content_above_events' => 'Contenuto sopra gli eventi',
     'content_below_events' => 'Contenuto sotto gli eventi',
     'markdown_supported' => 'La formattazione Markdown e supportata',

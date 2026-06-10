@@ -1027,7 +1027,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
-                            <textarea id="description" name="description"
+                            <textarea id="description" name="description" data-content-dir="{{ content_dir($role) }}"
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">{{ old('description', $role->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>

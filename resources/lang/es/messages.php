@@ -1537,6 +1537,7 @@ return [
     'test_send' => 'Envio de prueba',
     'send_a_test' => 'Enviar una Prueba',
     'test_email_sent' => 'Correo de prueba enviado',
+    'test_email_sent_fallback' => 'Correo de prueba enviado desde nuestra plataforma porque la configuración de tu correo personalizado está fallando actualmente. Comprueba la configuración de tu correo electrónico.',
     'content_above_events' => 'Contenido sobre los eventos',
     'content_below_events' => 'Contenido debajo de los eventos',
     'markdown_supported' => 'Se admite formato Markdown',

@@ -2077,6 +2077,7 @@
             destroyDescriptionEditors() {
                 Object.keys(this.descriptionEditors).forEach(idx => {
                     if (this.descriptionEditors[idx]) {
+                        this.descriptionEditors[idx]._stopEditorObserver?.();
                         this.descriptionEditors[idx].toTextArea();
                     }
                 });
@@ -2189,6 +2190,7 @@
                 if (confirm(@json(__("messages.confirm_remove_event")))) {
                     // Destroy description editor for this event
                     if (this.descriptionEditors[idx]) {
+                        this.descriptionEditors[idx]._stopEditorObserver?.();
                         this.descriptionEditors[idx].toTextArea();
                         delete this.descriptionEditors[idx];
                     }

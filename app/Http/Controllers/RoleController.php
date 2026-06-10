@@ -1688,10 +1688,11 @@ class RoleController extends Controller
             'photo_count' => $event->approved_photos_count ?? 0,
             'venue_profile_image' => $event->venue?->profile_image_url ?: null,
             'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
-            'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent')->map(fn ($r) => [
+            'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && $r->isClaimed())->map(fn ($r) => [
                 'name' => $r->name,
                 'profile_image' => $r->profile_image_url ?: null,
                 'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                'guest_url' => ($role && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
             ])->values()->toArray(),
             'videos' => $event->approvedVideos->take(3)->map(fn ($v) => [
                 'youtube_url' => $v->youtube_url,
@@ -1835,7 +1836,7 @@ class RoleController extends Controller
             }
         }
 
-        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek);
+        return $this->buildCalendarResponse($events, $pastEvents, $hasMorePastEvents, $role, $subdomain, (int) $month, (int) $year, $timezone, $firstDayOfWeek, true);
     }
 
     public function adminCalendarEvents(Request $request, $subdomain): JsonResponse

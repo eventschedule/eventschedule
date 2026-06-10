@@ -1538,6 +1538,7 @@ return [
     'test_send' => 'Envoi test',
     'send_a_test' => 'Envoyer un test',
     'test_email_sent' => 'E-mail test envoyé',
+    'test_email_sent_fallback' => 'E-mail de test envoyé depuis notre plateforme, car les paramètres de votre messagerie personnalisée échouent actuellement. Veuillez vérifier vos paramètres de messagerie.',
     'content_above_events' => 'Contenu au-dessus des événements',
     'content_below_events' => 'Contenu en dessous des événements',
     'markdown_supported' => 'Le formatage Markdown est pris en charge',

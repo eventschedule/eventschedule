@@ -142,7 +142,15 @@ class GraphicEmailService
 
             if (config('app.hosted')) {
                 if (! app(RoleMailerService::class)->sendForRole($role, $recipients, $mailable)) {
-                    return false;
+                    // The schedule's custom SMTP is unavailable/failing, so
+                    // sendForRole skipped the send. Graphic emails go to the
+                    // owner's own configured recipient addresses (not public
+                    // subscribers), so fall back to the platform mailer using
+                    // the platform's own From identity (avoids the SPF/DKIM
+                    // problems that justify the strict no-fallback rule for
+                    // newsletters). The owner is still notified of the SMTP
+                    // failure separately via RoleMailerService::markFailed().
+                    Mail::to($recipients)->send(new GraphicEmail($role, $imageData, $eventText, usePlatformSender: true));
                 }
             } else {
                 Mail::to($recipients)->send($mailable);

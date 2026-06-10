@@ -1544,6 +1544,7 @@ return [
     'test_send' => 'Testverzending',
     'send_a_test' => 'Test Verzenden',
     'test_email_sent' => 'Test-e-mail verzonden',
+    'test_email_sent_fallback' => 'Test-e-mail verzonden via ons platform omdat je aangepaste e-mailinstellingen momenteel mislukken. Controleer je e-mailinstellingen.',
     'content_above_events' => 'Inhoud boven evenementen',
     'content_below_events' => 'Inhoud onder evenementen',
     'markdown_supported' => 'Markdown-opmaak wordt ondersteund',

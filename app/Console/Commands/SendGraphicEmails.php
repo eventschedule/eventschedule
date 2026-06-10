@@ -85,15 +85,17 @@ class SendGraphicEmails extends Command
                         'role_id' => $role->id,
                         'subdomain' => $role->subdomain,
                         'recipient_count' => count(array_filter(array_map('trim', explode(',', $recipientEmails)))),
+                        // True when the schedule's custom SMTP is failing and the
+                        // email went out via the platform mailer fallback instead.
+                        'via_platform_fallback' => $role->isEmailSettingsFailureActive(),
                     ]);
 
                     $sent++;
                 } else {
-                    // A false result means either no flyer events or that the
-                    // schedule's custom SMTP is failing (send skipped, not retried
-                    // via the platform). Log the accurate reason.
-                    $reason = $role->isEmailSettingsFailureActive() ? 'email_settings_failed' : 'no_flyer_events';
-                    $this->logSkip($role, $reason);
+                    // A failing custom SMTP now falls back to the platform mailer
+                    // (counted as sent above), so a false result here means there
+                    // were no upcoming flyer events to send.
+                    $this->logSkip($role, 'no_flyer_events');
                     $skipped++;
                 }
             } catch (\Exception $e) {

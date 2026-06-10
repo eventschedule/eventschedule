@@ -512,6 +512,16 @@
         .cm-s-easymde .cm-header-5,
         .cm-s-easymde .cm-header-6 { font-size: 1.15rem !important; }
 
+        /* RTL editor support. The editing area direction is handled by CodeMirror's
+           own `direction` option (set in editor-helpers.js); here we only flip the
+           rendered preview. The toolbar is intentionally left to inherit the page
+           direction so it never flips based on content. */
+        .EasyMDEContainer.editor-rtl .editor-preview,
+        .EasyMDEContainer.editor-rtl .editor-preview-side {
+            direction: rtl;
+            text-align: right;
+        }
+
         input[type="text"],
         input[type="email"],
         input[type="password"],

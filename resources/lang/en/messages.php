@@ -1565,6 +1565,7 @@ return [
     'test_send' => 'Test Send',
     'send_a_test' => 'Send a Test',
     'test_email_sent' => 'Test email sent',
+    'test_email_sent_fallback' => 'Test email sent from our platform because your custom email settings are currently failing. Please check your email settings.',
     'content_above_events' => 'Content Above Events',
     'content_below_events' => 'Content Below Events',
     'markdown_supported' => 'Markdown formatting is supported',

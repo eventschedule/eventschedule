@@ -834,6 +834,7 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
+import { applyEditorDirection, attachEditorObserver } from '../editor-helpers';
 
 const props = defineProps({
     initialBlocks: { type: Array, default: () => [] },
@@ -981,14 +982,19 @@ function initEasyMDE(blockId) {
     });
 
     instance.codemirror.on('change', () => {
+        applyEditorDirection(instance, el);
         updateBlockData(blockId, 'content', instance.value());
     });
 
     easyMDEInstances[blockId] = instance;
+
+    applyEditorDirection(instance, el);
+    attachEditorObserver(instance);
 }
 
 function destroyEasyMDE(blockId) {
     if (easyMDEInstances[blockId]) {
+        easyMDEInstances[blockId]._stopEditorObserver?.();
         easyMDEInstances[blockId].toTextArea();
         delete easyMDEInstances[blockId];
     }

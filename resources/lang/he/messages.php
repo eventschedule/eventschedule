@@ -1539,6 +1539,7 @@ return [
     'test_send' => 'שליחת ניסיון',
     'send_a_test' => 'שלח בדיקה',
     'test_email_sent' => 'אימייל ניסיון נשלח',
+    'test_email_sent_fallback' => 'הודעת בדיקה נשלחה מהפלטפורמה שלנו מכיוון שהגדרות האימייל המותאמות אישית שלך נכשלות כעת. אנא בדוק את הגדרות האימייל שלך.',
     'content_above_events' => 'תוכן מעל אירועים',
     'content_below_events' => 'תוכן מתחת לאירועים',
     'markdown_supported' => 'עיצוב Markdown נתמך',

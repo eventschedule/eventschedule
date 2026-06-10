@@ -1541,6 +1541,7 @@ return [
     'test_send' => 'Testversand',
     'send_a_test' => 'Test senden',
     'test_email_sent' => 'Test-E-Mail gesendet',
+    'test_email_sent_fallback' => 'Test-E-Mail wurde über unsere Plattform gesendet, da Ihre benutzerdefinierten E-Mail-Einstellungen derzeit fehlschlagen. Bitte überprüfen Sie Ihre E-Mail-Einstellungen.',
     'content_above_events' => 'Inhalt uber den Events',
     'content_below_events' => 'Inhalt unter den Events',
     'markdown_supported' => 'Markdown-Formatierung wird unterstutzt',

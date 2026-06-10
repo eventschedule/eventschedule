@@ -40,6 +40,7 @@ window.flatpickrLocales = {
 
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
+import { applyEditorDirection, attachEditorObserver } from './editor-helpers';
 
 function initEasyMDEOn(element) {
     if (element._easyMDE) return;
@@ -124,7 +125,11 @@ function initEasyMDEOn(element) {
 
     element._easyMDE = easyMDE;
 
+    applyEditorDirection(easyMDE, element);
+    attachEditorObserver(easyMDE);
+
     easyMDE.codemirror.on('change', function() {
+        applyEditorDirection(easyMDE, element);
         element.dispatchEvent(new Event('change', { bubbles: true }));
     });
 }
@@ -167,9 +172,15 @@ window.initTinyMDE = function(element, onChange) {
         status: false,
     });
 
-    if (onChange) {
-        easyMDE.codemirror.on('change', onChange);
-    }
+    element._easyMDE = easyMDE;
+
+    applyEditorDirection(easyMDE, element);
+    attachEditorObserver(easyMDE);
+
+    easyMDE.codemirror.on('change', function() {
+        applyEditorDirection(easyMDE, element);
+        if (onChange) onChange();
+    });
 
     return easyMDE;
 };

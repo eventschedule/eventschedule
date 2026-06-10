@@ -74,7 +74,7 @@
         $uniqueCategoryIds = array_unique($eventCategoryIds);
         $hasOnlineEvents = collect($events)->contains(fn($event) => !empty($event->event_url));
 
-        $eventToVueArray = function($event) use ($role, $subdomain) {
+        $eventToVueArray = function($event) use ($role, $subdomain, $route) {
             $groupId = isset($role) ? $event->getGroupIdForSubdomain($role->subdomain) : null;
             $curatorTranslation = null;
             if (isset($role) && $role->isCurator()) {
@@ -134,7 +134,7 @@
                 'venue_profile_image' => $event->venue?->profile_image_url ?: null,
                 'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
                 'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
-                'talent' => $event->roles->filter(fn($r) => $r->type === 'talent')->map(fn($r) => [
+                'talent' => $event->roles->filter(fn($r) => $r->type === 'talent' && ($route !== 'guest' || $r->isClaimed()))->map(fn($r) => [
                     'name' => $r->name,
                     'profile_image' => $r->profile_image_url ?: null,
                     'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,

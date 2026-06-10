@@ -324,6 +324,17 @@ class ImportCuratorEvents extends Command
         $eventsProcessed = 0;
 
         foreach ($eventLinks as $eventUrl) {
+            // Skip URLs that exceed the parsed_event_urls.url column length,
+            // otherwise the event is created but never recorded as parsed and
+            // gets re-imported on every run
+            if (strlen($eventUrl) > 768) {
+                if ($debug) {
+                    $this->line("Skipping over-long event URL: {$eventUrl}");
+                }
+
+                continue;
+            }
+
             // Check if the event URL has already been parsed
             $parsedEventUrl = DB::table('parsed_event_urls')
                 ->where('url', $eventUrl)

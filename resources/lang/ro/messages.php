@@ -1566,6 +1566,7 @@ return [
     'test_send' => 'Trimitere Test',
     'send_a_test' => 'Trimite un Test',
     'test_email_sent' => 'Email test trimis',
+    'test_email_sent_fallback' => 'E-mailul de test a fost trimis de pe platforma noastră deoarece setările tale de e-mail personalizate eșuează momentan. Verifică setările de e-mail.',
     'content_above_events' => 'Conținut Deasupra Evenimentelor',
     'content_below_events' => 'Conținut Sub Evenimente',
     'markdown_supported' => 'Formatarea Markdown este suportată',

@@ -22,14 +22,24 @@ class GraphicEmail extends Mailable
 
     protected $eventText;
 
+    protected $usePlatformSender;
+
     /**
      * Create a new message instance.
+     *
+     * @param  bool  $usePlatformSender  When true, keep the platform's default
+     *                                   From identity even if the schedule has
+     *                                   custom SMTP settings. Used when the
+     *                                   schedule's custom SMTP is failing and
+     *                                   we fall back to the platform mailer, so
+     *                                   SPF/DKIM stay aligned.
      */
-    public function __construct(Role $role, string $imageData, string $eventText)
+    public function __construct(Role $role, string $imageData, string $eventText, bool $usePlatformSender = false)
     {
         $this->role = $role;
         $this->imageData = $imageData;
         $this->eventText = $eventText;
+        $this->usePlatformSender = $usePlatformSender;
     }
 
     /**
@@ -40,8 +50,10 @@ class GraphicEmail extends Mailable
         $fromAddress = config('mail.from.address');
         $fromName = config('mail.from.name');
 
-        // If role has email settings, use those for from address
-        if ($this->role && $this->role->hasEmailSettings()) {
+        // If role has email settings, use those for from address (unless we're
+        // falling back to the platform mailer, which keeps the platform sender
+        // so SPF/DKIM stay aligned).
+        if (! $this->usePlatformSender && $this->role && $this->role->hasEmailSettings()) {
             $emailSettings = $this->role->getEmailSettings();
             if (! empty($emailSettings['from_address'])) {
                 $fromAddress = $emailSettings['from_address'];

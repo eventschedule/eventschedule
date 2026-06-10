@@ -1550,6 +1550,7 @@ return [
     'test_send' => 'Testi saatmine',
     'send_a_test' => 'Saada test',
     'test_email_sent' => 'Testmeil saadetud',
+    'test_email_sent_fallback' => 'Testmeil saadeti meie platvormilt, kuna teie kohandatud e-posti seaded ei tööta praegu. Palun kontrollige oma e-posti seadeid.',
     'content_above_events' => 'Sündmuste kohal olev sisu',
     'content_below_events' => 'Sisu sündmuste all',
     'markdown_supported' => 'Toetatakse allahindluse vormindamist',

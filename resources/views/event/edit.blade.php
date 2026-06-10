@@ -1549,7 +1549,7 @@
 
                         <div class="mb-6">
                             <x-input-label for="description" :value="__('messages.description')" />
-                            <textarea id="description" name="description"
+                            <textarea id="description" name="description" data-content-dir="{{ content_dir($role) }}"
                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                 autocomplete="off">{{ old('description', $event->description) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
@@ -2449,6 +2449,7 @@
                                         <textarea :ref="'partDescription_' + part.uid"
                                                   :name="'event_parts[' + index + '][description]'"
                                                   rows="2"
+                                                  data-content-dir="{{ content_dir($role) }}"
                                                   class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">@{{ part.description }}</textarea>
                                     </div>
                                     <input type="hidden" :name="'event_parts[' + index + '][id]'" :value="part.id || ''" />
@@ -2904,7 +2905,7 @@
 
                                 <div class="mb-6" v-show="event.payment_method == 'cash'">
                                     <x-input-label for="payment_instructions" :value="__('messages.payment_instructions')" />
-                                    <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4"
+                                    <textarea id="payment_instructions" name="payment_instructions" v-model="event.payment_instructions" rows="4" data-content-dir="{{ content_dir($role) }}"
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                                 </div>
                                 </div>
@@ -3143,7 +3144,7 @@
                                 <!-- Tickets Tab -->
                                 <div v-show="activeTicketTab === 'tickets'">
                                 <div class="mb-6">
-                                    <div v-for="(ticket, index) in tickets" :key="index" 
+                                    <div v-for="(ticket, index) in tickets" :key="ticket.uid"
                                         :class="{'mt-4 p-4 border border-gray-300 dark:border-gray-700 rounded-lg': tickets.length > 1, 'mt-4': tickets.length === 1}">
                                         <input type="hidden" v-bind:name="`tickets[${index}][id]`" v-model="ticket.id">
                                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -3300,7 +3301,7 @@
 
                                         <div class="mt-4">
                                             <x-input-label :value="__('messages.description')" />
-                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4"
+                                            <textarea v-bind:name="`tickets[${index}][description]`" v-model="ticket.description" rows="4" data-content-dir="{{ content_dir($role) }}"
                                                 class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                                         </div>
 
@@ -3399,7 +3400,7 @@
                                 <div v-show="activeTicketTab === 'options' && event.tickets_enabled">
                                 <div class="mb-6">
                                     <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
-                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4"
+                                    <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4" data-content-dir="{{ content_dir($role) }}"
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                                 </div>
 
@@ -4507,7 +4508,8 @@
         isOnline: false,
         eventName: @json($event->name ?? ''),
         startsAt: @json($oldStartsAt ?? ''),
-        tickets: @json($event->tickets ?? [new Ticket()]).map(ticket => ({
+        tickets: @json($event->tickets ?? [new Ticket()]).map((ticket, i) => ({
+          uid: i,
           ...ticket,
           volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
           max_per_order: ticket.max_per_order ?? null,
@@ -4530,6 +4532,7 @@
             maximumFractionDigits: 2
           }).format(ticket.price)
         })),
+        ticketUidCounter: @json(max(1, ($event->tickets ?? collect())->count())),
         eventCustomFields: @json($event->custom_fields ?? []),
         showExpireUnpaid: @json($event->expire_unpaid_tickets > 0),
         showSalesDates: @json(($event->tickets ?? collect())->contains(fn($t) => $t->sales_start_at || $t->sales_end_at)),
@@ -5283,6 +5286,7 @@
       },
       destroyPartEditor(part) {
         if (this.partEditors[part.uid]) {
+          this.partEditors[part.uid]._stopEditorObserver?.();
           this.partEditors[part.uid].toTextArea();
           delete this.partEditors[part.uid];
         }
@@ -5522,6 +5526,7 @@
       addTicket() {
         var newIndex = this.tickets.length;
         this.tickets.push({
+            uid: this.ticketUidCounter++,
             id: null,
             type: '',
             quantity: null,
@@ -5553,6 +5558,12 @@
         document.querySelectorAll('.datepicker-ticket-sales-end').forEach(input => {
           if (input._flatpickr) input._flatpickr.destroy();
         });
+        // Dispose the removed row's markdown editor so it isn't orphaned
+        const removedDesc = document.querySelector('textarea[name="tickets[' + index + '][description]"]');
+        if (removedDesc && removedDesc._easyMDE) {
+          removedDesc._easyMDE._stopEditorObserver?.();
+          removedDesc._easyMDE.toTextArea();
+        }
         this.tickets.splice(index, 1);
         if (this.tickets.length > 0) {
           this.$nextTick(() => {

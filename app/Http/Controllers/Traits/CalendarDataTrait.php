@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 trait CalendarDataTrait
 {
-    protected function calendarEventToVueArray(Event $event, ?Role $role, ?string $subdomain, ?array $userAdminRoleIds = null): array
+    protected function calendarEventToVueArray(Event $event, ?Role $role, ?string $subdomain, ?array $userAdminRoleIds = null, bool $guestView = false): array
     {
         $groupId = $role ? $event->getGroupIdForSubdomain($role->subdomain) : null;
 
@@ -86,7 +86,7 @@ trait CalendarDataTrait
             'venue_profile_image' => $event->venue?->profile_image_url ?: null,
             'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
             'venue_guest_url' => ($event->venue && isset($role) && $event->venue->subdomain === $role->subdomain) ? null : ($event->venue?->getGuestUrl() ?: null),
-            'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent')->map(fn ($r) => [
+            'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && (! $guestView || $r->isClaimed()))->map(fn ($r) => [
                 'name' => $r->name,
                 'profile_image' => $r->profile_image_url ?: null,
                 'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
@@ -195,7 +195,7 @@ trait CalendarDataTrait
         ];
     }
 
-    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0): JsonResponse
+    protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0, bool $guestView = false): JsonResponse
     {
         $lastDay = ($firstDayOfWeek + 6) % 7;
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDayOfWeek);
@@ -217,12 +217,12 @@ trait CalendarDataTrait
 
         $eventsForVue = [];
         foreach ($events as $event) {
-            $eventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds);
+            $eventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds, $guestView);
         }
 
         $pastEventsForVue = [];
         foreach ($pastEvents as $event) {
-            $pastEventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds);
+            $pastEventsForVue[] = $this->calendarEventToVueArray($event, $role, $subdomain, $userAdminRoleIds, $guestView);
         }
 
         $eventsMap = $this->buildEventsMap($events, $startOfMonth, $endOfMonth);

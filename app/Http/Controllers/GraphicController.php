@@ -202,22 +202,25 @@ class GraphicController extends Controller
             $result = $service->sendGraphicEmail($role, $recipientEmails);
 
             if (! $result) {
-                // sendGraphicEmail returns false both when there are no events to
-                // send and when the schedule's custom SMTP is failing (the send is
-                // skipped, not retried via the platform). Report the right cause.
-                $message = $role->isEmailSettingsFailureActive()
-                    ? __('messages.email_settings_failed_warning_title')
-                    : __('messages.no_events_found');
-
+                // A failing custom SMTP now falls back to the platform mailer (and
+                // returns true), so a false result here means there were no
+                // upcoming events to render.
                 return response()->json([
                     'success' => false,
-                    'message' => $message,
+                    'message' => __('messages.no_events_found'),
                 ], 400);
             }
 
+            // Delivered. If the schedule's custom SMTP is failing, it went out via
+            // the platform mailer fallback - tell the owner so they know their
+            // custom email settings still need fixing.
+            $message = $role->isEmailSettingsFailureActive()
+                ? __('messages.test_email_sent_fallback')
+                : __('messages.test_email_sent');
+
             return response()->json([
                 'success' => true,
-                'message' => __('messages.test_email_sent'),
+                'message' => $message,
             ]);
         } catch (\Exception $e) {
             \Log::error('Failed to send graphic test email: '.$e->getMessage());

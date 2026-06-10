@@ -25,13 +25,22 @@ class ResolveCustomDomain
             return $next($request);
         }
 
-        // Look up the custom domain
-        $role = Cache::remember("custom_domain:{$host}", 600, function () use ($host) {
-            return Role::where('custom_domain_host', $host)
-                ->where('custom_domain_mode', 'direct')
-                ->where('custom_domain_status', 'active')
-                ->first(['id', 'subdomain', 'custom_domain_host']);
-        });
+        // Look up the custom domain. Guard against a partially-migrated database
+        // (missing custom_domain_* columns) so a schema gap degrades gracefully
+        // instead of throwing a QueryException on every request to an unrecognized
+        // host, which would take the whole hosted site down.
+        try {
+            $role = Cache::remember("custom_domain:{$host}", 600, function () use ($host) {
+                return Role::where('custom_domain_host', $host)
+                    ->where('custom_domain_mode', 'direct')
+                    ->where('custom_domain_status', 'active')
+                    ->first(['id', 'subdomain', 'custom_domain_host']);
+            });
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return $next($request);
+        }
 
         if (! $role) {
             abort(404);
@@ -74,13 +83,13 @@ class ResolveCustomDomain
 
                 // Restore canonical, og:url, and hreflang to subdomain URL (SEO: canonical should always be the primary domain)
                 $content = str_replace(
-                    ['<link rel="canonical" href="' . $customDomainUrl, '<meta property="og:url" content="' . $customDomainUrl],
-                    ['<link rel="canonical" href="' . $subdomainUrl, '<meta property="og:url" content="' . $subdomainUrl],
+                    ['<link rel="canonical" href="'.$customDomainUrl, '<meta property="og:url" content="'.$customDomainUrl],
+                    ['<link rel="canonical" href="'.$subdomainUrl, '<meta property="og:url" content="'.$subdomainUrl],
                     $content
                 );
                 $content = preg_replace(
-                    '/<link rel="alternate" hreflang="([^"]*)" href="' . preg_quote($customDomainUrl, '/') . '/',
-                    '<link rel="alternate" hreflang="$1" href="' . $subdomainUrl,
+                    '/<link rel="alternate" hreflang="([^"]*)" href="'.preg_quote($customDomainUrl, '/').'/',
+                    '<link rel="alternate" hreflang="$1" href="'.$subdomainUrl,
                     $content
                 );
 

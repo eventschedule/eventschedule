@@ -1545,6 +1545,7 @@ return [
     'test_send' => 'Envio de teste',
     'send_a_test' => 'Enviar um Teste',
     'test_email_sent' => 'E-mail de teste enviado',
+    'test_email_sent_fallback' => 'E-mail de teste enviado pela nossa plataforma porque as suas configurações de e-mail personalizadas estão a falhar no momento. Verifique as suas configurações de e-mail.',
     'content_above_events' => 'Conteudo acima dos eventos',
     'content_below_events' => 'Conteudo abaixo dos eventos',
     'markdown_supported' => 'Formatacao Markdown e suportada',
