@@ -530,7 +530,7 @@ yourdomain.com.    CNAME    your-server.hosting.com.
 
                             <div class="doc-callout doc-callout-warning mt-6">
                                 <div class="doc-callout-title">Important</div>
-                                <p>Set <code class="doc-inline-code">SESSION_DOMAIN</code> to <code class="doc-inline-code">.yourdomain.com</code> (with leading dot) to allow session sharing across subdomains.</p>
+                                <p>Set <code class="doc-inline-code">SESSION_DOMAIN</code> to <code class="doc-inline-code">.yourdomain.com</code> (with leading dot) to allow session sharing across subdomains. If left unset, hosted mode automatically defaults it to your <code class="doc-inline-code">APP_URL</code> base domain; setting it explicitly takes precedence.</p>
                             </div>
                         </section>
 
@@ -655,7 +655,8 @@ yourdomain.com.    CNAME    your-server.hosting.com.
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Session domain mismatch" or login issues across subdomains</h4>
                                     <ul class="doc-list text-sm">
-                                        <li>Set <code class="doc-inline-code">SESSION_DOMAIN=.yourdomain.com</code> (with leading dot)</li>
+                                        <li>Set <code class="doc-inline-code">SESSION_DOMAIN=.yourdomain.com</code> (with leading dot). If unset, hosted mode defaults it to the <code class="doc-inline-code">APP_URL</code> base domain</li>
+                                        <li>Make sure <code class="doc-inline-code">APP_URL</code> is set to your app subdomain (e.g. <code class="doc-inline-code">https://app.yourdomain.com</code>)</li>
                                         <li>Clear browser cookies and try again</li>
                                     </ul>
                                 </div>

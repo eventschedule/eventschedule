@@ -29,6 +29,24 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
+     * Hosted mode spans multiple subdomains (app., schedule subdomains), so the
+     * session cookie must cover the whole base domain. Default it when
+     * SESSION_DOMAIN is not explicitly configured. ResolveCustomDomain overrides
+     * this to null per-request for custom-domain requests.
+     */
+    public static function defaultHostedSessionDomain(): void
+    {
+        if (config('app.hosted')
+            && config('app.env') !== 'local'
+            && ! config('app.is_testing')
+            && ! config('session.domain')
+            && str_contains(_base_domain(), '.')
+            && ! filter_var(_base_domain(), FILTER_VALIDATE_IP)) {
+            config(['session.domain' => '.'._base_domain()]);
+        }
+    }
+
+    /**
      * Bootstrap any application services.
      */
     public function boot(): void
@@ -40,6 +58,8 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') !== 'local') {
             URL::forceScheme('https');
         }
+
+        static::defaultHostedSessionDomain();
 
         // Register authorization policies
         Gate::policy(Event::class, EventPolicy::class);

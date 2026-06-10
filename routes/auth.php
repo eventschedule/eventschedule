@@ -15,7 +15,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['app_subdomain', 'guest'])->group(function () {
     Route::get('sign_up', [RegisteredUserController::class, 'create'])
         ->name('sign_up');
 
