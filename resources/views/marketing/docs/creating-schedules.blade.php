@@ -198,6 +198,10 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Description</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">A bio or description of your schedule. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> for links, bold text, lists, and more. Tell visitors what you're about and what kind of events they can expect.</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Banner Message <span class="text-xs font-medium text-cyan-600 dark:text-cyan-400">(Pro)</span></h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Turn on <strong class="text-gray-900 dark:text-white">Show banner</strong> to display a message in a banner at the top of your schedule's guest page, such as a venue change or a "tickets on sale" notice. Supports <strong class="text-gray-900 dark:text-white">Markdown formatting</strong> including links, and you can choose whether it appears on your schedule page only or also on individual event pages.</p>
+                                </div>
                             </div>
 
                             <!-- Localization Tab -->

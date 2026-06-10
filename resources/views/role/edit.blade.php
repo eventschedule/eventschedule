@@ -1032,6 +1032,55 @@
                             <x-input-error class="mt-2" :messages="$errors->get('description')" />
                         </div>
 
+                        @php $bannerDisabled = ! $role->isPro(); @endphp
+
+                        @if ($bannerDisabled)
+                            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.banner_pro_only') }}</span>
+                                </p>
+                            </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="banner_enabled"
+                                label="{{ __('messages.banner_enabled') }}"
+                                checked="{{ old('banner_enabled', $role->banner_enabled) }}"
+                                help="{{ __('messages.banner_enabled_help') }}"
+                                :disabled="$bannerDisabled" />
+                        </div>
+
+                        <div class="mb-6" id="banner-message-wrapper" style="{{ old('banner_enabled', $role->banner_enabled) && ! $bannerDisabled ? '' : 'display: none;' }}">
+                            <x-input-label for="banner_message" :value="__('messages.banner_message')" />
+                            <textarea id="banner_message" name="banner_message"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                rows="3" dir="auto" maxlength="500"
+                                placeholder="{{ __('messages.enter_banner_message') }}">{{ old('banner_message', $role->banner_message) }}</textarea>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.banner_message_hint') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('banner_message')" />
+
+                            @if ($role->banner_message_en)
+                            <div class="mt-4">
+                                <x-input-label for="banner_message_en" :value="__('messages.banner_message') . ' (' . __('messages.english') . ')'" />
+                                <textarea id="banner_message_en" name="banner_message_en"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                    rows="3" dir="auto" maxlength="500">{{ old('banner_message_en', $role->banner_message_en) }}</textarea>
+                                <x-input-error class="mt-2" :messages="$errors->get('banner_message_en')" />
+                            </div>
+                            @endif
+
+                            <div class="mt-4">
+                                <x-toggle name="banner_on_event_pages"
+                                    label="{{ __('messages.banner_on_event_pages') }}"
+                                    checked="{{ old('banner_on_event_pages', $role->banner_on_event_pages) }}"
+                                    help="{{ __('messages.banner_on_event_pages_help') }}"
+                                    :disabled="$bannerDisabled" />
+                            </div>
+                        </div>
+
                         </div>
 
                         <!-- Tab Content: Localization -->
@@ -4101,6 +4150,15 @@ if (feedbackToggle && feedbackDelayWrapper) {
         feedbackDelayWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
         if (feedbackTestWrapper) feedbackTestWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
         if (feedbackPublicWrapper) feedbackPublicWrapper.style.display = (this.checked && !feedbackDisabled) ? '' : 'none';
+    });
+}
+
+// Toggle banner message fields visibility
+var bannerToggle = document.querySelector('input[name="banner_enabled"][type="checkbox"]');
+var bannerMessageWrapper = document.getElementById('banner-message-wrapper');
+if (bannerToggle && bannerMessageWrapper) {
+    bannerToggle.addEventListener('change', function() {
+        bannerMessageWrapper.style.display = this.checked ? '' : 'none';
     });
 }
 

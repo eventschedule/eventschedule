@@ -176,6 +176,11 @@
             height: 100%;
         }
 
+        .gp-banner a {
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
         body {
             @media (prefers-color-scheme: dark) {
                 color: #33383C !important;

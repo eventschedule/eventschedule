@@ -50,6 +50,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
   </style>
 
   <main>
+    @include('role.partials.guest-banner')
     <div>
       <div class="container mx-auto pt-3 md:pt-4 pb-3 md:pb-10 px-5 md:mt-0 relative z-10"
       >

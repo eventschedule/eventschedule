@@ -2999,6 +2999,16 @@ class RoleController extends Controller
             $request->merge(['carpool_enabled' => $role->carpool_enabled]);
         }
 
+        // Guard banner behind Pro plan
+        if (! $role->isPro()) {
+            $request->merge([
+                'banner_enabled' => $role->banner_enabled,
+                'banner_on_event_pages' => $role->banner_on_event_pages,
+                'banner_message' => $role->banner_message,
+                'banner_message_en' => $role->banner_message_en,
+            ]);
+        }
+
         // Guard custom_domain behind Enterprise plan
         if (! $role->isEnterprise()) {
             $request->merge([

@@ -49,6 +49,10 @@ class Role extends Model implements MustVerifyEmail
         'language_code',
         'description',
         'description_en',
+        'banner_enabled',
+        'banner_on_event_pages',
+        'banner_message',
+        'banner_message_en',
         'short_description',
         'short_description_en',
         'accept_requests',
@@ -124,6 +128,8 @@ class Role extends Model implements MustVerifyEmail
         'approved_subdomains' => 'array',
         'last_translated_at' => 'datetime',
         'direct_registration' => 'boolean',
+        'banner_enabled' => 'boolean',
+        'banner_on_event_pages' => 'boolean',
         'feedback_enabled' => 'boolean',
         'feedback_public' => 'boolean',
         'fan_comments_enabled' => 'boolean',
@@ -194,6 +200,9 @@ class Role extends Model implements MustVerifyEmail
 
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
+
+            $model->banner_message_html = MarkdownUtils::convertToHtml($model->banner_message);
+            $model->banner_message_html_en = MarkdownUtils::convertToHtml($model->banner_message_en);
 
             if (isset($model->custom_css)) {
                 $model->custom_css = CssUtils::sanitizeCss($model->custom_css);
@@ -299,7 +308,7 @@ class Role extends Model implements MustVerifyEmail
                 }
             }
 
-            if ($model->isDirty(['name', 'short_description', 'description', 'address1', 'address2', 'city', 'state', 'request_terms'])) {
+            if ($model->isDirty(['name', 'short_description', 'description', 'address1', 'address2', 'city', 'state', 'request_terms', 'banner_message'])) {
                 $model->translation_attempts = 0;
             }
 
@@ -334,6 +343,11 @@ class Role extends Model implements MustVerifyEmail
 
             if ($model->isDirty('request_terms') && ! $model->isDirty('request_terms_en')) {
                 $model->request_terms_en = null;
+            }
+
+            if ($model->isDirty('banner_message') && ! $model->isDirty('banner_message_en')) {
+                $model->banner_message_en = null;
+                $model->banner_message_html_en = null;
             }
         });
 
@@ -1466,6 +1480,17 @@ class Role extends Model implements MustVerifyEmail
 
         if ($this->request_terms_en && (session()->has('translate') || request()->lang == 'en')) {
             $value = $this->request_terms_en;
+        }
+
+        return $value;
+    }
+
+    public function translatedBannerMessage()
+    {
+        $value = $this->banner_message_html;
+
+        if ($this->banner_message_html_en && (session()->has('translate') || request()->lang == 'en')) {
+            $value = $this->banner_message_html_en;
         }
 
         return $value;

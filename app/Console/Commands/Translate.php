@@ -139,6 +139,11 @@ class Translate extends Command
                             ->whereNull('request_terms_en');
                     })
                     ->orWhere(function ($q) {
+                        $q->whereNotNull('banner_message')
+                            ->where('banner_message', '!=', '')
+                            ->whereNull('banner_message_en');
+                    })
+                    ->orWhere(function ($q) {
                         // Include roles with custom fields that might need translation
                         $q->whereNotNull('event_custom_fields');
                     })
@@ -274,6 +279,14 @@ class Translate extends Command
                 $translationAttempted = true;
                 if ($debug) {
                     $this->info("Translated request terms from {$role->language_code} to en: '{$role->request_terms}' → '{$role->request_terms_en}'");
+                }
+            }
+
+            if ($role->banner_message && ! $role->banner_message_en) {
+                $role->banner_message_en = GeminiUtils::translate($role->banner_message, $role->language_code, 'en', $glossary);
+                $translationAttempted = true;
+                if ($debug) {
+                    $this->info("Translated banner from {$role->language_code} to en: '{$role->banner_message}' → '{$role->banner_message_en}'");
                 }
             }
 

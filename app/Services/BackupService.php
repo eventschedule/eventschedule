@@ -41,6 +41,7 @@ class BackupService
         'phone', 'email', 'website', 'address1', 'address1_en', 'address2', 'address2_en',
         'city', 'city_en', 'state', 'state_en', 'postal_code', 'country_code', 'language_code',
         'description', 'description_en', 'short_description', 'short_description_en',
+        'banner_enabled', 'banner_on_event_pages', 'banner_message', 'banner_message_en',
         'accept_requests', 'event_request_form', 'require_account', 'use_24_hour_time', 'timezone',
         'formatted_address', 'geo_address', 'geo_lat', 'geo_lon', 'show_email', 'show_phone',
         'require_approval', 'event_layout', 'request_terms', 'request_terms_en', 'custom_css',
@@ -1077,6 +1078,8 @@ class BackupService
         // Regenerate HTML fields from markdown
         $role->description_html = MarkdownUtils::convertToHtml($role->description);
         $role->description_html_en = MarkdownUtils::convertToHtml($role->description_en);
+        $role->banner_message_html = MarkdownUtils::convertToHtml($role->banner_message);
+        $role->banner_message_html_en = MarkdownUtils::convertToHtml($role->banner_message_en);
 
         if ($role->custom_css) {
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);
