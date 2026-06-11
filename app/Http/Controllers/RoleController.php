@@ -3722,8 +3722,8 @@ class RoleController extends Controller
             $newUrls = $request->input('new_sponsor_urls', []);
             $newTiers = $request->input('new_sponsor_tiers', []);
 
-            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
             foreach ($newFiles as $index => $file) {
                 if (count($sponsors) >= 12) {

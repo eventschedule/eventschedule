@@ -209,7 +209,7 @@
                 <div class="flex items-start justify-between mb-3">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="font-medium text-gray-900 dark:text-white">{{ $offer->user->name }}</span>
+                            <span v-pre class="font-medium text-gray-900 dark:text-white">{{ $offer->user->name }}</span>
                             @php
                                 $driverRating = $carpoolRatings[$offer->user_id]['rating'] ?? null;
                                 $driverReviewCount = $carpoolRatings[$offer->user_id]['count'] ?? 0;
@@ -223,7 +223,7 @@
                             </span>
                             @endif
                         </div>
-                        <p class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ $offer->city }}</p>
+                        <p v-pre class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ $offer->city }}</p>
                     </div>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $offer->direction === 'to_event' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' : ($offer->direction === 'from_event' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400') }}">
                         {{ $offer->directionLabel() }}
@@ -245,7 +245,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        {{ $offer->meeting_point }}
+                        <span v-pre>{{ $offer->meeting_point }}</span>
                     </span>
                     @endif
                     <span class="flex items-center gap-1">
@@ -258,7 +258,7 @@
                 </div>
 
                 @if ($offer->note)
-                <p class="text-sm text-gray-500 dark:text-[#9ca3af] mb-3 italic">{{ $offer->note }}</p>
+                <p v-pre class="text-sm text-gray-500 dark:text-[#9ca3af] mb-3 italic">{{ $offer->note }}</p>
                 @endif
 
                 {{-- Contact info for approved riders --}}
@@ -282,7 +282,7 @@
                         @foreach ($offer->pendingRequests as $pendingReq)
                         <div class="flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                             <div>
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $pendingReq->user->name }}</span>
+                                <span v-pre class="text-sm font-medium text-gray-900 dark:text-white">{{ $pendingReq->user->name }}</span>
                                 @php
                                     $riderRating = $carpoolRatings[$pendingReq->user_id]['rating'] ?? null;
                                     $riderReviewCount = $carpoolRatings[$pendingReq->user_id]['count'] ?? 0;
@@ -296,7 +296,7 @@
                                 </span>
                                 @endif
                                 @if ($pendingReq->message)
-                                <p class="text-xs text-gray-500 dark:text-[#9ca3af] mt-0.5 italic">{{ $pendingReq->message }}</p>
+                                <p v-pre class="text-xs text-gray-500 dark:text-[#9ca3af] mt-0.5 italic">{{ $pendingReq->message }}</p>
                                 @endif
                             </div>
                             @if (! $eventEnded)
@@ -322,8 +322,8 @@
                         <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $approvedReq->user->name }}</span>
-                                    <p class="text-xs text-gray-500 dark:text-[#9ca3af]">{{ $approvedReq->user->email }}@if($approvedReq->user->phone) &middot; {{ $approvedReq->user->phone }}@endif</p>
+                                    <span v-pre class="text-sm font-medium text-gray-900 dark:text-white">{{ $approvedReq->user->name }}</span>
+                                    <p v-pre class="text-xs text-gray-500 dark:text-[#9ca3af]">{{ $approvedReq->user->email }}@if($approvedReq->user->phone) &middot; {{ $approvedReq->user->phone }}@endif</p>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs text-green-600 dark:text-green-400 font-medium">{{ __('messages.approved') }}</span>

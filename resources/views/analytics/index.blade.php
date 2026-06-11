@@ -29,7 +29,7 @@
                     <div class="relative" id="event-selector-dropdown">
                         <select @mousedown.prevent="toggleDropdown" @keydown.space.prevent="toggleDropdown" @keydown.enter.prevent="toggleDropdown"
                             class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-base cursor-pointer">
-                            <option>{{ $selectedEventName }}</option>
+                            <option v-pre>{{ $selectedEventName }}</option>
                         </select>
                         <div v-cloak v-if="dropdownOpen" class="absolute z-50 mt-1 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#1e1e1e] shadow-lg max-h-96 overflow-y-auto" style="min-width: 280px">
                             <div v-if="events.length > 0" class="sticky top-0 bg-white dark:bg-[#1e1e1e] p-2 border-b border-gray-200 dark:border-[#2d2d30]">

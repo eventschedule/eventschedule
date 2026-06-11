@@ -4233,7 +4233,7 @@
                                 @foreach ($pendingComments as $comment)
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                                     <div class="flex-1">
-                                        <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
+                                        <p v-pre class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                             {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
                                             @if ($comment->event_date)
@@ -4307,7 +4307,7 @@
                                 @foreach ($approvedComments as $comment)
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="flex-1">
-                                        <p class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
+                                        <p v-pre class="text-gray-800 dark:text-gray-200">{{ $comment->comment }}</p>
                                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                             {{ $comment->eventPart ? $comment->eventPart->name : __('messages.general') }}
                                             @if ($comment->event_date)
@@ -4393,8 +4393,8 @@
                             <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
                                 <div class="flex items-start justify-between">
                                     <div>
-                                        <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $carpoolOffer->user->name }}</span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 ms-2">{{ $carpoolOffer->city }} &middot; {{ $carpoolOffer->directionLabel() }}</span>
+                                        <span v-pre class="text-sm font-medium text-gray-900 dark:text-white">{{ $carpoolOffer->user->name }}</span>
+                                        <span v-pre class="text-xs text-gray-500 dark:text-gray-400 ms-2">{{ $carpoolOffer->city }} &middot; {{ $carpoolOffer->directionLabel() }}</span>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ $carpoolOffer->approvedRequests->count() }}/{{ $carpoolOffer->total_spots }} {{ __('messages.carpool_spots') }}</p>
                                     </div>
                                     <form method="POST" action="{{ route('carpool.admin_remove_offer', ['subdomain' => $role->subdomain, 'offer_hash' => \App\Utils\UrlUtils::encodeId($carpoolOffer->id)]) }}" onsubmit="return confirm('{{ addslashes(__('messages.are_you_sure')) }}')">
@@ -4409,7 +4409,7 @@
                                     <p class="text-xs font-medium text-red-700 dark:text-red-400 mb-1">{{ __('messages.carpool_reports') }} ({{ $offerReports->count() }})</p>
                                     @foreach ($offerReports as $report)
                                     <div class="flex items-start justify-between">
-                                        <p class="text-xs text-red-600 dark:text-red-300">{{ $report->reporter->name }}: {{ $report->reason }}</p>
+                                        <p v-pre class="text-xs text-red-600 dark:text-red-300">{{ $report->reporter->name }}: {{ $report->reason }}</p>
                                         <form method="POST" action="{{ route('carpool.admin_dismiss_report', ['subdomain' => $role->subdomain, 'report_hash' => \App\Utils\UrlUtils::encodeId($report->id)]) }}">
                                             @csrf
                                             @method('DELETE')
