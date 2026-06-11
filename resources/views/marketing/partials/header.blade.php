@@ -39,12 +39,13 @@
             <div class="flex items-center space-x-4">
                 <a
                     href="{{ marketing_url('/search') }}"
-                    class="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                    class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all"
                     aria-label="{{ __('messages.search') }}"
                 >
                     <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
+                    <span class="hidden lg:inline text-sm font-medium">Search</span>
                 </a>
 
                 <!-- GitHub star badge (desktop only) -->

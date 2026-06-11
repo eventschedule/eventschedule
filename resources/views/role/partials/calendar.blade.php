@@ -3102,14 +3102,14 @@ const calendarApp = createApp({
                 const [ey, em, ed] = event.local_end_date.split('-').map(Number);
                 const endDate = new Date(ey, em - 1, ed);
                 const opts = { month: 'short', day: 'numeric' };
-                return startDate.toLocaleDateString(undefined, opts) +
-                    ' - ' + endDate.toLocaleDateString(undefined, opts);
+                return startDate.toLocaleDateString(this.languageCode, opts) +
+                    ' - ' + endDate.toLocaleDateString(this.languageCode, opts);
             }
             const date = new Date(event.local_starts_at);
             if (this.use24Hour) {
-                return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                return date.toLocaleTimeString(this.languageCode, { hour: '2-digit', minute: '2-digit', hour12: false });
             } else {
-                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                return date.toLocaleTimeString(this.languageCode, { hour: 'numeric', minute: '2-digit', hour12: true });
             }
         },
         formatPrice(price, currencyCode) {

@@ -92,7 +92,6 @@
     <meta name="twitter:site" content="@ScheduleEvent">
 
     <!-- Structured Data -->
-    {{-- WebSite SearchAction (Sitelinks Searchbox) intentionally omitted: the /search endpoint is disabled. Re-add a "potentialAction" SearchAction here when search is re-enabled. --}}
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
@@ -103,6 +102,14 @@
         "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "publisher": {
             "@id": "{{ config('app.url') }}/#organization"
+        },
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ config('app.url') }}/search?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
         }
     }
     </script>
