@@ -944,7 +944,7 @@ class GeminiUtils
             $eventUrl = null;
             $event = Event::where('registration_url', $item['registration_url'])
                 ->upcomingOrOngoing()
-                ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+                ->where('creator_role_id', $role->id)
                 ->first();
             if ($event) {
                 $data[$key]['event_url'] = $event->getGuestUrl();
@@ -958,7 +958,7 @@ class GeminiUtils
                 $eventDate = Carbon::parse($item['event_date_time'], $timezone)->setTimezone('UTC');
                 $query = Event::where('starts_at', $eventDate)
                     ->upcomingOrOngoing()
-                    ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id));
+                    ->where('creator_role_id', $role->id);
 
                 // Check for same venue address
                 if (! empty($item['event_address'])) {

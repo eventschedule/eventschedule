@@ -4770,6 +4770,8 @@ class MarketingController extends Controller
         if (strlen($query) >= 2) {
             $escapedQuery = str_replace(['%', '_'], ['\\%', '\\_'], $query);
 
+            $excludeCountry = strtolower(trim((string) config('app.search_exclude_country', '')));
+
             $publicScheduleFilter = function ($q) {
                 $q->where(function ($query) {
                     $query->where(function ($q) {
@@ -4792,6 +4794,10 @@ class MarketingController extends Controller
                     ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
             })
                 ->where($publicScheduleFilter)
+                ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
+                    // keep schedules with no country; exclude the configured one (case-insensitive)
+                    $q->whereRaw('(country_code IS NULL OR LOWER(country_code) != ?)', [$excludeCountry]);
+                })
                 ->orderBy('name')
                 ->limit(12)
                 ->get();
@@ -4812,6 +4818,12 @@ class MarketingController extends Controller
                 ->where('is_private', false)
                 ->where('is_draft', false)
                 ->whereHas('roles', $publicScheduleFilter)
+                ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
+                    // exclude events that have any associated schedule in the configured country
+                    $q->whereDoesntHave('roles', function ($r) use ($excludeCountry) {
+                        $r->whereRaw('LOWER(country_code) = ?', [$excludeCountry]);
+                    });
+                })
                 ->orderByRaw('starts_at IS NULL, starts_at ASC')
                 ->limit(12)
                 ->get();

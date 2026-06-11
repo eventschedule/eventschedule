@@ -100,7 +100,7 @@
                         msg.is_from_admin
                             ? 'bg-gray-100 dark:bg-[#2d2d30] text-gray-900 dark:text-gray-100 chat-bubble-admin'
                             : 'bg-[var(--brand-button-bg)] text-white chat-bubble-user'
-                    ]">@{{ msg.body }}</div>
+                    ]" v-html="linkify(msg.body)"></div>
                 </div>
             </template>
         </div>
@@ -182,6 +182,25 @@
                 this.clearAllPolling();
             },
             methods: {
+                linkify(text) {
+                    if (!text) return '';
+                    var escaped = String(text)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                    return escaped.replace(/(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi, function(m) {
+                        var trailing = '';
+                        var punct = m.match(/[.,!?)\]]+$/);
+                        if (punct) {
+                            trailing = punct[0];
+                            m = m.slice(0, m.length - trailing.length);
+                        }
+                        var href = /^www\./i.test(m) ? 'https://' + m : m;
+                        return '<a href="' + href + '" target="_blank" rel="noopener noreferrer nofollow" style="color: inherit; text-decoration: underline;">' + m + '</a>' + trailing;
+                    });
+                },
                 clearAllPolling() {
                     if (this.openPollInterval) clearInterval(this.openPollInterval);
                     if (this.closedPollInterval) clearInterval(this.closedPollInterval);

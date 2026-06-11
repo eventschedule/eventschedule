@@ -41,6 +41,7 @@ return [
     'marketing_url' => env('APP_MARKETING_URL', 'https://eventschedule.com'),
     'support_email' => env('SUPPORT_EMAIL', 'contact@eventschedule.com'),
     'trial_days' => (int) env('TRIAL_DAYS', 7),
+    'search_exclude_country' => env('SEARCH_EXCLUDE_COUNTRY', ''),
 
     /*
     |--------------------------------------------------------------------------

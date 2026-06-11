@@ -36,14 +36,12 @@
         <priority>0.8</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/examples')])
     </url>
-    {{-- TODO: Re-enable search when there are more events worldwide
     <url>
         <loc>{{ url('/search') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
-    --}}
     <url>
         <loc>{{ url('/compare') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>

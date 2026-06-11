@@ -825,8 +825,6 @@ class EventController extends Controller
             'year' => $date->year,
         ];
 
-        AuditService::log(AuditService::EVENT_UPDATE, auth()->id(), 'Event', $event->id, null, null, $event->name);
-
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.event_updated'));
     }
@@ -1135,8 +1133,6 @@ class EventController extends Controller
             'month' => $date->month,
             'year' => $date->year,
         ];
-
-        AuditService::log(AuditService::EVENT_CREATE, auth()->id(), 'Event', $event->id, null, null, $event->name);
 
         return redirect(route('role.view_admin', $data))
             ->with('message', __('messages.event_created'));

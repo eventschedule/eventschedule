@@ -553,8 +553,7 @@ if (config('app.is_nexus')) {
         Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
-        // TODO: Re-enable search when there are more events worldwide
-        // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
+        Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -747,8 +746,7 @@ if (config('app.is_nexus')) {
             Route::get('/pricing', [MarketingController::class, 'pricing'])->name('marketing.pricing');
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
             Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
-            // TODO: Re-enable search when there are more events worldwide
-            // Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
+            Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');

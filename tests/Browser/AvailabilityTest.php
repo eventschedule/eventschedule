@@ -55,9 +55,11 @@ class AvailabilityTest extends DuskTestCase
             $isDisabled = $browser->script("return document.getElementById('saveButton').disabled;");
             $this->assertFalse($isDisabled[0], 'Save button should be enabled after toggling a date');
 
-            // Save (full page reload - wait for navigation, then for toast)
-            $browser->clickAndWaitForReload('#saveButton', 15)
-                ->waitForText('Successfully updated availability', 10);
+            // Save (JS click triggers the jQuery save handler; a native Selenium click can
+            // miss the button under the sticky calendar header, leaving the reload to never fire)
+            $browser->waitForReload(function (Browser $browser) {
+                $browser->script("document.getElementById('saveButton').click();");
+            }, 15)->waitForText('Successfully updated availability', 10);
 
             // Verify database has the date
             $role = Role::where('subdomain', 'talent')->first();
@@ -74,9 +76,10 @@ class AvailabilityTest extends DuskTestCase
             $browser->script("document.querySelector('.day-element[data-date=\"{$targetDate}\"]').click()");
             $browser->waitUntilMissing('.day-element[data-date="'.$targetDate.'"] .day-x', 5);
 
-            // Save again (full page reload - wait for navigation, then for toast)
-            $browser->clickAndWaitForReload('#saveButton', 15)
-                ->waitForText('Successfully updated availability', 10);
+            // Save again (JS click - see note above)
+            $browser->waitForReload(function (Browser $browser) {
+                $browser->script("document.getElementById('saveButton').click();");
+            }, 15)->waitForText('Successfully updated availability', 10);
 
             // Verify database no longer has the date
             $roleUser->refresh();

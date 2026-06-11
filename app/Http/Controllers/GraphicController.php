@@ -251,20 +251,20 @@ class GraphicController extends Controller
             $layout = 'grid';
         }
 
-        // Get date_position from request or settings (applies to grid and row layouts)
-        $datePosition = $request->get('date_position', $graphicSettings['date_position'] ?? null);
+        // Get date_position from request (applies to grid and row layouts; empty = default)
+        $datePosition = $request->get('date_position') ?: null;
         if (! in_array($layout, ['grid', 'row'])) {
             $datePosition = null; // Date position only applies to grid and row layouts
         }
 
-        // Get max_per_row from request or settings (applies to grid and row layouts)
-        $maxPerRow = $request->get('max_per_row', $graphicSettings['max_per_row'] ?? null);
+        // Get max_per_row from request (applies to grid and row layouts; empty = default)
+        $maxPerRow = $request->get('max_per_row') ?: null;
         if (! in_array($layout, ['grid', 'row'])) {
             $maxPerRow = null;
         }
 
-        // Get overlay_text from request or settings (for custom text on flyers)
-        $overlayText = $request->get('overlay_text', $graphicSettings['overlay_text'] ?? '');
+        // Get overlay_text from request (for custom text on flyers)
+        $overlayText = $request->get('overlay_text', '');
 
         // Get header_text / footer_text from request or settings (live-editable schedule-wide text)
         $headerText = $request->has('header_text')
@@ -279,8 +279,8 @@ class GraphicController extends Controller
             ? $request->boolean('number_events')
             : (bool) ($graphicSettings['number_events'] ?? false);
 
-        // Get event_count from request or settings
-        $eventCountSetting = $request->get('event_count', $graphicSettings['event_count'] ?? null);
+        // Get event_count from request (empty = default limit)
+        $eventCountSetting = $request->get('event_count');
         $eventLimit = self::resolveGraphicEventLimit($eventCountSetting);
 
         // Base query builder for future/ongoing events belonging to this schedule
@@ -372,10 +372,8 @@ class GraphicController extends Controller
                 return response()->json(['error' => __('messages.'.$errorKey), 'error_type' => $errorKey]);
             }
 
-            // Get text template - use request parameter if provided, otherwise fall back to saved settings
-            $textTemplate = $request->has('text_template')
-                ? $request->get('text_template', '')
-                : ($graphicSettings['text_template'] ?? '');
+            // Get text template from request (empty = default template)
+            $textTemplate = $request->get('text_template', '');
 
             // Get URL formatting settings
             $urlSettings = [

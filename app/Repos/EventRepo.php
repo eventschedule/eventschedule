@@ -13,6 +13,7 @@ use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\AuditService;
 use App\Services\SmsService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
@@ -1483,6 +1484,18 @@ class EventRepo
                 $event->syncToCalDAV('delete');
             }
         }
+
+        // Audit log: single chokepoint for every create/update path (web, API,
+        // imports, webhooks). wasRecentlyCreated distinguishes insert from update.
+        AuditService::log(
+            $event->wasRecentlyCreated ? AuditService::EVENT_CREATE : AuditService::EVENT_UPDATE,
+            $user?->id,
+            'Event',
+            $event->id,
+            null,
+            null,
+            $event->name,
+        );
 
         return $event;
     }

@@ -190,7 +190,7 @@
             }
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif !important;
             min-height: 100vh;
-            background-attachment: {{ ($role->event_layout ?? 'calendar') === 'list' ? 'fixed' : 'scroll' }};
+            background-attachment: {{ (($event && !request()->embed && !request()->graphic) || ($role->event_layout ?? 'calendar') === 'list') ? 'fixed' : 'scroll' }};
             display: flex;
             flex-direction: column;
             @if ($event && $otherRole && $otherRole->isClaimed())
