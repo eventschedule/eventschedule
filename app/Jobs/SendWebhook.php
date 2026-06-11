@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Webhook;
 use App\Models\WebhookDelivery;
+use App\Utils\UrlUtils;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Http;
@@ -42,19 +43,16 @@ class SendWebhook implements ShouldQueue
         $success = false;
 
         try {
-            // SSRF prevention: block private IPs in hosted mode only
-            $resolvedIp = null;
+            // SSRF prevention: block private/reserved targets in hosted mode only.
+            // (Selfhosted users may legitimately POST webhooks to internal hosts.)
+            $target = null;
             if (config('app.hosted')) {
-                $host = parse_url($this->webhook->url, PHP_URL_HOST);
-                if ($host) {
-                    $resolvedIp = gethostbyname($host);
-                    if (($resolvedIp === $host && ! filter_var($host, FILTER_VALIDATE_IP))
-                        || ! filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
-                        $responseBody = 'Blocked: private/reserved IP address';
-                        $this->logDelivery($responseStatus, $responseBody, false, $startTime);
+                $target = UrlUtils::validatedTarget($this->webhook->url);
+                if ($target === null) {
+                    $responseBody = 'Blocked: private/reserved or unresolvable address';
+                    $this->logDelivery($responseStatus, $responseBody, false, $startTime);
 
-                        return;
-                    }
+                    return;
                 }
             }
 
@@ -68,20 +66,24 @@ class SendWebhook implements ShouldQueue
                 ])
                 ->withBody($jsonBody, 'application/json');
 
-            // Pin to the resolved IP to prevent DNS rebinding attacks
-            if ($resolvedIp) {
-                $port = parse_url($this->webhook->url, PHP_URL_PORT)
-                    ?? (parse_url($this->webhook->url, PHP_URL_SCHEME) === 'https' ? 443 : 80);
-                $response = $httpClient
-                    ->withOptions([
-                        'curl' => [
-                            CURLOPT_RESOLVE => ["{$host}:{$port}:{$resolvedIp}"],
-                        ],
-                    ])
-                    ->post($this->webhook->url);
-            } else {
-                $response = $httpClient->post($this->webhook->url);
+            // In hosted mode, harden the request: don't follow redirects (a 30x
+            // could rebind to an internal host) and pin DNS to the validated IP.
+            $options = [];
+            if ($target !== null) {
+                $options['allow_redirects'] = false;
+                if (! filter_var($target['host'], FILTER_VALIDATE_IP)) {
+                    $pinIp = filter_var($target['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+                        ? '['.$target['ip'].']'
+                        : $target['ip'];
+                    $options['curl'] = [
+                        CURLOPT_RESOLVE => ["{$target['host']}:{$target['port']}:{$pinIp}"],
+                    ];
+                }
             }
+
+            $response = ! empty($options)
+                ? $httpClient->withOptions($options)->post($this->webhook->url)
+                : $httpClient->post($this->webhook->url);
 
             $responseStatus = $response->status();
             $responseBody = substr($response->body(), 0, 500);

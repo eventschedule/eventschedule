@@ -1159,7 +1159,9 @@ abstract class AbstractEventDesign
                     ]);
                 }
 
-                $imageData = file_get_contents($this->role->background_image_url, false, $context);
+                $imageData = $this->isRemoteImageUrlSafe($this->role->background_image_url)
+                    ? file_get_contents($this->role->background_image_url, false, $context)
+                    : false;
                 if ($imageData === false) {
                     // Fallback to cURL if file_get_contents fails
                     $imageData = $this->fetchImageWithCurl($this->role->background_image_url);
@@ -1282,9 +1284,29 @@ abstract class AbstractEventDesign
         };
     }
 
+    /**
+     * Whether a remote image URL is safe to fetch. Selfhosted installs may
+     * legitimately reference images on their own (possibly internal) hosts, so
+     * SSRF blocking is enforced in hosted mode only (mirrors SendWebhook).
+     */
+    protected function isRemoteImageUrlSafe(string $url): bool
+    {
+        if (! config('app.hosted')) {
+            return true;
+        }
+
+        return \App\Utils\UrlUtils::isUrlSafe($url);
+    }
+
     protected function fetchImageWithCurl(string $url): string|false
     {
         if (! function_exists('curl_init')) {
+            return false;
+        }
+
+        // SSRF guard (hosted mode) plus an HTTP(S)-only restriction so file:// or
+        // gopher:// cannot be used to read local resources.
+        if (! $this->isRemoteImageUrlSafe($url)) {
             return false;
         }
 
@@ -1292,6 +1314,8 @@ abstract class AbstractEventDesign
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         // Enable SSL verification to prevent MITM attacks
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);

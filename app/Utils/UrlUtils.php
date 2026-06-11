@@ -423,88 +423,410 @@ class UrlUtils
     }
 
     /**
-     * Validate if URL is safe to make requests to
+     * Validate if a URL is safe to make outbound requests to (SSRF guard).
+     *
+     * Returns true only when the URL uses http/https and its host - whether an
+     * IP literal or a hostname resolved to its A/AAAA records - does not point at
+     * a private, reserved, loopback, link-local, ULA, IPv4-mapped, NAT64, CGNAT,
+     * or cloud-metadata address. Resolution failures fail closed (return false).
      */
     public static function isUrlSafe($url)
     {
-        // Parse URL
+        return self::validatedTarget($url) !== null;
+    }
+
+    /**
+     * Validate a URL for outbound requests and return a descriptor with the
+     * vetted connection IP so callers can pin the request and defeat DNS
+     * rebinding (see safeHttpGet()). Returns null when the URL is unsafe.
+     *
+     * @return array{url:string,scheme:string,host:string,port:int,ip:string,ips:array<int,string>}|null
+     */
+    public static function validatedTarget($url)
+    {
+        if (! is_string($url) || $url === '') {
+            return null;
+        }
+
         $parsedUrl = parse_url($url);
 
         if (! $parsedUrl || ! isset($parsedUrl['scheme']) || ! isset($parsedUrl['host'])) {
-            return false;
+            return null;
         }
 
         // Only allow HTTP and HTTPS
-        if (! in_array($parsedUrl['scheme'], ['http', 'https'])) {
-            return false;
+        $scheme = strtolower($parsedUrl['scheme']);
+        if (! in_array($scheme, ['http', 'https'], true)) {
+            return null;
         }
 
-        $host = $parsedUrl['host'];
-
-        // Block private IP ranges and localhost (IPv4)
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-            // Block private and reserved IPv4 ranges
-            if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-                return false;
-            }
+        // parse_url() keeps the brackets on IPv6 literals ("[::1]") and may carry
+        // a %zone-id; normalize before any classification or the checks below miss.
+        $host = self::normalizeHost($parsedUrl['host']);
+        if ($host === '') {
+            return null;
         }
 
-        // Block private/reserved IPv6 addresses
-        if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            // Block loopback (::1)
-            if ($host === '::1' || strtolower($host) === '0:0:0:0:0:0:0:1') {
-                return false;
-            }
-
-            // Block link-local (fe80::/10)
-            if (self::isIpv6InRange($host, 'fe80::', 10)) {
-                return false;
-            }
-
-            // Block unique local (fc00::/7 - includes fd00::/8)
-            if (self::isIpv6InRange($host, 'fc00::', 7)) {
-                return false;
-            }
-
-            // Block IPv4-mapped IPv6 addresses (::ffff:0:0/96)
-            // These could be used to bypass IPv4 checks
-            if (stripos($host, '::ffff:') === 0) {
-                return false;
-            }
-
-            // Block documentation addresses (2001:db8::/32)
-            if (self::isIpv6InRange($host, '2001:db8::', 32)) {
-                return false;
-            }
-        }
-
-        // Block common internal hostnames
+        // Block common internal hostnames (defense in depth - IP literals are
+        // caught by isBlockedIp(), so this list is names only).
         $blockedHosts = [
-            'localhost', '127.0.0.1', '::1',
-            'metadata.google.internal',
-            'instance-data', 'metadata.aws.amazon.com',
-            '169.254.169.254', // AWS metadata
-            'metadata.google.com',
+            'localhost', 'ip6-localhost', 'ip6-loopback',
+            'metadata.google.internal', 'metadata.google.com',
+            'metadata.aws.amazon.com', 'instance-data', 'instance-data.ec2.internal',
         ];
-
-        if (in_array(strtolower($host), $blockedHosts)) {
-            return false;
+        if (in_array($host, $blockedHosts, true)) {
+            return null;
         }
 
-        // Resolve hostname to IP and check the resolved IP too (DNS rebinding protection)
-        // Only do this for non-IP hosts
-        if (! filter_var($host, FILTER_VALIDATE_IP)) {
-            $resolvedIp = gethostbyname($host);
-            // If resolution fails, gethostbyname returns the original hostname
-            if ($resolvedIp !== $host) {
-                // Check if resolved IP is private/reserved
-                if (filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-                    return false;
+        // Determine the set of IPs the request could actually reach.
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            // Host is an IP literal - validate it directly, nothing to resolve.
+            $ips = [$host];
+        } else {
+            // Hostname - resolve BOTH A and AAAA records and fail closed when
+            // nothing resolves (an IPv4-only lookup would let AAAA-only internal
+            // hosts through, and treating "no record" as safe fails open).
+            $ips = self::resolveAllIps($host);
+            if (empty($ips)) {
+                return null;
+            }
+        }
+
+        // Reject if ANY candidate address is private/reserved.
+        foreach ($ips as $ip) {
+            if (self::isBlockedIp($ip)) {
+                return null;
+            }
+        }
+
+        $port = $parsedUrl['port'] ?? ($scheme === 'https' ? 443 : 80);
+
+        return [
+            'url' => $url,
+            'scheme' => $scheme,
+            'host' => $host,
+            'port' => (int) $port,
+            'ip' => $ips[0],
+            'ips' => $ips,
+        ];
+    }
+
+    /**
+     * Normalize a parsed host for classification: strip IPv6 brackets and any
+     * %zone-id, then lowercase. parse_url() returns "[::1]" for IPv6 literals and
+     * may percent-encode the zone separator as "%25".
+     */
+    private static function normalizeHost(string $host): string
+    {
+        $host = trim($host);
+
+        // [::1] -> ::1
+        if (strlen($host) >= 2 && $host[0] === '[' && substr($host, -1) === ']') {
+            $host = substr($host, 1, -1);
+        }
+
+        // Drop an IPv6 zone id: fe80::1%eth0 / fe80::1%25eth0 -> fe80::1
+        if (($pos = strpos($host, '%')) !== false) {
+            $host = substr($host, 0, $pos);
+        }
+
+        return strtolower($host);
+    }
+
+    /**
+     * Resolve a hostname to all of its IPv4 (A) and IPv6 (AAAA) addresses.
+     * Returns an empty array when nothing resolves so callers can fail closed.
+     */
+    private static function resolveAllIps(string $host): array
+    {
+        $ips = [];
+
+        // Primary: query A and AAAA together.
+        $records = @dns_get_record($host, DNS_A | DNS_AAAA);
+        if (is_array($records)) {
+            foreach ($records as $record) {
+                if (! empty($record['ip'])) {
+                    $ips[] = $record['ip'];       // A
+                }
+                if (! empty($record['ipv6'])) {
+                    $ips[] = $record['ipv6'];     // AAAA
                 }
             }
         }
 
-        return true;
+        // Fallback (A only) in case dns_get_record is restricted in the environment.
+        if (empty($ips)) {
+            $v4 = @gethostbynamel($host);
+            if (is_array($v4)) {
+                $ips = $v4;
+            }
+        }
+
+        return array_values(array_unique(array_filter($ips)));
+    }
+
+    /**
+     * Determine whether an IPv4 or IPv6 literal must be blocked for outbound
+     * requests (loopback, private, link-local, ULA, IPv4-mapped/compat, NAT64,
+     * CGNAT, benchmarking, documentation, and cloud-metadata ranges).
+     */
+    public static function isBlockedIp(string $ip): bool
+    {
+        // ---- IPv4 ----
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            // Covers 10/8, 172.16/12, 192.168/16, 127/8, 169.254/16 (incl. the
+            // 169.254.169.254 metadata address), 0/8, 240/4, 255.255.255.255.
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return true;
+            }
+
+            // Ranges filter_var does NOT cover.
+            $extraIpv4Cidrs = [
+                '100.64.0.0/10',   // CGNAT (RFC 6598)
+                '198.18.0.0/15',   // benchmarking (RFC 2544)
+                '192.0.0.0/24',    // IETF protocol assignments (RFC 6890)
+                '192.0.2.0/24',    // documentation TEST-NET-1
+                '198.51.100.0/24', // documentation TEST-NET-2
+                '203.0.113.0/24',  // documentation TEST-NET-3
+                '192.88.99.0/24',  // deprecated 6to4 relay anycast
+            ];
+            foreach ($extraIpv4Cidrs as $cidr) {
+                if (self::isIpv4InCidr($ip, $cidr)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // ---- IPv6 ----
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $binary = inet_pton($ip);
+            if ($binary === false || strlen($binary) !== 16) {
+                return true; // unparseable - treat as unsafe
+            }
+
+            // Loopback and unspecified.
+            if ($ip === '::1' || $ip === '::') {
+                return true;
+            }
+
+            // IPv4-bearing prefixes: extract the embedded IPv4 from the low 4
+            // bytes and re-check it. Covers ::ffff:a.b.c.d in ALL textual forms,
+            // not just the "::ffff:" string prefix. ::/96 (deprecated v4-compat),
+            // ::ffff:0:0/96 (v4-mapped), 64:ff9b::/96 (NAT64).
+            foreach (['::ffff:0:0' => 96, '::' => 96, '64:ff9b::' => 96] as $prefix => $length) {
+                if (self::isIpv6InRange($ip, $prefix, $length)) {
+                    $embedded = inet_ntop(substr($binary, 12, 4));
+                    if ($embedded !== false && self::isBlockedIp($embedded)) {
+                        return true;
+                    }
+
+                    // A mapped/NAT64 literal aimed at infrastructure is itself
+                    // suspect; block the whole IPv4-bearing prefix.
+                    return true;
+                }
+            }
+
+            // Manual prefix checks (authoritative, independent of filter_var,
+            // which is unreliable for IPv6 across builds).
+            $blockedPrefixes = [
+                ['fe80::', 10],     // link-local
+                ['fc00::', 7],      // unique local (incl. fd00::/8)
+                ['2001:db8::', 32], // documentation
+                ['2001:2::', 48],   // benchmarking
+                ['100::', 64],      // discard-only
+                ['fec0::', 10],     // deprecated site-local
+                ['ff00::', 8],      // multicast
+            ];
+            foreach ($blockedPrefixes as [$prefix, $length]) {
+                if (self::isIpv6InRange($ip, $prefix, $length)) {
+                    return true;
+                }
+            }
+
+            // Belt-and-suspenders for anything the manual list misses.
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Not a valid IP literal.
+        return false;
+    }
+
+    /**
+     * Check whether an IPv4 address falls within a CIDR range.
+     */
+    private static function isIpv4InCidr(string $ip, string $cidr): bool
+    {
+        [$subnet, $bits] = explode('/', $cidr);
+        $bits = (int) $bits;
+
+        $ipLong = ip2long($ip);
+        $subnetLong = ip2long($subnet);
+        if ($ipLong === false || $subnetLong === false) {
+            return false;
+        }
+
+        $mask = $bits === 0 ? 0 : (-1 << (32 - $bits));
+
+        return ($ipLong & $mask) === ($subnetLong & $mask);
+    }
+
+    /**
+     * Perform an SSRF-safe HTTP GET: validates the URL, pins the connection to
+     * the vetted IP (defeats DNS rebinding), and follows redirects only after
+     * re-validating + re-pinning each hop. Returns null when the URL (or a
+     * redirect hop) is unsafe; may throw on transport errors like any Http call.
+     */
+    public static function safeHttpGet($url, array $headers = [], int $timeout = 30, int $maxRedirects = 4)
+    {
+        return self::safeHttpGetFollowing($url, $headers, $timeout, $maxRedirects)['response'];
+    }
+
+    /**
+     * Bounded, SSRF-safe redirect following. Every hop - including each redirect
+     * target - is re-validated and IP-pinned, so a validated host that 30x's to an
+     * internal address is stopped at the unsafe hop (Guzzle's own redirect follower
+     * would re-resolve the target unpinned). Returns the final Response (null if a
+     * hop was unsafe) and the final URL reached.
+     *
+     * @return array{response:\Illuminate\Http\Client\Response|null,url:string}
+     */
+    private static function safeHttpGetFollowing($url, array $headers, int $timeout, int $maxRedirects): array
+    {
+        $currentUrl = is_string($url) ? $url : '';
+        $response = null;
+
+        for ($hop = 0; $hop <= $maxRedirects; $hop++) {
+            $target = self::validatedTarget($currentUrl);
+            if ($target === null) {
+                return ['response' => null, 'url' => $currentUrl];
+            }
+
+            $curlOptions = [
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_MAXFILESIZE => 10485760, // 10MB - cap SSRF'd response size
+            ];
+
+            // Pin the hostname to the address we validated (defeats DNS rebinding).
+            $resolve = self::pinnedCurlResolve($target);
+            if (! empty($resolve)) {
+                $curlOptions[CURLOPT_RESOLVE] = $resolve;
+            }
+
+            $response = \Illuminate\Support\Facades\Http::timeout($timeout)
+                ->withHeaders($headers)
+                ->withOptions([
+                    'allow_redirects' => false,
+                    'curl' => $curlOptions,
+                ])
+                ->get($currentUrl);
+
+            // Stop unless this is a redirect we can still follow.
+            if (! $response->redirect() || $hop === $maxRedirects) {
+                return ['response' => $response, 'url' => $currentUrl];
+            }
+
+            $location = $response->header('Location');
+            $next = ($location !== '') ? self::resolveRedirectUrl($location, $currentUrl) : null;
+            if ($next === null) {
+                return ['response' => $response, 'url' => $currentUrl];
+            }
+
+            $currentUrl = $next;
+        }
+
+        return ['response' => $response, 'url' => $currentUrl];
+    }
+
+    /**
+     * Resolve a (possibly relative) redirect Location against the URL it came
+     * from. Handles absolute, scheme-relative (//host), absolute-path (/p) and
+     * relative forms. Returns null when it cannot be resolved.
+     */
+    private static function resolveRedirectUrl(string $location, string $base): ?string
+    {
+        $location = trim($location);
+        if ($location === '') {
+            return null;
+        }
+
+        // Already absolute (scheme + host).
+        $parsed = parse_url($location);
+        if (is_array($parsed) && isset($parsed['scheme'], $parsed['host'])) {
+            return $location;
+        }
+
+        $baseParts = parse_url($base);
+        if (! is_array($baseParts) || ! isset($baseParts['scheme'], $baseParts['host'])) {
+            return null;
+        }
+
+        $authority = $baseParts['host'];
+        if (isset($baseParts['port'])) {
+            $authority .= ':'.$baseParts['port'];
+        }
+
+        // Scheme-relative: //host/path
+        if (str_starts_with($location, '//')) {
+            return $baseParts['scheme'].':'.$location;
+        }
+
+        // Absolute path: /path
+        if (str_starts_with($location, '/')) {
+            return $baseParts['scheme'].'://'.$authority.$location;
+        }
+
+        // Relative path: resolve against the base path's directory.
+        $basePath = $baseParts['path'] ?? '/';
+        $slash = strrpos($basePath, '/');
+        $dir = $slash === false ? '/' : substr($basePath, 0, $slash + 1);
+
+        return $baseParts['scheme'].'://'.$authority.$dir.$location;
+    }
+
+    /**
+     * SSRF-safe download returning the response body (e.g. for remote images),
+     * or null when the URL is unsafe or the request fails. Use in place of
+     * file_get_contents() on user-influenced URLs.
+     */
+    public static function safeFetch($url, int $timeout = 15)
+    {
+        try {
+            $response = self::safeHttpGet($url, ['User-Agent' => 'EventSchedule/1.0'], $timeout);
+
+            if ($response === null || ! $response->successful()) {
+                return null;
+            }
+
+            return $response->body();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Build CURLOPT_RESOLVE entries that pin a validated target's hostname to its
+     * vetted IP. Returns an empty array for IP-literal hosts (nothing to pin), so
+     * the result can be spread directly into curl options.
+     *
+     * @param  array{host:string,port:int,ip:string}  $target
+     */
+    private static function pinnedCurlResolve(array $target): array
+    {
+        if (filter_var($target['host'], FILTER_VALIDATE_IP)) {
+            return [];
+        }
+
+        $pinIp = filter_var($target['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
+            ? '['.$target['ip'].']'
+            : $target['ip'];
+
+        return ["{$target['host']}:{$target['port']}:{$pinIp}"];
     }
 
     /**
@@ -578,68 +900,29 @@ class UrlUtils
             'image_path' => null,
         ];
 
-        // Validate URL for security
-        if (! self::isUrlSafe($url)) {
+        // Validate URL before any request (each fetch hop is re-validated below).
+        if (self::validatedTarget($url) === null) {
             return $result;
         }
 
         try {
-            $ch = curl_init($url);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_MAXREDIRS => 3, // Reduced from 10
-                CURLOPT_TIMEOUT => 15, // Reduced from 30
-                CURLOPT_CONNECTTIMEOUT => 10, // Reduced from 30
-                CURLOPT_USERAGENT => 'EventSchedule/1.0', // Don't impersonate browsers
-                CURLOPT_HTTPHEADER => [
-                    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language: en-US,en;q=0.5',
-                ],
-                CURLOPT_HEADER => true,
-                // Security settings
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-                CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-                CURLOPT_MAXFILESIZE => 10485760, // 10MB limit
-            ]);
+            // Follow redirects safely (each hop re-validated + IP-pinned) so the
+            // og:image is read from the final page rather than a 3xx body.
+            $followed = self::safeHttpGetFollowing($url, [
+                'User-Agent' => 'EventSchedule/1.0',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language' => 'en-US,en;q=0.5',
+            ], 15, 4);
 
-            $response = curl_exec($ch);
-
-            if ($response === false) {
-                curl_close($ch);
-
+            $response = $followed['response'];
+            if ($response === null) {
                 return $result;
             }
 
-            // Process redirect URL
-            $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $headers = substr($response, 0, $headerSize);
-            $html = substr($response, $headerSize);
+            $result['redirect_url'] = $followed['url'];
 
-            $redirectUrls = [];
-            foreach (explode("\n", $headers) as $header) {
-                if (stripos($header, 'Location:') === 0) {
-                    $redirectUrl = trim(substr($header, 9));
-                    // Validate redirect URL too
-                    if (self::isUrlSafe($redirectUrl)) {
-                        $redirectUrls[] = $redirectUrl;
-                    }
-                }
-            }
-
-            $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            curl_close($ch);
-
-            // Determine redirect URL
-            if (! empty($redirectUrls)) {
-                $result['redirect_url'] = end($redirectUrls);
-            } elseif ($httpCode >= 200 && $httpCode < 400 && self::isUrlSafe($finalUrl)) {
-                $result['redirect_url'] = $finalUrl;
-            }
+            $httpCode = $response->status();
+            $html = $response->successful() ? $response->body() : '';
 
             // Process social image
             if ($httpCode >= 200 && $httpCode < 400 && ! empty($html)) {
@@ -686,18 +969,24 @@ class UrlUtils
      */
     private static function downloadImageSecurely($imageUrl)
     {
+        // Re-validate and capture the vetted IP for pinning (defeats rebinding).
+        $target = self::validatedTarget($imageUrl);
+        if ($target === null) {
+            return false;
+        }
+
         $ch = curl_init();
         curl_setopt_array($ch, [
             CURLOPT_URL => $imageUrl,
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => false,
             CURLOPT_TIMEOUT => 10,
             CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_MAXREDIRS => 2,
             CURLOPT_USERAGENT => 'EventSchedule/1.0',
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_RESOLVE => self::pinnedCurlResolve($target),
             CURLOPT_MAXFILESIZE => 5242880, // 5MB limit for images
         ]);
 

@@ -121,7 +121,9 @@ class ListDesign extends AbstractEventDesign
                     ]);
                 }
 
-                $imageData = file_get_contents($imageUrl, false, $context);
+                $imageData = $this->isRemoteImageUrlSafe($imageUrl)
+                    ? file_get_contents($imageUrl, false, $context)
+                    : false;
                 if ($imageData === false) {
                     // Fallback to cURL if file_get_contents fails
                     $imageData = $this->fetchImageWithCurl($imageUrl);

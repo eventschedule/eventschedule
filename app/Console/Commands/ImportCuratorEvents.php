@@ -11,7 +11,6 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ImportCuratorEvents extends Command
@@ -145,14 +144,12 @@ class ImportCuratorEvents extends Command
                 $this->line("Checking robots.txt at: {$robotsUrl}");
             }
 
-            // Fetch robots.txt
-            $response = Http::timeout(10)
-                ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
-                ->get($robotsUrl);
+            // Fetch robots.txt (SSRF-safe: validated + IP-pinned, redirects re-checked)
+            $response = UrlUtils::safeHttpGet($robotsUrl, ['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'], 10);
 
-            if (! $response->successful()) {
+            if ($response === null || ! $response->successful()) {
                 if ($debug) {
-                    $this->warn("Could not fetch robots.txt (HTTP {$response->status()}), assuming scraping is allowed");
+                    $this->warn('Could not fetch robots.txt (HTTP '.($response?->status() ?? 'n/a').'), assuming scraping is allowed');
                 }
 
                 return true; // Default to allowing if robots.txt is not accessible
@@ -281,6 +278,15 @@ class ImportCuratorEvents extends Command
             $this->line("Fetching content from: {$url}");
         }
 
+        // Validate URL against SSRF before any outbound request (incl. robots.txt)
+        if (! UrlUtils::isUrlSafe($url)) {
+            if ($debug) {
+                $this->warn("URL blocked by SSRF check: {$url}");
+            }
+
+            return 0;
+        }
+
         // Check robots.txt first
         if (! $this->checkRobotsTxt($url, $debug)) {
             if ($debug) {
@@ -290,19 +296,12 @@ class ImportCuratorEvents extends Command
             return 0;
         }
 
-        // Validate URL against SSRF before fetching
-        if (! UrlUtils::isUrlSafe($url)) {
-            if ($debug) {
-                $this->warn("URL blocked by SSRF check: {$url}");
-            }
+        // Fetch the webpage content (SSRF-safe: validated + IP-pinned, redirects re-checked)
+        $response = UrlUtils::safeHttpGet($url, ['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'], 30);
 
-            return 0;
+        if ($response === null) {
+            throw new \Exception('Failed to fetch URL: blocked by SSRF check');
         }
-
-        // Fetch the webpage content
-        $response = Http::timeout(30)
-            ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
-            ->get($url);
 
         if (! $response->successful()) {
             throw new \Exception("Failed to fetch URL: HTTP {$response->status()}");
@@ -463,6 +462,16 @@ class ImportCuratorEvents extends Command
             $this->line("Processing event URL: {$eventUrl}");
         }
 
+        // Validate URL against SSRF - event URLs are parsed from scraped HTML and
+        // are attacker-influenced, so they must be checked before fetching.
+        if (! UrlUtils::isUrlSafe($eventUrl)) {
+            if ($debug) {
+                $this->warn("Event URL blocked by SSRF check: {$eventUrl}");
+            }
+
+            return false;
+        }
+
         // Check if event already exists for this curator
         $existingEvent = Event::whereHas('roles', function ($query) use ($curator) {
             $query->where('role_id', $curator->id);
@@ -476,10 +485,12 @@ class ImportCuratorEvents extends Command
             return false;
         }
 
-        // Fetch event page content
-        $response = Http::timeout(30)
-            ->withHeaders(['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'])
-            ->get($eventUrl);
+        // Fetch event page content (SSRF-safe: validated + IP-pinned, redirects re-checked)
+        $response = UrlUtils::safeHttpGet($eventUrl, ['User-Agent' => 'Event Schedule Bot/1.0 (+https://www.eventschedule.com)'], 30);
+
+        if ($response === null) {
+            throw new \Exception('Failed to fetch event URL: blocked by SSRF check');
+        }
 
         if (! $response->successful()) {
             throw new \Exception("Failed to fetch event URL: HTTP {$response->status()}");
@@ -502,15 +513,19 @@ class ImportCuratorEvents extends Command
         $imageFormat = null;
         $imageUrl = null;
 
-        if ($ogImage && UrlUtils::isUrlSafe($ogImage)) {
+        if ($ogImage) {
             try {
-                $imageData = file_get_contents($ogImage);
-                $imageUrl = $ogImage;
-                $imageFormat = ImageUtils::detectImageFormat($imageData, $ogImage);
-                if ($debug) {
-                    $this->line('Downloaded image data: '.strlen($imageData).' bytes, format: '.$imageFormat);
+                // safeFetch validates (SSRF), pins the IP, and re-checks each redirect hop.
+                $imageData = UrlUtils::safeFetch($ogImage);
+                if ($imageData !== null) {
+                    $imageUrl = $ogImage;
+                    $imageFormat = ImageUtils::detectImageFormat($imageData, $ogImage);
+                    if ($debug) {
+                        $this->line('Downloaded image data: '.strlen($imageData).' bytes, format: '.$imageFormat);
+                    }
                 }
             } catch (\Exception $e) {
+                $imageData = null;
                 if ($debug) {
                     $this->warn('Failed to download image: '.$e->getMessage());
                 }

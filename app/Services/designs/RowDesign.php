@@ -114,6 +114,13 @@ class RowDesign extends AbstractEventDesign
      */
     protected function getImageDimensions(string $url): ?array
     {
+        // SSRF guard (hosted mode): don't probe internal addresses for dimensions.
+        // The URL-literal check leaves local-path handling unchanged; this also
+        // covers the cURL fallback below, which is only called from here.
+        if (filter_var($url, FILTER_VALIDATE_URL) && ! $this->isRemoteImageUrlSafe($url)) {
+            return null;
+        }
+
         try {
             // Use aggressive timeout - better to use default aspect ratio than hang
             $contextOptions = [
@@ -179,6 +186,8 @@ class RowDesign extends AbstractEventDesign
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);  // Aggressive 5-second timeout
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);  // 3-second connect timeout
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; EventGraphicGenerator/1.0)');
@@ -313,7 +322,9 @@ class RowDesign extends AbstractEventDesign
                     ]);
                 }
 
-                $imageData = file_get_contents($imageUrl, false, $context);
+                $imageData = $this->isRemoteImageUrlSafe($imageUrl)
+                    ? file_get_contents($imageUrl, false, $context)
+                    : false;
                 if ($imageData === false) {
                     $imageData = $this->fetchImageWithCurl($imageUrl);
                     if ($imageData === false) {
