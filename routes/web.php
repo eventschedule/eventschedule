@@ -554,6 +554,8 @@ if (config('app.is_nexus')) {
         Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
         Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
         Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
+        Route::get('/browse', [MarketingController::class, 'browse'])->name('marketing.browse');
+        Route::post('/browse/event/{hash}/toggle-discovery', [MarketingController::class, 'toggleEventDiscovery'])->name('marketing.discovery.toggle')->middleware('auth');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -702,6 +704,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
         Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
+        Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
         Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
@@ -747,6 +750,8 @@ if (config('app.is_nexus')) {
             Route::get('/about', [MarketingController::class, 'about'])->name('marketing.about');
             Route::get('/examples', [MarketingController::class, 'demos'])->name('marketing.demos');
             Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
+            Route::get('/browse', [MarketingController::class, 'browse'])->name('marketing.browse');
+            Route::post('/browse/event/{hash}/toggle-discovery', [MarketingController::class, 'toggleEventDiscovery'])->name('marketing.discovery.toggle')->middleware('auth');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -897,6 +902,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/creating-events', [MarketingController::class, 'docsCreatingEvents'])->name('marketing.docs.creating_events');
             Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
+            Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
             Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
@@ -944,6 +950,7 @@ if (config('app.is_nexus')) {
             Route::get('/demos', fn () => redirect('https://eventschedule.com/examples', 301));
             Route::get('/examples', fn () => redirect('https://eventschedule.com/examples', 301));
             Route::get('/search', fn () => redirect('https://eventschedule.com/search', 301));
+            Route::get('/browse', fn () => redirect('https://eventschedule.com/browse', 301));
             Route::get('/faq', fn () => redirect('https://eventschedule.com/faq', 301));
             Route::get('/ticketing', fn () => redirect('https://eventschedule.com/features/ticketing', 301));
             Route::get('/ai', fn () => redirect('https://eventschedule.com/features/ai', 301));
@@ -1079,6 +1086,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/creating-events', fn () => redirect('https://eventschedule.com/docs/creating-events', 301));
             Route::get('/docs/sharing', fn () => redirect('https://eventschedule.com/docs/sharing', 301));
             Route::get('/docs/tickets', fn () => redirect('https://eventschedule.com/docs/tickets', 301));
+            Route::get('/docs/subscriptions', fn () => redirect('https://eventschedule.com/docs/subscriptions', 301));
             Route::get('/docs/event-graphics', fn () => redirect('https://eventschedule.com/docs/event-graphics', 301));
             Route::get('/docs/newsletters', fn () => redirect('https://eventschedule.com/docs/newsletters', 301));
             Route::get('/docs/analytics', fn () => redirect('https://eventschedule.com/docs/analytics', 301));
@@ -1124,6 +1132,7 @@ if (config('app.is_nexus')) {
     Route::get('/demos', fn () => redirect()->route('home'));
     Route::get('/examples', fn () => redirect()->route('home'));
     Route::get('/search', fn () => redirect()->route('home'));
+    Route::get('/browse', fn () => redirect()->route('home'));
     Route::get('/faq', fn () => redirect()->route('home'));
     Route::get('/referral-program', fn () => redirect('/docs/referral-program', 301));
     Route::get('/features/ticketing', fn () => redirect()->route('home'));
@@ -1213,6 +1222,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/creating-events', fn () => redirect()->route('home'))->name('marketing.docs.creating_events');
     Route::get('/docs/sharing', fn () => redirect()->route('home'))->name('marketing.docs.sharing');
     Route::get('/docs/tickets', fn () => redirect()->route('home'))->name('marketing.docs.tickets');
+    Route::get('/docs/subscriptions', fn () => redirect()->route('home'))->name('marketing.docs.subscriptions');
     Route::get('/docs/event-graphics', fn () => redirect()->route('home'))->name('marketing.docs.event_graphics');
     Route::get('/docs/newsletters', fn () => redirect()->route('home'))->name('marketing.docs.newsletters');
     Route::get('/docs/analytics', fn () => redirect()->route('home'))->name('marketing.docs.analytics');

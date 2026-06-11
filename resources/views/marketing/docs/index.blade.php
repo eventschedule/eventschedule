@@ -237,6 +237,18 @@
                     </div>
                 </a>
 
+                <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-card block">
+                    <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
+                        <div class="flex items-center gap-3 mb-3">
+                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" />
+                            </svg>
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Subscriptions &amp; Passes</h3>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Sell one pass a guest reuses across many events.</p>
+                    </div>
+                </a>
+
                 <a href="{{ route('marketing.docs.sharing') }}" class="doc-card block">
                     <div class="rounded-xl border border-cyan-200 dark:border-white/10 p-5 h-full bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-900 dark:to-teal-900 hover:border-cyan-500/30 transition-colors">
                         <div class="flex items-center gap-3 mb-3">

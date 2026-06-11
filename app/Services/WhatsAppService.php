@@ -58,6 +58,17 @@ class WhatsAppService
     public static function downloadMedia(string $mediaUrl): ?string
     {
         try {
+            // Only ever fetch (and send Twilio credentials to) Twilio-hosted media
+            // URLs. The URL arrives in the (signature-verified) webhook payload, but
+            // restricting the host here prevents SSRF to internal addresses and stops
+            // the Basic-auth credentials below from leaking to a non-Twilio target.
+            $host = strtolower((string) parse_url($mediaUrl, PHP_URL_HOST));
+            if ($host !== 'twilio.com' && ! str_ends_with($host, '.twilio.com')) {
+                Log::warning('Twilio media download blocked: non-Twilio host', ['url' => $mediaUrl]);
+
+                return null;
+            }
+
             $sid = config('services.twilio.sid');
             $token = config('services.twilio.token');
 

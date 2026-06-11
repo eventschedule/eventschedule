@@ -27,7 +27,7 @@ class WebhookSettingsController extends Controller
 
         $url = $request->url;
 
-        if (config('app.hosted') && $this->isPrivateUrl($url)) {
+        if (UrlUtils::validatedTarget($url) === null) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.webhook_url_not_allowed'));
         }
@@ -76,7 +76,7 @@ class WebhookSettingsController extends Controller
 
         $url = $request->url;
 
-        if (config('app.hosted') && $this->isPrivateUrl($url)) {
+        if (UrlUtils::validatedTarget($url) === null) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.webhook_url_not_allowed'));
         }
@@ -180,7 +180,10 @@ class WebhookSettingsController extends Controller
             abort(403);
         }
 
-        if (config('app.hosted') && $this->isPrivateUrl($webhook->url)) {
+        // Validate + pin the target right before sending (TOCTOU-safe against DNS
+        // rebinding); the same vetted IP is used for the request below.
+        $curl = UrlUtils::safePinnedCurlOptions($webhook->url);
+        if ($curl === null) {
             return redirect()->to(route('profile.edit').'#section-webhooks')
                 ->with('error', __('messages.webhook_url_not_allowed'));
         }
@@ -207,6 +210,10 @@ class WebhookSettingsController extends Controller
                     'User-Agent' => 'EventSchedule-Webhook/1.0',
                 ])
                 ->withBody($jsonBody, 'application/json')
+                ->withOptions([
+                    'allow_redirects' => false,
+                    'curl' => $curl,
+                ])
                 ->post($webhook->url);
 
             $status = $response->status();
@@ -253,20 +260,5 @@ class WebhookSettingsController extends Controller
             ->get();
 
         return response()->json($deliveries);
-    }
-
-    private function isPrivateUrl(string $url): bool
-    {
-        $host = parse_url($url, PHP_URL_HOST);
-        if (! $host) {
-            return false;
-        }
-
-        $ip = gethostbyname($host);
-        if ($ip !== $host || filter_var($host, FILTER_VALIDATE_IP)) {
-            return ! filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
-        }
-
-        return false;
     }
 }

@@ -38,14 +38,14 @@
             <!-- Right side buttons -->
             <div class="flex items-center space-x-4">
                 <a
-                    href="{{ marketing_url('/search') }}"
-                    class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all"
-                    aria-label="{{ __('messages.search') }}"
+                    href="{{ marketing_url('/browse') }}"
+                    class="inline-flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all {{ request()->is('*/browse') || request()->is('browse') ? 'text-blue-600 dark:text-blue-400' : '' }}"
+                    aria-label="Browse events"
                 >
                     <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
                     </svg>
-                    <span class="hidden lg:inline text-sm font-medium">Search</span>
+                    <span class="hidden lg:inline text-sm font-medium">Browse</span>
                 </a>
 
                 <!-- GitHub star badge (desktop only) -->
@@ -121,6 +121,9 @@
         <!-- Mobile Navigation -->
         <div id="mobile-menu" class="hidden md:hidden pb-4">
             <div class="flex flex-col space-y-3">
+                <a href="{{ marketing_url('/browse') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
+                    Browse
+                </a>
                 <a href="{{ marketing_url('/features') }}" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2">
                     Features
                 </a>

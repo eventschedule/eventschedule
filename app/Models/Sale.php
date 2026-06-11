@@ -302,13 +302,23 @@ class Sale extends Model
         // Include tickets
         $data->tickets = $this->saleTickets->filter(fn ($saleTicket) => $saleTicket->ticket)
             ->map(function ($saleTicket) {
-                return [
+                $row = [
                     'ticket_id' => UrlUtils::encodeId($saleTicket->ticket_id),
                     'quantity' => $saleTicket->quantity,
                     'price' => (float) $saleTicket->ticket->price,
                     'type' => $saleTicket->ticket->type,
                     'is_addon' => (bool) $saleTicket->ticket->is_addon,
+                    'is_pass' => (bool) $saleTicket->ticket->is_pass,
                 ];
+
+                if ($saleTicket->ticket->is_pass) {
+                    $row['pass_usage_type'] = $saleTicket->ticket->pass_usage_type;
+                    $row['pass_visits_used'] = $saleTicket->passUsageCount();
+                    $row['pass_max_uses'] = $saleTicket->ticket->pass_max_uses;
+                    $row['pass_expires_at'] = $saleTicket->pass_expires_at?->toIso8601String();
+                }
+
+                return $row;
             })->values();
 
         // total_quantity stays per-row (same as before Fix 1 — primary's SaleTicket was already qty=1 then);

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\Role;
 use App\Utils\EventTextGenerator;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -243,8 +244,9 @@ abstract class AbstractEventDesign
             }
         }
 
-        // Fetch and measure
-        $imageData = $this->fetchImageWithCurl($headerUrl);
+        // Fetch and measure (own-host assets are read from local disk; external
+        // URLs are validated + IP-pinned via UrlUtils::safeFetch).
+        $imageData = $this->fetchImageData($headerUrl);
         if (! $imageData) {
             return;
         }
@@ -1143,32 +1145,11 @@ abstract class AbstractEventDesign
 
             // Handle both local and remote images
             if (filter_var($this->role->background_image_url, FILTER_VALIDATE_URL)) {
-                // Remote image
-
-                // Disable SSL verification for local development
-                $context = null;
-                if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
-                    $context = stream_context_create([
-                        'ssl' => [
-                            'verify_peer' => false,
-                            'verify_peer_name' => false,
-                        ],
-                        'http' => [
-                            'timeout' => 30,
-                        ],
-                    ]);
-                }
-
-                $imageData = $this->isRemoteImageUrlSafe($this->role->background_image_url)
-                    ? file_get_contents($this->role->background_image_url, false, $context)
-                    : false;
+                // Remote image - fetch SSRF-safely (own-host assets are read from
+                // local disk; external URLs are validated + IP-pinned).
+                $imageData = $this->fetchImageData($this->role->background_image_url);
                 if ($imageData === false) {
-                    // Fallback to cURL if file_get_contents fails
-                    $imageData = $this->fetchImageWithCurl($this->role->background_image_url);
-
-                    if ($imageData === false) {
-                        return;
-                    }
+                    return;
                 }
             } else {
                 // Local file path
@@ -1289,57 +1270,73 @@ abstract class AbstractEventDesign
      * legitimately reference images on their own (possibly internal) hosts, so
      * SSRF blocking is enforced in hosted mode only (mirrors SendWebhook).
      */
-    protected function isRemoteImageUrlSafe(string $url): bool
+    /**
+     * Fetch image bytes for graphic generation, SSRF-safely and without a needless
+     * self-HTTP round-trip. The URL is almost always one of this app's own assets:
+     * the flyer/profile/background accessors render stored paths as a local
+     * /storage URL, a /images/demo URL, or our own CDN URL. Own-host URLs (and bare
+     * relative paths) are read straight from local disk - which also means a
+     * selfhost whose APP_URL is a private/LAN address keeps working. Anything that
+     * is a genuinely external URL is fetched via UrlUtils::safeFetch (validated +
+     * IP-pinned + redirect-revalidated, http/https only). Returns binary data or
+     * false.
+     */
+    protected function fetchImageData(string $url, int $timeout = 30): string|false
     {
-        if (! config('app.hosted')) {
-            return true;
+        if ($url === '') {
+            return false;
         }
 
-        return \App\Utils\UrlUtils::isUrlSafe($url);
+        // Bare relative path (not a URL): read from local disk.
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return $this->readLocalImageData($url);
+        }
+
+        // Full URL pointing at this app's own host: read the underlying file from
+        // local disk rather than HTTP-fetching ourselves.
+        $appHost = parse_url((string) config('app.url'), PHP_URL_HOST);
+        $urlHost = parse_url($url, PHP_URL_HOST);
+        if ($appHost && $urlHost && strcasecmp($appHost, $urlHost) === 0) {
+            $local = $this->readLocalImageData((string) parse_url($url, PHP_URL_PATH));
+            if ($local !== false) {
+                return $local;
+            }
+        }
+
+        // External URL (or own asset not found on disk): SSRF-safe fetch.
+        return UrlUtils::safeFetch($url, $timeout) ?: false;
     }
 
-    protected function fetchImageWithCurl(string $url): string|false
+    /**
+     * Read an image from the local public/storage disk, trying the same path
+     * variations the design subclasses use for local images. Returns binary data
+     * or false.
+     */
+    protected function readLocalImageData(string $path): string|false
     {
-        if (! function_exists('curl_init')) {
+        $path = ltrim($path, '/');
+        if ($path === '') {
             return false;
         }
 
-        // SSRF guard (hosted mode) plus an HTTP(S)-only restriction so file:// or
-        // gopher:// cannot be used to read local resources.
-        if (! $this->isRemoteImageUrlSafe($url)) {
-            return false;
+        $candidates = [
+            public_path($path),
+            public_path('storage/'.$path),
+            public_path('images/'.$path),
+            storage_path('app/public/'.$path),
+            $path,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                $data = @file_get_contents($candidate);
+                if ($data !== false && $data !== '') {
+                    return $data;
+                }
+            }
         }
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        // Enable SSL verification to prevent MITM attacks
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; EventGraphicGenerator/1.0)');
-
-        $imageData = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            return false;
-        }
-
-        if ($httpCode !== 200) {
-            return false;
-        }
-
-        if ($imageData === false || empty($imageData)) {
-            return false;
-        }
-
-        return $imageData;
+        return false;
     }
 
     protected function hexToColor(string $hex): int

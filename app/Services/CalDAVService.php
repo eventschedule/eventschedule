@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Repos\EventRepo;
 use App\Utils\EventTextGenerator;
 use App\Utils\SlugPatternUtils;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use HTMLPurifier;
 use HTMLPurifier_Config;
@@ -950,9 +951,25 @@ class CalDAVService
         // Use longer timeout for REPORT requests as they may fetch large date ranges
         $timeout = strtoupper($method) === 'REPORT' ? 90 : 30;
 
+        // SSRF guard: validate the target (user-configured server/calendar URL or a
+        // server-discovered href) and pin the connection to the vetted IP so a
+        // private/reserved/metadata address cannot be reached, and redirects are not
+        // followed (a 30x could rebind to an internal host). Discovery here is done
+        // via PROPFIND, not HTTP redirects, so disabling them does not break sync.
+        // Every hop funnels through makeRequest() because callers resolve each href
+        // before calling it.
+        $curl = UrlUtils::safePinnedCurlOptions($url);
+        if ($curl === null) {
+            throw new \RuntimeException('CalDAV target is not an allowed address');
+        }
+
         $request = Http::withBasicAuth($settings['username'], $settings['password'])
             ->withHeaders($allHeaders)
-            ->timeout($timeout);
+            ->timeout($timeout)
+            ->withOptions([
+                'allow_redirects' => false,
+                'curl' => $curl,
+            ]);
 
         switch (strtoupper($method)) {
             case 'PROPFIND':

@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    @if ($waitlistCount > 0 || $hasPro)
+    @if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0)
     <div class="ap-tab-container mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav class="-mb-px flex gap-6">
             <button type="button" id="tab-sales"
@@ -17,6 +17,12 @@
             <button type="button" id="tab-feedback"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
                 {{ __('messages.feedback') }}
+            </button>
+            @endif
+            @if (($subscriptionsCount ?? 0) > 0)
+            <button type="button" id="tab-subscriptions"
+                class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
+                {{ __('messages.subscriptions') }} ({{ $subscriptionsCount }})
             </button>
             @endif
         </nav>
@@ -94,6 +100,12 @@
     </div>
     @endif
 
+    @if (($subscriptionsCount ?? 0) > 0)
+    <div id="subscriptions-panel" style="display: none;">
+        @include('ticket.subscriptions_table', ['subscriptions' => $subscriptions ?? collect()])
+    </div>
+    @endif
+
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
@@ -104,7 +116,7 @@ var waitlistSortDir = 'desc';
 var feedbackSortBy = '';
 var feedbackSortDir = 'desc';
 
-@if ($waitlistCount > 0 || $hasPro)
+@if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0)
 // Tab switching
 const activeClass = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
 const inactiveClass = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -125,11 +137,21 @@ function setActiveTab(activeId) {
     if (feedbackPanel) {
         feedbackPanel.style.display = activeId === 'tab-feedback' ? '' : 'none';
     }
+    var subscriptionsPanel = document.getElementById('subscriptions-panel');
+    if (subscriptionsPanel) {
+        subscriptionsPanel.style.display = activeId === 'tab-subscriptions' ? '' : 'none';
+    }
 }
 
 document.getElementById('tab-sales').addEventListener('click', function() {
     setActiveTab('tab-sales');
 });
+
+@if (($subscriptionsCount ?? 0) > 0)
+document.getElementById('tab-subscriptions').addEventListener('click', function() {
+    setActiveTab('tab-subscriptions');
+});
+@endif
 
 @if ($waitlistCount > 0)
 document.getElementById('tab-waitlist').addEventListener('click', function() {

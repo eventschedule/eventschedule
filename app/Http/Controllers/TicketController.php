@@ -11,15 +11,18 @@ use App\Models\EventFeedback;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\SaleTicket;
 use App\Models\TicketWaitlist;
 use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Services\PassRedemptionService;
 use App\Services\RoleMailerService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
+use App\Utils\CsvUtils;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
@@ -178,8 +181,73 @@ class TicketController extends Controller
 
             $hasPro = $user->roles()->get()->contains(fn ($role) => $role->isPro());
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir'));
+            $subscriptions = $this->getSubscriptionsData();
+            $subscriptionsCount = $subscriptions->count();
+
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount'));
         }
+    }
+
+    /**
+     * Build the per-subscriber subscription/pass usage rows for the Subscriptions
+     * tab: who holds a pass, how many visits they've used, and at which events.
+     */
+    private function getSubscriptionsData()
+    {
+        $user = auth()->user();
+
+        $saleTickets = SaleTicket::whereHas('ticket', fn ($q) => $q->where('is_pass', true))
+            ->whereHas('sale', function ($q) use ($user) {
+                $q->where('is_deleted', false)
+                    ->where('status', 'paid')
+                    ->whereHas('event', fn ($eq) => $eq->where('user_id', $user->id));
+            })
+            ->with(['sale:id,name,email,event_id,secret', 'ticket:id,type,pass_usage_type,pass_max_uses'])
+            ->get();
+
+        // Resolve names for every event referenced in a usage log, in one query.
+        $eventIds = $saleTickets->flatMap(fn ($st) => collect($st->pass_usages ?? [])
+            ->map(fn ($u) => (int) ($u['event_id'] ?? 0)))->filter()->unique();
+        $eventNames = Event::whereIn('id', $eventIds)->pluck('name', 'id');
+
+        return $saleTickets->map(function ($st) use ($eventNames) {
+            $usages = collect($st->pass_usages ?? [])->sortByDesc('at')->values();
+            $count = $usages->count();
+            $type = $st->ticket->pass_usage_type;
+            $max = $st->ticket->pass_max_uses;
+
+            if ($type === 'total' && $max) {
+                $limitLabel = $count.' / '.$max;
+            } else {
+                $limitLabel = trans_choice('messages.visits_count', $count, ['count' => $count]);
+            }
+
+            if ($st->passIsExpired()) {
+                $status = 'expired';
+            } elseif ($type === 'total' && $max && $count >= $max) {
+                $status = 'used_up';
+            } else {
+                $status = 'active';
+            }
+
+            return [
+                'name' => $st->sale->name,
+                'email' => $st->sale->email,
+                'ticket_type' => $st->ticket->type,
+                'limit_label' => $limitLabel,
+                'expires_at' => $st->pass_expires_at ? $st->pass_expires_at->format('M j, Y') : null,
+                'status' => $status,
+                'ticket_url' => route('ticket.view', [
+                    'event_id' => UrlUtils::encodeId($st->sale->event_id),
+                    'secret' => $st->sale->secret,
+                ]),
+                'usages' => $usages->map(fn ($u) => [
+                    'event' => $eventNames[(int) ($u['event_id'] ?? 0)] ?? '—',
+                    'date' => $u['date'] ?? '',
+                    'time' => isset($u['at']) ? Carbon::createFromTimestamp((int) $u['at'])->format('M j, g:i A') : '',
+                ])->values(),
+            ];
+        })->sortBy('name')->values();
     }
 
     private function salesQuery(?string $filter, bool $primaryOnly = true, bool $includePast = false)
@@ -650,7 +718,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Check-in Status', 'Check-in Time'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -664,21 +732,25 @@ class TicketController extends Controller
                     return ($st->ticket->type ?: '').' x'.$st->quantity;
                 })->implode(', ');
 
+                // Free-text cells (attendee-supplied or owner-supplied) are run
+                // through CsvUtils::sanitizeCell to neutralize CSV/formula injection
+                // when the export is opened in a spreadsheet app. App-formatted
+                // numeric/date/encoded columns are left as-is.
                 $row = [
-                    $sale->name,
-                    $sale->email,
-                    $sale->phone,
-                    $sale->event->name,
+                    CsvUtils::sanitizeCell($sale->name),
+                    CsvUtils::sanitizeCell($sale->email),
+                    CsvUtils::sanitizeCell($sale->phone),
+                    CsvUtils::sanitizeCell($sale->event->name),
                     $sale->event_date,
-                    $tickets,
-                    $addons,
+                    CsvUtils::sanitizeCell($tickets),
+                    CsvUtils::sanitizeCell($addons),
                     $sale->quantity(),
                     number_format($sale->payment_amount, 2, '.', ''),
                     $sale->event->ticket_currency_code,
-                    $sale->promoCode ? $sale->promoCode->code : '',
+                    CsvUtils::sanitizeCell($sale->promoCode ? $sale->promoCode->code : ''),
                     $sale->discount_amount ? number_format($sale->discount_amount, 2, '.', '') : '',
-                    $sale->transaction_reference,
-                    $sale->payment_method,
+                    CsvUtils::sanitizeCell($sale->transaction_reference),
+                    CsvUtils::sanitizeCell($sale->payment_method),
                     $sale->status,
                     $sale->created_at->timezone($sale->event->creatorRole?->timezone ?? config('app.timezone'))->format('Y-m-d H:i'),
                     $sale->group_id ? UrlUtils::encodeId($sale->group_id) : '',
@@ -700,6 +772,12 @@ class TicketController extends Controller
                 $row[] = $checkinTimestamp !== null
                     ? \Carbon\Carbon::createFromTimestamp($checkinTimestamp)->timezone($sale->event->creatorRole?->timezone ?? config('app.timezone'))->format('Y-m-d H:i')
                     : '';
+
+                // Pass / subscription columns
+                $passSt = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass);
+                $row[] = $passSt ? $passSt->ticket->pass_usage_type : '';
+                $row[] = $passSt ? $passSt->passUsageCount() : '';
+                $row[] = ($passSt && $passSt->pass_expires_at) ? $passSt->pass_expires_at->format('Y-m-d') : '';
 
                 // Build custom field values
                 $customValues = array_fill(0, count($customFieldNames), '');
@@ -747,7 +825,7 @@ class TicketController extends Controller
                     }
                 }
 
-                $row = array_merge($row, $customValues);
+                $row = array_merge($row, array_map([CsvUtils::class, 'sanitizeCell'], $customValues));
                 fputcsv($handle, $row);
             }
 
@@ -2242,7 +2320,43 @@ class TicketController extends Controller
 
     public function scan()
     {
-        return view('ticket.scan');
+        $user = auth()->user();
+
+        // Event context for the scanner: the operator picks which event they're
+        // scanning at (needed for cross-event subscriptions). List the user's
+        // events without a tickets-only filter, since a subscription may cover
+        // free / ticketless events.
+        $events = Event::where('user_id', $user->id)
+            ->whereNotNull('starts_at')
+            ->orderBy('starts_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        $today = now()->format('Y-m-d');
+
+        $eventIdsWithTodaySales = Sale::whereIn('event_id', $events->pluck('id'))
+            ->where('event_date', $today)
+            ->where('status', 'paid')
+            ->where('is_deleted', false)
+            ->pluck('event_id')
+            ->unique();
+
+        // Prefer an event with sales today, then any event occurring today, else most recent.
+        $selectedEventId = $events->first(fn ($e) => $eventIdsWithTodaySales->contains($e->id))?->id
+            ?? $events->first(fn ($e) => $e->matchesDate(now()->startOfDay()))?->id
+            ?? $events->first()?->id;
+
+        $eventsData = $events->map(fn ($event) => [
+            'id' => UrlUtils::encodeId($event->id),
+            'name' => $event->name,
+            'starts_at' => $event->starts_at ? $event->getShortDateRangeDisplay('D, M j, Y') : null,
+            'image_url' => $event->getImageUrl(),
+        ]);
+
+        return view('ticket.scan', [
+            'events' => $eventsData,
+            'selectedEventId' => $selectedEventId ? UrlUtils::encodeId($selectedEventId) : null,
+        ]);
     }
 
     public function scanned($eventId, $secret)
@@ -2264,96 +2378,35 @@ class TicketController extends Controller
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
+        // Passes / subscriptions are valid across one or more events and are
+        // redeemed once per event per day, so they bypass the single-date window
+        // and per-seat logic below. For a cross-event subscription the operator
+        // may be scanning at a covered event other than the one the pass was
+        // bought on; `scan_event_id` identifies that event (default: the pass's
+        // home event). All validation + the neutral `pass_status` contract live
+        // in PassRedemptionService.
+        if ($sale->isPass()) {
+            $scanningEvent = $event;
+            if ($scanEventId = request('scan_event_id')) {
+                $resolved = Event::with('creatorRole')->find(UrlUtils::decodeId($scanEventId));
+                if ($resolved) {
+                    $scanningEvent = $resolved;
+                }
+            }
+
+            if (! $user->canScanEvent($scanningEvent)) {
+                return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
+            }
+
+            return response()->json(app(PassRedemptionService::class)->redeem($sale, $scanningEvent, now()));
+        }
+
         if (! $user->canScanEvent($event)) {
             return response()->json(['error' => __('messages.you_are_not_authorized_to_scan_this_ticket')], 200);
         }
 
         if (! $event->starts_at) {
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
-        }
-
-        // Season passes are valid for every occurrence of a recurring event and are
-        // checked in once per occurrence, so they bypass the single-date window and
-        // per-seat logic below. A valid pass must never read as invalid/fraud: only
-        // payment problems are returned as `error` (red); everything else is a
-        // neutral/positive `pass_status` the scanner styles accordingly.
-        if ($sale->isPass()) {
-            if ($sale->status == 'unpaid') {
-                return response()->json(['error' => __('messages.this_ticket_is_not_paid')], 200);
-            } elseif ($sale->status == 'cancelled') {
-                return response()->json(['error' => __('messages.this_ticket_is_cancelled')], 200);
-            } elseif ($sale->status == 'refunded') {
-                return response()->json(['error' => __('messages.this_ticket_is_refunded')], 200);
-            }
-
-            $tz = $event->creatorRole?->timezone ?? config('app.timezone');
-            $todayCarbon = now($tz)->startOfDay();
-            $today = $todayCarbon->format('Y-m-d');
-
-            $passTicket = $sale->saleTickets->first(fn ($st) => $st->ticket?->is_pass);
-            $checkins = $passTicket?->pass_checkins ?? [];
-
-            $data = new \stdClass;
-            $data->attendee = $sale->name;
-            $data->event = $event->name;
-            $data->is_pass = true;
-            $data->pass_checkin_count = count($checkins);
-
-            // Is today a valid occurrence of the recurring series?
-            if (! $event->matchesDate($todayCarbon->copy())) {
-                $next = $this->nextOccurrenceDate($event, $today);
-                $data->pass_status = 'no_event_today';
-                $data->date = $next ? $event->localStartsAt(true, $next) : null;
-                $data->next_event = $data->date;
-
-                return response()->json($data);
-            }
-
-            $data->date = $event->localStartsAt(true, $today);
-
-            // Build today's occurrence window in UTC (schedule-TZ time-of-day applied to today).
-            $startsAt = strlen($event->starts_at) === 10
-                ? Carbon::createFromFormat('Y-m-d', $event->starts_at, 'UTC')->startOfDay()
-                : Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
-            $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
-            $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $today.' '.$timeOfDay, $tz)->setTimezone('UTC');
-            $duration = $event->duration > 0 ? $event->duration : 2;
-            $endUtc = $startUtc->copy()->addHours($duration);
-            $earliest = $startUtc->copy()->subHours(24);
-            $nowUtc = now('UTC');
-
-            if ($nowUtc->lt($earliest)) {
-                $data->pass_status = 'too_early';
-                $data->check_in_opens = $startUtc->copy()->setTimezone($tz)->format('g:i A');
-
-                return response()->json($data);
-            }
-
-            if ($nowUtc->gt($endUtc)) {
-                $data->pass_status = 'event_over';
-
-                return response()->json($data);
-            }
-
-            // Entry allowed - once per occurrence.
-            if (isset($checkins[$today])) {
-                $data->pass_status = 'already_today';
-                $data->checked_in_at = Carbon::createFromTimestamp($checkins[$today], $tz)->format('g:i A');
-
-                return response()->json($data);
-            }
-
-            $checkins[$today] = time();
-            if ($passTicket) {
-                $passTicket->pass_checkins = $checkins;
-                $passTicket->save();
-            }
-            $data->pass_status = 'valid';
-            $data->pass_checkin_count = count($checkins);
-
-            WebhookService::dispatch('ticket.scanned', $sale);
-
-            return response()->json($data);
         }
 
         // Build the UTC start moment from $sale->event_date (a schedule-TZ calendar date)
@@ -2419,23 +2472,6 @@ class TicketController extends Controller
         WebhookService::dispatch('ticket.scanned', $sale);
 
         return response()->json($data);
-    }
-
-    /**
-     * Find the next occurrence date (Y-m-d) on/after $fromDate for a recurring
-     * event, scanning forward up to a year. Returns null if none.
-     */
-    protected function nextOccurrenceDate(Event $event, string $fromDate): ?string
-    {
-        $date = Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay();
-        for ($i = 0; $i < 366; $i++) {
-            if ($event->matchesDate($date->copy())) {
-                return $date->format('Y-m-d');
-            }
-            $date->addDay();
-        }
-
-        return null;
     }
 
     public function qrCode($eventId, $secret)

@@ -125,6 +125,11 @@
                     Event Schedule may amend this Agreement upon notice to you, which may be provided through email, your account dashboard, and/or the Event Schedule website. You agree that any changes to this Agreement will be binding on you 7 days after the amendment is made (or, if a longer period if required by applicable law). If you elect to not accept the changes to this Agreement, you must immediately cancel/cease using the Event Schedule platform.
                 </p>
 
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Accessibility</h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Event Schedule is committed to making our platform accessible to everyone. For details on our accessibility standards and how to report any issues, see our <x-link href="{{ marketing_url('/accessibility') }}">Accessibility Statement</x-link>.
+                </p>
+
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Communication & Resolution</h2>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
                     Questions regarding the terms & conditions of Event Schedule account(s), contact: <a href="mailto:legal@eventschedule.com" class="text-blue-600 dark:text-blue-400 hover:underline">legal@eventschedule.com</a>

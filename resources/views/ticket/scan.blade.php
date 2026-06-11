@@ -42,7 +42,18 @@
     <div id="app" class="max-w-2xl mx-auto px-4">
         <div class="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-lg dark:shadow-none dark:border dark:border-[#2d2d30] p-6">
             <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-gray-100 mb-6">{{ __('messages.scan_ticket') }}</h2>
-            
+
+            <!-- Event context: which event the operator is scanning at (governs subscription redemption) -->
+            @if (!empty($events) && count($events) > 0)
+            <div class="mb-5">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ __('messages.scanning_at_event') }}</label>
+                <x-event-selector />
+                <p v-if="selectedEvent" class="mt-1.5 text-xs text-gray-500 dark:text-[#9ca3af]">
+                    {{ __('messages.scanning_at') }}: <span class="font-medium text-gray-700 dark:text-gray-300">@{{ selectedEvent.name }}</span><template v-if="selectedEvent.starts_at"> &middot; @{{ selectedEvent.starts_at }}</template>
+                </p>
+            </div>
+            @endif
+
             <div id="reader" class="max-w-md mx-auto"></div>
             
             <div v-if="scanResult" class="mt-6 text-center">
@@ -68,7 +79,7 @@
                         <!-- Season Pass badge -->
                         <span v-if="isPass" class="mb-2 inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-3 py-1 text-xs font-semibold text-[var(--brand-blue)]">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14a2 2 0 012 2v3a2 2 0 000 4v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3a2 2 0 000-4V7a2 2 0 012-2z"/></svg>
-                            {{ __('messages.season_pass') }}
+                            @{{ passBadgeLabel }}
                         </span>
 
                         <p :class="['font-medium text-center', toneTextClass]">
@@ -88,12 +99,13 @@
                             <p><span class="font-medium">{{ __('messages.attendee') }}:</span> @{{ eventDetails.attendee }}</p>
                         </div>
 
-                        <!-- Pass: check-in context -->
+                        <!-- Pass / subscription: redemption context -->
                         <template v-if="isPass">
                             <div class="mt-2 text-gray-700 dark:text-[#d1d5db] space-y-1">
                                 <p v-if="passStatus === 'already_today' && eventDetails.checked_in_at">{{ __('messages.pass_entered_at') }} @{{ eventDetails.checked_in_at }}</p>
                                 <p v-if="passStatus === 'too_early' && eventDetails.check_in_opens">{{ __('messages.pass_check_in_opens_at') }} @{{ eventDetails.check_in_opens }}</p>
-                                <p class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ __('messages.pass_checkins_label') }}: @{{ eventDetails.pass_checkin_count }}</p>
+                                <p v-if="passUsesLabel" class="text-sm font-medium">@{{ passUsesLabel }}</p>
+                                <p v-if="eventDetails.valid_until" class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ __('messages.pass_valid_until') }} @{{ eventDetails.valid_until }}</p>
                             </div>
                         </template>
 
@@ -136,10 +148,16 @@
                     qrScanner: null,
                     scanResult: null,
                     eventDetails: null,
-                    errorMessage: null
+                    errorMessage: null,
+                    events: @json($events ?? []),
+                    selectedEventId: @json($selectedEventId ?? ''),
+                    dropdownOpen: false,
                 }
             },
             computed: {
+                selectedEvent() {
+                    return this.events.find(e => e.id === this.selectedEventId) || null;
+                },
                 hasUsedSeats() {
                     if (!this.eventDetails || this.eventDetails.is_pass) return false;
                     return (this.eventDetails.tickets || []).some(ticket =>
@@ -157,6 +175,7 @@
                     if (this.isPass) {
                         if (this.passStatus === 'valid') return 'success';
                         if (this.passStatus === 'already_today') return 'warning';
+                        if (['limit_reached', 'expired', 'not_covered'].includes(this.passStatus)) return 'error';
                         return 'info';
                     }
                     return this.hasUsedSeats ? 'warning' : 'success';
@@ -184,11 +203,46 @@
                         no_event_today: @json(__('messages.pass_no_event_today')),
                         too_early: @json(__('messages.pass_valid')),
                         event_over: @json(__('messages.pass_event_over')),
+                        limit_reached: @json(__('messages.pass_limit_reached')),
+                        expired: @json(__('messages.pass_expired')),
+                        not_covered: @json(__('messages.pass_not_covered')),
                     };
                     return map[this.passStatus] || @json(__('messages.ticket_scanned_successfully'));
+                },
+                passBadgeLabel() {
+                    const type = this.eventDetails && this.eventDetails.pass_usage_type;
+                    if (type === 'per_occurrence') return @json(__('messages.season_pass'));
+                    return @json(__('messages.subscription'));
+                },
+                passUsesLabel() {
+                    if (!this.isPass || !this.eventDetails) return null;
+                    const type = this.eventDetails.pass_usage_type;
+                    const count = this.eventDetails.pass_usage_count;
+                    const max = this.eventDetails.pass_max_uses;
+                    if (type === 'total' && max) {
+                        return @json(__('messages.pass_visit_x_of_n')).replace(':used', count).replace(':total', max);
+                    }
+                    if (type === 'unlimited' || type === 'per_occurrence') {
+                        return @json(__('messages.pass_unlimited_visits'));
+                    }
+                    if (type === 'per_event') {
+                        return @json(__('messages.pass_one_per_event'));
+                    }
+                    return null;
                 }
             },
             methods: {
+                toggleDropdown() {
+                    this.dropdownOpen = !this.dropdownOpen;
+                },
+                closeDropdown() {
+                    this.dropdownOpen = false;
+                },
+                onEventChange(eventId) {
+                    this.selectedEventId = eventId;
+                    this.closeDropdown();
+                    try { localStorage.setItem('scan_event_id', eventId); } catch (e) {}
+                },
                 onScanSuccess(decodedText, decodedResult) {
                     this.qrScanner.clear();
                     this.scanResult = decodedText;
@@ -215,7 +269,8 @@
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': token
-                        }
+                        },
+                        body: JSON.stringify({ scan_event_id: this.selectedEventId || null })
                     })
                     .then(response => {
                         if (!response.ok) {
@@ -268,6 +323,23 @@
                 }
             },
             mounted() {
+                try {
+                    const saved = localStorage.getItem('scan_event_id');
+                    if (saved && this.events.some(e => e.id === saved)) {
+                        this.selectedEventId = saved;
+                    }
+                } catch (e) {}
+
+                document.addEventListener('click', (e) => {
+                    const el = document.getElementById('event-selector-dropdown');
+                    if (el && !el.contains(e.target)) {
+                        this.closeDropdown();
+                    }
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeDropdown();
+                });
+
                 this.initializeScanner();
             }
         }).mount('#app')

@@ -45,6 +45,9 @@ class SendFeedbackRequests extends Command
             ->where('is_deleted', false)
             ->whereNull('feedback_sent_at')
             ->whereDoesntHave('feedback')
+            // Subscriptions/passes are sold on a dateless "Subscriptions" container
+            // event, so a post-event feedback survey doesn't apply to them.
+            ->whereDoesntHave('saleTickets.ticket', fn ($q) => $q->where('is_pass', true))
             ->whereIn('subdomain', $eligibleSubdomains)
             ->where(function ($q) {
                 $q->whereNull('group_id')

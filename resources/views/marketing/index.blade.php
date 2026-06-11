@@ -166,7 +166,7 @@
         </div>
     </section>
 
-    <!-- Discover / Search Section -->
+    <!-- Discover Section -->
     <section class="relative bg-gray-50 dark:bg-[#0f0f14] py-24 lg:py-32 overflow-hidden">
         <!-- Animated gradient orbs -->
         <div class="absolute inset-0 overflow-hidden" aria-hidden="true">
@@ -176,11 +176,11 @@
         <!-- Grid pattern overlay -->
         <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]" aria-hidden="true"></div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <!-- Eyebrow badge -->
             <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-reveal" style="opacity: 0;">
                 <svg aria-hidden="true" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300">Discover</span>
             </div>
@@ -189,59 +189,40 @@
             <h2 class="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-5 animate-reveal delay-100" style="opacity: 0;">
                 Discover events across the <span class="text-gradient">community</span>
             </h2>
-            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 animate-reveal delay-200" style="opacity: 0;">
-                Search thousands of schedules and upcoming events. Live music, fitness classes, comedy nights, community meetups, and more.
+            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
+                Upcoming events from across the community. Live music, fitness classes, comedy nights, community meetups, and more.
             </p>
 
-            <!-- Search bar -->
-            <div class="relative max-w-2xl mx-auto animate-reveal delay-300" style="opacity: 0;">
-                <!-- Floating preview card (decorative) -->
-                <div class="hidden lg:block absolute -right-10 -top-8 w-56 rotate-3 opacity-60 blur-[0.5px] animate-float pointer-events-none" aria-hidden="true" style="animation-delay: 0.8s;">
-                    <div class="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 shadow-xl">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4E81FA] to-sky-500 flex items-center justify-center text-white font-bold">J</div>
-                        <div class="min-w-0 text-left">
-                            <div class="h-2.5 w-24 rounded bg-gray-200 dark:bg-white/10 mb-1.5"></div>
-                            <div class="h-2 w-16 rounded bg-gray-100 dark:bg-white/5"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Soft gradient glow behind the bar -->
-                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-sky-500/20 to-cyan-500/20 rounded-2xl blur-xl" aria-hidden="true"></div>
-
-                <form action="{{ marketing_url('/search') }}" method="GET" class="relative">
-                    <label for="home-search" class="sr-only">Search events and schedules</label>
-                    <div class="flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-1">
-                            <svg aria-hidden="true" class="absolute ltr:left-4 rtl:right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input
-                                id="home-search"
-                                type="search"
-                                name="q"
-                                required
-                                minlength="2"
-                                placeholder="Search yoga studios, jazz nights, comedy clubs..."
-                                class="w-full ltr:pl-12 rtl:pr-12 ltr:pr-4 rtl:pl-4 py-4 sm:py-5 text-lg rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 shadow-2xl shadow-blue-500/10 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent"
-                            >
-                        </div>
-                        <button type="submit" class="w-full sm:w-auto px-8 py-4 sm:py-5 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
-                            Search events
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Popular searches -->
-            <div class="flex flex-wrap items-center justify-center gap-2 mt-6 animate-reveal delay-300" style="opacity: 0;">
-                <span class="text-sm text-gray-500 dark:text-gray-400">Popular:</span>
-                @foreach(['Music', 'Comedy', 'Yoga', 'Workshops'] as $term)
-                <a href="{{ marketing_url('/search') . '?q=' . urlencode($term) }}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-blue-400/50 dark:hover:border-blue-400/30 hover:text-blue-600 dark:hover:text-blue-400 transition-all">
-                    {{ $term }}
-                </a>
+            {{-- Upcoming events grid --}}
+            @if($discoverEvents->count() > 0)
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left animate-reveal delay-300" style="opacity: 0;">
+                @foreach($discoverEvents as $event)
+                    @include('marketing.partials.event-card', ['event' => $event])
                 @endforeach
             </div>
+
+            <div class="mt-12 flex flex-col items-center gap-3 animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ marketing_url('/browse') }}" class="inline-flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                    Browse all events
+                    <svg aria-hidden="true" class="w-5 h-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+                <a href="{{ marketing_url('/search') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    or search for something specific
+                </a>
+            </div>
+            @else
+            {{-- No events yet: still offer a way in --}}
+            <div class="animate-reveal delay-300" style="opacity: 0;">
+                <a href="{{ marketing_url('/browse') }}" class="inline-flex items-center gap-2 px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                    Browse all events
+                    <svg aria-hidden="true" class="w-5 h-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+            @endif
 
             <!-- Get-discovered bridge -->
             <p class="mt-10 text-gray-500 dark:text-gray-400 animate-reveal delay-300" style="opacity: 0;">

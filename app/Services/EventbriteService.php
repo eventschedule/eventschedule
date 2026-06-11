@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Utils\UrlUtils;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -66,35 +67,23 @@ class EventbriteService
     public function downloadImage(string $imageUrl): ?string
     {
         try {
-            $parsed = parse_url($imageUrl);
-            if (! in_array($parsed['scheme'] ?? '', ['http', 'https'])) {
-                return null;
-            }
-
-            $host = $parsed['host'] ?? '';
-            $ip = gethostbyname($host);
-            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
-                return null;
-            }
-
-            $response = Http::timeout(30)->get($imageUrl);
-            if (! $response->successful()) {
+            // SSRF-safe fetch: validates the URL, pins the connection to the vetted
+            // IP (defeats DNS rebinding), and re-validates every redirect hop.
+            $body = UrlUtils::safeFetch($imageUrl, 30);
+            if ($body === null) {
                 return null;
             }
 
             // Validate file size (5MB limit, matching UrlUtils::downloadImageSecurely)
-            if (strlen($response->body()) > 5 * 1024 * 1024) {
+            if (strlen($body) > 5 * 1024 * 1024) {
                 return null;
             }
 
-            // Validate content type
-            $contentType = trim(explode(';', $response->header('Content-Type') ?? '')[0]);
-            if (! in_array($contentType, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'])) {
-                return null;
-            }
-
-            // Validate actual image data
-            if (getimagesizefromstring($response->body()) === false) {
+            // Validate the bytes are a real image of an allowed type. safeFetch does
+            // not expose the Content-Type header, so the type check rides on the
+            // decoded image's reported MIME (stronger than trusting the header).
+            $info = getimagesizefromstring($body);
+            if ($info === false || ! in_array($info['mime'] ?? '', ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
                 return null;
             }
 
@@ -110,7 +99,7 @@ class EventbriteService
             $filename = 'eventbrite_'.uniqid().'.'.$extension;
             $path = $tempDir.'/'.$filename;
 
-            file_put_contents($path, $response->body());
+            file_put_contents($path, $body);
 
             return $filename;
         } catch (\Exception $e) {

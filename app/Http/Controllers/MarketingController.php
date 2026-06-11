@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Services\AuditService;
+use App\Services\DemoService;
+use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class MarketingController extends Controller
@@ -17,6 +21,11 @@ class MarketingController extends Controller
         return view('marketing.index', [
             'personas' => $this->getPersonas(),
             'steps' => $this->getSteps(),
+            'discoverEvents' => $this->publicUpcomingEventsQuery()
+                ->where('is_hidden_from_discovery', false)
+                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
+                ->limit(6)
+                ->get(),
         ]);
     }
 
@@ -987,6 +996,14 @@ class MarketingController extends Controller
     public function docsTickets()
     {
         return view('marketing.docs.tickets', $this->getDocNavigation('marketing.docs.tickets'));
+    }
+
+    /**
+     * Subscriptions & passes documentation page
+     */
+    public function docsSubscriptions()
+    {
+        return view('marketing.docs.subscriptions', $this->getDocNavigation('marketing.docs.subscriptions'));
     }
 
     /**
@@ -4515,6 +4532,7 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.ai_import', 'title' => 'AI Import'],
             ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
+            ['route' => 'marketing.docs.subscriptions', 'title' => 'Subscriptions & Passes'],
             ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
@@ -4772,58 +4790,31 @@ class MarketingController extends Controller
 
             $excludeCountry = strtolower(trim((string) config('app.search_exclude_country', '')));
 
-            $publicScheduleFilter = function ($q) {
-                $q->where(function ($query) {
-                    $query->where(function ($q) {
-                        $q->whereNotNull('email')
-                            ->whereNotNull('email_verified_at');
-                    })->orWhere(function ($q) {
-                        $q->whereNotNull('phone')
-                            ->whereNotNull('phone_verified_at');
-                    });
-                })
-                    ->where('is_deleted', false)
-                    ->where('is_unlisted', false)
-                    ->whereNotNull('user_id');
-            };
-
             $schedules = Role::where(function ($q) use ($escapedQuery) {
                 $q->where('subdomain', 'like', $escapedQuery.'%')
                     ->orWhere('name', 'like', '%'.$escapedQuery.'%')
                     ->orWhere('city', 'like', '%'.$escapedQuery.'%')
                     ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
             })
-                ->where($publicScheduleFilter)
+                ->where($this->publicScheduleFilter())
+                ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
+                ->where('subdomain', 'not like', 'demo-%')
                 ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
-                    // keep schedules with no country; exclude the configured one (case-insensitive)
-                    $q->whereRaw('(country_code IS NULL OR LOWER(country_code) != ?)', [$excludeCountry]);
+                    // strict: only schedules with a known country other than the excluded one
+                    $q->whereNotNull('country_code')
+                        ->where('country_code', '!=', '')
+                        ->whereRaw('LOWER(country_code) != ?', [$excludeCountry]);
                 })
                 ->orderBy('name')
                 ->limit(12)
                 ->get();
 
-            $events = Event::with(['roles'])
+            $events = $this->publicUpcomingEventsQuery()
                 ->where(function ($q) use ($escapedQuery) {
                     $q->where('name', 'like', '%'.$escapedQuery.'%')
                         ->orWhere('short_description', 'like', '%'.$escapedQuery.'%');
                 })
-                ->where(function ($q) {
-                    $q->where('starts_at', '>=', Carbon::today())
-                        ->orWhereNotNull('days_of_week')
-                        ->orWhere(function ($q2) {
-                            $q2->where('duration', '>=', 24)
-                                ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [Carbon::today()]);
-                        });
-                })
-                ->where('is_private', false)
-                ->where('is_draft', false)
-                ->whereHas('roles', $publicScheduleFilter)
-                ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
-                    // exclude events that have any associated schedule in the configured country
-                    $q->whereDoesntHave('roles', function ($r) use ($excludeCountry) {
-                        $r->whereRaw('LOWER(country_code) = ?', [$excludeCountry]);
-                    });
-                })
+                ->where('is_hidden_from_discovery', false)
                 ->orderByRaw('starts_at IS NULL, starts_at ASC')
                 ->limit(12)
                 ->get();
@@ -4835,6 +4826,126 @@ class MarketingController extends Controller
             'schedules' => $schedules,
             'events' => $events,
         ]);
+    }
+
+    /**
+     * Browse page - highlights upcoming public events across the platform.
+     */
+    public function browse()
+    {
+        $isAdmin = auth()->check() && auth()->user()->isAdmin();
+
+        $events = $this->publicUpcomingEventsQuery()
+            ->where('is_hidden_from_discovery', false)
+            ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
+            ->limit(24)
+            ->get();
+
+        // Admins also see hidden events so they can restore them.
+        $hiddenEvents = $isAdmin
+            ? $this->publicUpcomingEventsQuery()
+                ->where('is_hidden_from_discovery', true)
+                ->orderByRaw('starts_at IS NULL, starts_at ASC')
+                ->limit(50)
+                ->get()
+            : collect();
+
+        return view('marketing.browse', [
+            'events' => $events,
+            'hiddenEvents' => $hiddenEvents,
+        ]);
+    }
+
+    /**
+     * Admin-only: toggle whether an event is hidden from the platform discovery
+     * surfaces (homepage Discover, /browse, /search). Does not unpublish the event.
+     */
+    public function toggleEventDiscovery(string $hash)
+    {
+        abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
+
+        $event = Event::findOrFail(UrlUtils::decodeIdOrFail($hash));
+        $event->is_hidden_from_discovery = ! $event->is_hidden_from_discovery;
+        $event->save();
+
+        AuditService::log(
+            'event.toggle_discovery',
+            auth()->id(),
+            Event::class,
+            $event->id,
+            null,
+            ['is_hidden_from_discovery' => $event->is_hidden_from_discovery],
+        );
+
+        return back()->with('message', $event->is_hidden_from_discovery
+            ? 'Event hidden from discovery'
+            : 'Event restored to discovery');
+    }
+
+    /**
+     * Closure constraining a Role query to publicly listed, claimed, verified schedules.
+     */
+    private function publicScheduleFilter(): \Closure
+    {
+        return function ($q) {
+            $q->where(function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNotNull('email')
+                        ->whereNotNull('email_verified_at');
+                })->orWhere(function ($q) {
+                    $q->whereNotNull('phone')
+                        ->whereNotNull('phone_verified_at');
+                });
+            })
+                ->where('is_deleted', false)
+                ->where('is_unlisted', false)
+                ->whereNotNull('user_id');
+        };
+    }
+
+    /**
+     * Base query for upcoming, public, non-demo events shown on the platform discovery
+     * surfaces (homepage Discover, /browse, /search). Callers add hidden-state filtering,
+     * any text search, ordering and limits.
+     */
+    private function publicUpcomingEventsQuery(): Builder
+    {
+        $excludeCountry = strtolower(trim((string) config('app.search_exclude_country', '')));
+        $publicScheduleFilter = $this->publicScheduleFilter();
+
+        return Event::with(['roles'])
+            ->where(function ($q) {
+                $q->where('starts_at', '>=', Carbon::today())
+                    ->orWhereNotNull('days_of_week')
+                    ->orWhere(function ($q2) {
+                        $q2->where('duration', '>=', 24)
+                            ->whereRaw('DATE_ADD(starts_at, INTERVAL duration HOUR) >= ?', [Carbon::today()]);
+                    });
+            })
+            ->where('is_private', false)
+            ->where('is_draft', false)
+            // Only surface events a public schedule has actually accepted (is_accepted = true).
+            // Pending (null) or rejected (false) curator associations stay out of discovery,
+            // matching the guest portal, which never shows un-accepted events for a schedule.
+            ->whereHas('roles', function ($q) use ($publicScheduleFilter) {
+                $publicScheduleFilter($q);
+                $q->where('event_role.is_accepted', true);
+            })
+            // Keep demo seed data out of the public showcase.
+            ->whereDoesntHave('roles', function ($r) {
+                $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
+                    ->orWhere('subdomain', 'like', 'demo-%');
+            })
+            ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
+                // strict: require at least one schedule with a known country, and exclude events
+                // linked to any schedule in the configured country
+                $q->whereHas('roles', function ($r) {
+                    $r->whereNotNull('country_code')->where('country_code', '!=', '');
+                })
+                    ->whereDoesntHave('roles', function ($r) use ($excludeCountry) {
+                        $r->whereRaw('LOWER(country_code) = ?', [$excludeCountry]);
+                    });
+            });
     }
 
     /**
@@ -4853,6 +4964,7 @@ class MarketingController extends Controller
             'sharing' => route('marketing.docs.sharing'),
             'newsletters' => route('marketing.docs.newsletters'),
             'tickets' => route('marketing.docs.tickets'),
+            'subscriptions' => route('marketing.docs.subscriptions'),
             'event_graphics' => route('marketing.docs.event_graphics'),
             'analytics' => route('marketing.docs.analytics'),
             'account_settings' => route('marketing.docs.account_settings'),
@@ -5019,6 +5131,14 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Financial Reporting', 'description' => 'Track revenue and financial metrics.', 'url' => $r['tickets'].'#financial', 'category' => 'User Guide', 'keywords' => 'revenue money financial report'],
             ['page' => 'Selling Tickets', 'section' => 'Embed Widget', 'description' => 'Embed a ticket purchase or RSVP form on any website.', 'url' => $r['tickets'].'#embed-widget', 'category' => 'User Guide', 'keywords' => 'embed widget iframe ticket rsvp website'],
             ['page' => 'Selling Tickets', 'section' => 'Embed Tickets (Feature Page)', 'description' => 'Embed a ticket purchase or RSVP form on any website with one line of code.', 'url' => $r['embed_tickets_feature'], 'category' => 'User Guide', 'keywords' => 'embed tickets iframe widget website sell rsvp purchase'],
+
+            // Subscriptions & Passes
+            ['page' => 'Subscriptions & Passes', 'section' => 'Subscriptions & Passes', 'description' => 'Sell one pass a guest pays for once and reuses across many events.', 'url' => $r['subscriptions'].'#overview', 'category' => 'User Guide', 'keywords' => 'subscription pass multi-use membership punch card visit festival season recurring reuse'],
+            ['page' => 'Subscriptions & Passes', 'section' => 'How It Works', 'description' => 'The buy, scan, and track lifecycle of a pass.', 'url' => $r['subscriptions'].'#how-it-works', 'category' => 'User Guide', 'keywords' => 'how it works lifecycle buy scan track visits'],
+            ['page' => 'Subscriptions & Passes', 'section' => 'Subscription Types', 'description' => 'Visit pass, membership, festival pass, and season pass.', 'url' => $r['subscriptions'].'#types', 'category' => 'User Guide', 'keywords' => 'visit pass membership festival season punch card unlimited type'],
+            ['page' => 'Subscriptions & Passes', 'section' => 'Covered Events', 'description' => 'Choose which events a pass works at: all events, a sub-schedule, or specific events.', 'url' => $r['subscriptions'].'#coverage', 'category' => 'User Guide', 'keywords' => 'coverage covered all events sub-schedule specific cross-event'],
+            ['page' => 'Subscriptions & Passes', 'section' => 'Redeeming Passes', 'description' => 'Scan a pass at the door and read the result.', 'url' => $r['subscriptions'].'#redeeming', 'category' => 'User Guide', 'keywords' => 'redeem scan check-in door event selector visit already expired not covered'],
+            ['page' => 'Subscriptions & Passes', 'section' => 'Tracking Subscriptions', 'description' => 'See who used a pass, how many visits, and at which events.', 'url' => $r['subscriptions'].'#monitoring', 'category' => 'User Guide', 'keywords' => 'track usage visits subscriptions tab subscribers report monitor'],
 
             // Event Graphics
             ['page' => 'Event Graphics', 'section' => 'Overview', 'description' => 'Generate shareable images for social media.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'graphics images social media flyer'],

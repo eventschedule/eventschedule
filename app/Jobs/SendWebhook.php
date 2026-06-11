@@ -43,20 +43,18 @@ class SendWebhook implements ShouldQueue
         $success = false;
 
         try {
-            // SSRF prevention: block private/reserved targets in hosted mode only.
-            // (Selfhosted users may legitimately POST webhooks to internal hosts.)
-            $target = null;
-            if (config('app.hosted')) {
-                $target = UrlUtils::validatedTarget($this->webhook->url);
-                if ($target === null) {
-                    $responseBody = 'Blocked: private/reserved or unresolvable address';
-                    $this->logDelivery($responseStatus, $responseBody, false, $startTime);
+            // SSRF prevention: validate the target and pin DNS to the vetted IP so a
+            // private/reserved/metadata address - or a redirect/DNS-rebind to one -
+            // cannot be reached. Applied in all modes (hosted and selfhost).
+            $curl = UrlUtils::safePinnedCurlOptions($this->webhook->url);
+            if ($curl === null) {
+                $responseBody = 'Blocked: private/reserved or unresolvable address';
+                $this->logDelivery($responseStatus, $responseBody, false, $startTime);
 
-                    return;
-                }
+                return;
             }
 
-            $httpClient = Http::timeout(5)
+            $response = Http::timeout(5)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'X-Webhook-Signature' => 'sha256='.$signature,
@@ -64,26 +62,12 @@ class SendWebhook implements ShouldQueue
                     'X-Webhook-Timestamp' => $timestamp,
                     'User-Agent' => 'EventSchedule-Webhook/1.0',
                 ])
-                ->withBody($jsonBody, 'application/json');
-
-            // In hosted mode, harden the request: don't follow redirects (a 30x
-            // could rebind to an internal host) and pin DNS to the validated IP.
-            $options = [];
-            if ($target !== null) {
-                $options['allow_redirects'] = false;
-                if (! filter_var($target['host'], FILTER_VALIDATE_IP)) {
-                    $pinIp = filter_var($target['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)
-                        ? '['.$target['ip'].']'
-                        : $target['ip'];
-                    $options['curl'] = [
-                        CURLOPT_RESOLVE => ["{$target['host']}:{$target['port']}:{$pinIp}"],
-                    ];
-                }
-            }
-
-            $response = ! empty($options)
-                ? $httpClient->withOptions($options)->post($this->webhook->url)
-                : $httpClient->post($this->webhook->url);
+                ->withBody($jsonBody, 'application/json')
+                ->withOptions([
+                    'allow_redirects' => false,
+                    'curl' => $curl,
+                ])
+                ->post($this->webhook->url);
 
             $responseStatus = $response->status();
             $responseBody = substr($response->body(), 0, 500);

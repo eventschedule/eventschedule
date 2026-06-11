@@ -76,6 +76,8 @@ class Event extends Model
         'duration' => 'float',
         'is_private' => 'boolean',
         'is_draft' => 'boolean',
+        // Set only by the platform-admin discovery toggle (intentionally NOT in $fillable).
+        'is_hidden_from_discovery' => 'boolean',
         'rsvp_enabled' => 'boolean',
         'custom_fields' => 'array',
         'custom_field_values' => 'array',
@@ -1017,6 +1019,11 @@ class Event extends Model
 
     public function canSellTickets($date = null)
     {
+        // Pass / subscription tickets are not tied to the container event's own
+        // date (a "Subscriptions" event may be dateless or in the past); their
+        // validity is governed by pass expiry, so don't block their sale on date.
+        $hasPassTicket = $this->tickets->contains(fn ($t) => $t->is_pass);
+
         // For recurring events, check if the specific occurrence is in the past
         if ($this->days_of_week && $date) {
             if ($this->sell_after_start) {
@@ -1029,7 +1036,7 @@ class Event extends Model
         }
 
         // For non-recurring events, check if the event start time is in the past
-        if (! $this->days_of_week && $this->starts_at) {
+        if (! $this->days_of_week && $this->starts_at && ! $hasPassTicket) {
             if ($this->sell_after_start) {
                 if ($this->getEndDateTime(null, true)->isPast()) {
                     return false;

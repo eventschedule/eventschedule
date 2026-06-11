@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class WebhookService
 {
-    public static function dispatch(string $eventType, $model, ?array $prebuiltPayload = null): void
+    public static function dispatch(string $eventType, $model, ?array $prebuiltPayload = null, ?array $extraData = null): void
     {
         // Resolve the event owner's user_id
         if ($model instanceof Sale) {
@@ -57,6 +57,10 @@ class WebhookService
                 $data = $model->toApiData(true);
             } else {
                 $data = $model->toApiData();
+            }
+
+            if ($extraData) {
+                $data = array_merge($data, $extraData);
             }
 
             $payload = [

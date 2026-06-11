@@ -810,6 +810,36 @@ class UrlUtils
     }
 
     /**
+     * Validate a URL and return Guzzle `curl` options that pin its hostname to the
+     * vetted IP (defeating DNS rebinding), for callers that need verbs other than
+     * GET or must not follow redirects (e.g. CalDAV). Returns null when the URL is
+     * unsafe so the caller can reject the request. Unlike safeHttpGet() this does
+     * NOT issue the request or follow redirects - the caller supplies its own
+     * method, body, auth, and `allow_redirects => false`.
+     *
+     * @return array<int,mixed>|null
+     */
+    public static function safePinnedCurlOptions($url): ?array
+    {
+        $target = self::validatedTarget($url);
+        if ($target === null) {
+            return null;
+        }
+
+        $curl = [
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+        ];
+
+        $resolve = self::pinnedCurlResolve($target);
+        if (! empty($resolve)) {
+            $curl[CURLOPT_RESOLVE] = $resolve;
+        }
+
+        return $curl;
+    }
+
+    /**
      * Build CURLOPT_RESOLVE entries that pin a validated target's hostname to its
      * vetted IP. Returns an empty array for IP-literal hosts (nothing to pin), so
      * the result can be spread directly into curl options.

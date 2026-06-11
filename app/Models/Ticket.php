@@ -32,6 +32,12 @@ class Ticket extends Model
         'volume_discount',
         'is_addon',
         'is_pass',
+        'pass_usage_type',
+        'pass_max_uses',
+        'pass_valid_days',
+        'pass_scope',
+        'pass_scope_group_id',
+        'pass_event_ids',
         'image_url',
         'url',
     ];
@@ -43,6 +49,10 @@ class Ticket extends Model
         'sales_end_at' => 'datetime',
         'is_addon' => 'boolean',
         'is_pass' => 'boolean',
+        'pass_max_uses' => 'integer',
+        'pass_valid_days' => 'integer',
+        'pass_scope_group_id' => 'integer',
+        'pass_event_ids' => 'array',
     ];
 
     public function isSalesNotStarted()
@@ -63,6 +73,79 @@ class Ticket extends Model
     public function event()
     {
         return $this->belongsTo(Event::class);
+    }
+
+    /**
+     * Resolve the set of event IDs a subscription/pass covers, within its home
+     * schedule. `all_events`/`sub_schedule` are resolved dynamically so events
+     * created after the pass was sold are covered automatically; `specific_events`
+     * is the fixed list the owner picked.
+     */
+    public function coveredEventIds(?Role $schedule = null): array
+    {
+        switch ($this->pass_scope) {
+            case 'all_events':
+                return $schedule
+                    ? $schedule->events()->pluck('events.id')->map(fn ($id) => (int) $id)->all()
+                    : [];
+            case 'sub_schedule':
+                if (! $schedule || ! $this->pass_scope_group_id) {
+                    return [];
+                }
+
+                return $schedule->events()
+                    ->wherePivot('group_id', $this->pass_scope_group_id)
+                    ->pluck('events.id')->map(fn ($id) => (int) $id)->all();
+            case 'specific_events':
+                $ids = array_map('intval', $this->pass_event_ids ?? []);
+                if (! $schedule || empty($ids)) {
+                    return $ids;
+                }
+
+                // Intersect with the home schedule's events so a stale or forged id
+                // belonging to another tenant can never be reported as covered.
+                return $schedule->events()
+                    ->whereIn('events.id', $ids)
+                    ->pluck('events.id')->map(fn ($id) => (int) $id)->all();
+            case 'this_event':
+            default:
+                return [(int) $this->event_id];
+        }
+    }
+
+    /**
+     * Whether this pass can be redeemed at the given event. Coverage always
+     * resolves within the pass's own schedule, so a covered event must belong
+     * to $schedule (cross-tenant safety).
+     */
+    public function covers(Event $event, ?Role $schedule = null): bool
+    {
+        switch ($this->pass_scope) {
+            case 'all_events':
+                return $schedule
+                    ? $schedule->events()->where('events.id', $event->id)->exists()
+                    : false;
+            case 'sub_schedule':
+                return $schedule && $this->pass_scope_group_id
+                    ? $schedule->events()
+                        ->wherePivot('group_id', $this->pass_scope_group_id)
+                        ->where('events.id', $event->id)->exists()
+                    : false;
+            case 'specific_events':
+                if (! in_array((int) $event->id, array_map('intval', $this->pass_event_ids ?? []), true)) {
+                    return false;
+                }
+
+                // Even when the id is in the stored list, require the event to
+                // belong to the pass's home schedule (defends against a stale or
+                // forged cross-tenant id).
+                return $schedule
+                    ? $schedule->events()->where('events.id', $event->id)->exists()
+                    : true;
+            case 'this_event':
+            default:
+                return (int) $event->id === (int) $this->event_id;
+        }
     }
 
     public function getImageUrlAttribute($value)
@@ -153,6 +236,15 @@ class Ticket extends Model
         $data['type'] = $this->type;
         $data['is_addon'] = (bool) $this->is_addon;
         $data['is_pass'] = (bool) $this->is_pass;
+        if ($this->is_pass) {
+            $data['pass_usage_type'] = $this->pass_usage_type;
+            $data['pass_max_uses'] = $this->pass_max_uses ?: null;
+            $data['pass_valid_days'] = $this->pass_valid_days ?: null;
+            $data['pass_scope'] = $this->pass_scope;
+            $data['pass_covered_count'] = $this->pass_scope === 'specific_events'
+                ? count($this->pass_event_ids ?? [])
+                : null;
+        }
         $data['quantity'] = $this->quantity;
         $data['max_per_order'] = $this->max_per_order ?: null;
         $data['price'] = $this->price;

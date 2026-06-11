@@ -9,6 +9,7 @@ use App\Models\EventFeedback;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Services\WebhookService;
+use App\Utils\CsvUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -172,15 +173,6 @@ class FeedbackController extends Controller
             // UTF-8 BOM
             fwrite($file, "\xEF\xBB\xBF");
 
-            // Sanitize values to prevent CSV formula injection in spreadsheet apps
-            $sanitize = function ($value) {
-                if ($value && preg_match('/^[\=\+\-\@\t\r]/', $value)) {
-                    return "'".$value;
-                }
-
-                return $value;
-            };
-
             fputcsv($file, [
                 __('messages.event'),
                 __('messages.date'),
@@ -193,12 +185,12 @@ class FeedbackController extends Controller
 
             foreach ($query->lazy() as $feedback) {
                 fputcsv($file, [
-                    $sanitize($feedback->event?->name ?? ''),
+                    CsvUtils::sanitizeCell($feedback->event?->name ?? ''),
                     $feedback->event_date ?? '',
-                    $sanitize($feedback->sale?->name ?? ''),
-                    $feedback->sale?->email ?? '',
+                    CsvUtils::sanitizeCell($feedback->sale?->name ?? ''),
+                    CsvUtils::sanitizeCell($feedback->sale?->email ?? ''),
                     $feedback->rating,
-                    $sanitize($feedback->comment ?? ''),
+                    CsvUtils::sanitizeCell($feedback->comment ?? ''),
                     $feedback->created_at->format('Y-m-d H:i'),
                 ]);
             }

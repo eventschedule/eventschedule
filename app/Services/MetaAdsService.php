@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\BoostAd;
 use App\Models\BoostCampaign;
 use App\Models\Event;
+use App\Utils\UrlUtils;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -193,17 +194,16 @@ class MetaAdsService
     public function uploadImage(string $imageUrl): ?string
     {
         try {
-            // Download the image
-            $imageResponse = Http::timeout(30)->get($imageUrl);
-            if (! $imageResponse->successful()) {
+            // SSRF-safe download: validates the URL, pins the connection to the
+            // vetted IP (defeats DNS rebinding), and re-validates every redirect hop.
+            $imageContents = UrlUtils::safeFetch($imageUrl, 30);
+            if ($imageContents === null) {
                 Log::error('Meta Ads: Failed to download image', [
                     'image_url' => $imageUrl,
-                    'status' => $imageResponse->status(),
                 ]);
 
                 return null;
             }
-            $imageContents = $imageResponse->body();
             $tempPath = storage_path('app/temp/boost_'.uniqid().'.jpg');
 
             $tempDir = dirname($tempPath);

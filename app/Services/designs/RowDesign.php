@@ -114,102 +114,27 @@ class RowDesign extends AbstractEventDesign
      */
     protected function getImageDimensions(string $url): ?array
     {
-        // SSRF guard (hosted mode): don't probe internal addresses for dimensions.
-        // The URL-literal check leaves local-path handling unchanged; this also
-        // covers the cURL fallback below, which is only called from here.
-        if (filter_var($url, FILTER_VALIDATE_URL) && ! $this->isRemoteImageUrlSafe($url)) {
-            return null;
-        }
-
         try {
-            // Use aggressive timeout - better to use default aspect ratio than hang
-            $contextOptions = [
-                'http' => [
-                    'timeout' => 3,
-                ],
-            ];
-
-            // Disable SSL verification for local development
-            if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
-                $contextOptions['ssl'] = [
-                    'verify_peer' => false,
-                    'verify_peer_name' => false,
-                ];
+            // Read own-host assets from local disk; fetch external URLs SSRF-safely
+            // (validated + IP-pinned). A short timeout is used because a default
+            // aspect ratio is better than hanging the graphic generation.
+            $imageData = $this->fetchImageData($url, 5);
+            if ($imageData === false) {
+                return null;
             }
 
-            // Set the default stream context for getimagesize
-            stream_context_set_default($contextOptions);
-
-            $info = @getimagesize($url);
-
-            if ($info && isset($info[0]) && isset($info[1]) && $info[0] > 0 && $info[1] > 0) {
+            $info = @getimagesizefromstring($imageData);
+            if ($info && isset($info[0], $info[1]) && $info[0] > 0 && $info[1] > 0) {
                 return [
                     'width' => $info[0],
                     'height' => $info[1],
                 ];
             }
 
-            // Fast cURL fallback with aggressive 5-second timeout
-            $imageData = $this->fetchImageDimensionsWithFastCurl($url);
-            if ($imageData !== false) {
-                $image = @imagecreatefromstring($imageData);
-                if ($image) {
-                    $width = imagesx($image);
-                    $height = imagesy($image);
-                    imagedestroy($image);
-                    if ($width > 0 && $height > 0) {
-                        return [
-                            'width' => $width,
-                            'height' => $height,
-                        ];
-                    }
-                }
-            }
-
             return null;
         } catch (\Exception $e) {
             return null;
         }
-    }
-
-    /**
-     * Fast cURL fetch specifically for dimension detection
-     * Uses aggressive timeout to prevent request accumulation
-     */
-    protected function fetchImageDimensionsWithFastCurl(string $url): string|false
-    {
-        if (! function_exists('curl_init')) {
-            return false;
-        }
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-        curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);  // Aggressive 5-second timeout
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);  // 3-second connect timeout
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; EventGraphicGenerator/1.0)');
-
-        // SSL handling for local development
-        if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        } else {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        }
-
-        $imageData = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode !== 200 || $imageData === false || empty($imageData)) {
-            return false;
-        }
-
-        return $imageData;
     }
 
     protected function generateEventLayout(): void
@@ -308,30 +233,13 @@ class RowDesign extends AbstractEventDesign
 
             // Handle both local and remote images
             if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
-                // Remote image
-                $context = null;
-                if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
-                    $context = stream_context_create([
-                        'ssl' => [
-                            'verify_peer' => false,
-                            'verify_peer_name' => false,
-                        ],
-                        'http' => [
-                            'timeout' => 30,
-                        ],
-                    ]);
-                }
-
-                $imageData = $this->isRemoteImageUrlSafe($imageUrl)
-                    ? file_get_contents($imageUrl, false, $context)
-                    : false;
+                // Remote image - fetch SSRF-safely (own-host assets are read from
+                // local disk; external URLs are validated + IP-pinned).
+                $imageData = $this->fetchImageData($imageUrl);
                 if ($imageData === false) {
-                    $imageData = $this->fetchImageWithCurl($imageUrl);
-                    if ($imageData === false) {
-                        $this->createPlaceholderBackground($x, $y, $width, $height);
+                    $this->createPlaceholderBackground($x, $y, $width, $height);
 
-                        return;
-                    }
+                    return;
                 }
 
                 $sourceImage = $this->safeImageCreateFromString($imageData);

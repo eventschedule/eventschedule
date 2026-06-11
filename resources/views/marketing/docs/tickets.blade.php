@@ -281,17 +281,11 @@
                                 <li><strong class="text-gray-900 dark:text-white">Sales start date:</strong> Schedule when a ticket type becomes available for purchase</li>
                                 <li><strong class="text-gray-900 dark:text-white">Sales end date:</strong> Set a per-ticket-type cutoff to stop selling at a specific time</li>
                                 <li><strong class="text-gray-900 dark:text-white">Combined inventory:</strong> Set a total ticket limit across all ticket types for your event</li>
-                                <li><strong class="text-gray-900 dark:text-white">Season pass:</strong> On recurring events, mark a ticket type as a pass valid for all dates (see below)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Pass / subscription:</strong> Turn a ticket type into a multi-use pass valid across many events (see below)</li>
                             </ul>
 
-                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Season Passes (Subscriptions)</h4>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">On a <strong class="text-gray-900 dark:text-white">recurring</strong> event you can turn any ticket type into a <strong class="text-gray-900 dark:text-white">season pass</strong> by enabling <strong class="text-gray-900 dark:text-white">"Season pass - valid for all dates"</strong>. A pass is a one-time purchase that lets the holder attend every occurrence of the series with a single QR code - ideal for selling subscriptions.</p>
-                            <ul class="doc-list mb-6">
-                                <li><strong class="text-gray-900 dark:text-white">One QR, every date:</strong> The same ticket QR is scanned at each occurrence - no need to buy a ticket per date.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Once per occurrence:</strong> Each date can be checked in once; a second scan the same day shows "already checked in today".</li>
-                                <li><strong class="text-gray-900 dark:text-white">Shared inventory:</strong> The quantity is a single limit across the whole series, not per date.</li>
-                                <li><strong class="text-gray-900 dark:text-white">Separate purchase:</strong> A pass is bought on its own and cannot be combined with single-date tickets in the same order.</li>
-                            </ul>
+                            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Passes &amp; subscriptions</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Turn any ticket type into a multi-use <strong class="text-gray-900 dark:text-white">pass or subscription</strong> - one purchase a guest reuses across many events (a visit pass, a membership, a festival pass, or a season pass for a recurring event). See <a href="{{ route('marketing.docs.subscriptions') }}" class="text-cyan-400 hover:text-cyan-300">Subscriptions &amp; Passes</a> for the full guide.</p>
                         </section>
 
                         <!-- Free Tickets -->

@@ -6,7 +6,6 @@ use App\Models\Event;
 use App\Models\Sale;
 use App\Models\SaleTicket;
 use App\Utils\UrlUtils;
-use Carbon\Carbon;
 
 class CheckInController extends Controller
 {
@@ -89,7 +88,8 @@ class CheckInController extends Controller
         $ticketSoldCounts = [];
         foreach ($activeTickets as $ticket) {
             $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-            $ticketSoldCounts[$ticket->id] = $sold[$requestedDate] ?? 0;
+            // Passes track inventory under a single 'pass' key, not per date.
+            $ticketSoldCounts[$ticket->id] = $sold[$ticket->soldKey($requestedDate)] ?? 0;
         }
 
         // Get check-in counts and recent activity from SaleTickets
@@ -120,6 +120,23 @@ class CheckInController extends Controller
                         'name' => $saleTicket->sale->name,
                         'ticket_type' => $saleTicket->ticket->type,
                         'timestamp' => (int) $timestamp,
+                    ];
+                }
+            }
+
+            // Pass / subscription redemptions recorded at this event on this date.
+            // (Cross-event subscriptions sold on another event surface on the
+            // Subscriptions tab; here we count passes whose home event is this one.)
+            foreach (($saleTicket->pass_usages ?? []) as $usage) {
+                if ((int) ($usage['event_id'] ?? 0) === (int) $event->id
+                    && ($usage['date'] ?? null) === $requestedDate) {
+                    $ticketId = $saleTicket->ticket_id;
+                    $checkedInCounts[$ticketId] = ($checkedInCounts[$ticketId] ?? 0) + 1;
+
+                    $recentCheckins[] = [
+                        'name' => $saleTicket->sale->name,
+                        'ticket_type' => $saleTicket->ticket->type,
+                        'timestamp' => (int) ($usage['at'] ?? 0),
                     ];
                 }
             }

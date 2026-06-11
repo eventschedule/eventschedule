@@ -253,6 +253,13 @@ class BackupService
                 'sales_start_at' => $ticket->sales_start_at,
                 'sales_end_at' => $ticket->sales_end_at,
                 'custom_fields' => $ticket->custom_fields,
+                'is_pass' => $ticket->is_pass,
+                'pass_usage_type' => $ticket->pass_usage_type,
+                'pass_max_uses' => $ticket->pass_max_uses,
+                'pass_valid_days' => $ticket->pass_valid_days,
+                'pass_scope' => $ticket->pass_scope,
+                'pass_scope_group_id' => $ticket->pass_scope_group_id,
+                'pass_event_ids' => $ticket->pass_event_ids,
             ];
         })->toArray();
     }
@@ -308,6 +315,9 @@ class BackupService
                     '_ticket_ref_id' => $st->ticket_id,
                     'seats' => $st->seats,
                     'quantity' => $st->quantity,
+                    'pass_checkins' => $st->pass_checkins,
+                    'pass_usages' => $st->pass_usages,
+                    'pass_expires_at' => $st->pass_expires_at,
                 ];
                 for ($i = 1; $i <= 10; $i++) {
                     $field = "custom_value{$i}";
@@ -1236,6 +1246,13 @@ class BackupService
         $ticket->sales_start_at = $data['sales_start_at'] ?? null;
         $ticket->sales_end_at = $data['sales_end_at'] ?? null;
         $ticket->custom_fields = $data['custom_fields'] ?? null;
+        $ticket->is_pass = $data['is_pass'] ?? false;
+        $ticket->pass_usage_type = $data['pass_usage_type'] ?? 'per_occurrence';
+        $ticket->pass_max_uses = $data['pass_max_uses'] ?? null;
+        $ticket->pass_valid_days = $data['pass_valid_days'] ?? null;
+        $ticket->pass_scope = $data['pass_scope'] ?? 'this_event';
+        $ticket->pass_scope_group_id = $data['pass_scope_group_id'] ?? null;
+        $ticket->pass_event_ids = $data['pass_event_ids'] ?? null;
         $ticket->description_html = MarkdownUtils::convertToHtml($data['description'] ?? null);
         $ticket->saveQuietly();
 
@@ -1351,6 +1368,9 @@ class BackupService
             $st->sale_id = $sale->id;
             $st->ticket_id = $ticketId;
             $st->seats = $data['seats'] ?? null;
+            $st->pass_checkins = $data['pass_checkins'] ?? null;
+            $st->pass_usages = $data['pass_usages'] ?? null;
+            $st->pass_expires_at = $data['pass_expires_at'] ?? null;
             $st->quantity = $data['quantity'] ?? 1;
 
             for ($i = 1; $i <= 10; $i++) {

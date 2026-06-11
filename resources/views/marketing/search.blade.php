@@ -91,7 +91,7 @@
                     @foreach($schedules as $schedule)
                     @php $scheduleUrl = $schedule->getGuestUrl(); @endphp
                     @if($scheduleUrl)
-                    <a href="{{ $scheduleUrl }}" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
+                    <a href="{{ $scheduleUrl }}" target="_blank" rel="noopener" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
                         <div class="p-6 flex flex-col flex-1">
                             <div class="flex items-center gap-4 mb-4">
                                 @if($schedule->profile_image_url)
@@ -136,7 +136,7 @@
                     @foreach($events as $event)
                     @php $eventUrl = $event->getGuestUrl(); @endphp
                     @if($eventUrl)
-                    <a href="{{ $eventUrl }}" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
+                    <a href="{{ $eventUrl }}" target="_blank" rel="noopener" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
                         <div class="p-6 flex flex-col flex-1">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">{{ $event->name }}</h3>
                             @if($event->short_description)

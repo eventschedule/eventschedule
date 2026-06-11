@@ -37,7 +37,7 @@
                     <strong>{{ $saleTicket->ticket->type ?: __('messages.ticket') }}</strong>
                     x {{ $saleTicket->quantity }}
                     @if ($saleTicket->ticket->is_pass)
-                    <br><span style="display: inline-block; margin-top: 4px; font-size: 12px; color: #4E81FA;">{{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}</span>
+                    <br><span style="display: inline-block; margin-top: 4px; font-size: 12px; color: #4E81FA;">@if ($saleTicket->ticket->pass_usage_type === 'per_occurrence'){{ __('messages.season_pass') }} &middot; {{ __('messages.pass_valid_all_dates') }}@else{{ __('messages.subscription') }}@if ($saleTicket->ticket->pass_usage_type === 'total' && $saleTicket->ticket->pass_max_uses) &middot; {{ $saleTicket->ticket->pass_max_uses }} {{ __('messages.visits') }}@elseif ($saleTicket->ticket->pass_usage_type === 'unlimited') &middot; {{ __('messages.pass_unlimited_visits') }}@endif@endif</span>
                     @endif
                 </p>
             @endforeach

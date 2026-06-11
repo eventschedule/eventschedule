@@ -1074,6 +1074,7 @@ class EventRepo
         if ($event->tickets_enabled) {
             $ticketData = $request->input('tickets', []);
             $ticketIds = [];
+            $hasPassTicket = false;
 
             foreach ($ticketData as $data) {
                 // Process custom_fields with name_en translation
@@ -1166,40 +1167,107 @@ class EventRepo
                     }
                 }
 
-                // Season pass is only meaningful for recurring events.
-                $isPass = ! empty($event->days_of_week) ? (bool) ($data['is_pass'] ?? false) : false;
+                // Pass / subscription configuration. A pass is a single redeemable
+                // unit valid across one or more events; it is now allowed on any
+                // event (not only recurring), so subscriptions can be sold on a
+                // dedicated "Subscriptions" event.
+                $isPass = (bool) ($data['is_pass'] ?? false);
+                $hasPassTicket = $hasPassTicket || $isPass;
+
+                $passUsageType = $isPass ? ($data['pass_usage_type'] ?? 'per_occurrence') : 'per_occurrence';
+                $passScope = $isPass ? ($data['pass_scope'] ?? 'this_event') : 'this_event';
+
+                // per_occurrence (legacy season pass) only applies to recurring
+                // events and is always scoped to this event.
+                if ($passUsageType === 'per_occurrence' && empty($event->days_of_week)) {
+                    $passUsageType = 'total';
+                }
+                if ($passUsageType === 'per_occurrence') {
+                    $passScope = 'this_event';
+                }
+
+                $passMaxUses = ($isPass && $passUsageType === 'total' && ! empty($data['pass_max_uses']))
+                    ? max(1, (int) $data['pass_max_uses'])
+                    : null;
+                $passValidDays = ($isPass && ! empty($data['pass_valid_days']))
+                    ? max(1, (int) $data['pass_valid_days'])
+                    : null;
+                $passScopeGroupId = ($isPass && $passScope === 'sub_schedule' && ! empty($data['pass_scope_group_id']))
+                    ? UrlUtils::decodeId($data['pass_scope_group_id'])
+                    : null;
+                $passEventIds = null;
+                if ($isPass && $passScope === 'specific_events' && ! empty($data['pass_event_ids'])) {
+                    $rawIds = is_string($data['pass_event_ids'])
+                        ? json_decode($data['pass_event_ids'], true)
+                        : $data['pass_event_ids'];
+                    if (is_array($rawIds)) {
+                        $decodedIds = array_values(array_filter(array_map(
+                            fn ($id) => UrlUtils::decodeId($id),
+                            $rawIds
+                        )));
+
+                        // Tenant isolation: a pass may only cover events in its own
+                        // schedule. Drop ids that don't belong to the current
+                        // schedule (defends against forged/cross-tenant ids). With no
+                        // schedule context, keep the decoded ids - Ticket::covers()
+                        // still scopes coverage to the home schedule at redemption.
+                        if (! empty($decodedIds) && $currentRole) {
+                            $passEventIds = $currentRole->events()
+                                ->whereIn('events.id', $decodedIds)
+                                ->pluck('events.id')
+                                ->map(fn ($id) => (int) $id)
+                                ->values()
+                                ->all();
+                        } else {
+                            $passEventIds = $decodedIds;
+                        }
+                    }
+                }
+
+                // A pass is one redeemable unit per sale, so cap it at 1 per order.
+                $maxPerOrder = $isPass
+                    ? 1
+                    : (! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null);
+
+                $passAttributes = [
+                    'is_pass' => $isPass,
+                    'pass_usage_type' => $passUsageType,
+                    'pass_max_uses' => $passMaxUses,
+                    'pass_valid_days' => $passValidDays,
+                    'pass_scope' => $passScope,
+                    'pass_scope_group_id' => $passScopeGroupId,
+                    'pass_event_ids' => $passEventIds,
+                ];
 
                 if (! empty($data['id'])) {
                     $ticket = Ticket::find($data['id']);
                     $ticketIds[] = $ticket->id;
                     if ($ticket && $ticket->event_id == $event->id) {
-                        $ticket->update([
+                        $ticket->update(array_merge([
                             'type' => $data['type'] ?? null,
                             'quantity' => $data['quantity'] ?? null,
-                            'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
+                            'max_per_order' => $maxPerOrder,
                             'price' => $data['price'] ?? null,
                             'description' => $data['description'] ?? null,
                             'sales_start_at' => $salesStartAt,
                             'sales_end_at' => $salesEndAt,
                             'custom_fields' => $ticketCustomFields,
                             'volume_discount' => $volumeDiscount,
-                            'is_pass' => $isPass,
-                        ]);
+                        ], $passAttributes));
                     }
                 } else {
-                    $ticket = Ticket::create([
+                    $ticket = Ticket::create(array_merge([
                         'event_id' => $event->id,
                         'type' => $data['type'] ?? null,
                         'quantity' => $data['quantity'] ?? null,
-                        'max_per_order' => ! empty($data['max_per_order']) ? (int) $data['max_per_order'] : null,
+                        'max_per_order' => $maxPerOrder,
                         'price' => $data['price'] ?? null,
                         'description' => $data['description'] ?? null,
                         'sales_start_at' => $salesStartAt,
                         'sales_end_at' => $salesEndAt,
                         'custom_fields' => $ticketCustomFields,
                         'volume_discount' => $volumeDiscount,
-                        'is_pass' => $isPass,
-                    ]);
+                    ], $passAttributes));
                     $ticketIds[] = $ticket->id;
                 }
             }
@@ -1207,6 +1275,13 @@ class EventRepo
             $event->tickets()
                 ->whereNotIn('id', $ticketIds)
                 ->update(['is_deleted' => true]);
+
+            // Subscriptions are single redeemable units; per-person individual
+            // ticketing doesn't apply, so disable it when a pass is present.
+            if ($hasPassTicket && $event->individual_tickets) {
+                $event->individual_tickets = false;
+                $event->save();
+            }
         } else {
             $event->tickets()->update(['is_deleted' => true]);
         }

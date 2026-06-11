@@ -43,6 +43,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ url('/browse') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ url('/compare') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
@@ -797,6 +803,13 @@
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/docs/tickets')])
+    </url>
+    <url>
+        <loc>{{ url('/docs/subscriptions') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/subscriptions')])
     </url>
     <url>
         <loc>{{ url('/docs/event-graphics') }}</loc>

@@ -105,34 +105,13 @@ class ListDesign extends AbstractEventDesign
 
             // Handle both local and remote images
             if (filter_var($imageUrl, FILTER_VALIDATE_URL)) {
-                // Remote image
-
-                // Disable SSL verification for local development
-                $context = null;
-                if (app()->environment('local') || config('app.disable_ssl_verification', false)) {
-                    $context = stream_context_create([
-                        'ssl' => [
-                            'verify_peer' => false,
-                            'verify_peer_name' => false,
-                        ],
-                        'http' => [
-                            'timeout' => 30,
-                        ],
-                    ]);
-                }
-
-                $imageData = $this->isRemoteImageUrlSafe($imageUrl)
-                    ? file_get_contents($imageUrl, false, $context)
-                    : false;
+                // Remote image - fetch SSRF-safely (own-host assets are read from
+                // local disk; external URLs are validated + IP-pinned).
+                $imageData = $this->fetchImageData($imageUrl);
                 if ($imageData === false) {
-                    // Fallback to cURL if file_get_contents fails
-                    $imageData = $this->fetchImageWithCurl($imageUrl);
+                    $this->createPlaceholderBackground($x, $y);
 
-                    if ($imageData === false) {
-                        $this->createPlaceholderBackground($x, $y);
-
-                        return;
-                    }
+                    return;
                 }
 
                 $sourceImage = $this->safeImageCreateFromString($imageData);

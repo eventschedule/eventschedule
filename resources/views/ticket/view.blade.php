@@ -380,6 +380,55 @@
           @endif
         </div>
         @endif
+        @php
+            $passSaleTicket = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass);
+        @endphp
+        @if ($passSaleTicket)
+            @php
+                $passTicket = $passSaleTicket->ticket;
+                $passUsed = $passSaleTicket->passUsageCount();
+                // Only sub-schedule / specific-events scopes list individual events;
+                // all_events renders a label and per_occurrence (season pass) lists none.
+                $coveredEvents = in_array($passTicket->pass_scope, ['sub_schedule', 'specific_events'])
+                    ? \App\Models\Event::whereIn('id', $passTicket->coveredEventIds($role))->orderBy('starts_at')->limit(50)->get()
+                    : collect();
+            @endphp
+            <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
+                <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.subscription') }}</h2>
+                <div class="space-y-[8px] text-[14px] text-white print-text-dark">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/70 print-text-gray">{{ __('messages.visits_used') }}</span>
+                        <span class="font-medium">
+                            @if ($passTicket->pass_usage_type === 'total' && $passTicket->pass_max_uses)
+                                {{ $passUsed }} / {{ $passTicket->pass_max_uses }}
+                            @elseif ($passTicket->pass_usage_type === 'unlimited' || $passTicket->pass_usage_type === 'per_occurrence')
+                                {{ __('messages.pass_unlimited_visits') }}
+                            @else
+                                {{ $passUsed }}
+                            @endif
+                        </span>
+                    </div>
+                    @if ($passSaleTicket->pass_expires_at)
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/70 print-text-gray">{{ __('messages.pass_valid_until') }}</span>
+                        <span class="font-medium">{{ $passSaleTicket->pass_expires_at->format('M j, Y') }}</span>
+                    </div>
+                    @endif
+                    @if ($passTicket->pass_scope === 'all_events')
+                    <div class="text-white/70 print-text-gray">{{ __('messages.pass_scope_all_events') }}</div>
+                    @elseif ($coveredEvents->count() > 0)
+                    <div>
+                        <div class="text-white/70 print-text-gray mb-[4px]">{{ __('messages.covered_events') }}</div>
+                        <ul class="space-y-[2px]">
+                            @foreach ($coveredEvents as $ce)
+                            <li class="text-[13px]">{{ $ce->name }}@if ($ce->starts_at) <span class="text-white/50 print-text-gray">&middot; {{ \Carbon\Carbon::parse($ce->starts_at)->format('M j, Y') }}</span>@endif</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        @endif
         @if ($addonTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">
           <h2 class="text-[11px] uppercase tracking-wider text-white/50 print-text-gray font-semibold mb-[12px]">{{ __('messages.add_ons') }}</h2>

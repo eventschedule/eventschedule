@@ -3229,19 +3229,90 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- Season pass toggle (recurring events only) -->
-                                        <div v-if="isRecurring" class="mt-4">
+                                        <!-- Pass / subscription configuration -->
+                                        <div class="mt-4">
                                             <label class="flex items-start gap-3 cursor-pointer">
-                                                <button type="button" role="switch" :aria-checked="ticket.is_pass ? 'true' : 'false'" @click="ticket.is_pass = !ticket.is_pass"
+                                                <button type="button" role="switch" :aria-checked="ticket.is_pass ? 'true' : 'false'" @click="toggleTicketPass(index)"
                                                     :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.is_pass ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
                                                     <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.is_pass ? 'translate-x-5' : 'translate-x-0.5']"></span>
                                                 </button>
                                                 <span>
-                                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.pass_toggle_label') }}</span>
-                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_toggle_help') }}</span>
+                                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.subscription_toggle_label') }}</span>
+                                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('messages.subscription_toggle_help') }}</span>
                                                 </span>
                                             </label>
-                                            <input type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="ticket.is_pass ? 1 : 0">
+
+                                            <div v-if="ticket.is_pass" class="mt-3 ms-14 space-y-4">
+                                                <!-- Subscription type -->
+                                                <div>
+                                                    <x-input-label :value="__('messages.subscription_type')" />
+                                                    <select v-model="ticket.pass_usage_type" @change="normalizePassScope(ticket)" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="total">{{ __('messages.pass_type_visit_pass') }}</option>
+                                                        <option value="unlimited">{{ __('messages.pass_type_membership') }}</option>
+                                                        <option value="per_event">{{ __('messages.pass_type_festival') }}</option>
+                                                        <option v-if="isRecurring" value="per_occurrence">{{ __('messages.pass_type_season') }}</option>
+                                                    </select>
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ passTypeHelp(ticket.pass_usage_type) }}</p>
+                                                </div>
+
+                                                <!-- Visit cap (total) -->
+                                                <div v-if="ticket.pass_usage_type === 'total'">
+                                                    <x-input-label :value="__('messages.pass_max_uses')" />
+                                                    <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_max_uses" class="mt-1 block w-full sm:w-48" />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_max_uses_help') }}</p>
+                                                </div>
+
+                                                <!-- Validity window (not for season pass, which is bound by recurrence) -->
+                                                <div v-if="ticket.pass_usage_type !== 'per_occurrence'">
+                                                    <x-input-label :value="__('messages.pass_valid_days')" />
+                                                    <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_valid_days" class="mt-1 block w-full sm:w-48" />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_valid_days_help') }}</p>
+                                                </div>
+
+                                                <!-- Coverage (cross-event subscriptions) -->
+                                                <div v-if="ticket.pass_usage_type !== 'per_occurrence'">
+                                                    <x-input-label :value="__('messages.pass_coverage')" />
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('messages.pass_coverage_help') }}</p>
+                                                    <select v-model="ticket.pass_scope" class="block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <option value="all_events">{{ __('messages.pass_scope_all_events') }}</option>
+                                                        <option value="sub_schedule">{{ __('messages.pass_scope_sub_schedule') }}</option>
+                                                        <option value="specific_events">{{ __('messages.pass_scope_specific_events') }}</option>
+                                                    </select>
+                                                    <p v-if="ticket.pass_scope === 'all_events'" class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_scope_all_events_help') }}</p>
+
+                                                    <div v-if="ticket.pass_scope === 'sub_schedule'" class="mt-2">
+                                                        <select v-model="ticket.pass_scope_group_id" class="block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                            <option value="">{{ __('messages.select_sub_schedule') }}</option>
+                                                            <option v-for="g in passGroups" :key="g.id" :value="g.id">@{{ g.name }}</option>
+                                                        </select>
+                                                        <p v-if="passGroups.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_sub_schedules') }}</p>
+                                                    </div>
+
+                                                    <div v-if="ticket.pass_scope === 'specific_events'" class="mt-2">
+                                                        <input type="text" v-model="passEventSearch[index]" placeholder="{{ __('messages.search_events') }}" class="block w-full text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                        <div class="mt-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-2 space-y-1">
+                                                            <label v-for="e in getFilteredPassEvents(index)" :key="e.id" class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                                <input type="checkbox" :value="e.id" v-model="ticket.pass_event_ids" class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                                                <span>@{{ e.name }}</span>
+                                                            </label>
+                                                            <p v-if="getFilteredPassEvents(index).length === 0" class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_events_found') }}</p>
+                                                        </div>
+                                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ ticket.pass_event_ids.length }} {{ __('messages.events_covered') }}</p>
+                                                        <p v-if="ticket.pass_event_ids.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_events_warning') }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <template v-if="ticket.is_pass">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="1">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_usage_type]`" :value="ticket.pass_usage_type">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_max_uses]`" :value="ticket.pass_max_uses || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_valid_days]`" :value="ticket.pass_valid_days || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_scope]`" :value="ticket.pass_scope">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_scope_group_id]`" :value="ticket.pass_scope_group_id || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_event_ids]`" :value="JSON.stringify(ticket.pass_event_ids || [])">
+                                            </template>
+                                            <input v-else type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="0">
                                         </div>
                                         <!-- Ticket-level Custom Fields -->
                                         <div class="mt-4" v-if="ticket.custom_fields && Object.keys(ticket.custom_fields).length > 0">
@@ -4508,12 +4579,26 @@
         isOnline: false,
         eventName: @json($event->name ?? ''),
         startsAt: @json($oldStartsAt ?? ''),
+        @php
+        // Encoded coverage (group / event ids) per existing ticket, so the
+        // subscription selectors round-trip encoded ids (decoded in EventRepo).
+        $ticketPassCoverage = collect($event->tickets ?? [])->mapWithKeys(fn ($t) => [$t->id => [
+            'group' => $t->pass_scope_group_id ? \App\Utils\UrlUtils::encodeId($t->pass_scope_group_id) : '',
+            'events' => collect($t->pass_event_ids ?? [])->map(fn ($id) => \App\Utils\UrlUtils::encodeId($id))->values()->all(),
+        ]])->all();
+        @endphp
         tickets: @json($event->tickets ?? [new Ticket()]).map((ticket, i) => ({
           uid: i,
           ...ticket,
           volume_discount: ticket.volume_discount && typeof ticket.volume_discount === 'object' ? ticket.volume_discount : null,
           max_per_order: ticket.max_per_order ?? null,
           is_pass: !!ticket.is_pass,
+          pass_usage_type: ticket.pass_usage_type || 'per_occurrence',
+          pass_max_uses: ticket.pass_max_uses ?? null,
+          pass_valid_days: ticket.pass_valid_days ?? null,
+          pass_scope: ticket.pass_scope || 'this_event',
+          pass_scope_group_id: (@json($ticketPassCoverage)[ticket.id] || {}).group || '',
+          pass_event_ids: (@json($ticketPassCoverage)[ticket.id] || {}).events || [],
           custom_fields: ticket.custom_fields || {},
           sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
           sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
@@ -4593,6 +4678,9 @@
         isDirty: false,
         soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
+        passGroups: @json($role->groups->map(fn ($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->name])->values()),
+        passEvents: @json($role->events()->whereNotNull('events.starts_at')->orderBy('events.starts_at', 'desc')->limit(200)->get()->map(fn ($e) => ['id' => \App\Utils\UrlUtils::encodeId($e->id), 'name' => $e->name])->unique('id')->values()),
+        passEventSearch: {},
         isMultiDay: @json($isMultiDay),
         recurringIncludeDates: @json($event->recurring_include_dates ?? []),
         recurringExcludeDates: @json($event->recurring_exclude_dates ?? []),
@@ -5523,6 +5611,38 @@
         this.isSaving = true;
         this.isDirty = false;
       },
+      toggleTicketPass(index) {
+        const t = this.tickets[index];
+        t.is_pass = !t.is_pass;
+        if (t.is_pass) {
+          // Default to a season pass on recurring events, otherwise a cross-event subscription.
+          if (!t.pass_usage_type || (t.pass_usage_type === 'per_occurrence' && !this.isRecurring)) {
+            t.pass_usage_type = this.isRecurring ? 'per_occurrence' : 'total';
+          }
+          this.normalizePassScope(t);
+        }
+      },
+      normalizePassScope(ticket) {
+        if (ticket.pass_usage_type === 'per_occurrence') {
+          ticket.pass_scope = 'this_event';
+        } else if (!ticket.pass_scope || ticket.pass_scope === 'this_event') {
+          ticket.pass_scope = 'all_events';
+        }
+      },
+      passTypeHelp(type) {
+        const map = {
+          total: @json(__('messages.pass_type_visit_pass_help')),
+          unlimited: @json(__('messages.pass_type_membership_help')),
+          per_event: @json(__('messages.pass_type_festival_help')),
+          per_occurrence: @json(__('messages.pass_type_season_help')),
+        };
+        return map[type] || '';
+      },
+      getFilteredPassEvents(index) {
+        const q = (this.passEventSearch[index] || '').toLowerCase().trim();
+        if (!q) return this.passEvents;
+        return this.passEvents.filter(e => (e.name || '').toLowerCase().includes(q));
+      },
       addTicket() {
         var newIndex = this.tickets.length;
         this.tickets.push({
@@ -5536,6 +5656,12 @@
             custom_fields: {},
             volume_discount: null,
             is_pass: false,
+            pass_usage_type: 'per_occurrence',
+            pass_max_uses: null,
+            pass_valid_days: null,
+            pass_scope: 'this_event',
+            pass_scope_group_id: '',
+            pass_event_ids: [],
             sales_start_at_date: '',
             sales_start_at_time: '',
             sales_end_at_date: '',

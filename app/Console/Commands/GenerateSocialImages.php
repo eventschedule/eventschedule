@@ -25,6 +25,7 @@ class GenerateSocialImages extends Command
         'pricing' => '/pricing',
         'about' => '/about',
         'examples' => '/examples',
+        'browse' => '/browse',
         'faq' => '/faq',
         'why-create-account' => '/why-create-account',
 
