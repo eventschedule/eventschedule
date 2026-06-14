@@ -5201,6 +5201,7 @@ class MarketingController extends Controller
             ['page' => 'Installation', 'section' => 'Configure Environment', 'description' => 'Set up the .env configuration file.', 'url' => $r['selfhost_installation'].'#environment', 'category' => 'Selfhost', 'keywords' => 'env environment configuration'],
             ['page' => 'Installation', 'section' => 'Set Up the Cron Job', 'description' => 'Configure scheduled tasks for the application.', 'url' => $r['selfhost_installation'].'#cron', 'category' => 'Selfhost', 'keywords' => 'cron scheduler task'],
             ['page' => 'Installation', 'section' => 'Verification', 'description' => 'Test and verify the installation.', 'url' => $r['selfhost_installation'].'#verification', 'category' => 'Selfhost', 'keywords' => 'verify test check'],
+            ['page' => 'Installation', 'section' => 'Troubleshooting', 'description' => 'Fix setup problems: permission denied on laravel.log, 500 errors, and getting back to the setup wizard.', 'url' => $r['selfhost_installation'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix permission denied laravel.log 500 setup wizard locked out app_url storage'],
 
             // Stripe (Selfhost)
             ['page' => 'Stripe Integration', 'section' => 'Overview', 'description' => 'Set up Stripe for payment processing.', 'url' => $r['selfhost_stripe'].'#overview', 'category' => 'Selfhost', 'keywords' => 'stripe payment setup'],

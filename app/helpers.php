@@ -463,7 +463,7 @@ if (! function_exists('selfhost_needs_setup')) {
      * set but the database has no `users` table (migrations never ran / were wiped). The
      * setup wizard is the sign-up page, which keys off this so a failed or partial setup
      * stays recoverable instead of locking the user out. Always false in hosted/testing
-     * mode. Result is memoized per-request so the schema check runs at most once.
+     * mode. Result is memoized per worker process so the schema check runs at most once.
      */
     function selfhost_needs_setup(): bool
     {
