@@ -19,7 +19,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
-        if (! config('app.hosted') && (! config('app.url') || ! User::exists())) {
+        if (! config('app.hosted') && (selfhost_needs_setup() || ! User::exists())) {
             return redirect()->route('sign_up');
         }
 

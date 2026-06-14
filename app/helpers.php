@@ -454,3 +454,43 @@ if (! function_exists('get_sub_audience_info')) {
         return null;
     }
 }
+
+if (! function_exists('selfhost_needs_setup')) {
+    /**
+     * Whether a selfhosted install still needs the first-run setup wizard.
+     *
+     * Returns true when selfhost is not yet configured: APP_URL is blank, or APP_URL is
+     * set but the database has no `users` table (migrations never ran / were wiped). The
+     * setup wizard is the sign-up page, which keys off this so a failed or partial setup
+     * stays recoverable instead of locking the user out. Always false in hosted/testing
+     * mode. Result is memoized per-request so the schema check runs at most once.
+     */
+    function selfhost_needs_setup(): bool
+    {
+        if (config('app.hosted') || config('app.is_testing')) {
+            return false;
+        }
+
+        if (empty(config('app.url'))) {
+            return true; // fresh install, no DB query needed
+        }
+
+        // APP_URL is set, which only happens after a successful migrate, so only treat
+        // this as "needs setup" when we can CONFIRM the schema is gone.
+        static $needsSetup = null;
+        if ($needsSetup === null) {
+            try {
+                $needsSetup = ! \Illuminate\Support\Facades\Schema::hasTable('users');
+            } catch (\Throwable $e) {
+                // Connection error with APP_URL set means a transient DB outage on an
+                // already-configured install, not a fresh install. Return false so a DB
+                // blip does not redirect all traffic to (and expose) the setup wizard;
+                // the normal error surfaces instead. Blanking APP_URL still recovers the
+                // wizard for a genuine reconfigure.
+                $needsSetup = false;
+            }
+        }
+
+        return $needsSetup;
+    }
+}

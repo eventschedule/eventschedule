@@ -452,6 +452,7 @@ return [
     'test' => 'Test',
     'report_errors' => 'Rapporteer fouten aan de ontwikkelaars om ons te helpen de app te verbeteren (optioneel)',
     'env_not_writable' => 'Het .env-bestand is niet beschrijfbaar. Instellingen kunnen niet automatisch worden opgeslagen.',
+    'setup_migration_failed' => 'We hebben verbinding gemaakt met de database, maar de tabellen konden niet worden aangemaakt. Zorg ervoor dat de databasegebruiker volledige rechten heeft en dat de map storage beschrijfbaar is, en probeer het opnieuw. Zie storage/logs/laravel.log voor meer details.',
     'optional' => 'Optioneel',
     'i_accept_the_terms' => 'Ik accepteer de :terms',
     'import' => 'Importeren',

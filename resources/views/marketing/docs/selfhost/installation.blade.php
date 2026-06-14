@@ -76,6 +76,7 @@
                         <a href="#environment" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">4. Configure Environment</a>
                         <a href="#cron" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">5. Set Up Cron Job</a>
                         <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification</a>
+                        <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
                         <a href="#translations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom translations</a>
                     </nav>
                 </aside>
@@ -244,7 +245,12 @@
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">User Note</div>
-                                <p>The user <code class="doc-inline-code">www-data</code> is typical for Apache on Debian/Ubuntu. Your web server may run under a different user (e.g., <code class="doc-inline-code">nginx</code>, <code class="doc-inline-code">apache</code>, or <code class="doc-inline-code">http</code>). Check your server configuration.</p>
+                                <p>The user <code class="doc-inline-code">www-data</code> is typical for Apache on Debian/Ubuntu. Your web server may run under a different user (e.g., <code class="doc-inline-code">nginx</code>, <code class="doc-inline-code">apache</code>, or <code class="doc-inline-code">http</code>). Check your server configuration. Docker images based on Alpine often have no <code class="doc-inline-code">www-data</code> name at all, only the numeric UID <code class="doc-inline-code">82</code>, so use <code class="doc-inline-code">chown -R 82:82 ...</code> there instead.</p>
+                            </div>
+
+                            <div class="doc-callout doc-callout-warning">
+                                <div class="doc-callout-title">.env must be writable too</div>
+                                <p>The web-server user must also be able to write to the <code class="doc-inline-code">.env</code> file, not just <code class="doc-inline-code">storage</code>. The setup wizard generates the app key, saves your configuration to <code class="doc-inline-code">.env</code>, and runs database migrations for you, so include <code class="doc-inline-code">.env</code> in the ownership change above (e.g. <code class="doc-inline-code">sudo chown www-data:www-data .env</code>). If it is read-only, setup cannot complete.</p>
                             </div>
                         </section>
 
@@ -265,6 +271,11 @@
                                     <button class="doc-copy-btn">Copy</button>
                                 </div>
                                 <pre><code><span class="code-keyword">cp</span> .env.example .env</code></pre>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Leave APP_URL blank</div>
+                                <p>Do not set <code class="doc-inline-code">APP_URL</code> in <code class="doc-inline-code">.env</code> yourself. The setup wizard only appears while it is blank, and it writes the correct value for you once setup succeeds. You also do not need to fill in the database credentials by hand; just create the empty database from step 1 and enter its details in the wizard, which creates all the tables.</p>
                             </div>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Now access your application at <code class="doc-inline-code">https://your-domain.com</code> in your browser. You'll see the setup wizard where you can configure:</p>
@@ -351,6 +362,28 @@
                                 <li>Configure email settings for notifications</li>
                                 <li>Customize your branding and appearance</li>
                             </ul>
+                        </section>
+
+                        <!-- Troubleshooting -->
+                        <section id="troubleshooting" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Troubleshooting
+                            </h2>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">"Permission denied" writing storage/logs/laravel.log</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The web-server user cannot write to <code class="doc-inline-code">storage</code> (and often <code class="doc-inline-code">.env</code>). Re-run the ownership and permission commands from the <a href="#permissions" class="text-cyan-400 hover:text-cyan-300">file permissions</a> step, making sure to use the user your web server actually runs as. On Alpine-based Docker images that is the numeric UID <code class="doc-inline-code">82</code>, not <code class="doc-inline-code">www-data</code>.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">A 500 error, or you can't get back to the setup wizard</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">This usually means the database has no tables yet (migrations did not run). The setup wizard reappears automatically whenever the database is empty, so fix the underlying cause (database privileges or the file permissions above) and reload the page to run setup again.</p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Manual fallback</div>
+                                <p>If the wizard still does not appear, open <code class="doc-inline-code">.env</code>, clear the <code class="doc-inline-code">APP_URL</code> value so it is blank, and reload. The wizard will run again and rewrite <code class="doc-inline-code">APP_URL</code> once setup succeeds.</p>
+                            </div>
                         </section>
 
                         <!-- Custom translations -->

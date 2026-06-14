@@ -690,6 +690,7 @@ return [
     'test' => 'Test',
     'report_errors' => 'Vigadest teavitamine arendajatele, et aidata meil rakendust täiustada (valikuline)',
     'env_not_writable' => 'Env-faili ei saa kirjutada. Seadeid ei saa automaatselt salvestada.',
+    'setup_migration_failed' => 'Ühendus andmebaasiga õnnestus, kuid tabeleid ei õnnestunud luua. Veendu, et andmebaasi kasutajal on kõik õigused ja kaust storage on kirjutatav, seejärel proovi uuesti. Üksikasjad leiad failist storage/logs/laravel.log.',
     'optional' => 'Valikuline',
     'i_accept_the_terms' => 'Nõustun :tingimustega',
     'import' => 'Import',

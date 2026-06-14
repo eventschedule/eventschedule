@@ -697,6 +697,7 @@ return [
     'test' => 'Test',
     'report_errors' => 'Raportează erori dezvoltatorilor pentru a ne ajuta să îmbunătățim aplicația (opțional)',
     'env_not_writable' => 'Fișierul .env nu poate fi scris. Setările nu pot fi salvate automat.',
+    'setup_migration_failed' => 'Conexiunea la baza de date a reușit, dar tabelele nu au putut fi create. Asigură-te că utilizatorul bazei de date are toate privilegiile și că directorul storage poate fi scris, apoi încearcă din nou. Consultă storage/logs/laravel.log pentru detalii.',
     'optional' => 'Opțional',
     'i_accept_the_terms' => 'Accept :terms',
     'import' => 'Importă',

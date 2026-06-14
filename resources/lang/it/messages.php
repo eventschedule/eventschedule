@@ -460,6 +460,7 @@ return [
     'test' => 'Test',
     'report_errors' => 'Segnala errori agli sviluppatori per aiutarci a migliorare l\'app (opzionale)',
     'env_not_writable' => 'Il file .env non e scrivibile. Le impostazioni non possono essere salvate automaticamente.',
+    'setup_migration_failed' => 'Connessione al database riuscita, ma non e stato possibile creare le tabelle. Assicurati che l\'utente del database abbia tutti i privilegi e che la cartella storage sia scrivibile, quindi riprova. Controlla storage/logs/laravel.log per i dettagli.',
     'optional' => 'Opzionale',
     'i_accept_the_terms' => 'Accetto i :terms',
     'import' => 'Importa',

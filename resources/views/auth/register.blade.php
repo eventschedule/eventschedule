@@ -16,7 +16,7 @@
                 document.getElementById('language_code').value = twoLetterLanguageCode;
             @endif
 
-            @if (! config('app.hosted') && ! config('app.url'))
+            @if (selfhost_needs_setup())
                 // Disable register button initially
                 document.querySelector('button[type="submit"]').disabled = true;
 
@@ -312,7 +312,7 @@
                         if (data.has_existing_user) {
                             document.getElementById('test-result').innerHTML = '<span class="text-amber-600 dark:text-amber-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> {{ __('messages.database_already_initialized') }}</span>';
                             document.querySelector('button[type="submit"]').disabled = true;
-                            @if (! config('app.url'))
+                            @if (selfhost_needs_setup())
                             var regFields = document.getElementById('registration-fields');
                             if (regFields) regFields.style.display = 'none';
                             @endif
@@ -320,7 +320,7 @@
                             document.getElementById('test-result').innerHTML = '<span class="text-green-600 dark:text-green-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {{ __('messages.connection_successful') }}!</span>';
                             // Enable register button on successful connection
                             document.querySelector('button[type="submit"]').disabled = false;
-                            @if (! config('app.url'))
+                            @if (selfhost_needs_setup())
                             var regFields = document.getElementById('registration-fields');
                             if (regFields) regFields.style.display = 'block';
                             @endif
@@ -331,7 +331,7 @@
                         document.getElementById('test-error-text').textContent = data.error;
                         // Disable register button on failed connection
                         document.querySelector('button[type="submit"]').disabled = true;
-                        @if (! config('app.url'))
+                        @if (selfhost_needs_setup())
                         var regFields = document.getElementById('registration-fields');
                         if (regFields) regFields.style.display = 'none';
                         @endif
@@ -341,7 +341,7 @@
                     document.getElementById('test-result').innerHTML = '<span class="text-red-600 dark:text-red-400"><svg class="inline-block w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg> {{ __('messages.error_testing_connection') }}</span>';
                     // Disable register button on error
                     document.querySelector('button[type="submit"]').disabled = true;
-                    @if (! config('app.url'))
+                    @if (selfhost_needs_setup())
                     var regFields = document.getElementById('registration-fields');
                     if (regFields) regFields.style.display = 'none';
                     @endif
@@ -384,7 +384,7 @@
         </div>
         @endif
 
-        @if (! config('app.hosted') && ! config('app.url'))
+        @if (selfhost_needs_setup())
 
             @if (!is_writable(base_path('.env')))
             <div class="mb-4 rounded-md bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 p-4">
@@ -453,7 +453,7 @@
 
         @endif
 
-        @if (! config('app.hosted') && ! config('app.url'))
+        @if (selfhost_needs_setup())
         <div id="registration-fields" style="display: none;">
         @endif
 
@@ -619,7 +619,7 @@
             </div>
         </div>
 
-        @if (! config('app.hosted') && ! config('app.url'))
+        @if (selfhost_needs_setup())
         </div>
         @endif
     </form>

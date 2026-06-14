@@ -696,6 +696,7 @@ return [
     'test' => 'Test',
     'report_errors' => 'Report errors to the developers to help us improve the app (optional)',
     'env_not_writable' => 'The .env file is not writable. Settings cannot be saved automatically.',
+    'setup_migration_failed' => 'We connected to the database but could not create the tables. Make sure the database user has full privileges and that the storage directory is writable, then try again. Check storage/logs/laravel.log for details.',
     'optional' => 'Optional',
     'i_accept_the_terms' => 'I accept the :terms',
     'import' => 'Import',

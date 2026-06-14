@@ -4,6 +4,7 @@ use App\Http\Middleware\CaptureUtmParameters;
 use App\Http\Middleware\DemoAutoLogin;
 use App\Http\Middleware\DetectTrailingSlash;
 use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\EnsureSelfhostSetup;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\HandleBotTraffic;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -56,7 +57,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->authenticateSessions();
 
-        $middleware->web(append: [
+        $middleware->web(prepend: [
+            // Runs before route-model binding so a selfhost install with no migrated DB
+            // is redirected to the setup wizard before anything touches the database.
+            EnsureSelfhostSetup::class,
+        ], append: [
             CaptureUtmParameters::class,
             SetUserLanguage::class,
             EnsureEmailIsVerified::class,
