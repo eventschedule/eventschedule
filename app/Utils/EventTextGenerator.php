@@ -124,7 +124,7 @@ class EventTextGenerator
             '{number}' => $eventNumber !== null ? (string) $eventNumber : '',
             '{event_name}' => $forceEnglish ? $event->englishName() : $event->name,
             '{short_description}' => ($forceEnglish ? $event->englishShortDescription() : $event->short_description) ?? '',
-            '{description}' => ($forceEnglish ? $event->englishDescriptionHtml() : $event->description_html) ?? '',
+            '{description}' => self::htmlToPlainText($forceEnglish ? $event->englishDescriptionHtml() : $event->description_html),
             '{url}' => $eventUrl,
 
             // Venue variables
@@ -275,5 +275,29 @@ class EventTextGenerator
         }
 
         return '';
+    }
+
+    /**
+     * Convert rendered description HTML to clean plain text for text-only template
+     * channels (iCal/CalDAV, graphics text layers, SMS). Preserves line/paragraph
+     * breaks, strips tags, and decodes entities so markup never appears literally.
+     */
+    private static function htmlToPlainText(?string $html): string
+    {
+        if (! $html) {
+            return '';
+        }
+
+        // Turn line breaks / block boundaries into newlines before stripping so
+        // paragraphs don't run together.
+        $text = preg_replace('#<br\s*/?>#i', "\n", $html);
+        $text = preg_replace('#</(?:p|div|li|h[1-6])>#i', "\n", $text);
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = str_replace("\u{00A0}", ' ', $text); // nbsp (incl. blank-line spacers) -> space
+        $text = preg_replace("/[ \t]+\n/", "\n", $text);
+        $text = preg_replace("/\n{3,}/", "\n\n", $text);
+
+        return trim($text);
     }
 }

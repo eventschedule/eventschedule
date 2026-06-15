@@ -1232,7 +1232,9 @@
         </div>
 
         @if ($event->payment_method == 'cash' && $event->payment_instructions_html)
-            <div class="mt-8 custom-content">
+            {{-- v-pre: this user content is inside the #ticket-selector Vue mount; without it a {{ }} in the
+                 payment instructions would be compiled as a Vue expression (CSTI) in the buyer's browser. --}}
+            <div class="mt-8 custom-content" v-pre>
                 {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->payment_instructions_html) !!}
             </div>
         @endif
