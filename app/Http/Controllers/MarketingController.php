@@ -4936,6 +4936,8 @@ class MarketingController extends Controller
                 $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
                     ->orWhere('subdomain', 'like', 'demo-%');
             })
+            // Keep throwaway "test" events (and events under "test"-named schedules) out too.
+            ->excludeLikelyTest()
             ->when($excludeCountry !== '', function ($q) use ($excludeCountry) {
                 // strict: require at least one schedule with a known country, and exclude events
                 // linked to any schedule in the configured country

@@ -8,12 +8,43 @@ use App\Services\TicketVolumeDiscount;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
+    /**
+     * Names that, on their own, mark an event as throwaway test data.
+     * Matched against LOWER(TRIM(name)) by scopeExcludeLikelyTest().
+     *
+     * - LIKELY_TEST_NAME_REGEX: the "test" family (test, Test, test1, test 2,
+     *   testing, test test, test event). Anchored so "testival"/"test kitchen"/
+     *   "tester" are NOT matched. Used negatively for the event name and
+     *   positively for the schedule (talent/venue) name.
+     * - LIKELY_TEST_WEAK_REGEX: softer signals ("test concert", "sample sale",
+     *   "demo day") that only hide an event when it is otherwise empty. The
+     *   trailing [ _-]|$ requires a separator/end so "sampler"/"demos" are safe.
+     * - REPEATED_CHAR_REGEX: a single character repeated 3+ times (aaaa, ...., 1111).
+     *   Needs MySQL 8.0 regex backreferences.
+     * - LIKELY_TEST_NAMES: non-"test" junk literals (keyboard mashing, placeholders).
+     */
+    public const LIKELY_TEST_NAME_REGEX = '^test([[:space:]_-]*[0-9]*|ing| test| event)?$';
+
+    public const LIKELY_TEST_WEAK_REGEX = '^(test|my test|sample|example|demo)([ _-]|$)';
+
+    public const REPEATED_CHAR_REGEX = '^(.)\\1{2,}$';
+
+    public const LIKELY_TEST_NAMES = [
+        'asdf', 'asdfasdf', 'fdsa', 'qwerty', 'qwertyuiop',
+        'abc', 'abcd', 'xxx', 'xxxx', 'aaa', 'aaaa', 'zzz',
+        '123', '1234', '12345',
+        'untitled', 'untitled event', 'new event',
+        'delete', 'delete me', 'ignore', 'please ignore',
+        'lorem ipsum', 'na', 'n/a',
+    ];
+
     protected $fillable = [
         'starts_at',
         'duration',
@@ -511,6 +542,47 @@ class Event extends Model
         return $this->belongsToMany(Role::class)
             ->withPivot('id', 'name_translated', 'short_description_translated', 'description_translated', 'description_html_translated', 'is_accepted', 'group_id', 'google_event_id', 'caldav_event_uid', 'caldav_event_etag')
             ->using(EventRole::class);
+    }
+
+    /**
+     * Exclude events that look like throwaway test data from the discovery query.
+     *
+     * Conservative by design (it must not hide real events). An event is dropped when:
+     *   (a) its name is obvious junk on its own ("test", "asdf", "aaaa", "test 1", ...), or
+     *   (b) its name is a softer test signal ("test concert", "sample sale", ...) AND the
+     *       event has no real content (no description, image, ticket/RSVP or URL), or
+     *   (c) any associated schedule (talent/venue/curator) is named like a test.
+     *
+     * Only affects discovery surfaces (homepage Discover, /browse, /search); the event's
+     * own guest page is unaffected.
+     */
+    public function scopeExcludeLikelyTest(Builder $query): Builder
+    {
+        // (a) event name is NOT strong junk
+        $query->whereRaw('LOWER(TRIM(name)) NOT REGEXP ?', [self::LIKELY_TEST_NAME_REGEX])
+            ->whereRaw('TRIM(name) NOT REGEXP ?', [self::REPEATED_CHAR_REGEX])
+            ->whereNotIn(DB::raw('LOWER(TRIM(name))'), self::LIKELY_TEST_NAMES);
+
+        // (b) NOT ( weak-junk name AND empty content )  ==  ( NOT weak  OR  has content )
+        $query->where(function ($q) {
+            $q->whereRaw('LOWER(TRIM(name)) NOT REGEXP ?', [self::LIKELY_TEST_WEAK_REGEX])
+                ->orWhere(function ($c) {
+                    $c->where(fn ($x) => $x->whereNotNull('description')->where('description', '!=', ''))
+                        ->orWhere(fn ($x) => $x->whereNotNull('short_description')->where('short_description', '!=', ''))
+                        ->orWhere(fn ($x) => $x->whereNotNull('flyer_image_url')->where('flyer_image_url', '!=', ''))
+                        ->orWhere(fn ($x) => $x->whereNotNull('agenda_image_url')->where('agenda_image_url', '!=', ''))
+                        ->orWhere(fn ($x) => $x->whereNotNull('event_url')->where('event_url', '!=', ''))
+                        ->orWhere('tickets_enabled', true)
+                        ->orWhere('rsvp_enabled', true);
+                });
+        });
+
+        // (c) no associated talent/venue/curator schedule is named like a test
+        $query->whereDoesntHave('roles', function ($r) {
+            $r->whereRaw('LOWER(TRIM(roles.name)) REGEXP ?', [self::LIKELY_TEST_NAME_REGEX]);
+        });
+
+        return $query;
     }
 
     public function curatorBySubdomain($subdomain)
