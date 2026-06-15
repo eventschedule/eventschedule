@@ -218,4 +218,22 @@ class EventTest extends TestCase
         ]);
         $this->assertSame(2, $event->parts()->count());
     }
+
+    public function test_get_start_date_time_handles_null_user_timezone(): void
+    {
+        // Reproduces a 500: an authenticated user with a null timezone made
+        // Event::getStartDateTime() call Carbon::setTimezone(null) (TypeError).
+        $owner = \App\Models\User::factory()->create(['timezone' => null, 'email_verified_at' => now()]);
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+
+        $this->actingAs($owner);
+
+        $start = $event->getStartDateTime(null, true);
+        $end = $event->getEndDateTime(null, true);
+
+        $this->assertInstanceOf(\Carbon\Carbon::class, $start);
+        $this->assertInstanceOf(\Carbon\Carbon::class, $end);
+        $this->assertSame('UTC', $start->getTimezone()->getName());
+    }
 }

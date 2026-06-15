@@ -116,7 +116,9 @@ class ApiAdminTest extends TestCase
         $admin = $this->createOwner(true);
 
         $this->withSession(['admin_password_confirmed_at' => now()->timestamp])
-            ->actingAs($admin)->get(route('admin.dashboard'))->assertOk();
+            ->actingAs($admin)->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee(__('messages.active_users_7_days'));
     }
 
     public function test_admin_blog_create(): void
@@ -138,6 +140,8 @@ class ApiAdminTest extends TestCase
         $owner = $this->createOwner();
         $this->createRole($owner);
 
-        $this->actingAs($owner)->get(route('referrals'))->assertOk();
+        $this->actingAs($owner)->get(route('referrals'))
+            ->assertOk()
+            ->assertSee(__('messages.referral_program'));
     }
 }

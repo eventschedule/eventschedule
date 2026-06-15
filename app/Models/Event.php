@@ -1534,9 +1534,9 @@ class Event extends Model
         if ($timezoneOverride) {
             $timezone = $timezoneOverride;
         } elseif ($user = auth()->user()) {
-            $timezone = $user->timezone;
+            $timezone = $user->timezone ?? 'UTC';
         } elseif ($this->creatorRole) {
-            $timezone = $this->creatorRole->timezone;
+            $timezone = $this->creatorRole->timezone ?? 'UTC';
         }
 
         if (strlen($this->starts_at) === 10) {

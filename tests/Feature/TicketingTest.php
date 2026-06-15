@@ -81,9 +81,10 @@ class TicketingTest extends TestCase
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner);
-        $event = $this->createEvent($role);
+        // Event must be happening now so the check-in window (opens 24h before start) is open.
+        $event = $this->createEvent($role, ['starts_at' => now()->format('Y-m-d H:i:s')]);
         $ticket = $this->createTicket($event, ['price' => 0]);
-        $sale = $this->createSale($event, $role, ['status' => 'paid'], $ticket, 1);
+        $sale = $this->createSale($event, $role, ['status' => 'paid', 'event_date' => now()->format('Y-m-d')], $ticket, 1);
 
         $response = $this->actingAs($owner)->post(route('ticket.scanned', [
             'event_id' => UrlUtils::encodeId($event->id),
@@ -91,6 +92,12 @@ class TicketingTest extends TestCase
         ]));
 
         $response->assertOk();
+
+        // The scan must actually record the check-in (scanned() returns 200 even on
+        // errors, so asserting only the status is a false positive).
+        $saleTicket = \App\Models\SaleTicket::where('sale_id', $sale->id)->first();
+        $seats = json_decode($saleTicket->seats, true);
+        $this->assertNotNull($seats[1], 'seat 1 should have a check-in timestamp');
     }
 
     public function test_checkin_stats_endpoint(): void
@@ -104,7 +111,9 @@ class TicketingTest extends TestCase
         $this->actingAs($owner)->get(route('checkin.stats', [
             'event_id' => UrlUtils::encodeId($event->id),
             'date' => \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'),
-        ]))->assertOk();
+        ]))->assertOk()
+            ->assertJson(['event_name' => $event->name])
+            ->assertJsonStructure(['total_sold', 'total_checked_in', 'tickets']);
     }
 
     public function test_waitlist_join(): void
