@@ -138,9 +138,11 @@ class NewsletterTest extends TestCase
 
         $role->users()->attach($user->id, ['level' => 'owner']);
 
+        // In hosted mode with is_testing=false, bare-domain AP routes redirect to
+        // the app subdomain, so request the app subdomain host directly.
         $response = $this
             ->actingAs($user)
-            ->get('/newsletters?role_id=' . UrlUtils::encodeId($role->id));
+            ->get('https://app.eventschedule.test/newsletters?role_id=' . UrlUtils::encodeId($role->id));
 
         $response->assertOk();
     }

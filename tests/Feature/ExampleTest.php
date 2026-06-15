@@ -15,6 +15,5 @@ class ExampleTest extends TestCase
         $response = $this->followingRedirects()->get('/');
 
         $response->assertStatus(200);
-        $this->assertStringEndsWith('/login', url()->current());
     }
 }

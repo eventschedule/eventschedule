@@ -34,6 +34,54 @@ jobs:
       - name: npm security audit
         run: npm audit --omit=dev --audit-level=critical
 
+  feature-tests:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: eventschedule
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo, mysql
+          ini-values: memory_limit=1G
+          tools: composer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Configure env for tests
+        run: |
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=eventschedule/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+          sed -i 's/IS_HOSTED=.*/IS_HOSTED=true/' .env
+          echo "APP_TESTING=true" >> .env
+          echo "IS_NEXUS=true" >> .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run Feature & Unit tests
+        run: php artisan test
+
   dusk:
     runs-on: ubuntu-latest
     services:
