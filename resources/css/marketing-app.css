@@ -3,3 +3,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Brand color variables. Kept in sync with the same block in app.css so shared
+ * brand-styled components (e.g. <x-brand-button>, <x-link>) render correctly on
+ * the marketing site, which loads this bundle instead of app.css. Without these,
+ * the cookie banner's gradient Accept button has no background (white-on-white).
+ */
+:root {
+    --brand-blue: #4E81FA;
+    --brand-blue-light: #5A8DFF;
+    --brand-blue-dark: #3D6FE8;
+    --brand-blue-a10: rgba(78, 129, 250, 0.1);
+    --brand-blue-a20: rgba(78, 129, 250, 0.2);
+    --brand-blue-a30: rgba(78, 129, 250, 0.3);
+    --brand-button-bg-light: #5A8DFF;
+    --brand-button-bg: #4E81FA;
+    --brand-button-bg-hover: #3D6FE8;
+}
+.dark {
+    --brand-blue: #6B9AFF;
+    --brand-blue-light: #7AA8FF;
+    --brand-blue-dark: #5A8DFF;
+    --brand-blue-a10: rgba(107, 154, 255, 0.1);
+    --brand-blue-a20: rgba(107, 154, 255, 0.2);
+    --brand-blue-a30: rgba(107, 154, 255, 0.3);
+    --brand-button-bg-light: #5A8DFF;
+    --brand-button-bg: #4E81FA;
+    --brand-button-bg-hover: #3D6FE8;
+}
