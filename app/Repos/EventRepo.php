@@ -143,8 +143,58 @@ class EventRepo
             ->first();
     }
 
+    /**
+     * Reject pass tickets that are configured but missing required fields, before
+     * any DB writes - otherwise a misconfigured pass saves silently (e.g. a "visit
+     * pass" with no limit behaves as unlimited; a sub-schedule / specific-events
+     * pass with nothing selected covers no events and never redeems).
+     */
+    private function validatePassConfiguration($request): void
+    {
+        $usageTypes = ['per_occurrence', 'total', 'per_event', 'unlimited'];
+        $scopes = ['this_event', 'all_events', 'sub_schedule', 'specific_events'];
+
+        foreach ((array) $request->input('tickets', []) as $index => $data) {
+            if (empty($data['is_pass'])) {
+                continue;
+            }
+
+            $usageType = $data['pass_usage_type'] ?? 'per_occurrence';
+            $scope = $data['pass_scope'] ?? 'this_event';
+
+            if (! in_array($usageType, $usageTypes, true) || ! in_array($scope, $scopes, true)) {
+                throw ValidationException::withMessages(["tickets.{$index}.pass" => __('messages.error')]);
+            }
+
+            // A season pass is always scoped to its own event (mirrors the
+            // normalization below), so the coverage selectors don't apply.
+            if ($usageType === 'per_occurrence') {
+                $scope = 'this_event';
+            }
+
+            if ($usageType === 'total' && empty($data['pass_max_uses'])) {
+                throw ValidationException::withMessages(["tickets.{$index}.pass_max_uses" => __('messages.pass_max_uses_required')]);
+            }
+
+            if ($scope === 'sub_schedule' && empty($data['pass_scope_group_id'])) {
+                throw ValidationException::withMessages(["tickets.{$index}.pass_scope_group_id" => __('messages.select_sub_schedule')]);
+            }
+
+            if ($scope === 'specific_events') {
+                $raw = $data['pass_event_ids'] ?? null;
+                $ids = is_string($raw) ? json_decode($raw, true) : $raw;
+                $ids = is_array($ids) ? array_filter($ids, fn ($id) => $id !== null && $id !== '') : [];
+                if (empty($ids)) {
+                    throw ValidationException::withMessages(["tickets.{$index}.pass_event_ids" => __('messages.pass_no_events_warning')]);
+                }
+            }
+        }
+    }
+
     public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true)
     {
+        $this->validatePassConfiguration($request);
+
         $user = $request->user();
         $venue = null;
 

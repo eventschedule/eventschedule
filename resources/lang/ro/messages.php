@@ -573,6 +573,7 @@ return [
     'pass_type_season_help' => 'Valabil pentru fiecare apariție a acestui eveniment recurent, o dată per apariție.',
     'pass_max_uses' => 'Număr de vizite',
     'pass_max_uses_help' => 'De câte ori poate fi folosit permisul în total.',
+    'pass_max_uses_required' => 'Introduceți numărul de vizite pentru permisul de vizite.',
     'pass_valid_days' => 'Valabil (zile)',
     'pass_valid_days_help' => 'Zile de la achiziție până la expirarea permisului. Lăsați gol pentru fără expirare.',
     'pass_coverage' => 'Evenimente acoperite',

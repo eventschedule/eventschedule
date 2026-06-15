@@ -4597,8 +4597,8 @@
           pass_max_uses: ticket.pass_max_uses ?? null,
           pass_valid_days: ticket.pass_valid_days ?? null,
           pass_scope: ticket.pass_scope || 'this_event',
-          pass_scope_group_id: (@json($ticketPassCoverage)[ticket.id] || {}).group || '',
-          pass_event_ids: (@json($ticketPassCoverage)[ticket.id] || {}).events || [],
+          pass_scope_group_id: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).group || '',
+          pass_event_ids: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).events || [],
           custom_fields: ticket.custom_fields || {},
           sales_start_at_date: ticket.sales_start_at ? ticket.sales_start_at.substring(0, 10) : '',
           sales_start_at_time: ticket.sales_start_at ? ticket.sales_start_at.substring(11, 16) : '',
@@ -5604,6 +5604,22 @@
           if (hasInvalidTicketTypes) {
             event.preventDefault();
             alert(@json(__('messages.please_fill_in_ticket_types')));
+            return;
+          }
+
+          // A configured pass must not save silently broken (mirrors EventRepo::validatePassConfiguration)
+          let passError = null;
+          for (const t of this.tickets) {
+            if (!t.is_pass) continue;
+            if (t.pass_usage_type === 'total' && !(t.pass_max_uses > 0)) { passError = @json(__('messages.pass_max_uses_required')); break; }
+            if (t.pass_usage_type !== 'per_occurrence') {
+              if (t.pass_scope === 'sub_schedule' && !t.pass_scope_group_id) { passError = @json(__('messages.select_sub_schedule')); break; }
+              if (t.pass_scope === 'specific_events' && (!t.pass_event_ids || t.pass_event_ids.length === 0)) { passError = @json(__('messages.pass_no_events_warning')); break; }
+            }
+          }
+          if (passError) {
+            event.preventDefault();
+            alert(passError);
             return;
           }
         }

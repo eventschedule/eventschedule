@@ -566,6 +566,7 @@ return [
     'pass_type_season_help' => 'Kehtib selle korduva ürituse iga toimumiskorra puhul, üks kord toimumiskorra kohta.',
     'pass_max_uses' => 'Külastuste arv',
     'pass_max_uses_help' => 'Mitu korda saab pääset kokku kasutada.',
+    'pass_max_uses_required' => 'Palun sisesta külastuspääsme külastuste arv.',
     'pass_valid_days' => 'Kehtib (päeva)',
     'pass_valid_days_help' => 'Päevade arv ostust kuni pääsme aegumiseni. Jätke tühjaks, kui aegumist pole.',
     'pass_coverage' => 'Kaetud üritused',

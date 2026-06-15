@@ -329,6 +329,7 @@ return [
     'pass_type_season_help' => 'Geldig voor elke herhaling van dit terugkerende evenement, één keer per herhaling.',
     'pass_max_uses' => 'Aantal bezoeken',
     'pass_max_uses_help' => 'Hoe vaak de pas in totaal gebruikt kan worden.',
+    'pass_max_uses_required' => 'Voer het aantal bezoeken voor je bezoekpas in.',
     'pass_valid_days' => 'Geldig voor (dagen)',
     'pass_valid_days_help' => 'Dagen na aankoop voordat de pas verloopt. Laat leeg voor geen vervaldatum.',
     'pass_coverage' => 'Gedekte evenementen',

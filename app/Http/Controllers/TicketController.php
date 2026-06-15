@@ -3089,9 +3089,10 @@ class TicketController extends Controller
                         }
                     }
 
+                    // SaleTicket::created increments the sold count (passes are forced
+                    // to quantity 1); do not call updateSold() again here or imports
+                    // double-count inventory.
                     $sale->saleTickets()->create($saleTicketData);
-
-                    $ticket->updateSold($eventDate, $quantity);
 
                     // Sale::booted() clears matching TicketWaitlist rows only on `updated`,
                     // not `created` — so bulk-created paid imports must clear them inline.

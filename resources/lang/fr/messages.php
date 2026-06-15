@@ -522,6 +522,7 @@ return [
     'pass_type_season_help' => 'Valable pour chaque occurrence de cet événement récurrent, une fois par occurrence.',
     'pass_max_uses' => 'Nombre de visites',
     'pass_max_uses_help' => 'Combien de fois le pass peut être utilisé au total.',
+    'pass_max_uses_required' => 'Veuillez saisir le nombre de visites pour votre pass visites.',
     'pass_valid_days' => 'Valable (jours)',
     'pass_valid_days_help' => 'Jours après l\'achat avant l\'expiration du pass. Laissez vide pour aucune expiration.',
     'pass_coverage' => 'Événements couverts',

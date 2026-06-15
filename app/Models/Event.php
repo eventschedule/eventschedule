@@ -1726,7 +1726,7 @@ class Event extends Model
         $data->tickets_enabled = (bool) $this->tickets_enabled;
         if ($this->tickets_enabled && $this->relationLoaded('tickets')) {
             $data->tickets = $this->tickets->map(function ($ticket) {
-                return [
+                $row = [
                     'id' => UrlUtils::encodeId($ticket->id),
                     'type' => $ticket->type,
                     'price' => $ticket->price,
@@ -1735,7 +1735,20 @@ class Event extends Model
                     'sales_start_at' => $ticket->sales_start_at ? $ticket->sales_start_at->toIso8601String() : null,
                     'sales_end_at' => $ticket->sales_end_at ? $ticket->sales_end_at->toIso8601String() : null,
                     'volume_discount' => TicketVolumeDiscount::toGuestPayload($ticket->volume_discount),
+                    'is_pass' => (bool) $ticket->is_pass,
                 ];
+
+                if ($ticket->is_pass) {
+                    $row['pass_usage_type'] = $ticket->pass_usage_type;
+                    $row['pass_max_uses'] = $ticket->pass_max_uses ?: null;
+                    $row['pass_valid_days'] = $ticket->pass_valid_days ?: null;
+                    $row['pass_scope'] = $ticket->pass_scope;
+                    $row['pass_covered_count'] = $ticket->pass_scope === 'specific_events'
+                        ? count($ticket->pass_event_ids ?? [])
+                        : null;
+                }
+
+                return $row;
             })->values();
 
             if ($this->relationLoaded('addons')) {

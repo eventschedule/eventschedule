@@ -518,6 +518,17 @@ class EventController extends Controller
                 'description' => $ticket->description,
                 'custom_fields' => $ticket->custom_fields,
                 'volume_discount' => $ticket->volume_discount,
+                // Pass / subscription config (coverage ids encoded; consumed by the
+                // edit form's pass_coverage fallback since cloned tickets have no id).
+                'is_pass' => $ticket->is_pass,
+                'pass_usage_type' => $ticket->pass_usage_type,
+                'pass_max_uses' => $ticket->pass_max_uses,
+                'pass_valid_days' => $ticket->pass_valid_days,
+                'pass_scope' => $ticket->pass_scope,
+                'pass_coverage' => [
+                    'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
+                    'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
+                ],
                 // sold is not cloned
             ];
         }
@@ -767,6 +778,17 @@ class EventController extends Controller
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
                         'volume_discount' => $ticket->volume_discount,
+                        // Pass / subscription config (coverage ids encoded; consumed by
+                        // the edit form's pass_coverage fallback for id-less tickets).
+                        'is_pass' => $ticket->is_pass,
+                        'pass_usage_type' => $ticket->pass_usage_type,
+                        'pass_max_uses' => $ticket->pass_max_uses,
+                        'pass_valid_days' => $ticket->pass_valid_days,
+                        'pass_scope' => $ticket->pass_scope,
+                        'pass_coverage' => [
+                            'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
+                            'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
+                        ],
                     ];
                 })->toArray(),
                 'addons' => $event->addons->map(function ($addon) {
@@ -1069,6 +1091,17 @@ class EventController extends Controller
                         'description' => $ticket->description,
                         'custom_fields' => $ticket->custom_fields,
                         'volume_discount' => $ticket->volume_discount,
+                        // Pass / subscription config (coverage ids encoded; consumed by
+                        // the edit form's pass_coverage fallback for id-less tickets).
+                        'is_pass' => $ticket->is_pass,
+                        'pass_usage_type' => $ticket->pass_usage_type,
+                        'pass_max_uses' => $ticket->pass_max_uses,
+                        'pass_valid_days' => $ticket->pass_valid_days,
+                        'pass_scope' => $ticket->pass_scope,
+                        'pass_coverage' => [
+                            'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
+                            'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
+                        ],
                     ];
                 })->toArray(),
                 'addons' => $event->addons->map(function ($addon) {

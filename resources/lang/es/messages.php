@@ -518,6 +518,7 @@ return [
     'pass_type_season_help' => 'Válido para cada ocurrencia de este evento recurrente, una vez por ocurrencia.',
     'pass_max_uses' => 'Número de visitas',
     'pass_max_uses_help' => 'Cuántas veces se puede usar el pase en total.',
+    'pass_max_uses_required' => 'Introduce el número de visitas para tu pase de visitas.',
     'pass_valid_days' => 'Válido durante (días)',
     'pass_valid_days_help' => 'Días desde la compra antes de que caduque el pase. Déjalo en blanco para que no caduque.',
     'pass_coverage' => 'Eventos cubiertos',
