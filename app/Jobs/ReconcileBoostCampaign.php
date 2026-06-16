@@ -9,6 +9,7 @@ use App\Models\Role;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Services\MetaAdsServiceFake;
+use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -118,6 +119,12 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
                     'error' => $e->getMessage(),
                 ]);
             }
+            OneSignalService::pushToUser($campaign->user, [
+                'title_key' => 'messages.push_boost_completed_title',
+                'body_key' => 'messages.push_boost_completed_body',
+                'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+                'options' => [],
+            ], null);
         }
 
         // Auto-increase trust limit for hosted mode

@@ -27,6 +27,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\PushController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StripeController;
@@ -256,6 +257,11 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
     Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/settings/profile-image', [ProfileController::class, 'deleteImage'])->name('profile.delete_image');
+
+    // Push notifications (device subscription state + test send)
+    Route::post('/settings/push/subscribe', [PushController::class, 'subscribe'])->name('push.subscribe');
+    Route::post('/settings/push/unsubscribe', [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
+    Route::post('/settings/push/test', [PushController::class, 'test'])->name('push.test')->middleware('throttle:10,1');
 
     // Backup & Restore
     Route::post('/settings/backup/export', [BackupController::class, 'export'])->name('backup.export')->middleware('throttle:3,60');

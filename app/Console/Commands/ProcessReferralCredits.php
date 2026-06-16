@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\ReferralCreditEarned;
 use App\Models\Referral;
+use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
 
@@ -55,6 +56,13 @@ class ProcessReferralCredits extends Command
                         Mail::to($referral->referrer->email)->send(
                             new ReferralCreditEarned($referral)
                         );
+
+                        OneSignalService::pushToUser($referral->referrer, [
+                            'title_key' => 'messages.push_referral_credit_title',
+                            'body_key' => 'messages.push_referral_credit_body',
+                            'url' => route('referrals'),
+                            'options' => [],
+                        ], null);
                     } catch (\Exception $e) {
                         report($e);
                     }

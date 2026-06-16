@@ -34,6 +34,7 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Services\EmailService;
 use App\Services\MetaAdsService;
+use App\Services\OneSignalService;
 use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
@@ -294,6 +295,14 @@ class RoleController extends Controller
                 'error' => $e->getMessage(),
             ]);
         }
+
+        OneSignalService::pushToUser($user, [
+            'title_key' => 'messages.push_role_deleted_title',
+            'body_key' => 'messages.push_role_deleted_body',
+            'body_params' => ['name' => $role->name],
+            'url' => route('home'),
+            'options' => ['icon' => $role->profile_image_url],
+        ], $role);
 
         return redirect(route('home'))
             ->with('message', __('messages.deleted_schedule'));

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\EventPoll;
 use App\Models\Role;
 use App\Notifications\NewPollOptionsNotification;
+use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 
 class NotifyPollOptionChanges extends Command
@@ -70,8 +71,17 @@ class NotifyPollOptionChanges extends Command
                 $editors = $role->getEditorsWantingNotification('new_poll_option');
 
                 if ($editors->isNotEmpty()) {
+                    $pushUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'schedule']);
+
                     foreach ($editors as $editor) {
                         $editor->notify(new NewPollOptionsNotification($role, $currentCount));
+
+                        OneSignalService::pushToUser($editor, [
+                            'title_key' => 'messages.push_new_poll_option_title',
+                            'body_key' => 'messages.push_new_poll_option_body',
+                            'url' => $pushUrl,
+                            'options' => ['icon' => $role->profile_image_url],
+                        ], $role);
                     }
 
                     $role->last_notified_poll_option_count = $currentCount;

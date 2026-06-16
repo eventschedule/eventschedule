@@ -73,6 +73,9 @@ class UsageTrackingService
     // CalDAV operations
     const CALDAV_SYNC = 'caldav_sync';
 
+    // Push notifications
+    const PUSH_NOTIFICATION = 'push_notification';
+
     /**
      * Track a usage operation. Silently fails so tracking never disrupts actual operations.
      */

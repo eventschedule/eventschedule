@@ -93,6 +93,13 @@ return [
         'from' => env('TWILIO_FROM_NUMBER'),
     ],
 
+    'onesignal' => [
+        'app_id' => env('ONESIGNAL_APP_ID'),
+        'rest_api_key' => env('ONESIGNAL_REST_API_KEY'),
+        // Optional: required only for legacy macOS Safari web push.
+        'safari_web_id' => env('ONESIGNAL_SAFARI_WEB_ID'),
+    ],
+
     'digitalocean' => [
         'api_token' => env('DO_API_TOKEN'),
         'app_id' => env('DO_APP_ID'),

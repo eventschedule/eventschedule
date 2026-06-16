@@ -74,11 +74,13 @@ class SecurityHeaders
             // More permissive CSP for development
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io challenges.cloudflare.com cdn.jsdelivr.net",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io challenges.cloudflare.com cdn.jsdelivr.net cdn.onesignal.com *.onesignal.com",
                 "style-src 'self' 'unsafe-inline' {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com cdn.jsdelivr.net",
                 "img-src 'self' data: https: {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com eventschedule.nyc3.digitaloceanspaces.com cdn.jsdelivr.net",
                 "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
-                "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co",
+                "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co *.onesignal.com *.os.tc",
+                "worker-src 'self' cdn.onesignal.com *.onesignal.com",
+                "manifest-src 'self'",
                 "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com *.google.com challenges.cloudflare.com",
                 "object-src 'none'",
                 "base-uri 'self'",
@@ -88,11 +90,13 @@ class SecurityHeaders
             // Note: 'unsafe-inline' is kept as a fallback for CSP Level 1 browsers; Level 2+ browsers ignore it when nonces are present
             $csp = [
                 "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io challenges.cloudflare.com cdn.jsdelivr.net",
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io challenges.cloudflare.com cdn.jsdelivr.net cdn.onesignal.com *.onesignal.com",
                 "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.bootstrapcdn.com cdn.jsdelivr.net",
                 "img-src 'self' data: https: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com eventschedule.nyc3.digitaloceanspaces.com cdn.jsdelivr.net",
                 "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
-                "connect-src 'self' *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co",
+                "connect-src 'self' *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co *.onesignal.com *.os.tc",
+                "worker-src 'self' cdn.onesignal.com *.onesignal.com",
+                "manifest-src 'self'",
                 "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com *.google.com challenges.cloudflare.com",
                 "object-src 'none'",
                 "base-uri 'self'",

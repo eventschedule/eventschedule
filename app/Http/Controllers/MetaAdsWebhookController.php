@@ -7,6 +7,7 @@ use App\Jobs\SyncBoostAnalytics;
 use App\Mail\BoostRejected;
 use App\Models\BoostCampaign;
 use App\Services\BoostBillingService;
+use App\Services\OneSignalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -186,6 +187,12 @@ class MetaAdsWebhookController extends Controller
                                 'error' => $e->getMessage(),
                             ]);
                         }
+                        OneSignalService::pushToUser($campaign->user, [
+                            'title_key' => 'messages.push_boost_rejected_title',
+                            'body_key' => 'messages.push_boost_rejected_body',
+                            'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+                            'options' => [],
+                        ], null);
                     }
 
                     Log::info('Boost campaign rejected via webhook', ['campaign_id' => $campaign->id, 'refunded' => $refunded]);

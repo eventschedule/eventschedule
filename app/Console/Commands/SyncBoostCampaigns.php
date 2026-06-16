@@ -10,6 +10,7 @@ use App\Models\BoostCampaign;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Services\MetaAdsServiceFake;
+use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -125,6 +126,12 @@ class SyncBoostCampaigns extends Command
                             'error' => $e->getMessage(),
                         ]);
                     }
+                    OneSignalService::pushToUser($campaign->user, [
+                        'title_key' => 'messages.push_boost_rejected_title',
+                        'body_key' => 'messages.push_boost_rejected_body',
+                        'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+                        'options' => [],
+                    ], null);
                 }
 
                 Log::info('Boost campaign rejected', ['campaign_id' => $campaign->id, 'refunded' => $refunded]);
@@ -178,6 +185,12 @@ class SyncBoostCampaigns extends Command
                         'error' => $e->getMessage(),
                     ]);
                 }
+                OneSignalService::pushToUser($campaign->user, [
+                    'title_key' => 'messages.push_boost_budget_title',
+                    'body_key' => 'messages.push_boost_budget_body',
+                    'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+                    'options' => [],
+                ], null);
             }
         }
     }

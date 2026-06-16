@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\SupportMessageNotification;
+use App\Services\OneSignalService;
 use App\Models\SupportConversation;
 use App\Models\SupportMessage;
 use App\Models\User;
@@ -102,6 +103,11 @@ class SupportChatController extends Controller
                 Mail::to($admin->email)->queue(
                     new SupportMessageNotification($body, $user->name ?? $user->email, false, $replyUrl)
                 );
+                OneSignalService::pushToUser($admin, [
+                    'title_key' => 'messages.push_support_message_title',
+                    'body_key' => 'messages.push_support_message_body',
+                    'url' => $replyUrl,
+                ], null);
             }
         } catch (\Exception $e) {
             report($e);
@@ -222,6 +228,11 @@ class SupportChatController extends Controller
                     Mail::to($user->email)->queue(
                         new SupportMessageNotification($body, 'Event Schedule Support', true, $replyUrl)
                     );
+                    OneSignalService::pushToUser($user, [
+                        'title_key' => 'messages.push_support_message_title',
+                        'body_key' => 'messages.push_support_message_body',
+                        'url' => $replyUrl,
+                    ], null);
                 }
             }
         } catch (\Exception $e) {

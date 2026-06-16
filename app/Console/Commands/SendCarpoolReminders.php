@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SendQueuedEmail;
+use App\Services\OneSignalService;
 use App\Mail\CarpoolNotification;
 use App\Models\CarpoolOffer;
 use App\Models\CarpoolRequest;
@@ -130,6 +131,14 @@ class SendCarpoolReminders extends Command
                 $role->id,
                 $recipient->language_code ?? app()->getLocale()
             );
+
+            OneSignalService::pushToUser($recipient, [
+                'title_key' => 'messages.push_carpool_title',
+                'body_key' => 'messages.push_carpool_body',
+                'body_params' => ['event' => $event->name],
+                'url' => $event->getGuestUrl(),
+                'options' => ['icon' => $role->profile_image_url],
+            ], $role);
         } catch (\Exception $e) {
             report($e);
             Log::error('Failed to send carpool reminder: '.$e->getMessage(), [

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Event;
 use App\Notifications\NewFanContentNotification;
+use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 
 class NotifyFanContentChanges extends Command
@@ -66,6 +67,13 @@ class NotifyFanContentChanges extends Command
                 }
 
                 $event->user->notify(new NewFanContentNotification($event, $currentCount, $subdomain));
+
+                OneSignalService::pushToUser($event->user, [
+                    'title_key' => 'messages.push_new_fan_content_title',
+                    'body_key' => 'messages.push_new_fan_content_body',
+                    'url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]).'#section-fan-content',
+                    'options' => ['icon' => $role->profile_image_url],
+                ], $role);
 
                 $event->last_notified_fan_content_count = $currentCount;
                 $event->save();

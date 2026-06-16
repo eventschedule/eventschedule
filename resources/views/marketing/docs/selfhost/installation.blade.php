@@ -360,9 +360,31 @@
                                 <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Stripe payments</a> for ticket sales</li>
                                 <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Google Calendar integration</a></li>
                                 <li>Set up <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Twilio SMS</a> for phone verification (set <code class="doc-inline-code">TWILIO_SID</code>, <code class="doc-inline-code">TWILIO_AUTH_TOKEN</code>, and <code class="doc-inline-code">TWILIO_FROM_NUMBER</code> in your <code class="doc-inline-code">.env</code>)</li>
+                                <li>Enable <a href="#push-notifications" class="text-cyan-400 hover:text-cyan-300">push notifications</a> with OneSignal (optional)</li>
                                 <li>Configure email settings for notifications</li>
                                 <li>Customize your branding and appearance</li>
                             </ul>
+                        </section>
+
+                        <!-- Push Notifications -->
+                        <section id="push-notifications" class="doc-section">
+                            <h2 class="doc-heading">
+                                <span class="doc-heading-icon">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                                </span>
+                                Push Notifications (Optional)
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can send browser/web push notifications that mirror its email notifications (ticket sales, new requests, feedback, waitlist openings, and more) using <a href="https://onesignal.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">OneSignal</a>. Push is <strong>off by default</strong>: if you do not configure it, no push SDK is loaded and your installation makes no calls to OneSignal.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">To enable it, create a free OneSignal app (Web platform), then set these values in your <code class="doc-inline-code">.env</code>:</p>
+                            <pre class="doc-code-block"><code>ONESIGNAL_APP_ID=your-onesignal-app-id
+ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
+                            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 my-4">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <span>Enabling OneSignal loads its SDK from OneSignal's CDN and sends notification data to OneSignal's servers. Visitors choose to opt in per device; nothing is sent until they allow notifications.</span>
+                                </p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, schedule owners can turn on push under <strong>Settings &rarr; Notifications</strong> and send a test notification. Apple iOS only supports web push for sites the visitor adds to their home screen (iOS 16.4+); Android and desktop browsers work without installation.</p>
                         </section>
 
                         <!-- Troubleshooting -->

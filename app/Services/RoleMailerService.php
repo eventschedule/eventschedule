@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Mail\EmailSettingsFailedMail;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\OneSignalService;
 use Illuminate\Contracts\Mail\Mailable;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
@@ -171,6 +172,12 @@ class RoleMailerService
                 Mail::to($editor->email)->send(
                     new EmailSettingsFailedMail($role, $editor, $errorMessage, $role->email_settings_failed_at)
                 );
+
+                OneSignalService::pushToUser($editor, [
+                    'title_key' => 'messages.push_email_settings_failed_title',
+                    'body_key' => 'messages.push_email_settings_failed_body',
+                    'url' => route('role.edit', ['subdomain' => $role->subdomain]).'#section-integrations',
+                ], $role);
             } catch (Throwable $inner) {
                 Log::warning('Failed to notify editor of broken role SMTP', [
                     'role_id' => $role->id,

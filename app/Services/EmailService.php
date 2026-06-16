@@ -95,7 +95,22 @@ class EmailService
             return;
         }
 
-        // Check if email sending is possible
+        $editors = $role->getEditorsWantingNotification('new_sale');
+
+        // Push is an independent channel - mirror the email to editors who have
+        // enabled push, regardless of whether email/SMTP is configured. No-op
+        // when OneSignal is unconfigured or the editor has not opted in.
+        foreach ($editors as $editor) {
+            OneSignalService::pushToUser($editor, [
+                'title_key' => 'messages.push_new_sale_title',
+                'body_key' => 'messages.push_new_sale_body',
+                'body_params' => ['event' => $event->name],
+                'url' => route('sales'),
+                'options' => ['icon' => $role->profile_image_url],
+            ], $role);
+        }
+
+        // Email requires a configured mail transport.
         if (config('app.hosted')) {
             if (! $role->hasEmailSettings()) {
                 return;
@@ -106,8 +121,6 @@ class EmailService
                 return;
             }
         }
-
-        $editors = $role->getEditorsWantingNotification('new_sale');
 
         foreach ($editors as $editor) {
             try {
@@ -151,6 +164,18 @@ class EmailService
                 return;
             }
 
+            // Push is an independent channel: send buyer confirmation push(es)
+            // even when no email transport is configured. Resolve any associated
+            // role for the Pro-gate and notification branding.
+            $pushRole = $event->getRoleWithEmailSettings() ?: $event->roles->first();
+            if ($event->individual_tickets && $sale->group_id && $sale->isPrimarySale()) {
+                foreach (Sale::where('group_id', $sale->id)->get() as $groupSale) {
+                    $this->pushTicketConfirmation($groupSale, $event, $pushRole);
+                }
+            } else {
+                $this->pushTicketConfirmation($sale, $event, $pushRole);
+            }
+
             $role = $event->getRoleWithEmailSettings();
             if (! $role) {
                 return;
@@ -172,6 +197,26 @@ class EmailService
                 'event_id' => $sale->event_id,
             ]);
         }
+    }
+
+    /**
+     * Queue a ticket-confirmation push to the buyer (targeted by the hashed
+     * email alias the guest portal sets on the confirmation page). No-op unless
+     * OneSignal is configured and the buyer opted into push on their device.
+     */
+    protected function pushTicketConfirmation(Sale $sale, Event $event, ?Role $role): void
+    {
+        if ($this->isTestEmail($sale->email)) {
+            return;
+        }
+
+        OneSignalService::pushToGuestEmail($sale->email, app()->getLocale(), [
+            'title_key' => 'messages.push_ticket_title',
+            'body_key' => 'messages.push_ticket_body',
+            'body_params' => ['event' => $event->name],
+            'url' => $event->getGuestUrl(false, $sale->event_date ?? null, true),
+            'options' => ['icon' => $role?->profile_image_url],
+        ], $role);
     }
 
     /**

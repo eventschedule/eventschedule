@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventFeedback;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\OneSignalService;
 use App\Services\WebhookService;
 use App\Utils\CsvUtils;
 use App\Utils\UrlUtils;
@@ -207,6 +208,19 @@ class FeedbackController extends Controller
             return;
         }
 
+        $editors = $role->getEditorsWantingNotification('new_feedback');
+
+        // Push is an independent channel - dispatch regardless of email config.
+        foreach ($editors as $editor) {
+            OneSignalService::pushToUser($editor, [
+                'title_key' => 'messages.push_new_feedback_title',
+                'body_key' => 'messages.push_new_feedback_body',
+                'body_params' => ['event' => $event->name],
+                'url' => route('sales').'?tab=feedback',
+                'options' => ['icon' => $role->profile_image_url],
+            ], $role);
+        }
+
         // Check if email sending is possible
         if (config('app.hosted')) {
             if (! $role->hasEmailSettings()) {
@@ -218,8 +232,6 @@ class FeedbackController extends Controller
                 return;
             }
         }
-
-        $editors = $role->getEditorsWantingNotification('new_feedback');
 
         foreach ($editors as $editor) {
             try {

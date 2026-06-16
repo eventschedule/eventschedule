@@ -2787,6 +2787,114 @@
 
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.notification_settings_help') }}</p>
 
+                        @if (\App\Services\OneSignalService::isConfigured())
+                        <div class="mb-6 ap-card rounded-xl p-4" id="push-settings-section">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-[var(--brand-blue)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.push_notifications') }}</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.push_notifications_help') }}</p>
+                                    <p id="push-status" class="text-sm font-medium mt-2"></p>
+                                    <div class="mt-3 flex flex-wrap items-center gap-3">
+                                        <button type="button" id="push-enable-btn"
+                                            class="inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg shadow-sm text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+                                            {{ __('messages.push_enable_device') }}
+                                        </button>
+                                        <button type="button" id="push-test-btn"
+                                            class="inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg border border-gray-300 dark:border-[#2d2d30] text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1e1e1e] hover:bg-gray-50 dark:hover:bg-[#2d2d30] focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] transition-all duration-200 hidden">
+                                            {{ __('messages.push_send_test') }}
+                                        </button>
+                                    </div>
+                                    <div id="push-result" class="mt-2 hidden"></div>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-3">{{ __('messages.push_disclosure') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <script {!! nonce_attr() !!}>
+                        (function () {
+                            var statusEl = document.getElementById('push-status');
+                            var enableBtn = document.getElementById('push-enable-btn');
+                            var testBtn = document.getElementById('push-test-btn');
+                            var resultEl = document.getElementById('push-result');
+                            if (!statusEl || !enableBtn || !window.esPush) return;
+
+                            var csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                            var T = {
+                                enabled: @json(__('messages.push_enabled_device'), JSON_UNESCAPED_UNICODE),
+                                notEnabled: @json(__('messages.push_not_enabled'), JSON_UNESCAPED_UNICODE),
+                                blocked: @json(__('messages.push_blocked'), JSON_UNESCAPED_UNICODE),
+                                enable: @json(__('messages.push_enable_device'), JSON_UNESCAPED_UNICODE),
+                                testSent: @json(__('messages.push_test_sent'), JSON_UNESCAPED_UNICODE),
+                                testFailed: @json(__('messages.push_test_failed'), JSON_UNESCAPED_UNICODE),
+                            };
+
+                            function render(status) {
+                                statusEl.classList.remove('text-green-600', 'dark:text-green-400', 'text-amber-600', 'dark:text-amber-400', 'text-gray-500', 'dark:text-gray-400');
+                                if (status === 'enabled') {
+                                    statusEl.textContent = T.enabled;
+                                    statusEl.classList.add('text-green-600', 'dark:text-green-400');
+                                    enableBtn.classList.add('hidden');
+                                    testBtn.classList.remove('hidden');
+                                } else if (status === 'blocked') {
+                                    statusEl.textContent = T.blocked;
+                                    statusEl.classList.add('text-amber-600', 'dark:text-amber-400');
+                                    enableBtn.classList.add('hidden');
+                                    testBtn.classList.add('hidden');
+                                } else {
+                                    statusEl.textContent = T.notEnabled;
+                                    statusEl.classList.add('text-gray-500', 'dark:text-gray-400');
+                                    enableBtn.classList.remove('hidden');
+                                    testBtn.classList.add('hidden');
+                                }
+                            }
+
+                            function post(url) {
+                                return fetch(url, {
+                                    method: 'POST',
+                                    headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                                });
+                            }
+
+                            window.esPush.status().then(render);
+
+                            enableBtn.addEventListener('click', function () {
+                                enableBtn.disabled = true;
+                                window.esPush.enable().then(function (status) {
+                                    enableBtn.disabled = false;
+                                    if (status === 'enabled') {
+                                        post('{{ route('push.subscribe') }}');
+                                    }
+                                    render(status);
+                                });
+                            });
+
+                            testBtn.addEventListener('click', function () {
+                                testBtn.disabled = true;
+                                resultEl.classList.add('hidden');
+                                post('{{ route('push.test') }}').then(function (r) {
+                                    testBtn.disabled = false;
+                                    resultEl.classList.remove('hidden');
+                                    if (r.ok) {
+                                        resultEl.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-200';
+                                        resultEl.textContent = T.testSent;
+                                    } else {
+                                        resultEl.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                                        resultEl.textContent = T.testFailed;
+                                    }
+                                }).catch(function () {
+                                    testBtn.disabled = false;
+                                    resultEl.classList.remove('hidden');
+                                    resultEl.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
+                                    resultEl.textContent = T.testFailed;
+                                });
+                            });
+                        })();
+                        </script>
+                        <hr class="my-6 border-gray-200 dark:border-gray-700">
+                        @endif
+
                         <div class="mb-6" id="notification_new_request_section">
                             <x-toggle name="notification_new_request"
                                 label="{{ __('messages.notify_new_request') }}"

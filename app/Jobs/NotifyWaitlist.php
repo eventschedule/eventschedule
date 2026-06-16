@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Mail\WaitlistNotification;
 use App\Models\Event;
 use App\Models\TicketWaitlist;
+use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
@@ -82,5 +83,13 @@ class NotifyWaitlist implements ShouldQueue
             $role?->id,
             $entry->locale
         );
+
+        OneSignalService::pushToGuestEmail($entry->email, $entry->locale ?: app()->getLocale(), [
+            'title_key' => 'messages.push_waitlist_title',
+            'body_key' => 'messages.push_waitlist_body',
+            'body_params' => ['event' => $event->name],
+            'url' => $event->getGuestUrl(false, $entry->event_date, true),
+            'options' => ['icon' => $role?->profile_image_url],
+        ], $role);
     }
 }

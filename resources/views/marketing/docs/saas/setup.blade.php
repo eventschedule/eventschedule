@@ -321,6 +321,12 @@
                                     <li>Prices are defined in your Stripe dashboard; the Price IDs are referenced via environment variables</li>
                                 </ul>
                             </div>
+
+                            <h3 id="push-notifications" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Push Notifications (Optional)</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can send web push notifications that mirror its email notifications using <a href="https://onesignal.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">OneSignal</a>. This is a Pro feature and is <strong>off by default</strong>: with no configuration, no push SDK loads and no calls are made to OneSignal. To enable it platform-wide, create a OneSignal app (Web platform) and set:</p>
+                            <pre class="doc-code-block"><code>ONESIGNAL_APP_ID=your-onesignal-app-id
+ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Schedule owners on Pro/Enterprise plans can then enable push under <strong>Settings &rarr; Notifications</strong>. One OneSignal app serves the whole platform; tenants are segmented automatically. Note that enabling push loads the OneSignal SDK from their CDN and sends notification data to OneSignal, and that Apple iOS only supports web push for sites added to the home screen (iOS 16.4+).</p>
                         </section>
 
                         <!-- DNS Configuration -->

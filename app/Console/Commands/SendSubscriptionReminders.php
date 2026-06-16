@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\SubscriptionRenewal;
 use App\Mail\SubscriptionTrialEnding;
 use App\Models\Role;
+use App\Services\OneSignalService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -88,6 +89,13 @@ class SendSubscriptionReminders extends Command
                     new SubscriptionTrialEnding($role, $amount, $planLabel, $trialEndDate, $hasCard)
                 );
 
+                OneSignalService::pushToUser($role->user, [
+                    'title_key' => 'messages.push_subscription_trial_title',
+                    'body_key' => 'messages.push_subscription_trial_body',
+                    'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']),
+                    'options' => [],
+                ], null);
+
                 $role->trial_reminder_sent_at = now();
                 $role->save();
 
@@ -165,6 +173,13 @@ class SendSubscriptionReminders extends Command
                 Mail::to($role->user->email)->send(
                     new SubscriptionRenewal($role, $amount, $planLabel, $renewalDate, $hasCard)
                 );
+
+                OneSignalService::pushToUser($role->user, [
+                    'title_key' => 'messages.push_subscription_renewal_title',
+                    'body_key' => 'messages.push_subscription_renewal_body',
+                    'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']),
+                    'options' => [],
+                ], null);
 
                 $role->renewal_reminder_sent_at = now();
                 $role->save();

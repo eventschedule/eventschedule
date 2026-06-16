@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Mail\BackupImportComplete;
 use App\Models\BackupJob;
 use App\Services\BackupService;
+use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -106,6 +107,12 @@ class ProcessBackupImport implements ShouldQueue
             Mail::to($job->user->email)->send(
                 new BackupImportComplete($report)
             );
+
+            OneSignalService::pushToUser($job->user, [
+                'title_key' => 'messages.push_backup_import_title',
+                'body_key' => 'messages.push_backup_import_body',
+                'url' => app_url(route('profile.edit', [], false)).'#backup',
+            ], null);
 
         } catch (\Exception $e) {
             report($e);

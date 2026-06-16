@@ -6,6 +6,7 @@ use App\Mail\BackupExportComplete;
 use App\Models\BackupJob;
 use App\Models\Role;
 use App\Services\BackupService;
+use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Mail;
@@ -103,6 +104,12 @@ class ProcessBackupExport implements ShouldQueue
             Mail::to($job->user->email)->send(
                 new BackupExportComplete($downloadUrl, $scheduleNames, $expiresAt)
             );
+
+            OneSignalService::pushToUser($job->user, [
+                'title_key' => 'messages.push_backup_export_title',
+                'body_key' => 'messages.push_backup_export_body',
+                'url' => $downloadUrl,
+            ], null);
 
         } catch (\Exception $e) {
             report($e);

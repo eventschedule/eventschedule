@@ -8,7 +8,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
-    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">    
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+    <meta name="theme-color" content="#4E81FA">
+    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">
+
+    @if (\App\Services\OneSignalService::isConfigured())
+        @include('partials.onesignal')
+    @endif
     
     @if (config('app.hosted') || config('app.report_errors'))
         <script {!! nonce_attr() !!}>

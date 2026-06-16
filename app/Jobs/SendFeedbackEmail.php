@@ -6,6 +6,7 @@ use App\Mail\FeedbackRequest;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\OneSignalService;
 use App\Services\RoleMailerService;
 use App\Services\UsageTrackingService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -60,6 +61,14 @@ class SendFeedbackEmail implements ShouldBeUnique, ShouldQueue
 
             return;
         }
+
+        OneSignalService::pushToGuestEmail($sale->email, $this->locale, [
+            'title_key' => 'messages.push_feedback_request_title',
+            'title_params' => ['event' => $event->name],
+            'body_key' => 'messages.push_feedback_request_body',
+            'url' => $event->getGuestUrl(false, $sale->event_date ?? null, true),
+            'options' => ['icon' => $role->profile_image_url],
+        ], $role);
 
         $originalLocale = app()->getLocale();
 

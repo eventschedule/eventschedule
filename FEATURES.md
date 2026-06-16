@@ -68,6 +68,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Check-in dashboard | `CheckInController`, `$role->isPro()` | Real-time attendance tracking with per-ticket breakdown |
 | Ticket waitlist | `WaitlistController`, `$event->isPro()` | Auto-notify when sold-out tickets become available |
 | Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell |
+| Push notifications | `OneSignalService::dispatch()`, `$role->isPro()` | Browser/mobile web push (via OneSignal) mirroring email notifications; opt-in, off by default, requires `ONESIGNAL_APP_ID` |
 | Sales CSV export | `TicketController::exportSales()` | Export sales data with custom fields |
 | Post-event feedback | `FeedbackController`, `$role->isPro()` | Collect star ratings and comments from attendees after events |
 | Carpool matching | `CarpoolController`, `$role->isPro()` | Let attendees offer and request rides to events with driver approval, contact sharing, and reviews |

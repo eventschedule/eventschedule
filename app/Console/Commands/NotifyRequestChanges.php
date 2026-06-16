@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Event;
 use App\Models\Role;
 use App\Notifications\NewRequestsNotification;
+use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 
 class NotifyRequestChanges extends Command
@@ -57,8 +58,17 @@ class NotifyRequestChanges extends Command
                 $editors = $role->getEditorsWantingNotification('new_request');
 
                 if ($editors->isNotEmpty()) {
+                    $pushUrl = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']);
+
                     foreach ($editors as $editor) {
                         $editor->notify(new NewRequestsNotification($role, $currentRequestCount));
+
+                        OneSignalService::pushToUser($editor, [
+                            'title_key' => 'messages.push_new_request_title',
+                            'body_key' => 'messages.push_new_request_body',
+                            'url' => $pushUrl,
+                            'options' => ['icon' => $role->profile_image_url],
+                        ], $role);
                     }
 
                     $notifiedCount++;

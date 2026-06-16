@@ -568,6 +568,12 @@
           </div>
         </div>
 
+        @if ($sale->status === 'paid')
+          <div class="mt-[16px]">
+            @include('partials.push-optin', ['pushEmail' => $sale->email, 'pushName' => $event->name])
+          </div>
+        @endif
+
       </div>
     </main>
 

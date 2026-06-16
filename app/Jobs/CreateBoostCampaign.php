@@ -8,6 +8,7 @@ use App\Models\BoostCampaign;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
 use App\Services\MetaAdsServiceFake;
+use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -120,6 +121,12 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
                     'error' => $e->getMessage(),
                 ]);
             }
+            OneSignalService::pushToUser($campaign->user, [
+                'title_key' => 'messages.push_boost_created_title',
+                'body_key' => 'messages.push_boost_created_body',
+                'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+                'options' => [],
+            ], null);
         }
 
         Log::info('Boost campaign created on Meta', [
@@ -178,6 +185,12 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
                     'error' => $emailError->getMessage(),
                 ]);
             }
+            OneSignalService::pushToUser($campaign->user, [
+                'title_key' => 'messages.push_boost_rejected_title',
+                'body_key' => 'messages.push_boost_rejected_body',
+                'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+                'options' => [],
+            ], null);
         }
     }
 

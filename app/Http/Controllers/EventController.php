@@ -32,6 +32,7 @@ use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\MetaAdsService;
+use App\Services\OneSignalService;
 use App\Services\UsageTrackingService;
 use App\Services\WebhookService;
 use App\Utils\ColorUtils;
@@ -778,6 +779,14 @@ class EventController extends Controller
                     null,
                     $event->user->language_code
                 );
+
+                OneSignalService::pushToUser($event->user, [
+                    'title_key' => 'messages.push_event_accepted_title',
+                    'body_key' => 'messages.push_event_accepted_body',
+                    'body_params' => ['event' => $event->name],
+                    'url' => $event->getGuestUrl(false, null, true),
+                    'options' => ['icon' => $role->profile_image_url],
+                ], $role);
             }
         }
 
@@ -815,6 +824,14 @@ class EventController extends Controller
                     null,
                     $event->user->language_code
                 );
+
+                OneSignalService::pushToUser($event->user, [
+                    'title_key' => 'messages.push_event_declined_title',
+                    'body_key' => 'messages.push_event_declined_body',
+                    'body_params' => ['event' => $event->name],
+                    'url' => $event->getGuestUrl(false, null, true),
+                    'options' => ['icon' => $role->profile_image_url],
+                ], $role);
             }
         }
 
@@ -902,6 +919,14 @@ class EventController extends Controller
                             null,
                             $event->user->language_code
                         );
+
+                        OneSignalService::pushToUser($event->user, [
+                            'title_key' => 'messages.push_event_accepted_title',
+                            'body_key' => 'messages.push_event_accepted_body',
+                            'body_params' => ['event' => $event->name],
+                            'url' => $event->getGuestUrl(false, null, true),
+                            'options' => ['icon' => $role->profile_image_url],
+                        ], $role);
                     }
                 }
             }

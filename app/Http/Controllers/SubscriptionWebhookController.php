@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\SubscriptionPaymentFailed;
 use App\Models\Role;
+use App\Services\OneSignalService;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Http\Controllers\WebhookController;
 use Symfony\Component\HttpFoundation\Response;
@@ -105,6 +106,13 @@ class SubscriptionWebhookController extends WebhookController
         if ($role && $role->user) {
             try {
                 Mail::to($role->user->email)->send(new SubscriptionPaymentFailed($role));
+
+                OneSignalService::pushToUser($role->user, [
+                    'title_key' => 'messages.push_subscription_payment_failed_title',
+                    'body_key' => 'messages.push_subscription_payment_failed_body',
+                    'url' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan']),
+                    'options' => [],
+                ], null);
             } catch (\Exception $e) {
                 \Log::error('Failed to send payment failed email', [
                     'role_id' => $role->id,
