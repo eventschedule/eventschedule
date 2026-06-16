@@ -341,4 +341,36 @@ class TicketingTest extends TestCase
 
         \Illuminate\Support\Facades\Queue::assertPushed(\App\Jobs\SendQueuedEmail::class);
     }
+
+    public function test_rsvp_cancellation(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['rsvp_enabled' => true]);
+        $sale = $this->createSale($event, $role, [
+            'status' => 'paid',
+            'payment_method' => 'rsvp',
+            'payment_amount' => 0,
+        ]);
+
+        $this->post(route('rsvp.cancel', ['sale_id' => UrlUtils::encodeId($sale->id)]), [
+            'secret' => $sale->secret,
+        ]);
+
+        $this->assertSame('cancelled', $sale->fresh()->status);
+    }
+
+    public function test_buyer_ticket_view(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+        $ticket = $this->createTicket($event, ['price' => 0]);
+        $sale = $this->createSale($event, $role, ['name' => 'Ticket Holder', 'status' => 'paid'], $ticket, 1);
+
+        $this->get(route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $sale->secret,
+        ]))->assertOk()->assertSee('Ticket Holder');
+    }
 }

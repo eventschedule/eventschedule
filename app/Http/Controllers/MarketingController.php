@@ -5248,6 +5248,8 @@ class MarketingController extends Controller
 
             ['page' => 'Installation', 'section' => 'Custom translations', 'description' => 'Rename Talent to Artist or any other UI term. Overrides live in storage/app/lang/ and survive upgrades.', 'url' => $r['selfhost_installation'].'#translations', 'category' => 'Selfhost', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
             ['page' => 'SaaS Setup', 'section' => 'Custom translations', 'description' => 'Override UI strings in storage/app/lang/ across every tenant. Survives upgrades.', 'url' => $r['saas_setup'].'#translations', 'category' => 'SaaS', 'keywords' => 'translation language rename customize override messages talent artist curator event planner locale'],
+            ['page' => 'Installation', 'section' => 'Custom dashboard links', 'description' => 'Add custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['selfhost_installation'].'#custom-links', 'category' => 'Selfhost', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],
+            ['page' => 'SaaS Setup', 'section' => 'Custom dashboard links', 'description' => 'Add platform-wide custom links to the admin sidebar via CUSTOM_LINK_* environment variables.', 'url' => $r['saas_setup'].'#custom-links', 'category' => 'SaaS', 'keywords' => 'custom links sidebar dashboard navigation menu env environment'],
 
             // Admin Panel (Selfhost)
             ['page' => 'Admin Panel', 'section' => 'Overview', 'description' => 'Admin panel organization and sections.', 'url' => $r['selfhost_admin'].'#overview', 'category' => 'Selfhost', 'keywords' => 'admin panel dashboard'],

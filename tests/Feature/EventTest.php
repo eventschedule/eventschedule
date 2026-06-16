@@ -236,4 +236,57 @@ class EventTest extends TestCase
         $this->assertInstanceOf(\Carbon\Carbon::class, $end);
         $this->assertSame('UTC', $start->getTimezone()->getName());
     }
+
+    public function test_photo_gallery_shows_approved_photos(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['fan_photos_enabled' => true]);
+
+        \App\Models\EventPhoto::create([
+            'event_id' => $event->id,
+            'user_id' => $owner->id,
+            'photo_url' => 'photos/test.jpg',
+            'is_approved' => true,
+        ]);
+
+        $url = '/' . $role->subdomain . '/' . $event->slug . '/' . UrlUtils::encodeId($event->id) . '/photos';
+        $this->get($url)
+            ->assertOk()
+            ->assertViewHas('event', fn ($e) => $e->approvedPhotos->count() === 1);
+    }
+
+    public function test_bulk_photo_download(): void
+    {
+        // The controller assembles the zip on the real filesystem (storage/app/temp) and
+        // reads photo files directly, so Storage::fake doesn't satisfy it without polluting
+        // real storage. Left for a fixture that writes real temp files.
+        $this->markTestSkipped('Bulk photo download builds a zip from real on-disk files; needs a real-file fixture.');
+
+        \Illuminate\Support\Facades\Storage::fake('local');
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner); // enterprise = Pro
+        $event = $this->createEvent($role);
+
+        foreach (['photos/p1.jpg', 'photos/p2.jpg'] as $path) {
+            \Illuminate\Support\Facades\Storage::disk('local')->put($path, 'img');
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, 'img');
+            \App\Models\EventPhoto::create([
+                'event_id' => $event->id,
+                'user_id' => $owner->id,
+                'photo_url' => $path,
+                'is_approved' => true,
+            ]);
+        }
+
+        $response = $this->actingAs($owner)->get(route('event.download_photos', [
+            'subdomain' => $role->subdomain,
+            'event_hash' => UrlUtils::encodeId($event->id),
+        ]));
+
+        $response->assertOk();
+        $this->assertStringContainsString('zip', strtolower($response->headers->get('Content-Type') ?? ''));
+    }
 }

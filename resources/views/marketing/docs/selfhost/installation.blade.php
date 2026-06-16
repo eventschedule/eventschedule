@@ -78,6 +78,7 @@
                         <a href="#verification" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Verification</a>
                         <a href="#troubleshooting" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Troubleshooting</a>
                         <a href="#translations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom translations</a>
+                        <a href="#custom-links" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Custom dashboard links</a>
                     </nav>
                 </aside>
 
@@ -412,6 +413,37 @@ return [
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Why this works</div>
                                 <p>Changes apply on the next request, no cache clear is required. <code class="doc-inline-code">storage/app/</code> is gitignored, so your overrides survive <code class="doc-inline-code">php artisan app:update</code>, <code class="doc-inline-code">git pull</code>, and fresh checkouts. New keys added in future releases continue to show their bundled English (or translated) value until you override them.</p>
+                            </div>
+                        </section>
+
+                        <!-- Custom dashboard links -->
+                        <section id="custom-links" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                                </svg>
+                                Custom dashboard links
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add up to three custom links to the admin sidebar (for example a support site, community forum, or internal tool). They appear for every admin, just below the <span class="font-semibold text-gray-900 dark:text-white">Newsletters</span> link, and open in a new tab.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Set the following variables in your <code class="doc-inline-code">.env</code> file. A link only appears when <span class="font-semibold text-gray-900 dark:text-white">both</span> its title and URL are filled in, so you can configure one, two, or three links:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>.env</span>
+                                    <button class="doc-copy-btn">Copy</button>
+                                </div>
+                                <pre><code>CUSTOM_LINK_1_TITLE=<span class="code-string">"Support"</span>
+CUSTOM_LINK_1_URL=<span class="code-string">"https://support.example.com"</span>
+CUSTOM_LINK_2_TITLE=<span class="code-string">"Community"</span>
+CUSTOM_LINK_2_URL=<span class="code-string">"https://community.example.com"</span>
+CUSTOM_LINK_3_TITLE=
+CUSTOM_LINK_3_URL=</code></pre>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Reload cached config</div>
+                                <p>If you have run <code class="doc-inline-code">php artisan config:cache</code>, re-run it (or <code class="doc-inline-code">php artisan config:clear</code>) after editing <code class="doc-inline-code">.env</code> so the new links take effect.</p>
                             </div>
                         </section>
                     </div>

@@ -2,7 +2,7 @@
 
 Tracks which app features have automated **integration-test** coverage and which are gaps to fill.
 
-_Last updated: 2026-06-15_
+_Last updated: 2026-06-16_
 
 ## How to keep this current
 
@@ -26,28 +26,28 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 
 ## Summary
 
-**94 of 154 features covered (~61%).** (Up from 53 / ~37% at the start of this session.)
+**110 of 154 features covered (~71%).** (Up from 53 / ~37% at the start of this session.)
 
 | Area | Covered |
 |------|---------|
 | Authentication & Account | 8 / 11 |
 | User Profile & Settings | 7 / 7 |
-| Schedules (Roles) | 10 / 18 |
+| Schedules (Roles) | 13 / 18 |
 | Sub-schedules (Groups) | 4 / 4 |
-| Events | 13 / 14 |
-| Ticketing & Payments | 14 / 23 |
-| Community & Engagement | 6 / 9 |
+| Events | 14 / 14 |
+| Ticketing & Payments | 16 / 23 |
+| Community & Engagement | 7 / 9 |
 | Newsletters | 10 / 11 |
 | Integrations | 0 / 8 |
 | AI Features | 0 / 8 |
-| Graphics, Analytics & Promotion | 0 / 4 |
-| Customization & Branding | 6 / 8 |
-| Backup & Data | 1 / 2 |
-| Developer / API | 6 / 9 |
+| Graphics, Analytics & Promotion | 1 / 4 |
+| Customization & Branding | 7 / 8 |
+| Backup & Data | 2 / 2 |
+| Developer / API | 7 / 9 |
 | Billing & Plans | 1 / 3 |
-| Guest Portal | 6 / 8 |
-| Platform Admin | 2 / 7 |
-| **Total** | **94 / 154** |
+| Guest Portal | 7 / 8 |
+| Platform Admin | 6 / 7 |
+| **Total** | **110 / 154** |
 
 ## Coverage by feature
 
@@ -95,9 +95,9 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Mobile-optimized / responsive design | ✗ | — (non-functional) |
 | Venue location maps (Google Maps) | ✗ | — |
 | Sponsor / partner logos (Pro) | ✗ | — |
-| Schedule / venue merge | ✗ | — |
-| Schedule audit log (owner) | ✗ | — |
-| YouTube video matching (Talent) | ✗ | — |
+| Schedule / venue merge | ✓ | `ScheduleFeaturesTest` |
+| Schedule audit log (owner) | ✓ | `ScheduleFeaturesTest` |
+| YouTube video matching (Talent) | ✓ | `ScheduleFeaturesTest` |
 
 ### Sub-schedules (Groups)
 | Feature | Tested | Test |
@@ -149,8 +149,8 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Sale notification emails (Pro) | ✗ | skipped — env-guarded mail path (see Notes) |
 | Bulk attendee import (Pro) | ✗ | skipped — timezone-sensitive fixture (see Notes) |
 | Embed ticket widget (Pro) | ✗ | — |
-| RSVP cancellation | ✗ | — |
-| Ticket view + QR code (buyer) | ✗ | — |
+| RSVP cancellation | ✓ | `TicketingTest` |
+| Ticket view + QR code (buyer) | ✓ | `TicketingTest` (view; QR endpoint exits) |
 
 ### Community & Engagement
 | Feature | Tested | Test |
@@ -162,8 +162,8 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Fan photos (submit) | ✓ | `EventTest` |
 | Fan comments (submit) | ✓ | `EventTest` |
 | Carpool matching (Pro) | ✗ | — |
-| Guest event submission / booking request | ✗ | — |
-| Bulk photo download (Pro) | ✗ | — |
+| Guest event submission / booking request | ✓ | `ScheduleFeaturesTest` |
+| Bulk photo download (Pro) | ✗ | skipped — needs real on-disk file fixture |
 
 ### Newsletters
 | Feature | Tested | Test |
@@ -209,7 +209,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 |---|---|---|
 | Event graphics generator (Pro) | ✗ | — |
 | Scheduled graphic emails (Ent) | ✗ | — |
-| Built-in analytics dashboard | ✗ | — |
+| Built-in analytics dashboard | ✓ | `AdminFeaturesTest` (view recording + dashboard) |
 | Event boosting / Meta Ads (Pro) | ✗ | — (needs Meta Ads) |
 
 ### Customization & Branding
@@ -221,14 +221,14 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Accent color & font selection | ✓ | `MiscFeaturesTest` |
 | Custom CSS (Pro) | ✓ | `MiscFeaturesTest` |
 | Custom labels (Pro) | ✓ | `AuthExtraTest` |
-| White-label branding / remove "Powered by" (Pro) | ✗ | — |
+| White-label branding / remove "Powered by" (Pro) | ✓ | `ScheduleFeaturesTest` |
 | Custom domains (Ent) | ✗ | — (needs DigitalOcean) |
 
 ### Backup & Data
 | Feature | Tested | Test |
 |---|---|---|
 | Backup export | ✓ | `ApiAdminTest` |
-| Restore import | ✗ | — (multi-step upload/confirm flow) |
+| Restore import | ✓ | `AdminFeaturesTest` |
 
 ### Developer / API
 | Feature | Tested | Test |
@@ -239,7 +239,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | REST API — groups (POST) | ✓ | `GroupsTest`, `ApiAdminTest` |
 | REST API — auth / invalid key | ✓ | `ApiTest` |
 | API settings / key management | ✓ | `ApiTest`, `GroupsTest` (enableApi) |
-| Webhooks (Pro) | ✗ | — |
+| Webhooks (Pro) | ✓ | `AdminFeaturesTest` (config) |
 | AI agent support (agents.json / OpenAPI / llms.txt) | ✗ | — |
 | Automatic app updates (selfhost) | ✗ | — |
 
@@ -259,7 +259,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Search events | ✓ | `MiscFeaturesTest` |
 | iCal / RSS feeds | ✓ | `MiscFeaturesTest` |
 | Past events listing | ✓ | `MiscFeaturesTest` |
-| Photo gallery (approved photos) | ✗ | — |
+| Photo gallery (approved photos) | ✓ | `EventTest` |
 | Browse / discover schedules | ✗ | — |
 
 ### Platform Admin
@@ -268,10 +268,10 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Admin dashboard | ✓ | `ApiAdminTest` |
 | Blog | ✓ | `ApiAdminTest` |
 | User / domain management | ✗ | — |
-| Sale approval / refund | ✗ | — |
-| Support chat | ✗ | — |
-| Audit logs | ✗ | — |
-| Admin newsletter broadcast | ✗ | — |
+| Sale approval / refund | ✓ | `AdminFeaturesTest` (approval; refund needs Stripe) |
+| Support chat | ✓ | `AdminFeaturesTest` |
+| Audit logs | ✓ | `AdminFeaturesTest` |
+| Admin newsletter broadcast | ✓ | `AdminFeaturesTest` |
 
 ## Notes (findings, blockers, and pre-existing issues)
 
@@ -281,8 +281,10 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 3. **`ExampleTest`** — asserted `/` ends at `/login`; in hosted+test mode `/` returns 200 (home). Removed the stale assertion.
 4. **`NewsletterTest::test_newsletter_index_accessible_to_non_enterprise_role`** — failed with 302 because in hosted mode (`is_testing=false`) bare-domain AP routes redirect to the `app.` subdomain; the test now requests the app-subdomain host.
 
-### Suspected app robustness issue (worth a look)
-- **Null timezone → 500.** `Event::getStartDateTime()` (`app/Models/Event.php:1555`) calls `Carbon::setTimezone($timezone)` where `$timezone` comes from `auth()->user()->timezone`. If the authenticated user has a `null` timezone, this throws a `TypeError` (500) — hit via the bulk-attendee-import path. Real users normally have a timezone, but the value isn't guarded. Consider defaulting to UTC when null.
+### Suspected app robustness issues (worth a look)
+- **Null timezone → 500.** `Event::getStartDateTime()` (`app/Models/Event.php:1555`) calls `Carbon::setTimezone($timezone)` where `$timezone` comes from `auth()->user()->timezone`. If the authenticated user has a `null` timezone, this throws a `TypeError` (500) — hit via the bulk-attendee-import path. Fixed with a `?? 'UTC'` guard.
+- **Undefined `$headerTemplates` → 500 on guest pages.** `resources/views/role/partials/calendar.blade.php` referenced `$headerTemplates` (assigned only in an admin/Pro branch) on non-admin renders, 500ing guest/event pages (date-sensitive). Fixed with a defensive `$headerTemplates ?? collect()` default at the top of the partial.
+- **`amount_mismatch` not in the `sales.status` enum — FIXED.** Stripe/Invoice Ninja webhooks set `status='amount_mismatch'` on an amount discrepancy, but the enum couldn't store it (so the save failed and `approveSale`/`refundSale` were unreachable). Added it via migration `2026_06_16_000000_add_amount_mismatch_to_sales_status.php`; covered by `AdminFeaturesTest::test_admin_sale_approval`.
 
 ### Documented skips (kept as `markTestSkipped` with reasons)
 - **Bulk attendee import** (`TicketingTest`) — the posted `event_date` must match the event's *local* occurrence date (`matchesDate` uses the schedule timezone); reliable coverage needs a fixed-timezone fixture.

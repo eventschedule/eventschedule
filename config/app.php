@@ -43,6 +43,14 @@ return [
     'trial_days' => (int) env('TRIAL_DAYS', 7),
     'search_exclude_country' => env('SEARCH_EXCLUDE_COUNTRY', ''),
 
+    // Custom links shown in the admin sidebar (up to 3). A link only appears when
+    // both its title and URL are set. Works in both selfhosted and hosted (SaaS) modes.
+    'custom_links' => array_values(array_filter([
+        ['title' => env('CUSTOM_LINK_1_TITLE', ''), 'url' => env('CUSTOM_LINK_1_URL', '')],
+        ['title' => env('CUSTOM_LINK_2_TITLE', ''), 'url' => env('CUSTOM_LINK_2_URL', '')],
+        ['title' => env('CUSTOM_LINK_3_TITLE', ''), 'url' => env('CUSTOM_LINK_3_URL', '')],
+    ], fn ($link) => ! empty($link['title']) && ! empty($link['url']))),
+
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

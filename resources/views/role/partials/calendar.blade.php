@@ -1,3 +1,4 @@
+@php $headerTemplates = $headerTemplates ?? collect(); @endphp
 <style>
     [v-cloak] { display: none !important; }
     .hover-accent:not(:disabled):hover {
