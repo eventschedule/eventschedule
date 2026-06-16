@@ -127,6 +127,60 @@ Test files: `tests/Browser/GeneralTest.php`, `TicketTest.php`, `CuratorEventTest
 composer audit
 ```
 
+## Release Notes
+
+When the user asks for "release notes" (or "releasenotes"), generate the notes for the **next**
+version of the app and print the markdown in chat. Do not create a GitHub release/tag and do not
+bump version files unless explicitly asked separately. Follow the established style at
+https://github.com/eventschedule/eventschedule/releases.
+
+**Steps:**
+
+1. **Find the last release and next version.** The authoritative last published release is
+   `gh release view --json tagName,name` (cross-check `version_installed` in
+   `config/self-update.php`). Versions are `vMAJOR.MINOR.PATCH` (e.g. `v1.0.111`). The next
+   version is a **patch bump** by default (`v1.0.111` -> `v1.0.112`); only use a minor/major
+   bump if the user asks.
+
+2. **Review changes since the last release.** Run `git log <last-release-tag>..HEAD --oneline`.
+   If the tag is missing locally (local tags can lag GitHub), run `git fetch --tags` first. Read
+   the actual commits closely enough to describe each change accurately; for a referenced issue/PR
+   you can read it with `gh issue view <n>` / `gh pr view <n>` for a clearer summary.
+
+3. **Write short, user-facing bullets** matching the house style:
+   - Bullet list only, each prefixed with `Added:`, `Updated:`, or `Fixed:`. No emoji.
+   - Keep it short and sweet (past releases are ~1-7 bullets). Describe user-facing impact,
+     not implementation details.
+   - Skip internal-only commits (test-only changes, version bumps, CI, no-op refactors).
+   - Merge related commits into a single bullet.
+   - When a commit references an issue/PR number (e.g. `#89`), link it inline:
+     `[#89](https://github.com/eventschedule/eventschedule/issues/89)`.
+
+4. **Always link to the user guide.** Every release's notes must include user-guide links - the
+   user guide is the public docs at `https://eventschedule.com/docs/{slug}#{anchor}`. Link each
+   notable change to its relevant section (e.g. a trailing `[Learn more](...)` or by hyperlinking
+   the feature name): find the page slug from the `marketing.docs.*` routes in `routes/web.php`, and
+   the section anchor from `MarketingController::getDocSearchIndex()` or the feature->anchor map in
+   `app/Utils/HelpUtils.php`. Take slugs/anchors from those sources - never invent an anchor; if no
+   exact section fits, link the closest page (or the docs home, `https://eventschedule.com/docs`).
+   Never ship release notes without user-guide links.
+
+5. **Output.** Print the version as the title followed by the bullet body, as markdown in chat,
+   ready to paste into GitHub's release form.
+
+Apply the repo's writing rules to the notes too: no em-dashes; "schedule" not "role"; "selfhost"
+not "self-host".
+
+**Example output:**
+
+```
+v1.0.112
+
+- Added: OneSignal web push notifications so guests can opt in to event reminders. [Learn more](https://eventschedule.com/docs/account-settings)
+- Updated: Custom dashboard links [#87](https://github.com/eventschedule/eventschedule/issues/87) [Learn more](https://eventschedule.com/docs/getting-started)
+- Fixed: Markdown not formatting correctly in some event descriptions [#90](https://github.com/eventschedule/eventschedule/issues/90) [Learn more](https://eventschedule.com/docs/creating-events#details)
+```
+
 ## Feature Tiers (Free / Pro / Enterprise)
 
 See `FEATURES.md` for the complete reference of which features belong to each plan tier. **Always consult `FEATURES.md`** when:
