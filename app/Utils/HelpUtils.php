@@ -127,6 +127,7 @@ class HelpUtils
 
         // Simple page-level mappings
         '{subdomain}/schedule' => '/docs/managing-schedules#schedule',
+        '{subdomain}/templates' => '/docs/managing-schedules#templates',
         '{subdomain}/availability' => '/docs/managing-schedules#availability',
         '{subdomain}/requests' => '/docs/managing-schedules#requests',
         '{subdomain}/followers' => '/docs/managing-schedules#followers',

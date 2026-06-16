@@ -26,28 +26,28 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 
 ## Summary
 
-**94 of 145 features covered (~65%).** (Up from 53 / ~37% at the start of this session.)
+**94 of 154 features covered (~61%).** (Up from 53 / ~37% at the start of this session.)
 
 | Area | Covered |
 |------|---------|
 | Authentication & Account | 8 / 11 |
 | User Profile & Settings | 7 / 7 |
-| Schedules (Roles) | 10 / 16 |
+| Schedules (Roles) | 10 / 18 |
 | Sub-schedules (Groups) | 4 / 4 |
-| Events | 13 / 13 |
-| Ticketing & Payments | 14 / 21 |
-| Community & Engagement | 6 / 7 |
+| Events | 13 / 14 |
+| Ticketing & Payments | 14 / 23 |
+| Community & Engagement | 6 / 9 |
 | Newsletters | 10 / 11 |
-| Integrations | 0 / 9 |
+| Integrations | 0 / 8 |
 | AI Features | 0 / 8 |
 | Graphics, Analytics & Promotion | 0 / 4 |
 | Customization & Branding | 6 / 8 |
 | Backup & Data | 1 / 2 |
-| Developer / API | 5 / 8 |
+| Developer / API | 6 / 9 |
 | Billing & Plans | 1 / 3 |
-| Guest Portal | 6 / 7 |
-| Platform Admin | 2 / 6 |
-| **Total** | **94 / 145** |
+| Guest Portal | 6 / 8 |
+| Platform Admin | 2 / 7 |
+| **Total** | **94 / 154** |
 
 ## Coverage by feature
 
@@ -95,7 +95,9 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Mobile-optimized / responsive design | ✗ | — (non-functional) |
 | Venue location maps (Google Maps) | ✗ | — |
 | Sponsor / partner logos (Pro) | ✗ | — |
-| Custom domains (Ent) | ✗ | — (needs DigitalOcean) |
+| Schedule / venue merge | ✗ | — |
+| Schedule audit log (owner) | ✗ | — |
+| YouTube video matching (Talent) | ✗ | — |
 
 ### Sub-schedules (Groups)
 | Feature | Tested | Test |
@@ -121,6 +123,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Markdown descriptions | ✓ | `EventTest` |
 | Private & password-protected events (Ent) | ✓ | `EventTest` |
 | Event polls (Pro) | ✓ | `EventTest` |
+| Event templates (save / apply) | ✓ | `EventTemplateTest` |
 
 ### Ticketing & Payments
 | Feature | Tested | Test |
@@ -146,6 +149,8 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Sale notification emails (Pro) | ✗ | skipped — env-guarded mail path (see Notes) |
 | Bulk attendee import (Pro) | ✗ | skipped — timezone-sensitive fixture (see Notes) |
 | Embed ticket widget (Pro) | ✗ | — |
+| RSVP cancellation | ✗ | — |
+| Ticket view + QR code (buyer) | ✗ | — |
 
 ### Community & Engagement
 | Feature | Tested | Test |
@@ -157,6 +162,8 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Fan photos (submit) | ✓ | `EventTest` |
 | Fan comments (submit) | ✓ | `EventTest` |
 | Carpool matching (Pro) | ✗ | — |
+| Guest event submission / booking request | ✗ | — |
+| Bulk photo download (Pro) | ✗ | — |
 
 ### Newsletters
 | Feature | Tested | Test |
@@ -180,7 +187,6 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | CalDAV sync | ✗ | — (needs CalDAV server) |
 | Eventbrite import (Pro) | ✗ | — (needs Eventbrite OAuth) |
 | Third-party / URL import (selfhost) | ✗ | — |
-| Webhooks (Pro) | ✗ | — |
 | WhatsApp event creation (Ent) | ✗ | — (needs Meta webhook) |
 | Add to Google/Apple/MS calendar | ✗ | — |
 | iCal download (.ics, per event) | ✗ | — (subscription feed is covered under Guest Portal) |
@@ -232,6 +238,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | REST API — sales (GET) | ✓ | `ApiAdminTest` |
 | REST API — groups (POST) | ✓ | `GroupsTest`, `ApiAdminTest` |
 | REST API — auth / invalid key | ✓ | `ApiTest` |
+| API settings / key management | ✓ | `ApiTest`, `GroupsTest` (enableApi) |
 | Webhooks (Pro) | ✗ | — |
 | AI agent support (agents.json / OpenAPI / llms.txt) | ✗ | — |
 | Automatic app updates (selfhost) | ✗ | — |
@@ -252,6 +259,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Search events | ✓ | `MiscFeaturesTest` |
 | iCal / RSS feeds | ✓ | `MiscFeaturesTest` |
 | Past events listing | ✓ | `MiscFeaturesTest` |
+| Photo gallery (approved photos) | ✗ | — |
 | Browse / discover schedules | ✗ | — |
 
 ### Platform Admin
@@ -263,6 +271,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Sale approval / refund | ✗ | — |
 | Support chat | ✗ | — |
 | Audit logs | ✗ | — |
+| Admin newsletter broadcast | ✗ | — |
 
 ## Notes (findings, blockers, and pre-existing issues)
 

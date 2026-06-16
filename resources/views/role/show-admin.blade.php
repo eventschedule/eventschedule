@@ -381,6 +381,9 @@
             <select id="current-tab" name="current-tab"
                 class="block w-full rounded-lg border-0 py-1.5 ps-3 pe-10 ring-1 ring-inset ring-gray-300 dark:bg-gray-900 dark:text-gray-300 dark:ring-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-inset focus:ring-[var(--brand-blue)]">
                 <option value="schedule" {{ $tab == 'schedule' ? 'selected' : '' }}>{{ __('messages.schedule') }}</option>
+                @if (auth()->user()->isEditor($role->subdomain))
+                <option value="templates" {{ $tab == 'templates' ? 'selected' : '' }}>{{ __('messages.templates') }}</option>
+                @endif
                 @if ($role->isCurator())
                 <option value="videos" {{ $tab == 'videos' ? 'selected' : '' }}>
                     {{ __('messages.videos') }}</option>
@@ -410,6 +413,10 @@
             <nav class="-mb-px flex gap-x-8 overflow-x-auto scrollbar-hide">
                 <a href="{{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'schedule') ? ['subdomain' => $role->subdomain, 'tab' => 'schedule'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'schedule', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'schedule' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.schedule') }}</a>
+                @if (auth()->user()->isEditor($role->subdomain))
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'templates']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'templates' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.templates') }}</a>
+                @endif
                 @if ($role->isCurator())
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'videos']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'videos' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.videos') }}</a>
@@ -439,6 +446,8 @@
 
     @if ($tab == 'schedule')
     @include('role.show-admin-schedule')
+    @elseif ($tab == 'templates')
+    @include('role.show-admin-templates')
     @elseif ($tab == 'availability')
     @include('role.show-admin-availability')
     @elseif ($tab == 'requests')

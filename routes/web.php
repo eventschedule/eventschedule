@@ -13,6 +13,7 @@ use App\Http\Controllers\CarpoolController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\EventbriteController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\GoogleCalendarController;
@@ -329,6 +330,10 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/clone-event/{hash}', [EventController::class, 'clone'])->name('event.clone');
+    Route::post('/{subdomain}/save-as-template/{hash}', [EventTemplateController::class, 'store'])->name('event_template.store');
+    Route::get('/{subdomain}/templates/{hash}/apply', [EventTemplateController::class, 'apply'])->name('event_template.apply');
+    Route::put('/{subdomain}/templates/{hash}', [EventTemplateController::class, 'update'])->name('event_template.update');
+    Route::delete('/{subdomain}/templates/{hash}', [EventTemplateController::class, 'destroy'])->name('event_template.destroy');
     Route::delete('/{subdomain}/delete-event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update-event/{hash}', [EventController::class, 'update'])->name('event.update');
     Route::delete('/{subdomain}/delete-event-image', [EventController::class, 'deleteImage'])->name('event.delete_image');
@@ -407,7 +412,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
 
     Route::get('/{subdomain}/audit-log', [RoleController::class, 'auditLog'])->name('role.audit_log')->where('subdomain', '(?!docs(?=/|$)|admin(?=/|$))[^/]+');
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|availability|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 

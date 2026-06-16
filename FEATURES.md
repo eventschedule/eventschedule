@@ -64,6 +64,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Custom CSS styling | `RoleController:1748`, `$role->isPro()` | Custom CSS on schedule pages |
 | Custom fields | `RoleController:1822`, `$role->isPro()` | Custom data fields on events |
 | Event polls | `EventController`, `$role->isPro()` | Create polls on events, guests vote |
+| Event templates | `EventTemplateController`, `$role->isPro()` | Save an event as a reusable template and create new events from it (Templates tab) |
 | Check-in dashboard | `CheckInController`, `$role->isPro()` | Real-time attendance tracking with per-ticket breakdown |
 | Ticket waitlist | `WaitlistController`, `$event->isPro()` | Auto-notify when sold-out tickets become available |
 | Sale notification emails | `EmailService::sendNewSaleNotification()` | Opt-in email alerts when tickets sell |

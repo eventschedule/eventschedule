@@ -2002,6 +2002,7 @@ class RoleController extends Controller
         $followersWithRoles = [];
 
         $events = collect();
+        $eventTemplates = collect();
         $unscheduled = [];
         $requests = [];
         $month = $request->month;
@@ -2118,6 +2119,8 @@ class RoleController extends Controller
                 ->orderBy($followerSortBy, $followerSortDir)
                 ->paginate(10)
                 ->withQueryString();
+        } elseif ($tab == 'templates') {
+            $eventTemplates = $role->eventTemplates;
         }
 
         if (isset($followerSortBy)) {
@@ -2141,6 +2144,7 @@ class RoleController extends Controller
             'role',
             'tab',
             'events',
+            'eventTemplates',
             'members',
             'followers',
             'followersWithRoles',

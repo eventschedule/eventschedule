@@ -49,6 +49,128 @@ class EventRepo
     }
 
     /**
+     * Serialize an event into the `cloned_event` session payload shape consumed by
+     * EventController::create(). Shared by the Clone action and Event Templates so
+     * the two can't drift. The caller decides where the payload goes (session for a
+     * one-off clone, a persisted EventTemplate row for a template).
+     */
+    public static function buildClonePayload(Event $event): array
+    {
+        $event->loadMissing(['tickets', 'addons', 'roles', 'curators', 'parts']);
+
+        // Copy fillable fields (skip id/slug)
+        $clonedEventData = [];
+        foreach ($event->getFillable() as $field) {
+            if (! in_array($field, ['id', 'slug'])) {
+                $clonedEventData[$field] = $event->$field;
+            }
+        }
+
+        // Recurrence columns are NOT in $fillable, so the getFillable() loop above
+        // skips them - without this the day-of-week pattern and date exceptions would
+        // be silently dropped (the form keys recurrence off $event->days_of_week).
+        $clonedEventData['days_of_week'] = $event->days_of_week;
+        $clonedEventData['recurring_include_dates'] = $event->recurring_include_dates;
+        $clonedEventData['recurring_exclude_dates'] = $event->recurring_exclude_dates;
+
+        // Reset fields that shouldn't be carried to a new event
+        $clonedEventData['flyer_image_url'] = null;
+        $clonedEventData['sponsor_logos'] = null;
+        $clonedEventData['rsvp_sold'] = 0;
+
+        // Capture the source flyer's raw filename (not the accessor URL) so it can be
+        // copied to a new physical file when the new event is saved. Demo flyers live
+        // in public/images/demo/ (not in Storage), so they're skipped.
+        $rawFlyer = $event->getAttributes()['flyer_image_url'] ?? null;
+        $clonedFlyer = ($rawFlyer && ! str_starts_with($rawFlyer, 'demo_')) ? $rawFlyer : null;
+
+        // Clone tickets (reset sold quantities)
+        $clonedTickets = [];
+        foreach ($event->tickets as $ticket) {
+            $clonedTickets[] = [
+                'type' => $ticket->type,
+                'quantity' => $ticket->quantity,
+                'price' => $ticket->price,
+                'description' => $ticket->description,
+                'custom_fields' => $ticket->custom_fields,
+                'volume_discount' => $ticket->volume_discount,
+                // Pass / subscription config (coverage ids encoded; consumed by the
+                // edit form's pass_coverage fallback since cloned tickets have no id).
+                'is_pass' => $ticket->is_pass,
+                'pass_usage_type' => $ticket->pass_usage_type,
+                'pass_max_uses' => $ticket->pass_max_uses,
+                'pass_valid_days' => $ticket->pass_valid_days,
+                'pass_scope' => $ticket->pass_scope,
+                'pass_coverage' => [
+                    'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
+                    'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
+                ],
+                // sold is not cloned
+            ];
+        }
+        if (empty($clonedTickets)) {
+            // Represent "no tickets" as a single empty-fields array (rehydrated into a
+            // blank Ticket by create()) - never a model instance, so it round-trips as JSON.
+            $clonedTickets = [[]];
+        }
+
+        // Clone add-ons (reset sold quantities)
+        $clonedAddons = [];
+        foreach ($event->addons as $addon) {
+            $clonedAddons[] = [
+                'type' => $addon->type,
+                'quantity' => $addon->quantity,
+                'price' => $addon->price,
+                'description' => $addon->description,
+            ];
+        }
+
+        // Prepare venue and members
+        $venue = $event->venue;
+        $selectedMembers = [];
+        foreach ($event->roles as $each) {
+            if ($each->isTalent()) {
+                $selectedMembers[] = $each->toData();
+            }
+        }
+
+        // Prepare curator data
+        $curatorIds = [];
+        $curatorGroups = [];
+        foreach ($event->curators as $curator) {
+            $curatorId = UrlUtils::encodeId($curator->id);
+            $curatorIds[] = $curatorId;
+            $groupId = $event->getGroupIdForSubdomain($curator->subdomain);
+            if ($groupId) {
+                $curatorGroups[$curatorId] = UrlUtils::encodeId($groupId);
+            }
+        }
+
+        // Clone event parts
+        $clonedParts = [];
+        foreach ($event->parts as $part) {
+            $clonedParts[] = [
+                'name' => $part->name,
+                'description' => $part->description,
+                'start_time' => $part->start_time,
+                'end_time' => $part->end_time,
+            ];
+        }
+
+        return [
+            'event' => $clonedEventData,
+            'tickets' => $clonedTickets,
+            'addons' => $clonedAddons,
+            'venue_id' => $venue ? UrlUtils::encodeId($venue->id) : null,
+            'selected_members' => $selectedMembers,
+            'curators' => $curatorIds,
+            'curator_groups' => $curatorGroups,
+            'parts' => $clonedParts,
+            'flyer_image_filename' => $clonedFlyer,
+        ];
+    }
+
+    /**
      * Get UTC date range for a date in a given timezone
      */
     private function getUtcDateRange(Carbon $date): array

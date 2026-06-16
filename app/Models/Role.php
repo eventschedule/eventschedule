@@ -1753,6 +1753,11 @@ class Role extends Model implements MustVerifyEmail
         return $this->hasMany(\App\Models\Group::class);
     }
 
+    public function eventTemplates()
+    {
+        return $this->hasMany(\App\Models\EventTemplate::class)->orderByDesc('created_at');
+    }
+
     /**
      * Get event custom fields definition
      */
