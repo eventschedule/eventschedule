@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'Header- / footercode',
+    'header_footer_code_intro' => 'Voeg aangepaste code toe, zoals Google Tag Manager of analyse, aan alle openbare pagina\'s.',
+    'header_footer_code_warning' => 'Deze code wordt op alle openbare pagina\'s uitgevoerd. Plak alleen code uit betrouwbare bronnen.',
+    'custom_header_code' => 'Headercode',
+    'custom_header_code_help' => 'Wordt ingevoegd in de <head> van openbare pagina\'s. Google Tag Manager en Google Analytics werken meteen; andere externe scripts kunnen door het beveiligingsbeleid worden geblokkeerd.',
+    'custom_footer_code' => 'Footercode',
+    'custom_footer_code_help' => 'Wordt ingevoegd vóór de afsluitende </body>-tag van openbare pagina\'s.',
+
     'home' => 'Home',
     'at' => 'bij',
     'venues' => 'Locaties',

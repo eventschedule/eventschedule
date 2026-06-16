@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'Код верхнего / нижнего колонтитула',
+    'header_footer_code_intro' => 'Добавьте пользовательский код, например Google Tag Manager или аналитику, на все публичные страницы.',
+    'header_footer_code_warning' => 'Этот код выполняется на всех публичных страницах. Вставляйте только код из доверенных источников.',
+    'custom_header_code' => 'Код верхнего колонтитула',
+    'custom_header_code_help' => 'Вставляется в <head> публичных страниц. Google Tag Manager и Google Analytics работают сразу; другие внешние скрипты могут быть заблокированы политикой безопасности.',
+    'custom_footer_code' => 'Код нижнего колонтитула',
+    'custom_footer_code_help' => 'Вставляется перед закрывающим тегом </body> публичных страниц.',
+
     'home' => 'Главная',
     'at' => 'в',
     'venues' => 'Места проведения',

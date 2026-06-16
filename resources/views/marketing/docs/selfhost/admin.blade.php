@@ -107,6 +107,7 @@
                         <a href="#system-audit-log" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Audit Log</a>
                         <a href="#system-queue" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Queue</a>
                         <a href="#system-logs" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Logs</a>
+                        <a href="#system-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Settings</a>
                     </nav>
                 </aside>
 
@@ -398,6 +399,35 @@
                                 <li>Expand entries to view full stack traces for errors</li>
                             </ul>
                             <x-doc-screenshot id="selfhost-admin--logs" alt="Admin logs viewer showing application log entries" />
+                        </section>
+
+                        <!-- System: Settings -->
+                        <section id="system-settings" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                Settings (System)
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Settings page lets you add custom <strong class="text-gray-900 dark:text-white">header and footer code</strong> that is injected into every public guest page across the platform. This is the place to add site-wide tracking and analytics such as <strong class="text-gray-900 dark:text-white">Google Tag Manager</strong> or Google Analytics.</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Header Code</strong> - injected into the <code class="doc-inline-code">&lt;head&gt;</code> of public pages. Best for tag managers and analytics loaders.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Footer Code</strong> - injected just before the closing <code class="doc-inline-code">&lt;/body&gt;</code> tag. Best for deferred scripts, chat widgets, and the Google Tag Manager <code class="doc-inline-code">&lt;noscript&gt;</code> snippet.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The code is applied to all public schedule, event, and ticket pages. It is never shown in the admin panel or on the marketing site.</p>
+                            <div class="doc-callout doc-callout-warning mb-6">
+                                <div class="doc-callout-title">Only paste trusted code</div>
+                                <p>Header and footer code runs on every public page exactly as entered. Only paste code from sources you trust. Access to this page is restricted to admin users.</p>
+                            </div>
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Content Security Policy</div>
+                                <p>Google Tag Manager and Google Analytics are permitted by the built-in Content Security Policy and work out of the box. Scripts that load from other external domains may be blocked - add the domain to the <code class="doc-inline-code">script-src</code> directive in <code class="doc-inline-code">app/Http/Middleware/SecurityHeaders.php</code> if needed.</p>
+                            </div>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Privacy &amp; consent</div>
+                                <p>Injected analytics are not automatically gated by the cookie-consent banner. You are responsible for configuring consent (for example, Google consent mode) to comply with the privacy regulations in your region.</p>
+                            </div>
                         </section>
 
                     </div>

@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'كود الترويسة / التذييل',
+    'header_footer_code_intro' => 'أضف كودًا مخصصًا، مثل Google Tag Manager أو أدوات التحليل، إلى جميع الصفحات العامة.',
+    'header_footer_code_warning' => 'يعمل هذا الكود على جميع الصفحات العامة. الصق فقط الكود من مصادر موثوقة.',
+    'custom_header_code' => 'كود الترويسة',
+    'custom_header_code_help' => 'يُدرج داخل <head> في الصفحات العامة. يعمل Google Tag Manager وGoogle Analytics فورًا؛ وقد يتم حظر النصوص البرمجية الخارجية الأخرى بواسطة سياسة الأمان.',
+    'custom_footer_code' => 'كود التذييل',
+    'custom_footer_code_help' => 'يُدرج قبل وسم الإغلاق </body> في الصفحات العامة.',
+
     'home' => 'الرئيسية',
     'at' => 'في',
     'venues' => 'الأماكن',

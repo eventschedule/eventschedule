@@ -502,9 +502,13 @@
         @endif
         @endif
 
+        @include('partials.site-head-code')
+
         {{ isset($head) ? $head : '' }}
     </x-slot>
-    
+
+    <x-slot name="footCode">@include('partials.site-foot-code')</x-slot>
+
     @php
         $isRtl = $role->isRtl();
         $isRoleRtl = in_array($role->language_code, ['ar', 'he']);

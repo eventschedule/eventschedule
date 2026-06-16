@@ -5267,6 +5267,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Audit Log', 'description' => 'View platform activity audit log.', 'url' => $r['selfhost_admin'].'#system-audit-log', 'category' => 'Selfhost', 'keywords' => 'audit log activity tracking'],
             ['page' => 'Admin Panel', 'section' => 'Queue', 'description' => 'Monitor background job queue.', 'url' => $r['selfhost_admin'].'#system-queue', 'category' => 'Selfhost', 'keywords' => 'queue jobs background worker'],
             ['page' => 'Admin Panel', 'section' => 'Logs', 'description' => 'View application error logs.', 'url' => $r['selfhost_admin'].'#system-logs', 'category' => 'Selfhost', 'keywords' => 'logs errors debug'],
+            ['page' => 'Admin Panel', 'section' => 'Settings', 'description' => 'Add custom header and footer code (Google Tag Manager, analytics) injected into all public guest pages.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'settings header footer code google tag manager gtm analytics tracking script head body'],
 
             // Boost Setup (Selfhost)
             ['page' => 'Boost Setup', 'section' => 'Overview', 'description' => 'Set up Meta/Facebook boost for selfhosted instances.', 'url' => $r['selfhost_boost'].'#overview', 'category' => 'Selfhost', 'keywords' => 'boost meta facebook setup'],

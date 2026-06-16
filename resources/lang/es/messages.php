@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'Código de encabezado / pie de página',
+    'header_footer_code_intro' => 'Agrega código personalizado, como Google Tag Manager o herramientas de análisis, a todas las páginas públicas.',
+    'header_footer_code_warning' => 'Este código se ejecuta en todas las páginas públicas. Pega únicamente código de fuentes de confianza.',
+    'custom_header_code' => 'Código de encabezado',
+    'custom_header_code_help' => 'Se inserta en el <head> de las páginas públicas. Google Tag Manager y Google Analytics funcionan de inmediato; otros scripts externos pueden ser bloqueados por la política de seguridad.',
+    'custom_footer_code' => 'Código de pie de página',
+    'custom_footer_code_help' => 'Se inserta antes de la etiqueta de cierre </body> de las páginas públicas.',
+
     'home' => 'Inicio',
     'at' => 'en',
     'venues' => 'Lugares',

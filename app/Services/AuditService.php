@@ -93,6 +93,8 @@ class AuditService
 
     const ADMIN_BOOST_LIMIT = 'admin.boost_limit';
 
+    const ADMIN_SETTINGS_UPDATE = 'admin.settings_update';
+
     // Subscription actions
     const SUBSCRIPTION_CREATE = 'subscription.create';
 

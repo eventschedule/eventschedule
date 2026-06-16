@@ -458,6 +458,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/boost/grant-credit', [AdminController::class, 'boostGrantCredit'])->name('admin.boost.grant_credit');
         Route::post('/admin/boost/set-limit', [AdminController::class, 'boostSetLimit'])->name('admin.boost.set_limit');
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
+        Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
+        Route::post('/admin/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
         if (config('app.hosted')) {
             Route::get('/admin/domains', [AdminController::class, 'domains'])->name('admin.domains');
             Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');

@@ -2,6 +2,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'קוד כותרת עליונה / תחתונה',
+    'header_footer_code_intro' => 'הוסיפו קוד מותאם אישית, כגון Google Tag Manager או כלי ניתוח, לכל העמודים הציבוריים.',
+    'header_footer_code_warning' => 'קוד זה פועל בכל העמודים הציבוריים. הדביקו רק קוד ממקורות מהימנים.',
+    'custom_header_code' => 'קוד כותרת עליונה',
+    'custom_header_code_help' => 'מוטמע בתוך <head> של העמודים הציבוריים. ‏Google Tag Manager ו-Google Analytics פועלים מיד; סקריפטים חיצוניים אחרים עשויים להיחסם על ידי מדיניות האבטחה.',
+    'custom_footer_code' => 'קוד כותרת תחתונה',
+    'custom_footer_code_help' => 'מוטמע לפני תג הסגירה </body> של העמודים הציבוריים.',
+
     'home' => 'דף הבית',
     'at' => 'ב',
     'venues' => 'מקומות',

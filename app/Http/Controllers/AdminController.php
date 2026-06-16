@@ -16,6 +16,7 @@ use App\Models\Newsletter;
 use App\Models\Referral;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\Setting;
 use App\Models\UsageDaily;
 use App\Models\User;
 use App\Services\AuditService;
@@ -2413,6 +2414,67 @@ class AdminController extends Controller
         );
 
         return redirect()->back()->with('success', "Set boost spending limit to \${$request->amount} for {$role->subdomain}");
+    }
+
+    /**
+     * Show the global site settings form (custom header/footer code).
+     */
+    public function settings(Request $request): View|RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        return view('admin.settings', [
+            'custom_header_code' => Setting::get('custom_header_code'),
+            'custom_footer_code' => Setting::get('custom_footer_code'),
+        ]);
+    }
+
+    /**
+     * Persist the global site settings (custom header/footer code).
+     *
+     * Operator-only (super-admin) data, injected raw into public guest pages,
+     * so there is no sanitization step - see Setting / app-guest injection.
+     */
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate([
+            'custom_header_code' => ['nullable', 'string', 'max:65535'],
+            'custom_footer_code' => ['nullable', 'string', 'max:65535'],
+        ]);
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $old = [
+            'custom_header_code' => Setting::get('custom_header_code'),
+            'custom_footer_code' => Setting::get('custom_footer_code'),
+        ];
+        $new = [
+            'custom_header_code' => $request->input('custom_header_code'),
+            'custom_footer_code' => $request->input('custom_footer_code'),
+        ];
+
+        Setting::set('custom_header_code', $new['custom_header_code']);
+        Setting::set('custom_footer_code', $new['custom_footer_code']);
+
+        AuditService::log(
+            AuditService::ADMIN_SETTINGS_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            $old,
+            $new,
+            'Updated site header/footer code',
+        );
+
+        return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));
     }
 
     /**

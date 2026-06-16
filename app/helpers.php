@@ -31,6 +31,28 @@ if (! function_exists('nonce_attr')) {
     }
 }
 
+if (! function_exists('inject_csp_nonce')) {
+    /**
+     * Add the current request's CSP nonce to any <script> tag that lacks one.
+     *
+     * Operator-provided header/footer snippets (e.g. Google Tag Manager) contain
+     * inline <script> tags with no nonce; under our nonce-based CSP those would be
+     * blocked. Injecting the nonce lets them execute. This is only ever applied to
+     * trusted super-admin (operator) input, never to schedule-owner content.
+     */
+    function inject_csp_nonce(?string $html): string
+    {
+        $html = trim($html ?? '');
+        if ($html === '') {
+            return '';
+        }
+
+        $nonce = csp_nonce();
+
+        return preg_replace('/<script\b(?![^>]*\bnonce=)/i', '<script nonce="'.$nonce.'"', $html);
+    }
+}
+
 if (! function_exists('get_translated_categories')) {
     /**
      * Returns an [id => translated name] map of categories.

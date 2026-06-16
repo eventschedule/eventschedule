@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'Header / Footer Code',
+    'header_footer_code_intro' => 'Add custom code, such as Google Tag Manager or analytics, to every public guest page.',
+    'header_footer_code_warning' => 'This code runs on all public pages. Only paste code from trusted sources.',
+    'custom_header_code' => 'Header Code',
+    'custom_header_code_help' => 'Injected into the <head> of public pages. Google Tag Manager and Google Analytics work out of the box; other external scripts may be blocked by the security policy.',
+    'custom_footer_code' => 'Footer Code',
+    'custom_footer_code_help' => 'Injected before the closing </body> tag of public pages.',
+
     'home' => 'Home',
     'at' => 'at',
     'venues' => 'Venues',

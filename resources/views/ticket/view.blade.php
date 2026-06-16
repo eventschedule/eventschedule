@@ -1,6 +1,9 @@
 <x-app-layout>
 
+    <x-slot name="footCode">@include('partials.site-foot-code')</x-slot>
+
     <x-slot name="head">
+        @include('partials.site-head-code')
         <link href="/vendor/manrope/manrope.css" rel="stylesheet">
         <style {!! nonce_attr() !!}>
             /* Animations */

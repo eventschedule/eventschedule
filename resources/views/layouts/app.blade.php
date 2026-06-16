@@ -804,6 +804,10 @@
 
     @include('partials.cookie-banner')
 
+    {{-- Global operator-configured footer code (guest pages only); rendered here,
+         after $slot and outside Vue's #app mount, so injected <script> tags run. --}}
+    {{ isset($footCode) ? $footCode : '' }}
+
     {{-- @if (config('app.is_testing'))
         <style {!! nonce_attr() !!}>
             @keyframes es-ping { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3); opacity: 0; } }

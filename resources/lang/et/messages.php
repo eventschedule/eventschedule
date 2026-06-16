@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'Päise / jaluse kood',
+    'header_footer_code_intro' => 'Lisa kohandatud kood, näiteks Google Tag Manager või analüütika, kõigile avalikele külalislehtedele.',
+    'header_footer_code_warning' => 'See kood käivitatakse kõigil avalikel lehtedel. Kleebi ainult usaldusväärsetest allikatest pärinevat koodi.',
+    'custom_header_code' => 'Päise kood',
+    'custom_header_code_help' => 'Lisatakse avalike lehtede <head> sektsiooni. Google Tag Manager ja Google Analytics töötavad kohe; muud välised skriptid võivad turbepoliitika tõttu blokeeritud olla.',
+    'custom_footer_code' => 'Jaluse kood',
+    'custom_footer_code_help' => 'Lisatakse avalike lehtede sulgeva </body> sildi ette.',
+
     'home' => 'Avaleht',
     'at' => 'kohas',
     'venues' => 'Toimumiskohad',

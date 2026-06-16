@@ -1,6 +1,16 @@
 <?php
 
 return [
+
+    // Admin: site-wide custom header/footer code
+    'header_footer_code' => 'Cod antet / subsol',
+    'header_footer_code_intro' => 'Adăugați cod personalizat, precum Google Tag Manager sau instrumente de analiză, pe toate paginile publice.',
+    'header_footer_code_warning' => 'Acest cod rulează pe toate paginile publice. Lipiți doar cod din surse de încredere.',
+    'custom_header_code' => 'Cod antet',
+    'custom_header_code_help' => 'Inserat în <head>-ul paginilor publice. Google Tag Manager și Google Analytics funcționează imediat; alte scripturi externe pot fi blocate de politica de securitate.',
+    'custom_footer_code' => 'Cod subsol',
+    'custom_footer_code_help' => 'Inserat înainte de eticheta de închidere </body> a paginilor publice.',
+
     'home' => 'Acasă',
     'at' => 'la',
     'venues' => 'Locații',
