@@ -569,15 +569,6 @@ document.addEventListener('DOMContentLoaded', function() {
             openEmbedModal();
         });
     }
-
-    // Form confirm (delete schedule)
-    document.querySelectorAll('.form-confirm').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            if (!confirm(this.getAttribute('data-confirm'))) {
-                e.preventDefault();
-            }
-        });
-    });
 });
 </script>
 

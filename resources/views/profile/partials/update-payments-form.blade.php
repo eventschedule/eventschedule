@@ -267,15 +267,6 @@
 
 <script {!! nonce_attr() !!}>
 document.addEventListener('DOMContentLoaded', function() {
-    // Confirm before submit for forms with data-confirm
-    document.querySelectorAll('form[data-confirm]').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
-            if (!confirm(this.dataset.confirm)) {
-                e.preventDefault();
-            }
-        });
-    });
-
     // Alert buttons for demo mode
     document.querySelectorAll('[data-alert]').forEach(function(btn) {
         btn.addEventListener('click', function() {

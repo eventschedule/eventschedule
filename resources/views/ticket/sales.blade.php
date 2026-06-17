@@ -584,4 +584,14 @@ function resendEmail(saleId) {
     });
 }
 
+// CSP-safe capture-phase delegation for the standalone resend-email and waitlist-remove buttons
+// (replaces inline onclick). The row-action menu items are handled separately via [data-popup-toggle].
+document.addEventListener('click', function (e) {
+    if (! e.target.closest) return;
+    var resendBtn = e.target.closest('.js-resend-email');
+    if (resendBtn) { resendEmail(resendBtn.getAttribute('data-id')); return; }
+    var waitlistBtn = e.target.closest('.js-waitlist-remove');
+    if (waitlistBtn) { handleWaitlistRemove(waitlistBtn.getAttribute('data-id')); }
+}, true);
+
 </script>

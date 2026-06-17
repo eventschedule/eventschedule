@@ -685,7 +685,7 @@
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>
                                     {{ __('messages.view_ticket') }}
                                 </a>
-                                <button type="button" onclick="resendEmail('{{ \App\Utils\UrlUtils::encodeId($guest->id) }}')" class="inline-flex items-center gap-1 text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">
+                                <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($guest->id) }}" class="js-resend-email inline-flex items-center gap-1 text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)] hover:underline text-xs">
                                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" /></svg>
                                     {{ __('messages.send_email') }}
                                 </a>

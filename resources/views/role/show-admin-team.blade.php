@@ -70,7 +70,7 @@
                                         <form method="POST" action="{{ route('role.update_member_level', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($member->id)]) }}" class="inline">
                                             @csrf
                                             @method('PATCH')
-                                            <select name="level" onchange="this.form.submit()"
+                                            <select name="level" data-auto-submit="true"
                                                 class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 text-sm shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
                                                 <option value="admin" {{ $member->pivot->level == 'admin' ? 'selected' : '' }}>{{ __('messages.admin') }}</option>
                                                 <option value="viewer" {{ $member->pivot->level == 'viewer' ? 'selected' : '' }}>{{ __('messages.viewer') }}</option>

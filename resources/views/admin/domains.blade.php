@@ -169,7 +169,7 @@
                                     <form method="POST" action="{{ route('admin.domains.reprovision', $role) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-xs text-[var(--brand-blue)] hover:underline"
-                                            onclick="return confirm('Re-provision this domain?')">
+                                            data-confirm="Re-provision this domain?">
                                             @lang('messages.reprovision')
                                         </button>
                                     </form>
@@ -177,7 +177,7 @@
                                     <form method="POST" action="{{ route('admin.domains.remove', $role) }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-xs text-red-600 hover:underline"
-                                            onclick="return confirm('Remove this domain configuration?')">
+                                            data-confirm="Remove this domain configuration?">
                                             @lang('messages.remove')
                                         </button>
                                     </form>

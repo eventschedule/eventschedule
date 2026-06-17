@@ -116,7 +116,7 @@
                             <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ $subscriber->created_at?->format('M j, Y') }}</td>
                             <td class="px-4 py-3 text-sm text-right">
                                 <div class="flex gap-3 justify-end">
-                                    <button type="button" onclick="toggleSegmentEdit('{{ $encodedId }}')" class="text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</button>
+                                    <button type="button" data-segment="{{ $encodedId }}" class="js-segment-edit-toggle text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">{{ __('messages.edit') }}</button>
                                     <form method="POST" action="{{ route('newsletter.segment.user.delete', ['role_id' => \App\Utils\UrlUtils::encodeId($role->id), 'hash' => \App\Utils\UrlUtils::encodeId($segment->id), 'userHash' => $encodedId]) }}"
                                         class="js-confirm-form" data-confirm="{{ __('messages.are_you_sure') }}">
                                         @csrf
@@ -139,7 +139,7 @@
                                         <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-[var(--brand-button-bg)] border border-transparent rounded-lg font-semibold text-xs text-white hover:bg-[var(--brand-button-bg-hover)]">
                                             {{ __('messages.save_changes') }}
                                         </button>
-                                        <button type="button" onclick="toggleSegmentEdit(null)" class="inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
+                                        <button type="button" class="js-segment-edit-toggle inline-flex items-center px-3 py-1.5 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg font-semibold text-xs text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600">
                                             {{ __('messages.cancel') }}
                                         </button>
                                     </div>
@@ -209,5 +209,11 @@
                 document.querySelector('[data-edit-row="' + id + '"]').style.display = '';
             }
         }
+        // Capture-phase delegation (replaces inline onclick; CSP blocks inline handlers).
+        document.addEventListener('click', function (e) {
+            if (! e.target.closest) return;
+            var toggleBtn = e.target.closest('.js-segment-edit-toggle');
+            if (toggleBtn) toggleSegmentEdit(toggleBtn.getAttribute('data-segment') || null);
+        }, true);
     </script>
 </x-app-admin-layout>

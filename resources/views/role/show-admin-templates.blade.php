@@ -43,9 +43,8 @@
                     <button type="button"
                         data-rename-url="{{ route('event_template.update', ['subdomain' => $role->subdomain, 'hash' => $template->encodeId()]) }}"
                         data-rename-name="{{ $template->name }}"
-                        onclick="openRenameTemplateModal(this.dataset.renameUrl, this.dataset.renameName)"
                         title="{{ __('messages.rename_template') }}"
-                        class="inline-flex items-center justify-center p-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2d2d30] hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
+                        class="js-rename-template-open inline-flex items-center justify-center p-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#2d2d30] hover:text-gray-700 dark:hover:text-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)]">
                         <span class="sr-only">{{ __('messages.rename_template') }}</span>
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
@@ -53,7 +52,7 @@
                     </button>
 
                     <form method="POST" action="{{ route('event_template.destroy', ['subdomain' => $role->subdomain, 'hash' => $template->encodeId()]) }}"
-                        onsubmit="return confirm('{{ __('messages.are_you_sure') }}')">
+                        data-confirm="{{ __('messages.are_you_sure') }}">
                         @csrf
                         @method('DELETE')
                         <button type="submit" title="{{ __('messages.delete_template') }}"
@@ -71,7 +70,7 @@
 
     {{-- Rename modal (plain JS; CSTI-safe: name flows via data attribute -> input value, never compiled) --}}
     <div id="rename-template-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="rename-template-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity" onclick="closeRenameTemplateModal()"></div>
+        <div class="js-rename-template-close fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
         <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                 <div class="relative transform overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-4 pb-4 pt-5 text-start shadow-xl dark:shadow-gray-900/50 transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
@@ -83,8 +82,8 @@
                         <input type="text" id="rename-template-input" name="name" required maxlength="255"
                             class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-300 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] sm:text-sm" />
                         <div class="mt-6 flex flex-row gap-3">
-                            <button type="button" onclick="closeRenameTemplateModal()"
-                                class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                            <button type="button"
+                                class="js-rename-template-close flex-1 inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-base text-gray-700 dark:text-gray-300 shadow-sm transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                                 {{ __('messages.cancel') }}
                             </button>
                             <button type="submit"
@@ -112,6 +111,16 @@
         function closeRenameTemplateModal() {
             document.getElementById('rename-template-modal').classList.add('hidden');
         }
+        // Capture-phase delegation (replaces inline onclick; CSP blocks inline handlers).
+        document.addEventListener('click', function (e) {
+            if (! e.target.closest) return;
+            var openBtn = e.target.closest('.js-rename-template-open');
+            if (openBtn) {
+                openRenameTemplateModal(openBtn.getAttribute('data-rename-url'), openBtn.getAttribute('data-rename-name'));
+                return;
+            }
+            if (e.target.closest('.js-rename-template-close')) closeRenameTemplateModal();
+        }, true);
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeRenameTemplateModal();
         });

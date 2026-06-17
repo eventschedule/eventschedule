@@ -112,11 +112,11 @@
                             <td class="px-4 py-3 text-sm text-end whitespace-nowrap">
                                 <form method="POST" action="{{ route('admin.sale.approve', $sale->id) }}" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" onclick="return confirm('Approve this sale as paid?')">@lang('messages.approve_sale')</button>
+                                    <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" data-confirm="Approve this sale as paid?">@lang('messages.approve_sale')</button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.sale.refund', $sale->id) }}" class="inline ms-3">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" onclick="return confirm('Refund this sale via Stripe?')">@lang('messages.refund_sale')</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" data-confirm="Refund this sale via Stripe?">@lang('messages.refund_sale')</button>
                                 </form>
                             </td>
                         </tr>
@@ -153,11 +153,11 @@
                             <td class="px-4 py-3 text-sm text-end whitespace-nowrap">
                                 <form method="POST" action="{{ route('admin.boost.approve', $campaign->id) }}" class="inline">
                                     @csrf
-                                    <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" onclick="return confirm('Approve this boost campaign?')">@lang('messages.approve_sale')</button>
+                                    <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-200 text-sm font-medium" data-confirm="Approve this boost campaign?">@lang('messages.approve_sale')</button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.boost.refund', $campaign->id) }}" class="inline ms-3">
                                     @csrf
-                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" onclick="return confirm('Refund this boost campaign via Stripe?')">@lang('messages.refund_sale')</button>
+                                    <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200 text-sm font-medium" data-confirm="Refund this boost campaign via Stripe?">@lang('messages.refund_sale')</button>
                                 </form>
                             </td>
                         </tr>

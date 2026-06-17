@@ -48,8 +48,8 @@
                                 {{ $entry->created_at->format('M j, Y g:ia') }}
                             </td>
                             <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
-                                <button type="button" onclick="handleWaitlistRemove('{{ \App\Utils\UrlUtils::encodeId($entry->id) }}')"
-                                    class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
+                                <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($entry->id) }}"
+                                    class="js-waitlist-remove text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
                                     {{ __('messages.remove') }}
                                 </button>
                             </td>
@@ -83,8 +83,8 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $entry->event?->name }} - {{ $entry->event_date }}</p>
             <div class="flex justify-between items-center mt-3">
                 <p class="text-xs text-gray-400 dark:text-gray-500">{{ $entry->created_at->format('M j, Y g:ia') }}</p>
-                <button type="button" onclick="handleWaitlistRemove('{{ \App\Utils\UrlUtils::encodeId($entry->id) }}')"
-                    class="text-sm text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
+                <button type="button" data-id="{{ \App\Utils\UrlUtils::encodeId($entry->id) }}"
+                    class="js-waitlist-remove text-sm text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
                     {{ __('messages.remove') }}
                 </button>
             </div>

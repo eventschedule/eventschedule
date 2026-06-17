@@ -153,25 +153,3 @@
         </div>
     </div>
 </section>
-
-<script {!! nonce_attr() !!}>
-document.addEventListener('DOMContentLoaded', function() {
-    // Confirm on submit buttons with data-confirm (within forms)
-    document.querySelectorAll('button[data-confirm]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            if (!confirm(this.dataset.confirm)) {
-                e.preventDefault();
-            }
-        });
-    });
-
-    // Confirm on links with data-confirm
-    document.querySelectorAll('a[data-confirm]').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            if (!confirm(this.dataset.confirm)) {
-                e.preventDefault();
-            }
-        });
-    });
-});
-</script>

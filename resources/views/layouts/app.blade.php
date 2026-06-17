@@ -114,6 +114,80 @@
     </script>
 
     <script {!! nonce_attr() !!}>
+    // CSP-safe delegated handlers. The nonce-based CSP blocks inline on* attributes (script-src-attr),
+    // so these replace onclick/onsubmit/onchange across the app. Capture phase ('true') is required so
+    // handlers fire even for elements inside .pop-up-menu, whose bubble-phase click handler above calls
+    // stopPropagation().
+    (function () {
+        // data-confirm on a <form>: gate submission behind window.confirm(). This is the single
+        // source of truth for data-confirm app-wide; the former per-page .form-confirm (role/show-admin),
+        // payments, and google-calendar confirm handlers were consolidated into this block.
+        // Skip .js-confirm-form: those ~11 pages still keep their own per-page submit handler, so
+        // matching them here too would show the confirm dialog twice.
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (form && form.matches && form.matches('form[data-confirm]:not(.js-confirm-form)')) {
+                if (! window.confirm(form.getAttribute('data-confirm'))) {
+                    e.preventDefault();
+                }
+            }
+        }, true);
+
+        // data-auto-submit on a control (e.g. <select>): submit its form on change
+        document.addEventListener('change', function (e) {
+            if (! e.target.closest) return;
+            var el = e.target.closest('[data-auto-submit]');
+            if (! el) return;
+            var form = el.form || el.closest('form');
+            if (form) form.submit();
+        }, true);
+
+        document.addEventListener('click', function (e) {
+            if (! e.target.closest) return;
+
+            // data-confirm on a non-form trigger (button/link). A click inside a form[data-confirm]
+            // resolves to the form here, which is handled by the submit listener above - so skip it.
+            var confirmEl = e.target.closest('[data-confirm]');
+            if (confirmEl && confirmEl.tagName !== 'FORM') {
+                if (! window.confirm(confirmEl.getAttribute('data-confirm'))) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // Generic collapse: data-collapse="next|parent-next|child" (+ data-collapse-child, data-arrow)
+            var collapse = e.target.closest('[data-collapse]');
+            if (collapse) {
+                var mode = collapse.getAttribute('data-collapse');
+                var panel = null;
+                if (mode === 'next') {
+                    panel = collapse.nextElementSibling;
+                } else if (mode === 'parent-next') {
+                    var parentDiv = collapse.closest('div');
+                    panel = parentDiv ? parentDiv.nextElementSibling : null;
+                } else if (mode === 'child') {
+                    var childSel = collapse.getAttribute('data-collapse-child');
+                    panel = childSel ? collapse.parentElement.querySelector(childSel) : null;
+                }
+                if (panel) panel.classList.toggle('hidden');
+                var arrowSel = collapse.getAttribute('data-arrow');
+                if (arrowSel) {
+                    var arrow = collapse.querySelector(arrowSel);
+                    if (arrow) arrow.classList.toggle('rotate-90');
+                }
+            }
+
+            // Explicit toggle: data-toggle-target="#id" toggles .hidden on the target element
+            var toggle = e.target.closest('[data-toggle-target]');
+            if (toggle) {
+                var target = document.querySelector(toggle.getAttribute('data-toggle-target'));
+                if (target) target.classList.toggle('hidden');
+            }
+        }, true);
+    })();
+    </script>
+
+    <script {!! nonce_attr() !!}>
         window.appLocale = "{{ app()->getLocale() }}";
         window.editorTranslations = {
             bold: @json(__('messages.editor_bold')),

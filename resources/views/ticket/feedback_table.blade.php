@@ -85,7 +85,7 @@
 @if ($pendingCount > 0)
 <div class="mb-6">
     <div class="flex items-center justify-between mb-3">
-        <button type="button" onclick="this.closest('div').nextElementSibling.classList.toggle('hidden'); this.querySelector('.js-arrow').classList.toggle('rotate-90')" class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+        <button type="button" data-collapse="parent-next" data-arrow=".js-arrow" class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
             <svg class="js-arrow w-4 h-4 rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -106,7 +106,7 @@
                     @if ($readyToSendCount > 0)
                     <form method="POST" action="{{ route('sales.send_feedback_now') }}">
                         @csrf
-                        <button type="submit" onclick="return confirm('{{ __('messages.feedback_send_now_confirm', ['count' => $readyToSendCount]) }}')" class="group flex items-center w-full px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
+                        <button type="submit" data-confirm="{{ __('messages.feedback_send_now_confirm', ['count' => $readyToSendCount]) }}" class="group flex items-center w-full px-5 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
                             <svg class="me-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                             </svg>
@@ -116,7 +116,7 @@
                     @endif
                     <form method="POST" action="{{ route('sales.cancel_feedback') }}">
                         @csrf
-                        <button type="submit" onclick="return confirm('{{ __('messages.feedback_cancel_confirm', ['count' => $pendingCount]) }}')" class="group flex items-center w-full px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
+                        <button type="submit" data-confirm="{{ __('messages.feedback_cancel_confirm', ['count' => $pendingCount]) }}" class="group flex items-center w-full px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-colors" role="menuitem">
                             <svg class="me-3 h-5 w-5 text-red-400 dark:text-red-500 group-hover:text-red-500 dark:group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -141,7 +141,7 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     @foreach ($pendingGroups as $group)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('.js-expand-arrow').classList.toggle('rotate-90')">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150 cursor-pointer" data-collapse="next" data-arrow=".js-expand-arrow">
                         <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:ps-6">
                             <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4 text-gray-400 transition-transform duration-200 js-expand-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,7 +226,7 @@
 {{-- Sent Awaiting Response Section --}}
 @if ($awaitingCount > 0)
 <div class="mb-6">
-    <button type="button" onclick="this.parentElement.querySelector('.js-collapsible').classList.toggle('hidden'); this.querySelector('.js-arrow').classList.toggle('rotate-90')" class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
+    <button type="button" data-collapse="child" data-collapse-child=".js-collapsible" data-arrow=".js-arrow" class="flex items-center gap-2 mb-3 text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200">
         <svg class="js-arrow w-4 h-4 rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
