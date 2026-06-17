@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 vite.config.js.*
 phpunit.dusk.xml
+database.sqlite

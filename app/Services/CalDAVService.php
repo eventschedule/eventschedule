@@ -761,11 +761,10 @@ class CalDAVService
         }
 
         return DB::transaction(function () use ($role, $location) {
-            // Get IDs of venues where the role's user is a follower
+            // Get IDs of venues the role's user already follows
             $followedVenueIds = Role::where('type', 'venue')
-                ->whereHas('members', function ($query) use ($role) {
-                    $query->where('user_id', $role->user_id)
-                        ->where('level', 'follower');
+                ->whereHas('followers', function ($query) use ($role) {
+                    $query->where('users.id', $role->user_id);
                 })
                 ->where('is_deleted', false)
                 ->pluck('id')
@@ -793,6 +792,7 @@ class CalDAVService
             $venue->type = 'venue';
             $venue->user_id = $role->user_id;
             $venue->subdomain = $subdomain;
+            $venue->name = $location;
             $venue->address1 = $location;
             $venue->country_code = $role->country_code;
             $venue->save();
