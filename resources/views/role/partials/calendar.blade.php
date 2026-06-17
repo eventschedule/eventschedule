@@ -460,7 +460,7 @@
 </header>
 @endif
 
-    <div v-show="currentView === 'calendar'" class="{{ ($tab == 'availability' || (isset($embed) && $embed) || (isset($force_mobile) && $force_mobile)) ? '' : 'hidden' }} md:block {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
+    <div v-show="currentView === 'calendar'" class="{{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
 
         @if (request()->graphic)
             @include('role.partials.calendar-graphic')
