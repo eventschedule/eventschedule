@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Repos\EventRepo;
 use App\Services\EventbriteService;
+use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -231,7 +232,7 @@ class EventbriteController extends Controller
 
             // Fetch full description
             $htmlDescription = $service->getEventDescription($request->eventbrite_id);
-            $description = $this->htmlToMarkdown($htmlDescription);
+            $description = MarkdownUtils::convertHtmlToMarkdown($htmlDescription);
 
             // Download image if provided
             $imageFilename = null;
@@ -329,54 +330,5 @@ class EventbriteController extends Controller
                 'error' => __('messages.eventbrite_import_failed'),
             ], 500);
         }
-    }
-
-    /**
-     * Convert HTML to markdown (simple conversion for event descriptions)
-     */
-    protected function htmlToMarkdown(string $html): string
-    {
-        if (empty($html)) {
-            return '';
-        }
-
-        $text = $html;
-
-        // Convert headings
-        $text = preg_replace('/<h1[^>]*>(.*?)<\/h1>/si', "# $1\n\n", $text);
-        $text = preg_replace('/<h2[^>]*>(.*?)<\/h2>/si', "## $1\n\n", $text);
-        $text = preg_replace('/<h3[^>]*>(.*?)<\/h3>/si', "### $1\n\n", $text);
-        $text = preg_replace('/<h4[^>]*>(.*?)<\/h4>/si', "#### $1\n\n", $text);
-
-        // Convert bold and italic
-        $text = preg_replace('/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/si', '**$2**', $text);
-        $text = preg_replace('/<(em|i)[^>]*>(.*?)<\/(em|i)>/si', '*$2*', $text);
-
-        // Convert links
-        $text = preg_replace('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/si', '[$2]($1)', $text);
-
-        // Convert list items
-        $text = preg_replace('/<li[^>]*>(.*?)<\/li>/si', "- $1\n", $text);
-        $text = preg_replace('/<\/?[ou]l[^>]*>/si', "\n", $text);
-
-        // Convert line breaks and paragraphs
-        $text = preg_replace('/<br\s*\/?>/si', "\n", $text);
-        $text = preg_replace('/<\/p>/si', "\n\n", $text);
-        $text = preg_replace('/<p[^>]*>/si', '', $text);
-
-        // Convert images
-        $text = preg_replace('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/si', '![]($1)', $text);
-
-        // Strip remaining HTML tags
-        $text = strip_tags($text);
-
-        // Decode HTML entities
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-
-        // Clean up excessive whitespace
-        $text = preg_replace('/\n{3,}/', "\n\n", $text);
-        $text = trim($text);
-
-        return $text;
     }
 }

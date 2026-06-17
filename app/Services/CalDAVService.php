@@ -6,11 +6,10 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Repos\EventRepo;
 use App\Utils\EventTextGenerator;
+use App\Utils\MarkdownUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
-use HTMLPurifier;
-use HTMLPurifier_Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -680,14 +679,9 @@ class CalDAVService
             $event->creator_role_id = $role->id;
             $event->name = $eventData['summary'] ?: __('messages.untitled_event');
 
-            // Sanitize description from CalDAV to prevent XSS
-            $description = $eventData['description'] ?: '';
-            if ($description) {
-                $config = HTMLPurifier_Config::createDefault();
-                $purifier = new HTMLPurifier($config);
-                $description = $purifier->purify($description);
-            }
-            $event->description = $description;
+            // CalDAV descriptions may contain HTML; convert to Markdown (the storage
+            // format). XSS is sanitized when the Event saving hook renders to HTML.
+            $event->description = MarkdownUtils::convertHtmlToMarkdown($eventData['description'] ?? '');
 
             // Set start time
             if ($eventData['start']) {

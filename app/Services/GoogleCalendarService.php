@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Repos\EventRepo;
 use App\Utils\EventTextGenerator;
+use App\Utils\MarkdownUtils;
 use App\Utils\SlugPatternUtils;
 use Carbon\Carbon;
 use Google\Client;
@@ -684,7 +685,7 @@ class GoogleCalendarService
         $event->user_id = $role->user_id;
         $event->creator_role_id = $role->id;
         $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
-        $event->description = $googleEvent['description'] ?: '';
+        $event->description = MarkdownUtils::convertHtmlToMarkdown($googleEvent['description'] ?? '');
 
         // Set start time
         if ($googleEvent['start']->getDateTime()) {
@@ -756,7 +757,7 @@ class GoogleCalendarService
         $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
 
         if (! empty($googleEvent['description'])) {
-            $event->description = $googleEvent['description'];
+            $event->description = MarkdownUtils::convertHtmlToMarkdown($googleEvent['description']);
         }
 
         // Update start time

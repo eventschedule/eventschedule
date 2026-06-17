@@ -72,6 +72,62 @@ class MarkdownUtils
     }
 
     /**
+     * Convert HTML (e.g. from Google Calendar, CalDAV, or Eventbrite) to Markdown.
+     *
+     * Event descriptions are stored as Markdown; the Event saving hook renders
+     * them to *_html via convertToHtml(). Plain-text input is passed through
+     * (entity-decoded only) so characters like '<' survive strip_tags().
+     */
+    public static function convertHtmlToMarkdown(?string $html): string
+    {
+        if (empty($html)) {
+            return '';
+        }
+
+        // No real HTML tags -> treat as plain text (decode entities, do NOT strip_tags).
+        if (! preg_match('/<\/?(a|b|i|u|p|br|ul|ol|li|strong|em|h[1-6]|span|div|font|img|blockquote|pre|code)\b[^>]*>/i', $html)) {
+            return trim(html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        }
+
+        $text = $html;
+
+        // Headings
+        $text = preg_replace('/<h1[^>]*>(.*?)<\/h1>/si', "# $1\n\n", $text);
+        $text = preg_replace('/<h2[^>]*>(.*?)<\/h2>/si', "## $1\n\n", $text);
+        $text = preg_replace('/<h3[^>]*>(.*?)<\/h3>/si', "### $1\n\n", $text);
+        $text = preg_replace('/<h4[^>]*>(.*?)<\/h4>/si', "#### $1\n\n", $text);
+
+        // Bold / italic
+        $text = preg_replace('/<(strong|b)[^>]*>(.*?)<\/(strong|b)>/si', '**$2**', $text);
+        $text = preg_replace('/<(em|i)[^>]*>(.*?)<\/(em|i)>/si', '*$2*', $text);
+
+        // Links
+        $text = preg_replace('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/si', '[$2]($1)', $text);
+
+        // Lists
+        $text = preg_replace('/<li[^>]*>(.*?)<\/li>/si', "- $1\n", $text);
+        $text = preg_replace('/<\/?[ou]l[^>]*>/si', "\n", $text);
+
+        // Line breaks / paragraphs
+        $text = preg_replace('/<br\s*\/?>/si', "\n", $text);
+        $text = preg_replace('/<\/p>/si', "\n\n", $text);
+        $text = preg_replace('/<p[^>]*>/si', '', $text);
+
+        // Images
+        $text = preg_replace('/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/si', '![]($1)', $text);
+
+        // Remaining block-level elements -> line breaks (e.g. <div>, <h5>/<h6>, <blockquote>, <pre>).
+        $text = preg_replace('#</(div|h[1-6]|blockquote|pre)>#si', "\n", $text);
+
+        // Strip remaining tags, decode entities, tidy whitespace
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/\n{3,}/', "\n\n", $text);
+
+        return trim($text);
+    }
+
+    /**
      * Preserve vertical spacing the author typed as multiple blank lines.
      *
      * CommonMark collapses any run of blank lines into one paragraph break, so
