@@ -371,8 +371,11 @@ class EventController extends Controller
         }
 
         if ($request->date) {
-            // Parse the date in the user's timezone and set default time to 20:00
-            $event->starts_at = Carbon::createFromFormat('Y-m-d', $request->date, $user->timezone)
+            // Parse the date in the schedule's timezone and set default time to 20:00 so the
+            // default matches how the time will be captured (schedule-anchored), not the editor's
+            // personal account timezone.
+            $defaultTz = $role->timezone ?? $user->timezone ?? config('app.timezone');
+            $event->starts_at = Carbon::createFromFormat('Y-m-d', $request->date, $defaultTz)
                 ->setTime(20, 0, 0)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
@@ -1247,11 +1250,19 @@ class EventController extends Controller
 
     public function showGuestImport(Request $request, $subdomain)
     {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // When the curator requires an account, submitters must use their own schedule.
+        // Route through the request flow, which handles sign-in, talent-schedule
+        // creation, and the AP event editor (so the event is owned by the submitter's
+        // schedule rather than the curator).
+        if ($role->require_account) {
+            return redirect(route('role.request', ['subdomain' => $subdomain]));
+        }
+
         if (! auth()->check()) {
             session()->put('pending_request', $subdomain);
         }
-
-        $role = Role::subdomain($subdomain)->firstOrFail();
 
         // Store guest language for auth flow
         if (session()->has('translate')) {
@@ -1260,18 +1271,6 @@ class EventController extends Controller
             session()->put('guest_language', $request->lang);
         } elseif (is_valid_language_code($role->language_code)) {
             session()->put('guest_language', $role->language_code);
-        }
-
-        if (! auth()->check() && $role->require_account) {
-            $data = ['pending_request' => $subdomain];
-            if (session('guest_language')) {
-                $data['guest_language'] = session('guest_language');
-            }
-
-            return redirect_with_pending_action(
-                app_url(route('sign_up', [], false)),
-                $data
-            );
         }
 
         if ($request->lang) {
@@ -1800,15 +1799,22 @@ class EventController extends Controller
 
     public function guestImport(Request $request, $subdomain)
     {
-        // Handle user creation if requested
-        if ($request->input('create_account')) {
-            $this->createAndLoginUser($request);
-        }
-
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
+        }
+
+        // When the curator requires an account, submissions must go through the
+        // authenticated AP event editor (under the submitter's own schedule), not this
+        // guest endpoint. Guard against direct posts that would bypass that flow.
+        if ($role->require_account) {
+            abort(403, __('messages.not_authorized'));
+        }
+
+        // Handle user creation if requested
+        if ($request->input('create_account')) {
+            $this->createAndLoginUser($request);
         }
 
         // Prevent guests from injecting draft status
@@ -2041,11 +2047,13 @@ class EventController extends Controller
             }
         }
 
-        // Build starts_at from date + time
+        // Build starts_at from date + time, anchored to the schedule's timezone (not the
+        // submitting user's personal account timezone) so the saved time matches the schedule.
         $startsAt = null;
+        $startsAtTimezone = null;
         if ($request->date && $request->start_time) {
-            $timezone = $user ? $user->timezone : ($role->timezone ?? 'America/New_York');
-            $startsAt = Carbon::createFromFormat('Y-m-d H:i', $request->date.' '.$request->start_time, $timezone)
+            $startsAtTimezone = $role->timezone ?? $user?->timezone ?? config('app.timezone');
+            $startsAt = Carbon::createFromFormat('Y-m-d H:i', $request->date.' '.$request->start_time, $startsAtTimezone)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
         }
@@ -2055,6 +2063,7 @@ class EventController extends Controller
         $event->name = $request->event_name ?: __('messages.booking_request');
         $event->description = $request->description;
         $event->starts_at = $startsAt;
+        $event->timezone = $startsAtTimezone;
         $event->event_url = $isOnline ? ($request->event_url ?: 'online') : null;
 
         $user = $user ?: $role->user;

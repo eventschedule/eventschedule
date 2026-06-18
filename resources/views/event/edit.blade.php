@@ -9,7 +9,19 @@
 
 @php
   $use24hr = get_use_24_hour_time($role ?? null);
-  $oldStartsAt = old('starts_at', $event->localStartsAt());
+  // Prefill the time in the SCHEDULE's timezone so the form round-trips with the schedule-anchored
+  // capture in EventRepo::saveEvent(). An existing event stored under a different timezone will
+  // visibly show its real (possibly wrong) schedule-local time here, which is intended: it surfaces
+  // the problem so a single re-save corrects it.
+  $scheduleTz = (isset($role) && $role && $role->timezone) ? $role->timezone : config('app.timezone');
+  $prefillStartsAt = $event->starts_at
+      ? $event->getStartDateTime(null, true, $scheduleTz)->format('Y-m-d H:i:s')
+      : '';
+  $oldStartsAt = old('starts_at', $prefillStartsAt);
+  // Whether this existing event is anchored to a different timezone than the schedule (so its time
+  // above may be wrong and a re-save will correct it).
+  $eventIsOffTimezone = $event->exists && $event->starts_at && isset($role) && $role && $role->timezone && $event->isOffTimezoneFor($role);
+  $eventEffectiveTz = $eventIsOffTimezone ? $event->getEffectiveTimezone() : null;
   $oldDuration = old('duration', $event->duration);
   $eventDate = '';
   $eventStartTime = '';
@@ -547,6 +559,31 @@
                 } else {
                     hiddenDuration.value = '';
                 }
+            }
+
+            updateScheduleTimePreview(hiddenStartsAt.value, multiDayToggle);
+        }
+
+        // Display-only preview of the entered time in the schedule's timezone. The entered wall-clock
+        // already IS the schedule-local time (capture is schedule-anchored), so we format its
+        // components directly (no timezone conversion) and append the schedule's timezone name.
+        function updateScheduleTimePreview(startsAtVal, multiDayToggle) {
+            var el = document.getElementById('starts_at_preview');
+            if (! el) return;
+            var tz = el.getAttribute('data-tz');
+            var m = (startsAtVal || '').match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+            var isMidnightMultiDay = multiDayToggle && multiDayToggle.checked && m && m[4] === '00' && m[5] === '00';
+            if (! tz || ! m || isMidnightMultiDay) {
+                el.textContent = '';
+                return;
+            }
+            try {
+                var previewDate = new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+                var locale = document.documentElement.lang || undefined;
+                var formatted = new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(previewDate);
+                el.textContent = (el.getAttribute('data-prefix') || '') + ' ' + formatted + ' (' + tz + ')';
+            } catch (e) {
+                el.textContent = '';
             }
         }
 
@@ -1523,6 +1560,28 @@
                                     </div>
                                 </div>
                             </div>
+                            @php $eventScheduleTz = (isset($role) && $role && $role->timezone) ? $role->timezone : null; @endphp
+                            @if($eventScheduleTz)
+                                <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ __('messages.times_are_in_timezone') }} <span v-pre class="font-medium">{{ $eventScheduleTz }}</span>.
+                                    <span id="starts_at_preview" data-tz="{{ $eventScheduleTz }}" data-prefix="{{ __('messages.event_appears_as') }}" class="block sm:inline sm:ms-1 text-gray-400 dark:text-gray-500"></span>
+                                </p>
+                                @if($eventIsOffTimezone)
+                                <div class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2" v-pre>
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                    <p class="text-sm text-amber-700 dark:text-amber-300">{{ str_replace([':from', ':to'], [$eventEffectiveTz, $eventScheduleTz], __('messages.event_timezone_mismatch_hint')) }}</p>
+                                </div>
+                                @endif
+                            @else
+                                <div class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                    <p class="text-sm text-amber-700 dark:text-amber-300">{{ __('messages.schedule_timezone_missing') }}</p>
+                                </div>
+                            @endif
                             <div v-if="!isRecurring" class="mt-6 flex justify-end">
                                 <x-toggle name="is_multi_day" id="is_multi_day" :label="__('messages.multi_day_event')" :checked="$isMultiDay" />
                             </div>

@@ -11,8 +11,8 @@ use Tests\TestCase;
 
 class AuthExtraTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     public function test_google_social_login_creates_user(): void
     {
@@ -72,6 +72,7 @@ class AuthExtraTest extends TestCase
             'name' => $role->name,
             'email' => $role->email,
             'new_subdomain' => $role->subdomain,
+            'timezone' => $role->timezone,
             'custom_labels' => [
                 ['value' => 'Performers', 'value_en' => 'Performers'],
                 ['value' => 'Stages', 'value_en' => 'Stages'],

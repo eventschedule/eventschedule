@@ -19,6 +19,9 @@ class RoleCreateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            // A schedule must have a timezone: event times are captured and displayed in it, so a
+            // null timezone makes every event's time ambiguous.
+            'timezone' => ['required', 'timezone'],
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []

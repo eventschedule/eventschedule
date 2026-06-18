@@ -2011,8 +2011,11 @@ abstract class AbstractEventDesign
     {
         try {
             Carbon::setLocale($this->contentLocale());
-            $startDate = $event->getStartDateTime(null, true);
-            $endDate = $event->duration > 0 ? $event->getEndDateTime(null, true) : null;
+            // Render in the schedule's timezone (matching the text graphic path), not the
+            // viewing user's / creator's timezone, so the image and text agree.
+            $tz = $this->role->timezone ?? 'UTC';
+            $startDate = $event->getStartDateTime(null, true, $tz);
+            $endDate = $event->duration > 0 ? $event->getEndDateTime(null, true, $tz) : null;
 
             // Determine time format based on role's 24h setting
             $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
@@ -2097,10 +2100,12 @@ abstract class AbstractEventDesign
     {
         try {
             Carbon::setLocale($this->contentLocale());
-            $startDate = $event->getStartDateTime(null, true);
+            // Render in the schedule's timezone (matching the text graphic path).
+            $tz = $this->role->timezone ?? 'UTC';
+            $startDate = $event->getStartDateTime(null, true, $tz);
 
             if ($event->duration > 0 && $event->duration >= 24) {
-                $endDate = $event->getEndDateTime(null, true);
+                $endDate = $event->getEndDateTime(null, true, $tz);
 
                 if (! $startDate->isSameDay($endDate)) {
                     // Multi-day event

@@ -270,10 +270,12 @@ class ApiEventController extends Controller
             'members', 'schedule', 'tickets', 'event_parts', 'addons',
         ]));
 
-        // Convert UTC starts_at to user's local timezone (saveEvent converts local back to UTC)
+        // Convert the incoming UTC starts_at to the SCHEDULE's local time, because saveEvent()
+        // interprets the submitted wall-clock in the schedule's timezone (not the user's account tz).
         if ($request->has('starts_at')) {
+            $scheduleTz = $role->timezone ?? auth()->user()->timezone ?? config('app.timezone');
             $utcTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, 'UTC');
-            $localTime = $utcTime->setTimezone(auth()->user()->timezone)->format('Y-m-d H:i:s');
+            $localTime = $utcTime->setTimezone($scheduleTz)->format('Y-m-d H:i:s');
             $request->merge(['starts_at' => $localTime]);
         }
 
@@ -428,13 +430,18 @@ class ApiEventController extends Controller
             }
         }
 
-        // Preserve starts_at in user's local format if not being changed
+        // Express starts_at in the SCHEDULE's local time, because saveEvent() interprets the
+        // submitted wall-clock in the schedule's timezone (not the user's account tz). Using the
+        // schedule tz here makes the round-trip identity, so an update that doesn't change the time
+        // doesn't shift it.
+        $scheduleTz = $currentRole->timezone ?? auth()->user()->timezone ?? config('app.timezone');
         if (! $request->has('starts_at')) {
-            $request->merge(['starts_at' => $event->localStartsAt(false)]);
+            $request->merge(['starts_at' => $event->starts_at
+                ? $event->getStartDateTime(null, true, $scheduleTz)->format('Y-m-d H:i:s')
+                : '']);
         } else {
-            // Convert UTC starts_at to user's local timezone (saveEvent converts local back to UTC)
             $utcTime = Carbon::createFromFormat('Y-m-d H:i:s', $request->starts_at, 'UTC');
-            $localTime = $utcTime->setTimezone(auth()->user()->timezone)->format('Y-m-d H:i:s');
+            $localTime = $utcTime->setTimezone($scheduleTz)->format('Y-m-d H:i:s');
             $request->merge(['starts_at' => $localTime]);
         }
 

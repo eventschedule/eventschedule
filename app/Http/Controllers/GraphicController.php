@@ -57,7 +57,23 @@ class GraphicController extends Controller
             return false;
         })->all();
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl', 'aiGraphicModels'));
+        // Warn if any event that will appear in the graphic is anchored to a different timezone
+        // than this schedule: it would publish at the wrong time in the generated flyer/text/email.
+        $timezoneMismatchCount = 0;
+        if ($role->timezone) {
+            $timezoneMismatchCount = $role->events()
+                ->wherePivot('is_accepted', true)
+                ->upcomingOrOngoing()
+                ->where('events.is_private', false)
+                ->where('events.is_draft', false)
+                ->whereNull('events.event_password')
+                ->with('user:id,timezone')
+                ->get()
+                ->filter(fn ($event) => $event->isOffTimezoneFor($role))
+                ->count();
+        }
+
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl', 'aiGraphicModels', 'timezoneMismatchCount'));
     }
 
     public function getSettings($subdomain)

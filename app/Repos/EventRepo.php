@@ -747,12 +747,21 @@ class EventRepo
             $event->event_password = null;
         }
 
-        // Convert starts_at from user's local time to UTC before slug generation
+        // Convert starts_at from the schedule's local time to UTC before slug generation.
+        // Anchor to the schedule's timezone (not the editing user's personal account timezone):
+        // an event belongs to a schedule, so an organizer whose account timezone differs from the
+        // schedule's must not silently shift the saved time. Record the timezone used so the stored
+        // UTC instant is self-describing and off-timezone events are detectable later.
         if ($event->starts_at) {
-            $timezone = $user->timezone;
+            $timezone = $currentRole?->timezone ?? $venue?->timezone ?? $user?->timezone ?? config('app.timezone');
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');
+            $event->timezone = $timezone;
+        } else {
+            // No time means no meaningful capture timezone; never persist a client-supplied value
+            // ('timezone' is fillable for backup round-tripping).
+            $event->timezone = null;
         }
 
         // Handle slug update for existing events

@@ -663,11 +663,13 @@ class ListDesign extends AbstractEventDesign
     {
         try {
             Carbon::setLocale($this->contentLocale());
-            $startDate = $event->getStartDateTime(null, true);
+            // Render in the schedule's timezone (matching the text graphic path).
+            $tz = $this->role->timezone ?? 'UTC';
+            $startDate = $event->getStartDateTime(null, true, $tz);
             $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
 
             if ($event->duration > 0 && $event->duration >= 24) {
-                $endDate = $event->getEndDateTime(null, true);
+                $endDate = $event->getEndDateTime(null, true, $tz);
 
                 if (! $startDate->isSameDay($endDate)) {
                     // Multi-day event
@@ -676,7 +678,7 @@ class ListDesign extends AbstractEventDesign
             }
 
             if ($event->duration > 0) {
-                $endDate = $event->getEndDateTime(null, true);
+                $endDate = $event->getEndDateTime(null, true, $tz);
 
                 // Same day event with time range
                 return $startDate->translatedFormat('M j, Y').' at '.$startDate->format($timeFormat).' - '.$endDate->format($timeFormat);

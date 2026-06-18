@@ -10,8 +10,8 @@ use Tests\TestCase;
 
 class MiscFeaturesTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     public function test_customization_and_banner_saved(): void
     {
@@ -22,6 +22,7 @@ class MiscFeaturesTest extends TestCase
             'name' => $role->name,
             'email' => $role->email,
             'new_subdomain' => $role->subdomain,
+            'timezone' => $role->timezone,
             'custom_css' => 'body { background: #111; }',
             'accent_color' => '#4E81FA',
             'font_color' => '#ffffff',
@@ -81,7 +82,7 @@ class MiscFeaturesTest extends TestCase
         $role = $this->createRole($owner);
         $this->createEvent($role, ['name' => 'Summer Festival 2026']);
 
-        $response = $this->actingAs($owner)->get(route('role.search_events', ['subdomain' => $role->subdomain]) . '?q=Summer');
+        $response = $this->actingAs($owner)->get(route('role.search_events', ['subdomain' => $role->subdomain]).'?q=Summer');
         $response->assertOk();
         $this->assertStringContainsString('Summer Festival', $response->getContent());
     }
@@ -95,7 +96,7 @@ class MiscFeaturesTest extends TestCase
             'starts_at' => now()->subDays(30)->setTime(12, 0)->format('Y-m-d H:i:s'),
         ]);
 
-        $response = $this->get(route('role.list_past_events', ['subdomain' => $role->subdomain]) . '?before=' . now()->addDay()->toDateString());
+        $response = $this->get(route('role.list_past_events', ['subdomain' => $role->subdomain]).'?before='.now()->addDay()->toDateString());
         $response->assertOk();
         $this->assertStringContainsString('Last Year Show', $response->getContent());
     }

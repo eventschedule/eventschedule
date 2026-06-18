@@ -18,8 +18,6 @@
   </style>
 
   <main>
-    @include('partials.event-debug-comment', ['event' => $event, 'contextRole' => $role])
-
     @php
     $eventRole = $event->roles->where('id', $role->id)->first();
     $eventIsAccepted = $eventRole->pivot->is_accepted;

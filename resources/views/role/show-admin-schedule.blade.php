@@ -14,6 +14,36 @@
 </div>
 @endif
 
+@if ($role->isCurator() && isset($timezoneMismatchEvents) && $timezoneMismatchEvents->isNotEmpty())
+<div class="pb-4">
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3" v-pre>
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="text-sm text-gray-800 dark:text-gray-200 flex-1">
+                <p>{{ str_replace([':count', ':timezone'], [$timezoneMismatchEvents->count(), $role->timezone], __('messages.timezone_mismatch_banner')) }}</p>
+                <ul class="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                    @foreach($timezoneMismatchEvents->take(10) as $tzEvent)
+                    <li>
+                        <a href="{{ route('event.edit', ['subdomain' => $role->subdomain, 'hash' => App\Utils\UrlUtils::encodeId($tzEvent->id)]) }}"
+                           class="font-medium text-amber-700 dark:text-amber-300 underline hover:no-underline">{{ $tzEvent->name }}</a>
+                    </li>
+                    @endforeach
+                    @if($timezoneMismatchEvents->count() > 10)
+                    <li class="text-gray-500 dark:text-gray-400">{{ str_replace(':count', $timezoneMismatchEvents->count() - 10, __('messages.and_n_more')) }}</li>
+                    @endif
+                </ul>
+                <form method="POST" action="{{ route('role.timezone_warning_dismiss', ['subdomain' => $role->subdomain]) }}" class="mt-2">
+                    @csrf
+                    <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline">{{ __('messages.dismiss') }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 @include('role/partials/calendar', ['route' => 'admin', 'tab' => 'schedule'])
 
 @if (count($unscheduled))

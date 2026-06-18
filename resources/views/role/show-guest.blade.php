@@ -50,12 +50,6 @@ html[data-es-view="list"] #calendar-panel-wrapper {
   </style>
 
   <main>
-    @isset($events)
-      @foreach($events->filter(fn ($e) => $e->starts_at && (\Carbon\Carbon::parse($e->starts_at)->isAfter(now()) || ($e->duration >= 24 && $e->getEndDateTime()->isAfter(now()))))->take(40) as $debugEvent)
-        @include('partials.event-debug-comment', ['event' => $debugEvent, 'contextRole' => $role, 'compact' => true])
-      @endforeach
-    @endisset
-
     @include('role.partials.guest-banner')
     <div>
       <div class="container mx-auto pt-3 md:pt-4 pb-3 md:pb-10 px-5 md:mt-0 relative z-10"

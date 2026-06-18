@@ -17,6 +17,7 @@ use App\Models\AnalyticsSocialClicksDaily;
 use App\Models\AnalyticsUtmDaily;
 use App\Models\AuditLog;
 use App\Models\BoostCampaign;
+use App\Models\DismissedTimezoneWarning;
 use App\Models\DismissedVenueMergeSuggestion;
 use App\Models\Event;
 use App\Models\PageView;
@@ -779,6 +780,81 @@ class RoleController extends Controller
         }
 
         return $groups;
+    }
+
+    /**
+     * Upcoming, accepted events on this schedule whose effective timezone differs from the
+     * schedule's timezone (so they may publish at the wrong time in graphics/emails). Returns an
+     * empty collection when the warning has been dismissed for the current off-timezone set
+     * (passing $userId), or pass no $userId to get the raw set regardless of dismissal.
+     */
+    private function offTimezoneEvents(Role $schedule, ?int $userId = null): \Illuminate\Support\Collection
+    {
+        if (! $schedule->timezone) {
+            return collect();
+        }
+
+        $eventIds = DB::table('event_role')
+            ->where('role_id', $schedule->id)
+            ->where('is_accepted', true)
+            ->pluck('event_id');
+
+        if ($eventIds->isEmpty()) {
+            return collect();
+        }
+
+        $events = Event::whereIn('id', $eventIds)
+            ->upcomingOrOngoing()
+            ->where('is_private', false)
+            ->where('is_draft', false)
+            ->whereNull('event_password')
+            ->with('user:id,timezone')
+            ->get(['id', 'name', 'starts_at', 'timezone', 'user_id'])
+            ->filter(fn (Event $event) => $event->isOffTimezoneFor($schedule))
+            ->values();
+
+        if ($userId && $events->isNotEmpty()) {
+            $hash = DismissedTimezoneWarning::hashForEventIds($events->pluck('id')->all());
+            $dismissed = DismissedTimezoneWarning::where('user_id', $userId)
+                ->where('role_id', $schedule->id)
+                ->where('events_hash', $hash)
+                ->exists();
+
+            if ($dismissed) {
+                return collect();
+            }
+        }
+
+        return $events;
+    }
+
+    public function dismissTimezoneWarning(Request $request, $subdomain)
+    {
+        if (is_demo_mode()) {
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
+                ->with('error', __('messages.demo_mode_restriction'));
+        }
+
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        if (! auth()->user()->isEditor($subdomain) || ! $role->isCurator()) {
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
+                ->with('error', __('messages.not_authorized'));
+        }
+
+        // Recompute the current off-timezone set server-side and dismiss exactly that set, so the
+        // banner re-appears if a new off-timezone event later changes the set (and hash).
+        $events = $this->offTimezoneEvents($role);
+
+        if ($events->isNotEmpty()) {
+            DismissedTimezoneWarning::firstOrCreate([
+                'user_id' => auth()->user()->id,
+                'role_id' => $role->id,
+                'events_hash' => DismissedTimezoneWarning::hashForEventIds($events->pluck('id')->all()),
+            ]);
+        }
+
+        return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']);
     }
 
     public function mergeVenues($subdomain)
@@ -2144,8 +2220,10 @@ class RoleController extends Controller
         }
 
         $venueDuplicateGroupCount = 0;
+        $timezoneMismatchEvents = collect();
         if ($tab === 'schedule' && $role->isCurator() && auth()->user()->isEditor($subdomain)) {
             $venueDuplicateGroupCount = count($this->venueDuplicateGroups($role, auth()->user()->id));
+            $timezoneMismatchEvents = $this->offTimezoneEvents($role, auth()->user()->id);
         }
 
         return view('role/show-admin', compact(
@@ -2166,6 +2244,7 @@ class RoleController extends Controller
             'sortBy',
             'sortDir',
             'venueDuplicateGroupCount',
+            'timezoneMismatchEvents',
         ));
     }
 

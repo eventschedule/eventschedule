@@ -327,6 +327,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/{subdomain}/merge-venues/preview', [RoleController::class, 'mergeVenuesGroupPreview'])->name('role.merge_venues_preview');
     Route::post('/{subdomain}/merge-venues', [RoleController::class, 'mergeVenuesGroup'])->name('role.merge_venues_group');
     Route::post('/{subdomain}/merge-venues/dismiss', [RoleController::class, 'dismissVenueMergeSuggestion'])->name('role.merge_venues_dismiss');
+    Route::post('/{subdomain}/timezone-warning/dismiss', [RoleController::class, 'dismissTimezoneWarning'])->name('role.timezone_warning_dismiss');
     Route::get('/{subdomain}/add-event', [EventController::class, 'create'])->name('event.create');
     Route::get('/{subdomain}/verify/{hash}', [RoleController::class, 'verify'])->name('role.verification.verify');
     Route::get('/{subdomain}/resend', [RoleController::class, 'resendVerify'])->name('role.verification.resend');

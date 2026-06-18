@@ -76,6 +76,7 @@ class Event extends Model
         'category_id',
         'category_name',
         'creator_role_id',
+        'timezone',
         'recurring_end_type',
         'recurring_end_value',
         'recurring_frequency',
@@ -1556,6 +1557,41 @@ class Event extends Model
         }
 
         return $startAt;
+    }
+
+    /**
+     * The timezone this event's wall-clock is anchored to: the recorded capture timezone
+     * (events.timezone) when known, otherwise the creator's account timezone for legacy rows —
+     * which is exactly the timezone pre-fix capture used, so legacy detection stays accurate.
+     */
+    public function getEffectiveTimezone(): string
+    {
+        if ($this->timezone) {
+            return $this->timezone;
+        }
+
+        return $this->user?->timezone ?? config('app.timezone');
+    }
+
+    /**
+     * Whether this event is timed and its effective timezone differs from the given schedule's
+     * timezone, i.e. it may publish at the wrong time in that schedule's graphics/emails. This is
+     * the single source of truth for the "events in different timezones" warnings; every surface
+     * must use it rather than re-implementing the comparison.
+     */
+    public function isOffTimezoneFor(Role $schedule): bool
+    {
+        // Date-only events (Y-m-d, no wall-clock) can't be made wrong by a timezone.
+        if (! $this->starts_at || strlen((string) $this->starts_at) === 10) {
+            return false;
+        }
+
+        // Without a schedule timezone there is nothing to compare against.
+        if (! $schedule->timezone) {
+            return false;
+        }
+
+        return $this->getEffectiveTimezone() !== $schedule->timezone;
     }
 
     public function use24HourTime()

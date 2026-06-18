@@ -32,6 +32,12 @@ class RoleUpdateRequest extends FormRequest
 
         return [
             'name' => ['required', 'string', 'max:255'],
+            // A schedule must have a timezone (event times are captured and displayed in it). The
+            // field is disabled in demo mode, so it is only enforced outside demo.
+            'timezone' => array_merge(
+                is_demo_mode() ? [] : ['required'],
+                ['timezone']
+            ),
             'email' => array_merge(
                 ['required', 'string', 'email', 'max:255'],
                 config('app.hosted') ? [new NoFakeEmail] : []
