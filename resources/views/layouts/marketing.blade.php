@@ -291,12 +291,17 @@
 
             function watchSystemTheme() {
                 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                mediaQuery.addEventListener('change', function(e) {
+                const onChange = function(e) {
                     const currentTheme = safeGetItem(THEME_STORAGE_KEY);
                     if (currentTheme === THEMES.SYSTEM) {
                         applyTheme(THEMES.SYSTEM);
                     }
-                });
+                };
+                if (mediaQuery.addEventListener) {
+                    mediaQuery.addEventListener('change', onChange);
+                } else if (mediaQuery.addListener) {
+                    mediaQuery.addListener(onChange); // iOS Safari < 14, legacy API
+                }
             }
 
             function setThemeInternal(theme) {

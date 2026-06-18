@@ -37,7 +37,11 @@ trait RoleBillable
     {
         $subscription = $this->subscription('default');
 
-        if (! $subscription || ! $subscription->valid()) {
+        // Retain access during the Stripe dunning window: a past_due subscription
+        // (renewal charge failed, Stripe still retrying, not yet cancelled) keeps
+        // feature access until it becomes unpaid/cancelled. valid() excludes
+        // past_due, so accept it explicitly.
+        if (! $subscription || (! $subscription->valid() && ! $subscription->pastDue())) {
             return false;
         }
 
@@ -180,7 +184,11 @@ trait RoleBillable
     {
         $subscription = $this->subscription('default');
 
-        if (! $subscription || ! $subscription->active()) {
+        // Retain Enterprise access during the Stripe dunning window: a past_due
+        // subscription (renewal charge failed, Stripe still retrying, not yet
+        // cancelled) keeps access until it becomes unpaid/cancelled. active()
+        // excludes past_due, so accept it explicitly.
+        if (! $subscription || (! $subscription->active() && ! $subscription->pastDue())) {
             return false;
         }
 

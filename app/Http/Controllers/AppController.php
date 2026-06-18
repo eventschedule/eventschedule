@@ -205,39 +205,39 @@ class AppController extends Controller
             if (! Cache::has('td_hourly')) {
                 Cache::put('td_hourly', true, now()->addHour());
 
+                // Catch \Throwable (not just \Exception) so a fatal \Error in one
+                // command cannot abort the rest of the hourly block. The slow,
+                // external-API-bound app:translate runs LAST so that if it times out
+                // and the request is killed, the email-sending commands have already
+                // run (td_hourly is set up-front, so a mid-chain kill would otherwise
+                // skip everything after it until the next hour).
                 try {
                     \Artisan::call('app:release-tickets');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:release-tickets failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:expire-waitlist');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:expire-waitlist failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
-                    \Artisan::call('app:translate');
-                } catch (\Exception $e) {
-                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
-                    report($e);
-                }
-                try {
                     \Artisan::call('app:send-graphic-emails');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:send-graphic-emails failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:send-feedback-requests');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:send-feedback-requests failed: '.$e->getMessage());
                     report($e);
                 }
                 try {
                     \Artisan::call('app:send-carpool-reminders');
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:send-carpool-reminders failed: '.$e->getMessage());
                     report($e);
                 }
@@ -245,10 +245,20 @@ class AppController extends Controller
                 if (config('app.hosted')) {
                     try {
                         \Artisan::call('app:setup-demo');
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         \Log::error('Scheduled command app:setup-demo failed: '.$e->getMessage());
                         report($e);
                     }
+                }
+
+                // Run translation last: it is slow (per-item sleeps + external API)
+                // and the most likely to time out, so it must not starve the
+                // commands above.
+                try {
+                    \Artisan::call('app:translate');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
+                    report($e);
                 }
             }
 

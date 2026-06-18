@@ -54,7 +54,12 @@
             applyTheme();
 
             // Watch for system theme changes
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+            var mq = window.matchMedia('(prefers-color-scheme: dark)');
+            if (mq.addEventListener) {
+                mq.addEventListener('change', applyTheme);
+            } else if (mq.addListener) {
+                mq.addListener(applyTheme); // iOS Safari < 14, legacy API
+            }
         })();
     </script>
 

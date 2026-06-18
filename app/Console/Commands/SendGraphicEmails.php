@@ -183,6 +183,10 @@ class SendGraphicEmails extends Command
                 return 'ok';
 
             case 'monthly':
+                // Clamp to the month length so a send_day of 29-31 still fires on the
+                // last day of shorter months (e.g. day 31 in a 30-day month).
+                $sendDay = min($sendDay, $now->daysInMonth);
+
                 $isScheduledDayPassed = $now->day > $sendDay
                     || ($now->day === $sendDay && $now->hour >= $sendHour);
 

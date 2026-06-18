@@ -147,7 +147,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
               <div class="flex flex-row flex-wrap items-center justify-center gap-3">
                 {{-- Social icons --}}
                 @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
-                <div class="flex flex-row gap-3 items-center">
+                <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
                     @if($hasEmail)
                     <a href="mailto:{{ $role->email }}"
                        class="w-10 h-10 rounded-md flex justify-center items-center shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 social-tooltip"
@@ -316,7 +316,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
                   @endif
                   {{-- Social icons (desktop - simple monochrome style) --}}
                   @if($hasEmail || $hasPhone || $hasWebsite || $hasSocial || $hasPayment)
-                  <div class="flex flex-row gap-4 items-center mt-3">
+                  <div class="flex flex-row flex-wrap gap-4 items-center mt-3">
                       @if($hasEmail)
                       <a href="mailto:{{ $role->email }}"
                          class="text-[#33383C] dark:text-gray-400 hover:text-[#151B26] dark:hover:text-gray-200 transition-colors social-tooltip"
