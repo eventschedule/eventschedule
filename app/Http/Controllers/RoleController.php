@@ -3131,13 +3131,13 @@ class RoleController extends Controller
         $role->fill($request->all());
 
         if ($request->has('youtube_links')) {
-            $role->youtube_links = $request->input('youtube_links') ?: null;
+            $role->youtube_links = $this->sanitizeLinksJson($request->input('youtube_links'));
         }
         if ($request->has('social_links')) {
-            $role->social_links = $request->input('social_links') ?: null;
+            $role->social_links = $this->sanitizeLinksJson($request->input('social_links'));
         }
         if ($request->has('payment_links')) {
-            $role->payment_links = $request->input('payment_links') ?: null;
+            $role->payment_links = $this->sanitizeLinksJson($request->input('payment_links'));
         }
 
         // Save calendar ID to owner's pivot
@@ -4534,6 +4534,21 @@ class RoleController extends Controller
 
             return response()->json(['error' => __('messages.ai_details_generation_failed')], 500);
         }
+    }
+
+    private function sanitizeLinksJson($value)
+    {
+        $links = json_decode($value ?? '');
+
+        if (! is_array($links)) {
+            return null;
+        }
+
+        $links = array_values(array_filter($links, function ($link) {
+            return $link && isset($link->url) && $link->url !== '';
+        }));
+
+        return $links ? json_encode($links) : null;
     }
 
     public function previewLink(Request $request, $subdomain): JsonResponse

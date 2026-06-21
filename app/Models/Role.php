@@ -978,6 +978,19 @@ class Role extends Model implements MustVerifyEmail
         return $subdomain;
     }
 
+    public function decodeLinks($field)
+    {
+        $links = json_decode($this->{$field} ?? '[]');
+
+        if (! is_array($links)) {
+            return [];
+        }
+
+        return array_values(array_filter($links, function ($link) {
+            return $link && isset($link->url) && $link->url !== '';
+        }));
+    }
+
     public function getFirstVideoUrl()
     {
         if (! $this->youtube_links) {

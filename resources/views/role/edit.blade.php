@@ -1928,8 +1928,7 @@
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                                 {!! (!$role->youtube_links || $role->youtube_links == '[]') ? 'style="display:none"' : '' !!}>
                                 @if ($role->youtube_links && $role->youtube_links != '[]')
-                                @foreach(json_decode($role->youtube_links) as $link)
-                                @if ($link)
+                                @foreach($role->decodeLinks('youtube_links') as $link)
                                 <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
                                     <div class="flex items-start gap-4">
                                         <div class="flex-shrink-0 text-gray-500 dark:text-gray-400 pt-1">
@@ -1939,8 +1938,8 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
-                                                <h4 class="text-sm font-semibold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name }}</h4>
-                                                <img src="{{ $link->thumbnail_url }}" class="mt-2 rounded"/>
+                                                <h4 class="text-sm font-semibold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name ?? '' }}</h4>
+                                                <img src="{{ $link->thumbnail_url ?? '' }}" class="mt-2 rounded"/>
                                             </x-link>
                                         </div>
                                         <button type="button"
@@ -1950,7 +1949,6 @@
                                         </button>
                                     </div>
                                 </li>
-                                @endif
                                 @endforeach
                                 @endif
                             </ul>
@@ -1973,8 +1971,7 @@
                             <ul role="list" class="link-list divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden"
                                 {!! (!$role->social_links || $role->social_links == '[]') ? 'style="display:none"' : '' !!}>
                                 @if ($role->social_links && $role->social_links != '[]')
-                                @foreach(json_decode($role->social_links) as $link)
-                                @if ($link)
+                                @foreach($role->decodeLinks('social_links') as $link)
                                 @php $linkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
                                 <li class="p-4 bg-white dark:bg-gray-800" data-link-url="{{ $link->url }}">
                                     <div class="flex items-center gap-4">
@@ -2005,7 +2002,6 @@
                                         </button>
                                     </div>
                                 </li>
-                                @endif
                                 @endforeach
                                 @endif
                             </ul>

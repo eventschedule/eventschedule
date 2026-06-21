@@ -322,14 +322,12 @@
                 {{-- YouTube videos --}}
                 @if ($each->youtube_links)
                   @php
-                    $sidebarVideoLinks = json_decode($each->youtube_links);
+                    $sidebarVideoLinks = $each->decodeLinks('youtube_links');
                   @endphp
                   @foreach ($sidebarVideoLinks as $sLink)
-                    @if ($sLink)
                       <div class="rounded-lg overflow-hidden">
                         <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($sLink->url) }}" title="{{ $each->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
-                    @endif
                   @endforeach
                 @endif
               </div>
@@ -439,8 +437,7 @@
 
               @if ($event->venue->social_links)
               <div class="flex flex-row gap-3 items-center mt-2 {{ $role->isRtl() ? 'rtl' : '' }}">
-                @foreach (json_decode($event->venue->social_links) as $link)
-                  @if ($link)
+                @foreach ($event->venue->decodeLinks('social_links') as $link)
                   @php $venueLinkPlatform = \App\Utils\UrlUtils::detectPlatform($link->url); @endphp
                   <a
                     href="{{ $venueLinkPlatform !== 'website' ? $event->venue->getGuestUrl() . '/' . $venueLinkPlatform : $link->url }}" target="_blank" rel="noopener noreferrer nofollow"
@@ -451,7 +448,6 @@
                       {{ \App\Utils\UrlUtils::clean($link->url) }}
                     </x-url-icon>
                   </a>
-                  @endif
                 @endforeach
               </div>
               @endif

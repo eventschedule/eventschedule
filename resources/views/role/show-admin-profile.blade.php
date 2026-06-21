@@ -52,8 +52,7 @@
             <p class="text-gray-700 dark:text-gray-300">
 
             <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach(json_decode($role->youtube_links) as $link)
-                @if ($link)
+                @foreach($role->decodeLinks('youtube_links') as $link)
                 <li class="py-4">
                     <div class="flex">
                         <div class="me-4 flex-shrink-0 text-gray-500">
@@ -63,8 +62,8 @@
                         </div>
                         <div>
                             <x-link href="{{ $link->url }}" target="_blank" hideIcon class="block">
-                                <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name }}</h4>
-                                <img src="{{ $link->thumbnail_url }}"/>
+                                <h4 class="text-lg font-bold break-words line-clamp-2 text-gray-900 dark:text-gray-100">{{ $link->name ?? '' }}</h4>
+                                <img src="{{ $link->thumbnail_url ?? '' }}"/>
                             </x-link>
                             @if(!$isViewer)
                             <button type="button"
@@ -76,7 +75,6 @@
                         </div>
                     </div>
                 </li>
-                @endif
                 @endforeach
             </ul>
 
@@ -103,8 +101,7 @@
             @if ($role->social_links)
             <p class="text-gray-700 dark:text-gray-300">
             <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach(json_decode($role->social_links) as $link)
-                @if ($link)
+                @foreach($role->decodeLinks('social_links') as $link)
                 <li class="py-4">
                     <div class="flex">
                         <div class="me-4 flex-shrink-0 pt-1 text-gray-500">
@@ -129,7 +126,6 @@
                         </div>
                     </div>
                 </li>
-                @endif
                 @endforeach
             </ul>
             </p>
@@ -154,8 +150,7 @@
             @if ($role->payment_links)
             <p class="text-gray-700 dark:text-gray-300">
             <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
-                @foreach(json_decode($role->payment_links) as $link)
-                @if ($link)
+                @foreach($role->decodeLinks('payment_links') as $link)
                 <li class="py-4">
                     <div class="flex">
                         <div class="me-4 flex-shrink-0 pt-1 text-gray-500">
@@ -180,7 +175,6 @@
                         </div>
                     </div>
                 </li>
-                @endif
                 @endforeach
             </ul>
             </p>
