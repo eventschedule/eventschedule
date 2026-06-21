@@ -1014,7 +1014,7 @@ class Role extends Model implements MustVerifyEmail
 
         $links = json_decode($this->youtube_links);
 
-        if (count($links) >= 2) {
+        if (count($links) >= 2 && isset($links[1]->url)) {
             return $links[1]->url;
         }
 
