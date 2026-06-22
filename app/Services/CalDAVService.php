@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\Role;
 use App\Repos\EventRepo;
+use App\Services\Concerns\ConvertsLocationToVenue;
 use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
 use App\Utils\SlugPatternUtils;
@@ -19,6 +20,8 @@ use Sabre\VObject\Reader;
 
 class CalDAVService
 {
+    use ConvertsLocationToVenue;
+
     protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
@@ -724,76 +727,6 @@ class CalDAVService
             }
 
             return $event;
-        });
-    }
-
-    /**
-     * Convert a location string to a venue
-     */
-    protected function convertLocationToVenue(Role $role, string $location): ?Role
-    {
-        // Guard: cannot create venue without a user
-        if (! $role->user_id) {
-            Log::warning('Cannot create venue: role has no user', ['role_id' => $role->id]);
-
-            return null;
-        }
-
-        $location = trim($location);
-
-        if (! $location) {
-            return null;
-        }
-
-        // Truncate location if it exceeds database column limit
-        if (strlen($location) > 255) {
-            Log::warning('CalDAV location truncated', [
-                'role_id' => $role->id,
-                'original_length' => strlen($location),
-            ]);
-            $location = substr($location, 0, 255);
-        }
-
-        return DB::transaction(function () use ($role, $location) {
-            // Get IDs of venues the role's user already follows
-            $followedVenueIds = Role::where('type', 'venue')
-                ->whereHas('followers', function ($query) use ($role) {
-                    $query->where('users.id', $role->user_id);
-                })
-                ->where('is_deleted', false)
-                ->pluck('id')
-                ->toArray();
-
-            $venue = Role::where('type', 'venue')
-                ->where('address1', $location)
-                ->whereIn('id', $followedVenueIds)
-                ->where('is_deleted', false)
-                ->first();
-
-            if ($venue) {
-                return $venue;
-            }
-
-            // Create new venue with unique subdomain
-            // generateSubdomain already handles uniqueness, but we retry if race condition occurs
-            $subdomain = Role::generateSubdomain($location);
-            $attempts = 0;
-            while (Role::where('subdomain', $subdomain)->exists() && $attempts < 10) {
-                $subdomain = Role::generateSubdomain($location.'-'.++$attempts);
-            }
-
-            $venue = new Role;
-            $venue->type = 'venue';
-            $venue->user_id = $role->user_id;
-            $venue->subdomain = $subdomain;
-            $venue->name = $location;
-            $venue->address1 = $location;
-            $venue->country_code = $role->country_code;
-            $venue->save();
-
-            $venue->members()->attach($role->user_id, ['level' => 'follower', 'created_at' => now()]);
-
-            return $venue;
         });
     }
 

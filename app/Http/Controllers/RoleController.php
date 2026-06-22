@@ -698,6 +698,22 @@ class RoleController extends Controller
     }
 
     /**
+     * True when both roles share at least one owner/admin user, i.e. they are managed by
+     * the same person. Used to decide whether a curator's acceptance should carry onto a
+     * co-owned venue/talent.
+     */
+    private function rolesShareOwner(Role $a, Role $b): bool
+    {
+        return DB::table('role_user as a')
+            ->join('role_user as b', 'a.user_id', '=', 'b.user_id')
+            ->where('a.role_id', $a->id)
+            ->where('b.role_id', $b->id)
+            ->whereIn('a.level', ['owner', 'admin'])
+            ->whereIn('b.level', ['owner', 'admin'])
+            ->exists();
+    }
+
+    /**
      * Return duplicate-venue groups across a curator schedule's future, accepted
      * events. Each group is an array of Role models sharing a normalized
      * name|city|country key, with $venue->future_event_count and
@@ -1020,7 +1036,7 @@ class RoleController extends Controller
         }
 
         $eventCount = 0;
-        DB::transaction(function () use ($validated, $target, &$eventCount) {
+        DB::transaction(function () use ($role, $validated, $target, &$eventCount) {
             foreach ($validated as $source) {
                 $eventCount += $this->performMerge($source, $target);
             }
@@ -1029,6 +1045,35 @@ class RoleController extends Controller
             if ($target->is_deleted) {
                 $target->is_deleted = false;
                 $target->save();
+            }
+
+            // When the curator and the target venue are owned by the same user, the merge
+            // is a self-consolidation: the events are already accepted on the curator, so
+            // accept them on the venue too. Otherwise the venue's own page keeps hiding them
+            // (its is_accepted stays false/null from the importer). Gate on co-ownership so a
+            // merge into a venue claimed by someone else never force-accepts onto their page.
+            if ($this->rolesShareOwner($role, $target)) {
+                // Events sitting on the target venue but not yet accepted there...
+                $pendingEventIds = DB::table('event_role')
+                    ->where('role_id', $target->id)
+                    ->where(fn ($q) => $q->whereNull('is_accepted')->orWhere('is_accepted', false))
+                    ->pluck('event_id');
+
+                // ...that the curator has already accepted. Materialised (no event_role subquery inside
+                // the UPDATE) to avoid MySQL error 1093 (can't update a table referenced by a subquery
+                // in its own WHERE).
+                $acceptedEventIds = DB::table('event_role')
+                    ->where('role_id', $role->id)
+                    ->where('is_accepted', true)
+                    ->whereIn('event_id', $pendingEventIds)
+                    ->pluck('event_id');
+
+                if ($acceptedEventIds->isNotEmpty()) {
+                    DB::table('event_role')
+                        ->where('role_id', $target->id)
+                        ->whereIn('event_id', $acceptedEventIds)
+                        ->update(['is_accepted' => true]);
+                }
             }
         });
 
