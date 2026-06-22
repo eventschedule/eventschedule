@@ -3296,4 +3296,9 @@ return [
     'push_configured' => 'Pushmeldingen zijn geconfigureerd',
     'push_not_configured' => 'Pushmeldingen zijn niet geconfigureerd',
     'push_disclosure' => 'Door push in te schakelen worden meldingsgegevens verzonden naar OneSignal, een externe dienst.',
+    'header_style' => 'Kopstijl',
+    'header_style_banner' => 'Banner',
+    'header_style_compact' => 'Compact',
+    'header_style_help' => 'Banner: grote kop met afbeelding en beschrijving. Compact: een smalle balk bovenaan.',
+    'header_image_banner_only' => 'Geldt alleen voor de Banner-kopstijl.',
 ];

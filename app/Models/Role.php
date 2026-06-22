@@ -22,6 +22,7 @@ class Role extends Model implements MustVerifyEmail
         'type',
         'is_unlisted',
         'design',
+        'header_style',
         'background',
         'background_rotation',
         'background_colors',
@@ -172,10 +173,23 @@ class Role extends Model implements MustVerifyEmail
      */
     protected $attributes = [
         'header_image' => 'none',
+        'header_style' => 'compact',
         'fan_comments_enabled' => true,
         'fan_photos_enabled' => true,
         'fan_videos_enabled' => true,
     ];
+
+    /**
+     * Resolve the guest-portal header style. Two styles exist: "banner" (the large
+     * card) and "compact" (the slim full-width bar). null/invalid resolves to "banner";
+     * the legacy "minimal" value maps to "compact" (the same slim-row design it became).
+     */
+    public function headerStyle(): string
+    {
+        $style = $this->header_style === 'minimal' ? 'compact' : $this->header_style;
+
+        return in_array($style, ['banner', 'compact'], true) ? $style : 'banner';
+    }
 
     protected static function boot()
     {

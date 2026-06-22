@@ -3319,4 +3319,9 @@ return [
     'push_configured' => 'Push-уведомления настроены',
     'push_not_configured' => 'Push-уведомления не настроены',
     'push_disclosure' => 'При включении push данные уведомлений передаются в OneSignal - стороннюю службу.',
+    'header_style' => 'Стиль заголовка',
+    'header_style_banner' => 'Баннер',
+    'header_style_compact' => 'Компактный',
+    'header_style_help' => 'Баннер: большой заголовок с изображением и описанием. Компактный: узкая полоса вверху страницы.',
+    'header_image_banner_only' => 'Применяется только к стилю заголовка Баннер.',
 ];

@@ -193,6 +193,7 @@
             updateHeaderNavButtons();
             toggleCustomHeaderInput();
             updateFontNavButtons();
+            toggleHeaderImageForStyle();
             
             // Handle accept_requests checkbox
             const acceptRequestsCheckbox = document.querySelector('input[name="accept_requests"][type="checkbox"]');
@@ -459,6 +460,28 @@
             return luminance > 0.25 ? '#000000' : '#ffffff';
         }
 
+        // Returns the accent color only if it has >= 3:1 contrast against the given
+        // background, else the fallback (mirrors ColorUtils::readableAccentColor).
+        function getReadableAccent(accentColor, bgHex, fallback) {
+            try {
+                function lum(hex) {
+                    hex = hex.replace('#', '');
+                    var r = parseInt(hex.substr(0, 2), 16) / 255,
+                        g = parseInt(hex.substr(2, 2), 16) / 255,
+                        b = parseInt(hex.substr(4, 2), 16) / 255;
+                    r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+                    g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+                    b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+                    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+                }
+                var la = lum(accentColor), lb = lum(bgHex);
+                var ratio = (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+                return ratio >= 3 ? accentColor : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
         function updatePreview() {
             var isDark = document.documentElement.classList.contains('dark');
             var background = $('input[name="background"]:checked').val();
@@ -559,6 +582,52 @@
             // Apply content to preview container
             var $preview = $('#preview');
             $preview.html(contentHtml);
+
+            // Override the preview for the compact header style so it reads like the real
+            // full-screen layout: a full-width bar flush at the top, with a faint content hint below.
+            var headerStyle = $('input[name="header_style"]:checked').val() || 'banner';
+            if (headerStyle === 'compact') {
+                $preview.css('padding', '0'); // full-bleed: bar spans edge-to-edge like the real GP
+                var contrast = getContrastColor(accentColor);
+                var ctaPill = '<span style="display:inline-block;border-radius:6px;padding:4px 9px;font-size:10px;font-weight:600;white-space:nowrap;background-color:' + accentColor + ';color:' + contrast + ';">' + followText + '</span>';
+                var toggleHint = '<span style="display:inline-flex;flex-shrink:0;height:20px;border:1px solid ' + accentColor + ';border-radius:6px;overflow:hidden;">' +
+                    '<span style="width:20px;background-color:' + accentColor + ';"></span>' +
+                    '<span style="width:20px;"></span>' +
+                '</span>';
+                var dot = function (c) { return '<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background-color:' + c + ';"></span>'; };
+                // Faint, centered "page content" beneath the full-width bar so the preview reads as the full-screen layout (full-width bar over centered body content).
+                var hintCard = '<div style="flex:1;height:34px;border-radius:8px;background-color:rgba(127,127,127,0.22);"></div>';
+                var contentHint =
+                    '<div style="margin:0 auto;max-width:80%;">' +
+                        '<div style="height:7px;width:42%;border-radius:4px;background-color:rgba(127,127,127,0.4);margin:0 auto 9px;"></div>' +
+                        '<div style="display:flex;gap:8px;">' + hintCard + hintCard + hintCard + '</div>' +
+                    '</div>';
+                var minLogo = profileSrc ? '<img src="' + profileSrc + '" style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;">' : '';
+                var minLine = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)';
+                var minDot = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
+                var minBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+                var barHtml =
+                    '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width:100%;overflow:hidden;background-color:' + cardBg + ';border-bottom:1px solid ' + minBorder + ';">' +
+                        '<div style="padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+                            '<div style="display:flex;align-items:center;gap:8px;min-width:0;">' + minLogo +
+                                '<div style="font-size:15px;font-weight:600;color:' + fontColor + ';font-family:\'' + fontFamily + '\',sans-serif;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + name + '</div>' +
+                            '</div>' +
+                            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' + ctaPill + toggleHint + '</div>' +
+                        '</div>' +
+                        '<div style="border-top:1px solid ' + minBorder + ';padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+                            '<div style="height:6px;border-radius:3px;background-color:' + minLine + ';flex:1;max-width:55%;"></div>' +
+                            '<div style="display:flex;gap:5px;flex-shrink:0;">' + dot(minDot) + dot(minDot) + dot(minDot) + '</div>' +
+                        '</div>' +
+                    '</div>';
+                $preview.html(
+                    '<div style="width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">' +
+                        barHtml +
+                        '<div style="flex:1;padding:14px 16px;">' + contentHint + '</div>' +
+                    '</div>'
+                );
+            } else {
+                $preview.css('padding', '10px');
+            }
 
             // Reset background styles before applying new ones
             $preview.css('background-color', '').css('background-image', '');
@@ -789,6 +858,18 @@
                 select.selectedIndex = newIndex;
                 onChangeFont();
                 updateFontNavButtons();
+            }
+        }
+
+        // The header image applies to the Banner style only; show it for banner and hide
+        // it for the other styles (the chosen value is preserved while hidden).
+        function toggleHeaderImageForStyle() {
+            const styleRadio = document.querySelector('input[name="header_style"]:checked');
+            const style = styleRadio ? (styleRadio.value || 'banner') : 'banner';
+            const headerImage = document.getElementById('header_image');
+            const group = headerImage ? headerImage.closest('.mb-6') : null;
+            if (group) {
+                group.style.display = (style === 'banner') ? '' : 'none';
             }
         }
 
@@ -1539,97 +1620,6 @@
                     <!-- Background Tab Content -->
                     <div id="style-content-background" style="display: none;">
 
-                            @php
-                                $effectiveHeaderImage = $role->header_image;
-                                if ($role->header_image_url && !$effectiveHeaderImage) {
-                                    $effectiveHeaderImage = ''; // Custom
-                                }
-                            @endphp
-                            <div class="mb-6">
-                                <x-input-label for="header_image" :value="__('messages.header_image')" />
-                                <div class="flex items-center gap-1">
-                                    <select id="header_image" name="header_image"
-                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                        data-searchable data-action="header-image-input">
-                                        <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
-                                            {{ __('messages.none') }}</option>
-                                        @foreach($headers as $header => $name)
-                                        <option value="{{ $header }}"
-                                            {{ $effectiveHeaderImage == $header ? 'SELECTED' : '' }}>
-                                            {{ $name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button"
-                                            id="prev_header"
-                                            class="color-nav-button"
-                                            data-nav-action="changeHeaderImage" data-nav-direction="-1"
-                                            title="{{ __('messages.previous') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                                        </svg>
-                                    </button>
-                                    <button type="button"
-                                            id="next_header"
-                                            class="color-nav-button"
-                                            data-nav-action="changeHeaderImage" data-nav-direction="1"
-                                            title="{{ __('messages.next') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <div id="custom_header_input" style="display:none" class="mt-4">
-                                    <input id="header_image_url" name="header_image_url" type="file" class="hidden"
-                                        accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" />
-                                    <div class="mt-1 flex items-center gap-3">
-                                        <button type="button" data-trigger-file-input="header_image_url"
-                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
-                                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            {{ __('messages.choose_file') }}
-                                        </button>
-                                        <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
-                                    </div>
-                                    <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
-                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
-                                        <button type="button" id="clear-header-file-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
-                                    <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
-                                        {{ __('messages.image_size_warning') }}
-                                    </p>
-                                </div>
-
-                                <img id="header_image_preview"
-                                    src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
-                                    alt="Header Image Preview"
-                                    style="max-height:120px; {{ $effectiveHeaderImage && $effectiveHeaderImage !== 'none' ? '' : 'display:none;' }}"
-                                    class="pt-3 cursor-pointer" data-lightbox-src />
-
-                                @if ($role->header_image_url)
-                                <div id="delete_header_image_button" class="relative inline-block mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
-                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src="{{ $role->header_image_url }}" />
-                                    <button type="button"
-                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
-                                        data-delete-image-token="{{ csrf_token() }}"
-                                        data-delete-image-parent="true"
-                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
-                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                                @endif
-
-                            </div>
-
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.background_type')" />
                                 <div class="mt-2 space-y-2">
@@ -1815,6 +1805,121 @@
 
                     <!-- Advanced Tab Content -->
                     <div id="style-content-advanced" style="display: none;">
+                            <!-- Header Style -->
+                            <div class="mb-6">
+                                <x-input-label :value="__('messages.header_style')" />
+                                @php $currentHeaderStyle = old('header_style', $role->headerStyle()); @endphp
+                                <div class="mt-2 space-y-2">
+                                    @foreach(['banner', 'compact'] as $hs)
+                                    <div class="flex items-center">
+                                        <input type="radio"
+                                            id="header_style_{{ $hs }}"
+                                            name="header_style"
+                                            value="{{ $hs }}"
+                                            data-action="header-style-change"
+                                            {{ $currentHeaderStyle === $hs ? 'checked' : '' }}
+                                            class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
+                                        <label for="header_style_{{ $hs }}" class="ms-2 text-gray-900 dark:text-gray-100">
+                                            {{ __('messages.header_style_' . $hs) }}
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.header_style_help') }}</p>
+                                <x-input-error class="mt-2" :messages="$errors->get('header_style')" />
+                            </div>
+
+                            @php
+                                $effectiveHeaderImage = $role->header_image;
+                                if ($role->header_image_url && !$effectiveHeaderImage) {
+                                    $effectiveHeaderImage = ''; // Custom
+                                }
+                            @endphp
+                            <div class="mb-6">
+                                <x-input-label for="header_image" :value="__('messages.header_image')" />
+                                <div class="flex items-center gap-1">
+                                    <select id="header_image" name="header_image"
+                                        class="flex-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                        data-searchable data-action="header-image-input">
+                                        <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
+                                            {{ __('messages.none') }}</option>
+                                        @foreach($headers as $header => $name)
+                                        <option value="{{ $header }}"
+                                            {{ $effectiveHeaderImage == $header ? 'SELECTED' : '' }}>
+                                            {{ $name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="button"
+                                            id="prev_header"
+                                            class="color-nav-button"
+                                            data-nav-action="changeHeaderImage" data-nav-direction="-1"
+                                            title="{{ __('messages.previous') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+                                    <button type="button"
+                                            id="next_header"
+                                            class="color-nav-button"
+                                            data-nav-action="changeHeaderImage" data-nav-direction="1"
+                                            title="{{ __('messages.next') }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3 h-3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div id="custom_header_input" style="display:none" class="mt-4">
+                                    <input id="header_image_url" name="header_image_url" type="file" class="hidden"
+                                        accept="image/png, image/jpeg" data-file-trigger="header_image_url" data-filename-target="header_image_url_filename" />
+                                    <div class="mt-1 flex items-center gap-3">
+                                        <button type="button" data-trigger-file-input="header_image_url"
+                                            class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors border border-gray-300 dark:border-gray-600">
+                                            <svg class="w-4 h-4 ltr:mr-1.5 rtl:ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            {{ __('messages.choose_file') }}
+                                        </button>
+                                        <span id="header_image_url_filename" class="text-sm text-gray-500 dark:text-gray-400"></span>
+                                    </div>
+                                    <div id="header_image_url_preview_clear" class="relative inline-block pt-3" style="display: none;">
+                                        <img id="header_image_url_preview" src="#" alt="Header Image Preview" style="max-height:120px;" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src />
+                                        <button type="button" id="clear-header-file-btn" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <x-input-error class="mt-2" :messages="$errors->get('header_image_url')" />
+                                    <p id="header_image_size_warning" class="mt-2 text-sm text-red-600 dark:text-red-400" style="display: none;">
+                                        {{ __('messages.image_size_warning') }}
+                                    </p>
+                                </div>
+
+                                <img id="header_image_preview"
+                                    src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
+                                    alt="Header Image Preview"
+                                    style="max-height:120px; {{ $effectiveHeaderImage && $effectiveHeaderImage !== 'none' ? '' : 'display:none;' }}"
+                                    class="pt-3 cursor-pointer" data-lightbox-src />
+
+                                @if ($role->header_image_url)
+                                <div id="delete_header_image_button" class="relative inline-block mt-4 pt-1" style="display: {{ $effectiveHeaderImage ? 'none' : 'block' }};">
+                                    <img src="{{ $role->header_image_url }}" style="max-height:120px" class="rounded-lg border border-gray-200 dark:border-gray-600 cursor-pointer" data-lightbox-src="{{ $role->header_image_url }}" />
+                                    <button type="button"
+                                        data-delete-image-url="{{ route('role.delete_image', ['subdomain' => $role->subdomain, 'image_type' => 'header']) }}"
+                                        data-delete-image-token="{{ csrf_token() }}"
+                                        data-delete-image-parent="true"
+                                        style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;"
+                                        class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                @endif
+
+                            </div>
+
                             <div class="mb-6">
                                 <x-input-label :value="__('messages.default_layout')" />
                                 <div class="mt-2 space-y-2">
@@ -7001,6 +7106,10 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'font-family-change':
                 onChangeFont();
                 updateFontNavButtons();
+                break;
+            case 'header-style-change':
+                updatePreview();
+                toggleHeaderImageForStyle();
                 break;
             case 'toggle-field-options':
                 toggleEventFieldOptions(el);

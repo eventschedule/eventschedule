@@ -3296,4 +3296,9 @@ return [
     'push_configured' => 'Las notificaciones push están configuradas',
     'push_not_configured' => 'Las notificaciones push no están configuradas',
     'push_disclosure' => 'Al activar push, los datos de notificación se envían a OneSignal, un servicio de terceros.',
+    'header_style' => 'Estilo de Encabezado',
+    'header_style_banner' => 'Banner',
+    'header_style_compact' => 'Compacto',
+    'header_style_help' => 'Banner: encabezado grande con imagen y descripción. Compacto: una barra delgada en la parte superior.',
+    'header_image_banner_only' => 'Solo se aplica al estilo de encabezado Banner.',
 ];

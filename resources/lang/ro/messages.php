@@ -3336,4 +3336,9 @@ return [
     'push_configured' => 'Notificările push sunt configurate',
     'push_not_configured' => 'Notificările push nu sunt configurate',
     'push_disclosure' => 'Activarea push trimite datele de notificare către OneSignal, un serviciu terț.',
+    'header_style' => 'Stil antet',
+    'header_style_banner' => 'Banner',
+    'header_style_compact' => 'Compact',
+    'header_style_help' => 'Banner: antet mare cu imagine și descriere. Compact: o bară subțire în partea de sus.',
+    'header_image_banner_only' => 'Se aplică doar stilului de antet Banner.',
 ];

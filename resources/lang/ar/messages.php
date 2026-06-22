@@ -3297,4 +3297,9 @@ return [
     'push_configured' => 'إشعارات الدفع مُهيَّأة',
     'push_not_configured' => 'إشعارات الدفع غير مُهيَّأة',
     'push_disclosure' => 'تفعيل الدفع يُرسل بيانات الإشعارات إلى OneSignal، وهي خدمة طرف ثالث.',
+    'header_style' => 'نمط الترويسة',
+    'header_style_banner' => 'لافتة',
+    'header_style_compact' => 'مدمج',
+    'header_style_help' => 'لافتة: ترويسة كبيرة مع صورة ووصف. مدمج: شريط رفيع في أعلى الصفحة.',
+    'header_image_banner_only' => 'ينطبق على نمط ترويسة اللافتة فقط.',
 ];

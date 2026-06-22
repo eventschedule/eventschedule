@@ -3296,4 +3296,9 @@ return [
     'push_configured' => 'Le notifiche push sono configurate',
     'push_not_configured' => 'Le notifiche push non sono configurate',
     'push_disclosure' => 'Attivando le notifiche push, i dati vengono inviati a OneSignal, un servizio di terze parti.',
+    'header_style' => 'Stile Intestazione',
+    'header_style_banner' => 'Banner',
+    'header_style_compact' => 'Compatto',
+    'header_style_help' => 'Banner: intestazione grande con immagine e descrizione. Compatto: una barra sottile in alto.',
+    'header_image_banner_only' => 'Si applica solo allo stile di intestazione Banner.',
 ];

@@ -532,7 +532,7 @@
             }
         @endphp
 
-        @if (! request()->embed && $role->language_code != 'en')
+        @if (! request()->embed && $role->language_code != 'en' && $role->headerStyle() === 'banner')
             <div class="container mx-auto flex justify-end {{ $isRtl ? 'pl-5' : 'pr-5' }} pt-4">
                 <div class="gp-lang-switcher flex items-center rounded-full p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
                     @if(session()->has('translate') || request()->lang == 'en')

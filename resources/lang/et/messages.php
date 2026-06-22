@@ -3316,4 +3316,9 @@ return [
     'push_configured' => 'Push-teavitused on seadistatud',
     'push_not_configured' => 'Push-teavitused ei ole seadistatud',
     'push_disclosure' => 'Push-teavituste lubamine saadab teavitusandmed OneSignali, kolmanda osapoole teenusesse.',
+    'header_style' => 'Päise stiil',
+    'header_style_banner' => 'Bänner',
+    'header_style_compact' => 'Kompaktne',
+    'header_style_help' => 'Bänner: suur päis pildi ja kirjeldusega. Kompaktne: kitsas riba lehe ülaservas.',
+    'header_image_banner_only' => 'Kehtib ainult Bänneri päisestiili puhul.',
 ];

@@ -3301,4 +3301,9 @@ return [
     'push_configured' => 'Les notifications push sont configurées',
     'push_not_configured' => 'Les notifications push ne sont pas configurées',
     'push_disclosure' => 'L\'activation des notifications push envoie des données de notification à OneSignal, un service tiers.',
+    'header_style' => 'Style d\'en-tête',
+    'header_style_banner' => 'Bannière',
+    'header_style_compact' => 'Compact',
+    'header_style_help' => 'Bannière : grand en-tête avec image et description. Compact : une barre fine en haut de la page.',
+    'header_image_banner_only' => 'S\'applique uniquement au style d\'en-tête Bannière.',
 ];

@@ -36,7 +36,7 @@ use Illuminate\Support\Str;
 class BackupService
 {
     private const ROLE_EXPORT_FIELDS = [
-        'type', 'is_unlisted', 'design', 'background', 'background_rotation', 'background_colors',
+        'type', 'is_unlisted', 'design', 'header_style', 'background', 'background_rotation', 'background_colors',
         'background_color', 'accent_color', 'font_color', 'font_family', 'name', 'name_en',
         'phone', 'email', 'website', 'address1', 'address1_en', 'address2', 'address2_en',
         'city', 'city_en', 'state', 'state_en', 'postal_code', 'country_code', 'language_code',
@@ -1062,6 +1062,10 @@ class BackupService
                 $role->$field = $data[$field];
             }
         }
+        // Pre-feature backups have no header_style key; force null (resolves to the
+        // "banner" style) so the model's "compact" default doesn't change a restored
+        // schedule's appearance.
+        $role->header_style = $data['header_style'] ?? null;
         $role->subdomain = $subdomain;
         $role->user_id = $userId;
 

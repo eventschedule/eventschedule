@@ -3373,4 +3373,9 @@ return [
     'delete_template' => 'Delete Template',
     'use_a_template' => 'Use a Template',
     'started_from_template' => 'Started from a template. Set the date and adjust as needed.',
+    'header_style' => 'Header Style',
+    'header_style_banner' => 'Banner',
+    'header_style_compact' => 'Compact',
+    'header_style_help' => 'Banner: large header with image and description. Compact: a slim full-width bar at the top.',
+    'header_image_banner_only' => 'Applies to the Banner header style only.',
 ];

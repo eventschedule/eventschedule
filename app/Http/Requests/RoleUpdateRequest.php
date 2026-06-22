@@ -98,6 +98,7 @@ class RoleUpdateRequest extends FormRequest
             'banner_message_en' => ['nullable', 'string', 'max:500'],
             'slug_pattern' => ['nullable', 'string', 'max:500'],
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
+            'header_style' => ['nullable', 'string', 'in:banner,compact'],
             'direct_registration' => ['nullable', 'boolean'],
             'hide_past_events' => ['nullable', 'boolean'],
             'draft_events_default' => ['nullable', 'boolean'],

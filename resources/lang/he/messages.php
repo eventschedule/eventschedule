@@ -3293,4 +3293,9 @@ return [
     'push_configured' => 'התראות דחיפה מוגדרות',
     'push_not_configured' => 'התראות דחיפה אינן מוגדרות',
     'push_disclosure' => 'הפעלת דחיפה שולחת נתוני התראות ל-OneSignal, שירות צד שלישי.',
+    'header_style' => 'סגנון כותרת',
+    'header_style_banner' => 'באנר',
+    'header_style_compact' => 'קומפקטי',
+    'header_style_help' => 'באנר: כותרת גדולה עם תמונה ותיאור. קומפקטי: פס צר בראש העמוד.',
+    'header_image_banner_only' => 'חל על סגנון כותרת הבאנר בלבד.',
 ];

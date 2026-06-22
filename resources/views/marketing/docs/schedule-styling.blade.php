@@ -70,6 +70,7 @@
                         <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">On this page</div>
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Overview</a>
                         <a href="#event-layout" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Event Layout</a>
+                        <a href="#header-style" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Header Style</a>
                         <a href="#profile-image" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Profile Image</a>
                         <a href="#header-images" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Header Images</a>
                         <a href="#backgrounds" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Background Options</a>
@@ -130,6 +131,31 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List Layout</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Events displayed in a compact list. Best for text-heavy schedules or when you have many events.</p>
                                 </div>
+                            </div>
+                        </section>
+
+                        <!-- Header Style -->
+                        <section id="header-style" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25V18a2.25 2.25 0 002.25 2.25h13.5A2.25 2.25 0 0021 18V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 6v2.25m-18 0h18" />
+                                </svg>
+                                Header Style
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Choose how the header appears at the top of your public schedule page under <strong>Edit schedule &rarr; Style &rarr; Advanced</strong>. New schedules use the Compact style by default; the live preview updates as you switch between styles.</p>
+                            <div class="space-y-3 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Banner</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A large header with your header image, a prominent logo, name, tagline, full description, and social links. The most spacious option.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Compact</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">A slim full-width bar at the top of the page with your logo and name. Your description and social or contact links appear in a strip just beneath the bar.</p>
+                                </div>
+                            </div>
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Header image</div>
+                                <p>The header image applies to the <strong>Banner</strong> style only. The Compact style keeps your description and social links in a strip below the bar, so nothing is hidden.</p>
                             </div>
                         </section>
 
