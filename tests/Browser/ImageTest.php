@@ -99,14 +99,18 @@ class ImageTest extends DuskTestCase
             // C. Schedule Header Image
             // -----------------------------------------------
 
-            // Navigate to edit > style > background
+            // Navigate to edit > style > advanced (header image)
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
             $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="background"]')
+                ->click('button[data-style-tab="advanced"]')
                 ->pause(500);
+
+            // Header image controls only show for the "banner" header style; select it to reveal them
+            $browser->script("document.getElementById('header_style_banner').checked = true; document.getElementById('header_style_banner').dispatchEvent(new Event('change', { bubbles: true }));");
+            $browser->pause(300);
 
             // Select "Custom" (empty value) from header_image dropdown
             $browser->script("document.getElementById('header_image').value = ''; document.getElementById('header_image').dispatchEvent(new Event('input', { bubbles: true }));");
@@ -123,14 +127,17 @@ class ImageTest extends DuskTestCase
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->refresh()->header_image_url);
 
-            // Navigate back to edit > style > background
+            // Navigate back to edit > style > advanced (header image)
             $browser->visit('/talent/edit')
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
             $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="background"]')
-                ->pause(500)
+                ->click('button[data-style-tab="advanced"]')
+                ->pause(500);
+            // Ensure banner style so the header image block (and its delete button) is visible
+            $browser->script("document.getElementById('header_style_banner').checked = true; document.getElementById('header_style_banner').dispatchEvent(new Event('change', { bubbles: true }));");
+            $browser->pause(300)
                 ->waitFor('#delete_header_image_button', 5);
 
             // Delete via AJAX (override confirm dialog)
