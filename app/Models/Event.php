@@ -1435,8 +1435,10 @@ class Event extends Model
             $data['id'] = UrlUtils::encodeId($this->id);
         }
 
-        // Only include date for recurring events
-        if ($date && $this->days_of_week) {
+        // Only include the date for recurring events, and only when the id is
+        // also included. The dated guest route (event.view_guest_full) requires
+        // the id segment, so a date without an id would be unroutable.
+        if ($includeId && $date && $this->days_of_week) {
             $data['date'] = $date;
         }
 

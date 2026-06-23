@@ -75,8 +75,14 @@ class EventTextGenerator
         // Determine time format based on role's 24h setting
         $timeFormat = $role->use_24_hour_time ? 'H:i' : 'g:i A';
 
-        // Build the URL
-        $eventUrl = $event->getGuestUrl($role->subdomain, null, true);
+        // Get URL formatting settings
+        $urlIncludeHttps = $urlSettings['url_include_https'] ?? false;
+        $urlIncludeId = $urlSettings['url_include_id'] ?? false;
+
+        // Build the URL. Passing $urlIncludeId omits the encoded event id (and,
+        // for recurring events, the date segment) up front instead of stripping
+        // it after, producing a clean slug-only link when the option is unchecked.
+        $eventUrl = $event->getGuestUrl($role->subdomain, null, true, $urlIncludeId);
         if ($directRegistration && $event->registration_url) {
             if (str_contains($eventUrl, '?')) {
                 $eventUrl = str_replace('?', '/?', $eventUrl);
@@ -85,19 +91,9 @@ class EventTextGenerator
             }
         }
 
-        // Get URL formatting settings
-        $urlIncludeHttps = $urlSettings['url_include_https'] ?? false;
-        $urlIncludeId = $urlSettings['url_include_id'] ?? false;
-        $isRecurring = ! empty($event->days_of_week);
-
         // Remove HTTPS if not wanted
         if (! $urlIncludeHttps) {
             $eventUrl = preg_replace('#^https?://#', '', $eventUrl);
-        }
-
-        // Remove event ID from URL if not wanted (but always keep for recurring events)
-        if (! $urlIncludeId && ! $isRecurring) {
-            $eventUrl = preg_replace('#/[A-Za-z0-9+=]+(\?|$)#', '$1', $eventUrl);
         }
 
         // Build replacements array
