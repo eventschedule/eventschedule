@@ -53,17 +53,11 @@ class CuratorEventTest extends DuskTestCase
             $this->createTestVenue($browser);
             $this->createTestTalent($browser);
 
-            // Follow first curator
-            $browser->visit('/curator1')
-                ->waitForText('Submit Event', 5)
-                ->clickLink('Submit Event')
-                ->waitForLocation('/talent/add-event', 5);
-
-            // Follow second curator
-            $browser->visit('/curator2')
-                ->waitForText('Submit Event', 5)
-                ->clickLink('Submit Event')
-                ->waitForLocation('/talent/add-event', 5);
+            // Follow both curators so they appear as selectable schedules on the talent's
+            // add-event page. The single-page submission flow no longer establishes the
+            // follow via the "Submit Event" button, so follow directly via the follow route.
+            $browser->visit('/curator1/follow')->pause(500);
+            $browser->visit('/curator2/follow')->pause(500);
 
             // Create an event that will be added to both curator roles
             $this->createEventForBothCurators($browser);
