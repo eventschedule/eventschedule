@@ -311,7 +311,7 @@
             </h1>
 
             <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
-                Everything you need to know about Event Schedule. Can't find what you're looking for? <a href="mailto:contact@eventschedule.com" class="text-blue-400 hover:text-blue-300 transition-colors">Contact us</a>.
+                Everything you need to know about Event Schedule. Can't find what you're looking for? <a href="mailto:{{ config('app.support_email') }}" class="text-blue-400 hover:text-blue-300 transition-colors">Contact us</a>.
             </p>
         </div>
     </section>
@@ -886,7 +886,7 @@
                 We're here to help. Browse our <a href="{{ route('marketing.docs') }}" class="text-white underline hover:text-white/90">documentation</a> for detailed guides, or reach out and we'll get back to you as soon as possible.
             </p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a href="mailto:contact@eventschedule.com" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
+                <a href="mailto:{{ config('app.support_email') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
                     Contact Us
                     <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />

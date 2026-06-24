@@ -56,7 +56,7 @@ class ProfileController extends Controller
             'activeExportJobId' => $activeExportJob?->id,
         ];
 
-        if (! config('app.hosted') && ! config('app.is_testing')) {
+        if (! config('app.is_nexus') && ! config('app.is_testing') && $request->user()?->isAdmin()) {
             $data['version_installed'] = $updater->source()->getVersionInstalled();
 
             try {

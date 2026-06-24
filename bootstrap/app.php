@@ -25,12 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $trustedProxies = env('TRUSTED_PROXIES');
-        if ($trustedProxies) {
-            $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : explode(',', $trustedProxies));
-        } elseif (env('IS_NEXUS')) {
-            $middleware->trustProxies(at: '*');
-        }
+        // Trusted proxies are configured in config/trustedproxy.php (read at runtime by
+        // Laravel's TrustProxies middleware) so the setting survives `php artisan config:cache`.
+        // Reading env() here would return null once the config is cached, dropping proxy
+        // trust and causing infinite redirect loops behind a reverse proxy / Cloudflare.
 
         $middleware->validateCsrfTokens(except: [
             'google-calendar/webhook',

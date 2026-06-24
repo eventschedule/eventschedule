@@ -398,8 +398,9 @@ class RegisteredUserController extends Controller
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language', 'referral_code']);
 
-        // In selfhost mode, make the first user an admin
-        if (! config('app.hosted') && User::count() === 1) {
+        // On any non-nexus install (selfhost or a self-hosted SaaS), make the first user the
+        // instance admin so they can reach the admin portal and self-updater.
+        if (! config('app.is_nexus') && User::count() === 1) {
             $user->is_admin = true;
         }
 

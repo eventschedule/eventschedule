@@ -14,7 +14,7 @@
         "mainEntity": {
             "@type": "Organization",
             "name": "Event Schedule",
-            "email": "contact@eventschedule.com",
+            "email": "{{ config('app.support_email') }}",
             "url": "{{ config('app.url') }}"
         }
     }
@@ -71,11 +71,11 @@
                         <p class="text-lg text-gray-500 dark:text-blue-100/70 mb-8">
                             For general inquiries, feature requests, or support.
                         </p>
-                        <a href="mailto:contact@eventschedule.com" class="inline-flex items-center gap-3 px-6 py-3 bg-white text-blue-900 font-semibold hover:bg-blue-50 rounded-2xl transition-all">
+                        <a href="mailto:{{ config('app.support_email') }}" class="inline-flex items-center gap-3 px-6 py-3 bg-white text-blue-900 font-semibold hover:bg-blue-50 rounded-2xl transition-all">
                             <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            contact@eventschedule.com
+                            {{ config('app.support_email') }}
                             <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
                     </div>

@@ -15,7 +15,7 @@ class AppController extends Controller
 {
     public function update(UpdaterManager $updater)
     {
-        if (config('app.hosted')) {
+        if (config('app.is_nexus')) {
             return redirect()->to(route('profile.edit').'#section-app')->with('error', 'Not authorized');
         }
 
