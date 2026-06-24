@@ -900,7 +900,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Account</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Require submitters to have an account before they can submit event requests. This helps identify who is submitting events and prevents anonymous submissions.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Require submitters to have an account before they can submit event requests. This helps identify who is submitting events and prevents anonymous submissions. With the AI Import form, submitters complete everything - their account, their own schedule, and the event - on a single page, with their email verified by a code.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require Approval</h4>

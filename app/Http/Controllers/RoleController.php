@@ -4677,9 +4677,29 @@ class RoleController extends Controller
             return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
         }
 
-        // require_account=true → always route through the AP add-event screen
+        // require_account=true → single-page submission (AI-import curators on a plain
+        // subdomain) or the bridged 3-step path (booking-form / custom-domain curators).
         if ($role->require_account) {
-            if (! auth()->user()) {
+            $user = auth()->user();
+
+            // Editors of this schedule go straight to AP add-event for this schedule
+            if ($user && $user->isEditor($subdomain)) {
+                return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
+            }
+
+            // Single page: collect account + schedule + event together. Booking-form
+            // curators use a different form, and on a custom domain an in-place login
+            // can't set a session cookie the app subdomain can read, so both fall
+            // through to the bridged 3-step path below.
+            if (! $role->usesBookingForm() && ! $request->attributes->get('custom_domain_host')) {
+                if (! $user) {
+                    session()->put('pending_request', $subdomain);
+                }
+
+                return redirect(route('event.guest_import', ['subdomain' => $role->subdomain]));
+            }
+
+            if (! $user) {
                 $lang = session()->has('translate') ? 'en' : $role->language_code;
 
                 return redirect_with_pending_action(
@@ -4690,13 +4710,6 @@ class RoleController extends Controller
                         'pending_request_form' => 'import',
                     ]
                 );
-            }
-
-            $user = auth()->user();
-
-            // Editors of this schedule go straight to AP add-event for this schedule
-            if ($user->isEditor($subdomain)) {
-                return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
             }
 
             // Prevent demo account from following other roles

@@ -3263,7 +3263,6 @@
                         @if ($showRequestsTab)
                         <div id="engagement-tab-requests" class="engagement-tab-content">
 
-                        @if ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isCurator() || $role->isTalent()))
                         <div class="mb-6">
                             <x-toggle name="accept_requests"
                                 label="{{ __('messages.accept_requests') }}"
@@ -3342,7 +3341,6 @@
                                 placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
                         </div>
-                        @endif
 
                         </div>
                         @endif

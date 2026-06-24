@@ -22,6 +22,7 @@ use App\Models\EventPhoto;
 use App\Models\EventPoll;
 use App\Models\EventPollVote;
 use App\Models\EventVideo;
+use App\Models\Group;
 use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
@@ -31,6 +32,7 @@ use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
+use App\Services\DemoService;
 use App\Services\MetaAdsService;
 use App\Services\OneSignalService;
 use App\Services\UsageTrackingService;
@@ -41,6 +43,7 @@ use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -49,6 +52,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class EventController extends Controller
 {
@@ -1252,11 +1256,11 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        // When the curator requires an account, submitters must use their own schedule.
-        // Route through the request flow, which handles sign-in, talent-schedule
-        // creation, and the AP event editor (so the event is owned by the submitter's
-        // schedule rather than the curator).
-        if ($role->require_account) {
+        // Booking-form and custom-domain curators that require an account use the bridged
+        // 3-step path (the single page can't host their booking form or set a cross-domain
+        // login cookie); send them back through the request router. AI-import curators on a
+        // plain subdomain render the single page below with mandatory account + schedule.
+        if ($role->require_account && ($role->usesBookingForm() || $request->attributes->get('custom_domain_host'))) {
             return redirect(route('role.request', ['subdomain' => $subdomain]));
         }
 
@@ -1298,7 +1302,7 @@ class EventController extends Controller
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
-        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
+        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'requireAccount' => $role->require_account, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
     }
 
     public function parse(EventParseRequest $request, $subdomain)
@@ -1805,43 +1809,28 @@ class EventController extends Controller
             abort(403, __('messages.not_authorized'));
         }
 
-        // When the curator requires an account, submissions must go through the
-        // authenticated AP event editor (under the submitter's own schedule), not this
-        // guest endpoint. Guard against direct posts that would bypass that flow.
-        if ($role->require_account) {
-            abort(403, __('messages.not_authorized'));
-        }
-
-        // Handle user creation if requested
-        if ($request->input('create_account')) {
-            $this->createAndLoginUser($request);
-        }
-
         // Prevent guests from injecting draft status
         $request->request->remove('is_draft');
 
+        // Curators that require an account collect the account + schedule + event on this one
+        // page and own the event on the submitter's own talent schedule (linked to the curator).
+        if ($role->require_account) {
+            return $this->guestImportWithAccount($request, $role);
+        }
+
+        // Handle user creation if requested (optional account; event owned by the curator)
+        if ($request->boolean('create_account')) {
+            $this->createAndLoginUser($request);
+        }
+
         $event = $this->eventRepo->saveEvent($role, $request, null, false);
 
-        if ($request->social_image) {
-            $tempDir = storage_path('app/temp');
-            $imagePath = $tempDir.'/'.basename($request->social_image);
-            $realPath = realpath($imagePath);
-            if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
-                $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
-                $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
-                $path = $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
-
-                $event->flyer_image_url = $filename;
-                $event->save();
-            }
-        }
+        $this->attachGuestFlyerImage($request, $event);
 
         $role->autoCurateEvent($event);
 
         // Clear the pending request session
-        session()->forget('pending_request');
-        session()->forget('pending_request_allow_guest');
-        session()->forget('pending_request_form');
+        session()->forget(['pending_request', 'pending_request_allow_guest', 'pending_request_form']);
 
         return response()->json([
             'success' => true,
@@ -1853,33 +1842,303 @@ class EventController extends Controller
     }
 
     /**
-     * Create a new user and log them in
+     * Single-page submission for curators that require an account: create (or sign in) the
+     * submitter, ensure they have a talent schedule, save the event on it, and link it to the
+     * curator (pending the curator's approval unless auto-accepted).
+     */
+    private function guestImportWithAccount(Request $request, Role $role)
+    {
+        if (is_demo_mode()) {
+            return response()->json(['message' => __('messages.not_authorized')], 403);
+        }
+
+        // Honeypot
+        if ($request->filled('website')) {
+            return response()->json(['message' => __('messages.invalid_request')], 422);
+        }
+
+        $user = auth()->user();
+
+        if (! $user) {
+            if ($request->input('account_mode') === 'login') {
+                $request->validate([
+                    'account_email' => ['required', 'string', 'email'],
+                    'account_password' => ['required', 'string'],
+                ]);
+
+                if (! Auth::attempt([
+                    'email' => strtolower((string) $request->input('account_email')),
+                    'password' => (string) $request->input('account_password'),
+                ])) {
+                    throw ValidationException::withMessages([
+                        'account_password' => [__('messages.incorrect_password')],
+                    ]);
+                }
+
+                $user = auth()->user();
+            } else {
+                $user = $this->createAccountWithCode($request, $role);
+            }
+        }
+
+        // Resolve the submitter's talent schedule (reuse, or auto-create from the page name).
+        if ($request->filled('selected_talent_id')) {
+            $talent = $user->talents()->where('roles.id', UrlUtils::decodeId($request->selected_talent_id))->first();
+        } else {
+            $talent = $user->talents()->first();
+        }
+
+        if (! $talent) {
+            if (config('app.hosted') && $user->owner()->count() >= 50) {
+                return response()->json(['message' => __('messages.schedule_limit')], 422);
+            }
+
+            $name = trim((string) $request->input('schedule_name')) ?: $user->name;
+            $talent = $this->createTalentSchedule($user, $name, $request->input('timezone') ?: $role->timezone, $user->language_code);
+        }
+
+        // Auto-follow the curator (the form discloses this). Demo users never follow.
+        if (! DemoService::isDemoUser($user) && ! $user->isConnected($role->subdomain)) {
+            $user->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
+        }
+        if (! $user->follow_consent_dismissed) {
+            $user->follow_consent_dismissed = true;
+            $user->saveQuietly();
+        }
+
+        // Mirror the AP acceptance rule so require-approval curators get a pending item.
+        $isAccepted = ($role->accept_requests && ! $role->require_approval)
+            || ($role->approved_subdomains && in_array($talent->subdomain, $role->approved_subdomains));
+
+        try {
+            $event = $this->eventRepo->saveEvent($talent, $request, null, false);
+
+            $this->attachGuestFlyerImage($request, $event);
+
+            // Link the event to the curator. saveEvent()'s sync() only manages the talent's
+            // own schedules, so attach here (after the save).
+            if (! $event->roles()->where('roles.id', $role->id)->exists()) {
+                $pivot = ['is_accepted' => $isAccepted ?: null];
+
+                // Only honor a sub-schedule that actually belongs to this curator.
+                if ($request->filled('curator_group_id')) {
+                    $groupId = UrlUtils::decodeId($request->curator_group_id);
+                    if ($groupId && Group::where('id', $groupId)->where('role_id', $role->id)->exists()) {
+                        $pivot['group_id'] = $groupId;
+                    }
+                }
+
+                $event->roles()->attach($role->id, $pivot);
+            }
+
+            // Cascade to the talent's own default curators, matching the other import paths.
+            $talent->autoCurateEvent($event);
+        } catch (QueryException $e) {
+            report($e);
+
+            return response()->json(['message' => __('messages.error_saving_event')], 500);
+        }
+
+        session()->forget(['pending_request', 'pending_request_allow_guest', 'pending_request_form']);
+
+        return response()->json([
+            'success' => true,
+            'event' => [
+                'status' => $isAccepted ? 'live' : 'pending',
+                'event_name' => $event->name,
+                'view_url' => $event->getGuestUrl($talent->subdomain),
+                'dashboard_url' => app_url(route('role.view_admin', ['subdomain' => $talent->subdomain, 'tab' => 'schedule'], false)),
+            ],
+        ]);
+    }
+
+    /**
+     * Validate the 6-digit code (hosted), then create or update (stub) the submitter and log them
+     * in. Throws ValidationException (422 JSON) on any failure.
+     */
+    private function createAccountWithCode(Request $request, Role $role)
+    {
+        // Turnstile is enforced earlier, at the code-send step (sendVerificationCode), so it is
+        // not re-checked here (the emailed code is the proof, and the token is single-use).
+        $email = strtolower((string) $request->input('account_email'));
+        $existingUser = User::where('email', $email)->first();
+        $isStub = $existingUser ? $existingUser->isStub() : false;
+
+        $request->validate([
+            'account_name' => ['required', 'string', 'max:255'],
+            'account_email' => array_merge(
+                ['required', 'string', 'email', 'max:255'],
+                $isStub ? [] : ['unique:users,email'],
+                config('app.hosted') ? [new NoFakeEmail] : []
+            ),
+            'account_password' => ['required', 'string', 'min:8'],
+        ]);
+
+        // Verify the emailed 6-digit code (hosted only, matching registration).
+        if (config('app.hosted') && ! config('app.is_testing')) {
+            $request->validate(['verification_code' => ['required', 'string', 'size:6']]);
+
+            $originalEmail = Cache::pull('signup_code_email_'.$request->verification_code);
+            if (! $originalEmail || strtolower($originalEmail) !== $email) {
+                throw ValidationException::withMessages([
+                    'verification_code' => [__('messages.code_invalid')],
+                ]);
+            }
+        }
+
+        $utmParams = session('utm_params', []);
+        if (empty($utmParams) && $request->cookie('utm_params')) {
+            $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
+        }
+
+        $languageCode = (session()->has('guest_language') && is_valid_language_code(session('guest_language')))
+            ? session('guest_language')
+            : 'en';
+
+        $attributes = [
+            'name' => $request->input('account_name'),
+            'password' => Hash::make($request->input('account_password')),
+            'timezone' => $request->input('timezone') ?: ($role->timezone ?: 'UTC'),
+            'language_code' => $languageCode,
+            'utm_source' => $utmParams['utm_source'] ?? null,
+            'utm_medium' => $utmParams['utm_medium'] ?? null,
+            'utm_campaign' => $utmParams['utm_campaign'] ?? null,
+            'utm_content' => $utmParams['utm_content'] ?? null,
+            'utm_term' => $utmParams['utm_term'] ?? null,
+            'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
+            'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+        ];
+
+        if ($isStub) {
+            $existingUser->update($attributes);
+            $user = $existingUser;
+        } else {
+            $user = User::create(array_merge($attributes, ['email' => $email]));
+        }
+
+        session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
+
+        $user->email_verified_at = now();
+        $user->save();
+
+        Auth::login($user);
+
+        return $user;
+    }
+
+    /**
+     * Create a minimal talent schedule owned by the user. Contact fields are intentionally left
+     * null so the auto-created page stays noindex until the owner adds details.
+     */
+    private function createTalentSchedule(User $user, string $name, $timezone = null, $languageCode = null): Role
+    {
+        $talent = new Role;
+        $talent->type = 'talent';
+        $talent->user_id = $user->id;
+        $talent->name = $name;
+
+        // generateSubdomain already handles uniqueness, but retry on the off chance two
+        // same-named talents are created at once (mirrors the venue auto-create in
+        // ConvertsLocationToVenue) so a race can't surface as a raw UNIQUE-index 500.
+        $subdomain = Role::generateSubdomain($name);
+        $attempts = 0;
+        while (Role::where('subdomain', $subdomain)->exists() && $attempts < 10) {
+            $subdomain = Role::generateSubdomain($name.'-'.++$attempts);
+        }
+        $talent->subdomain = $subdomain;
+
+        $talent->timezone = $timezone ?: 'UTC';
+        $talent->language_code = is_valid_language_code($languageCode) ? $languageCode : 'en';
+
+        // Mark verified (without an email/phone) so the page is "claimed" and viewable by the
+        // owner (RoleController::viewGuest redirects unclaimed schedules). Leaving email/phone
+        // null keeps the auto-created page noindex and out of the sitemap.
+        $talent->email_verified_at = now();
+
+        if (config('app.is_testing')) {
+            $talent->plan_type = 'enterprise';
+            $talent->plan_expires = '2099-01-01';
+        }
+
+        $talent->save();
+
+        $user->roles()->attach($talent->id, [
+            'level' => 'owner',
+            'created_at' => now(),
+        ]);
+
+        AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $talent->id, null, null, $talent->name);
+
+        return $talent;
+    }
+
+    private function attachGuestFlyerImage(Request $request, Event $event): void
+    {
+        if (! $request->social_image) {
+            return;
+        }
+
+        $tempDir = storage_path('app/temp');
+        $imagePath = $tempDir.'/'.basename($request->social_image);
+        $realPath = realpath($imagePath);
+        if ($realPath && str_starts_with($realPath, $tempDir.DIRECTORY_SEPARATOR) && file_exists($realPath)) {
+            $file = new \Illuminate\Http\UploadedFile($realPath, basename($realPath));
+            $filename = strtolower('flyer_'.Str::random(32).'.'.$file->getClientOriginalExtension());
+            $file->storeAs(config('filesystems.default') == 'local' ? '/public' : '/', $filename);
+
+            $event->flyer_image_url = $filename;
+            $event->save();
+        }
+    }
+
+    /**
+     * Check whether an account already exists for the given email (drives the single-page
+     * on-blur register/login switch). Returns whether it exists and whether it is a stub.
+     */
+    public function checkEmail(Request $request)
+    {
+        $request->validate(['email' => ['required', 'string', 'email', 'max:255']]);
+
+        $user = User::where('email', strtolower($request->email))->first();
+
+        return response()->json([
+            'exists' => (bool) $user,
+            'stub' => $user ? $user->isStub() : false,
+        ]);
+    }
+
+    /**
+     * Create a new user and log them in (optional account on curators that do NOT require one).
      */
     private function createAndLoginUser(Request $request)
     {
-        // Validate user creation data
+        // The form posts account fields under account_* to avoid colliding with the event's own
+        // name/email fields in the same payload (older callers may still send name/email/password).
+        $name = $request->input('account_name', $request->input('name'));
+        $email = strtolower((string) $request->input('account_email', $request->input('email')));
+        $password = $request->input('account_password', $request->input('password'));
+
+        $request->merge(['account_name' => $name, 'account_email' => $email, 'account_password' => $password]);
+
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => array_merge(
-                ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'account_name' => ['required', 'string', 'max:255'],
+            'account_email' => array_merge(
+                ['required', 'string', 'email', 'max:255', 'unique:users,email'],
                 config('app.hosted') ? [new NoFakeEmail] : []
             ),
-            'password' => ['required', 'string', 'min:8'],
+            'account_password' => ['required', 'string', 'min:8'],
         ]);
 
-        // Create the user
         $utmParams = session('utm_params', []);
-
-        // Fall back to cookie if session has no UTM data
         if (empty($utmParams) && $request->cookie('utm_params')) {
             $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
         }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'timezone' => 'America/New_York', // Default timezone
+            'name' => $name,
+            'email' => $email,
+            'password' => Hash::make($password),
+            'timezone' => 'America/New_York',
             'language_code' => (session()->has('guest_language') && is_valid_language_code(session('guest_language')))
                 ? session('guest_language')
                 : 'en',
@@ -1894,11 +2153,9 @@ class EventController extends Controller
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);
 
-        // Mark email as verified for guest users (they're already using the system)
         $user->email_verified_at = now();
         $user->save();
 
-        // Log the user in
         Auth::login($user);
 
         return $user;
