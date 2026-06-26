@@ -20,14 +20,16 @@
         if (typeof Vue === 'undefined') return;
         const { createApp, ref } = Vue;
 
+        @php
+            // Share the loaded event instance across the form's tickets so toData() does not
+            // lazy-load it per ticket and passReservedSeats() memoizes one query per occurrence.
+            $event->tickets->each(fn ($t) => $t->setRelation('event', $event));
+        @endphp
         const app = createApp({
             data() {
                 return {
                     createAccount: @json((bool) old('create_account', false)),
-                    tickets: @json($event->tickets->filter(fn($t) => (!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date, $event) {
-                        // Share the loaded event instance so toData() doesn't lazy-load it per
-                        // ticket and passReservedSeats() memoizes to one query per (event,date).
-                        $ticket->setRelation('event', $event);
+                    tickets: @json($event->tickets->filter(fn($t) => (!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date) {
                         $data = $ticket->toData($date ?? request()->date);
                         $data['selectedQty'] = min((int) (old('tickets')[$data['id']] ?? 0), $data['quantity']);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];

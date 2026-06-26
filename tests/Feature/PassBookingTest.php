@@ -322,4 +322,46 @@ class PassBookingTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_guest_event_page_renders_buy_cta_with_pass_reservations(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner); // enterprise by default => isPro() true => canSellTickets passes
+        $event = $this->createEvent($role, [
+            'creator_role_id' => $role->id, 'tickets_enabled' => true, 'name' => 'Capacity Concert',
+        ]);
+        $date = Carbon::parse($event->starts_at)->format('Y-m-d');
+
+        // Two seat tickets (individual mode) + a booking-enabled pass: shared house = 5.
+        $this->createTicket($event, ['type' => 'GA', 'quantity' => 3, 'price' => 10]);
+        $this->createTicket($event, ['type' => 'VIP', 'quantity' => 2, 'price' => 30]);
+        $pass = $this->createTicket($event, [
+            'type' => 'Season Pass', 'quantity' => 100, 'price' => 50,
+            'is_pass' => true, 'pass_usage_type' => 'unlimited', 'pass_scope' => 'this_event',
+            'pass_allow_booking' => true,
+        ]);
+
+        // One advance booking leaves 4 seats: the guest page must still render the CTA (no 500,
+        // not spuriously sold out). This drives toData/occurrenceSeatsRemaining/setRelation through
+        // a real render - the exact path the Dusk "Buy Tickets" check exercises.
+        $holder = $this->createSale($event, $role, ['email' => 'h@gmail.com'], $pass);
+        $this->bookingService()->book($holder->fresh(), $event->id, $date);
+
+        $url = $this->guestEventUrl($role, $event);
+        $this->get($url)
+            ->assertOk()
+            ->assertSee('Capacity Concert')
+            ->assertSee($role->customLabel('buy_tickets'));
+
+        // Reserve the remaining 4 seats => sold out; the page must still render (no 500) and the
+        // buy CTA flips off - proving the gate is driven correctly, not spuriously.
+        for ($i = 0; $i < 4; $i++) {
+            $f = $this->createSale($event, $role, ['email' => "f{$i}@gmail.com"], $pass);
+            $this->bookingService()->book($f->fresh(), $event->id, $date);
+        }
+        $this->assertSame(0, $event->fresh()->occurrenceSeatsRemaining($date));
+        $this->assertTrue($event->fresh()->allTicketsSoldOut($date));
+
+        $this->get($url)->assertOk()->assertDontSee($role->customLabel('buy_tickets'));
+    }
 }
