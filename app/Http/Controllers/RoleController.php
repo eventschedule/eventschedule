@@ -39,6 +39,7 @@ use App\Services\OneSignalService;
 use App\Services\SmsService;
 use App\Services\UsageTrackingService;
 use App\Utils\ColorUtils;
+use App\Utils\DateUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
@@ -1187,8 +1188,8 @@ class RoleController extends Controller
             $month = $dateObj->month;
             $year = $dateObj->year;
         } else {
-            $month = is_numeric($request->month) ? (int) $request->month : now()->month;
-            $year = is_numeric($request->year) ? (int) $request->year : now()->year;
+            $month = DateUtils::normalizeMonth($request->month);
+            $year = DateUtils::normalizeYear($request->year);
         }
 
         if ($slug) {
@@ -1860,8 +1861,8 @@ class RoleController extends Controller
             return response()->json(['events' => [], 'eventsMap' => (object) [], 'pastEvents' => [], 'hasMorePastEvents' => false, 'filterMeta' => ['uniqueCategoryIds' => [], 'hasOnlineEvents' => false]]);
         }
 
-        $month = $request->month ?: now()->month;
-        $year = $request->year ?: now()->year;
+        $month = DateUtils::normalizeMonth($request->month);
+        $year = DateUtils::normalizeYear($request->year);
 
         $user = auth()->user();
         $timezone = ($user ? $user->timezone : null) ?? $role->timezone ?? 'UTC';
@@ -1977,8 +1978,8 @@ class RoleController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        $month = $request->month ?: now()->month;
-        $year = $request->year ?: now()->year;
+        $month = DateUtils::normalizeMonth($request->month);
+        $year = DateUtils::normalizeYear($request->year);
 
         $user = $request->user();
         $timezone = $user->timezone ?? $role->timezone ?? 'UTC';
@@ -2135,8 +2136,8 @@ class RoleController extends Controller
         $eventTemplates = collect();
         $unscheduled = [];
         $requests = [];
-        $month = $request->month;
-        $year = $request->year;
+        $month = DateUtils::normalizeMonth($request->month);
+        $year = DateUtils::normalizeYear($request->year);
         $startOfMonth = '';
         $datesUnavailable = [];
 
@@ -2159,13 +2160,6 @@ class RoleController extends Controller
         }
 
         if ($tab == 'schedule' || $tab == 'availability') {
-            if (! $month) {
-                $month = now()->month;
-            }
-            if (! $year) {
-                $year = now()->year;
-            }
-
             // Get timezone from user or role
             $user = $request->user();
             $timezone = $user->timezone ?? $role->timezone ?? 'UTC';

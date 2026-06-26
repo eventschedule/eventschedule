@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Traits;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Utils\DateUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -197,6 +198,9 @@ trait CalendarDataTrait
 
     protected function buildCalendarResponse($events, $pastEvents, bool $hasMorePastEvents, ?Role $role, ?string $subdomain, int $month, int $year, string $timezone, int $firstDayOfWeek = 0, bool $guestView = false): JsonResponse
     {
+        $month = DateUtils::normalizeMonth($month);
+        $year = DateUtils::normalizeYear($year);
+
         $lastDay = ($firstDayOfWeek + 6) % 7;
         $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth()->startOfWeek($firstDayOfWeek);
         $endOfMonth = Carbon::create($year, $month, 1)->endOfMonth()->endOfWeek($lastDay);

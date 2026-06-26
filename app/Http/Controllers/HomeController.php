@@ -13,6 +13,7 @@ use App\Models\Newsletter;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Services\AnalyticsService;
+use App\Utils\DateUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -55,16 +56,9 @@ class HomeController extends Controller
         }
 
         $events = [];
-        $month = $request->month;
-        $year = $request->year;
+        $month = DateUtils::normalizeMonth($request->month);
+        $year = DateUtils::normalizeYear($request->year);
         $startOfMonth = '';
-
-        if (! $month) {
-            $month = now()->month;
-        }
-        if (! $year) {
-            $year = now()->year;
-        }
 
         $user = $request->user();
         $timezone = $user->timezone ?? 'UTC';
@@ -414,8 +408,8 @@ class HomeController extends Controller
 
     public function calendarEvents(Request $request): JsonResponse
     {
-        $month = $request->month ?: now()->month;
-        $year = $request->year ?: now()->year;
+        $month = DateUtils::normalizeMonth($request->month);
+        $year = DateUtils::normalizeYear($request->year);
 
         $user = $request->user();
         $timezone = $user->timezone ?? 'UTC';
