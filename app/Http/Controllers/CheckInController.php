@@ -125,11 +125,15 @@ class CheckInController extends Controller
             }
 
             // Pass / subscription redemptions recorded at this event on this date.
+            // Only redemptions count as checked in; an advance booking is a
+            // reservation (the holder has not arrived yet) and is surfaced
+            // separately via the reserved-seat count below.
             // (Cross-event subscriptions sold on another event surface on the
             // Subscriptions tab; here we count passes whose home event is this one.)
             foreach (($saleTicket->pass_usages ?? []) as $usage) {
                 if ((int) ($usage['event_id'] ?? 0) === (int) $event->id
-                    && ($usage['date'] ?? null) === $requestedDate) {
+                    && ($usage['date'] ?? null) === $requestedDate
+                    && ($usage['kind'] ?? 'redemption') === 'redemption') {
                     $ticketId = $saleTicket->ticket_id;
                     $checkedInCounts[$ticketId] = ($checkedInCounts[$ticketId] ?? 0) + 1;
 
@@ -168,6 +172,9 @@ class CheckInController extends Controller
             'tickets' => $tickets,
             'total_sold' => $totalSold,
             'total_checked_in' => $totalCheckedIn,
+            // Total pass seats reserved for this occurrence (advance bookings plus
+            // any already redeemed), so door staff see expected pass attendance.
+            'pass_reserved' => $event->passReservedSeats($requestedDate),
             'recent_checkins' => $recentCheckins,
         ]);
     }

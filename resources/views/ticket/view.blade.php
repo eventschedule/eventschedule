@@ -431,6 +431,64 @@
                     @endif
                 </div>
             </div>
+
+            @if (!empty($passBookable))
+            @php $openOccurrences = collect($bookableOccurrences)->reject(fn ($o) => $o['booked'])->values(); @endphp
+            <div class="glass p-[20px] sm:p-[24px] print:hidden" id="pass-booking">
+                <h2 class="text-[11px] uppercase tracking-wider text-white/50 font-semibold mb-[12px]">{{ __('messages.book_your_dates') }}</h2>
+
+                @if (session('message'))
+                <div class="mb-[12px] rounded-[10px] bg-emerald-500/15 border border-emerald-400/30 px-[12px] py-[8px] text-[13px] text-emerald-200">{{ session('message') }}</div>
+                @endif
+                @if (session('error'))
+                <div class="mb-[12px] rounded-[10px] bg-red-500/15 border border-red-400/30 px-[12px] py-[8px] text-[13px] text-red-200">{{ session('error') }}</div>
+                @endif
+
+                @if (count($bookedOccurrences) > 0)
+                <div class="mb-[16px]">
+                    <div class="text-white/70 text-[13px] mb-[6px]">{{ __('messages.your_booked_dates') }}</div>
+                    <ul class="space-y-[6px]">
+                        @foreach ($bookedOccurrences as $b)
+                        <li class="flex items-center justify-between gap-[8px] rounded-[10px] bg-white/[0.04] px-[12px] py-[8px]">
+                            <span class="text-[13px] text-white">{{ $b['date_label'] ?: $b['date'] }}@if ($b['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $b['event_name'] }}</span>@endif</span>
+                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ __('messages.are_you_sure') }}">
+                                @csrf
+                                <input type="hidden" name="book_event_id" value="{{ $b['event_id'] }}">
+                                <input type="hidden" name="date" value="{{ $b['date'] }}">
+                                <button type="submit" class="text-[12px] text-red-400 hover:text-red-300 transition-colors font-medium">{{ __('messages.cancel') }}</button>
+                            </form>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
+                @if ($openOccurrences->count() > 0)
+                <div class="text-white/70 text-[13px] mb-[6px]">{{ __('messages.available_dates') }}</div>
+                <ul class="space-y-[6px]">
+                    @foreach ($openOccurrences as $o)
+                    <li class="flex items-center justify-between gap-[8px] rounded-[10px] bg-white/[0.04] px-[12px] py-[8px]">
+                        <span class="text-[13px] text-white">{{ $o['date_label'] ?: $o['date'] }}@if ($o['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $o['event_name'] }}</span>@endif
+                            @if (! is_null($o['seats_left'])) <span class="block text-[11px] {{ $o['sold_out'] ? 'text-red-300' : 'text-white/50' }}">{{ $o['sold_out'] ? __('messages.sold_out') : trans_choice('messages.seats_left', $o['seats_left'], ['count' => $o['seats_left']]) }}</span>@endif
+                        </span>
+                        @if ($o['sold_out'])
+                        <span class="text-[12px] text-white/40">{{ __('messages.sold_out') }}</span>
+                        @else
+                        <form action="{{ route('pass.book', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="book_event_id" value="{{ $o['event_id'] }}">
+                            <input type="hidden" name="date" value="{{ $o['date'] }}">
+                            <button type="submit" class="rounded-[8px] bg-violet-500 hover:bg-violet-400 px-[12px] py-[6px] text-[12px] font-semibold text-white transition-colors">{{ __('messages.book') }}</button>
+                        </form>
+                        @endif
+                    </li>
+                    @endforeach
+                </ul>
+                @elseif (count($bookedOccurrences) === 0)
+                <div class="text-[13px] text-white/50">{{ __('messages.no_dates_to_book') }}</div>
+                @endif
+            </div>
+            @endif
         @endif
         @if ($addonTickets->count() > 0)
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50">

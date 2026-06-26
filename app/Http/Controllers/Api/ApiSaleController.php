@@ -458,11 +458,13 @@ class ApiSaleController extends Controller
                     if ($ticket->quantity > 0) {
                         // Handle combined mode logic
                         if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-                            $totalSold = $lockedTickets->sum(function ($t) use ($eventDate) {
+                            $totalSold = $lockedTickets->filter(fn ($t) => ! $t->is_pass)->sum(function ($t) use ($eventDate) {
                                 $ticketSold = $t->sold ? (json_decode($t->sold, true) ?? []) : [];
 
                                 return $ticketSold[$eventDate] ?? 0;
                             });
+                            // Pass holders who booked this occurrence in advance occupy shared seats too.
+                            $totalSold += $eventDate ? $event->passReservedSeats($eventDate) : 0;
                             $totalQuantity = $event->getSameTicketQuantity();
                             $remainingTickets = $totalQuantity - $totalSold;
 

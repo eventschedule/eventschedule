@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Jobs\SendQueuedEmail;
 use App\Mail\NewSaleNotification;
+use App\Mail\PassBookingConfirmation;
 use App\Mail\TicketPurchase;
 use App\Models\Event;
 use App\Models\Role;
@@ -80,6 +81,57 @@ class EmailService
                 'sale_id' => $sale->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+            ]);
+
+            return self::ERROR_SEND_FAILED;
+        }
+    }
+
+    /**
+     * Confirm a single advance booking (pass holder reserved an occurrence).
+     * Mirrors sendTicketEmail's transport guards.
+     */
+    public function sendPassBookingConfirmation(Sale $sale, Event $bookedEvent, string $date, ?Role $role = null, bool $queue = true): string|true
+    {
+        if ($this->isTestEmail($sale->email)) {
+            return self::ERROR_SKIPPED;
+        }
+
+        if (is_demo_role($role)) {
+            return self::ERROR_SKIPPED;
+        }
+
+        try {
+            if (! $role) {
+                $role = $sale->event?->getRoleWithEmailSettings();
+            }
+
+            if (config('app.hosted')) {
+                if (! $role || ! $role->hasEmailSettings()) {
+                    return self::ERROR_NOT_CONFIGURED;
+                }
+            } else {
+                $mailer = config('mail.default');
+                if (in_array($mailer, ['log', 'array'])) {
+                    return self::ERROR_NOT_CONFIGURED;
+                }
+            }
+
+            $mailable = new PassBookingConfirmation($sale, $bookedEvent, $date, $role);
+
+            if ($queue) {
+                SendQueuedEmail::dispatch($mailable, $sale->email, $role?->id, app()->getLocale());
+            } elseif (config('app.hosted') && $role) {
+                app(RoleMailerService::class)->sendForRole($role, $sale->email, $mailable);
+            } else {
+                Mail::to($sale->email)->send($mailable);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send pass booking confirmation: '.$e->getMessage(), [
+                'sale_id' => $sale->id,
+                'error' => $e->getMessage(),
             ]);
 
             return self::ERROR_SEND_FAILED;

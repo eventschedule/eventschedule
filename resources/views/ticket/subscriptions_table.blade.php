@@ -42,6 +42,7 @@
                                     <th class="text-start font-medium pb-1">{{ __('messages.event') }}</th>
                                     <th class="text-start font-medium pb-1">{{ __('messages.date') }}</th>
                                     <th class="text-start font-medium pb-1">{{ __('messages.time') }}</th>
+                                    <th class="text-start font-medium pb-1">{{ __('messages.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="text-gray-700 dark:text-gray-300">
@@ -49,7 +50,14 @@
                                     <tr class="border-t border-gray-100 dark:border-[#2d2d30]">
                                         <td class="py-1.5 pe-4">{{ $usage['event'] }}</td>
                                         <td class="py-1.5 pe-4 whitespace-nowrap">{{ $usage['date'] }}</td>
-                                        <td class="py-1.5 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $usage['time'] }}</td>
+                                        <td class="py-1.5 pe-4 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $usage['time'] }}</td>
+                                        <td class="py-1.5 whitespace-nowrap">
+                                            @if (($usage['kind'] ?? 'attended') === 'booked')
+                                                <span class="inline-block rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-[var(--brand-blue)]">{{ __('messages.booked') }}</span>
+                                            @else
+                                                <span class="inline-block rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">{{ __('messages.attended') }}</span>
+                                            @endif
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

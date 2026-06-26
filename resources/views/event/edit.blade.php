@@ -3435,6 +3435,34 @@
                                                         <p v-if="ticket.pass_event_ids.length === 0" class="mt-1 text-xs text-amber-600 dark:text-amber-400">{{ __('messages.pass_no_events_warning') }}</p>
                                                     </div>
                                                 </div>
+
+                                                <!-- Advance booking -->
+                                                <div>
+                                                    <label class="flex items-center gap-3 cursor-pointer">
+                                                        <button type="button" role="switch" :aria-checked="ticket.pass_allow_booking ? 'true' : 'false'" @click="ticket.pass_allow_booking = !ticket.pass_allow_booking"
+                                                            :class="['relative inline-flex h-6 w-11 flex-shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800', ticket.pass_allow_booking ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700']">
+                                                            <span :class="['inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform mt-0.5', ticket.pass_allow_booking ? 'translate-x-5' : 'translate-x-0.5']"></span>
+                                                        </button>
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ __('messages.pass_allow_booking_label') }}</span>
+                                                    </label>
+                                                    <p class="mt-1 ms-14 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_allow_booking_help') }}</p>
+
+                                                    <div v-if="ticket.pass_allow_booking" class="mt-3 ms-14 space-y-3">
+                                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                                            <div class="flex items-start gap-2">
+                                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                                                                </svg>
+                                                                <p class="text-xs text-amber-800 dark:text-amber-200">{{ __('messages.pass_shared_capacity_warning') }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <x-input-label :value="__('messages.pass_seats_per_occurrence')" />
+                                                            <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_seats_per_occurrence" class="mt-1 block w-full sm:w-48" />
+                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_seats_per_occurrence_help') }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <template v-if="ticket.is_pass">
@@ -3445,6 +3473,8 @@
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_scope]`" :value="ticket.pass_scope">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_scope_group_id]`" :value="ticket.pass_scope_group_id || ''">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_event_ids]`" :value="JSON.stringify(ticket.pass_event_ids || [])">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_allow_booking]`" :value="ticket.pass_allow_booking ? 1 : 0">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_seats_per_occurrence]`" :value="ticket.pass_seats_per_occurrence || ''">
                                             </template>
                                             <input v-else type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="0">
                                         </div>
@@ -4731,6 +4761,8 @@
           pass_max_uses: ticket.pass_max_uses ?? null,
           pass_valid_days: ticket.pass_valid_days ?? null,
           pass_scope: ticket.pass_scope || 'this_event',
+          pass_allow_booking: !!ticket.pass_allow_booking,
+          pass_seats_per_occurrence: ticket.pass_seats_per_occurrence ?? null,
           pass_scope_group_id: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).group || '',
           pass_event_ids: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).events || [],
           custom_fields: ticket.custom_fields || {},
@@ -5810,6 +5842,8 @@
             pass_max_uses: null,
             pass_valid_days: null,
             pass_scope: 'this_event',
+            pass_allow_booking: false,
+            pass_seats_per_occurrence: null,
             pass_scope_group_id: '',
             pass_event_ids: [],
             sales_start_at_date: '',
@@ -6562,16 +6596,19 @@
         return this.tickets.some(ticket => ticket.price > 0 && ticket.quantity > 0);
       },
       hasSameTicketQuantities() {
-        if (this.tickets.length <= 1) {
+        // Passes don't define seat capacity; judge combined mode on seat tickets only
+        // (mirrors Event::hasSameTicketQuantities() on the server).
+        const seatTickets = this.tickets.filter(ticket => !ticket.is_pass);
+        if (seatTickets.length <= 1) {
           return false;
         }
-        
-        // Check that all tickets have quantities set
-        const ticketsWithQuantities = this.tickets.filter(ticket => ticket.quantity > 0);
-        if (ticketsWithQuantities.length !== this.tickets.length) {
+
+        // Check that all seat tickets have quantities set
+        const ticketsWithQuantities = seatTickets.filter(ticket => ticket.quantity > 0);
+        if (ticketsWithQuantities.length !== seatTickets.length) {
           return false;
         }
-        
+
         // Check that all quantities are the same
         const quantities = ticketsWithQuantities.map(ticket => ticket.quantity);
         return new Set(quantities).size === 1;
@@ -6580,11 +6617,11 @@
         if (!this.hasSameTicketQuantities) {
           return null;
         }
-        return this.tickets.find(ticket => ticket.quantity > 0).quantity;
+        return this.tickets.find(ticket => !ticket.is_pass && ticket.quantity > 0).quantity;
       },
       getTotalTicketQuantity() {
-        // Always return the sum of all quantities for display purposes
-        return this.tickets.reduce((total, ticket) => total + (ticket.quantity || 0), 0);
+        // Always return the sum of all seat-ticket quantities for display purposes
+        return this.tickets.filter(ticket => !ticket.is_pass).reduce((total, ticket) => total + (ticket.quantity || 0), 0);
       },
       getCombinedTotalQuantity() {
         // For combined mode, the total should be the same as the individual quantity
@@ -6592,7 +6629,7 @@
         if (this.hasSameTicketQuantities) {
           return this.getSameTicketQuantity;
         }
-        return this.tickets.reduce((total, ticket) => total + (ticket.quantity || 0), 0);
+        return this.tickets.filter(ticket => !ticket.is_pass).reduce((total, ticket) => total + (ticket.quantity || 0), 0);
       },
       hasIncompleteParticipantData() {
         return this.showMemberTypeRadio &&

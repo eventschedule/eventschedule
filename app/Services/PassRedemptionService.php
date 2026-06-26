@@ -118,40 +118,50 @@ class PassRedemptionService
             return $data;
         }
 
-        // One redemption per event per day: a same event-day re-scan never
-        // consumes a new use.
-        $existing = collect($usages)->first(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id
+        // A committed visit is one pass_usages entry per event-day. It may already
+        // exist because the holder reserved this occurrence in advance (kind
+        // 'booking'); scanning in then upgrades that entry to a redemption rather
+        // than consuming a second use. An entry already redeemed today is a
+        // genuine repeat scan. Legacy entries (no kind) are treated as redemptions.
+        $existingIndex = collect($usages)->search(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id
             && ($u['date'] ?? null) === $today);
 
-        if ($existing) {
+        if ($existingIndex !== false && ($usages[$existingIndex]['kind'] ?? 'redemption') === 'redemption') {
             $data->pass_status = 'already_today';
-            $data->checked_in_at = Carbon::createFromTimestamp($existing['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
+            $data->checked_in_at = Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
 
             return $data;
         }
 
-        // Visit-limit checks (only when this would be a brand new usage).
-        if ($ticket->pass_usage_type === 'total'
-            && $ticket->pass_max_uses
-            && count($usages) >= $ticket->pass_max_uses) {
-            $data->pass_status = 'limit_reached';
+        if ($existingIndex === false) {
+            // Brand new walk-up visit: enforce the visit limits, then record it.
+            if ($ticket->pass_usage_type === 'total'
+                && $ticket->pass_max_uses
+                && count($usages) >= $ticket->pass_max_uses) {
+                $data->pass_status = 'limit_reached';
 
-            return $data;
+                return $data;
+            }
+
+            if ($ticket->pass_usage_type === 'per_event'
+                && collect($usages)->contains(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id)) {
+                $data->pass_status = 'limit_reached';
+
+                return $data;
+            }
+
+            $usages[] = [
+                'event_id' => (int) $scanningEvent->id,
+                'date' => $today,
+                'at' => $nowUtc->timestamp,
+                'kind' => 'redemption',
+            ];
+        } else {
+            // Redeem the seat booked in advance for today (no new use consumed).
+            $usages[$existingIndex]['kind'] = 'redemption';
+            $usages[$existingIndex]['at'] = $nowUtc->timestamp;
         }
 
-        if ($ticket->pass_usage_type === 'per_event'
-            && collect($usages)->contains(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id)) {
-            $data->pass_status = 'limit_reached';
-
-            return $data;
-        }
-
-        // Record the visit.
-        $usages[] = [
-            'event_id' => (int) $scanningEvent->id,
-            'date' => $today,
-            'at' => $nowUtc->timestamp,
-        ];
         $passSaleTicket->pass_usages = $usages;
         $passSaleTicket->save();
 

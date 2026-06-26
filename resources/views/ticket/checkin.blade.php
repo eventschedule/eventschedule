@@ -62,6 +62,7 @@
                         :style="{ width: progressPercent + '%' }"></div>
                 </div>
                 <p class="mt-2 text-sm text-gray-500 dark:text-[#9ca3af]">@{{ progressPercent }}%</p>
+                <p v-if="stats.pass_reserved > 0" class="mt-1 text-sm text-[var(--brand-blue)]">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</p>
             </div>
 
             <!-- Per ticket type cards -->

@@ -260,6 +260,8 @@ class BackupService
                 'pass_scope' => $ticket->pass_scope,
                 'pass_scope_group_id' => $ticket->pass_scope_group_id,
                 'pass_event_ids' => $ticket->pass_event_ids,
+                'pass_allow_booking' => $ticket->pass_allow_booking,
+                'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
             ];
         })->toArray();
     }
@@ -1257,6 +1259,8 @@ class BackupService
         $ticket->pass_scope = $data['pass_scope'] ?? 'this_event';
         $ticket->pass_scope_group_id = $data['pass_scope_group_id'] ?? null;
         $ticket->pass_event_ids = $data['pass_event_ids'] ?? null;
+        $ticket->pass_allow_booking = $data['pass_allow_booking'] ?? false;
+        $ticket->pass_seats_per_occurrence = $data['pass_seats_per_occurrence'] ?? null;
         $ticket->description_html = MarkdownUtils::convertToHtml($data['description'] ?? null);
         $ticket->saveQuietly();
 

@@ -172,6 +172,9 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
 Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->name('rsvp.cancel')->middleware('throttle:10,1');
+Route::post('/ticket/book/{event_id}/{secret}', [TicketController::class, 'passBook'])->name('pass.book')->middleware('throttle:30,1');
+Route::post('/ticket/cancel-booking/{event_id}/{secret}', [TicketController::class, 'passCancelBooking'])->name('pass.cancel_booking')->middleware('throttle:30,1');
+Route::post('/pass/resend-link', [TicketController::class, 'resendPassLink'])->name('pass.resend_link')->middleware('throttle:5,1');
 
 Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
 Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');

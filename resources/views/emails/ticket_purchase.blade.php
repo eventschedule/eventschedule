@@ -71,7 +71,7 @@
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $ticketUrl }}"
                style="display: inline-block; background-color: #4E81FA; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                {{ $sale->isRsvp() ? __('messages.view_registration') : __('messages.view_your_tickets') }}
+                @if ($sale->isPass()){{ __('messages.manage_my_pass') }}@elseif ($sale->isRsvp()){{ __('messages.view_registration') }}@else{{ __('messages.view_your_tickets') }}@endif
             </a>
         </div>
         

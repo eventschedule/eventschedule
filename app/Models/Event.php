@@ -130,6 +130,9 @@ class Event extends Model
         'show_unavailable_tickets' => 'boolean',
     ];
 
+    /** Per-request memo of pass advance-booking seats reserved, keyed by occurrence date. */
+    protected $passReservedSeatsCache = [];
+
     protected static function boot()
     {
         parent::boot();
@@ -1853,6 +1856,7 @@ class Event extends Model
                     $row['pass_max_uses'] = $ticket->pass_max_uses ?: null;
                     $row['pass_valid_days'] = $ticket->pass_valid_days ?: null;
                     $row['pass_scope'] = $ticket->pass_scope;
+                    $row['pass_allow_booking'] = (bool) $ticket->pass_allow_booking;
                     $row['pass_covered_count'] = $ticket->pass_scope === 'specific_events'
                         ? count($ticket->pass_event_ids ?? [])
                         : null;
@@ -1937,13 +1941,15 @@ class Event extends Model
 
     public function allTicketsSoldOut($date)
     {
-        $tickets = $this->tickets;
+        // Passes don't define seat capacity (and are commonly unlimited, which
+        // would otherwise mask a full house); judge sold-out on seat tickets only.
+        $tickets = $this->seatTickets();
 
         if ($tickets->isEmpty()) {
             return false;
         }
 
-        // If any ticket has unlimited quantity (qty <= 0), never sold out
+        // If any seat ticket has unlimited quantity (qty <= 0), never sold out
         if ($tickets->contains(fn ($ticket) => $ticket->quantity <= 0)) {
             return false;
         }
@@ -1953,12 +1959,12 @@ class Event extends Model
                 $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
 
                 return $sold[$date] ?? 0;
-            });
+            }) + $this->passReservedSeats($date);
 
             return $totalSold >= $this->getSameTicketQuantity();
         }
 
-        // Individual mode: every ticket must be sold out
+        // Individual mode: every seat ticket must be sold out
         return $tickets->every(function ($ticket) use ($date) {
             $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
             $soldCount = $sold[$date] ?? 0;
@@ -1967,9 +1973,19 @@ class Event extends Model
         });
     }
 
+    /**
+     * Seat-defining tickets: sellable regular tickets only. tickets() already
+     * excludes add-ons; this also excludes passes, which do not define a
+     * per-occurrence seat capacity - they draw from it via advance booking.
+     */
+    public function seatTickets()
+    {
+        return $this->tickets->reject(fn ($ticket) => $ticket->is_pass)->values();
+    }
+
     public function hasSameTicketQuantities()
     {
-        $tickets = $this->tickets;
+        $tickets = $this->seatTickets();
         if ($tickets->count() <= 1) {
             return false;
         }
@@ -1987,7 +2003,7 @@ class Event extends Model
             return null;
         }
 
-        return $this->tickets->first()->quantity;
+        return $this->seatTickets()->first()->quantity;
     }
 
     public function getTotalTicketQuantity()
@@ -1997,7 +2013,52 @@ class Event extends Model
             return $this->getSameTicketQuantity();
         }
 
-        return $this->tickets->sum('quantity');
+        return $this->seatTickets()->sum('quantity');
+    }
+
+    /**
+     * Seats reserved by pass advance-bookings for this event's given occurrence
+     * date. Counts committed pass_usages entries naming this event+date across
+     * active (paid) pass sale-tickets in this event's schedule. Reservations live
+     * only in pass_usages (the source of truth), so a refunded/cancelled/expired
+     * pass drops out of "paid" and releases its seats automatically. Memoized per
+     * date for the request; can be optimized with a materialized counter later.
+     */
+    public function passReservedSeats(string $date): int
+    {
+        if (! array_key_exists($date, $this->passReservedSeatsCache)) {
+            $this->passReservedSeatsCache[$date] = $this->computePassReservedSeats($date);
+        }
+
+        return $this->passReservedSeatsCache[$date];
+    }
+
+    protected function computePassReservedSeats(string $date): int
+    {
+        $schedule = $this->creatorRole ?: $this->roles->first();
+        if (! $schedule) {
+            return 0;
+        }
+
+        $scheduleEventIds = $schedule->events()->pluck('events.id');
+
+        $saleTickets = SaleTicket::query()
+            ->whereNotNull('pass_usages')
+            ->whereHas('ticket', fn ($q) => $q->where('is_pass', true))
+            ->whereHas('sale', fn ($q) => $q->where('status', 'paid')->whereIn('event_id', $scheduleEventIds))
+            ->get(['id', 'pass_usages']);
+
+        $count = 0;
+        foreach ($saleTickets as $saleTicket) {
+            foreach (($saleTicket->pass_usages ?? []) as $usage) {
+                if ((int) ($usage['event_id'] ?? 0) === (int) $this->id
+                    && ($usage['date'] ?? null) === $date) {
+                    $count++;
+                }
+            }
+        }
+
+        return $count;
     }
 
     /**

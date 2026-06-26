@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\EmailService;
+use App\Services\PassBookingService;
 use App\Services\PassRedemptionService;
 use App\Services\RoleMailerService;
 use App\Services\TicketVolumeDiscount;
@@ -245,6 +246,7 @@ class TicketController extends Controller
                     'event' => $eventNames[(int) ($u['event_id'] ?? 0)] ?? '—',
                     'date' => $u['date'] ?? '',
                     'time' => isset($u['at']) ? Carbon::createFromTimestamp((int) $u['at'])->format('M j, g:i A') : '',
+                    'kind' => ($u['kind'] ?? 'redemption') === 'booking' ? 'booked' : 'attended',
                 ])->values(),
             ];
         })->sortBy('name')->values();
@@ -952,6 +954,8 @@ class TicketController extends Controller
                                     $totalSold = $lockedTickets->filter(fn ($ticket) => ! $ticket->is_pass)->sum(function ($ticket) use ($eventDate) {
                                         return $ticket->soldCountFor($eventDate);
                                     });
+                                    // Pass holders who booked this occurrence in advance occupy shared seats too.
+                                    $totalSold += $eventDate ? $event->passReservedSeats($eventDate) : 0;
                                     // In combined mode, the total quantity is the same as individual quantity
                                     $totalQuantity = $event->getSameTicketQuantity();
                                     $remainingTickets = $totalQuantity - $totalSold;
@@ -963,7 +967,11 @@ class TicketController extends Controller
                                     }
                                 } else {
                                     $soldCount = $ticketModel->soldCountFor($eventDate);
-                                    $remainingTickets = $ticketModel->quantity - $soldCount;
+                                    // A sole regular ticket is the event's only seat pool, so
+                                    // pass advance-bookings reduce its availability too.
+                                    $reserved = ($eventDate && ! $ticketModel->is_pass && ! $ticketModel->is_addon && $event->seatTickets()->count() === 1)
+                                        ? $event->passReservedSeats($eventDate) : 0;
+                                    $remainingTickets = $ticketModel->quantity - $soldCount - $reserved;
 
                                     if ($quantity > $remainingTickets) {
                                         throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
@@ -2499,10 +2507,16 @@ class TicketController extends Controller
     public function view($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
-        $sale = Sale::with('promoCode')->where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        $sale = Sale::with(['promoCode', 'saleTickets.ticket'])->where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
         $role = $event->role();
 
-        return view('ticket.view', compact('event', 'sale', 'role'));
+        // Advance booking surface (only for a paid, booking-enabled pass).
+        $bookingService = app(PassBookingService::class);
+        $passBookable = $bookingService->isBookable($sale);
+        $bookedOccurrences = $passBookable ? $bookingService->bookedOccurrences($sale) : [];
+        $bookableOccurrences = $passBookable ? $bookingService->bookableOccurrences($sale, now()) : [];
+
+        return view('ticket.view', compact('event', 'sale', 'role', 'passBookable', 'bookedOccurrences', 'bookableOccurrences'));
     }
 
     public function handleAction(Request $request, $sale_id)
@@ -2722,6 +2736,149 @@ class TicketController extends Controller
         }
 
         return redirect()->route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $sale->secret]);
+    }
+
+    /**
+     * Reserve a seat for a covered occurrence in advance (pass advance booking).
+     * Authenticated by the sale secret in the URL (the holder's private link).
+     */
+    public function passBook(Request $request, $eventId, $secret)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        $back = redirect()->route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $sale->secret,
+        ]);
+
+        $bookEventId = UrlUtils::decodeId($request->input('book_event_id'));
+        $date = $request->input('date');
+        if (! $bookEventId || ! $date) {
+            return $back->with('error', __('messages.pass_invalid_date'));
+        }
+
+        try {
+            $result = app(PassBookingService::class)->book($sale, (int) $bookEventId, $date, now());
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return $back->with('error', __('messages.error'));
+        }
+
+        if ($result->ok) {
+            $bookedEvent = Event::with('user')->find((int) $bookEventId);
+            if ($bookedEvent) {
+                (new EmailService)->sendPassBookingConfirmation(
+                    $sale, $bookedEvent, $date, $bookedEvent->getRoleWithEmailSettings(), queue: true
+                );
+            }
+
+            WebhookService::dispatch('ticket.booked', $sale, null, [
+                'booked_event_id' => UrlUtils::encodeId((int) $bookEventId),
+                'booked_event_date' => $date,
+            ]);
+
+            return $back->with('message', __('messages.pass_booking_confirmed'));
+        }
+
+        return $back->with('error', $this->passBookingStatusMessage($result->status));
+    }
+
+    /**
+     * Release an advance reservation, returning the seat to the shared pool.
+     */
+    public function passCancelBooking(Request $request, $eventId, $secret)
+    {
+        $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+
+        $back = redirect()->route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $sale->secret,
+        ]);
+
+        $bookEventId = UrlUtils::decodeId($request->input('book_event_id'));
+        $date = $request->input('date');
+        if (! $bookEventId || ! $date) {
+            return $back->with('error', __('messages.error'));
+        }
+
+        try {
+            $result = app(PassBookingService::class)->cancel($sale, (int) $bookEventId, $date);
+        } catch (\Illuminate\Database\QueryException $e) {
+            report($e);
+
+            return $back->with('error', __('messages.error'));
+        }
+
+        if ($result->ok) {
+            WebhookService::dispatch('ticket.booking_cancelled', $sale, null, [
+                'booked_event_id' => UrlUtils::encodeId((int) $bookEventId),
+                'booked_event_date' => $date,
+            ]);
+
+            return $back->with('message', __('messages.pass_booking_cancelled'));
+        }
+
+        return $back->with('error', __('messages.error'));
+    }
+
+    /**
+     * "Email me my pass link": re-send the holder's private pass link to the
+     * email on file. Always responds the same way so a pass's existence can't
+     * be probed.
+     */
+    public function resendPassLink(Request $request)
+    {
+        $request->validate([
+            'event_id' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        $generic = back()->with('message', __('messages.pass_link_sent_if_found'));
+
+        $event = Event::find(UrlUtils::decodeId($request->event_id));
+        if (! $event) {
+            return $generic;
+        }
+
+        $sale = Sale::where('event_id', $event->id)
+            ->where('email', $request->email)
+            ->where('status', 'paid')
+            ->whereHas('saleTickets.ticket', fn ($q) => $q->where('is_pass', true))
+            ->latest()
+            ->first();
+
+        if ($sale) {
+            $role = $event->getRoleWithEmailSettings();
+            if ($role) {
+                try {
+                    (new EmailService)->sendTicketEmail($sale, $role, queue: true);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+        }
+
+        return $generic;
+    }
+
+    /**
+     * Map a PassBookingService status to a user-facing message, reusing the
+     * scanner's neutral pass vocabulary where it applies.
+     */
+    private function passBookingStatusMessage(string $status): string
+    {
+        return match ($status) {
+            'sold_out' => __('messages.sold_out'),
+            'limit_reached' => __('messages.pass_limit_reached'),
+            'expired' => __('messages.pass_expired'),
+            'not_covered' => __('messages.pass_not_covered'),
+            'already_booked' => __('messages.pass_already_booked'),
+            'invalid_date' => __('messages.pass_invalid_date'),
+            default => __('messages.error'),
+        };
     }
 
     /**

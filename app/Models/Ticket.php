@@ -38,6 +38,8 @@ class Ticket extends Model
         'pass_scope',
         'pass_scope_group_id',
         'pass_event_ids',
+        'pass_allow_booking',
+        'pass_seats_per_occurrence',
         'image_url',
         'url',
     ];
@@ -53,6 +55,8 @@ class Ticket extends Model
         'pass_valid_days' => 'integer',
         'pass_scope_group_id' => 'integer',
         'pass_event_ids' => 'array',
+        'pass_allow_booking' => 'boolean',
+        'pass_seats_per_occurrence' => 'integer',
     ];
 
     public function isSalesNotStarted()
@@ -241,6 +245,7 @@ class Ticket extends Model
             $data['pass_max_uses'] = $this->pass_max_uses ?: null;
             $data['pass_valid_days'] = $this->pass_valid_days ?: null;
             $data['pass_scope'] = $this->pass_scope;
+            $data['pass_allow_booking'] = (bool) $this->pass_allow_booking;
             $data['pass_covered_count'] = $this->pass_scope === 'specific_events'
                 ? count($this->pass_event_ids ?? [])
                 : null;
@@ -258,14 +263,21 @@ class Ticket extends Model
 
         // Handle combined mode logic (passes always use their own pool, never combined)
         if ($this->event && ! $this->is_addon && ! $this->is_pass && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
-            $totalSold = $this->event->tickets->filter(fn ($ticket) => ! $ticket->is_pass)->sum(function ($ticket) use ($date) {
+            $totalSold = $this->event->seatTickets()->sum(function ($ticket) use ($date) {
                 return $ticket->soldCountFor($date);
             });
+            // Pass holders who booked this occurrence in advance occupy shared seats too.
+            $totalSold += $date ? $this->event->passReservedSeats($date) : 0;
             // In combined mode, the total quantity is the same as individual quantity
             $totalQuantity = $this->event->getSameTicketQuantity();
             $data['quantity'] = $totalQuantity > 0 ? max(0, min($perOrderCap, $totalQuantity - $totalSold)) : $perOrderCap;
         } else {
-            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
+            // When a sole regular ticket is the event's only seat pool, pass
+            // advance-bookings draw it down too (the combined branch above
+            // handles the multi-ticket shared-pool case).
+            $reserved = ($date && ! $this->is_pass && ! $this->is_addon && $this->event && $this->event->seatTickets()->count() === 1)
+                ? $this->event->passReservedSeats($date) : 0;
+            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold - $reserved)) : $perOrderCap;
         }
 
         $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);

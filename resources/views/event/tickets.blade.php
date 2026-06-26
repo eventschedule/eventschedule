@@ -24,7 +24,10 @@
             data() {
                 return {
                     createAccount: @json((bool) old('create_account', false)),
-                    tickets: @json($event->tickets->filter(fn($t) => (!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date) {
+                    tickets: @json($event->tickets->filter(fn($t) => (!$t->isSalesEnded() && !$t->isSalesNotStarted()) || $event->show_unavailable_tickets)->values()->map(function ($ticket) use ($date, $event) {
+                        // Share the loaded event instance so toData() doesn't lazy-load it per
+                        // ticket and passReservedSeats() memoizes to one query per (event,date).
+                        $ticket->setRelation('event', $event);
                         $data = $ticket->toData($date ?? request()->date);
                         $data['selectedQty'] = min((int) (old('tickets')[$data['id']] ?? 0), $data['quantity']);
                         $data['custom_fields'] = $ticket->custom_fields ?? [];
@@ -1009,6 +1012,7 @@
                         <template v-else-if="ticket.pass_usage_type === 'unlimited'">{{ __('messages.subscription') }} &middot; {{ __('messages.pass_unlimited_visits') }}</template>
                         <template v-else>{{ __('messages.subscription') }}</template>
                     </span>
+                    <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="text-xs text-[var(--brand-blue)] mt-1">{{ __('messages.pass_book_after_purchase') }}</p>
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                     <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>

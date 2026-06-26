@@ -101,6 +101,8 @@ class EventRepo
                 'pass_max_uses' => $ticket->pass_max_uses,
                 'pass_valid_days' => $ticket->pass_valid_days,
                 'pass_scope' => $ticket->pass_scope,
+                'pass_allow_booking' => $ticket->pass_allow_booking,
+                'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
                 'pass_coverage' => [
                     'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
                     'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
@@ -1405,6 +1407,14 @@ class EventRepo
                     }
                 }
 
+                // Advance booking: holders reserve a seat for a specific occurrence
+                // ahead of time (drawing from the shared pool), with an optional
+                // per-occurrence cap protecting walk-up inventory.
+                $passAllowBooking = $isPass && ! empty($data['pass_allow_booking']);
+                $passSeatsPerOccurrence = ($passAllowBooking && ! empty($data['pass_seats_per_occurrence']))
+                    ? max(1, (int) $data['pass_seats_per_occurrence'])
+                    : null;
+
                 // A pass is one redeemable unit per sale, so cap it at 1 per order.
                 $maxPerOrder = $isPass
                     ? 1
@@ -1418,6 +1428,8 @@ class EventRepo
                     'pass_scope' => $passScope,
                     'pass_scope_group_id' => $passScopeGroupId,
                     'pass_event_ids' => $passEventIds,
+                    'pass_allow_booking' => $passAllowBooking,
+                    'pass_seats_per_occurrence' => $passSeatsPerOccurrence,
                 ];
 
                 if (! empty($data['id'])) {

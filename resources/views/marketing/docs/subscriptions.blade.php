@@ -268,6 +268,22 @@
                             </ul>
                         </section>
 
+                        <section id="advance-booking" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                Advance booking
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">By default a pass is scan-at-the-door: the holder just turns up and scans in. If you want holders to reserve a seat for specific dates ahead of time, turn on <strong class="text-gray-900 dark:text-white">"Let holders book seats in advance"</strong> on the pass.</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">One shared pool of seats</strong> - advance bookings and regular ticket sales draw from the same capacity, so you can never oversell. If the room seats 50 and 30 holders book ahead, 20 seats remain for regular buyers.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Optional per-date cap</strong> - limit how many seats holders may reserve per date, keeping some walk-up inventory aside.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Holders book from their pass page</strong> - the private link in their confirmation email lists upcoming dates with seats left; they book or cancel a date themselves, and each booking counts as one visit until they hit their limit.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Booked or attended</strong> - the Subscriptions tab shows which dates a holder has reserved versus actually attended, and the check-in screen shows how many seats are reserved for the date.</li>
+                            </ul>
+                        </section>
+
                         <!-- Step 3: Scan at the door -->
                         <section id="redeeming" class="doc-section">
                             <h2 class="doc-heading">
