@@ -2765,7 +2765,8 @@ class TicketController extends Controller
 
         $bookEventId = UrlUtils::decodeId($request->input('book_event_id'));
         $date = $request->input('date');
-        if (! $bookEventId || ! $date) {
+        // Reject a malformed date here so book()'s Carbon::parse() can't 500 on garbage.
+        if (! $bookEventId || ! $date || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date)) {
             return $back->with('error', __('messages.pass_invalid_date'));
         }
 
@@ -2811,7 +2812,7 @@ class TicketController extends Controller
 
         $bookEventId = UrlUtils::decodeId($request->input('book_event_id'));
         $date = $request->input('date');
-        if (! $bookEventId || ! $date) {
+        if (! $bookEventId || ! $date || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $date)) {
             return $back->with('error', __('messages.error'));
         }
 

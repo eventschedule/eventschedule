@@ -2044,7 +2044,7 @@ class Event extends Model
     protected function computePassReservedSeats(string $date): int
     {
         $schedule = $this->creatorRole ?: $this->roles->first();
-        if (! $schedule || ! $schedule->hasBookablePass()) {
+        if (! $schedule || ! $schedule->hasPass()) {
             return 0;
         }
 

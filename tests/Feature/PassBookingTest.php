@@ -254,4 +254,72 @@ class PassBookingTest extends TestCase
         $this->assertEmpty($this->bookingService()->bookableOccurrences($holder->fresh(), Carbon::now()));
         $this->assertSame('expired', $this->bookingService()->book($holder->fresh(), $event->id, $date)->status);
     }
+
+    public function test_non_bookable_pass_redemptions_count_against_the_house(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id, 'tickets_enabled' => true]);
+        $date = Carbon::parse($event->starts_at)->format('Y-m-d');
+
+        $ga = $this->createTicket($event, ['type' => 'GA', 'quantity' => 5, 'price' => 10]);
+        // Drop-in / membership pass - NOT booking-enabled (the default for memberships).
+        $pass = $this->createTicket($event, [
+            'type' => 'Membership', 'quantity' => 100, 'price' => 50,
+            'is_pass' => true, 'pass_usage_type' => 'unlimited', 'pass_scope' => 'this_event',
+            'pass_allow_booking' => false,
+        ]);
+
+        // Three members scanned in (redemption usages, written by redeem() for any pass).
+        for ($i = 0; $i < 3; $i++) {
+            $sale = $this->createSale($event, $role, ['email' => "m{$i}@gmail.com"], $pass);
+            $st = $sale->saleTickets->first(fn ($s) => $s->ticket->is_pass);
+            $st->update(['pass_usages' => [['event_id' => $event->id, 'date' => $date, 'at' => 1, 'kind' => 'redemption']]]);
+        }
+
+        // Those occupied seats must reduce the house (the short-circuit regression dropped them).
+        $this->assertSame(3, $event->fresh()->passReservedSeats($date));
+        $this->assertSame(2, $event->fresh()->occurrenceSeatsRemaining($date));
+        $this->assertLessThanOrEqual(2, $this->regularAvailable($ga->id, $date));
+
+        // Filling the last 2 with regular sales sells the event out.
+        $this->createSale($event, $role, ['email' => 'b@gmail.com'], $ga, 2);
+        $this->assertTrue($event->fresh()->allTicketsSoldOut($date));
+    }
+
+    public function test_scanning_a_booked_date_upgrades_it_without_consuming_an_extra_use(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-07-15 18:00:00'));
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
+        $event = $this->createEvent($role, [
+            'creator_role_id' => $role->id, 'tickets_enabled' => true,
+            'starts_at' => '2026-07-15 18:00:00', 'duration' => 4,
+        ]);
+        $date = '2026-07-15';
+        $this->createTicket($event, ['type' => 'GA', 'quantity' => 10, 'price' => 10]);
+        $pass = $this->createTicket($event, [
+            'type' => 'Visit Pass', 'quantity' => 100, 'price' => 20,
+            'is_pass' => true, 'pass_usage_type' => 'total', 'pass_max_uses' => 1,
+            'pass_valid_days' => 90, 'pass_scope' => 'this_event', 'pass_allow_booking' => true,
+        ]);
+        $holder = $this->createSale($event, $role, ['email' => 'h@gmail.com'], $pass);
+
+        // Book today's occurrence (consumes the single allowed use up front).
+        $this->assertTrue($this->bookingService()->book($holder->fresh(), $event->id, $date)->ok);
+        $st = $holder->fresh()->saleTickets->first(fn ($s) => $s->ticket->is_pass);
+        $this->assertSame('booking', $st->pass_usages[0]['kind']);
+        $this->assertSame(1, $event->fresh()->passReservedSeats($date));
+
+        // Scanning at the door upgrades the booking to a redemption - no new entry, no extra use.
+        $result = app(\App\Services\PassRedemptionService::class)->redeem($holder->fresh(), $event->fresh(), Carbon::now());
+        $this->assertSame('valid', $result->pass_status);
+        $st = $holder->fresh()->saleTickets->first(fn ($s) => $s->ticket->is_pass);
+        $this->assertCount(1, $st->pass_usages);
+        $this->assertSame('redemption', $st->pass_usages[0]['kind']);
+        $this->assertSame(1, $event->fresh()->passReservedSeats($date));
+
+        Carbon::setTestNow();
+    }
 }

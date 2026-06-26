@@ -487,7 +487,8 @@ class ApiSaleController extends Controller
                 // Pass advance-bookings share the per-occurrence seat pool; cap a non-pass
                 // order at what's left after reservations (the combined+equal-quantity case is
                 // handled per-ticket above). No-op when nothing is reserved.
-                $orderIsPass = $lockedTickets->whereIn('id', array_keys($ticketIds))->contains(fn ($t) => $t->is_pass);
+                $positiveTicketIds = array_keys(array_filter($ticketIds, fn ($q) => (int) $q > 0));
+                $orderIsPass = $lockedTickets->whereIn('id', $positiveTicketIds)->contains(fn ($t) => $t->is_pass);
                 if (! $orderIsPass && $eventDate
                     && ! ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities())) {
                     $event->setRelation('tickets', $lockedTickets);
