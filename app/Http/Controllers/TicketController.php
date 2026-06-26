@@ -967,17 +967,28 @@ class TicketController extends Controller
                                     }
                                 } else {
                                     $soldCount = $ticketModel->soldCountFor($eventDate);
-                                    // A sole regular ticket is the event's only seat pool, so
-                                    // pass advance-bookings reduce its availability too.
-                                    $reserved = ($eventDate && ! $ticketModel->is_pass && ! $ticketModel->is_addon && $event->seatTickets()->count() === 1)
-                                        ? $event->passReservedSeats($eventDate) : 0;
-                                    $remainingTickets = $ticketModel->quantity - $soldCount - $reserved;
+                                    $remainingTickets = $ticketModel->quantity - $soldCount;
 
                                     if ($quantity > $remainingTickets) {
                                         throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    // Pass advance-bookings share the per-occurrence seat pool with regular
+                    // sales, so a non-pass order can't exceed what's left after reservations.
+                    // The combined+equal-quantity case is already capped per-ticket above; this
+                    // covers individual / single-ticket modes. No-op when nothing is reserved
+                    // (the house equals the sum of per-ticket limits).
+                    $orderIsPass = $selectedTickets->contains(fn ($t) => $t->is_pass);
+                    if (! $orderIsPass && $eventDate
+                        && ! ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities())) {
+                        $event->setRelation('tickets', $event->tickets()->lockForUpdate()->get());
+                        $houseRemaining = $event->occurrenceSeatsRemaining($eventDate);
+                        if ($houseRemaining !== null && array_sum($request->tickets) > $houseRemaining) {
+                            throw new \App\Exceptions\BusinessException(__('messages.tickets_not_available'));
                         }
                     }
 

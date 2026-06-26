@@ -1941,36 +1941,13 @@ class Event extends Model
 
     public function allTicketsSoldOut($date)
     {
-        // Passes don't define seat capacity (and are commonly unlimited, which
-        // would otherwise mask a full house); judge sold-out on seat tickets only.
-        $tickets = $this->seatTickets();
+        // Sold out when the shared per-occurrence house (after both regular sales and
+        // pass advance-bookings) has no seats left. Null = unlimited => never sold out.
+        // Equivalent to the old per-ticket "every sold out" check when nothing is
+        // reserved, and correctly accounts for pass reservations when they exist.
+        $remaining = $this->occurrenceSeatsRemaining($date);
 
-        if ($tickets->isEmpty()) {
-            return false;
-        }
-
-        // If any seat ticket has unlimited quantity (qty <= 0), never sold out
-        if ($tickets->contains(fn ($ticket) => $ticket->quantity <= 0)) {
-            return false;
-        }
-
-        if ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities()) {
-            $totalSold = $tickets->sum(function ($ticket) use ($date) {
-                $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-
-                return $sold[$date] ?? 0;
-            }) + $this->passReservedSeats($date);
-
-            return $totalSold >= $this->getSameTicketQuantity();
-        }
-
-        // Individual mode: every seat ticket must be sold out
-        return $tickets->every(function ($ticket) use ($date) {
-            $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
-            $soldCount = $sold[$date] ?? 0;
-
-            return $soldCount >= $ticket->quantity;
-        });
+        return $remaining !== null && $remaining <= 0;
     }
 
     /**
@@ -2017,6 +1994,37 @@ class Event extends Model
     }
 
     /**
+     * Single source of truth for how many seats remain at a given occurrence after
+     * BOTH regular sales and pass advance-bookings, against one shared per-occurrence
+     * house capacity. Null = unlimited (no defined ceiling). Used by the booking side
+     * (PassBookingService::seatsLeft) and every regular-sale availability check, so the
+     * two can never disagree and oversell. Safe for non-pass events: reserved is 0 and
+     * the house equals the sum of per-ticket limits, so this never binds tighter than
+     * the existing per-ticket checks.
+     */
+    public function occurrenceSeatsRemaining(?string $date): ?int
+    {
+        if (! $date) {
+            return null;
+        }
+
+        $seatTickets = $this->seatTickets();
+
+        // No seat tickets, or any unlimited seat ticket => no defined ceiling.
+        if ($seatTickets->isEmpty() || $seatTickets->contains(fn ($t) => $t->quantity <= 0)) {
+            return null;
+        }
+
+        $capacity = ($this->total_tickets_mode === 'combined' && $this->hasSameTicketQuantities())
+            ? (int) $this->getSameTicketQuantity()
+            : (int) $seatTickets->sum('quantity');
+
+        $regularSold = $seatTickets->sum(fn ($t) => $t->soldCountFor($date));
+
+        return max(0, $capacity - $regularSold - $this->passReservedSeats($date));
+    }
+
+    /**
      * Seats reserved by pass advance-bookings for this event's given occurrence
      * date. Counts committed pass_usages entries naming this event+date across
      * active (paid) pass sale-tickets in this event's schedule. Reservations live
@@ -2036,7 +2044,7 @@ class Event extends Model
     protected function computePassReservedSeats(string $date): int
     {
         $schedule = $this->creatorRole ?: $this->roles->first();
-        if (! $schedule) {
+        if (! $schedule || ! $schedule->hasBookablePass()) {
             return 0;
         }
 

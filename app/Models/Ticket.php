@@ -261,23 +261,18 @@ class Ticket extends Model
 
         $perOrderCap = $this->max_per_order ?: 20;
 
-        // Handle combined mode logic (passes always use their own pool, never combined)
-        if ($this->event && ! $this->is_addon && ! $this->is_pass && $this->event->total_tickets_mode === 'combined' && $this->event->hasSameTicketQuantities()) {
-            $totalSold = $this->event->seatTickets()->sum(function ($ticket) use ($date) {
-                return $ticket->soldCountFor($date);
-            });
-            // Pass holders who booked this occurrence in advance occupy shared seats too.
-            $totalSold += $date ? $this->event->passReservedSeats($date) : 0;
-            // In combined mode, the total quantity is the same as individual quantity
-            $totalQuantity = $this->event->getSameTicketQuantity();
-            $data['quantity'] = $totalQuantity > 0 ? max(0, min($perOrderCap, $totalQuantity - $totalSold)) : $perOrderCap;
+        // Passes and add-ons use only their own pool. A regular seat ticket is bounded
+        // by both its own pool AND the shared per-occurrence house (which subtracts pass
+        // advance-bookings): for combined mode the house is always the tighter bound, for
+        // individual mode both apply, and for non-pass events the house never binds
+        // tighter than the per-ticket limit (so behavior is unchanged there).
+        if ($this->is_pass || $this->is_addon || ! $this->event) {
+            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold)) : $perOrderCap;
         } else {
-            // When a sole regular ticket is the event's only seat pool, pass
-            // advance-bookings draw it down too (the combined branch above
-            // handles the multi-ticket shared-pool case).
-            $reserved = ($date && ! $this->is_pass && ! $this->is_addon && $this->event && $this->event->seatTickets()->count() === 1)
-                ? $this->event->passReservedSeats($date) : 0;
-            $data['quantity'] = $this->quantity > 0 ? max(0, min($perOrderCap, $this->quantity - $sold - $reserved)) : $perOrderCap;
+            $houseRemaining = $this->event->occurrenceSeatsRemaining($date);
+            $ownRemaining = $this->quantity > 0 ? max(0, $this->quantity - $sold) : null;
+            $bounds = array_filter([$ownRemaining, $houseRemaining], fn ($v) => $v !== null);
+            $data['quantity'] = empty($bounds) ? $perOrderCap : max(0, min($perOrderCap, min($bounds)));
         }
 
         $data['volume_discount'] = TicketVolumeDiscount::toGuestPayload($this->volume_discount);

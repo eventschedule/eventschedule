@@ -484,6 +484,19 @@ class ApiSaleController extends Controller
                     }
                 }
 
+                // Pass advance-bookings share the per-occurrence seat pool; cap a non-pass
+                // order at what's left after reservations (the combined+equal-quantity case is
+                // handled per-ticket above). No-op when nothing is reserved.
+                $orderIsPass = $lockedTickets->whereIn('id', array_keys($ticketIds))->contains(fn ($t) => $t->is_pass);
+                if (! $orderIsPass && $eventDate
+                    && ! ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities())) {
+                    $event->setRelation('tickets', $lockedTickets);
+                    $houseRemaining = $event->occurrenceSeatsRemaining($eventDate);
+                    if ($houseRemaining !== null && array_sum($ticketIds) > $houseRemaining) {
+                        throw new \App\Exceptions\BusinessException('Tickets not available.');
+                    }
+                }
+
                 // Create sale
                 $sale = new Sale;
                 $sale->event_id = $event->id;

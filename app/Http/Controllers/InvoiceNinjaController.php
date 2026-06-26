@@ -311,6 +311,15 @@ class InvoiceNinjaController extends Controller
                             $sold = $ticket->sold ? json_decode($ticket->sold, true) : [];
                             $soldCount = $sold[$sale->event_date] ?? 0;
                             $remaining = $ticket->quantity - $soldCount;
+                            // Honor pass advance-bookings against the shared per-occurrence
+                            // house for regular seat tickets (combined+equal handled above).
+                            if (! $ticket->is_addon && ! $ticket->is_pass && $sale->event_date) {
+                                $event->setRelation('tickets', $lockedTickets->reject(fn ($t) => $t->is_addon)->values());
+                                $houseRemaining = $event->occurrenceSeatsRemaining($sale->event_date);
+                                if ($houseRemaining !== null) {
+                                    $remaining = min($remaining, $houseRemaining);
+                                }
+                            }
                         }
                         if ($quantity > $remaining) {
                             \Log::warning('Invoice Ninja payment link oversell prevented', [

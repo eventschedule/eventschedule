@@ -389,6 +389,28 @@ class Role extends Model implements MustVerifyEmail
             ->using(EventRole::class);
     }
 
+    /** Per-request cache for whether this schedule has any booking-enabled pass. */
+    protected $hasBookablePassCache = null;
+
+    /**
+     * Whether this schedule has any advance-booking pass at all. Cached per request.
+     * Used to short-circuit pass-reservation counting for the vast majority of events
+     * that have no booking-enabled pass. Must be schedule-level (a multi-event-scope
+     * pass covering an event may be sold on a different event in the schedule).
+     */
+    public function hasBookablePass(): bool
+    {
+        if ($this->hasBookablePassCache === null) {
+            $this->hasBookablePassCache = Ticket::query()
+                ->where('is_pass', true)
+                ->where('pass_allow_booking', true)
+                ->whereIn('event_id', $this->events()->pluck('events.id'))
+                ->exists();
+        }
+
+        return $this->hasBookablePassCache;
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class)

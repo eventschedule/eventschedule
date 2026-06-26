@@ -62,9 +62,10 @@ class PassBookingService
             return collect();
         }
 
+        // Note: the events table has no is_deleted column (unlike tickets/sales);
+        // coveredEventIds already scopes ids to the pass's own schedule.
         return Event::with(['tickets', 'creatorRole'])
             ->whereIn('id', $ids)
-            ->where('is_deleted', false)
             ->get();
     }
 
@@ -86,18 +87,31 @@ class PassBookingService
             $end = $expiresAt->copy();
         }
 
+        // A date is bookable only if its occurrence start is on or before the pass
+        // expiry instant, so every offered date is still redeemable at the event
+        // (matches redeem()'s instant check, not a date-midnight comparison).
+        $withinExpiry = fn (string $d) => ! $expiresAt || $event->getStartDateTime($d)->lte($expiresAt);
+
         if ($event->days_of_week) {
             $cursor = $now->copy()->startOfDay();
             while ($cursor->lte($end) && count($dates) < self::MAX_DATES_PER_EVENT) {
-                if ($event->matchesDate($cursor) && $event->canSellTickets($cursor->format('Y-m-d'))) {
-                    $dates[] = $cursor->format('Y-m-d');
+                $d = $cursor->format('Y-m-d');
+                if ($event->matchesDate($cursor) && $event->canSellTickets($d) && $withinExpiry($d)) {
+                    $dates[] = $d;
                 }
                 $cursor->addDay();
             }
         } else {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->format('Y-m-d');
-            if ($now->copy()->startOfDay()->lte(Carbon::parse($date)->endOfDay())
-                && (! $expiresAt || $expiresAt->gte(Carbon::parse($date)->startOfDay()))) {
+            // Use the canonical schedule-TZ occurrence date: this handles a date-only
+            // starts_at (the raw createFromFormat('Y-m-d H:i:s', ...) would throw) and
+            // matches the seat-pool key + redemption's $today (the UTC date could differ
+            // and would never match at scan time). Apply the same sell + expiry gate as
+            // the recurring branch and book().
+            $date = $event->saleEventDateFromStartsAt();
+            if ($date
+                && $now->copy()->startOfDay()->lte(Carbon::parse($date)->endOfDay())
+                && $event->canSellTickets($date)
+                && $withinExpiry($date)) {
                 $dates[] = $date;
             }
         }
@@ -112,24 +126,13 @@ class PassBookingService
      */
     public function seatsLeft(Event $event, string $date, Ticket $passTicket): ?int
     {
-        $seatTickets = $event->seatTickets();
-        $reserved = $event->passReservedSeats($date);
-
-        // Shared house capacity for this occurrence.
-        if ($event->total_tickets_mode === 'combined' && $event->hasSameTicketQuantities()) {
-            $capacity = $event->getSameTicketQuantity();
-        } elseif ($seatTickets->isEmpty() || $seatTickets->contains(fn ($t) => $t->quantity <= 0)) {
-            $capacity = null; // unlimited
-        } else {
-            $capacity = $seatTickets->sum('quantity');
-        }
-
-        $regularSold = $seatTickets->sum(fn ($t) => $t->soldCountFor($date));
-        $houseLeft = $capacity === null ? null : max(0, (int) $capacity - $regularSold - $reserved);
+        // The shared per-occurrence house, after regular sales AND existing pass
+        // reservations - the same figure the regular-sale side enforces.
+        $houseLeft = $event->occurrenceSeatsRemaining($date);
 
         // Optional per-occurrence cap on how many seats passes may take.
         $passCap = $passTicket->pass_seats_per_occurrence;
-        $passLeft = $passCap ? max(0, (int) $passCap - $reserved) : null;
+        $passLeft = $passCap ? max(0, (int) $passCap - $event->passReservedSeats($date)) : null;
 
         if ($houseLeft === null) {
             return $passLeft;
@@ -258,7 +261,10 @@ class PassBookingService
             return $result;
         }
 
-        if ($saleTicket->pass_expires_at && $saleTicket->pass_expires_at->lt($dateCarbon)) {
+        // Expiry is a precise instant; reject a date only if its occurrence start is
+        // after expiry, so every bookable date is still redeemable at the event
+        // (book() and redeem() then agree on the boundary).
+        if ($saleTicket->pass_expires_at && $event->getStartDateTime($date)->gt($saleTicket->pass_expires_at)) {
             $result->status = 'expired';
 
             return $result;

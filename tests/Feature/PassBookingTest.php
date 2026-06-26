@@ -159,4 +159,99 @@ class PassBookingTest extends TestCase
         $this->assertSame('not_bookable', $result->status);
         $this->assertSame(0, $this->reserved($event, $date));
     }
+
+    public function test_multi_ticket_individual_event_does_not_oversell(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id, 'tickets_enabled' => true]);
+        $date = Carbon::parse($event->starts_at)->format('Y-m-d');
+
+        // Individual mode (default), two seat tickets => shared house = 20 + 10 = 30.
+        $ga = $this->createTicket($event, ['type' => 'GA', 'quantity' => 20, 'price' => 10]);
+        $vip = $this->createTicket($event, ['type' => 'VIP', 'quantity' => 10, 'price' => 30]);
+        $pass = $this->createTicket($event, [
+            'type' => 'Season Pass', 'quantity' => 100, 'price' => 50,
+            'is_pass' => true, 'pass_usage_type' => 'unlimited', 'pass_scope' => 'this_event',
+            'pass_allow_booking' => true,
+        ]);
+
+        $this->assertSame(30, $event->fresh()->occurrenceSeatsRemaining($date));
+
+        // 25 holders book in advance.
+        for ($i = 0; $i < 25; $i++) {
+            $holder = $this->createSale($event, $role, ['email' => "h{$i}@gmail.com"], $pass);
+            $r = $this->bookingService()->book($holder->fresh(), $event->id, $date);
+            $this->assertTrue($r->ok, "booking {$i} failed: {$r->status}");
+        }
+
+        // Only 5 seats remain for regular buyers - not the full 30 (the oversell bug).
+        $this->assertSame(5, $event->fresh()->occurrenceSeatsRemaining($date));
+        $this->assertLessThanOrEqual(5, $this->regularAvailable($ga->id, $date));
+        $this->assertLessThanOrEqual(5, $this->regularAvailable($vip->id, $date));
+
+        // Fill the last 5 with regular GA sales => the event now reads sold out
+        // (previously it never did, because passes were excluded from the check).
+        $this->createSale($event, $role, ['email' => 'buyer@gmail.com'], $ga, 5);
+        $this->assertSame(0, $event->fresh()->occurrenceSeatsRemaining($date));
+        $this->assertTrue($event->fresh()->allTicketsSoldOut($date));
+
+        // A further advance booking is rejected.
+        $extra = $this->createSale($event, $role, ['email' => 'extra@gmail.com'], $pass);
+        $this->assertSame('sold_out', $this->bookingService()->book($extra->fresh(), $event->id, $date)->status);
+    }
+
+    public function test_one_time_date_only_event_is_bookable_without_error(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        // A one-time event with a DATE-ONLY starts_at (10 chars) - previously threw a 500.
+        $dateOnly = Carbon::now()->addDays(10)->format('Y-m-d');
+        $event = $this->createEvent($role, [
+            'creator_role_id' => $role->id, 'tickets_enabled' => true, 'starts_at' => $dateOnly,
+        ]);
+        $this->createTicket($event, ['type' => 'GA', 'quantity' => 10, 'price' => 10]);
+        $pass = $this->createTicket($event, [
+            'type' => 'Pass', 'quantity' => 100, 'price' => 50,
+            'is_pass' => true, 'pass_usage_type' => 'unlimited', 'pass_scope' => 'this_event',
+            'pass_allow_booking' => true,
+        ]);
+        $holder = $this->createSale($event, $role, ['email' => 'h@gmail.com'], $pass);
+
+        // No exception, and the canonical occurrence date is offered.
+        $occ = $this->bookingService()->bookableOccurrences($holder->fresh(), Carbon::now());
+        $this->assertNotEmpty($occ);
+        $this->assertSame($event->saleEventDateFromStartsAt(), $occ[0]['date']);
+
+        // Booking round-trips into a reservation under the same date the pool keys on.
+        $r = $this->bookingService()->book($holder->fresh(), $event->id, $occ[0]['date']);
+        $this->assertTrue($r->ok, 'date-only booking failed: '.$r->status);
+        $this->assertSame(1, $event->fresh()->passReservedSeats($occ[0]['date']));
+    }
+
+    public function test_expiry_boundary_excludes_unredeemable_date(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        // Evening event; pass expires that morning => the date is not redeemable, so it
+        // must not be offered or bookable (book/redeem agree on the instant boundary).
+        $eveningUtc = Carbon::now()->addDays(5)->setTime(23, 0)->format('Y-m-d H:i:s');
+        $event = $this->createEvent($role, [
+            'creator_role_id' => $role->id, 'tickets_enabled' => true, 'starts_at' => $eveningUtc,
+        ]);
+        $date = Carbon::parse($eveningUtc)->format('Y-m-d');
+        $this->createTicket($event, ['type' => 'GA', 'quantity' => 10, 'price' => 10]);
+        $pass = $this->createTicket($event, [
+            'type' => 'Pass', 'quantity' => 100, 'price' => 50,
+            'is_pass' => true, 'pass_usage_type' => 'unlimited', 'pass_scope' => 'this_event',
+            'pass_allow_booking' => true,
+        ]);
+        $holder = $this->createSale($event, $role, ['email' => 'h@gmail.com'], $pass);
+        // Force expiry to that morning, before the 23:00 occurrence start.
+        $st = $holder->saleTickets->first(fn ($s) => $s->ticket && $s->ticket->is_pass);
+        $st->update(['pass_expires_at' => Carbon::parse($date.' 06:00:00')]);
+
+        $this->assertEmpty($this->bookingService()->bookableOccurrences($holder->fresh(), Carbon::now()));
+        $this->assertSame('expired', $this->bookingService()->book($holder->fresh(), $event->id, $date)->status);
+    }
 }

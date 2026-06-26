@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Sale;
+use App\Models\SaleTicket;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Validates and records redemption of a pass / subscription at a given event.
@@ -118,63 +120,76 @@ class PassRedemptionService
             return $data;
         }
 
-        // A committed visit is one pass_usages entry per event-day. It may already
-        // exist because the holder reserved this occurrence in advance (kind
-        // 'booking'); scanning in then upgrades that entry to a redemption rather
-        // than consuming a second use. An entry already redeemed today is a
-        // genuine repeat scan. Legacy entries (no kind) are treated as redemptions.
-        $existingIndex = collect($usages)->search(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id
-            && ($u['date'] ?? null) === $today);
+        // The pass_usages read-modify-write must be atomic against concurrent
+        // book()/cancel()/scan, which also mutate the array. Do it under a row lock
+        // and re-read the latest array (mirrors PassBookingService::book/cancel).
+        $data = DB::transaction(function () use ($passSaleTicket, $scanningEvent, $ticket, $today, $nowUtc, $tz, $data) {
+            $locked = SaleTicket::lockForUpdate()->find($passSaleTicket->id);
+            $usages = $locked->pass_usages ?? [];
 
-        if ($existingIndex !== false && ($usages[$existingIndex]['kind'] ?? 'redemption') === 'redemption') {
-            $data->pass_status = 'already_today';
-            $data->checked_in_at = Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
+            // A committed visit is one pass_usages entry per event-day. It may already
+            // exist because the holder reserved this occurrence in advance (kind
+            // 'booking'); scanning in then upgrades that entry to a redemption rather
+            // than consuming a second use. An entry already redeemed today is a
+            // genuine repeat scan. Legacy entries (no kind) are treated as redemptions.
+            $existingIndex = collect($usages)->search(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id
+                && ($u['date'] ?? null) === $today);
+
+            if ($existingIndex !== false && ($usages[$existingIndex]['kind'] ?? 'redemption') === 'redemption') {
+                $data->pass_status = 'already_today';
+                $data->checked_in_at = Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
+
+                return $data;
+            }
+
+            if ($existingIndex === false) {
+                // Brand new walk-up visit: enforce the visit limits, then record it.
+                if ($ticket->pass_usage_type === 'total'
+                    && $ticket->pass_max_uses
+                    && count($usages) >= $ticket->pass_max_uses) {
+                    $data->pass_status = 'limit_reached';
+
+                    return $data;
+                }
+
+                if ($ticket->pass_usage_type === 'per_event'
+                    && collect($usages)->contains(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id)) {
+                    $data->pass_status = 'limit_reached';
+
+                    return $data;
+                }
+
+                $usages[] = [
+                    'event_id' => (int) $scanningEvent->id,
+                    'date' => $today,
+                    'at' => $nowUtc->timestamp,
+                    'kind' => 'redemption',
+                ];
+            } else {
+                // Redeem the seat booked in advance for today (no new use consumed).
+                $usages[$existingIndex]['kind'] = 'redemption';
+                $usages[$existingIndex]['at'] = $nowUtc->timestamp;
+            }
+
+            $locked->pass_usages = $usages;
+            $locked->save();
+
+            $data->pass_status = 'valid';
+            $data->pass_usage_count = count($usages);
+            if ($ticket->pass_usage_type === 'total' && $ticket->pass_max_uses) {
+                $data->pass_remaining = max(0, $ticket->pass_max_uses - count($usages));
+            }
 
             return $data;
+        });
+
+        // Dispatch outside the transaction so the lock isn't held during delivery.
+        if ($data->pass_status === 'valid') {
+            WebhookService::dispatch('ticket.scanned', $sale, null, [
+                'scanned_event_id' => UrlUtils::encodeId($scanningEvent->id),
+                'scanned_event_date' => $today,
+            ]);
         }
-
-        if ($existingIndex === false) {
-            // Brand new walk-up visit: enforce the visit limits, then record it.
-            if ($ticket->pass_usage_type === 'total'
-                && $ticket->pass_max_uses
-                && count($usages) >= $ticket->pass_max_uses) {
-                $data->pass_status = 'limit_reached';
-
-                return $data;
-            }
-
-            if ($ticket->pass_usage_type === 'per_event'
-                && collect($usages)->contains(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id)) {
-                $data->pass_status = 'limit_reached';
-
-                return $data;
-            }
-
-            $usages[] = [
-                'event_id' => (int) $scanningEvent->id,
-                'date' => $today,
-                'at' => $nowUtc->timestamp,
-                'kind' => 'redemption',
-            ];
-        } else {
-            // Redeem the seat booked in advance for today (no new use consumed).
-            $usages[$existingIndex]['kind'] = 'redemption';
-            $usages[$existingIndex]['at'] = $nowUtc->timestamp;
-        }
-
-        $passSaleTicket->pass_usages = $usages;
-        $passSaleTicket->save();
-
-        $data->pass_status = 'valid';
-        $data->pass_usage_count = count($usages);
-        if ($ticket->pass_usage_type === 'total' && $ticket->pass_max_uses) {
-            $data->pass_remaining = max(0, $ticket->pass_max_uses - count($usages));
-        }
-
-        WebhookService::dispatch('ticket.scanned', $sale, null, [
-            'scanned_event_id' => UrlUtils::encodeId($scanningEvent->id),
-            'scanned_event_date' => $today,
-        ]);
 
         return $data;
     }
