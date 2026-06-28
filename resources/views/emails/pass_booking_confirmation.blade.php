@@ -35,6 +35,16 @@
             </a>
         </div>
 
+        @php $ticketNotes = $bookedEvent->parsedTicketNotesHtml($date, $role); @endphp
+        @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.important_information') }}</h3>
+            <div style="color: #333;">
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}
+            </div>
+        </div>
+        @endif
+
         <p style="font-size: 12px; color: #999; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
             {{ __('messages.event_support_contact') }}: <a href="mailto:{{ $bookedEvent->user->email }}" style="color: #4E81FA;">{{ $bookedEvent->user->email }}</a>
         </p>

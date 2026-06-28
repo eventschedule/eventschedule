@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
 use App\Services\TicketVolumeDiscount;
+use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
@@ -699,6 +700,52 @@ class Event extends Model
         return $this->roles->first(function ($role) {
             return $role->isTalent();
         });
+    }
+
+    /**
+     * Ticket notes rendered for display: the markdown HTML with template
+     * variables ({event_name}, {venue}, {date}, ...) substituted for the given
+     * occurrence date. Used in confirmation emails and on the guest ticket page.
+     * Returns null when there are no notes. The role is resolved robustly
+     * (NOT via role(), which is talent-only and can be null).
+     */
+    public function parsedTicketNotesHtml(?string $date = null, ?Role $role = null): ?string
+    {
+        if (empty($this->ticket_notes_html)) {
+            return null;
+        }
+
+        $role = $role ?? $this->getRoleWithEmailSettings() ?? $this->roles->first();
+        if (! $role) {
+            return $this->ticket_notes_html;
+        }
+
+        return EventTextGenerator::parseInlineVariables($this->ticket_notes_html, $this, $role, [
+            'date' => $date,
+            'escapeHtml' => true,
+        ]);
+    }
+
+    /**
+     * Plain-text counterpart of parsedTicketNotesHtml() for text emails.
+     */
+    public function parsedTicketNotesText(?string $date = null, ?Role $role = null): ?string
+    {
+        if (empty($this->ticket_notes_html)) {
+            return null;
+        }
+
+        $text = html_entity_decode(strip_tags($this->ticket_notes_html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        $role = $role ?? $this->getRoleWithEmailSettings() ?? $this->roles->first();
+        if (! $role) {
+            return $text;
+        }
+
+        return EventTextGenerator::parseInlineVariables($text, $this, $role, [
+            'date' => $date,
+            'escapeHtml' => false,
+        ]);
     }
 
     /**

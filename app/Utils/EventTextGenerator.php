@@ -65,12 +65,47 @@ class EventTextGenerator
      */
     public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [], $eventNumber = null, $forceEnglish = false)
     {
+        $replacements = self::buildReplacements($event, $role, $directRegistration, $urlSettings, $eventNumber, $forceEnglish);
+
+        $result = str_replace(array_keys($replacements), array_values($replacements), $template);
+
+        // Clean up orphaned | separators when venue or city (or other fields) are blank
+        $resultLines = explode("\n", $result);
+        $resultLines = array_map(function ($line) {
+            $line = preg_replace('/\s*\|\s*\|\s*/', ' | ', $line); // collapse "| |" into single "|"
+            $line = preg_replace('/^\s*\|\s*/', '', $line);        // trim leading "|"
+            $line = preg_replace('/\s*\|\s*$/', '', $line);        // trim trailing "|"
+
+            return $line;
+        }, $resultLines);
+        $result = implode("\n", $resultLines);
+
+        // Remove lines where all variables were blank (only separators/formatting remain)
+        $lines = explode("\n", $result);
+        $filteredLines = array_filter($lines, function ($line) {
+            // Remove formatting characters and whitespace to check if line has real content
+            $stripped = preg_replace('/[\s\*\|\:\-\,\.]+/', '', $line);
+
+            return $stripped !== '';
+        });
+
+        return implode("\n", $filteredLines);
+    }
+
+    /**
+     * Build the {token} => value replacement map shared by parseTemplate() and
+     * parseInlineVariables(). Pass $date to target a specific occurrence and
+     * $timezone to override the role timezone for date/time tokens.
+     */
+    private static function buildReplacements($event, $role, $directRegistration, $urlSettings = [], $eventNumber = null, $forceEnglish = false, $date = null, $timezone = null)
+    {
         // Set Carbon locale for translated date formats
         $locale = $forceEnglish ? 'en' : ($role->language_code ?? 'en');
         \Carbon\Carbon::setLocale($locale);
 
-        $startDate = $event->getStartDateTime(null, true, $role->timezone ?? 'UTC');
-        $endDate = $event->getEndDateTime(null, true, $role->timezone ?? 'UTC');
+        $tz = $timezone ?? $role->timezone ?? 'UTC';
+        $startDate = $event->getStartDateTime($date, true, $tz);
+        $endDate = $event->getEndDateTime($date, true, $tz);
 
         // Determine time format based on role's 24h setting
         $timeFormat = $role->use_24_hour_time ? 'H:i' : 'g:i A';
@@ -159,29 +194,43 @@ class EventTextGenerator
             }
         }
 
-        $result = str_replace(array_keys($replacements), array_values($replacements), $template);
+        return $replacements;
+    }
 
-        // Clean up orphaned | separators when venue or city (or other fields) are blank
-        $resultLines = explode("\n", $result);
-        $resultLines = array_map(function ($line) {
-            $line = preg_replace('/\s*\|\s*\|\s*/', ' | ', $line); // collapse "| |" into single "|"
-            $line = preg_replace('/^\s*\|\s*/', '', $line);        // trim leading "|"
-            $line = preg_replace('/\s*\|\s*$/', '', $line);        // trim trailing "|"
+    /**
+     * Substitute {tokens} in free-form text (e.g. event ticket notes) using the
+     * same variable vocabulary as parseTemplate(), but WITHOUT its line-level
+     * cleanup (which is tailored to the schedule-list format and would mangle
+     * prose paragraphs and blank lines). Unknown tokens are left untouched.
+     *
+     * Options: 'date' (occurrence date), 'forceEnglish', 'urlSettings', and
+     * 'escapeHtml' (HTML-escape each substituted value for safe HTML output).
+     */
+    public static function parseInlineVariables(string $template, $event, $role, array $opts = [])
+    {
+        if ($template === '' || strpos($template, '{') === false) {
+            return $template;
+        }
 
-            return $line;
-        }, $resultLines);
-        $result = implode("\n", $resultLines);
+        $replacements = self::buildReplacements(
+            $event,
+            $role,
+            false,
+            $opts['urlSettings'] ?? [],
+            null,
+            $opts['forceEnglish'] ?? false,
+            $opts['date'] ?? null,
+            $event->timezone ?? $role->timezone ?? null,
+        );
 
-        // Remove lines where all variables were blank (only separators/formatting remain)
-        $lines = explode("\n", $result);
-        $filteredLines = array_filter($lines, function ($line) {
-            // Remove formatting characters and whitespace to check if line has real content
-            $stripped = preg_replace('/[\s\*\|\:\-\,\.]+/', '', $line);
+        if (! empty($opts['escapeHtml'])) {
+            $replacements = array_map(
+                fn ($value) => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'),
+                $replacements
+            );
+        }
 
-            return $stripped !== '';
-        });
-
-        return implode("\n", $filteredLines);
+        return str_replace(array_keys($replacements), array_values($replacements), $template);
     }
 
     /**

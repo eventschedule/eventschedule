@@ -70,6 +70,8 @@ class PassBookingConfirmation extends Mailable
             with: [
                 'sale' => $this->sale,
                 'bookedEvent' => $this->bookedEvent,
+                'date' => $this->date,
+                'role' => $this->role,
                 'dateLabel' => $this->bookedEvent->localStartsAt(true, $this->date),
                 'manageUrl' => $manageUrl,
                 'qrCodeData' => $qrCodeData,

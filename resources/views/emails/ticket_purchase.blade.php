@@ -75,11 +75,12 @@
             </a>
         </div>
         
-        @if ($event->ticket_notes_html)
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <h4 style="margin-top: 0; color: #856404;">{{ __('messages.notes') }}:</h4>
-            <div style="color: #856404;">
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->ticket_notes_html) !!}
+        @php $ticketNotes = $event->parsedTicketNotesHtml($sale->event_date, $role); @endphp
+        @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.important_information') }}</h3>
+            <div style="color: #333;">
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}
             </div>
         </div>
         @endif

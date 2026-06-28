@@ -592,11 +592,12 @@
         {{-- Footer Section --}}
         <div class="glass rounded-b-[24px] p-[20px] sm:p-[24px] print:bg-slate-50">
           {{-- Notes --}}
-          @if ($event->ticket_notes_html)
+          @php $ticketNotes = $event->parsedTicketNotesHtml($sale->event_date); @endphp
+          @if ($ticketNotes && trim(strip_tags($ticketNotes)) !== '')
             <div class="mb-[16px] pb-[16px] border-b border-white/10 print:border-slate-200">
-              <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[8px]">{{ __('messages.notes') }}</h3>
+              <h3 class="text-[11px] uppercase tracking-wider text-violet-400 print:text-violet-600 font-semibold mb-[8px]">{{ __('messages.important_information') }}</h3>
               <div class="text-[12px] text-white/80 print-text-dark custom-content leading-relaxed">
-                {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->ticket_notes_html) !!}
+                {!! \App\Utils\UrlUtils::convertUrlsToLinks($ticketNotes) !!}
               </div>
             </div>
           @endif

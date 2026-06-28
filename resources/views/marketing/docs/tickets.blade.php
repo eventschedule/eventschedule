@@ -183,7 +183,7 @@
                                 <li>Save the event</li>
                             </ol>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. You can view all registrations in your sales list.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors will see a "Register" button on your event page. After registering, they receive a confirmation email with a QR code for check-in. Add <strong class="text-gray-900 dark:text-white">Registration notes</strong> (under Options) to include directions, parking, dress code, or other instructions in that email and on their ticket. You can view all registrations in your sales list.</p>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Attendees can cancel their own registration from the confirmation page linked in their email.</p>
 
@@ -301,7 +301,7 @@
                                 <li>Save the event</li>
                             </ol>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Visitors can "purchase" free tickets to RSVP. They'll receive a confirmation email with a QR code, and you'll have a list of who's coming. Add <strong class="text-gray-900 dark:text-white">Ticket notes</strong> (under Options) to include directions or other instructions in that email.</p>
 
                             <div class="doc-callout doc-callout-tip mb-6">
                                 <div class="doc-callout-title">Tip</div>
@@ -470,7 +470,7 @@
                                 <li><strong class="text-gray-900 dark:text-white">Configure sales dates:</strong> Enable per-ticket-type start and end dates to schedule when each ticket type becomes available or stops selling</li>
                                 <li><strong class="text-gray-900 dark:text-white">Show unavailable tickets:</strong> Display sold out and expired ticket types to visitors in a disabled state, so they can see what was offered</li>
                                 <li><strong class="text-gray-900 dark:text-white">Expire unpaid tickets:</strong> Automatically release unpaid tickets after a set number of hours, making them available for other buyers</li>
-                                <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that appear on the ticket (e.g., parking instructions, what to bring)</li>
+                                <li><strong class="text-gray-900 dark:text-white">Ticket notes:</strong> Add notes that are included in the confirmation email and shown on the attendee's ticket (e.g., directions, parking, dress code, or what to bring). Supports <a href="{{ route('marketing.docs.creating_schedules') }}#available-variables" class="text-cyan-400 hover:text-cyan-300">template variables</a> like {event_name} and {venue}, and is available for both ticketed and registration events.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Terms URL:</strong> Link to your terms and conditions. Buyers must agree before purchasing.</li>
                             </ul>
                         </section>

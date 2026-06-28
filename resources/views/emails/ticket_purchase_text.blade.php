@@ -32,9 +32,10 @@ $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket
 
 {{ __('messages.view_your_tickets') }}: {{ $ticketUrl }}
 
-@if ($event->ticket_notes_html)
-{{ __('messages.notes') }}:
-{{ strip_tags($event->ticket_notes_html) }}
+@php $ticketNotes = $event->parsedTicketNotesText($sale->event_date, $role); @endphp
+@if ($ticketNotes && trim($ticketNotes) !== '')
+{{ __('messages.important_information') }}:
+{{ $ticketNotes }}
 @endif
 
 {{ __('messages.event_support_contact') }}: {{ $event->user->email }}

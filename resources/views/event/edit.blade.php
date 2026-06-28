@@ -3631,15 +3631,18 @@
                                 </div>
                                 </div>
 
-                                <!-- Options Tab (continued) -->
-                                <div v-show="activeTicketTab === 'options' && event.tickets_enabled">
+                                <!-- Options Tab (continued) - shared by ticketed and registration (RSVP) events -->
+                                <div v-show="activeTicketTab === 'options' || event.rsvp_enabled">
                                 <div class="mb-6">
-                                    <x-input-label for="ticket_notes" :value="__('messages.ticket_notes')" />
+                                    <x-input-label for="ticket_notes" v-show="event.tickets_enabled" :value="__('messages.ticket_notes')" />
+                                    <x-input-label for="ticket_notes" v-show="!event.tickets_enabled" :value="__('messages.registration_notes')" />
                                     <textarea id="ticket_notes" name="ticket_notes" v-model="event.ticket_notes" rows="4" data-content-dir="{{ content_dir($role) }}"
                                         class="html-editor mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.ticket_notes_help') }}</p>
+                                    <x-link href="{{ marketing_url('/docs/creating-schedules#available-variables') }}" target="_blank" class="text-sm mt-1 inline-block">{{ __('messages.show_available_variables') }}</x-link>
                                 </div>
 
-                                <div class="mb-6">
+                                <div class="mb-6" v-show="event.tickets_enabled">
                                     <x-input-label for="terms_url" :value="__('messages.terms_url')" />
                                     <x-text-input id="terms_url" name="terms_url" type="url" class="mt-1 block w-full"
                                         :value="old('terms_url', $event->terms_url)"

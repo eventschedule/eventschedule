@@ -9,3 +9,9 @@
 {{ __('messages.attendee') }}: {{ $sale->name }}
 
 {{ __('messages.manage_my_pass') }}: {{ $manageUrl }}
+@php $ticketNotes = $bookedEvent->parsedTicketNotesText($date, $role); @endphp
+@if ($ticketNotes && trim($ticketNotes) !== '')
+
+{{ __('messages.important_information') }}:
+{{ $ticketNotes }}
+@endif
