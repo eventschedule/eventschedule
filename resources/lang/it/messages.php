@@ -3315,6 +3315,7 @@ return [
     'your_page_name_help' => 'Questa è la pagina pubblica in cui sono ospitati i tuoi eventi. :name metterà in evidenza il tuo evento.',
     'checking' => 'Verifica in corso...',
     'email_already_registered_login' => 'Hai già un account: inserisci la tua password per inviare.',
+    'account_creation_disabled' => 'La creazione di account è disabilitata su questo server. Accedi per continuare.',
     'forgot_your_password' => 'Hai dimenticato la password?',
     'use_another_email' => 'Usa un\'email diversa',
     'email_me_a_code' => 'Inviami un codice via email',

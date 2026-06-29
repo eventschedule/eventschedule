@@ -561,6 +561,8 @@
                 }
             }
 
+            if (window.vueApp) { window.vueApp.currentDuration = hiddenDuration.value; }
+
             updateScheduleTimePreview(hiddenStartsAt.value, multiDayToggle);
         }
 
@@ -4771,6 +4773,7 @@
         <input type="hidden" name="duration">
         <input type="hidden" name="event_url">
         <input type="hidden" name="venue_name">
+        <input type="hidden" name="venue_id">
     </form>
     @can('delete', $event)
     <form id="event-cancel-form" method="POST" action="{{ route('event.cancel', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="hidden">
@@ -4883,6 +4886,7 @@
         isOnline: false,
         eventName: @json($event->name ?? ''),
         startsAt: @json($oldStartsAt ?? ''),
+        currentDuration: @json((string) ($oldDuration ?? '')),
         @php
         // Encoded coverage (group / event ids) per existing ticket, so the
         // subscription selectors round-trip encoded ids (decoded in EventRepo).
@@ -4997,6 +5001,7 @@
         isSubmittingCancel: false,
         isSubmittingRestore: false,
         origStartsAt: null,
+        origDuration: null,
         origVenueId: null,
         origEventUrl: '',
         origIsOnline: false,
@@ -5968,6 +5973,11 @@
         if (!this.isRecurring && this.startsAt !== this.origStartsAt) {
           return true;
         }
+        // Duration (end time / multi-day end date) is a date change too; compare numerically so
+        // "2.00" vs "2" formatting differences don't register as a change.
+        if (!this.isRecurring && parseFloat(this.currentDuration || 0) !== parseFloat(this.origDuration || 0)) {
+          return true;
+        }
         const venueId = this.selectedVenue ? this.selectedVenue.id : null;
         if (this.isInPerson && venueId !== this.origVenueId) {
           return true;
@@ -6045,9 +6055,10 @@
         set('name', this.event.name || '');
         set('event_date', document.getElementById('event_date') ? document.getElementById('event_date').value : '');
         set('start_time', document.getElementById('start_time') ? document.getElementById('start_time').value : '');
-        set('duration', this.event.duration || '');
+        set('duration', document.getElementById('duration') ? document.getElementById('duration').value : (this.event.duration || ''));
         set('event_url', this.isOnline ? (this.event.event_url || '') : '');
         set('venue_name', (this.isInPerson && this.selectedVenue) ? (this.selectedVenue.name || '') : '');
+        set('venue_id', (this.isInPerson && this.selectedVenue) ? (this.selectedVenue.id || '') : '');
         form.submit();
       },
       notifyBody() {
@@ -6058,7 +6069,7 @@
       },
       changeSummary() {
         const out = [];
-        if (!this.isRecurring && this.startsAt !== this.origStartsAt) {
+        if (!this.isRecurring && (this.startsAt !== this.origStartsAt || parseFloat(this.currentDuration || 0) !== parseFloat(this.origDuration || 0))) {
           out.push(@json(__('messages.event_changed_date_label')));
         }
         const venueId = this.selectedVenue ? this.selectedVenue.id : null;
@@ -7113,6 +7124,7 @@
       // after init watchers settle; mirrors the server's comparison (venue by id, url normalized).
       this.$nextTick(() => {
         this.origStartsAt = this.startsAt;
+        this.origDuration = this.currentDuration;
         this.origVenueId = this.selectedVenue ? this.selectedVenue.id : null;
         this.origEventUrl = this.normalizeUrl(this.event.event_url);
         this.origIsOnline = this.isOnline;

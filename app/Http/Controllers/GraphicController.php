@@ -308,6 +308,7 @@ class GraphicController extends Controller
                 ->upcomingOrOngoing()
                 ->where('is_private', false)
                 ->where('is_draft', false)
+                ->where('is_cancelled', false)
                 ->whereNull('event_password')
                 ->when($request->boolean('exclude_recurring', false), function ($query) {
                     $query->whereNull('days_of_week');
@@ -454,6 +455,7 @@ class GraphicController extends Controller
             ->upcomingOrOngoing()
             ->where('is_private', false)
             ->where('is_draft', false)
+            ->where('is_cancelled', false)
             ->whereNull('event_password')
             ->when($excludeRecurring, fn ($q) => $q->whereNull('days_of_week'));
 
@@ -558,6 +560,7 @@ class GraphicController extends Controller
             ->where('flyer_image_url', '!=', '')
             ->where('is_private', false)
             ->where('is_draft', false)
+            ->where('is_cancelled', false)
             ->whereNull('event_password');
 
         // Only exclude recurring events if setting is true
@@ -577,6 +580,7 @@ class GraphicController extends Controller
                 ->upcomingOrOngoing()
                 ->where('is_private', false)
                 ->where('is_draft', false)
+                ->where('is_cancelled', false)
                 ->whereNull('event_password')
                 ->exists();
 

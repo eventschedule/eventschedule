@@ -3335,6 +3335,7 @@ return [
     'your_page_name_help' => 'See on avalik leht, kus sinu sündmused asuvad. :name tutvustab sinu sündmust.',
     'checking' => 'Kontrollin...',
     'email_already_registered_login' => 'Sul on juba konto - esitamiseks sisesta oma parool.',
+    'account_creation_disabled' => 'Kontode loomine on selles serveris keelatud. Jätkamiseks logi sisse.',
     'forgot_your_password' => 'Unustasid parooli?',
     'use_another_email' => 'Kasuta teist meiliaadressi',
     'email_me_a_code' => 'Saada mulle kood meiliga',

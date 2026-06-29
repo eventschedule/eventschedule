@@ -3315,6 +3315,7 @@ return [
     'your_page_name_help' => 'Dit is de openbare pagina waar je evenementen staan. :name zal je evenement uitlichten.',
     'checking' => 'Bezig met controleren...',
     'email_already_registered_login' => 'Je hebt al een account - voer je wachtwoord in om in te dienen.',
+    'account_creation_disabled' => 'Account aanmaken is uitgeschakeld op deze server. Log in om door te gaan.',
     'forgot_your_password' => 'Wachtwoord vergeten?',
     'use_another_email' => 'Een ander e-mailadres gebruiken',
     'email_me_a_code' => 'Mail me een code',

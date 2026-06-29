@@ -3355,6 +3355,7 @@ return [
     'your_page_name_help' => 'Aceasta este pagina publică unde sunt găzduite evenimentele tale. :name îți va promova evenimentul.',
     'checking' => 'Se verifică...',
     'email_already_registered_login' => 'Ai deja un cont - introdu parola pentru a trimite.',
+    'account_creation_disabled' => 'Crearea conturilor este dezactivată pe acest server. Conectează-te pentru a continua.',
     'forgot_your_password' => 'Ai uitat parola?',
     'use_another_email' => 'Folosește o altă adresă de email',
     'email_me_a_code' => 'Trimite-mi un cod pe email',

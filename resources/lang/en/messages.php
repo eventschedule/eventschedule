@@ -3417,6 +3417,7 @@ return [
     'your_page_name_help' => 'This is the public page where your events live. :name will feature your event.',
     'checking' => 'Checking...',
     'email_already_registered_login' => 'You already have an account - enter your password to submit.',
+    'account_creation_disabled' => 'Account creation is disabled on this server. Please log in to continue.',
     'forgot_your_password' => 'Forgot your password?',
     'use_another_email' => 'Use a different email',
     'email_me_a_code' => 'Email me a code',

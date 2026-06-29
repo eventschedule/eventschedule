@@ -33,6 +33,7 @@ class Webhook extends Model
         'event.created',
         'event.updated',
         'event.deleted',
+        'event.cancelled',
         'ticket.scanned',
         'ticket.booked',
         'ticket.booking_cancelled',

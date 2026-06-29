@@ -271,6 +271,12 @@ class PassBookingService
         }
 
         return DB::transaction(function () use ($event, $saleTicket, $passTicket, $eventId, $date, $now, $result) {
+            // Lock the event row first so concurrent bookings/checkouts serialize on this
+            // occurrence even when the event has no ticket rows of its own - a FOR UPDATE on
+            // tickets() locks nothing for a zero-row result, which would let the per-occurrence
+            // pass cap be exceeded under concurrency.
+            Event::whereKey($event->id)->lockForUpdate()->first();
+
             // Acquire the occurrence's seat lock (serializes vs checkout + other
             // bookings) and read seat counts from the locked rows, not a later
             // snapshot read.

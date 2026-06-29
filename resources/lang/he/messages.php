@@ -3336,6 +3336,7 @@ return [
     'your_page_name_help' => 'זהו העמוד הציבורי שבו האירועים שלך מופיעים. :name יציג את האירוע שלך.',
     'checking' => 'בודק...',
     'email_already_registered_login' => 'כבר יש לך חשבון - הזן את הסיסמה שלך כדי לשלוח.',
+    'account_creation_disabled' => 'יצירת חשבון מושבתת בשרת זה. יש להתחבר כדי להמשיך.',
     'forgot_your_password' => 'שכחת את הסיסמה?',
     'use_another_email' => 'השתמש בכתובת אימייל אחרת',
     'email_me_a_code' => 'שלחו לי קוד באימייל',

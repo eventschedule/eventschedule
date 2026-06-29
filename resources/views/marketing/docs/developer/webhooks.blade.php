@@ -128,6 +128,7 @@
                                         <tr><td class="font-mono text-sm">event.created</td><td>A new event is created</td></tr>
                                         <tr><td class="font-mono text-sm">event.updated</td><td>An event is updated</td></tr>
                                         <tr><td class="font-mono text-sm">event.deleted</td><td>An event is deleted</td></tr>
+                                        <tr><td class="font-mono text-sm">event.cancelled</td><td>An event is cancelled</td></tr>
                                         <tr><td class="font-mono text-sm">ticket.scanned</td><td>A ticket QR code is scanned at check-in</td></tr>
                                         <tr><td class="font-mono text-sm">feedback.submitted</td><td>An attendee submits feedback for an event</td></tr>
                                     </tbody>

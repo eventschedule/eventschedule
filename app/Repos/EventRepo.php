@@ -987,11 +987,14 @@ class EventRepo
         $wasDraftBeforeSave = $event->isDirty('is_draft') && $event->getOriginal('is_draft');
         $wasJustUnpublished = $event->isDirty('is_draft') && $event->getOriginal('is_draft') === false && $event->is_draft;
 
-        // Snapshot OLD values for attendee change notifications (issue #94). Only when an existing,
-        // non-cancelled event is updated with the notify flag set (the edit-form confirm dialog). The
-        // venue is read here, before roles()->sync() runs below, so $event->venue is still the OLD venue.
+        // Snapshot OLD values for attendee change notifications + the iCal sequence bump (issue #94).
+        // Captured for any existing, non-cancelled event update so a material change still advances the
+        // iCal SEQUENCE even when the organizer chooses not to notify; the notification itself is
+        // dispatched below only when notify_attendees was set. The venue is read here, before
+        // roles()->sync() runs below, so $event->venue is still the OLD venue.
+        $notifyRequested = $request->boolean('notify_attendees');
         $notifyOld = null;
-        if (! $isNewEvent && ! $event->is_cancelled && $request->boolean('notify_attendees')) {
+        if (! $isNewEvent && ! $event->is_cancelled) {
             $oldVenue = $event->venue;
             $notifyOld = [
                 'starts_at' => $event->getOriginal('starts_at'),
@@ -1808,7 +1811,7 @@ class EventRepo
                     && $event->starts_at
                     && Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->isPast();
 
-                if (! $isPast && EventChangeNotifier::hasRecipients($event)) {
+                if ($notifyRequested && ! $isPast && EventChangeNotifier::hasRecipients($event)) {
                     $note = $request->input('notify_message');
                     NotifyEventChange::dispatch($event->id, $changes, $note ? Str::limit($note, 280, '') : null);
                     $this->lastNotifiedCount = EventChangeNotifier::recipientCount($event);

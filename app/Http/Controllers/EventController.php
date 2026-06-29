@@ -46,6 +46,7 @@ use App\Utils\ImageUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Lockout;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +54,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -205,6 +207,8 @@ class EventController extends Controller
         $event->forceFill([
             'is_cancelled' => true,
             'cancelled_at' => now(),
+            // Bump the iCal sequence so subscribed calendars pick up the cancellation (STATUS:CANCELLED).
+            'ical_sequence' => (int) $event->ical_sequence + 1,
         ])->save();
 
         // Remove the event from organizers' / members' synced calendars
@@ -250,6 +254,8 @@ class EventController extends Controller
         $event->forceFill([
             'is_cancelled' => false,
             'cancelled_at' => null,
+            // Bump the iCal sequence so subscribed calendars pick up the restored event.
+            'ical_sequence' => (int) $event->ical_sequence + 1,
         ])->save();
 
         if (! $event->is_draft) {
@@ -335,7 +341,7 @@ class EventController extends Controller
             abort(403);
         }
 
-        $request->validate(['notify_message' => 'nullable|string|max:280']);
+        $request->validate(['notify_message' => 'nullable|string|max:280', 'venue_id' => 'nullable|string']);
 
         $role = $event->getRoleWithEmailSettings();
         $note = $request->input('notify_message');
@@ -362,6 +368,17 @@ class EventController extends Controller
         }
 
         $oldVenueName = optional($event->venue)->getDisplayName();
+
+        // The preview form submits the encoded venue id (like the main form) so a venue change or an
+        // in-person <-> online switch is reflected in the preview. A submitted venue_name with no id
+        // means a brand-new, unsaved venue, so use a non-numeric 'new:' proxy that still differs from
+        // the old id (detectMaterialChanges treats venue_id as a truthy boolean and a !== operand).
+        $newInPerson = $request->filled('venue_name');
+        $newVenueName = $newInPerson ? $request->input('venue_name') : null;
+        $newVenueId = $newInPerson
+            ? ($request->filled('venue_id') ? UrlUtils::decodeId($request->input('venue_id')) : 'new:'.$newVenueName)
+            : null;
+
         $changes = EventRepo::detectMaterialChanges([
             'starts_at' => $event->starts_at,
             'duration' => $event->duration,
@@ -375,8 +392,8 @@ class EventController extends Controller
             'duration' => $new->duration,
             'days_of_week' => $new->days_of_week,
             'event_url' => $new->event_url,
-            'venue_id' => optional($event->venue)->id,
-            'venue_name' => $request->filled('venue_name') ? $request->input('venue_name') : $oldVenueName,
+            'venue_id' => $newVenueId,
+            'venue_name' => $newVenueName,
         ]);
 
         $eventUrl = $event->getGuestUrl(false, null, true);
@@ -2045,16 +2062,39 @@ class EventController extends Controller
                     'account_password' => ['required', 'string'],
                 ]);
 
+                // Mirror the canonical login form's protections: a shared per-email|ip lockout (same
+                // throttle key as LoginRequest, so guesses here and on /login draw from one 5-try
+                // budget) plus failed-login audit logging. The route's per-IP throttle alone never
+                // locks the targeted account.
+                $email = strtolower((string) $request->input('account_email'));
+                $throttleKey = Str::transliterate(Str::lower((string) $request->input('account_email')).'|'.$request->ip());
+
+                if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+                    event(new Lockout($request));
+                    $seconds = RateLimiter::availableIn($throttleKey);
+                    throw ValidationException::withMessages([
+                        'account_password' => [trans('auth.throttle', [
+                            'seconds' => $seconds,
+                            'minutes' => ceil($seconds / 60),
+                        ])],
+                    ]);
+                }
+
                 if (! Auth::attempt([
-                    'email' => strtolower((string) $request->input('account_email')),
+                    'email' => $email,
                     'password' => (string) $request->input('account_password'),
                 ])) {
+                    RateLimiter::hit($throttleKey);
+                    AuditService::log(AuditService::AUTH_LOGIN_FAILED, null, null, null, null, null, $email);
                     throw ValidationException::withMessages([
                         'account_password' => [__('messages.incorrect_password')],
                     ]);
                 }
 
+                RateLimiter::clear($throttleKey);
+
                 $user = auth()->user();
+                AuditService::log(AuditService::AUTH_LOGIN, $user->id);
             } else {
                 $user = $this->createAccountWithCode($request, $role);
             }
@@ -2139,6 +2179,16 @@ class EventController extends Controller
     {
         // Turnstile is enforced earlier, at the code-send step (sendVerificationCode), so it is
         // not re-checked here (the emailed code is the proof, and the token is single-use).
+
+        // Selfhost does not allow public self-registration after the first user (mirrors
+        // RegisteredUserController::store). Block account creation/claim here too so this guest
+        // flow can't be used to mint accounts or take over an invited stub without verification.
+        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
+            throw ValidationException::withMessages([
+                'account_email' => [__('messages.account_creation_disabled')],
+            ]);
+        }
+
         $email = strtolower((string) $request->input('account_email'));
         $existingUser = User::where('email', $email)->first();
         $isStub = $existingUser ? $existingUser->isStub() : false;
@@ -2298,6 +2348,14 @@ class EventController extends Controller
         $password = $request->input('account_password', $request->input('password'));
 
         $request->merge(['account_name' => $name, 'account_email' => $email, 'account_password' => $password]);
+
+        // Selfhost does not allow public self-registration after the first user (mirrors
+        // RegisteredUserController::store). Block this optional-account path too.
+        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
+            throw ValidationException::withMessages([
+                'account_email' => [__('messages.account_creation_disabled')],
+            ]);
+        }
 
         $request->validate([
             'account_name' => ['required', 'string', 'max:255'],

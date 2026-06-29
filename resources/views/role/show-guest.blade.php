@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role" :fonts="$fonts">
+<x-app-guest-layout :role="$role" :fonts="$fonts" :has-inline-lang-toggle="$role->headerStyle() !== 'banner'">
 
   @php
    $isRtl = is_rtl();

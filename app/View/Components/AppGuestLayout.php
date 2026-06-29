@@ -19,6 +19,7 @@ class AppGuestLayout extends Component
         public ?Role $otherRole = null,
         public bool $galleryMode = false,
         public bool $noIndex = false,
+        public bool $hasInlineLangToggle = false,
     ) {}
 
     /**

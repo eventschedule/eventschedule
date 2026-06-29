@@ -59,6 +59,7 @@ trait ConvertsLocationToVenue
             $venue = null;
             if ($names && $role->user) {
                 $venue = $role->user->roles()
+                    ->wherePivotIn('level', ['owner', 'follower'])
                     ->where('roles.type', 'venue')
                     ->where(function ($q) use ($names, $normFull) {
                         $q->whereIn('roles.name_normalized', $names);

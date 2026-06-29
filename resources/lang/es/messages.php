@@ -3315,6 +3315,7 @@ return [
     'your_page_name_help' => 'Esta es la página pública donde estarán tus eventos. :name destacará tu evento.',
     'checking' => 'Comprobando...',
     'email_already_registered_login' => 'Ya tienes una cuenta: introduce tu contraseña para enviar.',
+    'account_creation_disabled' => 'La creación de cuentas está deshabilitada en este servidor. Inicia sesión para continuar.',
     'forgot_your_password' => '¿Olvidaste tu contraseña?',
     'use_another_email' => 'Usar un correo electrónico diferente',
     'email_me_a_code' => 'Envíame un código por correo',

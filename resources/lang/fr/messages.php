@@ -3320,6 +3320,7 @@ return [
     'your_page_name_help' => 'Il s\'agit de la page publique où vos événements sont hébergés. :name mettra votre événement en avant.',
     'checking' => 'Vérification...',
     'email_already_registered_login' => 'Vous avez déjà un compte - saisissez votre mot de passe pour soumettre.',
+    'account_creation_disabled' => 'La création de compte est désactivée sur ce serveur. Veuillez vous connecter pour continuer.',
     'forgot_your_password' => 'Mot de passe oublié ?',
     'use_another_email' => 'Utiliser une autre adresse e-mail',
     'email_me_a_code' => 'Envoyez-moi un code par e-mail',

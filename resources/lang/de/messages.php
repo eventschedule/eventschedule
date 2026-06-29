@@ -3319,6 +3319,7 @@ return [
     'your_page_name_help' => 'Dies ist die öffentliche Seite, auf der deine Veranstaltungen erscheinen. :name wird deine Veranstaltung präsentieren.',
     'checking' => 'Wird geprüft...',
     'email_already_registered_login' => 'Du hast bereits ein Konto - gib dein Passwort ein, um einzureichen.',
+    'account_creation_disabled' => 'Die Kontoerstellung ist auf diesem Server deaktiviert. Bitte melde dich an, um fortzufahren.',
     'forgot_your_password' => 'Passwort vergessen?',
     'use_another_email' => 'Eine andere E-Mail-Adresse verwenden',
     'email_me_a_code' => 'Code per E-Mail senden',
