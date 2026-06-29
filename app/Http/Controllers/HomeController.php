@@ -467,7 +467,7 @@ class HomeController extends Controller
 
                 $events = Event::select([
                     'id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id',
-                    'is_private', 'is_draft', 'event_password', 'updated_at',
+                    'is_private', 'is_draft', 'is_cancelled', 'event_password', 'updated_at',
                 ])
                     ->with([
                         'roles:id,subdomain,type,email_verified_at,phone_verified_at,user_id,custom_domain,custom_domain_mode,custom_domain_status',
@@ -476,6 +476,7 @@ class HomeController extends Controller
                     ->whereNotNull('starts_at')
                     ->where('is_private', false)
                     ->where('is_draft', false)
+                    ->where('is_cancelled', false)
                     ->whereNull('event_password')
                     ->whereHas('roles', fn ($q) => $q->where('is_accepted', true))
                     ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')

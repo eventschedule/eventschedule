@@ -222,6 +222,11 @@ class BackupService
         $eventData['days_of_week'] = $event->days_of_week;
         $eventData['recurring_include_dates'] = $event->recurring_include_dates;
         $eventData['recurring_exclude_dates'] = $event->recurring_exclude_dates;
+        // Cancellation state is not fillable (set only via cancel()/restore()), so export it
+        // explicitly or a restored cancelled event would come back active and resell tickets.
+        $eventData['is_cancelled'] = (bool) $event->is_cancelled;
+        $eventData['cancelled_at'] = optional($event->cancelled_at)->toDateTimeString();
+        $eventData['ical_sequence'] = (int) $event->ical_sequence;
 
         if ($includeImages) {
             $this->collectEventImages($event, $eventData, $imageFiles);
@@ -1192,6 +1197,11 @@ class BackupService
         if (! empty($data['recurring_exclude_dates'])) {
             $event->recurring_exclude_dates = $data['recurring_exclude_dates'];
         }
+
+        // Cancellation state (not fillable; mirrors the export side so a cancelled event stays cancelled)
+        $event->is_cancelled = (bool) ($data['is_cancelled'] ?? false);
+        $event->cancelled_at = $data['cancelled_at'] ?? null;
+        $event->ical_sequence = (int) ($data['ical_sequence'] ?? 0);
 
         // Regenerate HTML fields
         $event->description_html = MarkdownUtils::convertToHtml($event->description);

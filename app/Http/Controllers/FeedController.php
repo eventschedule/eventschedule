@@ -34,6 +34,7 @@ class FeedController extends Controller
             })
             ->where('is_private', false)
             ->where('is_draft', false)
+            ->where('is_cancelled', false)
             ->whereNull('event_password')
             ->with(['roles', 'venue'])
             ->orderBy('starts_at')
@@ -103,6 +104,7 @@ class FeedController extends Controller
             })
             ->where('is_private', false)
             ->where('is_draft', false)
+            ->where('is_cancelled', false)
             ->whereNull('event_password')
             ->with(['roles', 'venue'])
             ->orderBy('starts_at')
@@ -164,6 +166,7 @@ class FeedController extends Controller
 
         $vevent = "BEGIN:VEVENT\r\n";
         $vevent .= 'UID:'.$uid."\r\n";
+        $vevent .= 'SEQUENCE:'.((int) $event->ical_sequence)."\r\n";
         $vevent .= 'DTSTART:'.$startDate."\r\n";
         $vevent .= 'DTEND:'.$endDate."\r\n";
         $vevent .= 'SUMMARY:'.$this->escapeIcalText($title)."\r\n";

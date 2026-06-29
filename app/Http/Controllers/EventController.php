@@ -11,8 +11,10 @@ use App\Http\Requests\EventPollStoreRequest;
 use App\Http\Requests\EventPollVoteRequest;
 use App\Http\Requests\EventUpdateRequest;
 use App\Http\Requests\EventVideoSubmitRequest;
+use App\Jobs\NotifyEventCancelled;
 use App\Jobs\SendQueuedEmail;
 use App\Mail\EventAccepted;
+use App\Mail\EventChanged;
 use App\Mail\EventDeclined;
 use App\Models\BoostCampaign;
 use App\Models\Event;
@@ -33,6 +35,7 @@ use App\Rules\NoFakeEmail;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
+use App\Services\EventChangeNotifier;
 use App\Services\MetaAdsService;
 use App\Services\OneSignalService;
 use App\Services\UsageTrackingService;
@@ -143,6 +146,126 @@ class EventController extends Controller
         AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
 
         // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
+        $this->cancelActiveBoosts($event);
+
+        // Capture webhook payload before deletion
+        if (! $event->is_draft) {
+            $webhookPayload = [
+                'event' => 'event.deleted',
+                'timestamp' => now()->toIso8601String(),
+                'data' => $event->toApiData(),
+            ];
+            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+        }
+
+        $event->delete();
+
+        /*
+        $role = $event->role;
+        $venue = $event->venue;
+
+        $roleEmails = $role->members()->pluck('email')->toArray();
+        $venueEmails = $venue->members()->pluck('email')->toArray();
+        $emails = array_unique(array_merge($roleEmails, $venueEmails));
+
+        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event, $user));
+        */
+
+        $data = [
+            'subdomain' => $subdomain,
+            'tab' => 'schedule',
+        ];
+
+        return redirect(route('role.view_admin', $data))
+            ->with('message', __('messages.event_deleted'));
+    }
+
+    /**
+     * Soft-cancel an event: retain the row (and its sales / refund trail), mark it cancelled, stop
+     * advertising it, remove it from synced calendars, and optionally notify registered attendees.
+     */
+    public function cancel(Request $request, $subdomain, $hash)
+    {
+        $user = $request->user();
+        $event = Event::findOrFail(UrlUtils::decodeId($hash));
+
+        if ($user->cannot('delete', $event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if ($event->is_cancelled) {
+            return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
+        }
+
+        AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
+
+        // Cancel active boost campaigns (don't keep advertising a cancelled event)
+        $this->cancelActiveBoosts($event);
+
+        $event->forceFill([
+            'is_cancelled' => true,
+            'cancelled_at' => now(),
+        ])->save();
+
+        // Remove the event from organizers' / members' synced calendars
+        $event->dispatchCalendarSync('delete');
+
+        if (! $event->is_draft) {
+            WebhookService::dispatch('event.cancelled', $event);
+        }
+
+        // Notify registered attendees (email + push), gated on the schedule having email settings
+        if ($request->boolean('notify_attendees')
+            && ! $event->is_draft
+            && optional($event->getRoleWithEmailSettings())->hasEmailSettings()
+            && EventChangeNotifier::hasRecipients($event)) {
+            $note = $request->input('notify_message');
+            NotifyEventCancelled::dispatch($event->id, $note ? Str::limit($note, 280, '') : null);
+            $event->forceFill(['attendees_notified_at' => now()])->saveQuietly();
+        }
+
+        return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
+    }
+
+    /**
+     * Restore a previously cancelled event: clear the cancelled state, re-open sales, and re-add it to
+     * synced calendars. Does not re-email attendees (avoids a second surprise blast).
+     */
+    public function restore(Request $request, $subdomain, $hash)
+    {
+        $user = $request->user();
+        $event = Event::findOrFail(UrlUtils::decodeId($hash));
+
+        // Restore reverses a cancellation, so it requires the same authority as cancelling (delete).
+        if ($user->cannot('delete', $event)) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        if (! $event->is_cancelled) {
+            return redirect()->back();
+        }
+
+        AuditService::log(AuditService::EVENT_RESTORE, $user->id, 'Event', $event->id, null, null, $event->name);
+
+        $event->forceFill([
+            'is_cancelled' => false,
+            'cancelled_at' => null,
+        ])->save();
+
+        if (! $event->is_draft) {
+            $event->dispatchCalendarSync('create');
+            WebhookService::dispatch('event.updated', $event);
+        }
+
+        return redirect()->back()->with('message', __('messages.event_restored'));
+    }
+
+    /**
+     * Cancel and refund any active boost campaigns for an event. Shared by delete() and cancel() so a
+     * cancelled or deleted event never keeps running paid ads.
+     */
+    private function cancelActiveBoosts(Event $event): void
+    {
         $activeCampaigns = BoostCampaign::where('event_id', $event->id)
             ->whereIn('status', ['active', 'paused', 'pending_payment'])
             ->get();
@@ -184,44 +307,84 @@ class EventController extends Controller
                     }
                 }
             } catch (\Exception $e) {
-                \Log::warning('Failed to cancel boost campaign during event deletion', [
+                \Log::warning('Failed to cancel boost campaign', [
                     'campaign_id' => $campaign->id,
                     'event_id' => $event->id,
                     'error' => $e->getMessage(),
                 ]);
             }
         }
+    }
 
-        // Capture webhook payload before deletion
-        if (! $event->is_draft) {
-            $webhookPayload = [
-                'event' => 'event.deleted',
-                'timestamp' => now()->toIso8601String(),
-                'data' => $event->toApiData(),
-            ];
-            WebhookService::dispatch('event.deleted', $event, $webhookPayload);
+    /**
+     * Render the attendee change-notification email for the current (unsaved) form values so the
+     * organizer can preview what attendees will receive before sending. Editor-only; the note is
+     * length-capped and HTML-escaped in the email template.
+     */
+    public function notifyPreview(Request $request, $subdomain, $hash)
+    {
+        $user = $request->user();
+        $event = Event::with(['roles'])->findOrFail(UrlUtils::decodeId($hash));
+
+        if ($user->cannot('update', $event)) {
+            abort(403);
         }
 
-        $event->delete();
+        // A cancelled event never sends change notifications, so there is nothing to preview.
+        if ($event->is_cancelled) {
+            abort(403);
+        }
 
-        /*
-        $role = $event->role;
-        $venue = $event->venue;
+        $request->validate(['notify_message' => 'nullable|string|max:280']);
 
-        $roleEmails = $role->members()->pluck('email')->toArray();
-        $venueEmails = $venue->members()->pluck('email')->toArray();
-        $emails = array_unique(array_merge($roleEmails, $venueEmails));
+        $role = $event->getRoleWithEmailSettings();
+        $note = $request->input('notify_message');
+        $tz = $role && $role->timezone ? $role->timezone : $event->getEffectiveTimezone();
 
-        Notification::route('mail', $emails)->notify(new DeletedEventNotification($event, $user));
-        */
+        // Build an unsaved "new" event from the submitted form values for a representative preview.
+        $new = clone $event;
+        if ($request->filled('name')) {
+            $new->name = $request->input('name');
+        }
+        if ($request->filled('event_date') && $request->filled('start_time')) {
+            try {
+                $new->starts_at = Carbon::parse($request->input('event_date').' '.$request->input('start_time'), $tz)
+                    ->utc()->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // Leave the original start time if the submitted values can't be parsed.
+            }
+        }
+        if ($request->filled('duration')) {
+            $new->duration = (float) $request->input('duration');
+        }
+        if ($request->has('event_url')) {
+            $new->event_url = $request->input('event_url');
+        }
 
-        $data = [
-            'subdomain' => $subdomain,
-            'tab' => 'schedule',
-        ];
+        $oldVenueName = optional($event->venue)->getDisplayName();
+        $changes = EventRepo::detectMaterialChanges([
+            'starts_at' => $event->starts_at,
+            'duration' => $event->duration,
+            'timezone' => $event->timezone,
+            'days_of_week' => $event->days_of_week,
+            'event_url' => $event->event_url,
+            'venue_id' => optional($event->venue)->id,
+            'venue_name' => $oldVenueName,
+        ], [
+            'starts_at' => $new->starts_at,
+            'duration' => $new->duration,
+            'days_of_week' => $new->days_of_week,
+            'event_url' => $new->event_url,
+            'venue_id' => optional($event->venue)->id,
+            'venue_name' => $request->filled('venue_name') ? $request->input('venue_name') : $oldVenueName,
+        ]);
 
-        return redirect(route('role.view_admin', $data))
-            ->with('message', __('messages.event_deleted'));
+        $eventUrl = $event->getGuestUrl(false, null, true);
+        $icalUrl = $event->getAppleCalendarUrl();
+
+        $mailable = new EventChanged($new, $role, $changes, $eventUrl, $note, $icalUrl, $user->name);
+
+        return response($mailable->render());
     }
 
     public function create(Request $request, $subdomain)
@@ -595,6 +758,11 @@ class EventController extends Controller
             'pendingPhotos' => $pendingPhotos,
             'approvedPhotos' => $approvedPhotos,
             'polls' => $polls,
+            // Attendee change-notification UX (issue #94): the confirm dialog only appears when the
+            // event has registrants and the schedule can actually send email.
+            'registrantCount' => EventChangeNotifier::recipientCount($event),
+            'scheduleHasEmailSettings' => (bool) optional($event->getRoleWithEmailSettings())->hasEmailSettings(),
+            'attendeesNotifiedAt' => optional($event->attendees_notified_at)->toIso8601String(),
         ]);
     }
 
@@ -756,8 +924,15 @@ class EventController extends Controller
             'year' => $date->year,
         ];
 
+        // Tell the organizer whether attendees were emailed about the change.
+        $message = $this->eventRepo->lastNotifiedCount
+            ? __('messages.attendees_notified', ['count' => $this->eventRepo->lastNotifiedCount])
+            : ($request->boolean('notify_attendees')
+                ? __('messages.saved_without_notifying')
+                : __('messages.event_updated'));
+
         return redirect(route('role.view_admin', $data))
-            ->with('message', __('messages.event_updated'));
+            ->with('message', $message);
     }
 
     public function accept(Request $request, $subdomain, $hash)
@@ -3253,12 +3428,23 @@ class EventController extends Controller
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
 
-        $ical = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\n";
+        // Stable UID shared with the subscription feed (FeedController) so calendar clients update the
+        // existing entry rather than creating a duplicate; SEQUENCE bumps whenever a material detail
+        // changes (EventRepo), and STATUS:CANCELLED marks a cancelled occurrence.
+        $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'eventschedule.com';
+        $uid = $date ? "event-{$event->id}-{$date}@{$domain}" : "event-{$event->id}@{$domain}";
+
+        $ical = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Event Schedule//EN\r\nMETHOD:PUBLISH\r\nBEGIN:VEVENT\r\n";
+        $ical .= 'UID:'.$uid."\r\n";
+        $ical .= 'SEQUENCE:'.((int) $event->ical_sequence)."\r\n";
         $ical .= 'SUMMARY:'.$this->escapeIcalText($title)."\r\n";
         $ical .= 'DESCRIPTION:'.$this->escapeIcalText($description)."\r\n";
         $ical .= 'DTSTART:'.$startDate."\r\n";
         $ical .= 'DTEND:'.$endDate."\r\n";
         $ical .= 'LOCATION:'.$this->escapeIcalText($location)."\r\n";
+        if ($event->is_cancelled) {
+            $ical .= "STATUS:CANCELLED\r\n";
+        }
         $ical .= "END:VEVENT\r\nEND:VCALENDAR";
 
         return response($ical, 200, [

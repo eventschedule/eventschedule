@@ -60,7 +60,15 @@
     @endphp
 
   {{-- Status alerts (full width, fixed at top) --}}
-  @if ($event->is_draft)
+  @if ($event->is_cancelled)
+  <div class="fixed top-0 left-0 w-full bg-red-50 dark:bg-red-950 border-b border-red-200 dark:border-red-800 py-6 z-[60]">
+    <div class="container mx-auto px-5">
+      <div class="flex items-center justify-center text-red-800 dark:text-red-200">
+        <span class="text-xl font-medium">{{ __('messages.event_cancelled_banner') }}</span>
+      </div>
+    </div>
+  </div>
+  @elseif ($event->is_draft)
   <div class="fixed top-0 left-0 w-full bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
       <div class="flex items-center justify-center gap-3 text-blue-800 dark:text-blue-200">
@@ -94,7 +102,7 @@
   </div>
   @endif
   {{-- Spacer for fixed banner --}}
-  @if ($event->is_draft || $eventIsAccepted === null || ! $eventIsAccepted)
+  @if ($event->is_cancelled || $event->is_draft || $eventIsAccepted === null || ! $eventIsAccepted)
   <div class="h-[68px]"></div>
   @endif
 
@@ -841,7 +849,9 @@
 
         {{-- CTA buttons --}}
         <div id="desktop-cta-buttons" style="font-family: sans-serif" x-data="{ shareState: 'idle' }" class="relative items-center gap-3 text-left hidden sm:inline-flex self-start {{ $role->isRtl() ? 'rtl' : '' }}">
-        @if ($event->canAcceptRsvp($date))
+        @if ($event->is_cancelled)
+            <span class="text-base text-red-600 dark:text-red-400 font-medium">{{ __('messages.event_cancelled_guest_notice') }}</span>
+        @elseif ($event->canAcceptRsvp($date))
             <button type="button"
                   @click="$dispatch('show-event-form')"
                   class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
@@ -2080,7 +2090,9 @@
         </a>
       @endif
       {{-- Main CTA --}}
-      @if ($event->canAcceptRsvp($date))
+      @if ($event->is_cancelled)
+          <span class="flex-1 text-center text-sm text-red-600 dark:text-red-400 font-medium">{{ __('messages.event_cancelled_guest_notice') }}</span>
+      @elseif ($event->canAcceptRsvp($date))
           <button type="button"
                 @click="$dispatch('show-event-form')"
                 class="flex-1 justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"

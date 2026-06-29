@@ -65,6 +65,10 @@ class AuditService
 
     const EVENT_PUBLISH = 'event.publish';
 
+    const EVENT_CANCEL = 'event.cancel';
+
+    const EVENT_RESTORE = 'event.restore';
+
     // Sales actions
     const SALE_CHECKOUT = 'sale.checkout';
 

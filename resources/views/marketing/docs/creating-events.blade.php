@@ -141,6 +141,11 @@
                                 <div class="doc-callout-title">Pending Events</div>
                                 <p>If you have <a href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests" class="text-cyan-400 hover:text-cyan-300">Require Approval</a> enabled, submitted events appear in a pending queue. Review them in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Pending</strong> and approve or reject each one.</p>
                             </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Notifying attendees of changes</div>
+                                <p>When you change a published event's date, time, or location, or cancel it, you can automatically email everyone who registered. If your schedule has its own email settings configured, a confirmation appears on save (and when you cancel) so you can notify registered attendees, optionally with a short note. Cancelling an event keeps its tickets and refund records and shows a cancelled notice to guests, and you can restore the event later.</p>
+                            </div>
                         </section>
 
                         <!-- Details -->

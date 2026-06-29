@@ -1359,6 +1359,7 @@ class RoleController extends Controller
                     });
                 if (! $isMemberOrAdmin) {
                     $query->where('is_draft', false);
+                    $query->where('is_cancelled', false);
                     $query->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1372,6 +1373,7 @@ class RoleController extends Controller
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
                     $query->where('is_draft', false);
+                    $query->where('is_cancelled', false);
                     $query->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1391,7 +1393,7 @@ class RoleController extends Controller
                         ->where('role_id', $role->id)
                         ->where('is_accepted', true);
                 })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
                 ->orderBy('starts_at')
                 ->get();
         } else {
@@ -1403,7 +1405,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false));
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false));
 
             $events = $events->orderBy('starts_at')->get();
         }
@@ -1422,7 +1424,7 @@ class RoleController extends Controller
                             ->where('role_id', $role->id)
                             ->where('is_accepted', true);
                     })
-                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -1431,7 +1433,7 @@ class RoleController extends Controller
                     ->fullyPast(Carbon::now('UTC'))
                     ->whereNull('days_of_week')
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
-                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false))
+                    ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false))
                     ->orderByDesc('starts_at')
                     ->limit(51)
                     ->get();
@@ -1658,6 +1660,7 @@ class RoleController extends Controller
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
                     $q->where('is_draft', false);
+                    $q->where('is_cancelled', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1675,6 +1678,7 @@ class RoleController extends Controller
                 ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
                     $q->where('is_draft', false);
+                    $q->where('is_cancelled', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1885,6 +1889,7 @@ class RoleController extends Controller
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
                     $q->where('is_draft', false);
+                    $q->where('is_cancelled', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1905,6 +1910,7 @@ class RoleController extends Controller
                 })
                 ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
                     $q->where('is_draft', false);
+                    $q->where('is_cancelled', false);
                     $q->where(function ($q) use ($unlockedEventIds) {
                         $q->where('is_private', false);
                         if ($unlockedEventIds) {
@@ -1932,6 +1938,7 @@ class RoleController extends Controller
                     })
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
                         $q->where('is_draft', false);
+                        $q->where('is_cancelled', false);
                         $q->where(function ($q) use ($unlockedEventIds) {
                             $q->where('is_private', false);
                             if ($unlockedEventIds) {
@@ -1949,6 +1956,7 @@ class RoleController extends Controller
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
                     ->when(! $isMemberOrAdmin, function ($q) use ($unlockedEventIds) {
                         $q->where('is_draft', false);
+                        $q->where('is_cancelled', false);
                         $q->where(function ($q) use ($unlockedEventIds) {
                             $q->where('is_private', false);
                             if ($unlockedEventIds) {

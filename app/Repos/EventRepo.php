@@ -2,6 +2,7 @@
 
 namespace App\Repos;
 
+use App\Jobs\NotifyEventChange;
 use App\Jobs\SendQueuedEmail;
 use App\Jobs\SendQueuedSms;
 use App\Jobs\SyncEventToGoogleCalendar;
@@ -14,6 +15,7 @@ use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\EventChangeNotifier;
 use App\Services\SmsService;
 use App\Services\TicketVolumeDiscount;
 use App\Services\WebhookService;
@@ -30,6 +32,9 @@ use Illuminate\Validation\ValidationException;
 
 class EventRepo
 {
+    /** Number of attendees notified by the most recent saveEvent() call (drives the AP toast); null if none. */
+    public ?int $lastNotifiedCount = null;
+
     /**
      * Resolve the default category id to apply to a new event on this schedule.
      * Returns the role's default_category_id only if it's still in the schedule's
@@ -982,6 +987,23 @@ class EventRepo
         $wasDraftBeforeSave = $event->isDirty('is_draft') && $event->getOriginal('is_draft');
         $wasJustUnpublished = $event->isDirty('is_draft') && $event->getOriginal('is_draft') === false && $event->is_draft;
 
+        // Snapshot OLD values for attendee change notifications (issue #94). Only when an existing,
+        // non-cancelled event is updated with the notify flag set (the edit-form confirm dialog). The
+        // venue is read here, before roles()->sync() runs below, so $event->venue is still the OLD venue.
+        $notifyOld = null;
+        if (! $isNewEvent && ! $event->is_cancelled && $request->boolean('notify_attendees')) {
+            $oldVenue = $event->venue;
+            $notifyOld = [
+                'starts_at' => $event->getOriginal('starts_at'),
+                'duration' => $event->getOriginal('duration'),
+                'timezone' => $event->getOriginal('timezone'),
+                'days_of_week' => $event->getOriginal('days_of_week'),
+                'event_url' => $event->getOriginal('event_url'),
+                'venue_id' => $oldVenue?->id,
+                'venue_name' => $oldVenue?->getDisplayName(),
+            ];
+        }
+
         $event->save();
 
         if ($venue) {
@@ -1765,7 +1787,94 @@ class EventRepo
             $event->name,
         );
 
+        // Notify registered attendees of a material change (issue #94). $event is reloaded above, so
+        // $event->venue reflects the NEW venue. Date changes only fire for non-recurring events; venue /
+        // online-link changes fire for all (recurring scoped to upcoming occurrences in the notifier).
+        if ($notifyOld && ! $event->is_draft && ! $wasDraftBeforeSave) {
+            $changes = self::detectMaterialChanges($notifyOld, [
+                'starts_at' => $event->starts_at,
+                'duration' => $event->duration,
+                'days_of_week' => $event->days_of_week,
+                'event_url' => $event->event_url,
+                'venue_id' => $event->venue?->id,
+                'venue_name' => $event->venue?->getDisplayName(),
+            ]);
+
+            if (! empty($changes)) {
+                // Bump the iCal sequence so subscribed calendars pick up the change.
+                $event->forceFill(['ical_sequence' => (int) $event->ical_sequence + 1])->saveQuietly();
+
+                $isPast = ! $event->days_of_week
+                    && $event->starts_at
+                    && Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')->isPast();
+
+                if (! $isPast && EventChangeNotifier::hasRecipients($event)) {
+                    $note = $request->input('notify_message');
+                    NotifyEventChange::dispatch($event->id, $changes, $note ? Str::limit($note, 280, '') : null);
+                    $this->lastNotifiedCount = EventChangeNotifier::recipientCount($event);
+                }
+            }
+        }
+
         return $event;
+    }
+
+    /**
+     * Compute which attendee-relevant details changed between the pre-save snapshot and the saved event.
+     * Pure helper (no side effects) so it is unit-testable. Date/time fires only for non-recurring events
+     * (mirrors the boot-hook cascade boundary, Event.php). Venue + online link collapse into a single
+     * "location" change with a variant so an in-person<->online move reads as one coherent message.
+     */
+    public static function detectMaterialChanges(array $old, array $new): array
+    {
+        $changes = [];
+
+        if (! $new['days_of_week']) {
+            if ((string) $old['starts_at'] !== (string) $new['starts_at']
+                || (float) $old['duration'] !== (float) $new['duration']) {
+                $changes['date'] = [
+                    'old_starts_at' => $old['starts_at'],
+                    'old_duration' => $old['duration'],
+                    'old_timezone' => $old['timezone'],
+                ];
+            }
+        }
+
+        $oldVenueId = $old['venue_id'] ?? null;
+        $newVenueId = $new['venue_id'] ?? null;
+        $oldUrl = self::normalizeUrl($old['event_url'] ?? null);
+        $newUrl = self::normalizeUrl($new['event_url'] ?? null);
+
+        $wasInPerson = (bool) $oldVenueId;
+        $isInPerson = (bool) $newVenueId;
+        $wasOnline = $oldUrl !== '';
+        $isOnline = $newUrl !== '';
+
+        $variant = null;
+        if ($wasInPerson && $isOnline && ! $isInPerson) {
+            $variant = 'moved_online';
+        } elseif ($wasOnline && $isInPerson && ! $isOnline) {
+            $variant = 'moved_in_person';
+        } elseif ($isInPerson && $oldVenueId !== $newVenueId) {
+            $variant = 'venue';
+        } elseif ($isOnline && $oldUrl !== $newUrl) {
+            $variant = 'online_updated';
+        }
+
+        if ($variant) {
+            $changes['location'] = [
+                'variant' => $variant,
+                'old_venue' => $old['venue_name'] ?? null,
+                'new_venue' => $new['venue_name'] ?? null,
+            ];
+        }
+
+        return $changes;
+    }
+
+    private static function normalizeUrl(?string $url): string
+    {
+        return rtrim(strtolower(trim((string) $url)), '/');
     }
 
     public function getEvent($subdomain, $slug, $date = null, $eventId = null, ?Role $role = null)

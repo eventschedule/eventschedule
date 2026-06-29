@@ -357,6 +357,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::delete('/{subdomain}/templates/{hash}', [EventTemplateController::class, 'destroy'])->name('event_template.destroy');
     Route::delete('/{subdomain}/delete-event/{hash}', [EventController::class, 'delete'])->name('event.delete');
     Route::put('/{subdomain}/update-event/{hash}', [EventController::class, 'update'])->name('event.update');
+    Route::post('/{subdomain}/cancel-event/{hash}', [EventController::class, 'cancel'])->name('event.cancel');
+    Route::post('/{subdomain}/restore-event/{hash}', [EventController::class, 'restore'])->name('event.restore');
+    Route::post('/{subdomain}/notify-preview/{hash}', [EventController::class, 'notifyPreview'])->name('event.notify_preview');
     Route::delete('/{subdomain}/delete-event-image', [EventController::class, 'deleteImage'])->name('event.delete_image');
     Route::get('/{subdomain}/events-graphic', [GraphicController::class, 'generateGraphic'])->name('event.generate_graphic');
     Route::get('/{subdomain}/events-graphic/data', [GraphicController::class, 'generateGraphicData'])->name('event.generate_graphic_data');

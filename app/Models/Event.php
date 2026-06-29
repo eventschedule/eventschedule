@@ -109,6 +109,12 @@ class Event extends Model
         'duration' => 'float',
         'is_private' => 'boolean',
         'is_draft' => 'boolean',
+        // Cancellation state is set only via EventController::cancel()/restore() (intentionally NOT in
+        // $fillable, so the edit form's fill() can never toggle it via mass-assignment).
+        'is_cancelled' => 'boolean',
+        'cancelled_at' => 'datetime',
+        'attendees_notified_at' => 'datetime',
+        'ical_sequence' => 'integer',
         // Set only by the platform-admin discovery toggle (intentionally NOT in $fillable).
         'is_hidden_from_discovery' => 'boolean',
         'rsvp_enabled' => 'boolean',
@@ -290,28 +296,37 @@ class Event extends Model
             }
 
             // Sync deletion to Google Calendar and CalDAV for all roles that have sync enabled
-            foreach ($event->roles as $role) {
-                if ($role->syncsToGoogle()) {
-                    $user = $role->user;
-                    if ($user && $user->google_token) {
-                        SyncEventToGoogleCalendar::dispatchSync($event, $role, 'delete');
-                    }
-                }
+            $event->dispatchCalendarSync('delete');
+        });
+    }
 
-                // Delete from member Google Calendars
-                foreach ($role->getMembersWithCalendarSync() as $member) {
-                    if ($member->google_token) {
-                        SyncEventToGoogleCalendar::dispatchSync(
-                            $event, $role, 'delete', $member, $member->pivot->google_calendar_id
-                        );
-                    }
-                }
-
-                if ($role->syncsToCalDAV()) {
-                    SyncEventToCalDAV::dispatchSync($event, $role, 'delete');
+    /**
+     * Dispatch the given calendar-sync action ('create' / 'update' / 'delete') to Google Calendar and
+     * CalDAV for every role (and synced member) that has sync enabled. Shared by the delete hook and by
+     * the soft-cancel / restore flows (cancel removes the synced entry, restore re-creates it).
+     */
+    public function dispatchCalendarSync(string $action): void
+    {
+        foreach ($this->roles as $role) {
+            if ($role->syncsToGoogle()) {
+                $user = $role->user;
+                if ($user && $user->google_token) {
+                    SyncEventToGoogleCalendar::dispatchSync($this, $role, $action);
                 }
             }
-        });
+
+            foreach ($role->getMembersWithCalendarSync() as $member) {
+                if ($member->google_token) {
+                    SyncEventToGoogleCalendar::dispatchSync(
+                        $this, $role, $action, $member, $member->pivot->google_calendar_id
+                    );
+                }
+            }
+
+            if ($role->syncsToCalDAV()) {
+                SyncEventToCalDAV::dispatchSync($this, $role, $action);
+            }
+        }
     }
 
     public function tickets()
@@ -1142,6 +1157,12 @@ class Event extends Model
 
     public function canSellTickets($date = null)
     {
+        // A cancelled event never sells tickets or accepts RSVPs (covers the guest checkout/RSVP
+        // flows and the API, which all gate on this method).
+        if ($this->is_cancelled) {
+            return false;
+        }
+
         // Pass / subscription tickets are not tied to the container event's own
         // date (a "Subscriptions" event may be dateless or in the past); their
         // validity is governed by pass expiry, so don't block their sale on date.
@@ -1228,6 +1249,10 @@ class Event extends Model
 
     public function canAcceptRsvp($date = null)
     {
+        if ($this->is_cancelled) {
+            return false;
+        }
+
         if (! $this->rsvp_enabled) {
             return false;
         }
@@ -2487,13 +2512,15 @@ class Event extends Model
      */
     public function getSchemaEventStatus()
     {
+        if ($this->is_cancelled) {
+            return 'https://schema.org/EventCancelled';
+        }
+
         if (! $this->starts_at) {
             return 'https://schema.org/EventScheduled';
         }
 
-        // For most events, EventScheduled is the appropriate status
-        // Only use EventPostponed or EventCancelled if explicitly set
-        // Since we don't have explicit status tracking, default to EventScheduled
+        // EventScheduled is the appropriate status for all non-cancelled events.
         return 'https://schema.org/EventScheduled';
     }
 

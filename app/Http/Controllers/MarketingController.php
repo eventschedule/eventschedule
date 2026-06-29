@@ -4924,6 +4924,7 @@ class MarketingController extends Controller
             })
             ->where('is_private', false)
             ->where('is_draft', false)
+            ->where('is_cancelled', false)
             // Only surface events a public schedule has actually accepted (is_accepted = true).
             // Pending (null) or rejected (false) curator associations stay out of discovery,
             // matching the guest portal, which never shows un-accepted events for a schedule.

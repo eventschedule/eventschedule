@@ -1005,6 +1005,18 @@
 
 <div id="app">
 
+  @if ($event->exists && $event->is_cancelled)
+  <div class="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex items-start gap-2">
+      <svg class="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+      <p class="text-sm text-red-800 dark:text-red-300 font-medium">{{ __('messages.event_is_cancelled_ap') }}</p>
+    </div>
+    @can('delete', $event)
+    <button type="button" @click="submitRestore()" :disabled="isSubmittingRestore" class="shrink-0 inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-colors">{{ __('messages.restore_event') }}</button>
+    @endcan
+  </div>
+  @endif
+
   <div class="pb-4 flex items-center justify-between">
     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
       {{ $title }}
@@ -1107,6 +1119,17 @@
                     <div class="py-2" role="none">
                         <div class="border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
+                    @if (! $event->is_cancelled)
+                    <button type="button" @click="openCancelModal()" class="w-full group flex items-center px-5 py-3 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 focus:bg-amber-50 dark:focus:bg-amber-900/20 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                        <svg class="me-3 h-5 w-5 text-amber-400 group-hover:text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                        <div>{{ __('messages.cancel_event') }}</div>
+                    </button>
+                    @else
+                    <button type="button" @click="submitRestore()" :disabled="isSubmittingRestore" class="w-full group flex items-center px-5 py-3 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 focus:bg-green-50 dark:focus:bg-green-900/20 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                        <svg class="me-3 h-5 w-5 text-green-400 group-hover:text-green-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                        <div>{{ __('messages.restore_event') }}</div>
+                    </button>
+                    @endif
                     <form method="POST" action="{{ route('event.delete', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" id="event-delete-form" class="block">
                         @csrf
                         @method('DELETE')
@@ -1207,6 +1230,17 @@
                 <div class="py-2" role="none">
                     <div class="border-t border-gray-100 dark:border-gray-700"></div>
                 </div>
+                @if (! $event->is_cancelled)
+                <button type="button" @click="openCancelModal()" class="w-full group flex items-center px-5 py-3 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 focus:bg-amber-50 dark:focus:bg-amber-900/20 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-amber-400 group-hover:text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                    <div>{{ __('messages.cancel_event') }}</div>
+                </button>
+                @else
+                <button type="button" @click="submitRestore()" :disabled="isSubmittingRestore" class="w-full group flex items-center px-5 py-3 text-sm text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 focus:outline-none transition-colors" role="menuitem" tabindex="0">
+                    <svg class="me-3 h-5 w-5 text-green-400 group-hover:text-green-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                    <div>{{ __('messages.restore_event') }}</div>
+                </button>
+                @endif
                 <button type="submit" form="event-delete-form" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">
                     <svg class="me-3 h-5 w-5 text-red-400 group-hover:text-red-500 dark:group-hover:text-red-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
@@ -1298,6 +1332,9 @@
         <x-text-input name="venue_state" type="hidden" v-model="venueState" />                                                                
         <x-text-input name="venue_postal_code" type="hidden" v-model="venuePostalCode" />                                                                
         <x-text-input name="venue_country_code" type="hidden" v-model="venueCountryCode" autocomplete="off" />
+        {{-- Attendee change-notification decision (issue #94) --}}
+        <input type="hidden" name="notify_attendees" :value="notifyAttendees ? 1 : 0">
+        <input type="hidden" name="notify_message" :value="notifyMessage">
         <x-text-input name="venue_website" type="hidden" v-model="venueWebsite" />
 
         <div class="py-5">
@@ -1581,6 +1618,13 @@
                                     </svg>
                                     <p class="text-sm text-amber-700 dark:text-amber-300">{{ __('messages.schedule_timezone_missing') }}</p>
                                 </div>
+                            @endif
+                            {{-- Attendee change-notification hint (issue #94): shown only when the event has registrants. --}}
+                            @if ($event->exists)
+                            <p v-if="registrantCount > 0" v-cloak class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span v-if="scheduleHasEmailSettings">{{ __('messages.change_notifies_attendees_hint') }}</span>
+                                <a v-else href="{{ route('role.edit', ['subdomain' => $subdomain]) }}" class="text-[var(--brand-blue)] hover:underline">{{ __('messages.notify_requires_email_settings') }}</a>
+                            </p>
                             @endif
                             <div v-if="!isRecurring" class="mt-6 flex justify-end">
                                 <x-toggle name="is_multi_day" id="is_multi_day" :label="__('messages.multi_day_event')" :checked="$isMultiDay" />
@@ -4682,6 +4726,99 @@
     })->values()->toArray();
 @endphp
 
+    {{-- Attendee change-notification confirm dialog (issue #94). Vue-driven (not the Alpine x-modal). --}}
+    <div v-if="showNotifyModal" v-cloak @keydown.esc="closeNotifyModal()" tabindex="-1" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="notify-modal-title">
+        <div class="fixed inset-0 bg-black/50" @click="closeNotifyModal()"></div>
+        <div class="relative ap-card rounded-2xl shadow-lg w-full max-w-md p-6">
+            <h2 id="notify-modal-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.notify_attendees_title') }}</h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">@{{ notifyBody() }}</p>
+            <p v-if="changeSummary()" class="mt-1 text-sm text-gray-500 dark:text-gray-400">@{{ changeSummary() }}</p>
+
+            <div class="mt-4">
+                <label for="notify_message_field" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.notify_message_label') }}</label>
+                <textarea id="notify_message_field" ref="notifyMessageField" v-model="notifyMessage" maxlength="280" rows="3"
+                    placeholder="{{ __('messages.notify_message_placeholder') }}"
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#1e1e1e] dark:text-gray-100 text-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]"></textarea>
+                <div class="mt-1 text-xs text-gray-400 text-end">@{{ notifyMessage.length }}/280</div>
+            </div>
+
+            <div v-if="recentlyNotifiedMinutes() !== null" class="mt-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                <p class="text-xs text-amber-800 dark:text-amber-300">@{{ recentlyNotifiedCaption() }}</p>
+            </div>
+
+            <p class="mt-3 text-xs text-gray-400">{{ __('messages.notify_channels_note') }}</p>
+
+            <div class="mt-2">
+                <button type="button" @click="openNotifyPreview()" class="text-sm text-[var(--brand-blue)] hover:underline">{{ __('messages.preview_email') }}</button>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <button type="button" @click="confirmNotify(false)" :disabled="isSaving" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-[#2d2d30] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors disabled:opacity-50">{{ __('messages.dont_notify') }}</button>
+                <button type="button" @click="confirmNotify(true)" :disabled="isSaving" class="px-4 py-3 text-base rounded-lg text-white bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] transition-colors disabled:opacity-50">{{ __('messages.notify_attendees_button') }}</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Hidden form that POSTs the current (unsaved) values to render an email preview in a new tab. --}}
+    @if ($event->exists)
+    <form id="notify-preview-form" method="POST" action="{{ route('event.notify_preview', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" target="_blank" class="hidden">
+        @csrf
+        <input type="hidden" name="notify_message">
+        <input type="hidden" name="name">
+        <input type="hidden" name="event_date">
+        <input type="hidden" name="start_time">
+        <input type="hidden" name="duration">
+        <input type="hidden" name="event_url">
+        <input type="hidden" name="venue_name">
+    </form>
+    @can('delete', $event)
+    <form id="event-cancel-form" method="POST" action="{{ route('event.cancel', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="hidden">
+        @csrf
+        <input type="hidden" name="notify_attendees" value="0">
+        <input type="hidden" name="notify_message">
+    </form>
+    <form id="event-restore-form" method="POST" action="{{ route('event.restore', ['subdomain' => $subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}" class="hidden">
+        @csrf
+    </form>
+    @endcan
+    @endif
+
+    {{-- Cancel-event confirm dialog (issue #94). --}}
+    @if ($event->exists)
+    <div v-if="showCancelModal" v-cloak @keydown.esc="closeCancelModal()" tabindex="-1" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title">
+        <div class="fixed inset-0 bg-black/50" @click="closeCancelModal()"></div>
+        <div class="relative ap-card rounded-2xl shadow-lg w-full max-w-md p-6">
+            <h2 id="cancel-modal-title" class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.cancel_event_title') }}</h2>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                <span v-if="cancelWillNotify()">@{{ cancelBody() }}</span>
+                <span v-else>{{ __('messages.cancel_event_body_simple') }}</span>
+            </p>
+
+            <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                <p class="text-xs text-amber-800 dark:text-amber-300">{{ __('messages.cancel_refund_note') }}</p>
+            </div>
+
+            <div v-if="cancelWillNotify()" class="mt-4">
+                <label for="cancel_message_field" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.notify_message_label') }}</label>
+                <textarea id="cancel_message_field" ref="cancelMessageField" v-model="cancelMessage" maxlength="280" rows="3"
+                    placeholder="{{ __('messages.cancel_message_placeholder') }}"
+                    class="mt-1 block w-full rounded-lg border-gray-300 dark:border-[#2d2d30] dark:bg-[#1e1e1e] dark:text-gray-100 text-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)]"></textarea>
+                <div class="mt-1 text-xs text-gray-400 text-end">@{{ cancelMessage.length }}/280</div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <button type="button" @click="closeCancelModal()" class="px-4 py-3 text-base rounded-lg border border-gray-300 dark:border-[#2d2d30] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors">{{ __('messages.keep_event') }}</button>
+                <button type="button" @click="submitCancel()" :disabled="isSubmittingCancel" class="px-4 py-3 text-base rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors disabled:opacity-50">
+                    <span v-if="cancelWillNotify()">{{ __('messages.cancel_and_notify') }}</span>
+                    <span v-else>{{ __('messages.cancel_event') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
 </div>
 
 <script {!! nonce_attr() !!}>
@@ -4847,6 +4984,23 @@
         isDirty: false,
         soldLabel: @json(__('messages.sold_reserved')),
         isRecurring: @json($event->days_of_week ? true : false),
+        // Attendee change-notification UX (issue #94): confirm dialog on save when a key detail changed.
+        registrantCount: @json($registrantCount ?? 0),
+        scheduleHasEmailSettings: @json($scheduleHasEmailSettings ?? false),
+        attendeesNotifiedAt: @json($attendeesNotifiedAt ?? null),
+        notifyAttendees: false,
+        notifyMessage: '',
+        showNotifyModal: false,
+        notifyConfirmed: false,
+        showCancelModal: false,
+        cancelMessage: '',
+        isSubmittingCancel: false,
+        isSubmittingRestore: false,
+        origStartsAt: null,
+        origVenueId: null,
+        origEventUrl: '',
+        origIsOnline: false,
+        origIsInPerson: false,
         passGroups: @json($role->groups->map(fn ($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->name])->values()),
         passEvents: @json($role->events()->whereNotNull('events.starts_at')->orderBy('events.starts_at', 'desc')->limit(200)->get()->map(fn ($e) => ['id' => \App\Utils\UrlUtils::encodeId($e->id), 'name' => $e->name])->unique('id')->values()),
         passEventSearch: {},
@@ -5793,8 +5947,128 @@
           }
         }
 
+        // Attendee change notifications (issue #94): if a key detail changed and the event has
+        // notifiable registrants, confirm before saving. The chosen answer sets notify_attendees and
+        // re-submits (notifyConfirmed short-circuits this branch on the second pass).
+        if (!this.notifyConfirmed && this.shouldPromptNotify()) {
+          event.preventDefault();
+          this.showNotifyModal = true;
+          this.$nextTick(() => { if (this.$refs.notifyMessageField) this.$refs.notifyMessageField.focus(); });
+          return;
+        }
+
         this.isSaving = true;
         this.isDirty = false;
+      },
+      normalizeUrl(u) {
+        return (u || '').toString().trim().toLowerCase().replace(/\/+$/, '');
+      },
+      hasKeyChange() {
+        // Date/time, non-recurring only (mirrors the server's boot-hook boundary).
+        if (!this.isRecurring && this.startsAt !== this.origStartsAt) {
+          return true;
+        }
+        const venueId = this.selectedVenue ? this.selectedVenue.id : null;
+        if (this.isInPerson && venueId !== this.origVenueId) {
+          return true;
+        }
+        if (this.isOnline !== this.origIsOnline) {
+          return true;
+        }
+        if (this.isOnline && this.normalizeUrl(this.event.event_url) !== this.origEventUrl) {
+          return true;
+        }
+        return false;
+      },
+      shouldPromptNotify() {
+        return this.registrantCount > 0
+          && this.scheduleHasEmailSettings
+          && !this.event.is_cancelled
+          && !this.event.is_draft
+          && this.hasKeyChange();
+      },
+      recentlyNotifiedMinutes() {
+        if (!this.attendeesNotifiedAt) return null;
+        const mins = Math.floor((Date.now() - new Date(this.attendeesNotifiedAt).getTime()) / 60000);
+        return (mins >= 0 && mins < 10) ? mins : null;
+      },
+      recentlyNotifiedCaption() {
+        return @json(__('messages.notify_recently_caption')).replace(':minutes', this.recentlyNotifiedMinutes());
+      },
+      confirmNotify(notify) {
+        this.notifyAttendees = !!notify;
+        this.notifyConfirmed = true;
+        this.showNotifyModal = false;
+        this.$nextTick(() => {
+          window._skipUnsavedWarning = true;
+          document.getElementById('edit-form').requestSubmit();
+        });
+      },
+      closeNotifyModal() {
+        this.showNotifyModal = false;
+      },
+      openCancelModal() {
+        this.showCancelModal = true;
+        this.$nextTick(() => { if (this.$refs.cancelMessageField) this.$refs.cancelMessageField.focus(); });
+      },
+      closeCancelModal() {
+        this.showCancelModal = false;
+      },
+      cancelWillNotify() {
+        return this.registrantCount > 0 && this.scheduleHasEmailSettings;
+      },
+      submitCancel() {
+        if (this.isSubmittingCancel) return;
+        const form = document.getElementById('event-cancel-form');
+        if (!form) return;
+        this.isSubmittingCancel = true;
+        const notify = this.cancelWillNotify() ? 1 : 0;
+        const setVal = (n, v) => { const el = form.querySelector('[name="' + n + '"]'); if (el) el.value = v; };
+        setVal('notify_attendees', notify);
+        setVal('notify_message', this.cancelMessage || '');
+        window._skipUnsavedWarning = true;
+        form.submit();
+      },
+      submitRestore() {
+        if (this.isSubmittingRestore) return;
+        const form = document.getElementById('event-restore-form');
+        if (!form) return;
+        this.isSubmittingRestore = true;
+        window._skipUnsavedWarning = true;
+        form.submit();
+      },
+      openNotifyPreview() {
+        const form = document.getElementById('notify-preview-form');
+        if (!form) return;
+        const set = (n, v) => { const el = form.querySelector('[name="' + n + '"]'); if (el) el.value = v; };
+        set('notify_message', this.notifyMessage || '');
+        set('name', this.event.name || '');
+        set('event_date', document.getElementById('event_date') ? document.getElementById('event_date').value : '');
+        set('start_time', document.getElementById('start_time') ? document.getElementById('start_time').value : '');
+        set('duration', this.event.duration || '');
+        set('event_url', this.isOnline ? (this.event.event_url || '') : '');
+        set('venue_name', (this.isInPerson && this.selectedVenue) ? (this.selectedVenue.name || '') : '');
+        form.submit();
+      },
+      notifyBody() {
+        return @json(__('messages.notify_attendees_body')).replace(':count', this.registrantCount);
+      },
+      cancelBody() {
+        return @json(__('messages.cancel_event_body')).replace(':count', this.registrantCount);
+      },
+      changeSummary() {
+        const out = [];
+        if (!this.isRecurring && this.startsAt !== this.origStartsAt) {
+          out.push(@json(__('messages.event_changed_date_label')));
+        }
+        const venueId = this.selectedVenue ? this.selectedVenue.id : null;
+        const locationChanged = (this.isInPerson && venueId !== this.origVenueId)
+          || (this.isOnline !== this.origIsOnline)
+          || (this.isOnline && this.normalizeUrl(this.event.event_url) !== this.origEventUrl);
+        if (locationChanged) {
+          out.push(@json(__('messages.event_changed_location_label')));
+        }
+        return out.join(', ');
       },
       toggleTicketPass(index) {
         const t = this.tickets[index];
@@ -6834,6 +7108,16 @@
           this.isInPerson = true;
         }
       }
+
+      // Snapshot original key values so we can detect a material change on save (issue #94). Captured
+      // after init watchers settle; mirrors the server's comparison (venue by id, url normalized).
+      this.$nextTick(() => {
+        this.origStartsAt = this.startsAt;
+        this.origVenueId = this.selectedVenue ? this.selectedVenue.id : null;
+        this.origEventUrl = this.normalizeUrl(this.event.event_url);
+        this.origIsOnline = this.isOnline;
+        this.origIsInPerson = this.isInPerson;
+      });
 
       if (this.event.id) {
         this.eventName = this.event.name;
