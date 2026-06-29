@@ -156,14 +156,17 @@ https://github.com/eventschedule/eventschedule/releases.
    - When a commit references an issue/PR number (e.g. `#89`), link it inline:
      `[#89](https://github.com/eventschedule/eventschedule/issues/89)`.
 
-4. **Always link to the user guide.** Every release's notes must include user-guide links - the
-   user guide is the public docs at `https://eventschedule.com/docs/{slug}#{anchor}`. Link each
-   notable change to its relevant section (e.g. a trailing `[Learn more](...)` or by hyperlinking
-   the feature name): find the page slug from the `marketing.docs.*` routes in `routes/web.php`, and
-   the section anchor from `MarketingController::getDocSearchIndex()` or the feature->anchor map in
-   `app/Utils/HelpUtils.php`. Take slugs/anchors from those sources - never invent an anchor; if no
-   exact section fits, link the closest page (or the docs home, `https://eventschedule.com/docs`).
-   Never ship release notes without user-guide links.
+4. **Link features to the user guide (not fixes).** Every `Added:` and `Updated:` bullet must
+   include a user-guide link - the user guide is the public docs at
+   `https://eventschedule.com/docs/{slug}#{anchor}`. Do NOT add user-guide links to `Fixed:`
+   bullets: the docs describe features, not bug fixes, so a fix has no matching section. (Inline
+   issue/PR links like `[#90](...)` are still fine on fixes.) Link each feature to its relevant
+   section (e.g. a trailing `[Learn more](...)` or by hyperlinking the feature name): find the page
+   slug from the `marketing.docs.*` routes in `routes/web.php`, and the section anchor from
+   `MarketingController::getDocSearchIndex()` or the feature->anchor map in `app/Utils/HelpUtils.php`.
+   Take slugs/anchors from those sources - never invent an anchor; if no exact section fits, link the
+   closest page (or the docs home, `https://eventschedule.com/docs`). Never ship a feature bullet
+   without a user-guide link.
 
 5. **Output.** Print the version as the title followed by the bullet body, as markdown in chat,
    ready to paste into GitHub's release form.
@@ -178,7 +181,7 @@ v1.0.112
 
 - Added: OneSignal web push notifications so guests can opt in to event reminders. [Learn more](https://eventschedule.com/docs/account-settings)
 - Updated: Custom dashboard links [#87](https://github.com/eventschedule/eventschedule/issues/87) [Learn more](https://eventschedule.com/docs/getting-started)
-- Fixed: Markdown not formatting correctly in some event descriptions [#90](https://github.com/eventschedule/eventschedule/issues/90) [Learn more](https://eventschedule.com/docs/creating-events#details)
+- Fixed: Markdown not formatting correctly in some event descriptions [#90](https://github.com/eventschedule/eventschedule/issues/90)
 ```
 
 ## Feature Tiers (Free / Pro / Enterprise)

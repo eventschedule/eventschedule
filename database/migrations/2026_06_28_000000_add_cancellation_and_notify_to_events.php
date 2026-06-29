@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('events', function (Blueprint $table) {
             if (! Schema::hasColumn('events', 'is_cancelled')) {
-                $table->boolean('is_cancelled')->default(false)->after('is_draft');
+                $table->boolean('is_cancelled')->default(false);
             }
             if (! Schema::hasColumn('events', 'cancelled_at')) {
                 $table->timestamp('cancelled_at')->nullable()->after('is_cancelled');
