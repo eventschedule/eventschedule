@@ -1958,6 +1958,10 @@ class EventController extends Controller
 
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        // An event needs a name; reject empty/null before it reaches the typed
+        // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
+        $request->validate(['name' => ['required', 'string', 'max:255']]);
+
         $event = $this->eventRepo->saveEvent($role, $request, null, false);
 
         if ($request->social_image) {
@@ -2004,6 +2008,12 @@ class EventController extends Controller
         if (! $role->acceptEventRequests()) {
             abort(403, __('messages.not_authorized'));
         }
+
+        // An event needs a name; reject empty/null up front - before guestImportWithAccount()
+        // creates the user account + talent schedule - so a null name can't reach the typed
+        // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
+        // Covers both the non-account save below and the require_account path.
+        $request->validate(['name' => ['required', 'string', 'max:255']]);
 
         // Prevent guests from injecting draft status
         $request->request->remove('is_draft');
@@ -3484,7 +3494,7 @@ class EventController extends Controller
         $duration = $event->duration > 0 ? $event->duration : 2;
         $startAt = $event->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+        $endDate = $startAt->addMinutes(Event::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
 
         // Stable UID shared with the subscription feed (FeedController) so calendar clients update the
         // existing entry rather than creating a duplicate; SEQUENCE bumps whenever a material detail

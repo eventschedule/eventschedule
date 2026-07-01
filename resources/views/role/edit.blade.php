@@ -5165,10 +5165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     email_settings: emailSettings
                 })
             })
-            .then(response => {
-                if (!response.ok) throw new Error('Request failed');
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
                 sendTestEmailBtn.disabled = false;
                 sendTestEmailBtn.textContent = @json(__('messages.send_test_email'), JSON_UNESCAPED_UNICODE);
@@ -5238,6 +5235,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     testFeedbackResult.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-200';
                     testFeedbackResult.textContent = data.error || @json(__('messages.test_email_failed'));
+                    if (data.details) {
+                        testFeedbackResult.textContent += '\n\n' + data.details;
+                        testFeedbackResult.style.whiteSpace = 'pre-wrap';
+                    }
                 }
                 testFeedbackResult.classList.remove('hidden');
             })

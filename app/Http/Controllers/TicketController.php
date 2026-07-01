@@ -2438,7 +2438,7 @@ class TicketController extends Controller
         $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $sale->event_date.' '.$timeOfDay, $tz)
             ->setTimezone('UTC');
         $duration = $event->duration > 0 ? $event->duration : 2;
-        $endUtc = $startUtc->copy()->addHours($duration);
+        $endUtc = $startUtc->copy()->addMinutes(Event::durationHoursToMinutes($duration));
         $earliest = $startUtc->copy()->subHours(24);
         $nowUtc = now('UTC');
 

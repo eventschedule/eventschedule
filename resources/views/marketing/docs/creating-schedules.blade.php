@@ -1061,7 +1061,7 @@
 
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Availability</div>
-                                <p>Custom email settings are available for selfhosted installations and Pro plans.</p>
+                                <p>Per-schedule custom email settings are available on the hosted platform. Selfhosted installations configure email once at the server level instead - see the <a href="{{ route('marketing.docs.selfhost.email') }}" class="text-cyan-400 hover:text-cyan-300">selfhost email docs</a>.</p>
                             </div>
 
                             <div class="space-y-4 mb-6">
@@ -1085,6 +1085,50 @@
                                 <li>Set your custom sender name and email address</li>
                                 <li>Send a test email to verify the configuration</li>
                             </ol>
+
+                            <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-4 mt-8">Troubleshooting</h4>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If a message fails to send, click <strong class="text-gray-900 dark:text-white">Send Test Email</strong> to see the exact error returned by your email provider. A <strong class="text-gray-900 dark:text-white">"permission denied"</strong> error almost always comes from the provider rejecting your credentials or sender address, not from Event Schedule. Most problems fall into one of these categories:</p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">"Permission denied" or authentication errors</h4>
+                                    <ul class="doc-list text-sm">
+                                        <li>Double-check your SMTP username and password.</li>
+                                        <li>For Gmail or Google Workspace, create an <x-link href="https://myaccount.google.com/apppasswords" target="_blank">App Password</x-link> and use that instead of your normal account password.</li>
+                                        <li>Make sure your account has SMTP access enabled with your provider.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sender address rejected or not authorized</h4>
+                                    <ul class="doc-list text-sm">
+                                        <li>The most common cause of a "permission denied" style rejection: your <strong class="text-gray-900 dark:text-white">From address</strong> must be a verified sender (or on a verified domain) with your provider.</li>
+                                        <li>Providers such as Amazon SES, SendGrid, Mailgun, and Postmark reject mail sent from an unverified address.</li>
+                                        <li>Amazon SES accounts in sandbox mode can only send to verified recipients until you request production access.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Connection refused or timeout</h4>
+                                    <ul class="doc-list text-sm">
+                                        <li>Use port <code class="doc-inline-code">587</code> with TLS, or port <code class="doc-inline-code">465</code> with SSL, and make sure the port and encryption match.</li>
+                                        <li>Confirm the SMTP host is spelled correctly and that your provider allows outbound SMTP.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Emails going to spam</h4>
+                                    <ul class="doc-list text-sm">
+                                        <li>Set up SPF, DKIM, and DMARC DNS records for your sending domain.</li>
+                                        <li>Use a From address on a domain you own rather than a free email provider.</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">When email settings stop working</div>
+                                <p>If your SMTP credentials start failing, a warning banner appears on the <strong class="text-gray-900 dark:text-white">Email</strong> tab with a <strong class="text-gray-900 dark:text-white">Show error details</strong> link containing the provider's message. Delivery is paused while settings are failing, and Event Schedule automatically retries after 24 hours, or immediately once a test email succeeds. Fix the underlying issue, then send a test email to resume delivery right away.</p>
+                            </div>
 
                             <!-- Google Calendar -->
                             <h3 id="integrations-google" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Google Calendar</h3>

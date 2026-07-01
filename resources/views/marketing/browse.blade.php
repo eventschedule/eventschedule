@@ -94,6 +94,23 @@
                 </div>
             @endif
 
+            {{-- Admin-only preview: filter the showcase to events whose card shows an image --}}
+            @php $isBrowseAdmin = auth()->check() && auth()->user()->isAdmin(); @endphp
+            @if($isBrowseAdmin)
+                <div class="mb-8 flex flex-wrap items-center gap-3">
+                    <span class="text-sm font-medium text-amber-700 dark:text-amber-400">Admin preview</span>
+                    <a href="{{ $flyersOnly ? marketing_url('/browse') : marketing_url('/browse?flyers=1') }}"
+                       class="inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-full border transition-all {{ $flyersOnly ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-white dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-blue-400/50' }}">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 15l4-4 4 4 3-3 5 5" />
+                            <circle cx="9" cy="9" r="1.5" />
+                        </svg>
+                        {{ $flyersOnly ? 'Showing only events with flyers' : 'Only show events with flyers' }}
+                    </a>
+                </div>
+            @endif
+
             @if($events->count() > 0)
                 <div class="flex items-center gap-3 mb-8">
                     <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.upcoming_events') }}</h2>
@@ -104,6 +121,22 @@
                     @foreach($events as $event)
                         @include('marketing.partials.event-card', ['event' => $event])
                     @endforeach
+                </div>
+            @elseif($flyersOnly)
+                {{-- Admin-only: the flyers-only preview filter matched no events --}}
+                <div class="text-center py-16">
+                    <svg aria-hidden="true" class="w-16 h-16 mx-auto mb-6 text-gray-300 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a2 2 0 012-2h12a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 15l4-4 4 4 3-3 5 5" />
+                        <circle cx="9" cy="9" r="1.5" />
+                    </svg>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">No events with flyers match</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                        None of the upcoming events currently have a flyer or schedule image. Turn the filter off to see all events.
+                    </p>
+                    <a href="{{ marketing_url('/browse') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full border bg-white dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-white/10 hover:border-blue-400/50 transition-all">
+                        Show all events
+                    </a>
                 </div>
             @else
                 {{-- Empty state --}}

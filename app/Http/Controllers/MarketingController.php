@@ -4831,12 +4831,31 @@ class MarketingController extends Controller
     /**
      * Browse page - highlights upcoming public events across the platform.
      */
-    public function browse()
+    public function browse(Request $request)
     {
         $isAdmin = auth()->check() && auth()->user()->isAdmin();
 
+        // Admin-only preview: restrict the showcase to events whose card shows an image
+        // (own flyer, or a talent/venue schedule's profile photo) rather than the
+        // letter-gradient placeholder. Gated to admins so a non-admin appending the query
+        // param sees no change.
+        $flyersOnly = $isAdmin && $request->boolean('flyers');
+
         $events = $this->publicUpcomingEventsQuery()
             ->where('is_hidden_from_discovery', false)
+            ->when($flyersOnly, function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where(function ($f) {
+                        $f->whereNotNull('flyer_image_url')
+                            ->where('flyer_image_url', '!=', '');
+                    })
+                        ->orWhereHas('roles', function ($r) {
+                            $r->whereIn('roles.type', ['talent', 'venue'])
+                                ->whereNotNull('roles.profile_image_url')
+                                ->where('roles.profile_image_url', '!=', '');
+                        });
+                });
+            })
             ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
             ->limit(24)
             ->get();
@@ -4853,6 +4872,7 @@ class MarketingController extends Controller
         return view('marketing.browse', [
             'events' => $events,
             'hiddenEvents' => $hiddenEvents,
+            'flyersOnly' => $flyersOnly,
         ]);
     }
 
@@ -5028,7 +5048,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Carpool', 'description' => 'Enable carpool matching for event attendees.', 'url' => $r['creating_schedules'].'#engagement-carpool', 'category' => 'User Guide', 'keywords' => 'carpool ride sharing matching driver attendee'],
             ['page' => 'Creating Schedules', 'section' => 'Auto Import', 'description' => 'Automatically import events from external sources.', 'url' => $r['creating_schedules'].'#auto-import', 'category' => 'User Guide', 'keywords' => 'import automatic feed ical'],
             ['page' => 'Creating Schedules', 'section' => 'Integrations', 'description' => 'Connect with calendar and third-party services.', 'url' => $r['creating_schedules'].'#integrations', 'category' => 'User Guide', 'keywords' => 'connect sync third-party'],
-            ['page' => 'Creating Schedules', 'section' => 'Email Settings', 'description' => 'Configure email delivery for your schedule.', 'url' => $r['creating_schedules'].'#integrations-email', 'category' => 'User Guide', 'keywords' => 'email smtp sender notifications'],
+            ['page' => 'Creating Schedules', 'section' => 'Email Settings', 'description' => 'Configure email delivery for your schedule.', 'url' => $r['creating_schedules'].'#integrations-email', 'category' => 'User Guide', 'keywords' => 'email smtp sender notifications permission denied authentication failed test email error unverified sender app password troubleshooting'],
             ['page' => 'Creating Schedules', 'section' => 'Google Calendar', 'description' => 'Set up Google Calendar sync for your schedule.', 'url' => $r['creating_schedules'].'#integrations-google', 'category' => 'User Guide', 'keywords' => 'google calendar sync'],
             ['page' => 'Creating Schedules', 'section' => 'CalDAV', 'description' => 'Set up CalDAV protocol integration.', 'url' => $r['creating_schedules'].'#integrations-caldav', 'category' => 'User Guide', 'keywords' => 'caldav ical protocol'],
             ['page' => 'Creating Schedules', 'section' => 'Advanced', 'description' => 'Calendar description template and iCal/RSS feed URLs.', 'url' => $r['creating_schedules'].'#integrations-advanced', 'category' => 'User Guide', 'keywords' => 'advanced feeds ical rss subscribe calendar description template variables'],

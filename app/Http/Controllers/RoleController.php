@@ -5745,6 +5745,16 @@ class RoleController extends Controller
             $emailService->sendTestEmail($role, $email);
 
             return response()->json(['success' => true, 'message' => __('messages.test_email_sent')]);
+        } catch (\Symfony\Component\Mailer\Exception\ExceptionInterface $e) {
+            // The SMTP provider rejected the connection, credentials, or sender. Its message is the
+            // actionable content (e.g. "Permission denied", authentication failed, unverified
+            // sender), and we already surface this same message in the AP failure banner and the
+            // owner notification (see RoleMailerService::markFailed), so show it here too. This is
+            // an expected user-config failure, so it is not reported to Sentry.
+            return response()->json([
+                'error' => __('messages.failed_to_send_test_email'),
+                'details' => mb_substr($e->getMessage(), 0, 1000),
+            ], 500);
         } catch (\Exception $e) {
             // Log the full error server-side but return generic message to user
             \Log::error('Test email failed: '.$e->getMessage(), [
@@ -5820,6 +5830,17 @@ class RoleController extends Controller
             RateLimiter::hit($rateLimitKey, 60);
 
             return response()->json(['success' => true, 'message' => __('messages.test_email_sent_to', ['email' => $user->email])]);
+        } catch (\Symfony\Component\Mailer\Exception\ExceptionInterface $e) {
+            // The SMTP provider rejected the message; surface its actionable message just like the
+            // Email Settings test button. Expected user-config failure, so we log at warning level
+            // for visibility but do not report() it to Sentry.
+            \Log::warning('Test feedback email failed: '.$e->getMessage(), ['role_id' => $role->id]);
+            RateLimiter::hit($rateLimitKey, 60);
+
+            return response()->json([
+                'error' => __('messages.test_email_failed'),
+                'details' => mb_substr($e->getMessage(), 0, 1000),
+            ], 500);
         } catch (\Exception $e) {
             report($e);
             RateLimiter::hit($rateLimitKey, 60);

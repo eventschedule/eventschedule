@@ -161,7 +161,7 @@ class FeedController extends Controller
         $duration = $event->duration > 0 ? $event->duration : 2;
         $startAt = $event->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
-        $endDate = $startAt->copy()->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+        $endDate = $startAt->copy()->addMinutes(Event::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
         $url = custom_domain_url($event->getGuestUrl($role->subdomain, $date));
 
         $vevent = "BEGIN:VEVENT\r\n";

@@ -857,7 +857,7 @@ class Event extends Model
 
         // Multi-day events in pretty mode: show date range instead of single datetime
         if ($pretty && $this->is_multi_day) {
-            $endAt = $startAt->copy()->addHours($this->duration);
+            $endAt = $startAt->copy()->addMinutes($this->durationInMinutes());
 
             if ($role && $role->language_code) {
                 $startAt->setLocale($role->language_code);
@@ -893,7 +893,7 @@ class Event extends Model
 
         if ($endTime && $this->duration > 0) {
             $startDate = $startAt->format('Y-m-d');
-            $startAt->addHours($this->duration);
+            $startAt->addMinutes($this->durationInMinutes());
             $endDate = $startAt->format('Y-m-d');
 
             if ($startDate == $endDate) {
@@ -1005,7 +1005,7 @@ class Event extends Model
         } else {
             $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
             if ($this->duration && $this->duration >= 24) {
-                $endDate = Carbon::parse($this->localStartsAt())->addHours($this->duration)->startOfDay();
+                $endDate = Carbon::parse($this->localStartsAt())->addMinutes($this->durationInMinutes())->startOfDay();
 
                 return Carbon::parse($date)->startOfDay()->between($startDate, $endDate);
             }
@@ -1562,7 +1562,7 @@ class Event extends Model
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Ymd\THis\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Ymd\THis\Z');
+        $endDate = $startAt->addMinutes(self::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
 
         $url = 'https://calendar.google.com/calendar/r/eventedit?';
         $url .= 'text='.urlencode($title);
@@ -1592,7 +1592,7 @@ class Event extends Model
         $duration = $this->duration > 0 ? $this->duration : 2;
         $startAt = $this->getStartDateTime($date);
         $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
-        $endDate = $startAt->addSeconds($duration * 3600)->format('Y-m-d\TH:i:s\Z');
+        $endDate = $startAt->addMinutes(self::durationHoursToMinutes($duration))->format('Y-m-d\TH:i:s\Z');
 
         $url = 'https://outlook.live.com/calendar/0/deeplink/compose?';
         $url .= 'subject='.urlencode($title);
@@ -1700,12 +1700,28 @@ class Event extends Model
 
     public function isMultiDay()
     {
-        return ! $this->getStartDateTime(null, true)->isSameDay($this->getStartDateTime(null, true)->addHours($this->duration));
+        return ! $this->getStartDateTime(null, true)->isSameDay($this->getStartDateTime(null, true)->addMinutes($this->durationInMinutes()));
     }
 
     public function getIsMultiDayAttribute(): bool
     {
         return $this->duration >= 24;
+    }
+
+    /**
+     * Canonical conversion of a duration in hours (float) to whole minutes.
+     * Durations are stored as hours with limited precision (e.g. 50 min -> 0.83),
+     * so rounding to the nearest minute recovers the exact minute the user entered
+     * and avoids the end time displaying one minute early (e.g. 8:20 -> 8:19).
+     */
+    public static function durationHoursToMinutes($hours): int
+    {
+        return (int) round(((float) $hours) * 60);
+    }
+
+    public function durationInMinutes(): int
+    {
+        return static::durationHoursToMinutes($this->duration);
     }
 
     public function getStartEndTime($date = null, $use24 = false)
@@ -1717,7 +1733,7 @@ class Event extends Model
         }
 
         if ($this->duration > 0) {
-            $endDate = $date->copy()->addHours($this->duration);
+            $endDate = $date->copy()->addMinutes($this->durationInMinutes());
 
             return $date->format($use24 ? 'H:i' : 'g:i A').' - '.$endDate->format($use24 ? 'H:i' : 'g:i A');
         } else {
@@ -1728,7 +1744,7 @@ class Event extends Model
     public function getDateRangeDisplay($date = null)
     {
         $start = $this->getStartDateTime($date, true);
-        $end = $start->copy()->addHours($this->duration);
+        $end = $start->copy()->addMinutes($this->durationInMinutes());
 
         if ($start->year !== $end->year) {
             return $start->translatedFormat('F j, Y').' - '.$end->translatedFormat('F j, Y');
@@ -1748,7 +1764,7 @@ class Event extends Model
         $s = $this->getStartDateTime(null, true);
 
         if ($this->is_multi_day) {
-            $e = $s->copy()->addHours($this->duration);
+            $e = $s->copy()->addMinutes($this->durationInMinutes());
 
             if ($s->year !== $e->year) {
                 return $s->format('M j, Y').' - '.$e->format('M j, Y');
@@ -2291,7 +2307,7 @@ class Event extends Model
         $startAt = $this->getStartDateTime($date, $locale, $timezoneOverride);
         $duration = $this->duration > 0 ? $this->duration : 2; // Default to 2 hours if no duration
 
-        return $startAt->copy()->addHours($duration);
+        return $startAt->copy()->addMinutes(self::durationHoursToMinutes($duration));
     }
 
     /**

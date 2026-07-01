@@ -22,7 +22,7 @@
                     @endphp
                     @if($startDt)
                         @if($event->is_multi_day)
-                            @php $endDt = $startDt->copy()->addHours($event->duration); @endphp
+                            @php $endDt = $startDt->copy()->addMinutes($event->durationInMinutes()); @endphp
                             @if($startDt->year !== $endDt->year)
                                 {{ $startDt->format('M j, Y') }} - {{ $endDt->format('M j, Y') }}
                             @elseif($startDt->month !== $endDt->month)

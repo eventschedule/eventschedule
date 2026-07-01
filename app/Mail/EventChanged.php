@@ -122,7 +122,7 @@ class EventChanged extends Mailable
 
         // Multi-day (duration >= 24h) renders as a date range; single-day shows date + time range.
         if ($duration >= 24) {
-            $end = $start->copy()->addHours($duration);
+            $end = $start->copy()->addMinutes(Event::durationHoursToMinutes($duration));
 
             return $start->translatedFormat($dateFmt).' - '.$end->translatedFormat($dateFmt);
         }
@@ -130,7 +130,7 @@ class EventChanged extends Mailable
         $str = $start->translatedFormat($dateFmt).', '.$start->translatedFormat($timeFmt);
 
         if ($duration > 0) {
-            $end = $start->copy()->addHours($duration);
+            $end = $start->copy()->addMinutes(Event::durationHoursToMinutes($duration));
             $str .= ' - '.$end->translatedFormat($timeFmt);
         }
 
@@ -150,8 +150,8 @@ class EventChanged extends Mailable
 
         // Same start, only the end moved.
         if ($oldDuration != $newDuration) {
-            $oldEnd = $oldStart->copy()->addHours($oldDuration);
-            $newEnd = $newStart->copy()->addHours($newDuration);
+            $oldEnd = $oldStart->copy()->addMinutes(Event::durationHoursToMinutes($oldDuration));
+            $newEnd = $newStart->copy()->addMinutes(Event::durationHoursToMinutes($newDuration));
             $endDelta = $oldEnd->startOfDay()->diffInDays($newEnd->startOfDay(), false);
 
             if ($endDelta > 0) {

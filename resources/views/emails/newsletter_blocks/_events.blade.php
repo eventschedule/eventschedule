@@ -7,7 +7,7 @@
         $tz = $role->timezone ?? 'UTC';
         $s = \Carbon\Carbon::parse($event->starts_at)->setTimezone($tz);
         if ($event->is_multi_day) {
-            $e = $s->copy()->addHours($event->duration);
+            $e = $s->copy()->addMinutes($event->durationInMinutes());
             if ($s->year !== $e->year) {
                 $dateStr = $s->format('M j, Y') . ' - ' . $e->format('M j, Y');
             } elseif ($s->month !== $e->month) {

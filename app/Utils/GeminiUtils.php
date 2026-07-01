@@ -1064,7 +1064,7 @@ class GeminiUtils
 
         $prompt = str_replace([':from', ':to', ':glossary'], [$from, $to, $glossaryInstruction], $config['base'])."\n{$text}";
 
-        $response = self::sendRequest($prompt, null, false, 'translation');
+        $response = self::sendRequest($prompt, null, 'translation');
 
         // Handle quota exceeded or other errors gracefully
         if ($response === null || empty($response)) {
@@ -1116,7 +1116,7 @@ class GeminiUtils
         $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($groupNames)], config('ai_prompts.translate_group_names.base'));
 
         try {
-            $response = self::sendRequest($prompt, null, false, 'translation');
+            $response = self::sendRequest($prompt, null, 'translation');
 
             // Handle quota exceeded or other errors gracefully
             if ($response === null || empty($response)) {
@@ -1154,7 +1154,7 @@ class GeminiUtils
         $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($fieldNames)], config('ai_prompts.translate_custom_field_names.base'));
 
         try {
-            $response = self::sendRequest($prompt, null, false, 'translation');
+            $response = self::sendRequest($prompt, null, 'translation');
 
             // Handle quota exceeded or other errors gracefully
             if ($response === null || empty($response)) {
@@ -1191,7 +1191,7 @@ class GeminiUtils
         $prompt = str_replace([':from', ':values'], [$fromLanguage, json_encode($optionValues)], config('ai_prompts.translate_custom_field_options.base'));
 
         try {
-            $response = self::sendRequest($prompt, null, false, 'translation');
+            $response = self::sendRequest($prompt, null, 'translation');
 
             if ($response === null || empty($response)) {
                 return [];
@@ -1493,7 +1493,7 @@ class GeminiUtils
         if ($event->starts_at) {
             $startDt = $event->getStartDateTime(null, true);
             if ($event->is_multi_day) {
-                $endDt = $startDt->copy()->addHours($event->duration);
+                $endDt = $startDt->copy()->addMinutes($event->durationInMinutes());
                 if ($startDt->year !== $endDt->year) {
                     $prompt .= 'Date: '.$startDt->format('F j, Y').' - '.$endDt->format('F j, Y')."\n";
                 } elseif ($startDt->month !== $endDt->month) {

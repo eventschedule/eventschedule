@@ -742,6 +742,24 @@ class EventRepo
 
         $event->fill($request->all());
 
+        // NOT NULL boolean flags are submitted as Vue-bound hidden inputs (`:value="..."`),
+        // so a client that doesn't run the Vue bundle (old browser, JS disabled, bot) submits
+        // them empty; ConvertEmptyStringsToNull turns "" into null, which violates the columns'
+        // NOT NULL constraint on insert. Re-coerce any that were actually submitted back to a
+        // concrete boolean. Guarding on has() leaves an omitted flag at its model/DB default
+        // (false), so a partial update is never silently reset.
+        foreach ([
+            'tickets_enabled', 'rsvp_enabled',
+            'ask_phone', 'require_phone', 'country_code_phone',
+            'individual_tickets', 'individual_ticket_fields',
+            'sell_after_start', 'show_unavailable_tickets',
+            'is_draft', 'is_private',
+        ] as $boolField) {
+            if ($request->has($boolField)) {
+                $event->$boolField = $request->boolean($boolField);
+            }
+        }
+
         if ($isNewEvent && ! $event->category_id && $currentRole) {
             $defaultId = self::resolveDefaultCategoryId($currentRole);
             if ($defaultId) {

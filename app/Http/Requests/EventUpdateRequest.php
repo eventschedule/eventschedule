@@ -17,6 +17,8 @@ class EventUpdateRequest extends FormRequest
     public function rules(): array
     {
         return array_merge([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+
             'flyer_image_url' => ['image', 'max:2500'],
             'slug' => ['nullable', 'string', 'max:255'],
 

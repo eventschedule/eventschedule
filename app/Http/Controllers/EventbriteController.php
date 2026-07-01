@@ -112,7 +112,7 @@ class EventbriteController extends Controller
                 if ($startUtc) {
                     $isUpcoming = Carbon::parse($startUtc)->isFuture();
                     if (! $isUpcoming && $duration && $duration >= 24) {
-                        $isUpcoming = Carbon::parse($startUtc)->addHours($duration)->isFuture();
+                        $isUpcoming = Carbon::parse($startUtc)->addMinutes(\App\Models\Event::durationHoursToMinutes($duration))->isFuture();
                     }
                 }
 

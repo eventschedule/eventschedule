@@ -713,6 +713,12 @@
 
 {{-- List View Skeleton (Desktop) --}}
         <div v-if="currentView === 'list' && isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} space-y-4 animate-pulse">
+            {{-- Date Header Skeleton (matches the real header's translucent backing) --}}
+            <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 flex items-center gap-4">
+                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                <div class="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+            </div>
             @for ($i = 0; $i < 4; $i++)
             <div class="rounded-2xl shadow-sm overflow-hidden bg-white/95 dark:bg-gray-900/95">
                 <div class="flex flex-col md:flex-row">
@@ -754,9 +760,10 @@
 {{-- List View (Desktop) --}}
         <div v-show="currentView === 'list' && !isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- Upcoming Events --}}
-            <div v-if="allListEvents.length" class="space-y-4">
-                <template v-for="(event, eventIndex) in allListEvents" :key="'list-' + event.uniqueKey">
-                    <div v-if="event._isPast && (eventIndex === 0 || !allListEvents[eventIndex - 1]._isPast)"
+            <div v-if="allListGroups.length" class="space-y-8">
+                <template v-for="(group, groupIndex) in allListGroups" :key="'list-d-' + group.date">
+                    {{-- Past Events Divider (once, before the first all-past group) --}}
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))"
                          class="py-4 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
@@ -764,6 +771,27 @@
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
+                    {{-- One date: header + its cards --}}
+                    <div class="space-y-4">
+                        {{-- Date Header: translucent card-style backing keeps the date + hairlines
+                             readable on ANY guest background (solid/gradient/image) in light + dark.
+                             Guard the dateless group so it never shows "Invalid Date". --}}
+                        <div v-if="group.date && group.date !== 'no-date'"
+                             class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 flex items-center gap-4"
+                             role="heading" aria-level="2">
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                            <div class="text-center" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}>
+                                <span class="font-semibold text-xl text-gray-900 dark:text-gray-100" v-text="formatDateHeader(group.date)"></span>
+                                <span class="ms-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                                    &middot; <span v-text="group.events.length"></span>
+                                    <span v-if="group.events.length === 1">{{ __('messages.event') }}</span>
+                                    <span v-else>{{ __('messages.events') }}</span>
+                                </span>
+                            </div>
+                            <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
+                        </div>
+                        {{-- Cards for this date --}}
+                        <template v-for="event in group.events" :key="'list-d-' + event.uniqueKey">
                     <div @click="navigateToEvent(event, $event)" class="block cursor-pointer">
                         <div class="rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
                             {{-- Side-by-side layout when flyer image exists --}}
@@ -1467,6 +1495,8 @@
                             </template>
                         </div>
                     </div>
+                        </template>
+                    </div>
                 </template>
             </div>
 
@@ -1537,10 +1567,10 @@
         {{-- List View (Mobile) --}}
         <div v-show="currentView === 'list' && !isLoadingEvents" class="{{ (isset($force_mobile) && $force_mobile) ? 'hidden' : 'md:hidden' }} {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
             {{-- All events grouped by date --}}
-            <div v-if="allMobileListGroups.length > 0" class="space-y-6">
-                <template v-for="(group, groupIndex) in allMobileListGroups" :key="'list-m-' + group.date">
+            <div v-if="allListGroups.length > 0" class="space-y-6">
+                <template v-for="(group, groupIndex) in allListGroups" :key="'list-m-' + group.date">
                     {{-- Past Events Divider --}}
-                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allMobileListGroups[groupIndex - 1].events.every(e => e._isPast))"
+                    <div v-if="group.events.every(e => e._isPast) && (groupIndex === 0 || !allListGroups[groupIndex - 1].events.every(e => e._isPast))"
                          class="py-1 flex items-center gap-4">
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-600 rounded-full px-4 py-1 bg-white dark:bg-gray-900">
@@ -1548,8 +1578,8 @@
                         </span>
                         <div class="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
-                    {{-- Date Header --}}
-                    <div class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
+                    {{-- Date Header (guard the dateless group so it never shows "Invalid Date") --}}
+                    <div v-if="group.date && group.date !== 'no-date'" class="sticky top-0 z-10 {{ $stickyBleedClass }} bg-white dark:bg-gray-800">
                         <div class="pb-5 pt-3 px-4 flex items-center gap-4">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100 text-center" v-text="formatDateHeader(group.date)" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}></div>
@@ -2568,13 +2598,7 @@ const calendarApp = createApp({
                 events: grouped[date]
             }));
         },
-        allListEvents() {
-            const upcoming = this.flatUpcomingEvents.map(e => ({...e, _isPast: false}));
-            if (this.hidePastEvents) return upcoming;
-            const past = this.flatPastEvents.map(e => ({...e, _isPast: true}));
-            return upcoming.concat(past);
-        },
-        allMobileListGroups() {
+        allListGroups() {
             const groups = {};
             this.flatUpcomingEvents.forEach(event => {
                 const date = event.occurrenceDate || 'no-date';

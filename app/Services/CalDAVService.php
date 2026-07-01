@@ -523,7 +523,7 @@ class CalDAVService
                 'SUMMARY' => $event->name,
                 'DESCRIPTION' => $calDescription,
                 'DTSTART' => $event->getStartDateTime(),
-                'DTEND' => $event->getStartDateTime()->copy()->addHours($event->duration ?: 2),
+                'DTEND' => $event->getStartDateTime()->copy()->addMinutes(Event::durationHoursToMinutes($event->duration ?: 2)),
                 'DTSTAMP' => new \DateTime,
                 'CREATED' => $event->created_at ? new \DateTime($event->created_at->toDateTimeString()) : new \DateTime,
                 'LAST-MODIFIED' => $event->updated_at ? new \DateTime($event->updated_at->toDateTimeString()) : new \DateTime,

@@ -153,7 +153,7 @@ class WhatsAppWebhookController extends Controller
             if ($event->starts_at) {
                 $date = Carbon::parse($event->starts_at)->setTimezone($timezone);
                 if ($event->is_multi_day) {
-                    $end = $date->copy()->addHours($event->duration);
+                    $end = $date->copy()->addMinutes($event->durationInMinutes());
                     if ($date->year !== $end->year) {
                         $dateStr = $date->format('M j, Y').' - '.$end->format('M j, Y');
                     } elseif ($date->month !== $end->month) {
