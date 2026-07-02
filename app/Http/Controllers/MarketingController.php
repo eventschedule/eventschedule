@@ -4835,26 +4835,20 @@ class MarketingController extends Controller
     {
         $isAdmin = auth()->check() && auth()->user()->isAdmin();
 
-        // Admin-only preview: restrict the showcase to events whose card shows an image
-        // (own flyer, or a talent/venue schedule's profile photo) rather than the
-        // letter-gradient placeholder. Gated to admins so a non-admin appending the query
-        // param sees no change.
-        $flyersOnly = $isAdmin && $request->boolean('flyers');
-
+        // Only surface events whose card shows an image (own flyer, or a talent/venue
+        // schedule's profile photo) rather than the letter-gradient placeholder.
         $events = $this->publicUpcomingEventsQuery()
             ->where('is_hidden_from_discovery', false)
-            ->when($flyersOnly, function ($q) {
-                $q->where(function ($sub) {
-                    $sub->where(function ($f) {
-                        $f->whereNotNull('flyer_image_url')
-                            ->where('flyer_image_url', '!=', '');
-                    })
-                        ->orWhereHas('roles', function ($r) {
-                            $r->whereIn('roles.type', ['talent', 'venue'])
-                                ->whereNotNull('roles.profile_image_url')
-                                ->where('roles.profile_image_url', '!=', '');
-                        });
-                });
+            ->where(function ($sub) {
+                $sub->where(function ($f) {
+                    $f->whereNotNull('flyer_image_url')
+                        ->where('flyer_image_url', '!=', '');
+                })
+                    ->orWhereHas('roles', function ($r) {
+                        $r->whereIn('roles.type', ['talent', 'venue'])
+                            ->whereNotNull('roles.profile_image_url')
+                            ->where('roles.profile_image_url', '!=', '');
+                    });
             })
             ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
             ->limit(24)
@@ -4872,7 +4866,6 @@ class MarketingController extends Controller
         return view('marketing.browse', [
             'events' => $events,
             'hiddenEvents' => $hiddenEvents,
-            'flyersOnly' => $flyersOnly,
         ]);
     }
 
