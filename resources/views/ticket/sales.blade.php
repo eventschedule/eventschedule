@@ -19,10 +19,10 @@
                 {{ __('messages.feedback') }}
             </button>
             @endif
-            @if (($subscriptionsCount ?? 0) > 0)
+            @if ($hasPro || ($subscriptionsCount ?? 0) > 0)
             <button type="button" id="tab-subscriptions"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
-                {{ __('messages.subscriptions') }} ({{ $subscriptionsCount }})
+                {{ __('messages.subscriptions') }}@if (($subscriptionsCount ?? 0) > 0) ({{ $subscriptionsCount }})@endif
             </button>
             @endif
         </nav>
@@ -100,7 +100,7 @@
     </div>
     @endif
 
-    @if (($subscriptionsCount ?? 0) > 0)
+    @if ($hasPro || ($subscriptionsCount ?? 0) > 0)
     <div id="subscriptions-panel" style="display: none;">
         @include('ticket.subscriptions_table', ['subscriptions' => $subscriptions ?? collect()])
     </div>
@@ -147,7 +147,7 @@ document.getElementById('tab-sales').addEventListener('click', function() {
     setActiveTab('tab-sales');
 });
 
-@if (($subscriptionsCount ?? 0) > 0)
+@if ($hasPro || ($subscriptionsCount ?? 0) > 0)
 document.getElementById('tab-subscriptions').addEventListener('click', function() {
     setActiveTab('tab-subscriptions');
 });
@@ -337,6 +337,8 @@ if (tab === 'feedback' && document.getElementById('tab-feedback')) {
     document.getElementById('tab-feedback').click();
 } else if (tab === 'waitlist' && document.getElementById('tab-waitlist')) {
     document.getElementById('tab-waitlist').click();
+} else if (tab === 'subscriptions' && document.getElementById('tab-subscriptions')) {
+    document.getElementById('tab-subscriptions').click();
 }
 @endif
 

@@ -13,6 +13,15 @@
     ];
 @endphp
 
+@if ($subscriptions->isEmpty())
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.no_subscriptions_yet') }}</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.no_subscriptions_yet_help') }}</p>
+    </div>
+@else
 <div class="ap-card rounded-xl overflow-hidden">
     <div class="flex flex-wrap items-center gap-x-6 gap-y-1 p-4 border-b border-gray-200 dark:border-[#2d2d30] text-sm">
         <span class="text-gray-700 dark:text-gray-300"><span class="font-semibold">{{ $subscriptions->count() }}</span> {{ __('messages.subscriptions') }}</span>
@@ -74,3 +83,4 @@
         @endforeach
     </div>
 </div>
+@endif

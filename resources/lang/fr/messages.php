@@ -561,6 +561,8 @@ return [
     'visits_redeemed' => 'visites utilisées',
     'visits_count' => '{0} :count visites|{1} :count visite|[2,*] :count visites',
     'no_visits_yet' => 'Aucune visite pour le moment',
+    'no_subscriptions_yet' => 'Aucun abonnement pour le moment',
+    'no_subscriptions_yet_help' => 'Lorsque vous vendez un billet de pass ou d\'abonnement, les détenteurs et l\'utilisation de leurs visites apparaîtront ici.',
     'subscription_active' => 'Actif',
     'subscription_expired' => 'Expiré',
     'subscription_used_up' => 'Épuisé',

@@ -606,6 +606,8 @@ return [
     'visits_redeemed' => 'посещений использовано',
     'visits_count' => '{0} :count посещений|{1} :count посещение|[2,*] :count посещений',
     'no_visits_yet' => 'Посещений пока нет',
+    'no_subscriptions_yet' => 'Подписок пока нет',
+    'no_subscriptions_yet_help' => 'Когда вы продадите абонемент или подписку, здесь появятся их владельцы и использование ими посещений.',
     'subscription_active' => 'Активна',
     'subscription_expired' => 'Истекла',
     'subscription_used_up' => 'Использована',

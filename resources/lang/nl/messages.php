@@ -359,6 +359,8 @@ return [
     'visits_redeemed' => 'bezoeken ingewisseld',
     'visits_count' => '{0} :count bezoeken|{1} :count bezoek|[2,*] :count bezoeken',
     'no_visits_yet' => 'Nog geen bezoeken',
+    'no_subscriptions_yet' => 'Nog geen abonnementen',
+    'no_subscriptions_yet_help' => 'Wanneer u een pas- of abonnementsticket verkoopt, verschijnen hier de houders en hun bezoekgebruik.',
     'subscription_active' => 'Actief',
     'subscription_expired' => 'Verlopen',
     'subscription_used_up' => 'Opgebruikt',

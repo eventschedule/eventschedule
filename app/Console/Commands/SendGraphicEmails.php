@@ -32,44 +32,27 @@ class SendGraphicEmails extends Command
             ->whereNotNull('graphic_settings')
             ->get();
 
-        $considered = 0;
-        $sent = 0;
-        $skipped = 0;
-
         foreach ($roles as $role) {
-            $considered++;
-
             try {
                 $settings = $role->graphic_settings ?? [];
 
                 // Silent skip for roles where the user hasn't enabled scheduled emails -
                 // avoids log spam on instances with many roles.
                 if (empty($settings['enabled'])) {
-                    $skipped++;
-
                     continue;
                 }
 
                 if (! $role->isEnterprise()) {
-                    $this->logSkip($role, 'not_enterprise');
-                    $skipped++;
-
                     continue;
                 }
 
                 $recipientEmails = $settings['recipient_emails'] ?? '';
                 if (empty($recipientEmails)) {
-                    $this->logSkip($role, 'no_recipients');
-                    $skipped++;
-
                     continue;
                 }
 
                 $reason = $this->shouldSendReason($role, $settings);
                 if ($reason !== 'ok') {
-                    $this->logSkip($role, $reason);
-                    $skipped++;
-
                     continue;
                 }
 
@@ -89,34 +72,20 @@ class SendGraphicEmails extends Command
                         // email went out via the platform mailer fallback instead.
                         'via_platform_fallback' => $role->isEmailSettingsFailureActive(),
                     ]);
-
-                    $sent++;
-                } else {
-                    // A failing custom SMTP now falls back to the platform mailer
-                    // (counted as sent above), so a false result here means there
-                    // were no upcoming flyer events to send.
-                    $this->logSkip($role, 'no_flyer_events');
-                    $skipped++;
                 }
+                // A false result means the schedule's custom SMTP is failing and
+                // there were no upcoming flyer events to send via the fallback.
             } catch (\Exception $e) {
                 \Log::error('Failed to send graphic email for role '.$role->subdomain.': '.$e->getMessage());
-                $skipped++;
             }
         }
-
-        \Log::info('SendGraphicEmails: complete', [
-            'considered' => $considered,
-            'sent' => $sent,
-            'skipped' => $skipped,
-        ]);
     }
 
     /**
      * Determine whether the role is due for a send right now.
      *
      * Returns 'ok' if the email should be sent, otherwise a short reason string
-     * identifying which gate blocked it. Caller is responsible for any logging
-     * (so that disabled roles can be skipped silently before this is called).
+     * identifying which gate blocked it. Blocked roles are skipped silently.
      *
      * Period model: each frequency defines a "period" (a calendar day for daily,
      * a calendar day for weekly, a calendar month for monthly). At most one send
@@ -202,14 +171,5 @@ class SendGraphicEmails extends Command
             default:
                 return 'wrong_day';
         }
-    }
-
-    protected function logSkip(Role $role, string $reason): void
-    {
-        \Log::info('SendGraphicEmails: skipped', [
-            'role_id' => $role->id,
-            'subdomain' => $role->subdomain,
-            'reason' => $reason,
-        ]);
     }
 }

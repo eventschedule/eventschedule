@@ -360,6 +360,8 @@ return [
     'visits_redeemed' => 'visitas utilizadas',
     'visits_count' => '{0} :count visitas|{1} :count visita|[2,*] :count visitas',
     'no_visits_yet' => 'Ainda sem visitas',
+    'no_subscriptions_yet' => 'Ainda sem subscrições',
+    'no_subscriptions_yet_help' => 'Quando vender um bilhete de passe ou subscrição, os titulares e a utilização das suas visitas aparecerão aqui.',
     'subscription_active' => 'Ativa',
     'subscription_expired' => 'Expirada',
     'subscription_used_up' => 'Esgotada',

@@ -639,6 +639,8 @@ return [
     'visits_redeemed' => 'visits redeemed',
     'visits_count' => '{0} :count visits|{1} :count visit|[2,*] :count visits',
     'no_visits_yet' => 'No visits yet',
+    'no_subscriptions_yet' => 'No subscriptions yet',
+    'no_subscriptions_yet_help' => 'When you sell a pass or subscription ticket, the holders and their visit usage will appear here.',
     'subscription_active' => 'Active',
     'subscription_expired' => 'Expired',
     'subscription_used_up' => 'Used up',

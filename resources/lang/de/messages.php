@@ -531,6 +531,8 @@ return [
     'visits_redeemed' => 'eingelöste Besuche',
     'visits_count' => '{0} :count Besuche|{1} :count Besuch|[2,*] :count Besuche',
     'no_visits_yet' => 'Noch keine Besuche',
+    'no_subscriptions_yet' => 'Noch keine Abonnements',
+    'no_subscriptions_yet_help' => 'Sobald Sie ein Pass- oder Abonnement-Ticket verkaufen, erscheinen hier die Inhaber und ihre Besuchsnutzung.',
     'subscription_active' => 'Aktiv',
     'subscription_expired' => 'Abgelaufen',
     'subscription_used_up' => 'Aufgebraucht',

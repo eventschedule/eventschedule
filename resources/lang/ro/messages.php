@@ -612,6 +612,8 @@ return [
     'visits_redeemed' => 'vizite folosite',
     'visits_count' => '{0} :count vizite|{1} :count vizită|[2,*] :count vizite',
     'no_visits_yet' => 'Încă nicio vizită',
+    'no_subscriptions_yet' => 'Încă niciun abonament',
+    'no_subscriptions_yet_help' => 'Când vinzi un bilet de tip permis sau abonament, aici vor apărea deținătorii și utilizarea vizitelor lor.',
     'subscription_active' => 'Activ',
     'subscription_expired' => 'Expirat',
     'subscription_used_up' => 'Epuizat',

@@ -524,6 +524,8 @@ return [
     'visits_redeemed' => 'زيارة مستخدمة',
     'visits_count' => '{0} :count زيارة|{1} :count زيارة|[2,*] :count زيارات',
     'no_visits_yet' => 'لا زيارات بعد',
+    'no_subscriptions_yet' => 'لا اشتراكات بعد',
+    'no_subscriptions_yet_help' => 'عند بيع تذكرة تصريح أو اشتراك، سيظهر هنا حاملوها واستخدامهم للزيارات.',
     'subscription_active' => 'نشط',
     'subscription_expired' => 'منتهٍ',
     'subscription_used_up' => 'مُستنفد',

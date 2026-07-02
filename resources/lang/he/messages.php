@@ -785,6 +785,8 @@ return [
     'visits_redeemed' => 'ביקורים נוצלו',
     'visits_count' => '{0} :count ביקורים|{1} :count ביקור|[2,*] :count ביקורים',
     'no_visits_yet' => 'אין ביקורים עדיין',
+    'no_subscriptions_yet' => 'אין מנויים עדיין',
+    'no_subscriptions_yet_help' => 'לאחר שתמכרו מנוי או כרטיס רב-פעמי, המנויים והשימוש שלהם בביקורים יופיעו כאן.',
     'subscription_active' => 'פעיל',
     'subscription_expired' => 'פג תוקף',
     'subscription_used_up' => 'נוצל',

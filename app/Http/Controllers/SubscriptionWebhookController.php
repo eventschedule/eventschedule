@@ -131,6 +131,16 @@ class SubscriptionWebhookController extends WebhookController
      */
     protected function handleCustomerSubscriptionUpdated(array $payload)
     {
+        // Newer Stripe API versions (2025-03-31 "basil"+) moved current_period_end from the
+        // subscription object onto its items. Cashier v15 still reads the top-level key on the
+        // cancel_at_period_end branch (WebhookController line 173), so backfill it to avoid an
+        // "Undefined array key" error.
+        $object = &$payload['data']['object'];
+        if (! isset($object['current_period_end']) && isset($object['items']['data'][0]['current_period_end'])) {
+            $object['current_period_end'] = $object['items']['data'][0]['current_period_end'];
+        }
+        unset($object);
+
         // Let Cashier handle the base logic
         $response = parent::handleCustomerSubscriptionUpdated($payload);
 

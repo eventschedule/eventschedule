@@ -557,6 +557,8 @@ return [
     'visits_redeemed' => 'visitas canjeadas',
     'visits_count' => '{0} :count visitas|{1} :count visita|[2,*] :count visitas',
     'no_visits_yet' => 'Aún no hay visitas',
+    'no_subscriptions_yet' => 'Aún no hay suscripciones',
+    'no_subscriptions_yet_help' => 'Cuando vendas una entrada de pase o suscripción, aquí aparecerán los titulares y el uso de sus visitas.',
     'subscription_active' => 'Activa',
     'subscription_expired' => 'Caducada',
     'subscription_used_up' => 'Agotada',

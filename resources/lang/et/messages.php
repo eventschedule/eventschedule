@@ -605,6 +605,8 @@ return [
     'visits_redeemed' => 'külastust kasutatud',
     'visits_count' => '{0} :count külastust|{1} :count külastus|[2,*] :count külastust',
     'no_visits_yet' => 'Veel ühtegi külastust',
+    'no_subscriptions_yet' => 'Veel ühtegi tellimust',
+    'no_subscriptions_yet_help' => 'Kui müüte pääsme- või tellimuspileti, kuvatakse siin nende omanikud ja külastuste kasutus.',
     'subscription_active' => 'Aktiivne',
     'subscription_expired' => 'Aegunud',
     'subscription_used_up' => 'Ära kasutatud',
