@@ -713,10 +713,12 @@
 
 {{-- List View Skeleton (Desktop) --}}
         <div v-if="currentView === 'list' && isLoadingEvents" class="hidden md:block {{ (isset($force_mobile) && $force_mobile) ? '!hidden' : '' }} space-y-4 animate-pulse">
-            {{-- Date Header Skeleton (matches the real header's translucent backing) --}}
-            <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 flex items-center gap-4">
+            {{-- Date Header Skeleton (matches the real header's centered translucent pill) --}}
+            <div class="flex items-center gap-4">
                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                <div class="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5">
+                    <div class="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
                 <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
             </div>
             @for ($i = 0; $i < 4; $i++)
@@ -777,15 +779,13 @@
                              readable on ANY guest background (solid/gradient/image) in light + dark.
                              Guard the dateless group so it never shows "Invalid Date". --}}
                         <div v-if="group.date && group.date !== 'no-date'"
-                             class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 flex items-center gap-4"
+                             class="flex items-center gap-4"
                              role="heading" aria-level="2">
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
-                            <div class="text-center" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}>
+                            <div class="rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-5 py-2.5 text-center" {{ rtl_class($role ?? null, 'dir=rtl', '', $isAdminRoute) }}>
                                 <span class="font-semibold text-xl text-gray-900 dark:text-gray-100" v-text="formatDateHeader(group.date)"></span>
                                 <span class="ms-2 text-sm font-normal text-gray-500 dark:text-gray-400">
-                                    &middot; <span v-text="group.events.length"></span>
-                                    <span v-if="group.events.length === 1">{{ __('messages.event') }}</span>
-                                    <span v-else>{{ __('messages.events') }}</span>
+                                    &middot; <span v-text="group.events.length"></span>&nbsp;<span v-if="group.events.length === 1">{{ __('messages.event') }}</span><span v-else>{{ __('messages.events') }}</span>
                                 </span>
                             </div>
                             <div class="flex-1 h-px bg-gray-200 dark:bg-gray-600"></div>
