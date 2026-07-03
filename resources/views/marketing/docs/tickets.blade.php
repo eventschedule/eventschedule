@@ -703,6 +703,7 @@
                             <ul class="doc-list mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">Overall progress bar</strong> with percentage of attendees checked in</li>
                                 <li><strong class="text-gray-900 dark:text-white">Per-ticket-type breakdown</strong> showing check-in counts for each ticket type</li>
+                                <li><strong class="text-gray-900 dark:text-white">Guest headcount</strong> - when a <a href="{{ route('marketing.docs.subscriptions') }}#admissions-per-event" class="text-cyan-400 hover:text-cyan-300">pass admits guests</a>, a headcount including guests is shown next to the check-in count</li>
                                 <li><strong class="text-gray-900 dark:text-white">Recent activity feed</strong> showing the last 10 check-ins with attendee names and times</li>
                                 <li><strong class="text-gray-900 dark:text-white">Filter by event and event date</strong> to view specific event dates</li>
                             </ul>

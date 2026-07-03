@@ -79,6 +79,7 @@
                             </div>
                         </div>
                         <a href="#buying" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Step 2 - Buyers purchase</a>
+                        <a href="#admissions-per-event" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Admissions per event</a>
                         <div class="doc-nav-group">
                             <a href="#redeeming" class="doc-nav-group-header doc-nav-link">Step 3 - Scan at the door <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
@@ -284,6 +285,32 @@
                             </ul>
                         </section>
 
+                        <!-- Admissions per event -->
+                        <section id="admissions-per-event" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                </svg>
+                                Admissions per event
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">By default a pass admits one person - the holder. To let the holder bring a guest (or a few), set <strong class="text-gray-900 dark:text-white">Admissions per event</strong> when you create the pass. It's the total number of people who can enter at each event, <strong class="text-gray-900 dark:text-white">including the holder</strong>: leave it at <strong class="text-gray-900 dark:text-white">1</strong> for holder-only, or set <strong class="text-gray-900 dark:text-white">2</strong> so they can bring one guest.</p>
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">A guest doesn't use up a visit</div>
+                                <p>Party size is separate from the visit count. A Visit pass good for 10 visits with 2 admissions per event still counts each event as a <strong class="text-gray-900 dark:text-white">single</strong> visit - so the holder can bring a guest to all 10 events.</p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">At the door it's one scan per person:</p>
+                            <ul class="doc-list mb-6">
+                                <li>Scan the QR once for each person, up to the limit. The scanner shows <strong class="text-gray-900 dark:text-white">"Admitted 1 of 2"</strong> with <strong class="text-gray-900 dark:text-white">"Scan again to admit the guest"</strong>, then <strong class="text-gray-900 dark:text-white">"Admitted 2 of 2"</strong> and <strong class="text-gray-900 dark:text-white">"All guests admitted"</strong>.</li>
+                                <li>If the group arrives together, tap the <strong class="text-gray-900 dark:text-white">"Admit guest"</strong> button instead of pointing the camera at the same QR again.</li>
+                                <li>Once every admission is used, a further scan reads <strong class="text-gray-900 dark:text-white">"All 2 admissions already used today"</strong> - and, as always, no extra visit is spent.</li>
+                                <li>The <a href="{{ route('marketing.docs.tickets') }}#checkin-dashboard" class="text-cyan-400 hover:text-cyan-300">check-in dashboard</a> shows a headcount that includes guests alongside the pass count.</li>
+                            </ul>
+                            <div class="doc-callout doc-callout-tip mb-6">
+                                <div class="doc-callout-title">Example: two membership tiers</div>
+                                <p>Sell an <strong class="text-gray-900 dark:text-white">"Apprentice"</strong> pass with Admissions per event set to <strong class="text-gray-900 dark:text-white">1</strong> - the holder comes alone - and an <strong class="text-gray-900 dark:text-white">"Explorer"</strong> pass set to <strong class="text-gray-900 dark:text-white">2</strong> that lets them bring a friend to every event, all without using extra visits.</p>
+                            </div>
+                        </section>
+
                         <!-- Step 3: Scan at the door -->
                         <section id="redeeming" class="doc-section">
                             <h2 class="doc-heading">
@@ -318,6 +345,11 @@
                                             <td><span class="font-semibold text-green-600 dark:text-green-400">Welcome - checked in</span></td>
                                             <td>A visit was recorded (e.g. "Visit 3 of 10").</td>
                                             <td>Let them in.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="font-semibold text-green-600 dark:text-green-400">Admitted 1 of 2</span></td>
+                                            <td>A pass that admits more than one person let someone in and still has an admission left for this event.</td>
+                                            <td>Scan the next person, or tap <strong class="text-gray-900 dark:text-white">Admit guest</strong>. No extra visit is used.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-amber-600 dark:text-amber-400">Already checked in today</span></td>
@@ -371,6 +403,7 @@
                             </h2>
                             <ul class="doc-list mb-6">
                                 <li><strong class="text-gray-900 dark:text-white">One visit per event, per day.</strong> Re-scanning the same person at the same event the same day never uses a second visit.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Bring a guest.</strong> A pass can admit more than one person per event (set <strong class="text-gray-900 dark:text-white">Admissions per event</strong>) without using extra visits.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Sold on its own.</strong> A pass can't be added to the same order as normal single-date tickets - buy them separately.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Not auto-renewing.</strong> It's a one-time purchase; there's no recurring billing.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Refunds.</strong> Cancelling or refunding a pass stops it from being scanned, but its usage history is kept for your records.</li>
