@@ -3384,6 +3384,16 @@ return [
     'pass_shared_capacity_warning' => 'Eelbroneeringud ja tavaline piletimüük jagavad samu kohti. Kui sellel üritusel on 50 kohta ja 30 omanikku broneerib ette, jääb tavaostjatele alles vaid 20 kohta.',
     'pass_seats_per_occurrence' => 'Maksimaalne eelbroneeritavate kohtade arv kuupäeva kohta (valikuline)',
     'pass_seats_per_occurrence_help' => 'Piirake, mitu kohta võivad omanikud kuupäeva kohta broneerida, et kaitsta kohapeal ostjate varu. Jätke tühjaks, kui piletipõhist piirangut pole.',
+    'pass_admits_per_event' => 'Sissepääse ürituse kohta',
+    'pass_admits_per_event_help' => 'Inimeste koguarv, kes selle piletiga igal üritusel siseneda saavad, kaasa arvatud omanik. Jäta 1, kui ainult omanik, või pane 2, et omanik saaks kaasa võtta ühe külalise.',
+    'pass_admits_people_including_holder' => 'inimest ürituse kohta (omanik kaasa arvatud)',
+    'pass_admits_includes_holder' => 'Sisaldab omanikku',
+    'pass_admitted_x_of_n' => 'Sisse lastud :used / :total',
+    'pass_all_admits_used' => 'Kõik :count sissepääsu on täna juba kasutatud',
+    'pass_scan_again_for_guest' => 'Skaneeri uuesti, et külaline sisse lasta.',
+    'pass_all_guests_admitted' => 'Kõik külalised sisse lastud.',
+    'pass_admit_guest' => 'Lase külaline sisse',
+    'admitted_incl_guests' => 'sisse lastud (koos külalistega)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Uuendus: :event',

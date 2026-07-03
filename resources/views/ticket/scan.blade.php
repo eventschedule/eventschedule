@@ -105,6 +105,11 @@
                                 <p v-if="passStatus === 'already_today' && eventDetails.checked_in_at">{{ __('messages.pass_entered_at') }} @{{ eventDetails.checked_in_at }}</p>
                                 <p v-if="passStatus === 'too_early' && eventDetails.check_in_opens">{{ __('messages.pass_check_in_opens_at') }} @{{ eventDetails.check_in_opens }}</p>
                                 <p v-if="passUsesLabel" class="text-sm font-medium">@{{ passUsesLabel }}</p>
+                                <template v-if="admitsPerEvent > 1 && (passStatus === 'valid' || passStatus === 'already_today')">
+                                    <p v-if="admitsLabel" class="text-sm font-semibold">@{{ admitsLabel }}</p>
+                                    <p v-if="passStatus === 'valid' && admitsRemaining > 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_scan_again_for_guest') }}</p>
+                                    <p v-else-if="passStatus === 'valid' && admitsRemaining === 0" class="text-sm text-green-700 dark:text-green-300">{{ __('messages.pass_all_guests_admitted') }}</p>
+                                </template>
                                 <p v-if="eventDetails.valid_until" class="text-sm text-gray-500 dark:text-[#9ca3af]">{{ __('messages.pass_valid_until') }} @{{ eventDetails.valid_until }}</p>
                             </div>
                         </template>
@@ -132,6 +137,10 @@
 
                 </div>
 
+                <button v-if="isPass && passStatus === 'valid' && admitsRemaining > 0" @click="admitNextGuest"
+                        class="mt-6 me-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                        {{ __('messages.pass_admit_guest') }} (@{{ admitsRemaining }})
+                </button>
                 <button @click="startNewScan" class="mt-6 bg-[var(--brand-button-bg)] text-white px-4 py-2 rounded-lg hover:bg-[var(--brand-button-bg-hover)] transition-colors">
                         {{ __('messages.scan_another_ticket') }}
                 </button>
@@ -149,6 +158,7 @@
                     scanResult: null,
                     eventDetails: null,
                     errorMessage: null,
+                    lastScanUrl: null,
                     events: @json($events ?? []),
                     selectedEventId: @json($selectedEventId ?? ''),
                     dropdownOpen: false,
@@ -197,6 +207,11 @@
                     }[this.resultTone];
                 },
                 passTitle() {
+                    // A fully-admitted multi-admit pass reads "all admissions used",
+                    // not the single-admit "already checked in today".
+                    if (this.passStatus === 'already_today' && this.admitsPerEvent > 1) {
+                        return @json(__('messages.pass_all_admits_used')).replace(':count', this.admitsPerEvent);
+                    }
                     const map = {
                         valid: @json(__('messages.pass_welcome_checked_in')),
                         already_today: @json(__('messages.pass_already_checked_in_today')),
@@ -229,6 +244,21 @@
                         return @json(__('messages.pass_one_per_event'));
                     }
                     return null;
+                },
+                admitsPerEvent() {
+                    return (this.eventDetails && this.eventDetails.admits_per_event) || 1;
+                },
+                admitsUsed() {
+                    return (this.eventDetails && this.eventDetails.admits_used) || 0;
+                },
+                admitsRemaining() {
+                    return Math.max(0, this.admitsPerEvent - this.admitsUsed);
+                },
+                admitsLabel() {
+                    if (this.admitsPerEvent <= 1) return null;
+                    // Clamp to the limit so a lowered admits cap can't read "3 of 2".
+                    const used = Math.min(this.admitsPerEvent, this.admitsUsed || this.admitsPerEvent);
+                    return @json(__('messages.pass_admitted_x_of_n')).replace(':used', used).replace(':total', this.admitsPerEvent);
                 }
             },
             methods: {
@@ -261,6 +291,10 @@
                     }
 
                     const scanUrl = window.location.origin + url.pathname;
+                    this.lastScanUrl = scanUrl;
+                    this.postScan(scanUrl);
+                },
+                postScan(scanUrl) {
                     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
                     fetch(scanUrl, {
@@ -288,6 +322,14 @@
                     .catch((error) => {
                         this.errorMessage = error.message || @json(__('messages.an_error_occurred'));
                     });
+                },
+                // Admit the next person (holder's guest) on a multi-admit pass
+                // without re-aiming the camera at the same QR. Reuses the scan
+                // endpoint, which increments the admits counter server-side.
+                admitNextGuest() {
+                    if (this.lastScanUrl) {
+                        this.postScan(this.lastScanUrl);
+                    }
                 },
                 onScanFailure(error) {
                     console.warn(`Scan failed: ${error}`);

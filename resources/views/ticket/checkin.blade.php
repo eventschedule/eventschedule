@@ -62,6 +62,7 @@
                         :style="{ width: progressPercent + '%' }"></div>
                 </div>
                 <p class="mt-2 text-sm text-gray-500 dark:text-[#9ca3af]">@{{ progressPercent }}%</p>
+                <p v-if="stats.total_admitted > stats.total_checked_in" class="mt-1 text-sm text-gray-500 dark:text-[#9ca3af]">@{{ stats.total_admitted }} {{ __('messages.admitted_incl_guests') }}</p>
                 <p v-if="stats.pass_reserved > 0" class="mt-1 text-sm text-[var(--brand-blue)]">{{ __('messages.pass_seats_reserved') }}: @{{ stats.pass_reserved }}</p>
             </div>
 
@@ -79,6 +80,7 @@
                         <div class="bg-[var(--brand-button-bg)] h-2.5 rounded-full transition-all duration-500"
                             :style="{ width: ticketPercent(ticket) + '%' }"></div>
                     </div>
+                    <p v-if="ticket.admitted > ticket.checked_in" class="mt-1.5 text-xs text-gray-500 dark:text-[#9ca3af]">@{{ ticket.admitted }} {{ __('messages.admitted_incl_guests') }}</p>
                 </div>
             </div>
 
@@ -132,13 +134,13 @@
                 },
                 progressPercent() {
                     if (!this.stats || this.stats.total_sold === 0) return 0;
-                    return Math.round((this.stats.total_checked_in / this.stats.total_sold) * 100);
+                    return Math.min(100, Math.round((this.stats.total_checked_in / this.stats.total_sold) * 100));
                 }
             },
             methods: {
                 ticketPercent(ticket) {
                     if (ticket.sold === 0) return 0;
-                    return Math.round((ticket.checked_in / ticket.sold) * 100);
+                    return Math.min(100, Math.round((ticket.checked_in / ticket.sold) * 100));
                 },
                 relativeTime(timestamp) {
                     const now = Math.floor(Date.now() / 1000);

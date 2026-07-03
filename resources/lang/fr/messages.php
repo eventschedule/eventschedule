@@ -3369,6 +3369,16 @@ return [
     'pass_shared_capacity_warning' => 'Les réservations anticipées et la vente classique de billets partagent les mêmes places. Si cet événement compte 50 places et que 30 détenteurs réservent à l\'avance, il ne reste que 20 places pour les acheteurs classiques.',
     'pass_seats_per_occurrence' => 'Nombre maximal de places anticipées par date (facultatif)',
     'pass_seats_per_occurrence_help' => 'Limitez le nombre de places que les détenteurs peuvent réserver par date, afin de protéger les entrées sur place. Laissez vide pour aucune limite spécifique à l\'abonnement.',
+    'pass_admits_per_event' => 'Entrées par événement',
+    'pass_admits_per_event_help' => 'Nombre total de personnes pouvant entrer avec ce pass à chaque événement, titulaire compris. Laissez à 1 pour le titulaire seul, ou mettez 2 pour que le titulaire puisse amener un invité.',
+    'pass_admits_people_including_holder' => 'personnes par événement (titulaire compris)',
+    'pass_admits_includes_holder' => 'Titulaire compris',
+    'pass_admitted_x_of_n' => ':used sur :total admis',
+    'pass_all_admits_used' => 'Les :count entrées ont déjà été utilisées aujourd\'hui',
+    'pass_scan_again_for_guest' => 'Scannez à nouveau pour admettre l\'invité.',
+    'pass_all_guests_admitted' => 'Tous les invités sont admis.',
+    'pass_admit_guest' => 'Admettre l\'invité',
+    'admitted_incl_guests' => 'admis (invités compris)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Mise à jour : :event',

@@ -81,6 +81,7 @@ class CheckInController extends Controller
         $tickets = [];
         $totalSold = 0;
         $totalCheckedIn = 0;
+        $totalAdmitted = 0;
 
         $activeTickets = $event->tickets->where('is_deleted', false);
 
@@ -103,6 +104,7 @@ class CheckInController extends Controller
             ->get();
 
         $checkedInCounts = [];
+        $admittedCounts = [];
         $recentCheckins = [];
 
         foreach ($saleTickets as $saleTicket) {
@@ -115,6 +117,7 @@ class CheckInController extends Controller
                 if ($timestamp !== null) {
                     $ticketId = $saleTicket->ticket_id;
                     $checkedInCounts[$ticketId] = ($checkedInCounts[$ticketId] ?? 0) + 1;
+                    $admittedCounts[$ticketId] = ($admittedCounts[$ticketId] ?? 0) + 1;
 
                     $recentCheckins[] = [
                         'name' => $saleTicket->sale->name,
@@ -135,10 +138,15 @@ class CheckInController extends Controller
                     && ($usage['date'] ?? null) === $requestedDate
                     && ($usage['kind'] ?? 'redemption') === 'redemption') {
                     $ticketId = $saleTicket->ticket_id;
+                    // One pass = one check-in (keeps checked-in / sold <= 100%),
+                    // but a single visit may admit the holder plus guests - track
+                    // that headcount separately so door staff see true attendance.
+                    $admits = max(1, (int) ($usage['admits'] ?? 1));
                     $checkedInCounts[$ticketId] = ($checkedInCounts[$ticketId] ?? 0) + 1;
+                    $admittedCounts[$ticketId] = ($admittedCounts[$ticketId] ?? 0) + $admits;
 
                     $recentCheckins[] = [
-                        'name' => $saleTicket->sale->name,
+                        'name' => $saleTicket->sale->name.($admits > 1 ? ' (+'.($admits - 1).')' : ''),
                         'ticket_type' => $saleTicket->ticket->type,
                         'timestamp' => (int) ($usage['at'] ?? 0),
                     ];
@@ -150,15 +158,18 @@ class CheckInController extends Controller
         foreach ($activeTickets as $ticket) {
             $sold = $ticketSoldCounts[$ticket->id];
             $checkedIn = $checkedInCounts[$ticket->id] ?? 0;
+            $admitted = $admittedCounts[$ticket->id] ?? $checkedIn;
 
             $tickets[] = [
                 'type' => $ticket->type,
                 'sold' => $sold,
                 'checked_in' => $checkedIn,
+                'admitted' => $admitted,
             ];
 
             $totalSold += $sold;
             $totalCheckedIn += $checkedIn;
+            $totalAdmitted += $admitted;
         }
 
         // Sort recent check-ins by timestamp desc, take top 10
@@ -172,6 +183,9 @@ class CheckInController extends Controller
             'tickets' => $tickets,
             'total_sold' => $totalSold,
             'total_checked_in' => $totalCheckedIn,
+            // Headcount including pass guests (>= checked_in). Surfaced as a
+            // secondary line; the checked_in / sold ratio stays the primary stat.
+            'total_admitted' => $totalAdmitted,
             // Total pass seats reserved for this occurrence (advance bookings plus
             // any already redeemed), so door staff see expected pass attendance.
             'pass_reserved' => $event->passReservedSeats($requestedDate),

@@ -280,7 +280,8 @@
                 </div>
                 <div>
                   <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.guests') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $sale->isRsvp() ? 1 : ($sale->isPrimarySale() ? $sale->groupTotalQuantity() : $sale->quantity()) }}</p>
+                  @php $headerPassTicket = $sale->saleTickets->first(fn ($st) => $st->ticket && $st->ticket->is_pass); @endphp
+                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $headerPassTicket ? $headerPassTicket->ticket->admitsPerEvent() : ($sale->isRsvp() ? 1 : ($sale->isPrimarySale() ? $sale->groupTotalQuantity() : $sale->quantity())) }}</p>
                 </div>
               </div>
             </div>
@@ -411,6 +412,13 @@
                             @endif
                         </span>
                     </div>
+                    @if ($passTicket->admitsPerEvent() > 1)
+                    <div class="flex items-center justify-between">
+                        <span class="text-white/70 print-text-gray">{{ __('messages.pass_admits_per_event') }}</span>
+                        <span class="font-medium">{{ $passTicket->admitsPerEvent() }}</span>
+                    </div>
+                    <div class="text-[13px] text-white/60 print-text-gray">{{ __('messages.pass_admits_includes_holder') }}</div>
+                    @endif
                     @if ($passSaleTicket->pass_expires_at)
                     <div class="flex items-center justify-between">
                         <span class="text-white/70 print-text-gray">{{ __('messages.pass_valid_until') }}</span>

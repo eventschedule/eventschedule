@@ -3364,6 +3364,16 @@ return [
     'pass_shared_capacity_warning' => 'Voorafgaande boekingen en gewone ticketverkoop delen dezelfde plaatsen. Als dit evenement 50 plaatsen heeft en 30 houders vooraf boeken, blijven er slechts 20 plaatsen over voor gewone kopers.',
     'pass_seats_per_occurrence' => 'Max. vooraf te boeken plaatsen per datum (optioneel)',
     'pass_seats_per_occurrence_help' => 'Beperk hoeveel plaatsen houders per datum mogen reserveren, om voorraad voor walk-ins te beschermen. Laat leeg voor geen kaartspecifieke limiet.',
+    'pass_admits_per_event' => 'Toegangen per evenement',
+    'pass_admits_per_event_help' => 'Totaal aantal personen dat met deze pas bij elk evenement naar binnen mag, inclusief de houder. Laat op 1 voor alleen de houder, of zet op 2 zodat de houder een gast kan meenemen.',
+    'pass_admits_people_including_holder' => 'personen per evenement (houder inbegrepen)',
+    'pass_admits_includes_holder' => 'Inclusief de houder',
+    'pass_admitted_x_of_n' => ':used van :total toegelaten',
+    'pass_all_admits_used' => 'Alle :count toegangen zijn vandaag al gebruikt',
+    'pass_scan_again_for_guest' => 'Scan opnieuw om de gast toe te laten.',
+    'pass_all_guests_admitted' => 'Alle gasten toegelaten.',
+    'pass_admit_guest' => 'Gast toelaten',
+    'admitted_incl_guests' => 'toegelaten (incl. gasten)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Update: :event',

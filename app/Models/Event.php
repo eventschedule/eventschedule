@@ -1945,6 +1945,7 @@ class Event extends Model
                     $row['pass_valid_days'] = $ticket->pass_valid_days ?: null;
                     $row['pass_scope'] = $ticket->pass_scope;
                     $row['pass_allow_booking'] = (bool) $ticket->pass_allow_booking;
+                    $row['pass_admits_per_event'] = $ticket->admitsPerEvent();
                     $row['pass_covered_count'] = $ticket->pass_scope === 'specific_events'
                         ? count($ticket->pass_event_ids ?? [])
                         : null;
@@ -2149,7 +2150,9 @@ class Event extends Model
             foreach (($saleTicket->pass_usages ?? []) as $usage) {
                 if ((int) ($usage['event_id'] ?? 0) === (int) $this->id
                     && ($usage['date'] ?? null) === $date) {
-                    $count++;
+                    // A single visit may admit more than one person (holder plus
+                    // guests), so each occupies a seat in the shared pool.
+                    $count += max(1, (int) ($usage['admits'] ?? 1));
                 }
             }
         }

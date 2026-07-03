@@ -3364,6 +3364,16 @@ return [
     'pass_shared_capacity_warning' => 'Le prenotazioni anticipate e la normale vendita di biglietti condividono gli stessi posti. Se questo evento ha 50 posti e 30 titolari prenotano in anticipo, restano solo 20 posti per gli acquirenti normali.',
     'pass_seats_per_occurrence' => 'Numero massimo di posti anticipati per data (facoltativo)',
     'pass_seats_per_occurrence_help' => 'Limita quanti posti i titolari possono riservare per data, proteggendo la disponibilità per chi arriva senza prenotazione. Lascia vuoto per nessun limite specifico dell\'abbonamento.',
+    'pass_admits_per_event' => 'Ingressi per evento',
+    'pass_admits_per_event_help' => 'Numero totale di persone che possono entrare con questo abbonamento a ogni evento, incluso il titolare. Lascia 1 per il solo titolare, oppure imposta 2 così il titolare può portare un ospite.',
+    'pass_admits_people_including_holder' => 'persone per evento (titolare incluso)',
+    'pass_admits_includes_holder' => 'Titolare incluso',
+    'pass_admitted_x_of_n' => 'Ammessi :used di :total',
+    'pass_all_admits_used' => 'Tutti gli :count ingressi sono già stati usati oggi',
+    'pass_scan_again_for_guest' => 'Scansiona di nuovo per far entrare l\'ospite.',
+    'pass_all_guests_admitted' => 'Tutti gli ospiti sono entrati.',
+    'pass_admit_guest' => 'Ammetti ospite',
+    'admitted_incl_guests' => 'ammessi (ospiti inclusi)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Aggiornamento: :event',

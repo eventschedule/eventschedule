@@ -3404,6 +3404,16 @@ return [
     'pass_shared_capacity_warning' => 'Rezervările în avans și vânzările de bilete obișnuite folosesc aceleași locuri. Dacă acest eveniment are 50 de locuri și 30 de deținători rezervă în avans, rămân doar 20 de locuri pentru cumpărătorii obișnuiți.',
     'pass_seats_per_occurrence' => 'Număr maxim de locuri rezervabile în avans per dată (opțional)',
     'pass_seats_per_occurrence_help' => 'Limitează câte locuri pot rezerva deținătorii per dată, protejând stocul pentru cei care vin la fața locului. Lasă gol pentru nicio limită specifică abonamentului.',
+    'pass_admits_per_event' => 'Intrări per eveniment',
+    'pass_admits_per_event_help' => 'Numărul total de persoane care pot intra cu acest abonament la fiecare eveniment, inclusiv titularul. Lasă 1 doar pentru titular sau setează 2 pentru ca titularul să poată aduce un invitat.',
+    'pass_admits_people_including_holder' => 'persoane per eveniment (inclusiv titularul)',
+    'pass_admits_includes_holder' => 'Include titularul',
+    'pass_admitted_x_of_n' => 'Admiși :used din :total',
+    'pass_all_admits_used' => 'Toate cele :count intrări au fost deja folosite azi',
+    'pass_scan_again_for_guest' => 'Scanează din nou pentru a admite invitatul.',
+    'pass_all_guests_admitted' => 'Toți invitații au fost admiși.',
+    'pass_admit_guest' => 'Admite invitatul',
+    'admitted_incl_guests' => 'admiși (incl. invitați)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Actualizare: :event',

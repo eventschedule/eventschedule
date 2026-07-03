@@ -3435,6 +3435,14 @@
                                                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ passTypeHelp(ticket.pass_usage_type) }}</p>
                                                 </div>
 
+                                                <!-- Admissions per event (holder + guests) -->
+                                                <div>
+                                                    <x-input-label :value="__('messages.pass_admits_per_event')" />
+                                                    <x-text-input type="number" min="1" step="1" placeholder="1" v-model.number="ticket.pass_admits_per_event" class="mt-1 block w-full sm:w-48" />
+                                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_admits_per_event_help') }}</p>
+                                                    <p v-if="ticket.pass_admits_per_event > 1" class="mt-1 text-xs text-[var(--brand-blue)]">@{{ ticket.pass_admits_per_event }} {{ __('messages.pass_admits_people_including_holder') }}</p>
+                                                </div>
+
                                                 <!-- Visit cap (total) -->
                                                 <div v-if="ticket.pass_usage_type === 'total'">
                                                     <x-input-label :value="__('messages.pass_max_uses')" />
@@ -3521,6 +3529,7 @@
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_event_ids]`" :value="JSON.stringify(ticket.pass_event_ids || [])">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_allow_booking]`" :value="ticket.pass_allow_booking ? 1 : 0">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_seats_per_occurrence]`" :value="ticket.pass_seats_per_occurrence || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_admits_per_event]`" :value="ticket.pass_admits_per_event || ''">
                                             </template>
                                             <input v-else type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="0">
                                         </div>
@@ -4907,6 +4916,7 @@
           pass_scope: ticket.pass_scope || 'this_event',
           pass_allow_booking: !!ticket.pass_allow_booking,
           pass_seats_per_occurrence: ticket.pass_seats_per_occurrence ?? null,
+          pass_admits_per_event: ticket.pass_admits_per_event ?? 1,
           pass_scope_group_id: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).group || '',
           pass_event_ids: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).events || [],
           custom_fields: ticket.custom_fields || {},
@@ -6132,6 +6142,7 @@
             pass_scope: 'this_event',
             pass_allow_booking: false,
             pass_seats_per_occurrence: null,
+            pass_admits_per_event: 1,
             pass_scope_group_id: '',
             pass_event_ids: [],
             sales_start_at_date: '',

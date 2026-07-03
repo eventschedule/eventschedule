@@ -40,6 +40,7 @@ class Ticket extends Model
         'pass_event_ids',
         'pass_allow_booking',
         'pass_seats_per_occurrence',
+        'pass_admits_per_event',
         'image_url',
         'url',
     ];
@@ -57,7 +58,19 @@ class Ticket extends Model
         'pass_event_ids' => 'array',
         'pass_allow_booking' => 'boolean',
         'pass_seats_per_occurrence' => 'integer',
+        'pass_admits_per_event' => 'integer',
     ];
+
+    /**
+     * How many people this pass admits at each event (including the holder),
+     * resolved to at least 1. A value above 1 lets the holder bring guests, so
+     * the QR may be scanned that many times per event. Independent of the visit
+     * allowance - each event still counts as a single use.
+     */
+    public function admitsPerEvent(): int
+    {
+        return max(1, (int) ($this->pass_admits_per_event ?: 1));
+    }
 
     public function isSalesNotStarted()
     {
@@ -246,6 +259,7 @@ class Ticket extends Model
             $data['pass_valid_days'] = $this->pass_valid_days ?: null;
             $data['pass_scope'] = $this->pass_scope;
             $data['pass_allow_booking'] = (bool) $this->pass_allow_booking;
+            $data['pass_admits_per_event'] = $this->admitsPerEvent();
             $data['pass_covered_count'] = $this->pass_scope === 'specific_events'
                 ? count($this->pass_event_ids ?? [])
                 : null;

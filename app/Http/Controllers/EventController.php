@@ -879,6 +879,7 @@ class EventController extends Controller
                         'pass_scope' => $ticket->pass_scope,
                         'pass_allow_booking' => $ticket->pass_allow_booking,
                         'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
+                        'pass_admits_per_event' => $ticket->pass_admits_per_event,
                         'pass_coverage' => [
                             'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
                             'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
@@ -1225,6 +1226,7 @@ class EventController extends Controller
                         'pass_scope' => $ticket->pass_scope,
                         'pass_allow_booking' => $ticket->pass_allow_booking,
                         'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
+                        'pass_admits_per_event' => $ticket->pass_admits_per_event,
                         'pass_coverage' => [
                             'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
                             'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),

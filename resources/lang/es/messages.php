@@ -3364,6 +3364,16 @@ return [
     'pass_shared_capacity_warning' => 'Las reservas anticipadas y la venta normal de entradas comparten las mismas plazas. Si este evento tiene 50 plazas y 30 titulares reservan con antelación, solo quedan 20 plazas para los compradores normales.',
     'pass_seats_per_occurrence' => 'Máximo de plazas anticipadas por fecha (opcional)',
     'pass_seats_per_occurrence_help' => 'Limita cuántas plazas pueden reservar los titulares por fecha, protegiendo el inventario para quienes llegan sin reserva. Déjalo en blanco para no aplicar un límite específico del abono.',
+    'pass_admits_per_event' => 'Admisiones por evento',
+    'pass_admits_per_event_help' => 'Número total de personas que pueden entrar con este abono en cada evento, incluido el titular. Déjalo en 1 para solo el titular, o ponlo en 2 para que el titular pueda traer un invitado.',
+    'pass_admits_people_including_holder' => 'personas por evento (titular incluido)',
+    'pass_admits_includes_holder' => 'Incluye al titular',
+    'pass_admitted_x_of_n' => 'Admitidos :used de :total',
+    'pass_all_admits_used' => 'Todas las :count admisiones ya usadas hoy',
+    'pass_scan_again_for_guest' => 'Escanea de nuevo para admitir al invitado.',
+    'pass_all_guests_admitted' => 'Todos los invitados admitidos.',
+    'pass_admit_guest' => 'Admitir invitado',
+    'admitted_incl_guests' => 'admitidos (incl. invitados)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Actualización: :event',

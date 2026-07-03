@@ -73,6 +73,9 @@ class PassRedemptionService
         $data->pass_usage_type = $ticket->pass_usage_type;
         $data->pass_max_uses = $ticket->pass_max_uses ?: null;
         $data->pass_usage_count = count($usages);
+        // How many people this pass admits per event (1 = holder only). Surfaced
+        // so the scanner can show "Admitted 1 of 2" and prompt to scan the guest.
+        $data->admits_per_event = $ticket->admitsPerEvent();
         if ($passSaleTicket->pass_expires_at) {
             $data->valid_until = $passSaleTicket->pass_expires_at->copy()->setTimezone($tz)->format('M j, Y');
         }
@@ -126,6 +129,7 @@ class PassRedemptionService
         $data = DB::transaction(function () use ($passSaleTicket, $scanningEvent, $ticket, $today, $nowUtc, $tz, $data) {
             $locked = SaleTicket::lockForUpdate()->find($passSaleTicket->id);
             $usages = $locked->pass_usages ?? [];
+            $admitsPerEvent = $ticket->admitsPerEvent();
 
             // A committed visit is one pass_usages entry per event-day. It may already
             // exist because the holder reserved this occurrence in advance (kind
@@ -136,7 +140,29 @@ class PassRedemptionService
                 && ($u['date'] ?? null) === $today);
 
             if ($existingIndex !== false && ($usages[$existingIndex]['kind'] ?? 'redemption') === 'redemption') {
+                // Already redeemed today. A multi-admit pass (e.g. holder + guest)
+                // may still have admissions left, in which case this scan admits
+                // the next person on the SAME visit - it does not consume another
+                // use. Only when every admission is spent is it a repeat scan.
+                $admitsUsed = max(1, (int) ($usages[$existingIndex]['admits'] ?? 1));
+
+                if ($admitsUsed < $admitsPerEvent) {
+                    $usages[$existingIndex]['admits'] = $admitsUsed + 1;
+                    $locked->pass_usages = $usages;
+                    $locked->save();
+
+                    $data->pass_status = 'valid';
+                    $data->admits_used = $admitsUsed + 1;
+                    $data->pass_usage_count = count($usages);
+                    if ($ticket->pass_usage_type === 'total' && $ticket->pass_max_uses) {
+                        $data->pass_remaining = max(0, $ticket->pass_max_uses - count($usages));
+                    }
+
+                    return $data;
+                }
+
                 $data->pass_status = 'already_today';
+                $data->admits_used = $admitsUsed;
                 $data->checked_in_at = Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
 
                 return $data;
@@ -164,17 +190,20 @@ class PassRedemptionService
                     'date' => $today,
                     'at' => $nowUtc->timestamp,
                     'kind' => 'redemption',
+                    'admits' => 1,
                 ];
             } else {
                 // Redeem the seat booked in advance for today (no new use consumed).
                 $usages[$existingIndex]['kind'] = 'redemption';
                 $usages[$existingIndex]['at'] = $nowUtc->timestamp;
+                $usages[$existingIndex]['admits'] = max(1, (int) ($usages[$existingIndex]['admits'] ?? 1));
             }
 
             $locked->pass_usages = $usages;
             $locked->save();
 
             $data->pass_status = 'valid';
+            $data->admits_used = 1;
             $data->pass_usage_count = count($usages);
             if ($ticket->pass_usage_type === 'total' && $ticket->pass_max_uses) {
                 $data->pass_remaining = max(0, $ticket->pass_max_uses - count($usages));

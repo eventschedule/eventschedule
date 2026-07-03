@@ -3368,6 +3368,16 @@ return [
     'pass_shared_capacity_warning' => 'Vorausbuchungen und regulärer Ticketverkauf teilen sich dieselben Plätze. Wenn diese Veranstaltung 50 Plätze hat und 30 Inhaber im Voraus buchen, bleiben nur 20 Plätze für reguläre Käufer.',
     'pass_seats_per_occurrence' => 'Maximale Vorausplätze pro Termin (optional)',
     'pass_seats_per_occurrence_help' => 'Begrenzen Sie, wie viele Plätze Inhaber pro Termin reservieren dürfen, um Kontingente für Spontankäufer zu schützen. Leer lassen für keine kartenspezifische Begrenzung.',
+    'pass_admits_per_event' => 'Zutritte pro Veranstaltung',
+    'pass_admits_per_event_help' => 'Gesamtzahl der Personen, die mit diesem Pass bei jeder Veranstaltung eintreten dürfen, einschließlich des Inhabers. Auf 1 lassen für nur den Inhaber, oder auf 2 setzen, damit der Inhaber einen Gast mitbringen kann.',
+    'pass_admits_people_including_holder' => 'Personen pro Veranstaltung (inkl. Inhaber)',
+    'pass_admits_includes_holder' => 'Inklusive Inhaber',
+    'pass_admitted_x_of_n' => ':used von :total eingelassen',
+    'pass_all_admits_used' => 'Alle :count Zutritte heute bereits genutzt',
+    'pass_scan_again_for_guest' => 'Erneut scannen, um den Gast einzulassen.',
+    'pass_all_guests_admitted' => 'Alle Gäste eingelassen.',
+    'pass_admit_guest' => 'Gast einlassen',
+    'admitted_incl_guests' => 'eingelassen (inkl. Gäste)',
 
     // Attendee change notifications (issue #94)
     'event_changed_subject' => 'Aktualisierung: :event',

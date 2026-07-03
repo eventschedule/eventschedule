@@ -108,6 +108,7 @@ class EventRepo
                 'pass_scope' => $ticket->pass_scope,
                 'pass_allow_booking' => $ticket->pass_allow_booking,
                 'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
+                'pass_admits_per_event' => $ticket->pass_admits_per_event,
                 'pass_coverage' => [
                     'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
                     'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
@@ -1458,6 +1459,11 @@ class EventRepo
                     ? max(1, (int) $data['pass_seats_per_occurrence'])
                     : null;
 
+                // People admitted per event (holder plus any guests), always at
+                // least 1. Lets the holder bring guests without consuming extra
+                // visits; the QR is scanned once per admitted person.
+                $passAdmitsPerEvent = $isPass ? max(1, (int) ($data['pass_admits_per_event'] ?? 1)) : null;
+
                 // A pass is one redeemable unit per sale, so cap it at 1 per order.
                 $maxPerOrder = $isPass
                     ? 1
@@ -1473,6 +1479,7 @@ class EventRepo
                     'pass_event_ids' => $passEventIds,
                     'pass_allow_booking' => $passAllowBooking,
                     'pass_seats_per_occurrence' => $passSeatsPerOccurrence,
+                    'pass_admits_per_event' => $passAdmitsPerEvent,
                 ];
 
                 if (! empty($data['id'])) {
