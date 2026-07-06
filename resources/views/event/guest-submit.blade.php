@@ -890,6 +890,7 @@
 
             clearAutoFillImage() {
                 this.autoFillImage = null;
+                this.errorMessage = null;
             },
 
             async runAutoFill() {
@@ -908,7 +909,7 @@
                         headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                         body: formData
                     });
-                    let data = await response.json().catch(() => ({}));
+                    let data = (await response.json().catch(() => null)) || {};
                     // On success the parse endpoint returns the parsed events as a bare array.
                     if (Array.isArray(data)) {
                         data = { parsed: data };

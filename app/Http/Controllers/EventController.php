@@ -2202,6 +2202,13 @@ class EventController extends Controller
         ];
         $rules = [];
         foreach ($role->import_config['required_fields'] ?? [] as $field => $isRequired) {
+            // A stale group_id requirement must not brick submissions: the form hides the
+            // sub-schedule field (and skips its client-side check) when the curator has no
+            // sub-schedules, so don't demand server-side what the guest cannot provide.
+            if ($field === 'group_id' && ! $role->groups()->exists()) {
+                continue;
+            }
+
             if ($isRequired && isset($requestKeyByField[$field])) {
                 $rules[$requestKeyByField[$field]] = ['required'];
             }
