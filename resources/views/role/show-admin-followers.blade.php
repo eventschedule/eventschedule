@@ -13,7 +13,7 @@
 </div>
 
 
-@if($followers->isEmpty() || ! $role->email_verified_at)
+@if($followers->isEmpty())
 
 <div class="text-center pt-20">
     <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"

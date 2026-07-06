@@ -71,57 +71,101 @@
 
           <form v-show="!submitted" @submit.prevent="submitEvent" novalidate>
 
+            {{-- Draft restored banner --}}
+            <div v-if="draftRestored" class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-3 text-sm text-blue-800 dark:text-blue-200" aria-live="polite">
+              <span class="flex-1">{{ __('messages.draft_restored') }}</span>
+              <button type="button" @click="startFresh" class="underline hover:no-underline shrink-0">{{ __('messages.start_fresh') }}</button>
+              <button type="button" @click="draftRestored = false" aria-label="{{ __('messages.close') }}" class="shrink-0 p-1 text-blue-400 hover:text-blue-600 dark:hover:text-blue-200">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
             {{-- Event details --}}
             <div class="ap-card p-4 sm:p-8 shadow-md sm:rounded-xl">
               <div class="max-w-2xl mx-auto">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.event_details') }}</h3>
 
                 @if (config('services.google.gemini_key') || config('services.openai.api_key'))
-                {{-- Optional AI auto-fill (secondary), surfaced up top so guests find it before typing everything --}}
-                <div class="mb-4 border-b border-gray-200 dark:border-gray-700 pb-4">
-                  <button type="button" @click="showAutoFill = !showAutoFill" :aria-expanded="showAutoFill ? 'true' : 'false'" aria-controls="auto-fill-panel"
-                    class="text-sm text-[var(--brand-blue)] underline hover:no-underline">
-                    {{ __('messages.auto_fill_from_text_or_flyer') }}
-                  </button>
-                  <div id="auto-fill-panel" v-show="showAutoFill" class="mt-3">
-                    <textarea v-model="autoFillText" rows="3" :placeholder="autoFillPlaceholder"
+                {{-- AI auto-fill dropzone: the fast path. Dropping/pasting/selecting a flyer image
+                     parses immediately; pasted text parses via the Auto Fill button. Collapses to a
+                     success strip once applied. --}}
+                <div class="mb-6">
+                  <div v-if="autoFillDone" class="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg flex items-center gap-2 text-sm text-green-800 dark:text-green-300" aria-live="polite">
+                    <svg class="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span class="flex-1">{{ __('messages.auto_fill_applied') }}</span>
+                    <button type="button" @click="reopenAutoFill" class="underline hover:no-underline shrink-0">{{ __('messages.auto_fill_start_over') }}</button>
+                  </div>
+                  <div v-else class="relative rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#252526] p-4 transition-all duration-200"
+                    :style="autoFillDragging ? { borderColor: '{{ $accentColor }}' } : {}"
+                    @dragenter.prevent="autoFillDragEnter"
+                    @dragover.prevent
+                    @dragleave.prevent="autoFillDragLeave"
+                    @drop.prevent="autoFillDrop">
+                    <div class="flex items-center gap-2 mb-1">
+                      <svg class="h-5 w-5 shrink-0 text-[var(--brand-blue)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9.374 17.5l-.439-1.596a3.375 3.375 0 0 0-2.339-2.34L5 13.126l1.596-.439a3.375 3.375 0 0 0 2.34-2.34L9.374 8.75l.439 1.596a3.375 3.375 0 0 0 2.34 2.34l1.596.438-1.596.439a3.375 3.375 0 0 0-2.34 2.34ZM18.259 8.715 18 9.75l-.259-1.035a2.625 2.625 0 0 0-1.91-1.91L14.796 6.546l1.035-.259a2.625 2.625 0 0 0 1.91-1.91L18 3.34l.259 1.035a2.625 2.625 0 0 0 1.91 1.91l1.035.259-1.035.259a2.625 2.625 0 0 0-1.91 1.91Z" /></svg>
+                      <span class="font-medium text-sm text-gray-900 dark:text-gray-100">{{ __('messages.auto_fill_pitch') }}</span>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ __('messages.auto_fill_hint') }}</p>
+                    <textarea v-model="autoFillText" rows="2" :placeholder="autoFillPlaceholder" @paste="onAutoFillPaste" dir="auto"
                       class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
                     <input type="file" ref="autoFillImageInput" accept="image/*" class="hidden" @change="onAutoFillImageSelected">
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                       <button type="button" @click="$refs.autoFillImageInput.click()" :disabled="parsing"
                         class="px-4 py-2 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 disabled:opacity-50">
-                        {{ __('messages.upload_image') }}
+                        {{ __('messages.upload_flyer') }}
                       </button>
-                      <span v-if="autoFillImage" class="text-sm text-green-600 dark:text-green-400 inline-flex items-center gap-1">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                        {{ __('messages.image_attached') }}
-                        <button type="button" @click="clearAutoFillImage" class="ms-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 underline">{{ __('messages.remove') }}</button>
+                      <span v-if="autoFillImage" class="inline-flex items-center gap-2">
+                        <img v-if="autoFillImageUrl" :src="autoFillImageUrl" alt="" class="w-12 h-12 object-cover rounded-lg border border-gray-300 dark:border-gray-600">
+                        <button type="button" @click="clearAutoFillImage" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 underline">{{ __('messages.remove') }}</button>
                       </span>
-                      <button type="button" @click="runAutoFill" :disabled="parsing || (!autoFillText.trim() && !autoFillImage)"
-                        class="ms-auto px-4 py-2 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 disabled:opacity-50">
-                        <span v-if="parsing">{{ __('messages.processing') }}</span>
-                        <span v-else>{{ __('messages.auto_fill') }}</span>
+                      <button type="button" v-show="autoFillText.trim() || autoFillImage" @click="runAutoFill" :disabled="parsing"
+                        class="ms-auto px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 hover:shadow-md"
+                        style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                        {{ __('messages.auto_fill') }}
                       </button>
+                    </div>
+                    <p v-if="autoFillError" class="mt-2 text-sm text-red-600 dark:text-red-400" aria-live="polite">@{{ autoFillError }}</p>
+                    {{-- Drop overlay (pointer-events-none so it can't steal dragleave from the zone) --}}
+                    <div v-show="autoFillDragging" class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/90 dark:bg-gray-900/90 pointer-events-none">
+                      <div class="text-center">
+                        <svg class="mx-auto h-8 w-8 mb-2" :style="{ color: '{{ $accentColor }}' }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                        <p class="font-medium" :style="{ color: '{{ $accentColor }}' }">{{ __('messages.drop_files_here') }}</p>
+                      </div>
+                    </div>
+                    {{-- Parsing overlay --}}
+                    <div v-show="parsing" class="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/80 dark:bg-gray-900/80">
+                      <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        {{ __('messages.processing') }}
+                      </span>
                     </div>
                   </div>
                 </div>
                 @endif
 
                 <div class="mb-4">
-                  <label for="submit_event_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.event_name') }}</label>
-                  <input id="submit_event_name" type="text" v-model="event.name" autocomplete="off"
+                  <label for="submit_event_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.event_name') }} <span class="text-red-500">*</span></label>
+                  <input id="submit_event_name" type="text" v-model="event.name" autocomplete="off" :class="errClass('name')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                   <div>
-                    <label for="submit_event_date" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.date') }}</label>
+                    <label for="submit_event_date" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.date') }} <span class="text-red-500">*</span></label>
                     <input id="submit_event_date" type="text" autocomplete="off" aria-label="{{ __('messages.date') }}"
                       class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                   </div>
                   <div>
-                    <label for="submit_event_time" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.start_time') }}</label>
-                    <select id="submit_event_time" v-model="event.event_start_time"
+                    <label for="submit_event_time" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.start_time') }} <span class="text-red-500">*</span></label>
+                    <select id="submit_event_time" v-model="event.event_start_time" :class="errClass('event_start_time')"
+                      class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                      <option value="">{{ __('messages.select') }}</option>
+                      <option v-for="t in timeOptions" :key="t.value" :value="t.value">@{{ t.label }}</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="submit_event_end_time" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.end_time') }} <span class="font-normal text-gray-400 dark:text-gray-500">({{ __('messages.optional') }})</span></label>
+                    <select id="submit_event_end_time" v-model="event.event_end_time"
                       class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                       <option value="">{{ __('messages.select') }}</option>
                       <option v-for="t in timeOptions" :key="t.value" :value="t.value">@{{ t.label }}</option>
@@ -144,15 +188,15 @@
                 </div>
 
                 <div v-if="event.is_online" class="mb-4">
-                  <label for="submit_event_url" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.event_url') }}</label>
-                  <input id="submit_event_url" type="url" v-model="event.event_url" autocomplete="off"
+                  <label for="submit_event_url" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.event_url') }} <span class="text-red-500">*</span></label>
+                  <input id="submit_event_url" type="url" v-model="event.event_url" autocomplete="off" :class="errClass('event_url')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                 </div>
 
                 <div v-else>
                   <div class="mb-4">
-                    <label for="submit_venue_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.venue_name') }}</label>
-                    <input id="submit_venue_name" type="text" v-model="event.venue_name" autocomplete="off"
+                    <label for="submit_venue_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.venue_name') }} <span class="text-red-500">*</span></label>
+                    <input id="submit_venue_name" type="text" v-model="event.venue_name" autocomplete="off" :class="errClass('venue_name')"
                       class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                   </div>
                   <div class="mb-4">
@@ -189,15 +233,21 @@
 
                 {{-- Short description (curator-configured) --}}
                 <div class="mb-4" v-if="importFields.short_description || requiredFields.short_description">
-                  <label for="submit_short_description" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.short_description') }}<span v-if="requiredFields.short_description" class="text-red-500"> *</span></label>
-                  <input id="submit_short_description" type="text" maxlength="200" v-model="event.short_description" autocomplete="off"
+                  <div class="flex items-baseline justify-between">
+                    <label for="submit_short_description" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.short_description') }}<span v-if="requiredFields.short_description" class="text-red-500"> *</span></label>
+                    <span class="text-xs text-gray-400 dark:text-gray-500" aria-hidden="true">@{{ (event.short_description || '').length }}/200</span>
+                  </div>
+                  <input id="submit_short_description" type="text" maxlength="200" v-model="event.short_description" autocomplete="off" :class="errClass('short_description')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                 </div>
 
-                {{-- Description --}}
+                {{-- Description. EasyMDE renders inside the wrapper div, so the error ring goes on
+                     the wrapper (the hidden textarea can't show it). --}}
                 <div class="mb-4">
                   <label for="submit_description" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.description') }}<span v-if="requiredFields.description" class="text-red-500"> *</span></label>
-                  <textarea id="submit_description" class="html-editor mt-1 block w-full" rows="4"></textarea>
+                  <div class="mt-1 rounded-lg" :class="errClass('description')">
+                    <textarea id="submit_description" class="html-editor block w-full" rows="4"></textarea>
+                  </div>
                 </div>
 
                 {{-- Event image / flyer --}}
@@ -205,17 +255,20 @@
                   <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.image') }}</label>
                   <input type="file" ref="imageInput" accept="image/*" class="hidden" @change="onImageSelected">
                   <div class="mt-1 flex items-center gap-3">
+                    {{-- Thumbnail preview comes from the client-side file (temp uploads are not
+                         publicly served); falls back to a text label when no local file exists. --}}
+                    <img v-if="event.social_image && eventImageUrl" :src="eventImageUrl" alt="" class="w-16 h-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600">
+                    <span v-else-if="event.social_image" class="text-sm text-green-600 dark:text-green-400 inline-flex items-center gap-1">
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      {{ __('messages.image_attached') }}
+                    </span>
                     <button type="button" @click="$refs.imageInput.click()" :disabled="isUploadingImage"
                       class="px-4 py-2 text-sm rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 disabled:opacity-50">
                       <span v-if="isUploadingImage">{{ __('messages.uploading') }}</span>
                       <span v-else-if="event.social_image">{{ __('messages.replace_image') }}</span>
                       <span v-else>{{ __('messages.upload_image') }}</span>
                     </button>
-                    <span v-if="event.social_image" class="text-sm text-green-600 dark:text-green-400 inline-flex items-center gap-1">
-                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                      {{ __('messages.image_attached') }}
-                      <button type="button" @click="event.social_image = null" class="ms-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 underline">{{ __('messages.remove') }}</button>
-                    </span>
+                    <button v-if="event.social_image" type="button" @click="removeEventImage" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 underline">{{ __('messages.remove') }}</button>
                   </div>
                 </div>
 
@@ -224,7 +277,7 @@
                   <div>
                     <label for="submit_ticket_price" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.price') }}<span v-if="requiredFields.ticket_price" class="text-red-500"> *</span></label>
                     <div class="mt-1 flex gap-2">
-                      <input id="submit_ticket_price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" v-model="event.ticket_price" autocomplete="off"
+                      <input id="submit_ticket_price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" v-model="event.ticket_price" autocomplete="off" :class="errClass('ticket_price')"
                         class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                       <select v-model="event.ticket_currency_code"
                         class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
@@ -234,7 +287,7 @@
                   </div>
                   <div>
                     <label for="submit_registration_url" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.registration_url') }}<span v-if="requiredFields.registration_url" class="text-red-500"> *</span></label>
-                    <input id="submit_registration_url" type="url" v-model="event.registration_url" autocomplete="off"
+                    <input id="submit_registration_url" type="url" v-model="event.registration_url" autocomplete="off" :class="errClass('registration_url')"
                       class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                   </div>
                 </div>
@@ -242,14 +295,14 @@
                 {{-- Coupon code (curator-configured) --}}
                 <div class="mb-4" v-if="importFields.coupon_code || requiredFields.coupon_code">
                   <label for="submit_coupon_code" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.coupon_code') }}<span v-if="requiredFields.coupon_code" class="text-red-500"> *</span></label>
-                  <input id="submit_coupon_code" type="text" maxlength="255" v-model="event.coupon_code" autocomplete="off"
+                  <input id="submit_coupon_code" type="text" maxlength="255" v-model="event.coupon_code" autocomplete="off" :class="errClass('coupon_code')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                 </div>
 
                 {{-- Category (curator-configured) --}}
                 <div class="mb-4" v-if="importFields.category_id || requiredFields.category_id">
                   <label for="submit_category_id" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.category') }}<span v-if="requiredFields.category_id" class="text-red-500"> *</span></label>
-                  <select id="submit_category_id" v-model="event.category_id"
+                  <select id="submit_category_id" v-model="event.category_id" :class="errClass('category_id')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                     <option value="">{{ __('messages.please_select') }}</option>
                     @foreach (get_translated_categories($role) as $catId => $catName)
@@ -261,7 +314,7 @@
                 {{-- Sub-schedule (curator-configured) --}}
                 <div class="mb-2" v-if="(importFields.group_id || requiredFields.group_id) && groups.length > 0">
                   <label for="submit_group_id" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.schedule') }}<span v-if="requiredFields.group_id" class="text-red-500"> *</span></label>
-                  <select id="submit_group_id" v-model="event.group_id"
+                  <select id="submit_group_id" v-model="event.group_id" :class="errClass('group_id')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                     <option value="">{{ __('messages.please_select') }}</option>
                     <option v-for="g in groups" :key="g.id" :value="g.id">@{{ g.name }}</option>
@@ -306,9 +359,9 @@
                 {{-- Account fields (guests only) --}}
                 <template v-if="!isAuthed">
                   <div class="mb-4">
-                    <label for="account_email" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.email') }}</label>
+                    <label for="account_email" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.email') }} <span class="text-red-500">*</span></label>
                     <div class="relative">
-                      <input id="account_email" type="email" v-model="userEmail" @blur="checkEmailExists" :readonly="accountMode === 'login' && emailExists"
+                      <input id="account_email" type="email" v-model="userEmail" @blur="checkEmailExists" :readonly="accountMode === 'login' && emailExists" :class="errClass('account_email')"
                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm" autocomplete="email">
                       <span v-if="emailChecking" class="absolute end-3 top-3 text-xs text-gray-400" aria-live="polite">{{ __('messages.checking') }}</span>
                     </div>
@@ -320,9 +373,16 @@
                       {{ __('messages.email_already_registered_login') }}
                     </div>
                     <div class="mb-2">
-                      <label for="login_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }}</label>
-                      <input id="login_password" type="password" v-model="userPassword" autocomplete="current-password"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
+                      <label for="login_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }} <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                        <input id="login_password" :type="showPassword ? 'text' : 'password'" v-model="userPassword" autocomplete="current-password" :class="errClass('account_password')"
+                          class="mt-1 block w-full pe-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
+                        <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? hidePasswordLabel : showPasswordLabel"
+                          class="absolute end-2 top-1/2 -translate-y-1/2 mt-0.5 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                          <svg v-if="showPassword" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                          <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                        </button>
+                      </div>
                     </div>
                     <div class="flex items-center justify-between mb-2">
                       <a href="{{ route('password.request') }}" target="_blank" class="text-sm text-blue-600 dark:text-blue-300 underline hover:no-underline">{{ __('messages.forgot_your_password') }}</a>
@@ -333,14 +393,22 @@
                   {{-- New user: register + 6-digit code --}}
                   <template v-else>
                     <div class="mb-4">
-                      <label for="account_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
-                      <input id="account_name" type="text" v-model="userName" autocomplete="name"
+                      <label for="account_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }} <span class="text-red-500">*</span></label>
+                      <input id="account_name" type="text" v-model="userName" autocomplete="name" :class="errClass('account_name')"
                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
                     </div>
                     <div class="mb-4">
-                      <label for="account_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }}</label>
-                      <input id="account_password" type="password" v-model="userPassword" autocomplete="new-password"
-                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
+                      <label for="account_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }} <span class="text-red-500">*</span></label>
+                      <div class="relative">
+                        <input id="account_password" :type="showPassword ? 'text' : 'password'" v-model="userPassword" autocomplete="new-password" :class="errClass('account_password')"
+                          class="mt-1 block w-full pe-10 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
+                        <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? hidePasswordLabel : showPasswordLabel"
+                          class="absolute end-2 top-1/2 -translate-y-1/2 mt-0.5 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                          <svg v-if="showPassword" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                          <svg v-else class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                        </button>
+                      </div>
+                      <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.password_min_chars') }}</p>
                     </div>
 
                     @if (\App\Utils\TurnstileUtils::isEnabled())
@@ -351,7 +419,7 @@
 
                     @if (config('app.hosted') && ! config('app.is_testing'))
                     <div v-if="!codeSent" class="mt-4">
-                      <button type="button" @click="sendCode" :disabled="codeSending"
+                      <button id="send_code_button" type="button" @click="sendCode" :disabled="codeSending" :class="errClass('verification_code')"
                         class="inline-flex items-center px-4 py-3 text-base font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span v-if="!codeSending">{{ __('messages.email_me_a_code') }}</span>
                         <span v-else>{{ __('messages.sending') }}</span>
@@ -361,8 +429,8 @@
                       <p class="text-sm text-gray-600 dark:text-gray-400 mb-2" aria-live="polite">
                         {{ __('messages.code_sent_to_prefix') }} <span class="font-medium">@{{ userEmail }}</span>. {{ __('messages.code_sent_to_suffix') }}
                       </p>
-                      <label for="verification_code" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.verification_code') }}</label>
-                      <input id="verification_code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" :value="verificationCode" @input="onCodeInput"
+                      <label for="verification_code" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.verification_code') }} <span class="text-red-500">*</span></label>
+                      <input id="verification_code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" :value="verificationCode" @input="onCodeInput" :class="errClass('verification_code')"
                         class="mt-1 block w-full sm:w-40 tracking-[0.4em] text-center border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
                       <div class="mt-2 text-sm">
                         <span class="text-gray-500 dark:text-gray-400">{{ __('messages.didnt_receive_code') }}</span>
@@ -372,7 +440,7 @@
                     </div>
                     @endif
 
-                    <div class="mt-4 flex items-start gap-2">
+                    <div id="account_terms_row" class="mt-4 flex items-start gap-2 rounded-lg" :class="errClass('terms')">
                       <input id="account_terms" type="checkbox" v-model="acceptedTerms"
                         class="mt-1 h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-blue-600 focus:ring-blue-500">
                       <label for="account_terms" class="text-sm text-gray-700 dark:text-gray-300">
@@ -403,16 +471,17 @@
                 <a href="{{ $role->getGuestUrl() }}" class="px-4 py-3 text-base text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">
                   {{ __('messages.cancel') }}
                 </a>
-                <button type="submit" :disabled="submitDisabled"
-                  class="flex-1 inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  :style="submitDisabled ? {} : { backgroundColor: '{{ $accentColor }}', color: '{{ $contrastColor }}' }"
-                  :class="submitDisabled ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400' : 'hover:shadow-md'">
+                {{-- Always enabled (except while busy): clicking with missing fields highlights
+                     them and scrolls to the first one, which beats a mute disabled button. --}}
+                <button type="submit" :disabled="saving || isUploadingImage"
+                  class="flex-1 inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-md"
+                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
                   <span v-if="saving">{{ __('messages.submitting') }}</span>
                   <span v-else-if="accountMode === 'login' && !isAuthed">{{ __('messages.log_in_and_submit') }}</span>
                   <span v-else>{{ __('messages.submit_event') }}</span>
                 </button>
               </div>
-              <p v-show="missingFields.length" class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center" aria-live="polite">
+              <p v-show="triedSubmit && missingFields.length" class="mt-2 text-sm text-red-600 dark:text-red-400 text-center" aria-live="polite">
                 {{ __('messages.still_needed') }} @{{ missingFields.join(', ') }}
               </p>
             </div>
@@ -471,7 +540,7 @@
                     name: '',
                     event_date: '',
                     event_start_time: '',
-                    duration: null,
+                    event_end_time: '',
                     is_online: false,
                     venue_name: '',
                     venue_country_code: @json($role->country_code),
@@ -528,15 +597,30 @@
                 errorMessage: null,
                 saving: false,
                 isUploadingImage: false,
-                showAutoFill: false,
+                showPassword: false,
+                showPasswordLabel: @json(__('messages.show_password')),
+                hidePasswordLabel: @json(__('messages.hide_password')),
+                // Inline validation: fields only show error styling after a submit attempt.
+                triedSubmit: false,
+                pendingSubmit: false,
                 // Start open when the curator marked any submission field required - those
                 // fields live in this section, so hiding them would strand the submitter.
                 showMoreDetails: {{ $hasRequiredImportFields ? 'true' : 'false' }},
                 autoFillText: '',
                 autoFillImage: null,
+                autoFillImageUrl: null,
+                autoFillDone: false,
+                autoFillDragging: false,
+                autoFillDragDepth: 0,
+                autoFillError: null,
                 autoFillPlaceholder: @json(__('messages.auto_fill_placeholder')),
                 parsing: false,
+                eventImageUrl: null,
                 emailCheckSeq: 0,
+                // Draft autosave (localStorage, event fields only - never account data)
+                draftKey: 'es_guest_submit_draft_' + @json($role->subdomain),
+                draftRestored: false,
+                draftTimer: null,
             }
         },
 
@@ -594,6 +678,10 @@
                         if (descEl._easyMDE) self.event.description = descEl._easyMDE.value();
                     });
                 }
+
+                // Restore a saved draft only once the widgets exist (the date goes through
+                // Flatpickr, the description through EasyMDE).
+                self.restoreDraft();
             };
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initWidgets);
@@ -611,6 +699,22 @@
                     this.$nextTick(() => this.maybeRenderTurnstile());
                 }
             },
+
+            // Flatpickr's visible altInput is a DOM clone outside Vue's reach, so the
+            // error ring can't be bound with :class - mirror it imperatively.
+            dateHasError(hasError) {
+                var el = this.datePicker && this.datePicker.altInput;
+                if (!el) return;
+                el.classList.toggle('ring-1', hasError);
+                el.classList.toggle('ring-red-500', hasError);
+                el.classList.toggle('border-red-500', hasError);
+            },
+
+            event: {
+                deep: true,
+                handler() { this.queueDraftSave(); },
+            },
+            showMoreDetails() { this.queueDraftSave(); },
         },
 
         computed: {
@@ -627,54 +731,101 @@
                 return (this.isAuthed && this.talents.length === 1) ? this.talents[0].name : null;
             },
 
-            // Single source of truth for what still blocks submission, in visual order.
-            // Powers both the disabled state (canSubmit) and the "Still needed" hint, so
-            // the two can never disagree. The page name is NOT required - the server
-            // defaults it to the account name.
-            missingFields() {
-                const missing = [];
-
-                if (!this.event.name || !this.event.name.trim()) missing.push(@json(__('messages.event_name')));
-                if (!this.event.event_date) missing.push(@json(__('messages.date')));
-                if (!this.event.event_start_time) missing.push(@json(__('messages.start_time')));
-                if (this.event.is_online) {
-                    if (!(this.event.event_url || '').trim()) missing.push(@json(__('messages.event_url')));
-                } else if (!((this.event.venue_name || '').trim() || (this.event.venue_address1 || '').trim() || (this.event.venue_city || '').trim())) {
-                    missing.push(@json(__('messages.venue_name')));
-                }
-
-                // Curator-configured required submission fields (mirrored server-side).
-                if (this.requiredFields.short_description && !(this.event.short_description || '').trim()) missing.push(@json(__('messages.short_description')));
-                if (this.requiredFields.description && !(this.event.description || '').trim()) missing.push(@json(__('messages.description')));
-                if (this.requiredFields.ticket_price && !this.event.ticket_price) missing.push(@json(__('messages.price')));
-                if (this.requiredFields.coupon_code && !(this.event.coupon_code || '').trim()) missing.push(@json(__('messages.coupon_code')));
-                if (this.requiredFields.registration_url && !(this.event.registration_url || '').trim()) missing.push(@json(__('messages.registration_url')));
-                if (this.requiredFields.category_id && !this.event.category_id) missing.push(@json(__('messages.category')));
-                if (this.requiredFields.group_id && this.groups.length > 0 && !this.event.group_id) missing.push(@json(__('messages.schedule')));
+            // Single source of truth for what still blocks submission: one flag per field.
+            // Powers the per-field error styling (errClass), the "Still needed" hint, the
+            // scroll-to-first-missing behavior, and canSubmit, so they can never disagree.
+            // The page name is NOT required - the server defaults it to the account name.
+            missingMap() {
+                const e = this.event;
+                const m = {
+                    name: !e.name || !e.name.trim(),
+                    event_date: !e.event_date,
+                    event_start_time: !e.event_start_time,
+                    event_url: e.is_online && !(e.event_url || '').trim(),
+                    venue_name: !e.is_online && !((e.venue_name || '').trim() || (e.venue_address1 || '').trim() || (e.venue_city || '').trim()),
+                    // Curator-configured required submission fields (mirrored server-side).
+                    short_description: !!this.requiredFields.short_description && !(e.short_description || '').trim(),
+                    description: !!this.requiredFields.description && !(e.description || '').trim(),
+                    ticket_price: !!this.requiredFields.ticket_price && !e.ticket_price,
+                    registration_url: !!this.requiredFields.registration_url && !(e.registration_url || '').trim(),
+                    coupon_code: !!this.requiredFields.coupon_code && !(e.coupon_code || '').trim(),
+                    category_id: !!this.requiredFields.category_id && !e.category_id,
+                    group_id: !!this.requiredFields.group_id && this.groups.length > 0 && !e.group_id,
+                    account_email: false,
+                    account_name: false,
+                    account_password: false,
+                    verification_code: false,
+                    terms: false,
+                };
 
                 if (!this.isAuthed) {
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test((this.userEmail || '').trim())) missing.push(@json(__('messages.email')));
+                    m.account_email = !emailRegex.test((this.userEmail || '').trim());
 
                     if (this.accountMode === 'login') {
-                        if (!this.userPassword) missing.push(@json(__('messages.password')));
+                        m.account_password = !this.userPassword;
                     } else {
-                        if (!this.userName.trim()) missing.push(@json(__('messages.name')));
-                        if (!this.userPassword) missing.push(@json(__('messages.password')));
-                        if (this.requiresCode && this.verificationCode.trim().length !== 6) missing.push(@json(__('messages.verification_code')));
-                        if (!this.acceptedTerms) missing.push(@json(__('messages.terms_of_service')));
+                        m.account_name = !this.userName.trim();
+                        // min:8 mirrors the server rule so a short password fails here,
+                        // not after the code round-trip.
+                        m.account_password = !this.userPassword || this.userPassword.length < 8;
+                        m.verification_code = this.requiresCode && this.verificationCode.trim().length !== 6;
+                        m.terms = !this.acceptedTerms;
                     }
                 }
 
-                return missing;
+                return m;
+            },
+
+            // [field key, label, element id] in visual order; single source for the hint
+            // text and the scroll-to-first-missing target.
+            missingFieldOrder() {
+                return [
+                    ['name', @json(__('messages.event_name')), 'submit_event_name'],
+                    ['event_date', @json(__('messages.date')), 'submit_event_date'],
+                    ['event_start_time', @json(__('messages.start_time')), 'submit_event_time'],
+                    ['event_url', @json(__('messages.event_url')), 'submit_event_url'],
+                    ['venue_name', @json(__('messages.venue_name')), 'submit_venue_name'],
+                    ['short_description', @json(__('messages.short_description')), 'submit_short_description'],
+                    ['description', @json(__('messages.description')), 'submit_description'],
+                    ['ticket_price', @json(__('messages.price')), 'submit_ticket_price'],
+                    ['registration_url', @json(__('messages.registration_url')), 'submit_registration_url'],
+                    ['coupon_code', @json(__('messages.coupon_code')), 'submit_coupon_code'],
+                    ['category_id', @json(__('messages.category')), 'submit_category_id'],
+                    ['group_id', @json(__('messages.schedule')), 'submit_group_id'],
+                    ['account_email', @json(__('messages.email')), 'account_email'],
+                    ['account_name', @json(__('messages.name')), 'account_name'],
+                    ['account_password', @json(__('messages.password')), this.accountMode === 'login' ? 'login_password' : 'account_password'],
+                    ['verification_code', @json(__('messages.verification_code')), this.codeSent ? 'verification_code' : 'send_code_button'],
+                    ['terms', @json(__('messages.terms_of_service')), 'account_terms_row'],
+                ];
+            },
+
+            missingFields() {
+                return this.missingFieldOrder
+                    .filter((f) => this.missingMap[f[0]])
+                    .map((f) => f[1]);
+            },
+
+            dateHasError() {
+                return this.triedSubmit && this.missingMap.event_date;
+            },
+
+            // End time is optional; when set, it becomes the duration (hours, float) the
+            // backend already persists. Crossing midnight rolls to the next day, matching
+            // the AP event form.
+            computedDurationHours() {
+                if (!this.event.event_start_time || !this.event.event_end_time) return null;
+                const start = this.event.event_start_time.split(':');
+                const end = this.event.event_end_time.split(':');
+                let diff = (parseInt(end[0], 10) * 60 + parseInt(end[1], 10)) - (parseInt(start[0], 10) * 60 + parseInt(start[1], 10));
+                if (diff < 0) diff += 1440;
+                if (diff === 0) return null;
+                return Math.round((diff / 60) * 100) / 100;
             },
 
             canSubmit() {
                 return this.missingFields.length === 0 && !this.emailChecking;
-            },
-
-            submitDisabled() {
-                return !this.canSubmit || this.saving || this.isUploadingImage;
             },
         },
 
@@ -697,6 +848,39 @@
                     options.push({ value: value, label: label });
                 }
                 return options;
+            },
+
+            // Ring-only error styling (no border-width change) so borderless wrappers like
+            // the terms row and the EasyMDE container don't shift layout.
+            errClass(key) {
+                return (this.triedSubmit && this.missingMap[key]) ? 'ring-1 ring-red-500 border-red-500' : '';
+            },
+
+            scrollToFirstMissing() {
+                const detailFields = ['short_description', 'description', 'ticket_price', 'registration_url', 'coupon_code', 'category_id', 'group_id'];
+                for (const [key, , id] of this.missingFieldOrder) {
+                    if (!this.missingMap[key]) continue;
+                    if (detailFields.includes(key) && !this.showMoreDetails) {
+                        this.showMoreDetails = true;
+                    }
+                    this.$nextTick(() => {
+                        let el = document.getElementById(id);
+                        if (!el) return;
+                        // The date input is hidden behind Flatpickr's visible altInput clone.
+                        if (id === 'submit_event_date' && this.datePicker && this.datePicker.altInput) {
+                            el = this.datePicker.altInput;
+                        }
+                        // The description textarea is hidden behind EasyMDE; scroll its wrapper.
+                        if (id === 'submit_description' && el._easyMDE && el.parentElement) {
+                            el = el.parentElement;
+                        }
+                        el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        if (['INPUT', 'SELECT', 'TEXTAREA', 'BUTTON'].includes(el.tagName)) {
+                            try { el.focus({ preventScroll: true }); } catch (e) { /* older browsers */ }
+                        }
+                    });
+                    return;
+                }
             },
 
             async checkEmailExists() {
@@ -736,6 +920,11 @@
                 } finally {
                     if (seq === this.emailCheckSeq) {
                         this.emailChecking = false;
+                        // A submit that landed mid-check resumes instead of dead-clicking.
+                        if (this.pendingSubmit) {
+                            this.pendingSubmit = false;
+                            this.submitEvent();
+                        }
                     }
                 }
             },
@@ -861,6 +1050,10 @@
                     const data = await response.json();
                     if (data.success && data.filename) {
                         this.event.social_image = data.filename;
+                        // Thumbnail from the local file - the temp upload has no public URL.
+                        const reader = new FileReader();
+                        reader.onload = (ev) => { this.eventImageUrl = ev.target.result; };
+                        reader.readAsDataURL(file);
                     } else {
                         throw new Error(data.message || @json(__('messages.error_uploading_image')));
                     }
@@ -871,33 +1064,92 @@
                 }
             },
 
+            removeEventImage() {
+                this.event.social_image = null;
+                this.eventImageUrl = null;
+            },
+
             onAutoFillImageSelected(e) {
                 const file = e.target.files && e.target.files[0];
                 e.target.value = '';
-                if (!file) return;
+                if (file) this.setAutoFillImage(file);
+            },
+
+            // dragenter/dragleave fire for every child crossed, so track depth instead of
+            // a boolean (the classic counter pattern; the overlay is pointer-events-none).
+            autoFillDragEnter() {
+                this.autoFillDragDepth++;
+                this.autoFillDragging = true;
+            },
+
+            autoFillDragLeave() {
+                this.autoFillDragDepth = Math.max(0, this.autoFillDragDepth - 1);
+                if (this.autoFillDragDepth === 0) this.autoFillDragging = false;
+            },
+
+            autoFillDrop(e) {
+                this.autoFillDragDepth = 0;
+                this.autoFillDragging = false;
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (file) {
+                    this.setAutoFillImage(file);
+                    return;
+                }
+                const text = e.dataTransfer && e.dataTransfer.getData('text');
+                if (text) this.autoFillText = text;
+            },
+
+            onAutoFillPaste(e) {
+                const items = (e.clipboardData && e.clipboardData.items) || [];
+                for (const item of items) {
+                    if (item.kind === 'file' && item.type.startsWith('image/')) {
+                        const file = item.getAsFile();
+                        if (file) {
+                            e.preventDefault();
+                            this.setAutoFillImage(file);
+                            return;
+                        }
+                    }
+                }
+                // Plain text: let the default paste land in the textarea (v-model syncs).
+            },
+
+            // An image is a complete input on its own, so it parses immediately - no
+            // second click. Pasted text still goes through the Auto Fill button.
+            setAutoFillImage(file) {
                 if (!file.type.startsWith('image/')) {
-                    this.errorMessage = @json(__('messages.invalid_image_type'));
+                    this.autoFillError = @json(__('messages.invalid_image_type'));
                     return;
                 }
                 const maxSize = 2.5 * 1024 * 1024;
                 if (file.size > maxSize) {
-                    this.errorMessage = @json(__('messages.image_size_warning'));
+                    this.autoFillError = @json(__('messages.image_size_warning'));
                     return;
                 }
-                this.errorMessage = null;
+                this.autoFillError = null;
                 this.autoFillImage = file;
+                this.autoFillImageUrl = null;
+                const reader = new FileReader();
+                reader.onload = (ev) => { this.autoFillImageUrl = ev.target.result; };
+                reader.readAsDataURL(file);
+                if (!this.parsing) this.runAutoFill();
             },
 
             clearAutoFillImage() {
                 this.autoFillImage = null;
-                this.errorMessage = null;
+                this.autoFillImageUrl = null;
+                this.autoFillError = null;
+            },
+
+            reopenAutoFill() {
+                this.autoFillDone = false;
             },
 
             async runAutoFill() {
                 if (!this.autoFillText.trim() && !this.autoFillImage) return;
                 this.parsing = true;
                 this.accountError = null;
-                this.errorMessage = null;
+                this.autoFillError = null;
                 try {
                     const formData = new FormData();
                     formData.append('event_details', this.autoFillText);
@@ -947,7 +1199,16 @@
                             var sm = snapped % 60;
                             this.event.event_start_time = (sh < 10 ? '0' : '') + sh + ':' + (sm < 10 ? '0' : '') + sm;
                         }
-                        if (p.event_duration) this.event.duration = p.event_duration;
+                        // A parsed duration becomes a visible end time (needs a start to
+                        // anchor to; snapped to the same 30-minute grid).
+                        if (p.event_duration && this.event.event_start_time) {
+                            var stParts = this.event.event_start_time.split(':');
+                            var stMin = parseInt(stParts[0], 10) * 60 + parseInt(stParts[1], 10);
+                            var enMin = (Math.round((stMin + p.event_duration * 60) / 30) * 30) % 1440;
+                            var eh = Math.floor(enMin / 60);
+                            var em = enMin % 60;
+                            this.event.event_end_time = (eh < 10 ? '0' : '') + eh + ':' + (em < 10 ? '0' : '') + em;
+                        }
 
                         if (p.venue_name) this.event.venue_name = p.venue_name;
                         if (p.event_address) this.event.venue_address1 = p.event_address;
@@ -974,25 +1235,50 @@
                         }
                         // A parsed flyer image doubles as the event image (the endpoint stores
                         // it and returns the temp filename the save endpoint accepts).
-                        if (p.social_image) this.event.social_image = p.social_image;
+                        if (p.social_image) {
+                            this.event.social_image = p.social_image;
+                            // The uploaded flyer is the only client-side copy of the image.
+                            this.eventImageUrl = this.autoFillImageUrl;
+                        }
                         // Reveal the optional section when the parser filled any of its fields
                         if (p.event_details || p.ticket_price || p.registration_url || p.short_description || p.social_image) {
                             this.showMoreDetails = true;
                         }
-                        this.showAutoFill = false;
+                        this.autoFillDone = true;
                     } else {
                         // The parse endpoint reports failures (daily limit, parse error) under `error`
-                        this.errorMessage = data.error || data.message || @json(__('messages.error'));
+                        this.autoFillError = data.error || data.message || @json(__('messages.error'));
                     }
                 } catch (e) {
-                    this.errorMessage = @json(__('messages.error'));
+                    this.autoFillError = @json(__('messages.error'));
                 } finally {
                     this.parsing = false;
                 }
             },
 
             async submitEvent() {
-                if (!this.canSubmit || this.saving || this.isUploadingImage) return;
+                if (this.saving || this.isUploadingImage) return;
+                if (this.emailChecking) {
+                    // Resumed from checkEmailExists' finally block once the check lands.
+                    this.pendingSubmit = true;
+                    return;
+                }
+
+                // Pull the description out of EasyMDE before validating (its change callback
+                // usually keeps the model current, but be safe on direct submits).
+                var descNode = document.getElementById('submit_description');
+                if (descNode && descNode._easyMDE) {
+                    this.event.description = descNode._easyMDE.value();
+                }
+
+                // The button is always enabled; an incomplete submit highlights what's
+                // missing and jumps there instead of silently doing nothing.
+                if (!this.canSubmit) {
+                    this.triedSubmit = true;
+                    this.scrollToFirstMissing();
+                    return;
+                }
+
                 this.saving = true;
                 this.accountError = null;
                 this.errorMessage = null;
@@ -1001,14 +1287,12 @@
                 if (this.event.event_date && this.event.event_start_time) {
                     startsAt = this.event.event_date + ' ' + this.event.event_start_time + ':00';
                 }
-                var descNode = document.getElementById('submit_description');
-                var description = descNode && descNode._easyMDE ? descNode._easyMDE.value() : this.event.description;
 
                 var body = {
                     name: this.event.name,
                     starts_at: startsAt,
-                    duration: this.event.duration || null,
-                    description: description,
+                    duration: this.computedDurationHours,
+                    description: this.event.description,
                     social_image: this.event.social_image,
                     registration_url: this.event.registration_url,
                     ticket_price: this.event.ticket_price,
@@ -1039,6 +1323,11 @@
                     body.account_name = this.userName;
                     body.schedule_name = this.scheduleName;
                     body.verification_code = this.verificationCode;
+                    // The new account should get the guest's timezone, not the curator's
+                    // (the server falls back to the schedule's timezone without it).
+                    try {
+                        body.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+                    } catch (e) { /* very old browsers */ }
                 }
 
                 try {
@@ -1075,6 +1364,7 @@
                         this.selectedTalentId = data.posted_as || data.talents[0].id;
                     }
                     this.submitted = true;
+                    this.clearDraftStorage();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     this.$nextTick(() => {
                         const h = document.getElementById('submission-success-heading');
@@ -1087,19 +1377,21 @@
                 }
             },
 
-            resetForAnother() {
-                this.submitted = false;
-                this.submissionResult = null;
+            // Shared by "Submit another" and the draft banner's "Start fresh".
+            clearEventFields() {
                 this.errorMessage = null;
                 this.accountError = null;
+                this.triedSubmit = false;
                 this.showMoreDetails = {{ $hasRequiredImportFields ? 'true' : 'false' }};
-                this.showAutoFill = false;
+                this.autoFillDone = false;
                 this.autoFillText = '';
                 this.autoFillImage = null;
+                this.autoFillImageUrl = null;
+                this.autoFillError = null;
                 this.event.name = '';
                 this.event.event_date = '';
                 this.event.event_start_time = '';
-                this.event.duration = null;
+                this.event.event_end_time = '';
                 this.event.venue_name = '';
                 this.event.venue_address1 = '';
                 this.event.venue_city = '';
@@ -1108,12 +1400,23 @@
                 this.event.event_url = '';
                 this.event.description = '';
                 this.event.social_image = null;
+                this.eventImageUrl = null;
                 this.event.ticket_price = '';
                 this.event.registration_url = '';
                 this.event.short_description = '';
                 this.event.coupon_code = '';
                 this.event.category_id = '';
                 this.event.group_id = '';
+                if (this.datePicker) this.datePicker.clear();
+                var descNode = document.getElementById('submit_description');
+                if (descNode && descNode._easyMDE) descNode._easyMDE.value('');
+            },
+
+            resetForAnother() {
+                this.submitted = false;
+                this.submissionResult = null;
+                this.clearEventFields();
+                this.clearDraftStorage();
                 // The submitter is now authenticated; the submit response refreshed `talents`
                 // with their real schedules, so the picker/identity line just work. Fabricate a
                 // named stub only as a fallback (and never an empty-name one - that would hide
@@ -1126,10 +1429,100 @@
                         this.selectedTalentId = '';
                     }
                 }
-                if (this.datePicker) this.datePicker.clear();
-                var descNode = document.getElementById('submit_description');
-                if (descNode && descNode._easyMDE) descNode._easyMDE.value('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+
+            // --- Draft autosave -------------------------------------------------------
+            // Best-effort recovery for guests who leave mid-form (e.g. switching to their
+            // email app for the verification code on mobile). Event fields only.
+
+            queueDraftSave() {
+                if (this.submitted) return;
+                clearTimeout(this.draftTimer);
+                this.draftTimer = setTimeout(() => this.saveDraft(), 500);
+            },
+
+            saveDraft() {
+                try {
+                    const e = this.event;
+                    const hasContent = !!((e.name || '').trim() || e.event_date || e.event_start_time
+                        || (e.venue_name || '').trim() || (e.venue_address1 || '').trim() || (e.venue_city || '').trim()
+                        || (e.event_url || '').trim() || (e.description || '').trim() || (e.short_description || '').trim()
+                        || e.ticket_price || (e.registration_url || '').trim() || (e.coupon_code || '').trim());
+                    if (!hasContent) {
+                        // Clearing the form (Start fresh / Submit another) dissolves the draft.
+                        localStorage.removeItem(this.draftKey);
+                        return;
+                    }
+                    const draft = Object.assign({}, e);
+                    // The temp upload may be gone by the time they return; never restore it.
+                    delete draft.social_image;
+                    localStorage.setItem(this.draftKey, JSON.stringify({
+                        v: 1,
+                        savedAt: Date.now(),
+                        event: draft,
+                        showMoreDetails: this.showMoreDetails,
+                    }));
+                } catch (err) {
+                    // Storage full or blocked - drafts are best-effort.
+                }
+            },
+
+            restoreDraft() {
+                try {
+                    const raw = localStorage.getItem(this.draftKey);
+                    if (!raw) return;
+                    const draft = JSON.parse(raw);
+                    if (!draft || draft.v !== 1 || !draft.event) return;
+                    const maxAge = 7 * 24 * 60 * 60 * 1000;
+                    if (!draft.savedAt || (Date.now() - draft.savedAt) > maxAge) {
+                        localStorage.removeItem(this.draftKey);
+                        return;
+                    }
+
+                    const e = draft.event;
+                    const fields = ['name', 'event_start_time', 'event_end_time', 'is_online', 'venue_name',
+                        'venue_address1', 'venue_city', 'venue_state', 'venue_postal_code', 'venue_country_code',
+                        'event_url', 'description', 'ticket_price', 'ticket_currency_code', 'registration_url',
+                        'short_description', 'coupon_code'];
+                    fields.forEach((f) => {
+                        if (e[f] !== undefined && e[f] !== null && e[f] !== '') this.event[f] = e[f];
+                    });
+                    // Selects only accept known values (curator config may have changed).
+                    if (e.category_id && this.categoryIds.includes(String(e.category_id))) this.event.category_id = String(e.category_id);
+                    if (e.group_id && this.groups.some((g) => g.id === e.group_id)) this.event.group_id = e.group_id;
+                    if (e.ticket_currency_code && !this.currencies.some((c) => c.value === e.ticket_currency_code)) {
+                        this.event.ticket_currency_code = @json($defaultCurrency);
+                    }
+                    // Only restore a date the picker will display (minDate: today, local).
+                    var now = new Date();
+                    var todayLocal = now.getFullYear() + '-' + ('0' + (now.getMonth() + 1)).slice(-2) + '-' + ('0' + now.getDate()).slice(-2);
+                    if (e.event_date && e.event_date >= todayLocal) {
+                        this.event.event_date = e.event_date;
+                        if (this.datePicker) this.datePicker.setDate(e.event_date, false);
+                    }
+                    if (this.event.description) {
+                        var descNode = document.getElementById('submit_description');
+                        if (descNode && descNode._easyMDE) descNode._easyMDE.value(this.event.description);
+                    }
+                    if (draft.showMoreDetails) this.showMoreDetails = true;
+                    this.draftRestored = true;
+                } catch (err) {
+                    // Corrupt or blocked storage - start clean.
+                }
+            },
+
+            clearDraftStorage() {
+                clearTimeout(this.draftTimer);
+                try {
+                    localStorage.removeItem(this.draftKey);
+                } catch (err) { /* storage blocked */ }
+            },
+
+            startFresh() {
+                this.clearDraftStorage();
+                this.draftRestored = false;
+                this.clearEventFields();
             },
         },
     });

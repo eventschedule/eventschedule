@@ -274,7 +274,7 @@
                             </h2>
                             @if(config('app.hosted'))
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                The <strong class="text-gray-900 dark:text-white">Followers</strong> tab shows a list of users who follow your schedule. Followers receive notifications when you publish new events.
+                                The <strong class="text-gray-900 dark:text-white">Followers</strong> tab shows a list of users who follow your schedule. Followers are the default recipients when you send a <x-link href="{{ route('marketing.docs.newsletters') }}#recipients">newsletter</x-link>.
                             </p>
 
                             <ul class="doc-list mb-6">
