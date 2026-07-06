@@ -1,7 +1,4 @@
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
-@if (\App\Utils\TurnstileUtils::isEnabled())
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
-@endif
 
 <style {!! nonce_attr() !!}>
     #event-import-app {
@@ -82,7 +79,7 @@
                 <div class="flex justify-center">
                     <div class="w-full max-w-2xl md:max-w-xl lg:max-w-2xl">
                         <!-- Status header for guest users (curators that do NOT require an account) -->
-                        @if (isset($isGuest) && $isGuest && ! auth()->check() && ! ($requireAccount ?? false))
+                        @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                             <p class="text-sm text-blue-800 dark:text-blue-200">
                                 {!! __('messages.create_account_link', ['link' => '<a href="' . app_url('/sign_up') . '" class="font-medium underline hover:no-underline">' . __('messages.create_an_account') . '</a>']) !!}
@@ -236,7 +233,7 @@
         @endif
 
         <!-- Show All Fields and Save All buttons when events are parsed -->
-        <div v-if="preview && preview.parsed && preview.parsed.length > 0 && !requireAccount && !submitted" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="ap-card p-4 sm:p-8 shadow-md rounded-lg mb-4">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 @if (auth()->user() && auth()->user()->isAdmin())
                 <div class="flex items-center mb-3 sm:mb-0">
@@ -272,10 +269,8 @@
                 class="hidden">
 
         <!-- Events cards - Moved outside the main div -->
-        <div v-if="preview && preview.parsed && preview.parsed.length > 0 && !submitted" class="space-y-6">
-            <!-- In the single-page require-account flow we submit one event at a time, so only show the first parsed card. -->
+        <div v-if="preview && preview.parsed && preview.parsed.length > 0" class="space-y-6">
             <div v-for="(event, idx) in preview.parsed" :key="idx"
-                    v-show="!requireAccount || idx === 0"
                     :class="['ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4',
                             savedEvents[idx] ? 'border-2 border-green-500 dark:border-green-600' : '']">
                 
@@ -463,16 +458,16 @@
                                         @change="onVenueSelect(idx, $event.target.value ? venues.find(v => v.id === $event.target.value) : null)"
                                         :value="eventSelectedVenues[idx]?.id || ''">
                                     <option value="" disabled selected>{{ __('messages.please_select') }}</option>
-                                    <template v-if="memberVenues.length && followingVenues.length">
-                                        <option disabled>── {{ __('messages.member') }} ──</option>
-                                    </template>
+                                    <option v-if="venueGroupCount > 1 && memberVenues.length" disabled>── {{ __('messages.member') }} ──</option>
                                     <option v-for="venue in memberVenues" :key="venue.id" :value="venue.id">
                                         @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
                                     </option>
-                                    <template v-if="memberVenues.length && followingVenues.length">
-                                        <option disabled>── {{ __('messages.following') }} ──</option>
-                                    </template>
+                                    <option v-if="venueGroupCount > 1 && followingVenues.length" disabled>── {{ __('messages.following') }} ──</option>
                                     <option v-for="venue in followingVenues" :key="venue.id" :value="venue.id">
+                                        @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
+                                    </option>
+                                    <option v-if="venueGroupCount > 1 && connectedVenues.length" disabled>── {{ __('messages.from_past_events') }} ──</option>
+                                    <option v-for="venue in connectedVenues" :key="venue.id" :value="venue.id">
                                         @{{ (venue.name || venue.address1) + (venue.city ? ', ' + venue.city : '') }}
                                     </option>
                                 </select>
@@ -735,7 +730,7 @@
                         @endif
 
                         <!-- Account creation checkbox for guest users (curators that do NOT require an account) -->
-                        @if (isset($isGuest) && $isGuest && ! auth()->check() && ! ($requireAccount ?? false))
+                        @if (isset($isGuest) && $isGuest && ! auth()->check())
                         <div class="flex items-center">
                             <input type="checkbox" 
                                     id="create_account_@{{ idx }}" 
@@ -801,8 +796,8 @@
                         </div>
                         @endif
 
-                        <!-- Add buttons at the bottom of the left column (hidden in the single-page require-account flow; submit moves to the identity panel) -->
-                        <div v-if="!requireAccount" class="mt-12 flex justify-end gap-2">
+                        <!-- Add buttons at the bottom of the left column -->
+                        <div class="mt-12 flex justify-end gap-2">
                             <template v-if="savedEvents[idx]">
                                 <button v-if="!savedEventData[idx]?.is_curated && !{{ isset($isGuest) && $isGuest ? 'true' : 'false' }}" @click="handleEdit(idx)" type="button" class="px-4 py-2 {{ (isset($isGuest) && $isGuest) ? 'bg-blue-500 hover:bg-blue-600' : 'bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)]' }} text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md">
                                     {{ __('messages.edit') }}
@@ -1007,180 +1002,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Single-page require-account identity panel: account + schedule details --}}
-            <div v-if="requireAccount" class="ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4">
-                <div class="max-w-2xl mx-auto">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ __('messages.your_details') }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">{{ __('messages.your_details_help') }}</p>
-
-                    {{-- Honeypot --}}
-                    <input type="text" v-model="honeypot" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
-
-                    {{-- Posting as (authenticated user with exactly one schedule) --}}
-                    <p v-if="postingAsName" class="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                        {{ __('messages.posting_as') }} <span class="font-semibold">@{{ postingAsName }}</span>
-                    </p>
-
-                    {{-- Schedule picker (authenticated user with multiple schedules) --}}
-                    <div v-if="showTalentPicker" class="mb-4">
-                        <label for="post_as" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.post_as') }}</label>
-                        <select id="post_as" v-model="selectedTalentId" class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                            <option v-for="t in talents" :key="t.id" :value="t.id">@{{ t.name }}</option>
-                        </select>
-                    </div>
-
-                    {{-- Page name (we will create a talent schedule) --}}
-                    <div v-if="needsPageName" class="mb-4">
-                        <label for="schedule_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.your_page_name') }}</label>
-                        <input id="schedule_name" type="text" v-model="scheduleName" autocomplete="off"
-                            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
-                        <p v-pre class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.your_page_name_help', ['name' => $role->getDisplayName(true)]) }}</p>
-                    </div>
-
-                    {{-- Account fields (guests only) --}}
-                    <template v-if="!isAuthed">
-                        <div class="mb-4">
-                            <label for="account_email" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.email') }}</label>
-                            <div class="relative">
-                                <input id="account_email" type="email" v-model="userEmail" @blur="checkEmailExists" :readonly="accountMode === 'login' && emailExists"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm" autocomplete="email">
-                                <span v-if="emailChecking" class="absolute end-3 top-3 text-xs text-gray-400" aria-live="polite">{{ __('messages.checking') }}</span>
-                            </div>
-                        </div>
-
-                        {{-- Returning user: inline login --}}
-                        <template v-if="accountMode === 'login'">
-                            <div class="mb-3 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg text-sm text-blue-800 dark:text-blue-200" aria-live="polite">
-                                {{ __('messages.email_already_registered_login') }}
-                            </div>
-                            <div class="mb-2">
-                                <label for="login_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }}</label>
-                                <input id="login_password" type="password" v-model="userPassword" autocomplete="current-password"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
-                            </div>
-                            <div class="flex items-center justify-between mb-2">
-                                <a href="{{ route('password.request') }}" target="_blank" class="text-sm text-blue-600 dark:text-blue-300 underline hover:no-underline">{{ __('messages.forgot_your_password') }}</a>
-                                <button type="button" @click="useAnotherEmail" class="text-sm text-gray-500 dark:text-gray-400 underline hover:no-underline">{{ __('messages.use_another_email') }}</button>
-                            </div>
-                        </template>
-
-                        {{-- New user: register + 6-digit code --}}
-                        <template v-else>
-                            <div class="mb-4">
-                                <label for="account_name" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.name') }}</label>
-                                <input id="account_name" type="text" v-model="userName" autocomplete="name"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
-                            </div>
-                            <div class="mb-4">
-                                <label for="account_password" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.password') }}</label>
-                                <input id="account_password" type="password" v-model="userPassword" autocomplete="new-password"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
-                            </div>
-
-                            @if (\App\Utils\TurnstileUtils::isEnabled())
-                            <div v-if="turnstileEnabled" class="mt-4">
-                                <div id="turnstile-import-widget"></div>
-                            </div>
-                            @endif
-
-                            @if (config('app.hosted') && ! config('app.is_testing'))
-                            <div v-if="!codeSent" class="mt-4">
-                                <button type="button" @click="sendCode" :disabled="codeSending"
-                                    class="inline-flex items-center px-4 py-3 text-base font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <span v-if="!codeSending">{{ __('messages.email_me_a_code') }}</span>
-                                    <span v-else>{{ __('messages.sending') }}</span>
-                                </button>
-                            </div>
-                            <div v-else class="mt-4">
-                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2" aria-live="polite">
-                                    {{ __('messages.code_sent_to_prefix') }} <span class="font-medium">@{{ userEmail }}</span>. {{ __('messages.code_sent_to_suffix') }}
-                                </p>
-                                <label for="verification_code" class="block font-medium text-sm text-gray-700 dark:text-gray-300">{{ __('messages.verification_code') }}</label>
-                                <input id="verification_code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" :value="verificationCode" @input="onCodeInput"
-                                    class="mt-1 block w-40 tracking-[0.4em] text-center border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-lg shadow-sm">
-                                <div class="mt-2 text-sm">
-                                    <span class="text-gray-500 dark:text-gray-400">{{ __('messages.didnt_receive_code') }}</span>
-                                    <span v-if="resendCountdown > 0" class="text-gray-400 dark:text-gray-500">{{ __('messages.resend_in_label') }} @{{ resendCountdown }}s</span>
-                                    <button v-else type="button" @click="sendCode" class="text-blue-600 dark:text-blue-300 underline hover:no-underline">{{ __('messages.resend_code') }}</button>
-                                </div>
-                            </div>
-                            @endif
-
-                            <div class="mt-4 flex items-start gap-2">
-                                <input id="account_terms" type="checkbox" v-model="acceptedTerms"
-                                    class="mt-1 h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-blue-600 focus:ring-blue-500">
-                                <label for="account_terms" class="text-sm text-gray-700 dark:text-gray-300">
-                                    @if (config('app.hosted'))
-                                        {!! str_replace([':terms', ':privacy'], [
-                                            '<a href="' . marketing_url('/terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.terms_of_service') . '</a>',
-                                            '<a href="' . marketing_url('/privacy') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.privacy_policy') . '</a>'
-                                        ], __('messages.i_accept_the_terms_and_privacy')) !!}
-                                    @else
-                                        {!! str_replace([':terms'], [
-                                            '<a href="' . marketing_url('/self-hosting-terms-of-service') . '" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">' . __('messages.terms_of_service') . '</a>',
-                                        ], __('messages.i_accept_the_terms')) !!}
-                                    @endif
-                                </label>
-                            </div>
-                            <p v-pre class="mt-3 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.guest_submit_consent', ['name' => $role->getDisplayName(true)]) }}</p>
-                        </template>
-                    </template>
-
-                    <div v-if="errorMessage || accountError" class="mt-4 p-3 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg" aria-live="assertive">
-                        @{{ errorMessage || accountError }}
-                    </div>
-
-                    <div class="mt-6">
-                        <button type="button" @click="submitRequireAccount" :disabled="!canSubmitRequireAccount || savingEvents[0]"
-                            :class="['w-full inline-flex items-center justify-center px-4 py-3 text-base font-semibold rounded-lg transition-all duration-200',
-                                (!canSubmitRequireAccount || savingEvents[0]) ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md']">
-                            <span v-if="savingEvents[0]">{{ __('messages.submitting') }}</span>
-                            <span v-else-if="accountMode === 'login'">{{ __('messages.log_in_and_submit') }}</span>
-                            <span v-else>{{ __('messages.submit_event') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Single-page require-account confirmation screen (pending vs live) --}}
-        <div v-if="requireAccount && submitted" class="ap-card p-6 sm:p-10 shadow-md sm:rounded-xl mt-4">
-            <div class="max-w-2xl mx-auto text-center">
-                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
-                    <svg class="h-7 w-7 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <h2 id="submission-success-heading" tabindex="-1" class="text-2xl font-bold text-gray-900 dark:text-gray-100 focus:outline-none">
-                    <span v-if="submissionResult && submissionResult.status === 'live'">{{ __('messages.youre_live_title') }}</span>
-                    <span v-else>{{ __('messages.submitted_pending_title') }}</span>
-                </h2>
-                <p class="mt-3 text-gray-600 dark:text-gray-400">
-                    <template v-if="submissionResult && submissionResult.status === 'live'">
-                        <span class="font-semibold">@{{ submissionResult.event_name }}</span> <span v-pre>{{ __('messages.youre_live_body', ['curator' => $role->getDisplayName(true)]) }}</span>
-                    </template>
-                    <template v-else>
-                        <span v-pre>{{ __('messages.submitted_pending_body', ['curator' => $role->getDisplayName(true)]) }}</span>
-                    </template>
-                </p>
-
-                <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-                    <button type="button" @click="resetForAnother" class="text-sm text-gray-500 dark:text-gray-400 underline hover:no-underline order-last sm:order-first">{{ __('messages.submit_another') }}</button>
-                    <template v-if="submissionResult && submissionResult.status === 'live'">
-                        <a :href="submissionResult.dashboard_url" class="px-4 py-3 text-base font-semibold rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">{{ __('messages.go_to_dashboard') }}</a>
-                        <a :href="submissionResult.view_url" class="px-4 py-3 text-base font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">{{ __('messages.view_event') }}</a>
-                    </template>
-                    <template v-else>
-                        <a :href="submissionResult.view_url" class="px-4 py-3 text-base font-semibold rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200">{{ __('messages.view_event') }}</a>
-                        <a :href="submissionResult.dashboard_url" class="px-4 py-3 text-base font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200">{{ __('messages.go_to_dashboard') }}</a>
-                    </template>
-                </div>
-
-                @if (config('services.google.client_id') && config('app.hosted'))
-                <p class="mt-5 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.google_nudge_next_time') }}</p>
-                @endif
-            </div>
         </div>
 
 </form>
@@ -1262,31 +1083,6 @@
                 userName: '',
                 userEmail: '',
                 userPassword: '',
-                // Single-page require-account submission
-                requireAccount: {{ ($requireAccount ?? false) ? 'true' : 'false' }},
-                isAuthed: {{ auth()->check() ? 'true' : 'false' }},
-                requiresCode: {{ (config('app.hosted') && ! config('app.is_testing')) ? 'true' : 'false' }},
-                turnstileEnabled: {{ \App\Utils\TurnstileUtils::isEnabled() ? 'true' : 'false' }},
-                turnstileSiteKey: @json(\App\Utils\TurnstileUtils::getSiteKey()),
-                turnstileToken: '',
-                turnstileWidgetId: null,
-                talents: @json(auth()->check() ? auth()->user()->talents()->get()->map(fn($t) => ['id' => \App\Utils\UrlUtils::encodeId($t->id), 'name' => $t->name])->values() : []),
-                accountMode: 'register',
-                scheduleName: '',
-                verificationCode: '',
-                acceptedTerms: false,
-                emailChecking: false,
-                emailExists: null,
-                emailStub: false,
-                codeSent: false,
-                codeSending: false,
-                resendCountdown: 0,
-                resendTimer: null,
-                selectedTalentId: '',
-                honeypot: '',
-                submitted: false,
-                submissionResult: null,
-                accountError: null,
                 venues: @json($venues ?? []),
                 eventVenueTypes: [],      // 'use_existing' | 'create_new' per event
                 eventSelectedVenues: [],  // selected venue object per event
@@ -1317,7 +1113,16 @@
             },
 
             followingVenues() {
-                return this.venues.filter(v => !v.is_member);
+                return this.venues.filter(v => !v.is_member && !v.is_connected);
+            },
+
+            connectedVenues() {
+                return this.venues.filter(v => !v.is_member && v.is_connected);
+            },
+
+            venueGroupCount() {
+                return [this.memberVenues, this.followingVenues, this.connectedVenues]
+                    .filter(group => group.length > 0).length;
             },
 
             canCreateAccount() {
@@ -1360,74 +1165,11 @@
                 // If createAccount is not checked, only validate event fields
                 return eventFieldsValid;
             },
-
-            eventFieldsValid() {
-                return this.preview?.parsed?.every(event => {
-                    const hasName = event.event_name?.trim();
-                    const hasDate = event.event_date && event.event_start_time;
-                    const hasVenueInfo = event.venue_name?.trim() ||
-                                         event.event_address?.trim() ||
-                                         event.event_city?.trim() ||
-                                         ({{ $role->isCurator() ? 'true' : 'false' }} && @json($role->city));
-
-                    if (this.requiredFields.short_description && !event.short_description?.trim()) return false;
-                    if (this.requiredFields.description && !event.event_details?.trim()) return false;
-                    if (this.requiredFields.ticket_price && !event.ticket_price) return false;
-                    if (this.requiredFields.coupon_code && !event.coupon_code?.trim()) return false;
-                    if (this.requiredFields.registration_url && !event.registration_url?.trim()) return false;
-                    if (this.requiredFields.category_id && !event.category_id) return false;
-                    if (this.requiredFields.group_id && !event.group_id) return false;
-
-                    return hasName && hasVenueInfo && hasDate;
-                }) || false;
-            },
-
-            // Show the "your name/act/org" page-name field only when we will create a talent
-            // schedule (the submitter has none yet). Returning users reuse their own.
-            needsPageName() {
-                if (!this.requireAccount) return false;
-                if (this.accountMode === 'login') return false;
-                return this.talents.length === 0;
-            },
-
-            showTalentPicker() {
-                return this.requireAccount && this.isAuthed && this.talents.length > 1;
-            },
-
-            postingAsName() {
-                return (this.requireAccount && this.isAuthed && this.talents.length === 1) ? this.talents[0].name : null;
-            },
-
-            canSubmitRequireAccount() {
-                if (!this.eventFieldsValid) return false;
-                if (this.emailChecking) return false;
-
-                if (this.isAuthed) {
-                    return this.needsPageName ? !!this.scheduleName.trim() : true;
-                }
-
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test((this.userEmail || '').trim())) return false;
-
-                if (this.accountMode === 'login') {
-                    return !!this.userPassword;
-                }
-
-                // Register mode
-                let ok = !!(this.userName.trim() && this.userPassword && this.acceptedTerms && this.scheduleName.trim());
-                if (this.requiresCode) ok = ok && this.verificationCode.trim().length === 6;
-                return ok;
-            }
         },
 
                     created() {
                 this.loadShowAllFieldsPreference()
                 this.timeOptions = this.generateTimeOptions()
-
-                // Default the schedule picker to the user's first schedule (require-account flow)
-                if (this.requireAccount && this.isAuthed && this.talents.length) {
-                    this.selectedTalentId = this.talents[0].id
-                }
 
                 // Add global drag event listeners
                 document.addEventListener('dragend', this.handleGlobalDragEnd)
@@ -1448,10 +1190,6 @@
                 clearTimeout(this.dragTimeout);
                 this.dragTimeout = null;
             }
-            if (this.resendTimer) {
-                clearInterval(this.resendTimer);
-                this.resendTimer = null;
-            }
         },
 
         updated() {
@@ -1462,18 +1200,6 @@
         },
 
         watch: {
-            preview() {
-                this.$nextTick(() => this.maybeRenderTurnstile());
-            },
-            accountMode(mode) {
-                if (mode === 'login') {
-                    // The register subtree (and its widget) is destroyed; drop the stale handle.
-                    this.turnstileToken = '';
-                    this.turnstileWidgetId = null;
-                } else {
-                    this.$nextTick(() => this.maybeRenderTurnstile());
-                }
-            },
             showAllFields(newVal) {
                 if (newVal && this.preview) {
                     this.$nextTick(() => {
@@ -1484,155 +1210,6 @@
         },
 
         methods: {
-            // On email blur (require-account flow): switch to inline login for an existing
-            // account, or stay in register mode for a new/stub email.
-            async checkEmailExists() {
-                const email = (this.userEmail || '').trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!this.requireAccount || this.isAuthed || !emailRegex.test(email)) {
-                    return;
-                }
-                this.emailChecking = true;
-                this.accountError = null;
-                try {
-                    const response = await fetch('{{ route("event.check_email", ["subdomain" => $role->subdomain]) }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ email })
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        this.emailExists = data.exists;
-                        this.emailStub = data.stub;
-                        // A real account (with a password) signs in; a stub sets a password via register + code.
-                        if (data.exists && !data.stub) {
-                            this.accountMode = 'login';
-                            this.codeSent = false;
-                        } else {
-                            this.accountMode = 'register';
-                        }
-                    }
-                } catch (e) {
-                    // Non-blocking: fall back to register mode on a failed check.
-                } finally {
-                    this.emailChecking = false;
-                }
-            },
-
-            useAnotherEmail() {
-                this.accountMode = 'register';
-                this.emailExists = null;
-                this.codeSent = false;
-                this.verificationCode = '';
-                this.userPassword = '';
-                this.$nextTick(() => {
-                    const el = document.getElementById('account_email');
-                    if (el) el.focus();
-                });
-            },
-
-            // Turnstile uses explicit render: the widget div lives in a conditionally-rendered
-            // Vue subtree, so Cloudflare's implicit auto-scan never finds it. Render it ourselves
-            // once the register panel is in the DOM, and read the token from Vue state.
-            maybeRenderTurnstile() {
-                if (!this.turnstileEnabled || !this.turnstileSiteKey) return;
-                if (this.isAuthed || this.accountMode !== 'register') return;
-                if (!this.preview || !this.preview.parsed || !this.preview.parsed.length) return;
-                this.renderImportTurnstile();
-            },
-
-            renderImportTurnstile() {
-                const el = document.getElementById('turnstile-import-widget');
-                if (!el || el.childElementCount > 0) return; // not in DOM yet, or already rendered
-                if (typeof turnstile === 'undefined') {
-                    setTimeout(() => this.renderImportTurnstile(), 200);
-                    return;
-                }
-                this.turnstileWidgetId = turnstile.render('#turnstile-import-widget', {
-                    sitekey: this.turnstileSiteKey,
-                    callback: (token) => { this.turnstileToken = token; },
-                    'expired-callback': () => { this.turnstileToken = ''; },
-                    'error-callback': () => { this.turnstileToken = ''; },
-                });
-            },
-
-            resetTurnstile() {
-                this.turnstileToken = '';
-                if (this.turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
-                    turnstile.reset(this.turnstileWidgetId);
-                }
-            },
-
-            async sendCode() {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test((this.userEmail || '').trim())) {
-                    this.accountError = @json(__('messages.please_enter_valid_email'));
-                    return;
-                }
-                this.codeSending = true;
-                this.accountError = null;
-                try {
-                    const response = await fetch('{{ route("event.guest_send_code", ["subdomain" => $role->subdomain]) }}', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ email: this.userEmail.trim(), website: this.honeypot, 'cf-turnstile-response': this.turnstileToken })
-                    });
-                    const data = await response.json().catch(() => ({}));
-                    if (!response.ok || data.success === false) {
-                        this.accountError = data.message || @json(__('messages.error'));
-                        return;
-                    }
-                    this.codeSent = true;
-                    this.startResendCountdown();
-                    this.$nextTick(() => {
-                        const el = document.getElementById('verification_code');
-                        if (el) el.focus();
-                    });
-                } catch (e) {
-                    this.accountError = @json(__('messages.error'));
-                } finally {
-                    this.codeSending = false;
-                    // Turnstile tokens are single-use; reset so a Resend gets a fresh one.
-                    this.resetTurnstile();
-                }
-            },
-
-            startResendCountdown() {
-                this.resendCountdown = 30;
-                if (this.resendTimer) clearInterval(this.resendTimer);
-                this.resendTimer = setInterval(() => {
-                    this.resendCountdown--;
-                    if (this.resendCountdown <= 0) {
-                        clearInterval(this.resendTimer);
-                        this.resendTimer = null;
-                    }
-                }, 1000);
-            },
-
-            onCodeInput(event) {
-                this.verificationCode = (event.target.value || '').replace(/\D/g, '').slice(0, 6);
-            },
-
-            submitRequireAccount() {
-                if (!this.canSubmitRequireAccount) return;
-                this.handleSave(0);
-            },
-
-            resetForAnother() {
-                this.submitted = false;
-                this.submissionResult = null;
-                this.preview = null;
-                this.eventDetails = '';
-                this.detailsImage = null;
-                this.detailsImageUrl = null;
-                this.errorMessage = null;
-                this.accountError = null;
-                this.savedEvents = [];
-                this.savingEvents = [];
-                this.saveErrors = [];
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            },
-
             toggleImportMultiselect(idx, fieldKey, option, event) {
                 const current = (this.preview.parsed[idx].custom_field_values[fieldKey] || '').split(', ').map(s => s.trim()).filter(s => s);
                 if (event.target.checked) {
@@ -2360,7 +1937,7 @@
                             venue_id: venueId,
                             venue_language_code: '{{ $role->language_code }}',
                             claim_venue_ownership: !!this.eventClaimVenue[idx],
-                            members: this.requireAccount ? {} : members,
+                            members: members,
                             name: eventName,
                             name_en: parsed.event_name_en,
                             short_name: parsed.event_short_name,
@@ -2375,33 +1952,21 @@
                             ticket_price: parsed.ticket_price,
                             coupon_code: parsed.coupon_code,
                             ticket_currency_code: parsed.ticket_currency_code,
-                            current_role_group_id: this.requireAccount ? null : (parsed.group_id || null),
-                            curator_group_id: this.requireAccount ? (parsed.group_id || null) : undefined,
+                            current_role_group_id: parsed.group_id || null,
                             custom_field_values: parsed.custom_field_values || {},
                             category_id: parsed.category_id,
                             @if ($role->isCurator() && !isset($isGuest))
                                 curators: ['{{ \App\Utils\UrlUtils::encodeId($role->id) }}'],
                             @endif
-                            // Account data: the single-page require-account flow, or the optional
-                            // create-account checkbox on curators that do not require an account.
-                            // (account_* keys keep these distinct from the event's own name/email.)
-                            ...(this.requireAccount ? {
-                                account_mode: this.accountMode,
-                                account_email: this.userEmail,
-                                account_password: this.userPassword,
-                                selected_talent_id: this.selectedTalentId || null,
-                                website: this.honeypot,
-                                ...(this.accountMode === 'register' ? {
-                                    account_name: this.userName,
-                                    schedule_name: this.scheduleName,
-                                    verification_code: this.verificationCode
-                                } : {})
-                            } : ({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && this.createAccount ? {
+                            // Optional create-account checkbox for guests (curators that do
+                            // not require an account). account_* keys keep these distinct
+                            // from the event's own name/email.
+                            ...({{ isset($isGuest) && $isGuest ? 'true' : 'false' }} && this.createAccount ? {
                                 create_account: true,
                                 account_name: this.userName,
                                 account_email: this.userEmail,
                                 account_password: this.userPassword
-                            } : {}))
+                            } : {})
                         })
                     });
                     
@@ -2420,25 +1985,6 @@
                     }
 
                     const data = await response.json();
-
-                    // Single-page require-account flow shows a confirmation screen (pending vs live)
-                    // instead of redirecting to the (possibly not-yet-public) event.
-                    if (this.requireAccount) {
-                        // The submitter is now authenticated and owns a talent schedule, so a
-                        // follow-up "Submit another" only needs the event fields.
-                        this.isAuthed = true;
-                        if (this.talents.length === 0) {
-                            this.talents = [{ id: '', name: (this.scheduleName || this.userName || '').trim() }];
-                        }
-                        this.submissionResult = data.event;
-                        this.submitted = true;
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        this.$nextTick(() => {
-                            const h = document.getElementById('submission-success-heading');
-                            if (h) h.focus();
-                        });
-                        return;
-                    }
 
                     // Store the response data in savedEventData array
                     this.savedEvents[idx] = true;
@@ -2468,11 +2014,7 @@
                 } catch (error) {
                     console.error('Error saving event:', error);
                     this.errorMessage = error.message;
-                    // Set the per-card error too, except in the require-account flow where the
-                    // single identity panel already shows errorMessage (avoids a double display).
-                    if (!this.requireAccount) {
-                        this.saveErrors[idx] = error.message || 'An error occurred while saving the event';
-                    }
+                    this.saveErrors[idx] = error.message || 'An error occurred while saving the event';
                 } finally {
                     // Clear saving state for this event
                     this.savingEvents[idx] = false;

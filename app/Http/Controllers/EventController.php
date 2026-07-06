@@ -1413,10 +1413,27 @@ class EventController extends Controller
                 return $item->isVenue();
             });
 
+            // Venues connected to this schedule through past events (e.g. created by a
+            // previous AI import, by another admin of the schedule, or via calendar sync
+            // under another user) have no role_user pivot for this user but are still
+            // "existing" venues to the curator. Skipped for venue schedules: the AI
+            // parser pins events to the venue itself there. Claimed venues that do not
+            // accept requests are excluded, mirroring the pivot-list rule above.
+            $connectedVenues = collect();
+            if (! $role->isVenue()) {
+                $connectedIds = $role->connectedRoleIds('venue')->diff($venueRoles->pluck('id'));
+                if ($connectedIds->isNotEmpty()) {
+                    $connectedVenues = Role::whereIn('id', $connectedIds)
+                        ->get()
+                        ->filter(fn ($item) => $item->acceptEventRequests())
+                        ->values();
+                }
+            }
+
             // Sort venues by most-recently-used in this curator's events first,
             // then alphabetically. The recently-picked venue is far more likely
             // to be the right choice than the alphabetical first.
-            $venueIds = $venueRoles->pluck('id');
+            $venueIds = $venueRoles->pluck('id')->merge($connectedVenues->pluck('id'));
             $latestEventByVenue = [];
             if ($venueIds->isNotEmpty()) {
                 $latestEventByVenue = \DB::table('event_role')
@@ -1428,14 +1445,15 @@ class EventController extends Controller
                     ->all();
             }
 
-            $venueRoles = $venueRoles->sortBy([
+            $allVenueRoles = $venueRoles->concat($connectedVenues)->sortBy([
                 fn ($a, $b) => strcmp($latestEventByVenue[$b->id] ?? '', $latestEventByVenue[$a->id] ?? ''),
                 fn ($a, $b) => strcasecmp($a->name ?? '', $b->name ?? ''),
             ]);
 
-            $venues = array_values($venueRoles->map(function ($item) {
+            $venues = array_values($allVenueRoles->map(function ($item) {
                 return array_merge($item->toData(), [
-                    'is_member' => in_array($item->pivot->level, ['owner', 'admin', 'viewer'], true),
+                    'is_member' => $item->pivot && in_array($item->pivot->level, ['owner', 'admin', 'viewer'], true),
+                    'is_connected' => $item->pivot === null,
                 ]);
             })->toArray());
         }
@@ -1454,12 +1472,20 @@ class EventController extends Controller
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
-        // Booking-form and custom-domain curators that require an account use the bridged
-        // 3-step path (the single page can't host their booking form or set a cross-domain
-        // login cookie); send them back through the request router. AI-import curators on a
-        // plain subdomain render the single page below with mandatory account + schedule.
-        if ($role->require_account && ($role->usesBookingForm() || $request->attributes->get('custom_domain_host'))) {
-            return redirect(route('role.request', ['subdomain' => $subdomain]));
+        // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
+        // ?string, so only honor a string value.
+        $lang = is_string($request->lang) ? $request->lang : null;
+
+        // Require-account curators use the structured single-page submission (event.guest_submit),
+        // not this AI-import page; bounce them through the request router, which routes there
+        // (redirecting to the canonical subdomain on custom domains). This AI page renders below
+        // only for curators that do not require an account. Forward a valid ?lang= so shared
+        // localized links keep their language across the hop.
+        if ($role->require_account) {
+            return redirect(route('role.request', array_filter([
+                'subdomain' => $subdomain,
+                'lang' => $lang && is_valid_language_code($lang) ? $lang : null,
+            ])));
         }
 
         if (! auth()->check()) {
@@ -1469,18 +1495,18 @@ class EventController extends Controller
         // Store guest language for auth flow
         if (session()->has('translate')) {
             session()->put('guest_language', 'en');
-        } elseif ($request->lang && is_valid_language_code($request->lang)) {
-            session()->put('guest_language', $request->lang);
+        } elseif ($lang && is_valid_language_code($lang)) {
+            session()->put('guest_language', $lang);
         } elseif (is_valid_language_code($role->language_code)) {
             session()->put('guest_language', $role->language_code);
         }
 
-        if ($request->lang) {
+        if ($lang) {
             // Validate the language code before setting it
-            if (is_valid_language_code($request->lang)) {
-                app()->setLocale($request->lang);
+            if (is_valid_language_code($lang)) {
+                app()->setLocale($lang);
 
-                if ($request->lang == 'en') {
+                if ($lang == 'en') {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -1500,7 +1526,90 @@ class EventController extends Controller
 
         $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
 
-        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'requireAccount' => $role->require_account, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
+        return view('event.guest-import', ['role' => $role, 'isGuest' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
+    }
+
+    /**
+     * Structured single-page submission form for curators that require an account: explicit
+     * event fields + an inline account section (email/password/verification code, or login for
+     * an existing account) + a schedule name, all on one page. Posts to the same
+     * event.guest_import.store endpoint as the AI-import single page.
+     */
+    public function showGuestSubmit(Request $request, $subdomain)
+    {
+        $role = Role::subdomain($subdomain)->firstOrFail();
+
+        // Not accepting submissions → this page doesn't exist. Abort rather than redirect:
+        // request() routes require-account curators here without checking acceptEventRequests(),
+        // so redirecting back to it would infinite-loop.
+        if (! $role->acceptEventRequests()) {
+            abort(404);
+        }
+
+        // Non-account curators use a different form; hand back to the request router (which won't
+        // route them here, so no loop).
+        if (! $role->require_account) {
+            return redirect(route('role.request', ['subdomain' => $subdomain]));
+        }
+
+        // Booking-form curators collect submissions through the booking form's vetting questions;
+        // request() routes them down the bridged path (never here), so bounce direct URL hits back
+        // to the router instead of offering a form that skips their required questions.
+        if ($role->usesBookingForm()) {
+            return redirect(route('role.request', ['subdomain' => $subdomain]));
+        }
+
+        // On a custom domain, bounce through the request router, which redirects to this page on
+        // the canonical {subdomain}.eventschedule.com so the account+event flow and the post-submit
+        // dashboard share the .eventschedule.com cookie (a custom-domain login can't set a cookie
+        // the app subdomain reads).
+        if ($request->attributes->get('custom_domain_host')) {
+            return redirect(route('role.request', ['subdomain' => $subdomain]));
+        }
+
+        if (! auth()->check()) {
+            session()->put('pending_request', $subdomain);
+        }
+
+        // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
+        // ?string, so only honor a string value.
+        $lang = is_string($request->lang) ? $request->lang : null;
+
+        // Store guest language for auth flow
+        if (session()->has('translate')) {
+            session()->put('guest_language', 'en');
+        } elseif ($lang && is_valid_language_code($lang)) {
+            session()->put('guest_language', $lang);
+        } elseif (is_valid_language_code($role->language_code)) {
+            session()->put('guest_language', $role->language_code);
+        }
+
+        if ($lang) {
+            // Validate the language code before setting it
+            if (is_valid_language_code($lang)) {
+                app()->setLocale($lang);
+
+                if ($lang == 'en') {
+                    session()->put('translate', true);
+                } else {
+                    session()->forget('translate');
+                }
+            } else {
+                // If invalid language code, redirect to the same URL without the lang parameter
+                return redirect(request()->url());
+            }
+        } elseif (session()->has('translate')) {
+            app()->setLocale('en');
+        } else {
+            // Validate the language code from database before setting it
+            if (is_valid_language_code($role->language_code)) {
+                app()->setLocale($role->language_code);
+            }
+        }
+
+        $currencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
+
+        return view('event.guest-submit', ['role' => $role, 'isGuest' => true, 'requireAccount' => true, 'venues' => [], 'currencies' => $currencies, 'defaultCurrency' => MoneyUtils::getCurrencyForCountry($role->country_code)]);
     }
 
     public function parse(EventParseRequest $request, $subdomain)
@@ -1964,7 +2073,10 @@ class EventController extends Controller
         // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
         $request->validate(['name' => ['required', 'string', 'max:255']]);
 
-        $event = $this->eventRepo->saveEvent($role, $request, null, false);
+        // Attach newly created / safety-net-matched venues to the importing user as
+        // follower so they appear in the venue dropdowns on future visits, matching
+        // manual create, calendar sync, and the automated curator import.
+        $event = $this->eventRepo->saveEvent($role, $request, null, true);
 
         if ($request->social_image) {
             $tempDir = storage_path('app/temp');
@@ -1987,10 +2099,15 @@ class EventController extends Controller
         $venue = $event->venue;
         if ($venue) {
             $isMember = false;
+            $hasPivot = false;
             if ($user = $request->user()) {
                 $isMember = $user->member()->where('roles.id', $venue->id)->exists();
+                $hasPivot = $isMember || $user->roles()->where('roles.id', $venue->id)->exists();
             }
-            $venueData = array_merge($venue->toData(), ['is_member' => $isMember]);
+            $venueData = array_merge($venue->toData(), [
+                'is_member' => $isMember,
+                'is_connected' => ! $hasPivot,
+            ]);
         }
 
         return response()->json([
@@ -2023,6 +2140,12 @@ class EventController extends Controller
         // Curators that require an account collect the account + schedule + event on this one
         // page and own the event on the submitter's own talent schedule (linked to the curator).
         if ($role->require_account) {
+            // The structured page never renders for booking-form curators (their required
+            // vetting questions live on the booking form); block direct posts too.
+            if ($role->usesBookingForm()) {
+                return response()->json(['message' => __('messages.not_authorized')], 403);
+            }
+
             return $this->guestImportWithAccount($request, $role);
         }
 
@@ -2063,6 +2186,28 @@ class EventController extends Controller
         // Honeypot
         if ($request->filled('website')) {
             return response()->json(['message' => __('messages.invalid_request')], 422);
+        }
+
+        // Server backstop for the curator-configured required submission fields (the form
+        // enforces these client-side). Runs before account creation so a rejected submission
+        // doesn't mint an account. group_id arrives as curator_group_id in the guest flow.
+        $requestKeyByField = [
+            'short_description' => 'short_description',
+            'description' => 'description',
+            'ticket_price' => 'ticket_price',
+            'coupon_code' => 'coupon_code',
+            'registration_url' => 'registration_url',
+            'category_id' => 'category_id',
+            'group_id' => 'curator_group_id',
+        ];
+        $rules = [];
+        foreach ($role->import_config['required_fields'] ?? [] as $field => $isRequired) {
+            if ($isRequired && isset($requestKeyByField[$field])) {
+                $rules[$requestKeyByField[$field]] = ['required'];
+            }
+        }
+        if ($rules) {
+            $request->validate($rules);
         }
 
         $user = auth()->user();
@@ -2180,6 +2325,12 @@ class EventController extends Controller
                 'view_url' => $event->getGuestUrl($talent->subdomain),
                 'dashboard_url' => app_url(route('role.view_admin', ['subdomain' => $talent->subdomain, 'tab' => 'schedule'], false)),
             ],
+            // The submitter's schedules, so "Submit another" can offer the real picker (a
+            // login-mode client has no way to know them otherwise).
+            'posted_as' => UrlUtils::encodeId($talent->id),
+            'talents' => $user->talents()->get()
+                ->map(fn ($t) => ['id' => UrlUtils::encodeId($t->id), 'name' => $t->name])
+                ->values(),
         ]);
     }
 

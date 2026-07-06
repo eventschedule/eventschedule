@@ -3431,4 +3431,11 @@ return [
     'event_is_cancelled_ap' => 'Dit evenement is geannuleerd.',
     'event_cancelled_banner' => 'Dit evenement is geannuleerd.',
     'event_cancelled_guest_notice' => 'Dit evenement is geannuleerd. Als je een ticket hebt gekocht, neem dan contact op met de organisator over een terugbetaling.',
+    'auto_fill' => 'Automatisch invullen',
+    'auto_fill_from_text_or_flyer' => 'Heb je een flyer of tekst? Automatisch invullen',
+    'auto_fill_placeholder' => 'Plak hier de evenementdetails (naam, datum, tijd, locatie, beschrijving)...',
+    'replace_image' => 'Afbeelding vervangen',
+    'additional_details' => 'Extra details',
+    'still_needed' => 'Nog nodig:',
+    'from_past_events' => 'Uit eerdere evenementen',
 ];

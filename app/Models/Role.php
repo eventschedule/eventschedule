@@ -481,6 +481,23 @@ class Role extends Model implements MustVerifyEmail
             ->where('roles.type', 'venue');
     }
 
+    /**
+     * IDs of non-deleted roles of the given type that share at least one event with
+     * this schedule (e.g. venues this curator has hosted events at). Includes roles
+     * connected via pending/unaccepted events, matching the AI venue-matching tiers.
+     */
+    public function connectedRoleIds(string $type): \Illuminate\Support\Collection
+    {
+        return \DB::table('event_role as er1')
+            ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
+            ->join('roles', 'er2.role_id', '=', 'roles.id')
+            ->where('er1.role_id', $this->id)
+            ->where('roles.type', $type)
+            ->where('roles.is_deleted', false)
+            ->distinct()
+            ->pluck('roles.id');
+    }
+
     public function scopeType($query, $type)
     {
         return $query->where('roles.type', $type);

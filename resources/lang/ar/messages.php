@@ -3431,4 +3431,11 @@ return [
     'event_is_cancelled_ap' => 'هذه الفعالية ملغاة.',
     'event_cancelled_banner' => 'تم إلغاء هذه الفعالية.',
     'event_cancelled_guest_notice' => 'تم إلغاء هذه الفعالية. إذا كنت قد اشتريت تذكرة، فتواصل مع المنظّم بشأن استرداد المبلغ.',
+    'auto_fill' => 'تعبئة تلقائية',
+    'auto_fill_from_text_or_flyer' => 'لديك ملصق أو نص؟ سأملأ الحقول تلقائيًا',
+    'auto_fill_placeholder' => 'الصق تفاصيل الفعالية هنا (الاسم، التاريخ، الوقت، المكان، الوصف)...',
+    'replace_image' => 'استبدال الصورة',
+    'additional_details' => 'تفاصيل إضافية',
+    'still_needed' => 'ما زال مطلوبًا:',
+    'from_past_events' => 'من الأحداث السابقة',
 ];

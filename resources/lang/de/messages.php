@@ -3435,4 +3435,11 @@ return [
     'event_is_cancelled_ap' => 'Diese Veranstaltung ist abgesagt.',
     'event_cancelled_banner' => 'Diese Veranstaltung wurde abgesagt.',
     'event_cancelled_guest_notice' => 'Diese Veranstaltung wurde abgesagt. Wenn Sie ein Ticket gekauft haben, wenden Sie sich wegen einer Erstattung an den Veranstalter.',
+    'auto_fill' => 'Automatisch ausfüllen',
+    'auto_fill_from_text_or_flyer' => 'Haben Sie einen Flyer oder Text? Automatisch ausfüllen',
+    'auto_fill_placeholder' => 'Fügen Sie hier die Veranstaltungsdetails ein (Name, Datum, Uhrzeit, Ort, Beschreibung)...',
+    'replace_image' => 'Bild ersetzen',
+    'additional_details' => 'Weitere Details',
+    'still_needed' => 'Noch erforderlich:',
+    'from_past_events' => 'Aus vergangenen Events',
 ];

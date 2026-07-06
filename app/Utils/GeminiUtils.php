@@ -820,14 +820,7 @@ class GeminiUtils
 
                 // Fallback: Try connected venues (normalized name or address match)
                 if (! $venue && ($normName !== '' || $normNameEn !== '' || $normAddress !== '' || $normAddressEn !== '')) {
-                    $connectedVenueIds = \DB::table('event_role as er1')
-                        ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
-                        ->join('roles', 'er2.role_id', '=', 'roles.id')
-                        ->where('er1.role_id', $role->id)
-                        ->where('roles.type', 'venue')
-                        ->where('roles.is_deleted', false)
-                        ->distinct()
-                        ->pluck('roles.id');
+                    $connectedVenueIds = $role->connectedRoleIds('venue');
 
                     if ($connectedVenueIds->isNotEmpty()) {
                         $venue = Role::whereIn('id', $connectedVenueIds)
@@ -882,14 +875,7 @@ class GeminiUtils
                 $data[$key]['talent_id'] = UrlUtils::encodeId($role->id);
             } elseif (! empty($item['performers'])) {
                 // Get connected talent IDs once for all performers (needed for fallback)
-                $connectedTalentIds = \DB::table('event_role as er1')
-                    ->join('event_role as er2', 'er1.event_id', '=', 'er2.event_id')
-                    ->join('roles', 'er2.role_id', '=', 'roles.id')
-                    ->where('er1.role_id', $role->id)
-                    ->where('roles.type', 'talent')
-                    ->where('roles.is_deleted', false)
-                    ->distinct()
-                    ->pluck('roles.id');
+                $connectedTalentIds = $role->connectedRoleIds('talent');
 
                 foreach ($item['performers'] as $index => $performer) {
                     $talent = null;

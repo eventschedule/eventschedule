@@ -114,8 +114,12 @@ class ResolveCustomDomain
             }
         }
 
-        // Rewrite Location header on redirect responses
-        if ($response->isRedirection() && $response->headers->has('Location')) {
+        // Rewrite Location header on redirect responses. A controller can set the
+        // skip_location_rewrite request attribute to opt out - used to redirect off the custom
+        // domain onto the canonical {subdomain}.eventschedule.com page (e.g. the structured
+        // guest-submit flow, which needs the .eventschedule.com session cookie).
+        if ($response->isRedirection() && $response->headers->has('Location')
+            && ! $request->attributes->get('skip_location_rewrite')) {
             $location = $response->headers->get('Location');
             $location = str_replace($subdomainUrl, $customDomainUrl, $location);
             $location = str_replace("http://{$role->subdomain}.{$baseDomain}", $customDomainUrl, $location);

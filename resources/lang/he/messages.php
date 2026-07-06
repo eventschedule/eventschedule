@@ -3427,4 +3427,11 @@ return [
     'event_is_cancelled_ap' => 'אירוע זה מבוטל.',
     'event_cancelled_banner' => 'אירוע זה בוטל.',
     'event_cancelled_guest_notice' => 'אירוע זה בוטל. אם רכשת כרטיס, פנה למארגן בנוגע להחזר.',
+    'auto_fill' => 'מילוי אוטומטי',
+    'auto_fill_from_text_or_flyer' => 'יש לך פלייר או טקסט? אמלא עבורך אוטומטית',
+    'auto_fill_placeholder' => 'הדביקו כאן את פרטי האירוע (שם, תאריך, שעה, מקום, תיאור)...',
+    'replace_image' => 'החלף תמונה',
+    'additional_details' => 'פרטים נוספים',
+    'still_needed' => 'עוד נדרש:',
+    'from_past_events' => 'מאירועים קודמים',
 ];

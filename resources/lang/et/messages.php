@@ -3451,4 +3451,11 @@ return [
     'event_is_cancelled_ap' => 'See üritus on tühistatud.',
     'event_cancelled_banner' => 'See üritus on tühistatud.',
     'event_cancelled_guest_notice' => 'See üritus on tühistatud. Kui ostsite pileti, võtke tagasimakse osas ühendust korraldajaga.',
+    'auto_fill' => 'Automaatne täitmine',
+    'auto_fill_from_text_or_flyer' => 'Kas sul on flaier või tekst? Täidan väljad automaatselt',
+    'auto_fill_placeholder' => 'Kleebi siia sündmuse üksikasjad (nimi, kuupäev, kellaaeg, koht, kirjeldus)...',
+    'replace_image' => 'Asenda pilt',
+    'additional_details' => 'Lisainfo',
+    'still_needed' => 'Veel vaja:',
+    'from_past_events' => 'Möödunud sündmustest',
 ];

@@ -3431,4 +3431,11 @@ return [
     'event_is_cancelled_ap' => 'Este evento está cancelado.',
     'event_cancelled_banner' => 'Este evento foi cancelado.',
     'event_cancelled_guest_notice' => 'Este evento foi cancelado. Se comprou um bilhete, contacte o organizador sobre um reembolso.',
+    'auto_fill' => 'Preenchimento automático',
+    'auto_fill_from_text_or_flyer' => 'Tem um panfleto ou texto? Preencher automaticamente',
+    'auto_fill_placeholder' => 'Cole aqui os detalhes do evento (nome, data, hora, local, descrição)...',
+    'replace_image' => 'Substituir imagem',
+    'additional_details' => 'Detalhes adicionais',
+    'still_needed' => 'Ainda falta:',
+    'from_past_events' => 'De eventos passados',
 ];

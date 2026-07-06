@@ -4679,8 +4679,8 @@ class RoleController extends Controller
             return redirect(route('event.booking_request', ['subdomain' => $role->subdomain]));
         }
 
-        // require_account=true → single-page submission (AI-import curators on a plain
-        // subdomain) or the bridged 3-step path (booking-form / custom-domain curators).
+        // require_account=true → structured single-page submission (redirected to the canonical
+        // subdomain on custom domains) or the bridged 3-step path (booking-form curators).
         if ($role->require_account) {
             $user = auth()->user();
 
@@ -4689,16 +4689,38 @@ class RoleController extends Controller
                 return redirect(app_url(route('event.create', ['subdomain' => $role->subdomain], false)));
             }
 
-            // Single page: collect account + schedule + event together. Booking-form
-            // curators use a different form, and on a custom domain an in-place login
-            // can't set a session cookie the app subdomain can read, so both fall
-            // through to the bridged 3-step path below.
-            if (! $role->usesBookingForm() && ! $request->attributes->get('custom_domain_host')) {
+            // Structured single page: collect account + schedule + event together. On a custom
+            // domain, redirect to the schedule's canonical {subdomain}.eventschedule.com page so the
+            // inline login and the post-submit dashboard share the .eventschedule.com cookie (an
+            // in-place login on the custom domain can't set a cookie the app subdomain reads).
+            // Booking-form curators use a different form and fall through to the bridged path below.
+            if (! $role->usesBookingForm()) {
+                if ($request->attributes->get('custom_domain_host')) {
+                    // Skip ResolveCustomDomain's Location rewrite so the redirect actually leaves the
+                    // custom domain, and forward the chosen language (the host-only custom-domain
+                    // session cookie won't carry to the subdomain).
+                    $request->attributes->set('skip_location_rewrite', true);
+
+                    return redirect(route('event.guest_submit', [
+                        'subdomain' => $role->subdomain,
+                        'lang' => session()->has('translate') ? 'en' : $role->language_code,
+                    ]));
+                }
+
                 if (! $user) {
                     session()->put('pending_request', $subdomain);
                 }
 
-                return redirect(route('event.guest_import', ['subdomain' => $role->subdomain]));
+                // Forward a valid ?lang= (e.g. from a shared localized guest-add link bounced
+                // through here) so the submit page renders in the language the link promised.
+                $lang = is_string($request->lang) && is_valid_language_code($request->lang)
+                    ? $request->lang
+                    : null;
+
+                return redirect(route('event.guest_submit', array_filter([
+                    'subdomain' => $role->subdomain,
+                    'lang' => $lang,
+                ])));
             }
 
             if (! $user) {

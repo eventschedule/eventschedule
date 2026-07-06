@@ -3508,4 +3508,11 @@ return [
     'event_is_cancelled_ap' => 'This event is cancelled.',
     'event_cancelled_banner' => 'This event has been cancelled.',
     'event_cancelled_guest_notice' => 'This event has been cancelled. If you bought a ticket, contact the organizer about a refund.',
+    'auto_fill' => 'Auto-fill',
+    'auto_fill_from_text_or_flyer' => 'Have a flyer or text? Auto-fill for me',
+    'auto_fill_placeholder' => 'Paste event details here (name, date, time, venue, description)...',
+    'replace_image' => 'Replace image',
+    'additional_details' => 'Additional details',
+    'still_needed' => 'Still needed:',
+    'from_past_events' => 'From past events',
 ];

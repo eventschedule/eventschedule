@@ -2,7 +2,6 @@
 
 @php
   $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
-  $requireAccount = $requireAccount ?? false;
 @endphp
 
   @if ($role->profile_image_url && !$hasHeaderImage && $role->language_code == 'en')
@@ -56,20 +55,20 @@
 
                 <div class="w-full sm:w-auto text-end">
                     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                        {{ $requireAccount ? __('messages.submit_your_event') : __('messages.add_event') }}
+                        {{ __('messages.add_event') }}
                     </h2>
                     <h3 class="text-gray-700 dark:text-gray-300">
-                        {{ $requireAccount ? __('messages.submitting_to', ['name' => $role->getDisplayName(true)]) : $role->name }}
+                        {{ $role->name }}
                     </h3>
                 </div>
             @else
                 <!-- LTR Layout: Title on left, cancel button on right -->
                 <div>
                     <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
-                        {{ $requireAccount ? __('messages.submit_your_event') : __('messages.add_event') }}
+                        {{ __('messages.add_event') }}
                     </h2>
                     <h3 class="text-gray-700 dark:text-gray-300">
-                        {{ $requireAccount ? __('messages.submitting_to', ['name' => $role->getDisplayName(true)]) : $role->getDisplayName(true) }}
+                        {{ $role->getDisplayName(true) }}
                     </h3>
                 </div>
 
@@ -82,12 +81,6 @@
             @endif
 
             </div>
-
-            @if ($requireAccount)
-            <p class="text-sm text-gray-600 dark:text-gray-400 -mt-2">
-                {!! __('messages.guest_submit_value_strip') !!}
-            </p>
-            @endif
           </div>
         </div>
 

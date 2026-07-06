@@ -3471,4 +3471,11 @@ return [
     'event_is_cancelled_ap' => 'Acest eveniment este anulat.',
     'event_cancelled_banner' => 'Acest eveniment a fost anulat.',
     'event_cancelled_guest_notice' => 'Acest eveniment a fost anulat. Dacă ai cumpărat un bilet, contactează organizatorul pentru o rambursare.',
+    'auto_fill' => 'Completare automată',
+    'auto_fill_from_text_or_flyer' => 'Ai un afiș sau text? Completez automat',
+    'auto_fill_placeholder' => 'Lipește aici detaliile evenimentului (nume, dată, oră, locație, descriere)...',
+    'replace_image' => 'Înlocuiește imaginea',
+    'additional_details' => 'Detalii suplimentare',
+    'still_needed' => 'Mai este nevoie de:',
+    'from_past_events' => 'Din evenimente trecute',
 ];
