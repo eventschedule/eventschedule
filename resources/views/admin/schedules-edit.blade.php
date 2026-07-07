@@ -81,6 +81,41 @@
             </div>
         @endif
 
+        {{-- Phone Verification --}}
+        @if ($role->phone)
+            @if ($role->phone_verified_at)
+                <div class="ap-card rounded-xl shadow p-4">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="text-sm">
+                            <span class="text-gray-600 dark:text-gray-400">@lang('messages.phone'):</span>
+                            <span class="ms-2 font-medium text-gray-900 dark:text-white">{{ $role->phone }}</span>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                            @lang('messages.verified') &bull; {{ \Carbon\Carbon::parse($role->phone_verified_at)->format('M d, Y') }}
+                        </span>
+                    </div>
+                </div>
+            @else
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <div class="flex-1 text-sm text-amber-800 dark:text-amber-300">
+                            @lang('messages.phone_not_verified'){{ $role->phone ? ': '.$role->phone : '' }}
+                        </div>
+                        <form method="POST" action="{{ route('admin.schedules.verify_phone', ['role' => $role->encodeId()]) }}">
+                            @csrf
+                            <button type="submit" data-confirm="Mark this schedule's phone as verified?"
+                                class="inline-flex items-center px-3 py-1.5 border border-amber-300 dark:border-amber-700 rounded-lg text-xs font-medium text-amber-800 dark:text-amber-300 bg-white dark:bg-gray-700 hover:bg-amber-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-200">
+                                @lang('messages.mark_phone_verified')
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            @endif
+        @endif
+
         {{-- Edit Form --}}
         <form method="POST" action="{{ route('admin.schedules.update', ['role' => $role->encodeId()]) }}" class="ap-card rounded-xl shadow">
             @csrf

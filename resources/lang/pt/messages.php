@@ -244,6 +244,8 @@ return [
     'free' => 'Gratuito',
     'invalid_request' => 'Pedido inválido',
     'email_not_verified' => 'E-mail não verificado',
+    'phone_not_verified' => 'Telefone não verificado',
+    'mark_phone_verified' => 'Marcar telefone como verificado',
     'connect_stripe' => 'Conectar Stripe',
     'stripe_connected' => 'Stripe conectado com sucesso!',
     'failed_to_connect_stripe' => 'Falha ao conectar Stripe',

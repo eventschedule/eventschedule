@@ -243,6 +243,8 @@ return [
     'free' => 'Gratis',
     'invalid_request' => 'Ongeldige aanvraag',
     'email_not_verified' => 'E-mail niet geverifieerd',
+    'phone_not_verified' => 'Telefoonnummer niet geverifieerd',
+    'mark_phone_verified' => 'Telefoonnummer als geverifieerd markeren',
     'connect_stripe' => 'Stripe verbinden',
     'stripe_connected' => 'Stripe succesvol verbonden!',
     'failed_to_connect_stripe' => 'Stripe-verbinding mislukt',

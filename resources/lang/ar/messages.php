@@ -408,6 +408,8 @@ return [
     'free' => 'مجاني',
     'invalid_request' => 'طلب غير صالح',
     'email_not_verified' => 'البريد الإلكتروني غير مُحقق',
+    'phone_not_verified' => 'رقم الهاتف غير مُحقق',
+    'mark_phone_verified' => 'تحديد رقم الهاتف كمُحقق',
     'connect_stripe' => 'ربط سترايب',
     'stripe_connected' => 'تم ربط سترايب بنجاح!',
     'failed_to_connect_stripe' => 'فشل في ربط سترايب',

@@ -495,6 +495,8 @@ return [
     'free' => 'Gratuit',
     'invalid_request' => 'Cerere invalidă',
     'email_not_verified' => 'Email neverificat',
+    'phone_not_verified' => 'Telefon neverificat',
+    'mark_phone_verified' => 'Marchează telefonul ca verificat',
     'connect_stripe' => 'Conectează Stripe',
     'stripe_connected' => 'Stripe conectat cu succes!',
     'failed_to_connect_stripe' => 'Conectarea Stripe a eșuat',

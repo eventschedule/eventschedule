@@ -494,6 +494,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
             Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
             Route::post('/admin/schedules/{role}/verify-email', [AdminController::class, 'verifyScheduleEmail'])->name('admin.schedules.verify_email');
+            Route::post('/admin/schedules/{role}/verify-phone', [AdminController::class, 'verifySchedulePhone'])->name('admin.schedules.verify_phone');
         }
 
         if (config('app.hosted')) {

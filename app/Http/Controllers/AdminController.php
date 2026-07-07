@@ -1965,6 +1965,37 @@ class AdminController extends Controller
     }
 
     /**
+     * Manually mark a schedule's phone number as verified.
+     */
+    public function verifySchedulePhone($roleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $decodedId = UrlUtils::decodeId($roleId);
+        $role = Role::findOrFail($decodedId);
+
+        if (! $role->phone_verified_at) {
+            $role->phone_verified_at = now();
+            $role->save();
+
+            AuditService::log(
+                AuditService::ADMIN_PHONE_VERIFY,
+                auth()->id(),
+                'App\\Models\\Role',
+                $role->id,
+                ['phone_verified_at' => null],
+                ['phone_verified_at' => (string) $role->phone_verified_at],
+                "Phone manually verified for {$role->subdomain}",
+            );
+        }
+
+        return redirect()->route('admin.schedules.edit', ['role' => $role->encodeId()])
+            ->with('success', 'Phone verified for '.$role->name.'.');
+    }
+
+    /**
      * Retry translation for a stuck record by resetting translation_attempts to 0.
      */
     public function retryTranslation(Request $request)

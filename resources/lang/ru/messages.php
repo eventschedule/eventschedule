@@ -496,6 +496,8 @@ return [
     'free' => 'Бесплатно',
     'invalid_request' => 'Неверный запрос',
     'email_not_verified' => 'Электронная почта не подтверждена',
+    'phone_not_verified' => 'Номер телефона не подтверждён',
+    'mark_phone_verified' => 'Отметить номер телефона как подтверждённый',
     'connect_stripe' => 'Подключить полосу',
     'stripe_connected' => 'Stripe успешно подключен!',
     'failed_to_connect_stripe' => 'Не удалось подключить Stripe.',

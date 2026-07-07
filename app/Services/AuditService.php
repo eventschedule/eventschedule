@@ -87,6 +87,8 @@ class AuditService
 
     const ADMIN_EMAIL_VERIFY = 'admin.email_verify';
 
+    const ADMIN_PHONE_VERIFY = 'admin.phone_verify';
+
     const ADMIN_QUEUE_ACTION = 'admin.queue_action';
 
     const ADMIN_PASSWORD_CONFIRMED = 'admin.password_confirmed';

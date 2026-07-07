@@ -237,6 +237,8 @@ return [
     'free' => 'חינם',
     'invalid_request' => 'בקשה לא תקינה',
     'email_not_verified' => 'הדוא"ל לא אומת',
+    'phone_not_verified' => 'מספר הטלפון לא אומת',
+    'mark_phone_verified' => 'סמן את הטלפון כמאומת',
     'connect_stripe' => 'חבר Stripe',
     'stripe_connected' => 'חיבור ל-Stripe בוצע בהצלחה!',
     'failed_to_connect_stripe' => 'החיבור ל-Stripe נכשל',

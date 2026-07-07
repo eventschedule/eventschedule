@@ -415,6 +415,8 @@ return [
     'free' => 'Kostenlos',
     'invalid_request' => 'Ungültige Anfrage',
     'email_not_verified' => 'E-Mail nicht verifiziert',
+    'phone_not_verified' => 'Telefonnummer nicht verifiziert',
+    'mark_phone_verified' => 'Telefonnummer als verifiziert markieren',
     'connect_stripe' => 'Stripe verbinden',
     'stripe_connected' => 'Stripe erfolgreich verbunden!',
     'failed_to_connect_stripe' => 'Fehler beim Verbinden von Stripe',

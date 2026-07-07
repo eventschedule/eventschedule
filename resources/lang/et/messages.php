@@ -495,6 +495,8 @@ return [
     'free' => 'Tasuta',
     'invalid_request' => 'Kehtetu taotlus',
     'email_not_verified' => 'E-posti aadress pole kinnitatud',
+    'phone_not_verified' => 'Telefoninumber pole kinnitatud',
+    'mark_phone_verified' => 'Märgi telefoninumber kinnitatuks',
     'connect_stripe' => 'Ühendage Stripe',
     'stripe_connected' => 'Stripe on edukalt ühendatud!',
     'failed_to_connect_stripe' => 'Stripe\'i ühendamine ebaõnnestus',

@@ -495,6 +495,8 @@ return [
     'free' => 'Free',
     'invalid_request' => 'Invalid request',
     'email_not_verified' => 'Email not verified',
+    'phone_not_verified' => 'Phone not verified',
+    'mark_phone_verified' => 'Mark Phone as Verified',
     'connect_stripe' => 'Connect Stripe',
     'stripe_connected' => 'Stripe connected successfully!',
     'failed_to_connect_stripe' => 'Failed to connect Stripe',

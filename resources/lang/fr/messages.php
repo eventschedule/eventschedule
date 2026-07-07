@@ -445,6 +445,8 @@ return [
     'free' => 'Gratuit',
     'invalid_request' => 'Demande invalide',
     'email_not_verified' => 'E-mail non vérifié',
+    'phone_not_verified' => 'Téléphone non vérifié',
+    'mark_phone_verified' => 'Marquer le téléphone comme vérifié',
     'connect_stripe' => 'Connecter Stripe',
     'stripe_connected' => 'Stripe connecté avec succès!',
     'failed_to_connect_stripe' => 'Échec de la connexion à Stripe',
