@@ -1439,12 +1439,17 @@
     <!-- ============================================================ -->
     <!-- 6. Discover: upcoming events rail (always-bright band)       -->
     <!-- ============================================================ -->
+    @php $discoverPinned = $discoverEvents->count() >= 4; @endphp
     <section id="discover" class="relative scroll-mt-24 bg-gray-50 px-2 py-6 dark:bg-[#0f0f14] sm:px-4">
         <div @class([
             'relative rounded-[2.5rem] bg-white shadow-2xl shadow-gray-900/10 ring-1 ring-gray-200 2xl:mx-auto 2xl:max-w-[100rem]',
-            'es-gallery' => $discoverEvents->count() >= 4,
+            'es-gallery' => $discoverPinned,
         ]) data-scene="gallery">
-            <div class="es-gallery-pin py-20 lg:py-0">
+            <div @class([
+                'es-gallery-pin',
+                'py-20 lg:py-0' => $discoverPinned,
+                'py-16 lg:py-24' => ! $discoverPinned,
+            ])>
             <div class="mx-auto mb-8 max-w-3xl px-4 text-center sm:px-6">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100/80 px-4 py-1.5" data-reveal>
                     <svg aria-hidden="true" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
