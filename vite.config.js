@@ -22,6 +22,7 @@ export default defineConfig({
             input: [
                 'resources/js/app.js',
                 'resources/js/marketing.js',
+                'resources/js/marketing-home.js',
                 'resources/js/newsletter-builder.js',
                 'resources/js/color-picker.js',
                 //'resources/js/leaflet.js',
