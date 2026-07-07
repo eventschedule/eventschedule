@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\MarketingDailyStat;
+use App\Models\PageView;
 use App\Models\Referral;
 use App\Models\User;
 use App\Notifications\SignupVerificationCode;
@@ -71,6 +73,17 @@ class RegisteredUserController extends Controller
             } else {
                 // Clear stale token from session
                 session()->forget('sms_token');
+            }
+        }
+
+        // Onboarding funnel stage 2 ("viewed sign-up page"). Count once per session per
+        // UTC day, skipping bots. Counted on all deployments (the /sign_up page is served
+        // on the app subdomain, not the nexus, so this is not gated on is_nexus).
+        if (! PageView::isBot(request()->userAgent())) {
+            $dayKey = 'signup_view_'.now()->format('Ymd');
+            if (! session()->has($dayKey)) {
+                MarketingDailyStat::record('signup_views');
+                session()->put($dayKey, true);
             }
         }
 

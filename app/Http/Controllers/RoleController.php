@@ -2637,6 +2637,14 @@ class RoleController extends Controller
             return redirect()->route('home')->with('error', __('messages.schedule_limit'));
         }
 
+        // Onboarding funnel stage 4 ("reached the new-schedule step"). First-touch stamp.
+        // Base query builder + whereNull writes at most once and does not bump users.updated_at
+        // (which the admin active-users metric keys off).
+        DB::table('users')
+            ->where('id', auth()->id())
+            ->whereNull('schedule_form_viewed_at')
+            ->update(['schedule_form_viewed_at' => now()]);
+
         $role = new Role;
         $role->type = $type;
         $role->require_account = $type === 'curator';

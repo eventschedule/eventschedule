@@ -5,6 +5,178 @@
 
         @include('admin.partials._date-range-filter', ['range' => $range])
 
+        {{-- ===================== Onboarding Funnel ===================== --}}
+        @php
+            $funnelStages = $funnel['stages'];
+            $funnelStageLabel = fn ($key) => __('messages.funnel_stage_' . $key);
+            $biggestDropToKey = $funnel['biggest_drop']['to_key'] ?? null;
+            $isNexus = (bool) config('app.is_nexus');
+            $trafficNote = null;
+            if (! $isNexus) {
+                $trafficNote = __('messages.funnel_traffic_not_tracked');
+            } elseif (! $funnel['traffic_tracked']) {
+                $trafficNote = $funnel['tracking_started_at']
+                    ? __('messages.funnel_tracking_began', ['date' => \Illuminate\Support\Carbon::parse($funnel['tracking_started_at'])->format('M j, Y')])
+                    : __('messages.funnel_tracking_pending');
+            }
+        @endphp
+
+        <div class="flex items-center gap-3 pt-2">
+            <div class="dashboard-icon p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10" style="--icon-glow: rgba(59, 130, 246, 0.15)">
+                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 8h12M9 12h6M11 16h2" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">@lang('messages.funnel_onboarding_title')</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.funnel_onboarding_subtitle')</p>
+            </div>
+        </div>
+
+        {{-- Hero KPIs: north-star, biggest leak, overall --}}
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {{-- North-star: Signup to first event, with period-over-period change --}}
+            <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
+                <div class="flex items-center gap-3 mb-3 self-start">
+                    <div class="dashboard-icon p-2 rounded-xl bg-green-50 dark:bg-green-500/10" style="--icon-glow: rgba(16, 185, 129, 0.15)">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_north_star')</p>
+                </div>
+                <p class="dashboard-stat-value text-3xl font-bold text-gray-900 dark:text-white text-center">{{ $funnel['first_event_conv'] === null ? __('messages.funnel_na') : $funnel['first_event_conv'] . '%' }}</p>
+                <div class="mt-4 flex items-center text-sm w-full">
+                    @if($funnel['first_event_conv_change'] !== null)
+                        <span class="{{ $funnel['first_event_conv_change'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
+                            {{ $funnel['first_event_conv_change'] >= 0 ? '+' : '' }}{{ $funnel['first_event_conv_change'] }} @lang('messages.funnel_pts')
+                        </span>
+                        <span class="text-gray-500 dark:text-gray-400 ms-2">@lang('messages.vs_previous_period')</span>
+                    @else
+                        <span class="text-gray-500 dark:text-gray-400">{{ number_format($funnel['cohort_size']) }} @lang('messages.signups_total')</span>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Biggest onboarding leak --}}
+            <x-stat-panel label="{{ __('messages.funnel_biggest_leak') }}" color="amber">
+                @if($funnel['biggest_drop'])
+                    -{{ $funnel['biggest_drop']['drop_pct'] }}%
+                    <x-slot:subtitle>
+                        {{ $funnelStageLabel($funnel['biggest_drop']['from_key']) }} &rarr; {{ $funnelStageLabel($funnel['biggest_drop']['to_key']) }}<br>
+                        {{ number_format($funnel['biggest_drop']['lost']) }} @lang('messages.funnel_users_lost')
+                    </x-slot:subtitle>
+                @else
+                    {{ __('messages.funnel_na') }}
+                    <x-slot:subtitle>@lang('messages.funnel_no_leak')</x-slot:subtitle>
+                @endif
+            </x-stat-panel>
+
+            {{-- Overall visitor to first event --}}
+            <x-stat-panel label="{{ __('messages.funnel_visitor_to_event') }}">
+                {{ $funnel['visitor_to_event_conv'] === null ? __('messages.funnel_na') : $funnel['visitor_to_event_conv'] . '%' }}
+                @if($funnel['visitor_to_event_conv'] === null && $trafficNote)
+                    <x-slot:subtitle>{{ $trafficNote }}</x-slot:subtitle>
+                @endif
+            </x-stat-panel>
+        </div>
+
+        {{-- Funnel bars + conversion-over-time chart --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {{-- Funnel form --}}
+            <div class="ap-card rounded-xl shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.funnel_stages_title')</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    @if($funnel['cohort_size'] > 0)
+                        @lang('messages.funnel_cohort_of', ['count' => number_format($funnel['cohort_size'])])
+                    @else
+                        @lang('messages.funnel_no_signups_period')
+                    @endif
+                </p>
+
+                <div class="space-y-1">
+                    @foreach($funnelStages as $i => $stage)
+                        @php
+                            $isTraffic = $stage['group'] === 'traffic';
+                            $count = $stage['count'];
+                            $label = $funnelStageLabel($stage['key']);
+                            $ariaCount = $count === null ? __('messages.funnel_na') : number_format($count);
+                            $barWidth = ($count !== null && $count > 0) ? max(2, $stage['width']) : 0;
+                        @endphp
+
+                        {{-- Group labels: site traffic (anonymous) vs signups this period (cohort) --}}
+                        @if($i === 0)
+                            <div class="flex items-center gap-2 pb-1">
+                                <span class="text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">@lang('messages.funnel_group_traffic')</span>
+                                <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
+                            </div>
+                        @elseif($i === 2)
+                            <div class="flex items-center gap-2 pt-3 pb-1">
+                                <span class="text-[11px] uppercase tracking-wide text-gray-400 dark:text-gray-500">@lang('messages.funnel_group_cohort')</span>
+                                <span class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></span>
+                            </div>
+                        @endif
+
+                        {{-- Drop connector (users lost from the previous stage) --}}
+                        @if($stage['drop_count'] !== null && $stage['drop_count'] > 0)
+                            @php $isBiggest = $biggestDropToKey === $stage['key']; @endphp
+                            <div class="text-center text-xs {{ $isBiggest ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-gray-400 dark:text-gray-500' }}">
+                                &darr; {{ number_format($stage['drop_count']) }} @lang('messages.funnel_lost')
+                                @if($stage['step_conv'] !== null)({{ round(max(0, 100 - $stage['step_conv']), 1) }}%)@endif
+                                @if($isBiggest) &middot; @lang('messages.funnel_biggest_leak') @endif
+                            </div>
+                        @endif
+
+                        {{-- Stage: label + count above, bar (track + fill) below --}}
+                        <div>
+                            <div class="flex items-center justify-between text-sm mb-1">
+                                <span class="font-medium text-gray-800 dark:text-gray-200">
+                                    {{ $label }}
+                                    @if($isTraffic)
+                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_traffic') }}">&#9432;</span>
+                                    @elseif($stage['key'] === 'account')
+                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_cohort') }}">&#9432;</span>
+                                    @elseif(in_array($stage['key'], ['reached_schedule', 'reached_event'], true))
+                                        <span class="text-gray-400 dark:text-gray-500 cursor-help" title="{{ __('messages.funnel_tooltip_click_steps') }}">&#9432;</span>
+                                    @endif
+                                </span>
+                                <span class="text-gray-900 dark:text-white font-semibold whitespace-nowrap">
+                                    {{ $ariaCount }}
+                                    @if($stage['step_conv'] !== null)
+                                        <span class="text-gray-400 dark:text-gray-500 font-normal">({{ $stage['step_conv'] }}%)</span>
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="h-8 w-full rounded-lg bg-gray-200 dark:bg-gray-700 overflow-hidden" role="img"
+                                 aria-label="{{ $label }}: {{ $ariaCount }}{{ $stage['step_conv'] !== null ? ' (' . $stage['step_conv'] . '%)' : '' }}">
+                                @if($count === null)
+                                    <div class="h-full w-full rounded-lg border border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center">
+                                        <span class="text-xs text-gray-400 dark:text-gray-500 px-2 text-center">{{ $trafficNote ?? __('messages.funnel_na') }}</span>
+                                    </div>
+                                @else
+                                    <div class="h-full rounded-lg transition-all duration-200"
+                                         style="width: {{ $barWidth }}%; {{ $isTraffic ? 'background: var(--brand-blue-light);' : 'background: linear-gradient(90deg, var(--brand-button-bg-light), var(--brand-button-bg));' }}"></div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Conversion over time --}}
+            <div class="ap-card rounded-xl shadow p-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">@lang('messages.funnel_over_time')</h3>
+                @if(count($funnelTrend['labels']) >= 2)
+                    <div class="h-64">
+                        <canvas id="onboardingFunnelChart"></canvas>
+                    </div>
+                    <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">@lang('messages.funnel_period_in_progress')</p>
+                @else
+                    <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.funnel_not_enough_history')</p>
+                @endif
+            </div>
+        </div>
+
         {{-- User Count with Period Comparison --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="ap-card rounded-xl shadow p-6 flex flex-col items-center">
@@ -200,6 +372,71 @@
             @endif
         </div>
         @endif
+
+        {{-- Onboarding progress (per-user work queue) --}}
+        <div class="ap-card rounded-xl shadow p-6">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">@lang('messages.onboarding_progress_title')</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">@lang('messages.onboarding_progress_subtitle')</p>
+
+            @if($onboardingProgress->count() > 0)
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_signed_up')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_progress')</th>
+                                <th class="text-start py-2 font-medium text-gray-500 dark:text-gray-400">@lang('messages.funnel_furthest')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($onboardingProgress as $u)
+                                @php
+                                    $steps = [
+                                        'account' => true,
+                                        'reached_schedule' => $u->schedule_form_viewed_at !== null || $u->schedules_count > 0,
+                                        'saved_schedule' => $u->schedules_count > 0,
+                                        'reached_event' => $u->event_form_viewed_at !== null || $u->events_count > 0,
+                                        'saved_event' => $u->events_count > 0,
+                                    ];
+                                    $furthestKey = 'account';
+                                    foreach ($steps as $stepKey => $reached) {
+                                        if ($reached) { $furthestKey = $stepKey; }
+                                    }
+                                    $isStuck = $u->schedules_count > 0 && $u->events_count == 0;
+                                @endphp
+                                <tr class="border-b border-gray-100 dark:border-gray-700/50 {{ $isStuck ? 'bg-amber-50/60 dark:bg-amber-500/5' : '' }}">
+                                    <td class="py-2 pe-4">
+                                        <a href="mailto:{{ $u->email }}" class="text-[var(--brand-blue)] hover:underline" title="{{ $u->email }}">{{ $u->name ?: $u->email }}</a>
+                                    </td>
+                                    <td class="py-2 pe-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $u->created_at->diffForHumans() }}</td>
+                                    <td class="py-2 pe-4">
+                                        <div class="flex items-center gap-1" role="img" aria-label="{{ __('messages.funnel_stage_' . $furthestKey) }}">
+                                            @foreach($steps as $stepKey => $reached)
+                                                <span class="w-6 h-2 rounded-full {{ $reached ? 'bg-[var(--brand-button-bg)]' : 'bg-gray-200 dark:bg-gray-700' }}"
+                                                      title="{{ __('messages.funnel_stage_' . $stepKey) }}{{ $reached ? '' : ' (' . __('messages.funnel_not_reached') . ')' }}"></span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="py-2 whitespace-nowrap">
+                                        <span class="text-gray-600 dark:text-gray-400">{{ __('messages.funnel_stage_' . $furthestKey) }}</span>
+                                        @if($isStuck)
+                                            <span class="ms-1 text-xs px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">@lang('messages.onboarding_stuck')</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    {{ $onboardingProgress->links() }}
+                </div>
+            @else
+                <p class="text-sm text-gray-500 dark:text-gray-400">@lang('messages.no_data')</p>
+            @endif
+        </div>
 
         {{-- Recent Signups --}}
         <div class="ap-card rounded-xl shadow p-6">
@@ -466,6 +703,81 @@
                     }
                 });
             @endif
+
+            // Onboarding funnel: conversion rates over time
+            const onboardingCanvas = document.getElementById('onboardingFunnelChart');
+            if (onboardingCanvas) {
+                const funnelIsRtl = @json(is_rtl());
+                const funnelLastIndex = @json($funnelTrend['last_index']);
+                const dashLast = (ctx) => ctx.p1DataIndex === funnelLastIndex ? [6, 6] : undefined;
+                const funnelDatasets = [];
+                @if($funnelTrend['has_traffic'])
+                    funnelDatasets.push({
+                        label: @json(__('messages.funnel_visitor_to_signup')),
+                        data: @json($funnelTrend['visitor_to_signup']),
+                        borderColor: brandBlue,
+                        backgroundColor: brandBlue,
+                        spanGaps: true,
+                        tension: 0.3,
+                        segment: { borderDash: dashLast },
+                    });
+                @endif
+                funnelDatasets.push({
+                    label: @json(__('messages.funnel_signup_to_schedule')),
+                    data: @json($funnelTrend['signup_to_schedule']),
+                    borderColor: '#F59E0B',
+                    backgroundColor: '#F59E0B',
+                    spanGaps: true,
+                    tension: 0.3,
+                    segment: { borderDash: dashLast },
+                });
+                funnelDatasets.push({
+                    label: @json(__('messages.funnel_signup_to_event')),
+                    data: @json($funnelTrend['signup_to_event']),
+                    borderColor: '#10B981',
+                    backgroundColor: '#10B981',
+                    spanGaps: true,
+                    tension: 0.3,
+                    segment: { borderDash: dashLast },
+                });
+
+                new Chart(onboardingCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: @json($funnelTrend['labels']),
+                        datasets: funnelDatasets,
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: textColor, boxWidth: 12, padding: 8 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (c) => c.dataset.label + ': ' + (c.parsed.y === null ? 'n/a' : c.parsed.y + '%')
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                reverse: funnelIsRtl,
+                                grid: { color: gridColor },
+                                ticks: { color: textColor }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                suggestedMax: 100,
+                                grid: { color: gridColor },
+                                ticks: { color: textColor, callback: (v) => v + '%' }
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         // Initialize charts when DOM is ready

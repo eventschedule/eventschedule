@@ -423,6 +423,14 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.email_not_verified'));
         }
 
+        // Onboarding funnel stage 6 ("reached the add-event step"). First-touch stamp.
+        // Base query builder + whereNull writes at most once and does not bump users.updated_at
+        // (which the admin active-users metric keys off).
+        DB::table('users')
+            ->where('id', $user->id)
+            ->whereNull('event_form_viewed_at')
+            ->update(['event_form_viewed_at' => now()]);
+
         $event = new Event;
         $event->user_id = $user->id;
         $event->is_draft = $role->draft_events_default;

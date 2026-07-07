@@ -12,6 +12,7 @@ use App\Http\Middleware\ResolveCustomDomain;
 use App\Http\Middleware\SanitizeUserAgent;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetUserLanguage;
+use App\Http\Middleware\TrackMarketingVisit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -61,6 +62,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureSelfhostSetup::class,
         ], append: [
             CaptureUtmParameters::class,
+            TrackMarketingVisit::class,
             SetUserLanguage::class,
             EnsureEmailIsVerified::class,
             HandleBotTraffic::class,

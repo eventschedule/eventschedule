@@ -175,6 +175,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'carpool_notifications_enabled' => 'boolean',
             'follow_consent_dismissed' => 'boolean',
             'push_settings' => 'array',
+            'schedule_form_viewed_at' => 'datetime',
+            'event_form_viewed_at' => 'datetime',
         ];
     }
 
@@ -190,6 +192,23 @@ class User extends Authenticatable implements MustVerifyEmail
     public function defaultRole()
     {
         return $this->belongsTo(Role::class, 'default_role_id');
+    }
+
+    /**
+     * Schedules this user created/owns directly (roles.user_id), as counted by the
+     * admin schedules metric. Distinct from roles() which is the role_user membership pivot.
+     */
+    public function createdRoles()
+    {
+        return $this->hasMany(Role::class, 'user_id');
+    }
+
+    /**
+     * Events this user created (events.user_id). Used by the onboarding funnel.
+     */
+    public function createdEvents()
+    {
+        return $this->hasMany(Event::class, 'user_id');
     }
 
     public function countRoles()
