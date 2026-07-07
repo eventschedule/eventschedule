@@ -225,10 +225,10 @@ function initPointer() {
         return;
     }
 
-    // Hero: cursor spotlight + depth parallax on the floating chips.
+    // Hero: cursor spotlight + subtle parallax on the tilted poster wall.
     const hero = document.querySelector('.es-hero');
     if (hero) {
-        const chips = Array.from(hero.querySelectorAll('.es-chip'));
+        const wall = hero.querySelector('.es-wall-tilt');
         const spot = hero.querySelector('.es-spot');
         let targetX = 0;
         let targetY = 0;
@@ -239,10 +239,12 @@ function initPointer() {
         const settle = () => {
             curX = lerp(curX, targetX, 0.09);
             curY = lerp(curY, targetY, 0.09);
-            chips.forEach((chip) => {
-                const depth = parseFloat(chip.getAttribute('data-depth')) || 20;
-                chip.style.transform = 'translate3d(' + (curX * depth).toFixed(1) + 'px, ' + (curY * depth).toFixed(1) + 'px, 0)';
-            });
+            if (wall) {
+                wall.style.setProperty('--tx', (curX * 26).toFixed(1) + 'px');
+                wall.style.setProperty('--ty', (curY * 20).toFixed(1) + 'px');
+                wall.style.setProperty('--wx', (curY * -1.6).toFixed(2) + 'deg');
+                wall.style.setProperty('--wz', (curX * 1.2).toFixed(2) + 'deg');
+            }
             if (Math.abs(curX - targetX) > 0.001 || Math.abs(curY - targetY) > 0.001) {
                 raf = requestAnimationFrame(settle);
             } else {

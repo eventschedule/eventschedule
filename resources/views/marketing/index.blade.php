@@ -141,25 +141,73 @@
             50% { background-position: 100% 50%; }
         }
 
-        /* Floating hero chips */
-        .es-chip { will-change: transform; }
-        html.es-anim .es-chip {
-            opacity: 0;
-            animation: es-chip-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            animation-delay: var(--in, 0.9s);
+        /* Live poster wall: a tilted plane of drifting event-poster columns.
+           Mouse parallax feeds the --tx/--ty/--wx/--wz custom props so the
+           base tilt never has to be recomputed in JS. */
+        .es-wall { z-index: 1; }
+        .es-wall-tilt {
+            position: absolute;
+            inset: -14% -8%;
+            display: flex;
+            justify-content: center;
+            gap: 1.25rem;
+            transform: perspective(1400px)
+                rotateX(calc(12deg + var(--wx, 0deg)))
+                rotateZ(calc(-5deg + var(--wz, 0deg)))
+                translate3d(var(--tx, 0px), var(--ty, 0px), 0)
+                scale(1.12);
+            will-change: transform;
         }
-        @keyframes es-chip-in {
-            from { opacity: 0; }
-            to   { opacity: 1; }
+        .es-wall-col { flex: 0 0 auto; }
+        .es-wall-col:nth-child(5) { display: none; }
+        @media (min-width: 1536px) {
+            .es-wall-col:nth-child(5) { display: block; }
         }
-        .es-chip-float { animation: float 7s ease-in-out infinite; animation-delay: var(--fd, 0s); }
-        .es-wobble { animation: es-wobble 9s ease-in-out infinite; transform-style: preserve-3d; }
-        @keyframes es-wobble {
-            0%, 100% { transform: perspective(600px) rotateY(-10deg) rotateX(4deg); }
-            50% { transform: perspective(600px) rotateY(12deg) rotateX(-4deg); }
+        .es-wall-track {
+            display: flex;
+            flex-direction: column;
+            animation: es-wall-drift var(--dur, 60s) linear infinite;
+            will-change: transform;
         }
-        .es-chip-card {
-            box-shadow: 0 18px 50px -18px rgba(10, 15, 35, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+        .es-wall-col:nth-child(even) .es-wall-track { animation-direction: reverse; }
+        .es-wall-col:hover .es-wall-track,
+        .es-wall-col:focus-within .es-wall-track { animation-play-state: paused; }
+        @keyframes es-wall-drift {
+            from { transform: translateY(0); }
+            to   { transform: translateY(-50%); }
+        }
+        .es-wall-card {
+            width: 11rem;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            opacity: 0.85;
+            box-shadow: 0 18px 45px -18px rgba(10, 15, 35, 0.45);
+            transition: opacity 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            transform: translateZ(0);
+        }
+        @media (min-width: 1280px) {
+            .es-wall-card { width: 13rem; }
+        }
+        .dark .es-wall-card { opacity: 0.7; }
+        a.es-wall-card:hover,
+        a.es-wall-card:focus-visible {
+            opacity: 1;
+            transform: scale(1.04);
+            box-shadow: 0 0 0 2px rgba(78, 129, 250, 0.85), 0 24px 60px -18px rgba(78, 129, 250, 0.45);
+        }
+
+        /* Radial scrim that keeps the centered hero copy crisp over the wall */
+        .es-hero-scrim {
+            z-index: 2;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.92), transparent 16%, transparent 84%, rgba(255, 255, 255, 0.95)),
+                radial-gradient(ellipse 62% 58% at 50% 46%, rgba(255, 255, 255, 0.97) 32%, rgba(255, 255, 255, 0.86) 52%, rgba(255, 255, 255, 0.38) 74%, transparent 93%);
+        }
+        .dark .es-hero-scrim {
+            background:
+                linear-gradient(to bottom, rgba(10, 10, 15, 0.92), transparent 16%, transparent 84%, rgba(10, 10, 15, 0.96)),
+                radial-gradient(ellipse 62% 58% at 50% 46%, rgba(10, 10, 15, 0.96) 32%, rgba(10, 10, 15, 0.86) 52%, rgba(10, 10, 15, 0.42) 74%, transparent 93%);
         }
 
         /* Scroll cue */
@@ -572,8 +620,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             .es-aurora,
-            .es-chip-float,
-            .es-wobble,
+            .es-wall-track,
             .es-cue-dot,
             .es-marquee-track,
             .es-laser,
@@ -675,81 +722,58 @@
             <div class="es-aurora es-aurora-3"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <div class="es-spot absolute inset-0"></div>
         </div>
 
-        <!-- Floating product chips (decorative, wide screens only) -->
-        <div class="pointer-events-none absolute inset-0 hidden xl:block" aria-hidden="true">
-            <!-- Mini event card -->
-            <div class="es-chip absolute left-[5%] top-[22%]" data-depth="26" style="--in: 0.9s;">
-                <div class="es-chip-float" style="--fd: 0s;">
-                    <div class="es-chip-card glass flex items-center gap-3 rounded-2xl p-3.5 backdrop-blur-xl">
-                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-white">
-                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
-                        </div>
-                        <div>
-                            <div class="text-sm font-semibold text-gray-900 dark:text-white">Jazz Night</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Fri · 8:00 PM</div>
-                        </div>
-                        <div class="ml-2 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">$25</div>
-                    </div>
-                </div>
-            </div>
-            <!-- QR ticket stub -->
-            <div class="es-chip absolute right-[5%] top-[17%]" data-depth="36" style="--in: 1.05s;">
-                <div class="es-chip-float" style="--fd: 1.4s;">
-                    <div class="es-wobble">
-                        <div class="es-chip-card glass rounded-2xl p-3.5 text-center backdrop-blur-xl">
-                            <div class="mb-2 text-[9px] font-bold uppercase tracking-[0.22em] text-gray-400 dark:text-gray-500">Admit One</div>
-                            <svg class="mx-auto h-14 w-14 text-gray-900 dark:text-white" viewBox="0 0 29 29" fill="currentColor" aria-hidden="true">
-                                <path d="M0 0h9v9H0V0zm2 2v5h5V2H2zm1 1h3v3H3V3zm17-3h9v9h-9V0zm2 2v5h5V2h-5zm1 1h3v3h-3V3zM0 20h9v9H0v-9zm2 2v5h5v-5H2zm1 1h3v3H3v-3zM12 0h2v2h-2V0zm3 0h2v4h-2V0zm-3 4h2v3h-2V4zm3 3h4v2h-4V7zm-3 3h3v2h-3v-2zm5 0h2v3h-2v-3zm7 1h2v2h-2v-2zm3-1h2v4h-2v-4zM0 12h2v2H0v-2zm3 0h4v2H3v-2zm5 1h2v4H8v-4zm3 3h2v2h-2v-2zm3-2h3v2h-3v-2zm5 1h2v3h-2v-3zm3 1h4v2h-4v-2zm5 1h2v2h-2v-2zm-15 4h4v2h-4v-2zm5 1h2v2h-2v-2zm3-2h2v4h-2v-4zm3 2h4v2h-4v-2zm-7 3h2v4h-2v-4zm-3 1h2v3h-2v-3zm8 0h3v2h-3v-2zm5-1h2v4h-2v-4z"/>
-                            </svg>
-                            <div class="mt-2 text-[10px] font-semibold text-gray-500 dark:text-gray-400">GA x1 · #0042</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Calendar date tile -->
-            <div class="es-chip absolute left-[8%] top-[60%]" data-depth="42" style="--in: 1.2s;">
-                <div class="es-chip-float" style="--fd: 0.7s;">
-                    <div class="es-chip-card glass w-24 overflow-hidden rounded-2xl text-center backdrop-blur-xl">
-                        <div class="bg-gradient-to-r from-[#4E81FA] to-[#0EA5E9] py-1 text-[10px] font-bold uppercase tracking-widest text-white">Jul</div>
-                        <div class="py-2.5">
-                            <div class="text-3xl font-black leading-none text-gray-900 dark:text-white">18</div>
-                            <div class="mt-1 text-[10px] font-medium text-gray-500 dark:text-gray-400">3 events</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Ticket sold toast -->
-            <div class="es-chip absolute right-[6%] top-[63%]" data-depth="24" style="--in: 1.35s;">
-                <div class="es-chip-float" style="--fd: 2.1s;">
-                    <div class="es-chip-card glass flex items-center gap-3 rounded-2xl p-3.5 backdrop-blur-xl">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
-                            <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                        </span>
-                        <div>
-                            <div class="text-sm font-semibold text-gray-900 dark:text-white">Ticket sold</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">Front Row x2 · $50.00</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- New follower toast -->
-            <div class="es-chip absolute left-[16%] top-[79%]" data-depth="18" style="--in: 1.5s;">
-                <div class="es-chip-float" style="--fd: 3s;">
-                    <div class="es-chip-card glass flex items-center gap-3 rounded-2xl p-3 backdrop-blur-xl">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-cyan-400 text-xs font-bold text-white">M</span>
-                        <div>
-                            <div class="text-xs font-semibold text-gray-900 dark:text-white">New follower</div>
-                            <div class="text-[11px] text-gray-500 dark:text-gray-400">Maya · just now</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {{-- Live poster wall data: real upcoming events (same /browse visibility
+             rules as the rail), padded with decorative demo flyers. Decorative
+             cards never carry names or links. --}}
+        @php
+            $wallEventCards = [];
+            foreach ($discoverEvents->take(8) as $wallEvent) {
+                $wallUrl = $wallEvent->getGuestUrl();
+                $wallImg = $wallEvent->getImageUrl();
+                if (! $wallUrl || ! $wallImg) {
+                    continue;
+                }
+                $wallEventCards[] = [
+                    'url' => $wallUrl,
+                    'img' => $wallImg,
+                    'name' => $wallEvent->name,
+                    'date' => $wallEvent->starts_at
+                        ? $wallEvent->getShortDateRangeDisplay('M j')
+                        : __('messages.recurring'),
+                ];
+            }
+            $wallCards = $wallEventCards;
+            $wallDemoFlyers = ['jazz', 'party', 'rock', 'dj', 'comedy', 'openmic', 'special'];
+            $wallDemoIndex = 0;
+            while (count($wallCards) < 12) {
+                $wallCards[] = [
+                    'url' => null,
+                    'img' => asset('images/demo/demo_flyer_' . $wallDemoFlyers[$wallDemoIndex % count($wallDemoFlyers)] . '.webp'),
+                    'name' => null,
+                    'date' => null,
+                ];
+                $wallDemoIndex++;
+            }
+            $wallColumns = [[], [], [], [], []];
+            foreach ($wallCards as $wallIndex => $wallCard) {
+                $wallColumns[$wallIndex % 5][] = $wallCard;
+            }
+            // Each looping half needs enough posters to outrun the viewport.
+            $wallColumns = array_map(function ($column) {
+                $half = [];
+                $i = 0;
+                while (count($half) < 5) {
+                    $half[] = $column[$i % count($column)];
+                    $i++;
+                }
+                return $half;
+            }, $wallColumns);
+            $wallDurations = [58, 72, 50, 66, 62];
+        @endphp
 
-        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 py-28 text-center sm:px-6 lg:px-8">
+        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8 lg:py-28">
             <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
                 <span class="relative flex h-2 w-2">
                     <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
@@ -768,13 +792,13 @@
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#showcase" data-magnetic="0.16" class="group inline-flex items-center justify-center gap-2.5 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-shadow hover:shadow-lg dark:text-white">
+                <a href="#showcase" data-magnetic="0.16" class="group pointer-events-auto inline-flex items-center justify-center gap-2.5 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-shadow hover:shadow-lg dark:text-white">
                     <span class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/10 transition-colors group-hover:bg-gray-900/20 dark:bg-white/10 dark:group-hover:bg-white/20">
                         <svg class="h-3.5 w-3.5 ltr:ml-0.5 rtl:mr-0.5 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
                     </span>
                     Watch the 2-minute demo
                 </a>
-                <a href="{{ app_url('/sign_up') }}" data-magnetic="0.16" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/25 transition-shadow hover:shadow-2xl hover:shadow-blue-500/40">
+                <a href="{{ app_url('/sign_up') }}" data-magnetic="0.16" class="group pointer-events-auto relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/25 transition-shadow hover:shadow-2xl hover:shadow-blue-500/40">
                     <span class="relative z-10 flex items-center gap-2">
                         Start for free
                         <svg class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -784,9 +808,78 @@
             </div>
 
             <p class="es-fade-up es-d-4 mt-6 text-sm text-gray-500 dark:text-gray-400">Set up in under 2 minutes</p>
+
+            {{-- Compact clickable poster strip (mobile and tablets) --}}
+            <div class="es-fade-up es-d-5 pointer-events-auto mt-12 lg:hidden">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1">
+                        <div class="es-marquee-track">
+                            @for ($stripCopy = 0; $stripCopy < 2; $stripCopy++)
+                                @foreach ($wallCards as $stripCard)
+                                    @if ($stripCard['url'])
+                                        <a href="{{ $stripCard['url'] }}" target="_blank" rel="noopener" @if ($stripCopy === 1) aria-hidden="true" tabindex="-1" @endif class="block w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:ring-white/10" aria-label="{{ $stripCard['name'] }}">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="lazy" decoding="async" fetchpriority="low">
+                                        </a>
+                                    @else
+                                        <div class="w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 dark:ring-white/10" aria-hidden="true">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="lazy" decoding="async" fetchpriority="low">
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="es-fade-up es-d-5 pointer-events-none absolute bottom-7 left-1/2 hidden -translate-x-1/2 sm:block" aria-hidden="true">
+        {{-- The wall (desktop): tilted drifting poster columns. Painted under
+             the content via z-index, but after it in the DOM so keyboard
+             focus reaches the CTAs before the poster links. --}}
+        <div class="es-wall absolute inset-0 hidden lg:block" @if (! count($wallEventCards)) aria-hidden="true" @endif>
+            <div class="es-wall-tilt">
+                @foreach ($wallColumns as $wallColumnIndex => $wallColumnCards)
+                    <div class="es-wall-col" style="--dur: {{ $wallDurations[$wallColumnIndex] }}s;">
+                        <div class="es-wall-track">
+                            @for ($wallCopy = 0; $wallCopy < 2; $wallCopy++)
+                                @foreach ($wallColumnCards as $wallCard)
+                                    @if ($wallCard['url'])
+                                        <a href="{{ $wallCard['url'] }}" target="_blank" rel="noopener" @if ($wallCopy === 1) aria-hidden="true" tabindex="-1" @endif class="es-wall-card group relative block bg-gray-200 focus-visible:outline-none dark:bg-white/10" aria-label="{{ $wallCard['name'] }}">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="lazy" decoding="async" fetchpriority="low">
+                                            <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2.5 pt-8">
+                                                <span class="block truncate text-xs font-bold text-white">{{ $wallCard['name'] }}</span>
+                                                <span class="block text-[10px] text-white/75">{{ $wallCard['date'] }}</span>
+                                            </span>
+                                        </a>
+                                    @else
+                                        <div class="es-wall-card relative bg-gray-200 dark:bg-white/10" aria-hidden="true">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="lazy" decoding="async" fetchpriority="low">
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="es-hero-scrim pointer-events-none absolute inset-0 hidden lg:block" aria-hidden="true"></div>
+        <div class="es-spot pointer-events-none absolute inset-0 z-[3]" aria-hidden="true"></div>
+
+        @if (count($wallEventCards))
+            <div class="pointer-events-none absolute top-6 z-10 hidden lg:block ltr:right-6 rtl:left-6" aria-hidden="true">
+                <div class="glass flex items-center gap-2 rounded-full px-3.5 py-1.5">
+                    <span class="relative flex h-2 w-2">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                    </span>
+                    <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Live from the community</span>
+                </div>
+            </div>
+        @endif
+
+        <div class="es-fade-up es-d-5 pointer-events-none absolute bottom-7 left-1/2 z-10 hidden -translate-x-1/2 lg:block" aria-hidden="true">
             <div class="es-cue"><span class="es-cue-dot"></span></div>
         </div>
     </section>
