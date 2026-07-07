@@ -489,9 +489,11 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
             Route::get('/admin/domains', [AdminController::class, 'domains'])->name('admin.domains');
             Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');
             Route::post('/admin/domains/{role}/remove', [AdminController::class, 'domainRemove'])->name('admin.domains.remove');
-            Route::get('/admin/plans', [AdminController::class, 'plans'])->name('admin.plans');
-            Route::get('/admin/plans/{role}/edit', [AdminController::class, 'editPlan'])->name('admin.plans.edit');
-            Route::put('/admin/plans/{role}', [AdminController::class, 'updatePlan'])->name('admin.plans.update');
+            Route::redirect('/admin/plans', '/admin/schedules');
+            Route::get('/admin/schedules', [AdminController::class, 'schedules'])->name('admin.schedules');
+            Route::get('/admin/schedules/{role}/edit', [AdminController::class, 'editSchedule'])->name('admin.schedules.edit');
+            Route::put('/admin/schedules/{role}', [AdminController::class, 'updateSchedule'])->name('admin.schedules.update');
+            Route::post('/admin/schedules/{role}/verify-email', [AdminController::class, 'verifyScheduleEmail'])->name('admin.schedules.verify_email');
         }
 
         if (config('app.hosted')) {

@@ -85,6 +85,8 @@ class AuditService
     // Admin actions
     const ADMIN_PLAN_UPDATE = 'admin.plan_update';
 
+    const ADMIN_EMAIL_VERIFY = 'admin.email_verify';
+
     const ADMIN_QUEUE_ACTION = 'admin.queue_action';
 
     const ADMIN_PASSWORD_CONFIRMED = 'admin.password_confirmed';

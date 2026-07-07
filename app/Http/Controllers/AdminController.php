@@ -25,6 +25,7 @@ use App\Services\DemoService;
 use App\Services\DigitalOceanService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -1364,7 +1365,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Display the admin plans management page.
+     * Display the admin referrals page.
      */
     public function referrals(Request $request)
     {
@@ -1407,7 +1408,7 @@ class AdminController extends Controller
         ]);
     }
 
-    public function plans(Request $request)
+    public function schedules(Request $request)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -1495,10 +1496,6 @@ class AdminController extends Controller
 
         // Build query for role list (excluding demo roles)
         $query = Role::whereNotNull('user_id')
-            ->where(function ($q) {
-                $q->whereNotNull('email_verified_at')
-                    ->orWhereNotNull('phone_verified_at');
-            })
             ->where('subdomain', '!=', DemoService::DEMO_ROLE_SUBDOMAIN)
             ->where('subdomain', 'not like', 'demo-%')
             ->with(['user', 'subscriptions']);
@@ -1552,9 +1549,22 @@ class AdminController extends Controller
             }
         }
 
+        // Verification filter
+        if ($verification = $request->input('verification')) {
+            if ($verification === 'verified') {
+                $query->where(function ($q) {
+                    $q->whereNotNull('email_verified_at')
+                        ->orWhereNotNull('phone_verified_at');
+                });
+            } elseif ($verification === 'unverified') {
+                $query->whereNull('email_verified_at')
+                    ->whereNull('phone_verified_at');
+            }
+        }
+
         $roles = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
-        return view('admin.plans', compact(
+        return view('admin.schedules', compact(
             'roles',
             'freeCount',
             'proCount',
@@ -1567,9 +1577,9 @@ class AdminController extends Controller
     }
 
     /**
-     * Show the edit form for a role's plan.
+     * Show the edit form for a role.
      */
-    public function editPlan($roleId)
+    public function editSchedule($roleId)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -1578,13 +1588,13 @@ class AdminController extends Controller
         $decodedId = UrlUtils::decodeId($roleId);
         $role = Role::with('user', 'subscriptions')->findOrFail($decodedId);
 
-        return view('admin.plans-edit', compact('role'));
+        return view('admin.schedules-edit', compact('role'));
     }
 
     /**
      * Update a role's plan.
      */
-    public function updatePlan(AdminPlanUpdateRequest $request, $roleId)
+    public function updateSchedule(AdminPlanUpdateRequest $request, $roleId)
     {
         if (! auth()->user()->isAdmin()) {
             return redirect()->back()->with('error', __('messages.not_authorized'));
@@ -1620,7 +1630,39 @@ class AdminController extends Controller
             "Plan updated for {$role->subdomain}",
         );
 
-        return redirect()->route('admin.plans')->with('success', 'Plan updated successfully for '.$role->name.'.');
+        return redirect()->route('admin.schedules')->with('success', 'Plan updated successfully for '.$role->name.'.');
+    }
+
+    /**
+     * Manually mark a role's email as verified.
+     */
+    public function verifyScheduleEmail($roleId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $decodedId = UrlUtils::decodeId($roleId);
+        $role = Role::findOrFail($decodedId);
+
+        if (! $role->hasVerifiedEmail()) {
+            if ($role->markEmailAsVerified()) {
+                event(new Verified($role));
+            }
+
+            AuditService::log(
+                AuditService::ADMIN_EMAIL_VERIFY,
+                auth()->id(),
+                'App\\Models\\Role',
+                $role->id,
+                ['email_verified_at' => null],
+                ['email_verified_at' => (string) $role->email_verified_at],
+                "Email manually verified for {$role->subdomain}",
+            );
+        }
+
+        return redirect()->route('admin.schedules.edit', ['role' => $role->encodeId()])
+            ->with('success', 'Email verified for '.$role->name.'.');
     }
 
     /**

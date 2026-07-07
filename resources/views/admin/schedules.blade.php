@@ -1,7 +1,7 @@
 <x-app-admin-layout>
 
     <div class="space-y-4">
-        @include('admin.partials._navigation', ['active' => 'plans'])
+        @include('admin.partials._navigation', ['active' => 'schedules'])
 
         {{-- Row 1: Plan Breakdown --}}
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -109,7 +109,7 @@
 
         {{-- Filters --}}
         <div class="ap-card rounded-xl shadow p-4">
-            <form method="GET" action="{{ route('admin.plans') }}" class="flex flex-col sm:flex-row gap-4">
+            <form method="GET" action="{{ route('admin.schedules') }}" class="flex flex-col sm:flex-row gap-4">
                 <div class="flex-1 relative">
                     <input type="text" name="search" value="{{ request('search') }}"
                         placeholder="{{ __('messages.search_schedules') }}" autocomplete="off" data-subdomain-autocomplete
@@ -140,12 +140,19 @@
                         <option value="trial" {{ request('source') === 'trial' ? 'selected' : '' }}>@lang('messages.trial')</option>
                     </select>
                 </div>
+                <div class="w-full sm:w-40">
+                    <select name="verification" class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                        <option value="">@lang('messages.all')</option>
+                        <option value="verified" {{ request('verification') === 'verified' ? 'selected' : '' }}>@lang('messages.verified')</option>
+                        <option value="unverified" {{ request('verification') === 'unverified' ? 'selected' : '' }}>@lang('messages.unverified')</option>
+                    </select>
+                </div>
                 <div class="flex gap-2">
                     <x-brand-button type="submit">
                         @lang('messages.filter')
                     </x-brand-button>
-                    @if(request('search') || request('plan_type') || request('status') || request('source'))
-                        <x-secondary-link :href="route('admin.plans')">
+                    @if(request('search') || request('plan_type') || request('status') || request('source') || request('verification'))
+                        <x-secondary-link :href="route('admin.schedules')">
                             @lang('messages.clear')
                         </x-secondary-link>
                     @endif
@@ -191,9 +198,16 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div>
-                                            <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
-                                                {{ $role->name }}
-                                            </a>
+                                            <div class="flex items-center gap-2">
+                                                <a href="{{ route('role.view_guest', ['subdomain' => $role->subdomain]) }}" target="_blank" class="text-sm font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    {{ $role->name }}
+                                                </a>
+                                                @if (! $role->email_verified_at && ! $role->phone_verified_at)
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
+                                                        @lang('messages.unverified')
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <div class="text-sm text-gray-500 dark:text-gray-400">{{ $role->subdomain }}</div>
                                         </div>
                                     </div>
@@ -264,7 +278,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                                    <a href="{{ route('admin.plans.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                    <a href="{{ route('admin.schedules.edit', ['role' => $role->encodeId()]) }}" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
                                         @lang('messages.edit')
                                     </a>
                                 </td>
