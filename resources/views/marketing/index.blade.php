@@ -792,13 +792,13 @@
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#showcase" data-magnetic="0.16" class="group pointer-events-auto inline-flex items-center justify-center gap-2.5 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-shadow hover:shadow-lg dark:text-white">
+                <a href="#showcase" class="group pointer-events-auto inline-flex items-center justify-center gap-2.5 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
                     <span class="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900/10 transition-colors group-hover:bg-gray-900/20 dark:bg-white/10 dark:group-hover:bg-white/20">
                         <svg class="h-3.5 w-3.5 ltr:ml-0.5 rtl:mr-0.5 rtl:rotate-180" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
                     </span>
-                    Watch the 2-minute demo
+                    Watch the 3-minute demo
                 </a>
-                <a href="{{ app_url('/sign_up') }}" data-magnetic="0.16" class="group pointer-events-auto relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/25 transition-shadow hover:shadow-2xl hover:shadow-blue-500/40">
+                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                     <span class="relative z-10 flex items-center gap-2">
                         Start for free
                         <svg class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -986,7 +986,7 @@
                                 </span>
                             </span>
                             <span class="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black/50 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm" aria-hidden="true">
-                                Watch the 2-minute overview
+                                Watch the 3-minute overview
                             </span>
                         </a>
                     </div>
@@ -1557,18 +1557,7 @@
                                 <div class="es-orbit-logo">
                                     <a href="{{ marketing_url('/google-calendar') }}" class="group flex flex-col items-center gap-1.5" aria-label="Google Calendar integration">
                                         <span class="glass flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
-                                            <svg aria-hidden="true" class="h-9 w-9" viewBox="0 0 24 24" fill="none">
-                                                <path d="M18.316 5.684H5.684v12.632h12.632V5.684z" fill="#fff"/>
-                                                <path d="M21.053 22H5.684l-2.631-2.632V5.684L5.684 3h12.632L21.053 5.684V22z" fill="#4285F4"/>
-                                                <path d="M18.316 22l2.737-2.632V22h-2.737z" fill="#1A73E8"/>
-                                                <path d="M5.684 18.316L3.053 22V19.368l2.631-1.053z" fill="#1A73E8"/>
-                                                <path d="M21.053 5.684L18.316 3v2.684h2.737z" fill="#1A73E8"/>
-                                                <path d="M5.684 3L3.053 5.684h2.631V3z" fill="#EA4335"/>
-                                                <path d="M18.316 5.684V3l2.737 2.684h-2.737z" fill="#34A853"/>
-                                                <rect x="7" y="9" width="10" height="1" rx="0.5" fill="#fff"/>
-                                                <rect x="7" y="12" width="7" height="1" rx="0.5" fill="#fff"/>
-                                                <rect x="7" y="15" width="5" height="1" rx="0.5" fill="#fff"/>
-                                            </svg>
+                                            @include('marketing.partials.integration-logo', ['name' => 'google', 'class' => 'h-9 w-9'])
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Google Calendar</span>
                                     </a>
@@ -1580,10 +1569,7 @@
                                 <div class="es-orbit-logo">
                                     <a href="{{ marketing_url('/stripe') }}" class="group flex flex-col items-center gap-1.5" aria-label="Stripe integration">
                                         <span class="glass flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
-                                            <svg aria-hidden="true" class="h-9 w-9" viewBox="0 0 24 24" fill="none">
-                                                <rect x="1" y="4" width="22" height="16" rx="3" fill="#635BFF"/>
-                                                <path d="M11.2 10.3c0-.66.6-1.12 1.45-1.12.95 0 1.95.45 2.55 1.05l.8-1.85c-.7-.55-1.7-.95-3.05-.95-2.2 0-3.6 1.15-3.6 3.05 0 3 4.1 2.5 4.1 3.8 0 .55-.5.95-1.35.95-1.1 0-2.3-.55-3-1.15l-.85 1.85c.85.7 2.1 1.15 3.55 1.15 2.25 0 3.75-1.1 3.75-3.05 0-3.25-4.35-2.7-4.35-3.73z" fill="#fff"/>
-                                            </svg>
+                                            @include('marketing.partials.integration-logo', ['name' => 'stripe', 'class' => 'h-9 w-9'])
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Stripe</span>
                                     </a>
@@ -1595,11 +1581,7 @@
                                 <div class="es-orbit-logo">
                                     <a href="{{ marketing_url('/invoiceninja') }}" class="group flex flex-col items-center gap-1.5" aria-label="Invoice Ninja integration">
                                         <span class="glass flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
-                                            <svg aria-hidden="true" class="h-9 w-9" viewBox="0 0 24 24" fill="none">
-                                                <rect x="3" y="5" width="18" height="16" rx="2" class="fill-gray-900 dark:fill-white"/>
-                                                <path d="M7.5 10h9M7.5 13h6M7.5 16h3" class="stroke-white dark:stroke-gray-900" stroke-width="1.5" stroke-linecap="round"/>
-                                                <path d="M12 2L9 5h6l-3-3z" fill="#4CAF50"/>
-                                            </svg>
+                                            @include('marketing.partials.integration-logo', ['name' => 'invoiceninja', 'class' => 'h-9 w-9'])
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Invoice Ninja</span>
                                     </a>
@@ -1616,13 +1598,7 @@
                                 <div class="es-orbit-logo">
                                     <a href="{{ marketing_url('/caldav') }}" class="group flex flex-col items-center gap-1.5" aria-label="CalDAV integration">
                                         <span class="glass flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
-                                            <svg aria-hidden="true" class="h-9 w-9" viewBox="0 0 24 24" fill="none">
-                                                <rect x="3" y="5" width="18" height="17" rx="2" fill="#F57C00"/>
-                                                <rect x="3" y="5" width="18" height="5" rx="2" fill="#E65100"/>
-                                                <circle cx="7" cy="7.5" r="1" fill="#fff" fill-opacity="0.8"/>
-                                                <circle cx="17" cy="7.5" r="1" fill="#fff" fill-opacity="0.8"/>
-                                                <path d="M9 15l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                                            </svg>
+                                            @include('marketing.partials.integration-logo', ['name' => 'caldav', 'class' => 'h-9 w-9'])
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">CalDAV</span>
                                     </a>
@@ -1634,14 +1610,7 @@
                                 <div class="es-orbit-logo">
                                     <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-1.5" aria-label="Apple Calendar sync">
                                         <span class="glass flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
-                                            <svg aria-hidden="true" class="h-9 w-9" viewBox="0 0 24 24" fill="none">
-                                                <rect x="3" y="5" width="18" height="17" rx="3" class="fill-white dark:fill-gray-200"/>
-                                                <rect x="3" y="5" width="18" height="6" rx="3" fill="#EF4444"/>
-                                                <text x="7.5" y="9.5" fill="#fff" font-size="5" font-weight="bold" font-family="system-ui">31</text>
-                                                <circle cx="8" cy="16" r="1.5" fill="#EF4444"/>
-                                                <rect x="11" y="14" width="6" height="1" rx="0.5" fill="#9ca3af"/>
-                                                <rect x="11" y="16.5" width="4" height="1" rx="0.5" fill="#9ca3af"/>
-                                            </svg>
+                                            @include('marketing.partials.integration-logo', ['name' => 'apple', 'class' => 'h-9 w-9'])
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Apple Calendar</span>
                                     </a>
@@ -1653,13 +1622,7 @@
                                 <div class="es-orbit-logo">
                                     <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-1.5" aria-label="Outlook calendar sync">
                                         <span class="glass flex h-16 w-16 items-center justify-center rounded-2xl transition-transform group-hover:scale-110">
-                                            <svg aria-hidden="true" class="h-9 w-9" viewBox="0 0 24 24" fill="none">
-                                                <rect x="3" y="4" width="18" height="17" rx="2" fill="#0078D4"/>
-                                                <rect x="12" y="4" width="9" height="8.5" rx="1" fill="#0063B1"/>
-                                                <path d="M13 5.5l4 3-4 3" stroke="#fff" stroke-width="1" fill="none" stroke-linejoin="round"/>
-                                                <ellipse cx="8" cy="14.5" rx="3.5" ry="4" fill="#0063B1"/>
-                                                <ellipse cx="8" cy="14.5" rx="2" ry="2.5" fill="#fff" fill-opacity="0.3"/>
-                                            </svg>
+                                            @include('marketing.partials.integration-logo', ['name' => 'outlook', 'class' => 'h-9 w-9'])
                                         </span>
                                         <span class="text-[11px] font-medium text-gray-500 dark:text-gray-400">Outlook</span>
                                     </a>
@@ -1673,64 +1636,27 @@
             <!-- Flat row (mobile and tablets) -->
             <div class="mt-10 flex flex-wrap items-center justify-center gap-x-10 gap-y-8 lg:hidden" data-reveal>
                 <a href="{{ marketing_url('/google-calendar') }}" class="group flex flex-col items-center gap-2">
-                    <svg aria-hidden="true" class="h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100" viewBox="0 0 24 24" fill="none">
-                        <path d="M18.316 5.684H5.684v12.632h12.632V5.684z" fill="#fff"/>
-                        <path d="M21.053 22H5.684l-2.631-2.632V5.684L5.684 3h12.632L21.053 5.684V22z" fill="#4285F4"/>
-                        <path d="M18.316 22l2.737-2.632V22h-2.737z" fill="#1A73E8"/>
-                        <path d="M5.684 18.316L3.053 22V19.368l2.631-1.053z" fill="#1A73E8"/>
-                        <path d="M21.053 5.684L18.316 3v2.684h2.737z" fill="#1A73E8"/>
-                        <path d="M5.684 3L3.053 5.684h2.631V3z" fill="#EA4335"/>
-                        <path d="M18.316 5.684V3l2.737 2.684h-2.737z" fill="#34A853"/>
-                        <rect x="7" y="9" width="10" height="1" rx="0.5" fill="#fff"/>
-                        <rect x="7" y="12" width="7" height="1" rx="0.5" fill="#fff"/>
-                        <rect x="7" y="15" width="5" height="1" rx="0.5" fill="#fff"/>
-                    </svg>
+                    @include('marketing.partials.integration-logo', ['name' => 'google', 'class' => 'h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">Google Calendar</span>
                 </a>
                 <a href="{{ marketing_url('/stripe') }}" class="group flex flex-col items-center gap-2">
-                    <svg aria-hidden="true" class="h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100" viewBox="0 0 24 24" fill="none">
-                        <rect x="1" y="4" width="22" height="16" rx="3" fill="#635BFF"/>
-                        <path d="M11.2 10.3c0-.66.6-1.12 1.45-1.12.95 0 1.95.45 2.55 1.05l.8-1.85c-.7-.55-1.7-.95-3.05-.95-2.2 0-3.6 1.15-3.6 3.05 0 3 4.1 2.5 4.1 3.8 0 .55-.5.95-1.35.95-1.1 0-2.3-.55-3-1.15l-.85 1.85c.85.7 2.1 1.15 3.55 1.15 2.25 0 3.75-1.1 3.75-3.05 0-3.25-4.35-2.7-4.35-3.73z" fill="#fff"/>
-                    </svg>
+                    @include('marketing.partials.integration-logo', ['name' => 'stripe', 'class' => 'h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">Stripe</span>
                 </a>
                 <a href="{{ marketing_url('/invoiceninja') }}" class="group flex flex-col items-center gap-2">
-                    <svg aria-hidden="true" class="h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="5" width="18" height="16" rx="2" class="fill-gray-900 dark:fill-white"/>
-                        <path d="M7.5 10h9M7.5 13h6M7.5 16h3" class="stroke-white dark:stroke-gray-900" stroke-width="1.5" stroke-linecap="round"/>
-                        <path d="M12 2L9 5h6l-3-3z" fill="#4CAF50"/>
-                    </svg>
+                    @include('marketing.partials.integration-logo', ['name' => 'invoiceninja', 'class' => 'h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">Invoice Ninja</span>
                 </a>
                 <a href="{{ marketing_url('/caldav') }}" class="group flex flex-col items-center gap-2">
-                    <svg aria-hidden="true" class="h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="5" width="18" height="17" rx="2" fill="#F57C00"/>
-                        <rect x="3" y="5" width="18" height="5" rx="2" fill="#E65100"/>
-                        <circle cx="7" cy="7.5" r="1" fill="#fff" fill-opacity="0.8"/>
-                        <circle cx="17" cy="7.5" r="1" fill="#fff" fill-opacity="0.8"/>
-                        <path d="M9 15l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    </svg>
+                    @include('marketing.partials.integration-logo', ['name' => 'caldav', 'class' => 'h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">CalDAV</span>
                 </a>
                 <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-2">
-                    <svg aria-hidden="true" class="h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="5" width="18" height="17" rx="3" class="fill-white dark:fill-gray-200"/>
-                        <rect x="3" y="5" width="18" height="6" rx="3" fill="#EF4444"/>
-                        <text x="7.5" y="9.5" fill="#fff" font-size="5" font-weight="bold" font-family="system-ui">31</text>
-                        <circle cx="8" cy="16" r="1.5" fill="#EF4444"/>
-                        <rect x="11" y="14" width="6" height="1" rx="0.5" fill="#9ca3af"/>
-                        <rect x="11" y="16.5" width="4" height="1" rx="0.5" fill="#9ca3af"/>
-                    </svg>
+                    @include('marketing.partials.integration-logo', ['name' => 'apple', 'class' => 'h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">Apple Calendar</span>
                 </a>
                 <a href="{{ marketing_url('/features/calendar-sync') }}" class="group flex flex-col items-center gap-2">
-                    <svg aria-hidden="true" class="h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="4" width="18" height="17" rx="2" fill="#0078D4"/>
-                        <rect x="12" y="4" width="9" height="8.5" rx="1" fill="#0063B1"/>
-                        <path d="M13 5.5l4 3-4 3" stroke="#fff" stroke-width="1" fill="none" stroke-linejoin="round"/>
-                        <ellipse cx="8" cy="14.5" rx="3.5" ry="4" fill="#0063B1"/>
-                        <ellipse cx="8" cy="14.5" rx="2" ry="2.5" fill="#fff" fill-opacity="0.3"/>
-                    </svg>
+                    @include('marketing.partials.integration-logo', ['name' => 'outlook', 'class' => 'h-10 w-10 opacity-60 transition-opacity group-hover:opacity-100'])
                     <span class="text-xs text-gray-500 dark:text-gray-400">Outlook</span>
                 </a>
             </div>
@@ -1826,7 +1752,7 @@
                                     <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
                                 </span>
                                 <span class="mx-auto rounded-lg bg-white px-4 py-1 text-xs font-medium text-gray-500 shadow-sm dark:bg-white/10 dark:text-gray-400">
-                                    <span class="es-type-url" data-full="eventschedule.com/blue-note">eventschedule.com/blue-note</span><span class="es-caret"></span>
+                                    <span class="es-type-url" data-full="blue-note.eventschedule.com">blue-note.eventschedule.com</span><span class="es-caret"></span>
                                 </span>
                                 <span class="w-14"></span>
                             </div>
@@ -1863,7 +1789,7 @@
                                 <div class="es-scene es-scene-1 flex flex-col items-center justify-center gap-5 p-6">
                                     <div class="es-pop flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-6 py-4 dark:border-blue-500/30 dark:bg-blue-500/10" style="--i: 0;">
                                         <svg class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                                        <span class="font-mono text-sm font-semibold text-gray-900 dark:text-white">eventschedule.com/blue-note</span>
+                                        <span class="font-mono text-sm font-semibold text-gray-900 dark:text-white">blue-note.eventschedule.com</span>
                                         <span class="rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-gray-600 shadow-sm dark:bg-white/10 dark:text-gray-300">Copy</span>
                                     </div>
                                     <div class="flex flex-wrap justify-center gap-2">
@@ -1922,10 +1848,10 @@
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">eventschedule.com/</span>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-name" autocomplete="off" spellcheck="false" maxlength="30"
-                                class="w-full min-w-0 border-0 bg-transparent p-0 font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
                         <a href="{{ app_url('/sign_up') }}" data-magnetic="0.14" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-shadow hover:shadow-2xl hover:shadow-cyan-500/40">
                             <span class="relative z-10 flex items-center gap-2">
