@@ -21,10 +21,24 @@ class MarketingController extends Controller
         return view('marketing.index', [
             'personas' => $this->getPersonas(),
             'steps' => $this->getSteps(),
+            // Same visibility rules as /browse: only events whose card shows a real
+            // image (own flyer, or a talent/venue schedule's profile photo), so the
+            // homepage rail is guaranteed visually rich posters.
             'discoverEvents' => $this->publicUpcomingEventsQuery()
                 ->where('is_hidden_from_discovery', false)
+                ->where(function ($sub) {
+                    $sub->where(function ($f) {
+                        $f->whereNotNull('flyer_image_url')
+                            ->where('flyer_image_url', '!=', '');
+                    })
+                        ->orWhereHas('roles', function ($r) {
+                            $r->whereIn('roles.type', ['talent', 'venue'])
+                                ->whereNotNull('roles.profile_image_url')
+                                ->where('roles.profile_image_url', '!=', '');
+                        });
+                })
                 ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-                ->limit(6)
+                ->limit(10)
                 ->get(),
         ]);
     }

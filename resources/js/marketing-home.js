@@ -307,6 +307,44 @@ function initPointer() {
             btn.style.transform = '';
         });
     });
+
+    // One-time confetti puff when the cursor first reaches the claim button.
+    const claimBtn = document.querySelector('#claim a[data-magnetic]');
+    if (claimBtn) {
+        let puffed = false;
+        claimBtn.addEventListener('pointerenter', () => {
+            if (puffed || typeof window.confetti !== 'function') {
+                return;
+            }
+            puffed = true;
+            const r = claimBtn.getBoundingClientRect();
+            window.confetti({
+                particleCount: 26,
+                spread: 55,
+                startVelocity: 28,
+                gravity: 1.2,
+                origin: {
+                    x: (r.left + r.width / 2) / window.innerWidth,
+                    y: r.top / window.innerHeight,
+                },
+                colors: ['#4E81FA', '#0EA5E9', '#22D3EE', '#ffffff'],
+                disableForReducedMotion: true,
+            });
+        });
+    }
+
+    // Replay the AI card's flyer-to-fields animation on hover.
+    const aiCard = document.querySelector('.es-ai-replay');
+    if (aiCard) {
+        aiCard.addEventListener('pointerenter', () => {
+            aiCard.classList.add('es-replaying');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    aiCard.classList.remove('es-replaying');
+                });
+            });
+        });
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -337,6 +375,9 @@ function initMarquee() {
         s.track.style.animation = 'none';
         s.row.addEventListener('pointerenter', () => { s.hover = true; });
         s.row.addEventListener('pointerleave', () => { s.hover = false; });
+        // Pause for keyboard users tabbing through the persona links.
+        s.row.addEventListener('focusin', () => { s.hover = true; });
+        s.row.addEventListener('focusout', () => { s.hover = false; });
     });
 
     if ('IntersectionObserver' in window) {
@@ -522,6 +563,11 @@ function initVideoFacade() {
         return;
     }
     facade.addEventListener('click', (e) => {
+        // Let modified clicks (new tab / new window) fall through to the
+        // plain link instead of swapping the player in place.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) {
+            return;
+        }
         e.preventDefault();
         const src = facade.getAttribute('data-video-src');
         if (!src) {
@@ -560,6 +606,44 @@ function initClaim() {
             input.value = slug;
         }
     });
+}
+
+/* ------------------------------------------------------------------ */
+/* Section dot navigation                                              */
+/* ------------------------------------------------------------------ */
+
+function initDotNav() {
+    const nav = document.querySelector('.es-dotnav');
+    if (!nav || !('IntersectionObserver' in window)) {
+        return;
+    }
+    const dots = Array.from(nav.querySelectorAll('.es-dot'));
+    const map = new Map();
+    dots.forEach((dot) => {
+        const id = (dot.getAttribute('href') || '').slice(1);
+        const section = document.getElementById(id);
+        if (section) {
+            map.set(section, dot);
+        }
+    });
+    if (!map.size) {
+        return;
+    }
+    // A narrow horizontal band across the middle of the viewport decides
+    // the active section, so even the very tall pinned scenes register.
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) {
+                return;
+            }
+            const active = map.get(entry.target);
+            if (!active) {
+                return;
+            }
+            dots.forEach((dot) => dot.classList.toggle('is-active', dot === active));
+        });
+    }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+    map.forEach((dot, section) => io.observe(section));
 }
 
 /* ------------------------------------------------------------------ */
@@ -612,6 +696,7 @@ function init() {
     initCounters();
     initVideoFacade();
     initClaim();
+    initDotNav();
     initConfetti();
 }
 

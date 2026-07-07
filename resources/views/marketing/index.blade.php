@@ -2,6 +2,9 @@
     <x-slot name="title">{{ __('marketing.home_title') }}</x-slot>
     <x-slot name="description">{{ __('marketing.home_description') }}</x-slot>
     <x-slot name="breadcrumbTitle">Home</x-slot>
+    <x-slot name="headMeta">
+        <link rel="preconnect" href="https://img.youtube.com">
+    </x-slot>
 
     {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
          so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
@@ -41,7 +44,7 @@
             position: absolute;
             border-radius: 9999px;
             filter: blur(90px);
-            opacity: 0.4;
+            opacity: 0.5;
             will-change: transform;
         }
         .dark .es-aurora { opacity: 0.55; }
@@ -94,10 +97,10 @@
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none;
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(78, 129, 250, 0.12), transparent 60%);
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(78, 129, 250, 0.16), transparent 60%);
         }
         .dark .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(110, 160, 255, 0.14), transparent 60%);
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(110, 160, 255, 0.16), transparent 60%);
         }
 
         /* Masked headline lines slide up from behind a clip on load */
@@ -511,6 +514,44 @@
         }
 
         /* --------------------------------------------------------------
+           Fixed-theme bands: the screening room dives dark in both
+           modes, the gallery showroom stays bright in both modes.
+           -------------------------------------------------------------- */
+
+        .es-band-dark {
+            background:
+                radial-gradient(120% 100% at 50% 0%, rgba(11, 20, 36, 0.95) 0%, rgba(5, 5, 8, 0.99) 62%),
+                #050508;
+        }
+
+        /* --------------------------------------------------------------
+           Dot navigation
+           -------------------------------------------------------------- */
+
+        .es-dot { padding: 2px; }
+        .es-dot .es-dot-pip {
+            transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(78, 129, 250, 0.7); }
+        .es-dot.is-active .es-dot-pip {
+            height: 1.5rem;
+            background: linear-gradient(180deg, #4E81FA, #22D3EE);
+        }
+
+        /* --------------------------------------------------------------
+           AI card replay (hover re-runs the flyer-to-fields animation)
+           -------------------------------------------------------------- */
+
+        .es-replaying .es-ai-field {
+            opacity: 0 !important;
+            transform: translateY(8px) !important;
+            transition: none !important;
+        }
+
+        /* Pause marquee for keyboard users on the CSS fallback too */
+        .es-marquee:focus-within .es-marquee-track { animation-play-state: paused; }
+
+        /* --------------------------------------------------------------
            Finale
            -------------------------------------------------------------- */
 
@@ -594,12 +635,40 @@
         ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com.'],
         ['q' => 'Who is Event Schedule for?', 'a' => 'Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience.'],
     ]" />
+    {{-- Structured data: list the publicly visible events in the rail --}}
+    @php
+        $eventListItems = [];
+        $eventListPos = 1;
+        foreach ($discoverEvents as $discoverEvent) {
+            $eventItemUrl = $discoverEvent->getGuestUrl();
+            if (! $eventItemUrl) {
+                continue;
+            }
+            $eventListItems[] = [
+                '@type' => 'ListItem',
+                'position' => $eventListPos++,
+                'url' => $eventItemUrl,
+                'name' => $discoverEvent->name,
+            ];
+        }
+    @endphp
+    @if (count($eventListItems))
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {!! json_encode([
+        '@context' => 'https://schema.org',
+        '@type' => 'ItemList',
+        'name' => 'Upcoming events on Event Schedule',
+        'url' => url('/'),
+        'itemListElement' => $eventListItems,
+    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+    </script>
+    @endif
     </x-slot>
 
     <!-- ============================================================ -->
     <!-- 1. Hero: the aurora stage                                    -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero relative flex min-h-[calc(100svh-4rem)] items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
             <div class="es-aurora es-aurora-1"></div>
             <div class="es-aurora es-aurora-2"></div>
@@ -726,79 +795,85 @@
     <!-- 2. Marquee: who it's for                                     -->
     <!-- ============================================================ -->
     @php
-        $marqueePersonas = [
-            ['Musicians', 'bg-blue-500'],
-            ['Venues', 'bg-sky-500'],
-            ['DJs', 'bg-cyan-500'],
-            ['Promoters', 'bg-blue-400'],
-            ['Food Trucks', 'bg-cyan-500'],
-            ['Theaters', 'bg-amber-500'],
-            ['Bands', 'bg-emerald-500'],
-            ['Festivals', 'bg-rose-500'],
+        $marqueeRows = [
+            [
+                ['Musicians', 'bg-blue-500', marketing_url('/for-musicians')],
+                ['Venues', 'bg-sky-500', marketing_url('/for-venues')],
+                ['DJs', 'bg-cyan-500', marketing_url('/for-djs')],
+                ['Promoters', 'bg-blue-400', marketing_url('/for-curators')],
+                ['Food Trucks', 'bg-cyan-500', marketing_url('/for-food-trucks-and-vendors')],
+                ['Theaters', 'bg-amber-500', marketing_url('/for-theaters')],
+                ['Bands', 'bg-emerald-500', marketing_url('/for-live-concerts')],
+                ['Festivals', 'bg-rose-500', marketing_url('/use-cases')],
+            ],
+            [
+                ['Comedians', 'bg-amber-500', marketing_url('/for-comedians')],
+                ['Nightclubs', 'bg-blue-500', marketing_url('/for-nightclubs')],
+                ['Yoga Studios', 'bg-emerald-500', marketing_url('/for-fitness-and-yoga')],
+                ['Art Galleries', 'bg-rose-500', marketing_url('/for-art-galleries')],
+                ['Farmers Markets', 'bg-lime-500', marketing_url('/for-farmers-markets')],
+                ['Restaurants', 'bg-orange-500', marketing_url('/for-restaurants')],
+                ['Community Centers', 'bg-sky-500', marketing_url('/for-community-centers')],
+                ['Magicians', 'bg-cyan-500', marketing_url('/for-magicians')],
+            ],
         ];
     @endphp
-    <section class="relative overflow-hidden border-y border-gray-200 bg-white py-10 dark:border-white/10 dark:bg-[#0a0a0f]">
+    <section class="relative overflow-hidden border-y border-gray-200 bg-white py-10 dark:border-white/10 dark:bg-[#0a0a0f]" aria-label="Who uses Event Schedule">
         <h2 class="sr-only">Who uses Event Schedule</h2>
         <div class="es-marquee-mask space-y-4">
-            <div class="es-marquee" data-marquee="1">
-                <div class="es-marquee-track">
-                    @for ($i = 0; $i < 2; $i++)
-                        @foreach ($marqueePersonas as [$persona, $dot])
-                            <span class="glass flex items-center gap-2.5 rounded-full px-6 py-3 text-lg font-semibold text-gray-800 dark:text-gray-200">
-                                <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
-                                {{ $persona }}
-                            </span>
-                        @endforeach
-                    @endfor
+            @foreach ($marqueeRows as $rowIndex => $row)
+                <div class="es-marquee" data-marquee="{{ $rowIndex === 0 ? '1' : '-1' }}">
+                    <div class="es-marquee-track">
+                        @for ($i = 0; $i < 2; $i++)
+                            @foreach ($row as [$persona, $dot, $href])
+                                <a href="{{ $href }}" @if ($i === 1) aria-hidden="true" tabindex="-1" @endif class="flex items-center gap-2.5 rounded-full border border-gray-200/70 bg-gray-100/80 px-6 py-3 text-lg font-semibold text-gray-800 transition-colors hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-200 dark:hover:text-blue-400">
+                                    <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                                    {{ $persona }}
+                                </a>
+                            @endforeach
+                        @endfor
+                    </div>
                 </div>
-            </div>
-            <div class="es-marquee" data-marquee="-1">
-                <div class="es-marquee-track">
-                    @for ($i = 0; $i < 2; $i++)
-                        @foreach (array_reverse($marqueePersonas) as [$persona, $dot])
-                            <span class="glass flex items-center gap-2.5 rounded-full px-6 py-3 text-lg font-semibold text-gray-800 dark:text-gray-200">
-                                <span class="h-2 w-2 rounded-full {{ $dot }}" aria-hidden="true"></span>
-                                {{ $persona }}
-                            </span>
-                        @endforeach
-                    @endfor
-                </div>
-            </div>
+            @endforeach
         </div>
     </section>
 
     <!-- ============================================================ -->
     <!-- 3. Showcase: the 3D screening room                           -->
     <!-- ============================================================ -->
-    <section id="showcase" class="relative scroll-mt-24 overflow-hidden bg-white pb-24 pt-16 dark:bg-[#0a0a0f] lg:pb-36 lg:pt-24">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-600/10 to-transparent blur-[100px]"></div>
-        </div>
-        <div class="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    See it in <span class="text-gradient">action</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From first event to sold-out show, in one short tour.
-                </p>
+    <section id="showcase" class="relative scroll-mt-24 bg-white px-2 pb-20 pt-14 dark:bg-[#0a0a0f] sm:px-4 lg:pb-28 lg:pt-20">
+        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-24 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
+                <div class="es-aurora es-aurora-2" style="opacity: 0.25;"></div>
+                <div class="absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-b from-blue-600/20 to-transparent blur-[100px]"></div>
+                <div class="grid-overlay absolute inset-0 opacity-30"></div>
             </div>
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
+                        See it in <span class="text-gradient">action</span>
+                    </h2>
+                    <p class="text-lg text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                        From first event to sold-out show, in one short tour.
+                    </p>
+                </div>
 
-            <div class="es-persp relative" data-scene="showcase">
-                <div class="es-frame relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl shadow-blue-900/20 dark:border-white/10 dark:bg-[#101016]">
-                    <!-- Browser chrome -->
-                    <div class="flex items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-white/10 dark:bg-white/5" aria-hidden="true">
-                        <span class="flex gap-1.5">
-                            <span class="h-3 w-3 rounded-full bg-[#FF5F57]"></span>
-                            <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
-                            <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
-                        </span>
-                        <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white px-4 py-1 text-xs font-medium text-gray-500 shadow-sm dark:bg-white/10 dark:text-gray-400">
-                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                            eventschedule.com
-                        </span>
-                        <span class="w-14"></span>
-                    </div>
+                <div class="es-persp relative" data-scene="showcase">
+                    <div class="es-frame relative overflow-hidden rounded-2xl border border-white/10 bg-[#101016] shadow-2xl shadow-black/50">
+                        <!-- Browser chrome -->
+                        <div class="flex items-center gap-3 border-b border-white/10 bg-white/5 px-4 py-3" aria-hidden="true">
+                            <span class="flex gap-1.5">
+                                <span class="h-3 w-3 rounded-full bg-[#FF5F57]"></span>
+                                <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
+                                <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
+                            </span>
+                            <span class="mx-auto flex items-center gap-1.5 rounded-lg bg-white/10 px-4 py-1 text-xs font-medium text-gray-400">
+                                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                eventschedule.com
+                            </span>
+                            <span class="w-14"></span>
+                        </div>
                     <!-- Click-to-play video facade -->
                     <div class="relative aspect-video bg-black">
                         <a href="https://www.youtube-nocookie.com/embed/IL8Fj0p6Lz8"
@@ -823,7 +898,8 @@
                         </a>
                     </div>
                 </div>
-                <div class="es-frame-glow" aria-hidden="true"></div>
+                    <div class="es-frame-glow" aria-hidden="true"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -957,7 +1033,7 @@
                 </a>
 
                 <!-- AI-Powered -->
-                <a href="{{ marketing_url('/features/ai') }}" class="es-bento group relative block lg:col-span-3" data-tilt="4" data-reveal="panel" aria-label="Learn more about AI-powered features">
+                <a href="{{ marketing_url('/features/ai') }}" class="es-bento es-ai-replay group relative block lg:col-span-3" data-tilt="4" data-reveal="panel" aria-label="Learn more about AI-powered features">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] sm:p-8">
                         <div class="mb-3 flex items-center gap-3">
                             <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/20">
@@ -1268,129 +1344,74 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Gallery: pinned horizontal showcase                       -->
+    <!-- 6. Discover: upcoming events rail (always-bright band)       -->
     <!-- ============================================================ -->
-    @php
-        $galleryShots = [
-            ['file' => 'marketing_6', 'alt' => 'Community hub schedule page with a monthly calendar view', 'caption' => 'Community calendars'],
-            ['file' => 'list_villageidiot', 'alt' => 'Music venue schedule page with event flyers and ticket buttons', 'caption' => 'Venues and nightlife'],
-            ['file' => 'marketing_1', 'alt' => 'Yoga retreat schedule page with a custom tie-dye background', 'caption' => 'Classes and retreats'],
-            ['file' => 'marketing_3', 'alt' => 'Art class event page with an auto-generated flyer', 'caption' => 'Event pages and flyers'],
-            ['file' => 'list_battleofthebands', 'alt' => 'Band schedule page listing upcoming shows', 'caption' => 'Bands on tour'],
-        ];
-    @endphp
-    <section class="es-gallery relative bg-white dark:bg-[#0a0a0f]" data-scene="gallery">
-        <div class="es-gallery-pin py-24 lg:py-0">
-            <div class="mx-auto mb-10 max-w-3xl px-4 text-center sm:px-6">
-                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
-                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Real pages</span>
+    <section id="discover" class="relative scroll-mt-24 bg-gray-50 px-2 py-6 dark:bg-[#0f0f14] sm:px-4">
+        <div @class([
+            'relative rounded-[2.5rem] bg-white shadow-2xl shadow-gray-900/10 ring-1 ring-gray-200 2xl:mx-auto 2xl:max-w-[100rem]',
+            'es-gallery' => $discoverEvents->count() >= 4,
+        ]) data-scene="gallery">
+            <div class="es-gallery-pin py-20 lg:py-0">
+            <div class="mx-auto mb-8 max-w-3xl px-4 text-center sm:px-6">
+                <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100/80 px-4 py-1.5" data-reveal>
+                    <svg aria-hidden="true" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                    </svg>
+                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600">Discover</span>
                 </div>
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Beautiful <span class="text-gradient">out of the box</span>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                    Discover events across the <span class="text-gradient">community</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
-                    Every schedule gets a page worth sharing. Your colors, your background, your brand.
+                <p class="text-lg text-gray-600 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
+                    Upcoming events from across the community. Live music, fitness classes, comedy nights, community meetups, and more.
                 </p>
             </div>
 
-            <div class="es-rail-clip w-full" tabindex="0" aria-label="Gallery of example schedule pages">
-                <div class="es-rail items-stretch gap-6 px-6 lg:gap-8 lg:px-[7vw]">
-                    @foreach ($galleryShots as $shot)
-                        <figure class="es-shot w-[78vw] shrink-0 sm:w-[400px]">
-                            <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl shadow-gray-900/10 dark:border-white/10 dark:bg-[#101016] dark:shadow-black/40">
-                                <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-50 px-4 py-2.5 dark:border-white/10 dark:bg-white/5" aria-hidden="true">
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#FF5F57]"></span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]"></span>
-                                    <span class="h-2.5 w-2.5 rounded-full bg-[#28C840]"></span>
-                                </div>
-                                <div class="relative h-[50vh] overflow-hidden lg:h-[54vh]">
-                                    <picture>
-                                        <source srcset="{{ asset('images/screenshots/' . $shot['file'] . '_800w.webp') }}" type="image/webp">
-                                        <img src="{{ asset('images/screenshots/' . $shot['file'] . '_800w.jpg') }}" alt="{{ $shot['alt'] }}" class="h-full w-full object-cover object-top" loading="lazy" decoding="async" width="585" height="800">
-                                    </picture>
-                                </div>
-                            </div>
-                            <figcaption class="mt-4 text-center">
-                                <span class="glass inline-block rounded-full px-4 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $shot['caption'] }}</span>
-                            </figcaption>
-                        </figure>
-                    @endforeach
+            @if ($discoverEvents->count() > 0)
+                <div class="es-rail-clip w-full" tabindex="0" aria-label="Upcoming events across the community">
+                    <div class="es-rail items-stretch gap-5 px-6 lg:gap-7 lg:px-[7vw]">
+                        @foreach ($discoverEvents as $event)
+                            @include('marketing.partials.event-poster-card', ['event' => $event])
+                        @endforeach
 
-                    <!-- Rail finale card -->
-                    <div class="es-shot flex w-[78vw] shrink-0 sm:w-[400px] flex-col">
-                        <div class="relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#101830] via-[#0a0a0f] to-[#06202a] p-10 text-center shadow-2xl">
-                            <div class="grid-overlay absolute inset-0 opacity-40" aria-hidden="true"></div>
-                            <div class="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#4E81FA]/30 blur-[80px]" aria-hidden="true"></div>
-                            <div class="relative">
-                                <div class="mb-3 text-3xl font-black text-white">Yours is next</div>
-                                <p class="mb-8 text-gray-400">Set up your page in minutes and make it unmistakably yours.</p>
-                                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-6 py-3.5 font-semibold text-white shadow-xl shadow-blue-500/30 transition-transform hover:scale-105">
-                                    Start for free
-                                    <svg class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                </a>
+                        <!-- Rail finale card -->
+                        <div class="es-shot flex w-[72vw] shrink-0 sm:w-[320px]">
+                            <div class="relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#101830] via-[#0a0a0f] to-[#06202a] p-8 text-center shadow-xl">
+                                <div class="grid-overlay absolute inset-0 opacity-40" aria-hidden="true"></div>
+                                <div class="absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-[#4E81FA]/30 blur-[80px]" aria-hidden="true"></div>
+                                <div class="relative">
+                                    <div class="mb-3 text-2xl font-black text-white">Your events could be here</div>
+                                    <p class="mb-6 text-sm text-gray-400">Create your schedule and get discovered by the community.</p>
+                                    <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-6 py-3 font-semibold text-white shadow-xl shadow-blue-500/30 transition-transform hover:scale-105">
+                                        Start for free
+                                        <svg class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                    </a>
+                                </div>
                             </div>
                         </div>
-                        <div class="mt-4 h-8" aria-hidden="true"></div>
                     </div>
                 </div>
-            </div>
 
-            <div class="es-rail-progress-wrap mx-auto mt-10 w-48" aria-hidden="true">
-                <div class="h-1 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
-                    <div class="es-rail-progress h-full w-full rounded-full"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. Discover: live events from the community                  -->
-    <!-- ============================================================ -->
-    <section id="discover" class="relative scroll-mt-24 overflow-hidden bg-gray-50 py-24 dark:bg-[#0f0f14] lg:py-32">
-        <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div class="absolute left-1/4 top-10 h-[420px] w-[420px] rounded-full bg-gradient-to-r from-blue-600/10 to-sky-500/10 blur-[120px]"></div>
-            <div class="absolute bottom-0 right-1/4 h-[360px] w-[360px] rounded-full bg-gradient-to-r from-sky-500/10 to-cyan-500/10 blur-[120px]"></div>
-        </div>
-
-        <div class="relative z-10 mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                <svg aria-hidden="true" class="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-                </svg>
-                <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Discover</span>
-            </div>
-
-            <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                Discover events across the <span class="text-gradient">community</span>
-            </h2>
-            <p class="mx-auto mb-12 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.16s;">
-                Upcoming events from across the community. Live music, fitness classes, comedy nights, community meetups, and more.
-            </p>
-
-            @if ($discoverEvents->count() > 0)
-                <div class="grid grid-cols-1 gap-6 text-left sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="90">
-                    @foreach ($discoverEvents as $event)
-                        <div data-reveal>
-                            @include('marketing.partials.event-card', ['event' => $event])
-                        </div>
-                    @endforeach
+                <div class="es-rail-progress-wrap mx-auto mt-8 w-48" aria-hidden="true">
+                    <div class="h-1 overflow-hidden rounded-full bg-gray-200">
+                        <div class="es-rail-progress h-full w-full rounded-full"></div>
+                    </div>
                 </div>
 
-                <div class="mt-12 flex flex-col items-center gap-3" data-reveal>
-                    <a href="{{ marketing_url('/browse') }}" data-magnetic="0.14" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-shadow hover:shadow-xl hover:shadow-blue-500/40">
+                <div class="mt-8 flex flex-col items-center gap-3 px-4">
+                    <a href="{{ marketing_url('/browse') }}" data-magnetic="0.14" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-7 py-3.5 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-shadow hover:shadow-xl hover:shadow-blue-500/40">
                         Browse all events
                         <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
-                    <a href="{{ marketing_url('/search') }}" class="text-sm text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
+                    <a href="{{ marketing_url('/search') }}" class="text-sm text-gray-500 transition-colors hover:text-blue-600">
                         or search for something specific
                     </a>
                 </div>
             @else
                 {{-- No events yet: still offer a way in --}}
-                <div data-reveal>
+                <div class="px-4 text-center">
                     <a href="{{ marketing_url('/browse') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105">
                         Browse all events
                         <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1400,15 +1421,16 @@
                 </div>
             @endif
 
-            <p class="mt-10 text-gray-500 dark:text-gray-400" data-reveal>
+            <p class="mt-6 px-4 pb-2 text-center text-gray-500">
                 Run events of your own?
-                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-1 font-semibold text-blue-600 transition-all hover:gap-2 dark:text-blue-400">
+                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center gap-1 font-semibold text-blue-600 transition-all hover:gap-2">
                     Get discovered in community search
                     <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
             </p>
+            </div>
         </div>
     </section>
 
@@ -1826,6 +1848,32 @@
             </div>
         </div>
     </section>
+
+    <!-- Section dot navigation (desktop) -->
+    @php
+        $dotSections = [
+            ['top', 'Top'],
+            ['showcase', 'Demo'],
+            ['features', 'Features'],
+            ['discover', 'Discover'],
+            ['integrations', 'Integrations'],
+            ['open-source', 'Free & open source'],
+            ['how-it-works', 'How it works'],
+            ['claim', 'Get started'],
+        ];
+    @endphp
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#15151c] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
