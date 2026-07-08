@@ -121,14 +121,6 @@
                             Privacy Policy
                         </a>
                     </li>
-                    @if (config('services.google.analytics'))
-                    <li>
-                        <button type="button" data-cookie-consent-reopen
-                                class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] rounded-sm">
-                            {{ __('messages.cookie_consent_manage') }}
-                        </button>
-                    </li>
-                    @endif
                     <li>
                         <a href="{{ marketing_url('/terms-of-service') }}" class="text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Terms of Service

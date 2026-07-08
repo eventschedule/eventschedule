@@ -372,7 +372,10 @@
              cards never carry names or links. --}}
         @php
             $wallEventCards = [];
-            foreach ($discoverEvents->take(8) as $wallEvent) {
+            foreach ($discoverEvents as $wallEvent) {
+                if (count($wallEventCards) >= 12) {
+                    break;
+                }
                 $wallUrl = $wallEvent->getGuestUrl();
                 $wallImg = $wallEvent->getImageUrl();
                 if (! $wallUrl || ! $wallImg) {

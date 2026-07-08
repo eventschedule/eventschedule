@@ -156,7 +156,7 @@
                     If you accept, Google Analytics sets first-party cookies named <code>_ga</code> and <code>_ga_&lt;measurement-id&gt;</code>, used to distinguish unique visitors and sessions. We also set <code>ads_data_redaction</code> on every page so any beacons that do fire are stripped of advertising identifiers.
                 </p>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    You can withdraw consent at any time. Use the "Cookie preferences" link in the site footer, or the button in the next section, to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)).
+                    You can withdraw consent at any time. Use the "Cookie preferences" button in the next section to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)).
                 </p>
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">{{ __('messages.cookie_consent_privacy_heading') }}</h2>

@@ -38,7 +38,7 @@ class MarketingController extends Controller
                         });
                 })
                 ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
-                ->limit(10)
+                ->limit(12)
                 ->get(),
         ]);
     }
