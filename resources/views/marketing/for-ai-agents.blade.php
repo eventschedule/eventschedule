@@ -3,33 +3,6 @@
     <x-slot name="description">Full REST API with OpenAPI spec, llms.txt, and agents.json for AI agents. Create events, manage tickets, and automate scheduling. Zero fees.</x-slot>
     <x-slot name="breadcrumbTitle">For AI Agents</x-slot>
 
-    <style {!! nonce_attr() !!}>
-        .agent-glow-text {
-            background: linear-gradient(135deg, #06b6d4, #10b981);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(6, 182, 212, 0.3);
-        }
-        .dark .agent-glow-text {
-            background: linear-gradient(135deg, #22d3ee, #34d399);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(34, 211, 238, 0.3);
-        }
-
-        .noise::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-        }
-
-    </style>
-
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -107,486 +80,508 @@
     </script>
     </x-slot>
 
-    {{-- Section 1: Hero --}}
-    <section class="relative min-h-screen flex items-center overflow-hidden bg-white dark:bg-[#0a0a0f] noise">
-        {{-- Animated gradient orbs --}}
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-cyan-600/30 to-cyan-500/30 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-cyan-600/10 to-emerald-600/10 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 3s;"></div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <style {!! nonce_attr() !!}>
+        /* For-ai-agents "The Console" styles. The shared es-* motion system lives
+           in marketing.css; this holds the agent glow gradient, the drifting API
+           console card, and the streaming data-packet motif. */
+        .text-gradient-agent {
+            background: linear-gradient(135deg, #06b6d4, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(6, 182, 212, 0.3);
+        }
+        .dark .text-gradient-agent {
+            background: linear-gradient(135deg, #22d3ee, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(34, 211, 238, 0.3);
+        }
+        @keyframes es-agent-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .es-agent-float { animation: es-agent-float 6s ease-in-out infinite; }
+
+        /* Data-packet stream: request packets flow through the pipe in a wave,
+           like API calls streaming between agent and server. */
+        .es-flow { display: flex; align-items: center; }
+        .es-packet {
+            flex: 0 0 auto;
+            width: 10px; height: 10px; border-radius: 2px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.6), rgba(16, 185, 129, 0.6));
+            animation: es-packet var(--pk-dur, 2.4s) ease-in-out infinite;
+            animation-delay: var(--pk-delay, 0s);
+        }
+        @keyframes es-packet {
+            0%, 100% { opacity: 0.15; transform: translateX(-2px) scale(0.8); }
+            50% { opacity: 0.95; transform: translateX(2px) scale(1.1); box-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .es-agent-float, .es-packet { animation: none !important; }
+            .es-packet { opacity: 0.5; transform: none; }
+        }
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: schedule events, programmatically                  -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(6, 182, 212, 0.3), rgba(6, 182, 212, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(16, 185, 129, 0.28), rgba(16, 185, 129, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(20, 184, 166, 0.14), rgba(20, 184, 166, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <!-- Data-packet stream along the bottom edge -->
+            <div class="es-flow absolute bottom-0 left-0 right-0 hidden h-20 items-center justify-center gap-2.5 px-8 pb-6 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+                @for ($i = 0; $i < 26; $i++)
+                    @php $dur = 2.2 + ($i % 5) * 0.26; $delay = ($i % 12) * 0.12; @endphp
+                    <span class="es-packet" style="--pk-dur: {{ $dur }}s; --pk-delay: {{ $delay }}s;"></span>
+                @endfor
+            </div>
         </div>
 
-        {{-- Grid pattern overlay --}}
-        <div class="absolute inset-0 grid-pattern bg-[size:60px_60px]"></div>
-
-        <div class="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-center">
-            {{-- Badge --}}
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                <svg aria-hidden="true" class="w-4 h-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-cyan-500 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">For AI Agents & Developers</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For AI Agents & Developers</span>
             </div>
 
-            {{-- Main headline --}}
-            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 animate-reveal delay-100" style="opacity: 0;">
-                <span class="block text-gray-900 dark:text-white">Schedule events.</span>
-                <span class="block agent-glow-text pb-2">Programmatically.</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Schedule events.</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-agent">Programmatically.</span></span></span>
             </h1>
 
-            {{-- Subheadline --}}
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 A full REST API with OpenAPI spec. Let your AI agent create events, manage tickets, and automate scheduling with simple HTTP requests.
             </p>
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-base text-gray-400 dark:text-gray-500">
+                llms.txt, agents.json, and a machine-readable OpenAPI spec, so agents can discover, understand, and drive Event Schedule without human help.
+            </p>
 
-            {{-- CTAs --}}
-            <div class="flex flex-col sm:flex-row gap-4 justify-center animate-reveal delay-300" style="opacity: 0;">
-                <a href="{{ route('marketing.docs.developer.api') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/25">
-                    <span class="absolute inset-0 animate-shimmer"></span>
+            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="{{ route('marketing.docs.developer.api') }}" class="group pointer-events-auto relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-cyan-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
+                    <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
                     <span class="relative z-10 flex items-center gap-2">
                         Read API Docs
-                        <svg aria-hidden="true" class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </span>
                 </a>
-                <a href="/api/openapi.json" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 dark:border-white/20 rounded-2xl hover:border-cyan-500 dark:hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all">
-                    <svg aria-hidden="true" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <a href="/api/openapi.json" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     OpenAPI Spec
                 </a>
             </div>
 
-            {{-- Tech tags --}}
-            <div class="flex flex-wrap justify-center gap-3 mt-12 animate-reveal delay-300" style="opacity: 0;">
-                @foreach(['OpenAI', 'Claude', 'LangChain', 'Custom Agents', 'REST'] as $tag)
-                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 text-sm border border-gray-200 dark:border-white/10">{{ $tag }}</span>
-                @endforeach
+            <!-- Tech-tag marquee -->
+            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                        <div class="es-marquee-track">
+                            @for ($tc = 0; $tc < 2; $tc++)
+                                @foreach (['OpenAI', 'Claude', 'LangChain', 'Custom Agents', 'REST', 'MCP', 'Python', 'cURL'] as $tag)
+                                    <span class="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100/80 px-4 py-1.5 font-mono text-xs font-semibold text-cyan-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400"></span>
+                                        {{ $tag }}
+                                    </span>
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
     </section>
-    {{-- Stats Section --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-16 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-6 text-center">
-                <div class="p-6">
-                    <div class="text-4xl font-bold text-cyan-400 mb-2">40+ hours</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-sm">to build event management from scratch</div>
+
+    <!-- ============================================================ -->
+    <!-- 2. Stats                                                     -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="grid gap-6 text-center md:grid-cols-3" data-reveal-group="90">
+                <div data-reveal class="p-6">
+                    <div class="mb-2 text-4xl font-black text-cyan-500 dark:text-cyan-400">40+ hours</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">to build event management from scratch</div>
                 </div>
-                <div class="p-6 border-x border-gray-200 dark:border-white/5">
-                    <div class="text-4xl font-bold text-amber-400 mb-2">0%</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-sm">platform fees on ticket sales</div>
+                <div data-reveal class="border-gray-200 p-6 dark:border-white/5 md:border-x">
+                    <div class="mb-2 text-4xl font-black text-emerald-500 dark:text-emerald-400">0%</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">platform fees on ticket sales</div>
                 </div>
-                <div class="p-6">
-                    <div class="text-4xl font-bold text-sky-400 mb-2">< 5 min</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-sm">to your first API call</div>
+                <div data-reveal class="p-6">
+                    <div class="mb-2 text-4xl font-black text-sky-500 dark:text-sky-400">&lt; 5 min</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">to your first API call</div>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Section 2: Features Bento Grid --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Everything your agent needs
+    <!-- ============================================================ -->
+    <!-- 3. Bento features                                            -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Everything your <span class="text-gradient-agent">agent needs</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     A complete toolkit for programmatic event management.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
 
-                {{-- Card 1: Full REST API (2-col span) --}}
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-cyan-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                                </svg>
-                                REST API
+                <!-- Full REST API (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="flex flex-col items-center gap-8 lg:flex-row">
+                            <div class="flex-1">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                    REST API
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Full REST API</h3>
+                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Create, read, update, and delete schedules, events, tickets, and sub-schedules. Standard HTTP methods, JSON responses, and predictable URL structure. Webhooks for real-time event notifications.</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">JSON responses</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">API key auth</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Webhooks</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Rate limiting</span>
+                                </div>
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Full REST API</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Create, read, update, and delete schedules, events, tickets, and sub-schedules. Standard HTTP methods, JSON responses, and predictable URL structure. Webhooks for real-time event notifications.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">JSON responses</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">API key auth</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Webhooks</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Rate limiting</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 w-full lg:w-auto">
-                            <div class="relative animate-float">
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 max-w-xs">
-                                    <div class="text-xs text-gray-400 mb-2 font-mono">POST /api/events</div>
-                                    <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
-                                        {<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"name"</span>: <span class="text-emerald-600 dark:text-emerald-400">"AI Meetup"</span>,<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"starts_at"</span>: <span class="text-emerald-600 dark:text-emerald-400">"2026-06-15"</span>,<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"venue"</span>: <span class="text-emerald-600 dark:text-emerald-400">"Tech Hub SF"</span><br>
-                                        }
+                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
+                                <div class="animate-float">
+                                    <div class="max-w-xs rounded-2xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]">
+                                        <div class="mb-2 font-mono text-xs text-gray-400">POST /api/events</div>
+                                        <div class="font-mono text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                                            {<br>
+                                            &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"name"</span>: <span class="text-emerald-600 dark:text-emerald-400">"AI Meetup"</span>,<br>
+                                            &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"starts_at"</span>: <span class="text-emerald-600 dark:text-emerald-400">"2026-06-15"</span>,<br>
+                                            &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"venue"</span>: <span class="text-emerald-600 dark:text-emerald-400">"Tech Hub SF"</span><br>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="my-2 flex justify-center">
+                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-cyan-500 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                                    </div>
+                                    <div class="max-w-xs rounded-2xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]">
+                                        <div class="mb-2 font-mono text-xs text-emerald-500">201 Created</div>
+                                        <div class="font-mono text-sm leading-relaxed text-gray-600 dark:text-gray-300">
+                                            {<br>
+                                            &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"id"</span>: <span class="text-amber-600 dark:text-amber-400">42</span>,<br>
+                                            &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"name"</span>: <span class="text-emerald-600 dark:text-emerald-400">"AI Meetup"</span>,<br>
+                                            &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"url"</span>: <span class="text-emerald-600 dark:text-emerald-400">"..."</span><br>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="flex justify-center my-2">
-                                    <svg aria-hidden="true" class="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                    </svg>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Smart event creation -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                            Smart Creation
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Smart event creation</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Send event details and the API auto-resolves venues, members, and categories. No need to look up IDs first.</p>
+                        <div class="mt-auto space-y-3">
+                            <div class="es-ai-field flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300" style="--i: 0;">
+                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                Venue auto-resolution
+                            </div>
+                            <div class="es-ai-field flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300" style="--i: 1;">
+                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                Member matching
+                            </div>
+                            <div class="es-ai-field flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300" style="--i: 2;">
+                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                Sub-schedule assignment
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- One link for everything -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            Shareable URL
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">One link for everything</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Every schedule gets a public URL your agent can share. Events, tickets, and iCal feeds all accessible from one link.</p>
+                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-[#0f0f18]" aria-hidden="true">
+                            <div class="truncate font-mono text-sm text-sky-600 dark:text-sky-300">your-schedule.eventschedule.com</div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Ticket management (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="flex flex-col items-center gap-8 lg:flex-row">
+                            <div class="flex-1">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                                    Ticketing
                                 </div>
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-4 max-w-xs">
-                                    <div class="text-xs text-emerald-500 mb-2 font-mono">201 Created</div>
-                                    <div class="text-sm text-gray-600 dark:text-gray-300 font-mono leading-relaxed">
-                                        {<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"id"</span>: <span class="text-amber-600 dark:text-amber-400">42</span>,<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"name"</span>: <span class="text-emerald-600 dark:text-emerald-400">"AI Meetup"</span>,<br>
-                                        &nbsp;&nbsp;<span class="text-cyan-600 dark:text-cyan-400">"url"</span>: <span class="text-emerald-600 dark:text-emerald-400">"..."</span><br>
-                                        }
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Ticket management</h3>
+                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Create ticket types, set prices, and track sales through the API. Zero platform fees on all ticket sales.</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Multiple ticket types</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Zero platform fees</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Sales tracking</span>
+                                </div>
+                            </div>
+                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
+                                <div class="max-w-xs space-y-3">
+                                    <div class="es-ai-field flex items-center justify-between rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-[#0f0f14]" style="--i: 0;">
+                                        <div><div class="text-sm font-semibold text-gray-900 dark:text-white">General Admission</div><div class="text-xs text-gray-500 dark:text-gray-400">50 available</div></div>
+                                        <div class="text-lg font-bold text-amber-600 dark:text-amber-400">$25</div>
+                                    </div>
+                                    <div class="es-ai-field flex items-center justify-between rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-[#0f0f14]" style="--i: 1;">
+                                        <div><div class="text-sm font-semibold text-gray-900 dark:text-white">VIP Access</div><div class="text-xs text-gray-500 dark:text-gray-400">10 available</div></div>
+                                        <div class="text-lg font-bold text-amber-600 dark:text-amber-400">$75</div>
+                                    </div>
+                                    <div class="es-ai-field flex items-center justify-between rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-[#0f0f14]" style="--i: 2;">
+                                        <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Student</div><div class="text-xs text-gray-500 dark:text-gray-400">25 available</div></div>
+                                        <div class="text-lg font-bold text-amber-600 dark:text-amber-400">$15</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                {{-- Card 2: Smart Event Creation --}}
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-emerald-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                        Smart Creation
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Smart event creation</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Send event details and the API auto-resolves venues, members, and categories. No need to look up IDs first.</p>
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                            Venue auto-resolution
+                <!-- Recurring events -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            Recurring
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                            Member matching
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Recurring events</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Set up repeating events with flexible patterns. Daily, weekly, monthly, or custom recurrence rules.</p>
+                        <div class="mt-auto flex flex-wrap gap-2">
+                            <span class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">Every Monday</span>
+                            <span class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">1st of month</span>
+                            <span class="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">Every 2 weeks</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                            <svg aria-hidden="true" class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                            Sub-schedule assignment
-                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                {{-- Card 3: One Link for Everything --}}
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        Shareable URL
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for everything</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Every schedule gets a public URL your agent can share. Events, tickets, and iCal feeds all accessible from one link.</p>
-                    <div class="bg-gray-200 dark:bg-[#0f0f18] rounded-xl border border-gray-200 dark:border-white/10 p-3">
-                        <div class="text-sm font-mono text-sky-600 dark:text-sky-300 truncate">your-schedule.eventschedule.com</div>
+                <!-- Multi-language -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+                            i18n
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Multi-language</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Events auto-translate to 11 languages. Reach a global audience without extra work.</p>
+                        <div class="mt-auto space-y-2">
+                            <div class="es-ai-field flex items-center gap-3" style="--i: 0;"><span class="w-8 font-mono text-sm text-teal-600 dark:text-teal-400">EN</span><span class="text-sm text-gray-600 dark:text-gray-300">AI Developer Meetup</span></div>
+                            <div class="es-ai-field flex items-center gap-3" style="--i: 1;"><span class="w-8 font-mono text-sm text-teal-600 dark:text-teal-400">ES</span><span class="text-sm text-gray-600 dark:text-gray-300">Encuentro de desarrolladores IA</span></div>
+                            <div class="es-ai-field flex items-center gap-3" style="--i: 2;"><span class="w-8 font-mono text-sm text-teal-600 dark:text-teal-400">DE</span><span class="text-sm text-gray-600 dark:text-gray-300">KI-Entwicklertreffen</span></div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                {{-- Card 4: Ticket Management (2-col span) --}}
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                                </svg>
-                                Ticketing
+                <!-- OpenAPI spec -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            OpenAPI 3.0
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">OpenAPI spec</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Download the OpenAPI 3.0 spec to auto-generate client libraries in any language.</p>
+                        <div class="mt-auto">
+                            <div class="mb-4 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-[#0f0f18]">
+                                <div class="truncate font-mono text-sm text-cyan-600 dark:text-cyan-300">/api/openapi.json</div>
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Ticket management</h3>
-                            <p class="text-gray-600 dark:text-white/80 text-lg mb-6">Create ticket types, set prices, and track sales through the API. Zero platform fees on all ticket sales.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple ticket types</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Zero platform fees</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Sales tracking</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 w-full lg:w-auto">
-                            <div class="space-y-3 max-w-xs">
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">General Admission</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">50 available</div>
-                                    </div>
-                                    <div class="text-lg font-bold text-amber-600 dark:text-amber-400">$25</div>
-                                </div>
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">VIP Access</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">10 available</div>
-                                    </div>
-                                    <div class="text-lg font-bold text-amber-600 dark:text-amber-400">$75</div>
-                                </div>
-                                <div class="bg-gray-200 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">Student</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">25 available</div>
-                                    </div>
-                                    <div class="text-lg font-bold text-amber-600 dark:text-amber-400">$15</div>
-                                </div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-700 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300">Python</span>
+                                <span class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-700 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300">JavaScript</span>
+                                <span class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-700 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300">Go</span>
+                                <span class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs text-cyan-700 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300">PHP</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {{-- Card 5: Recurring Events --}}
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Recurring
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Recurring events</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Set up repeating events with flexible patterns. Daily, weekly, monthly, or custom recurrence rules.</p>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-500/20">Every Monday</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-500/20">1st of month</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-sm border border-blue-200 dark:border-blue-500/20">Every 2 weeks</span>
-                    </div>
-                </div>
-
-                {{-- Card 6: Multi-Language --}}
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-teal-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                        i18n
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Multi-language</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Events auto-translate to 11 languages. Reach a global audience without extra work.</p>
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm font-mono text-teal-600 dark:text-teal-400 w-8">EN</span>
-                            <span class="text-sm text-gray-600 dark:text-gray-300">AI Developer Meetup</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm font-mono text-teal-600 dark:text-teal-400 w-8">ES</span>
-                            <span class="text-sm text-gray-600 dark:text-gray-300">Encuentro de desarrolladores IA</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-sm font-mono text-teal-600 dark:text-teal-400 w-8">DE</span>
-                            <span class="text-sm text-gray-600 dark:text-gray-300">KI-Entwicklertreffen</span>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Card 7: OpenAPI Spec --}}
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-emerald-100 dark:from-cyan-900 dark:to-emerald-900 border border-cyan-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        OpenAPI 3.0
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">OpenAPI spec</h3>
-                    <p class="text-gray-600 dark:text-white/80 mb-6">Download the OpenAPI 3.0 spec to auto-generate client libraries in any language.</p>
-                    <div class="bg-gray-200 dark:bg-[#0f0f18] rounded-xl border border-gray-200 dark:border-white/10 p-3 mb-4">
-                        <div class="text-sm font-mono text-cyan-600 dark:text-cyan-300 truncate">/api/openapi.json</div>
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs border border-cyan-200 dark:border-cyan-500/20">Python</span>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs border border-cyan-200 dark:border-cyan-500/20">JavaScript</span>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs border border-cyan-200 dark:border-cyan-500/20">Go</span>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 text-xs border border-cyan-200 dark:border-cyan-500/20">PHP</span>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- AI-Native Discovery Files --}}
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    AI-native discovery
+    <!-- ============================================================ -->
+    <!-- 4. AI-native discovery files                                -->
+    <!-- ============================================================ -->
+    @php
+        $discovery = [
+            ['llms.txt', '/llms.txt', 'TXT', 'cyan', 'Concise summary for initial discovery and routing. Helps agents decide whether this API is relevant to a task before fetching full documentation.', '/llms.txt',
+                '<div class="text-cyan-600 dark:text-cyan-400"># Event Schedule</div><div class="text-gray-500 dark:text-gray-400">&gt; Open-source platform for...</div><div class="text-cyan-600 dark:text-cyan-400 mt-1">## API</div><div class="text-gray-600 dark:text-gray-300">- Authentication: X-API-Key</div>'],
+            ['llms-full.txt', '/llms-full.txt', 'TXT', 'emerald', 'Self-contained docs with full API details. No link-following needed for agents to start working - everything an LLM needs is in one file.', '/llms-full.txt',
+                '<div class="text-emerald-600 dark:text-emerald-400"># Event Schedule - Full Docs</div><div class="text-gray-500 dark:text-gray-400">&gt; Complete API reference...</div><div class="text-emerald-600 dark:text-emerald-400 mt-1">## Schedule Types</div><div class="text-gray-600 dark:text-gray-300">- Venue | Talent | Curator</div>'],
+            ['agents.json', '/.well-known/agents.json', 'JSON', 'teal', 'Pre-defined multi-step workflows for common tasks. Agents can execute complete sequences like registration and event creation without custom logic.', '/.well-known/agents.json',
+                '<div class="text-gray-600 dark:text-gray-300">{</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-teal-600 dark:text-teal-400">"name"</span>: <span class="text-amber-600 dark:text-amber-400">"Event Schedule API"</span>,</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-teal-600 dark:text-teal-400">"flows"</span>: [</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="text-teal-600 dark:text-teal-400">"name"</span>: <span class="text-amber-600 dark:text-amber-400">"register_and_setup"</span> }</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;]</div><div class="text-gray-600 dark:text-gray-300">}</div>'],
+            ['openapi.json', '/api/openapi.json', 'JSON', 'sky', 'Machine-readable OpenAPI 3.0 specification for auto-generating client libraries and tool definitions in any language.', '/api/openapi.json',
+                '<div class="text-gray-600 dark:text-gray-300">{</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"openapi"</span>: <span class="text-amber-600 dark:text-amber-400">"3.0.3"</span>,</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"info"</span>: {</div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"title"</span>: <span class="text-amber-600 dark:text-amber-400">"Event Schedule API"</span></div><div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;}</div><div class="text-gray-600 dark:text-gray-300">}</div>'],
+        ];
+        $discoveryStyles = [
+            'cyan' => ['border-cyan-200 dark:border-cyan-800/50 hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-cyan-500/10', 'from-cyan-50 to-teal-50 dark:from-cyan-950/40 dark:to-teal-950/40', 'bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300', 'text-cyan-600 dark:text-cyan-400'],
+            'emerald' => ['border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-emerald-500/10', 'from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40', 'bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300', 'text-emerald-600 dark:text-emerald-400'],
+            'teal' => ['border-teal-200 dark:border-teal-800/50 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-teal-500/10', 'from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40', 'bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300', 'text-teal-600 dark:text-teal-400'],
+            'sky' => ['border-sky-200 dark:border-sky-800/50 hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-sky-500/10', 'from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/40', 'bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300', 'text-sky-600 dark:text-sky-400'],
+        ];
+    @endphp
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    <span class="text-gradient-agent">AI-native</span> discovery
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Standard discovery files so AI agents can find and understand the API without human help.
                 </p>
             </div>
 
-            <div class="space-y-6">
-                {{-- llms.txt --}}
-                <a href="/llms.txt" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-cyan-200 dark:border-cyan-800/50 hover:border-cyan-400 dark:hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-0.5 transition-all duration-200">
-                    {{-- Terminal preview --}}
-                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950/40 dark:to-teal-950/40 p-5">
-                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                            </div>
-                            <div class="p-3 font-mono text-xs leading-relaxed">
-                                <div class="text-cyan-600 dark:text-cyan-400"># Event Schedule</div>
-                                <div class="text-gray-500 dark:text-gray-400">> Open-source platform for...</div>
-                                <div class="text-cyan-600 dark:text-cyan-400 mt-1">## API</div>
-                                <div class="text-gray-600 dark:text-gray-300">- Authentication: X-API-Key</div>
+            <div class="space-y-6" data-reveal-group="90">
+                @foreach ($discovery as [$name, $href, $badge, $color, $desc, $path, $preview])
+                    @php [$cardCls, $panelCls, $badgeCls, $linkCls] = $discoveryStyles[$color]; @endphp
+                    <a href="{{ $href }}" data-reveal class="group flex flex-col overflow-hidden rounded-2xl border bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:bg-[#0a0a0f] md:flex-row {{ $cardCls }}">
+                        <div class="flex-shrink-0 bg-gradient-to-br p-5 md:w-[280px] lg:w-[320px] {{ $panelCls }}">
+                            <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#0f0f14]">
+                                <div class="flex items-center gap-1.5 border-b border-gray-200 bg-gray-50 px-3 py-2 dark:border-white/10 dark:bg-white/5">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-red-400"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-green-400"></span>
+                                </div>
+                                <div class="p-3 font-mono text-xs leading-relaxed">{!! $preview !!}</div>
                             </div>
                         </div>
-                    </div>
-                    {{-- Details --}}
-                    <div class="flex-1 p-6 flex flex-col justify-center">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">llms.txt</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 text-xs font-medium">TXT</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Concise summary for initial discovery and routing. Helps agents decide whether this API is relevant to a task before fetching full documentation.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms.txt</span>
-                            <span class="inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400 gap-1 group-hover:gap-2 transition-all">
-                                View file
-                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- llms-full.txt --}}
-                <a href="/llms-full.txt" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-emerald-200 dark:border-emerald-800/50 hover:border-emerald-400 dark:hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-0.5 transition-all duration-200">
-                    {{-- Terminal preview --}}
-                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 p-5">
-                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                        <div class="flex flex-1 flex-col justify-center p-6">
+                            <div class="mb-2 flex items-center gap-3">
+                                <h3 class="font-mono text-xl font-bold text-gray-900 dark:text-white">{{ $name }}</h3>
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeCls }}">{{ $badge }}</span>
                             </div>
-                            <div class="p-3 font-mono text-xs leading-relaxed">
-                                <div class="text-emerald-600 dark:text-emerald-400"># Event Schedule - Full Docs</div>
-                                <div class="text-gray-500 dark:text-gray-400">> Complete API reference...</div>
-                                <div class="text-emerald-600 dark:text-emerald-400 mt-1">## Schedule Types</div>
-                                <div class="text-gray-600 dark:text-gray-300">- Venue | Talent | Curator</div>
+                            <p class="mb-4 text-sm text-gray-600 dark:text-gray-400">{{ $desc }}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="font-mono text-xs text-gray-400 dark:text-gray-500">{{ $path }}</span>
+                                <span class="inline-flex items-center gap-1 text-sm font-medium transition-all group-hover:gap-2 {{ $linkCls }}">
+                                    View file
+                                    <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
                             </div>
                         </div>
-                    </div>
-                    {{-- Details --}}
-                    <div class="flex-1 p-6 flex flex-col justify-center">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">llms-full.txt</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 text-xs font-medium">TXT</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Self-contained docs with full API details. No link-following needed for agents to start working - everything an LLM needs is in one file.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/llms-full.txt</span>
-                            <span class="inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400 gap-1 group-hover:gap-2 transition-all">
-                                View file
-                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- agents.json --}}
-                <a href="/.well-known/agents.json" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-teal-200 dark:border-teal-800/50 hover:border-teal-400 dark:hover:border-teal-500 hover:shadow-lg hover:shadow-teal-500/10 hover:-translate-y-0.5 transition-all duration-200">
-                    {{-- Terminal preview --}}
-                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/40 dark:to-cyan-950/40 p-5">
-                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                            </div>
-                            <div class="p-3 font-mono text-xs leading-relaxed">
-                                <div class="text-gray-600 dark:text-gray-300">{</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-teal-600 dark:text-teal-400">"name"</span>: <span class="text-amber-600 dark:text-amber-400">"Event Schedule API"</span>,</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-teal-600 dark:text-teal-400">"flows"</span>: [</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="text-teal-600 dark:text-teal-400">"name"</span>: <span class="text-amber-600 dark:text-amber-400">"register_and_setup"</span> }</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;]</div>
-                                <div class="text-gray-600 dark:text-gray-300">}</div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Details --}}
-                    <div class="flex-1 p-6 flex flex-col justify-center">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">agents.json</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-500/15 text-teal-700 dark:text-teal-300 text-xs font-medium">JSON</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Pre-defined multi-step workflows for common tasks. Agents can execute complete sequences like registration and event creation without custom logic.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/.well-known/agents.json</span>
-                            <span class="inline-flex items-center text-sm font-medium text-teal-600 dark:text-teal-400 gap-1 group-hover:gap-2 transition-all">
-                                View file
-                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </a>
-
-                {{-- openapi.json --}}
-                <a href="/api/openapi.json" class="group flex flex-col md:flex-row overflow-hidden rounded-2xl bg-white dark:bg-[#0a0a0f] border border-sky-200 dark:border-sky-800/50 hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-lg hover:shadow-sky-500/10 hover:-translate-y-0.5 transition-all duration-200">
-                    {{-- Terminal preview --}}
-                    <div class="md:w-[280px] lg:w-[320px] flex-shrink-0 bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-950/40 dark:to-blue-950/40 p-5">
-                        <div class="rounded-lg bg-white dark:bg-[#0f0f14] border border-gray-200 dark:border-white/10 overflow-hidden shadow-sm">
-                            <div class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
-                                <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                                <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                            </div>
-                            <div class="p-3 font-mono text-xs leading-relaxed">
-                                <div class="text-gray-600 dark:text-gray-300">{</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"openapi"</span>: <span class="text-amber-600 dark:text-amber-400">"3.0.3"</span>,</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"info"</span>: {</div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-sky-600 dark:text-sky-400">"title"</span>: <span class="text-amber-600 dark:text-amber-400">"Event Schedule API"</span></div>
-                                <div class="text-gray-600 dark:text-gray-300">&nbsp;&nbsp;}</div>
-                                <div class="text-gray-600 dark:text-gray-300">}</div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Details --}}
-                    <div class="flex-1 p-6 flex flex-col justify-center">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h3 class="text-xl font-bold font-mono text-gray-900 dark:text-white">openapi.json</h3>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 text-xs font-medium">JSON</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Machine-readable OpenAPI 3.0 specification for auto-generating client libraries and tool definitions in any language.</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-mono text-gray-400 dark:text-gray-500">/api/openapi.json</span>
-                            <span class="inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400 gap-1 group-hover:gap-2 transition-all">
-                                View file
-                                <svg aria-hidden="true" class="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                </a>
+                    </a>
+                @endforeach
             </div>
         </div>
     </section>
 
-    {{-- Section 3: Built for every kind of integration --}}
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Built for every kind of integration
+    <!-- ============================================================ -->
+    <!-- 5. Quick start (dark terminal band)                          -->
+    <!-- ============================================================ -->
+    @php
+        $quickstart = [
+            ['1', 'Get your API key', '<a href="'.app_url('/sign_up').'" class="font-medium text-cyan-300 hover:underline">Sign up for free</a> and generate an API key from your account settings.', 'Authorization: Bearer YOUR_API_KEY'],
+            ['2', 'Create a schedule', 'POST to /api/schedules with a name and subdomain. Your schedule is live instantly.', 'curl -X POST /api/schedules \\<br>&nbsp;&nbsp;-d \'{"name": "My Schedule"}\''],
+            ['3', 'Start managing events', 'Create events, set up tickets, and manage your schedule programmatically.', 'curl -X POST /api/events \\<br>&nbsp;&nbsp;-d \'{"name": "AI Meetup"}\''],
+        ];
+    @endphp
+    <section id="quickstart" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
+        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0) 60%); opacity: 0.55;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="es-flow absolute bottom-0 left-0 right-0 flex h-16 items-center justify-center gap-2.5 px-8 pb-3 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+                    @for ($i = 0; $i < 26; $i++)
+                        @php $dur = 2.2 + ($i % 5) * 0.26; $delay = ($i % 12) * 0.12; @endphp
+                        <span class="es-packet" style="--pk-dur: {{ $dur }}s; --pk-delay: {{ $delay }}s;"></span>
+                    @endfor
+                </div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-2xl text-center">
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
+                        Three steps to your <span class="text-gradient-agent">first API call</span>
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="90">
+                    @foreach ($quickstart as [$num, $title, $desc, $code])
+                        <div data-reveal class="flex flex-col rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-center transition-all hover:-translate-y-1 hover:bg-white/[0.07]">
+                            <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-emerald-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
+                                {{ $num }}
+                            </div>
+                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
+                            <p class="flex-1 text-sm text-gray-400">{!! $desc !!}</p>
+                            <div class="mt-4 rounded-xl border border-white/10 bg-black/30 p-3 text-left">
+                                <div class="truncate font-mono text-xs leading-relaxed text-gray-300">{!! $code !!}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Built for every kind of integration (sub-audience cards) -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Built for every kind of <span class="text-gradient-agent">integration</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whatever you're building, the API has you covered.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {{-- AI Assistants --}}
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                <!-- AI Assistants -->
                 <x-sub-audience-card
                     name="AI Assistants"
                     description="Give your AI assistant the ability to create and manage events for users through natural conversation."
@@ -600,7 +595,7 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                {{-- Developer Tools & Scripts --}}
+                <!-- Developer Tools & Scripts -->
                 <x-sub-audience-card
                     name="Developer Tools & Scripts"
                     description="Automate event management with scripts, CLI tools, and custom integrations using the REST API."
@@ -614,7 +609,7 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                {{-- Community Bots --}}
+                <!-- Community Bots -->
                 <x-sub-audience-card
                     name="Community Bots"
                     description="Build Discord, Slack, or Telegram bots that create events and notify community members automatically."
@@ -628,7 +623,7 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                {{-- Booking Platforms --}}
+                <!-- Booking Platforms -->
                 <x-sub-audience-card
                     name="Booking Platforms"
                     description="Integrate event creation and ticket management into your existing booking or reservation system."
@@ -642,7 +637,7 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                {{-- Calendar Aggregators --}}
+                <!-- Calendar Aggregators -->
                 <x-sub-audience-card
                     name="Calendar Aggregators"
                     description="Pull events from Event Schedule into aggregation services and cross-platform calendar views."
@@ -656,7 +651,7 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                {{-- Custom Integrations --}}
+                <!-- Custom Integrations -->
                 <x-sub-audience-card
                     name="Custom Integrations"
                     description="Use the OpenAPI spec to generate client libraries and build custom integrations in any language."
@@ -673,269 +668,163 @@
         </div>
     </section>
 
-    {{-- Section 4: Quick Start --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Three steps to your first API call
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="flex flex-col text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-emerald-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
-                        1
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Get your API key</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
-                        <a href="{{ app_url('/sign_up') }}" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">Sign up for free</a> and generate an API key from your account settings.
-                    </p>
-                    <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
-                        <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed truncate">Authorization: Bearer YOUR_API_KEY</div>
-                    </div>
+    <!-- ============================================================ -->
+    <!-- 7. Key features                                              -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <div class="space-y-3" data-reveal-group="70">
+                <div data-reveal>
+                    <x-feature-link-card name="AI Features" description="Import, generate content, create brand style, and more with AI" :url="marketing_url('/features/ai')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
                 </div>
-
-                <div class="flex flex-col text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-emerald-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
-                        2
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Create a schedule</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
-                        POST to /api/schedules with a name and subdomain. Your schedule is live instantly.
-                    </p>
-                    <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
-                        <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed">curl -X POST /api/schedules \<br>&nbsp;&nbsp;-d '{"name": "My Schedule"}'</div>
-                    </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
                 </div>
-
-                <div class="flex flex-col text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-cyan-600 to-emerald-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-cyan-600/25">
-                        3
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Start managing events</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm flex-1">
-                        Create events, set up tickets, and manage your schedule programmatically.
-                    </p>
-                    <div class="mt-4 bg-gray-100 dark:bg-[#0f0f14] rounded-xl border border-gray-200 dark:border-white/10 p-3 text-left">
-                        <div class="text-xs font-mono text-gray-500 dark:text-gray-400 leading-relaxed">curl -X POST /api/events \<br>&nbsp;&nbsp;-d '{"name": "AI Meetup"}'</div>
-                    </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Embed Calendar" description="Add your schedule to any website with one snippet" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
+                    </x-feature-link-card>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Key Features -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
-            <div class="space-y-3">
-                <x-feature-link-card
-                    name="AI Features"
-                    description="Import, generate content, create brand style, and more with AI"
-                    :url="marketing_url('/features/ai')"
-                    icon-color="blue"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Analytics"
-                    description="Track page views, devices, and traffic sources"
-                    :url="marketing_url('/features/analytics')"
-                    icon-color="emerald"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Embed Calendar"
-                    description="Add your schedule to any website with one snippet"
-                    :url="marketing_url('/features/embed-calendar')"
-                    icon-color="blue"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-            </div>
-        </div>
-    </section>
-
-    {{-- FAQ Section --}}
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Everything you need to know about the API and LLM discovery files.
-                </p>
-            </div>
-
-            <div class="space-y-4">
-                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What is llms.txt?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            llms.txt is an emerging standard that helps AI models discover and understand your platform. Event Schedule provides both <a href="/llms.txt" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">llms.txt</a> (a concise summary for initial discovery and routing) and <a href="/llms-full.txt" class="text-cyan-600 dark:text-cyan-400 hover:underline font-medium">llms-full.txt</a> (a complete, self-contained reference so agents can work without following additional links).
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What can I do with the API?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 11 languages.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is the API free to use?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Read operations are free on any Pro schedule. Write operations (creating and updating events, tickets, etc.) require a Pro plan. Ticket sales have zero platform fees - you keep 100% of revenue minus payment processing.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            How does authentication work?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Authentication uses API keys passed via the <code class="text-sm bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">X-API-Key</code> header. Generate your API key from your account settings after signing up. Read-only endpoints on public schedules don't require authentication.
-                        </p>
-                </details>
             </div>
         </div>
     </section>
 
     @include('marketing.partials.pricing-nudge')
 
-    <!-- Related Pages -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-20">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related pages</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="{{ marketing_url('/for-webinars') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Webinars</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-virtual-conferences') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Virtual Conferences</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-curators') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Curators</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-online-classes') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Online Classes</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                    See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    {{-- Section 5: CTA --}}
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden border-t border-cyan-200 dark:border-cyan-900/20">
-        {{-- Mesh gradient background --}}
-        <div class="absolute inset-0">
-            <div class="absolute top-0 left-[-10%] w-[50%] h-[60%] bg-cyan-600/15 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-0 right-[-10%] w-[50%] h-[60%] bg-emerald-600/15 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-        </div>
-
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                Give your agent the power of scheduling.
-            </h2>
-            <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
-                Full REST API. OpenAPI spec. Zero platform fees.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-cyan-500/20">
-                    <span class="absolute inset-0 animate-shimmer"></span>
-                    <span class="relative z-10 flex items-center gap-2">
-                        Get Started Free
-                        <svg aria-hidden="true" class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- ============================================================ -->
+    <!-- 8. Related pages                                             -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+                @foreach ([['/for-webinars', 'Webinars'], ['/for-virtual-conferences', 'Virtual Conferences'], ['/for-curators', 'Curators'], ['/for-online-classes', 'Online Classes']] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                        <div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                        </div>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
-                    </span>
-                </a>
-                <a href="{{ route('marketing.docs.developer.api') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-gray-700 dark:text-gray-200 border-2 border-gray-300 dark:border-white/20 rounded-2xl hover:border-cyan-500 dark:hover:border-cyan-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-all">
-                    Read API Docs
+                    </a>
+                @endforeach
+            </div>
+            <div class="mt-6 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                    See all use cases
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                 </a>
             </div>
-            <p class="mt-6 text-gray-500 text-sm">Pro plan required for write operations</p>
         </div>
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 9. FAQ                                                       -->
+    <!-- ============================================================ -->
+    @php
+        $faqLink = 'font-medium text-cyan-600 hover:underline dark:text-cyan-400';
+        $faqs = [
+            ['What is llms.txt?', 'llms.txt is an emerging standard that helps AI models discover and understand your platform. Event Schedule provides both <a href="/llms.txt" class="'.$faqLink.'">llms.txt</a> (a concise summary for initial discovery and routing) and <a href="/llms-full.txt" class="'.$faqLink.'">llms-full.txt</a> (a complete, self-contained reference so agents can work without following additional links).'],
+            ['What can I do with the API?', 'You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 11 languages.'],
+            ['Is the API free to use?', 'Read operations are free on any Pro schedule. Write operations (creating and updating events, tickets, etc.) require a Pro plan. Ticket sales have zero platform fees - you keep 100% of revenue minus payment processing.'],
+            ['How does authentication work?', 'Authentication uses API keys passed via the <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-white/10">X-API-Key</code> header. Generate your API key from your account settings after signing up. Read-only endpoints on public schedules don\'t require authentication.'],
+        ];
+    @endphp
+    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient-agent">questions</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything you need to know about the API and LLM discovery files.
+                </p>
+            </div>
+
+            <div class="space-y-4" data-reveal-group="80">
+                @foreach ($faqs as [$q, $a])
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{!! $a !!}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 10. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-cyan-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(6, 182, 212, 0.3), rgba(6, 182, 212, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="es-flow absolute bottom-0 left-0 right-0 flex h-14 items-center justify-center gap-2.5 px-8 pb-3 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+                        @for ($i = 0; $i < 22; $i++)
+                            @php $dur = 2.2 + ($i % 5) * 0.26; $delay = ($i % 12) * 0.12; @endphp
+                            <span class="es-packet" style="--pk-dur: {{ $dur }}s; --pk-delay: {{ $delay }}s;"></span>
+                        @endfor
+                    </div>
+                </div>
+
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Give your agent the <span class="text-gradient-agent">power of scheduling.</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Full REST API. OpenAPI spec. Zero platform fees.
+                    </p>
+
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-agent" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-cyan-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get Started Free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+
+                    <p class="mt-6 text-sm text-gray-300">
+                        or <a href="{{ route('marketing.docs.developer.api') }}" class="font-medium text-cyan-300 hover:underline">read the API docs</a>
+                    </p>
+                    <p class="mt-2 text-sm text-gray-400">Pro plan required for write operations</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

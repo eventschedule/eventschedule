@@ -35,27 +35,49 @@
 
     @include('marketing.docs.partials.styles')
 
+    <style {!! nonce_attr() !!}>
+        .text-gradient-docs {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-docs {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="es-hero relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5 noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 35%, rgba(8, 145, 178, 0.22), rgba(8, 145, 178, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 78% 70%, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
         </div>
-        <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <x-docs-breadcrumb currentTitle="Creating Schedules" />
 
-            <div class="flex items-center gap-4 mb-4">
+            <div class="es-fade-up es-d-1 flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
                     <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Creating Schedules</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Creating <span class="text-gradient-docs">Schedules</span></h1>
             </div>
-            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
+            <p class="es-fade-up es-d-2 text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Set up and configure your schedule - from basic details and contact info to sub-schedules, calendar integrations, and auto import.
             </p>
         </div>
@@ -481,7 +503,7 @@
                             <!-- Custom Categories -->
                             <h3 id="customize-categories" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Custom Categories</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Tailor the event categories shown on your event form and your schedule's filter. The 12 system defaults (Art &amp; Culture, Business Networking, Community, Concerts, Education, Food &amp; Drink, Health &amp; Fitness, Parties &amp; Festivals, Personal Growth, Sports, Spirituality, Tech) are pre-loaded as editable rows. Rename or remove any of them, and add up to 20 custom categories that match how you organise events — 32 entries total.
+                                Tailor the event categories shown on your event form and your schedule's filter. The 12 system defaults (Art &amp; Culture, Business Networking, Community, Concerts, Education, Food &amp; Drink, Health &amp; Fitness, Parties &amp; Festivals, Personal Growth, Sports, Spirituality, Tech) are pre-loaded as editable rows. Rename or remove any of them, and add up to 20 custom categories that match how you organise events - 32 entries total.
                             </p>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
@@ -490,7 +512,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Removing a default</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click the X on any default to remove it from your event form and guest portal filter. Events already tagged with that category keep their badge — the original name still resolves via the system defaults. If the category is in use, you'll see a confirmation showing how many events are affected. Use "Reset to default categories" to restore the original 12.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Click the X on any default to remove it from your event form and guest portal filter. Events already tagged with that category keep their badge - the original name still resolves via the system defaults. If the category is in use, you'll see a confirmation showing how many events are affected. Use "Reset to default categories" to restore the original 12.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding a custom category</h4>
@@ -502,7 +524,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Ordering</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Categories are always shown alphabetically — there's no manual reordering. The list re-sorts itself when you rename, add, or remove a row.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Categories are always shown alphabetically - there's no manual reordering. The list re-sorts itself when you rename, add, or remove a row.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translation</h4>
@@ -1405,7 +1427,7 @@ example.eventschedule.com/summer-concert</code></pre>
 
                             <h5 class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h5>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values using numbered variables.
+                                If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> in your schedule settings, you can include their values using numbered variables.
                             </p>
 
                             @if (!empty($customFieldsData))

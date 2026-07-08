@@ -193,7 +193,7 @@
             background-attachment: {{ (($event && !request()->embed && !request()->graphic) || ($role->event_layout ?? 'calendar') === 'list') ? 'fixed' : 'scroll' }};
             display: flex;
             flex-direction: column;
-            @if ($event && $otherRole && $otherRole->isClaimed())
+            @if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground())
                 @if ($otherRole->background == 'gradient')
                     background-image: linear-gradient({{ $otherRole->background_rotation }}deg, {{ $otherRole->background_colors }});
                 @elseif ($otherRole->background == 'solid')
@@ -519,7 +519,7 @@
             $showMobileBanner = false;
             $mobileBannerUrl = '';
 
-            if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->background == 'image') {
+            if ($event && $otherRole && $otherRole->isClaimed() && $otherRole->hasConfiguredBackground() && $otherRole->background == 'image') {
                 $showMobileBanner = true;
                 $mobileBannerUrl = $otherRole->background_image
                     ? asset('images/backgrounds/' . $otherRole->background_image . '.webp')

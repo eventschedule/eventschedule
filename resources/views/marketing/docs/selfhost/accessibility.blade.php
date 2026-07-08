@@ -24,19 +24,45 @@
 
     @include('marketing.docs.partials.styles')
 
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0 grid-pattern"></div>
+    <style {!! nonce_attr() !!}>
+        .text-gradient-docs {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-docs {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <section class="es-hero relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5 noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 22% 30%, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
+        </div>
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <x-docs-breadcrumb currentTitle="Web accessibility" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
-            <div class="flex items-center gap-4 mb-4">
+            <div class="es-fade-up es-d-2 flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-500/20">
                     <svg aria-hidden="true" class="w-6 h-6 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a4 4 0 014 4v1h1a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h1V8a4 4 0 118 0z" />
                     </svg>
                 </div>
-                <h1 id="overview" class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white scroll-mt-24">Web accessibility (selfhost)</h1>
+                <h1 id="overview" class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white scroll-mt-24"><span class="text-gradient-docs">Web accessibility (selfhost)</span></h1>
             </div>
-            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
+            <p class="es-fade-up es-d-3 text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Event Schedule ships with a public accessibility declaration on the hosted marketing site, an in-app accessibility panel, and skip links. When you selfhost on your own domain, you are usually responsible for your own legal compliance and for publishing your own accessibility statement for visitors who use your installation.
             </p>
         </div>

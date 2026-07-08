@@ -35,26 +35,48 @@
 
     @include('marketing.docs.partials.styles')
 
+    <style {!! nonce_attr() !!}>
+        .text-gradient-docs {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-docs {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden noise border-b border-gray-200 dark:border-white/5">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-rays absolute inset-0"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <x-docs-breadcrumb currentTitle="Stripe Integration" section="selfhost" sectionTitle="Selfhost" sectionRoute="marketing.docs.selfhost" />
 
-            <div class="flex items-center gap-4 mb-4">
+            <div class="es-fade-up es-d-1 flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20">
                     <svg aria-hidden="true" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Stripe Integration Setup</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Stripe Integration <span class="text-gradient-docs">Setup</span></h1>
             </div>
-            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
+            <p class="es-fade-up es-d-2 text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Choose the setup guide that matches how you're using Event Schedule.
             </p>
         </div>
@@ -220,7 +242,7 @@
                                     </svg>
                                     <div>
                                         <p class="text-amber-700 dark:text-amber-300 font-medium mb-1">Important: Webhook Event</p>
-                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Make sure to select <code class="doc-inline-code">checkout.session.completed</code>—this is different from SaaS setups which use <code class="doc-inline-code">payment_intent.succeeded</code>.</p>
+                                        <p class="text-gray-600 dark:text-gray-400 text-sm">Make sure to select <code class="doc-inline-code">checkout.session.completed</code> - this is different from SaaS setups which use <code class="doc-inline-code">payment_intent.succeeded</code>.</p>
                                     </div>
                                 </div>
                             </div>
@@ -681,9 +703,9 @@ stripe trigger customer.subscription.created</code></pre>
                             </h2>
                             <ol class="doc-list doc-list-numbered">
                                 <li><span class="font-semibold text-gray-900 dark:text-white">API Key Security:</span> Never expose secret keys in client-side code or version control. Use environment variables.</li>
-                                <li><span class="font-semibold text-gray-900 dark:text-white">Webhook Verification:</span> Always verify webhook signatures—Event Schedule does this automatically.</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">Webhook Verification:</span> Always verify webhook signatures - Event Schedule does this automatically.</li>
                                 <li><span class="font-semibold text-gray-900 dark:text-white">HTTPS Required:</span> Stripe requires HTTPS for webhook endpoints in production.</li>
-                                <li><span class="font-semibold text-gray-900 dark:text-white">PCI Compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope—card data never touches your server.</li>
+                                <li><span class="font-semibold text-gray-900 dark:text-white">PCI Compliance:</span> Using Stripe Checkout and Elements keeps you out of PCI scope - card data never touches your server.</li>
                             </ol>
                         </section>
                     </div>

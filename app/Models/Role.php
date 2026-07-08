@@ -173,7 +173,7 @@ class Role extends Model implements MustVerifyEmail
      */
     protected $attributes = [
         'header_image' => 'none',
-        'header_style' => 'compact',
+        'header_style' => 'banner',
         'fan_comments_enabled' => true,
         'fan_photos_enabled' => true,
         'fan_videos_enabled' => true,
@@ -811,6 +811,16 @@ class Role extends Model implements MustVerifyEmail
     public function isClaimed()
     {
         return ($this->email_verified_at != null || $this->phone_verified_at != null) && $this->user_id != null;
+    }
+
+    public function hasConfiguredBackground(): bool
+    {
+        return match ($this->background) {
+            'gradient' => filled($this->background_colors),
+            'solid'    => filled($this->background_color),
+            'image'    => filled($this->background_image) || filled($this->background_image_url),
+            default    => false,
+        };
     }
 
     public function isEditableBy(?User $user): bool

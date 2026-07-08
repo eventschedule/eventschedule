@@ -16,130 +16,10 @@
 
     <style {!! nonce_attr() !!}>
         /* ==============================================================
-           Homepage-specific styles: aurora hero, scroll scenes, bento
-           mockups, orbit, odometers, and the finale. Generic reveal
-           utilities live in marketing.css.
+           Homepage-exclusive styles: the live poster wall, 3D showcase,
+           pinned gallery rail, integrations orbit, and the how-it-works
+           story. The shared es-* motion system lives in marketing.css.
            ============================================================== */
-
-        .es-balance { text-wrap: balance; }
-
-        ::selection { background: rgba(78, 129, 250, 0.35); }
-
-        /* Film grain */
-        .noise::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.025;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* --------------------------------------------------------------
-           Hero: aurora, god rays, cursor spotlight, masked headline
-           -------------------------------------------------------------- */
-
-        .es-aurora {
-            position: absolute;
-            border-radius: 9999px;
-            filter: blur(90px);
-            opacity: 0.5;
-            will-change: transform;
-        }
-        .dark .es-aurora { opacity: 0.55; }
-        .es-aurora-1 {
-            width: 640px; height: 640px; left: -160px; top: -140px;
-            background: radial-gradient(circle at 30% 30%, rgba(78, 129, 250, 0.55), rgba(78, 129, 250, 0) 65%);
-            animation: es-drift-1 26s ease-in-out infinite alternate;
-        }
-        .es-aurora-2 {
-            width: 560px; height: 560px; right: -140px; top: 5%;
-            background: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.5), rgba(14, 165, 233, 0) 65%);
-            animation: es-drift-2 32s ease-in-out infinite alternate;
-        }
-        .es-aurora-3 {
-            width: 760px; height: 760px; left: 50%; bottom: -45%; margin-left: -380px;
-            background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.35), rgba(34, 211, 238, 0) 60%);
-            animation: es-drift-3 30s ease-in-out infinite alternate;
-        }
-        @keyframes es-drift-1 {
-            from { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
-            to   { transform: translate3d(90px, 70px, 0) rotate(25deg) scale(1.15); }
-        }
-        @keyframes es-drift-2 {
-            from { transform: translate3d(0, 0, 0) rotate(0deg) scale(1.1); }
-            to   { transform: translate3d(-80px, 90px, 0) rotate(-20deg) scale(0.95); }
-        }
-        @keyframes es-drift-3 {
-            from { transform: translate3d(0, 0, 0) scale(1); }
-            to   { transform: translate3d(0, -70px, 0) scale(1.18); }
-        }
-
-        .es-rays {
-            opacity: 0.5;
-            background: conic-gradient(from 200deg at 50% -20%,
-                transparent 0deg,
-                rgba(78, 129, 250, 0.08) 12deg,
-                transparent 24deg,
-                transparent 42deg,
-                rgba(14, 165, 233, 0.07) 54deg,
-                transparent 66deg,
-                transparent 90deg,
-                rgba(34, 211, 238, 0.06) 102deg,
-                transparent 116deg);
-            mask-image: linear-gradient(to bottom, black 20%, transparent 75%);
-            -webkit-mask-image: linear-gradient(to bottom, black 20%, transparent 75%);
-        }
-        .dark .es-rays { opacity: 0.85; }
-
-        .es-spot {
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(78, 129, 250, 0.16), transparent 60%);
-        }
-        .dark .es-spot {
-            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(110, 160, 255, 0.16), transparent 60%);
-        }
-
-        /* Masked headline lines slide up from behind a clip on load */
-        .es-mask {
-            display: block;
-            overflow: hidden;
-            padding-bottom: 0.12em;
-            margin-bottom: -0.12em;
-        }
-        .es-mask-line { display: block; }
-        html.es-anim .es-mask .es-mask-line {
-            transform: translateY(115%);
-            animation: es-rise 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
-        }
-        html.es-anim .es-mask-2 .es-mask-line { animation-delay: 0.28s; }
-        @keyframes es-rise { to { transform: translateY(0); } }
-
-        html.es-anim .es-fade-up {
-            opacity: 0;
-            animation: es-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-        @keyframes es-fade-up {
-            from { opacity: 0; transform: translateY(26px); }
-            to   { opacity: 1; transform: none; }
-        }
-        html.es-anim .es-d-1 { animation-delay: 0.05s; }
-        html.es-anim .es-d-2 { animation-delay: 0.45s; }
-        html.es-anim .es-d-3 { animation-delay: 0.6s; }
-        html.es-anim .es-d-4 { animation-delay: 0.75s; }
-        html.es-anim .es-d-5 { animation-delay: 1.3s; }
-
-        .es-gradient-anim {
-            background-size: 200% 200%;
-            animation: es-gradient-shift 6s ease infinite;
-        }
-        @keyframes es-gradient-shift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
 
         /* Live poster wall: a tilted plane of drifting event-poster columns.
            Mouse parallax feeds the --tx/--ty/--wx/--wz custom props so the
@@ -210,47 +90,6 @@
                 radial-gradient(ellipse 62% 58% at 50% 46%, rgba(10, 10, 15, 0.96) 32%, rgba(10, 10, 15, 0.86) 52%, rgba(10, 10, 15, 0.42) 74%, transparent 93%);
         }
 
-        /* Scroll cue */
-        .es-cue {
-            width: 26px; height: 42px;
-            border-radius: 9999px;
-            border: 2px solid rgba(120, 130, 160, 0.5);
-            display: flex; justify-content: center;
-        }
-        .es-cue-dot {
-            width: 4px; height: 9px; border-radius: 9999px;
-            margin-top: 7px;
-            background: linear-gradient(180deg, #4E81FA, #22D3EE);
-            animation: es-cue 2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-        }
-        @keyframes es-cue {
-            0% { transform: translateY(0); opacity: 1; }
-            70% { transform: translateY(14px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 0; }
-        }
-
-        /* --------------------------------------------------------------
-           Marquee
-           -------------------------------------------------------------- */
-
-        .es-marquee-mask {
-            mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
-            -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
-        }
-        .es-marquee { overflow: hidden; }
-        .es-marquee-track {
-            display: flex;
-            width: max-content;
-            gap: 0.875rem;
-            padding-right: 0.875rem;
-            will-change: transform;
-            animation: es-marquee-slide 48s linear infinite;
-        }
-        [data-marquee="-1"] .es-marquee-track { animation-direction: reverse; }
-        @keyframes es-marquee-slide {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-50%); }
-        }
 
         /* --------------------------------------------------------------
            Showcase: 3D screening room
@@ -282,108 +121,6 @@
             80%, 100% { transform: scale(1.7); opacity: 0; }
         }
 
-        /* --------------------------------------------------------------
-           Bento cards: tilt, glare, cursor border glow, mockup life
-           -------------------------------------------------------------- */
-
-        .es-tilt-inner {
-            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
-            will-change: transform;
-        }
-        .es-bento:hover .es-tilt-inner { box-shadow: 0 30px 60px -20px rgba(10, 15, 35, 0.25); }
-        .dark .es-bento:hover .es-tilt-inner { box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6); }
-
-        .es-glare {
-            position: absolute; inset: 0;
-            opacity: 0;
-            transition: opacity 0.35s ease;
-            pointer-events: none;
-            background: radial-gradient(620px circle at var(--gx, 50%) var(--gy, 50%), rgba(78, 129, 250, 0.09), transparent 45%);
-        }
-        .dark .es-glare {
-            background: radial-gradient(620px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, 0.09), transparent 45%);
-        }
-        .es-bento:hover .es-glare { opacity: 1; }
-
-        .es-ring-glow { display: none; }
-        @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
-            .es-ring-glow {
-                display: block;
-                position: absolute; inset: 0;
-                border-radius: 1.5rem;
-                padding: 1.5px;
-                opacity: 0;
-                transition: opacity 0.35s ease;
-                pointer-events: none;
-                background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 50%), rgba(78, 129, 250, 0.65), rgba(34, 211, 238, 0.25) 45%, transparent 70%);
-                -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                -webkit-mask-composite: xor;
-                mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-                mask-composite: exclude;
-            }
-            .es-bento:hover .es-ring-glow { opacity: 1; }
-        }
-
-        /* Ticket QR laser scan */
-        .es-laser {
-            position: absolute;
-            left: 6%; right: 6%;
-            top: 14%;
-            height: 2px;
-            border-radius: 9999px;
-            background: linear-gradient(90deg, transparent, #22D3EE, transparent);
-            box-shadow: 0 0 14px rgba(34, 211, 238, 0.85);
-            animation: es-laser 2.8s ease-in-out infinite;
-        }
-        @keyframes es-laser {
-            0%, 100% { top: 14%; opacity: 0.9; }
-            50% { top: 82%; opacity: 1; }
-        }
-        .es-checkin {
-            opacity: 0;
-            transform: translateY(10px) scale(0.9);
-            transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-        .es-bento:hover .es-checkin { opacity: 1; transform: none; }
-
-        /* Analytics bars grow when the card reveals */
-        .es-bar {
-            transform: scaleY(0.06);
-            transform-origin: bottom;
-            transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
-            transition-delay: var(--bd, 0.3s);
-        }
-        [data-reveal].is-revealed .es-bar, html:not(.es-anim) .es-bar { transform: scaleY(1); }
-
-        /* AI: parsed fields materialize when the card reveals */
-        .es-ai-field {
-            opacity: 0;
-            transform: translateY(8px);
-            transition: all 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-            transition-delay: calc(var(--i, 0) * 0.18s + 0.5s);
-        }
-        [data-reveal].is-revealed .es-ai-field, html:not(.es-anim) .es-ai-field { opacity: 1; transform: none; }
-
-        /* Calendar sync pulse traveling between tiles */
-        .es-sync-dot {
-            position: absolute;
-            top: 50%;
-            left: 14%;
-            width: 8px; height: 8px;
-            margin-top: -4px;
-            border-radius: 9999px;
-            background: #22D3EE;
-            box-shadow: 0 0 12px rgba(34, 211, 238, 0.9);
-            animation: es-sync-dot 2.6s ease-in-out infinite;
-        }
-        @keyframes es-sync-dot {
-            0% { left: 14%; opacity: 0; }
-            12% { opacity: 1; }
-            48% { left: calc(86% - 8px); opacity: 1; }
-            60% { left: calc(86% - 8px); opacity: 0; }
-            61% { left: 14%; opacity: 0; }
-            100% { left: 14%; opacity: 0; }
-        }
 
         /* --------------------------------------------------------------
            Gallery: pinned horizontal rail (desktop, motion allowed)
@@ -473,32 +210,6 @@
             80%, 100% { transform: scale(2.1); opacity: 0; }
         }
 
-        /* --------------------------------------------------------------
-           Odometer stats
-           -------------------------------------------------------------- */
-
-        .es-od { display: inline-flex; line-height: 1; }
-        .es-od-col {
-            display: inline-block;
-            height: 1em;
-            overflow: hidden;
-            vertical-align: top;
-        }
-        /* The translateY on the strip breaks background-clip:text
-           propagation from the parent .text-gradient, so each digit
-           carries its own gradient. */
-        .es-od-strip span {
-            background: linear-gradient(135deg, #4E81FA 0%, #0EA5E9 50%, #22D3EE 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .es-od-strip {
-            display: flex;
-            flex-direction: column;
-            transition: transform 2.1s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .es-od-strip span { display: block; height: 1em; line-height: 1; }
 
         /* --------------------------------------------------------------
            How it works: pinned story
@@ -561,91 +272,23 @@
             html.es-anim .es-steps[data-active-step="2"] .es-step-2 { opacity: 1; }
         }
 
-        /* --------------------------------------------------------------
-           Fixed-theme bands: the screening room dives dark in both
-           modes, the gallery showroom stays bright in both modes.
-           -------------------------------------------------------------- */
-
-        .es-band-dark {
-            background:
-                radial-gradient(120% 100% at 50% 0%, rgba(11, 20, 36, 0.95) 0%, rgba(5, 5, 8, 0.99) 62%),
-                #050508;
-        }
 
         /* --------------------------------------------------------------
-           Dot navigation
-           -------------------------------------------------------------- */
-
-        .es-dot { padding: 2px; }
-        .es-dot .es-dot-pip {
-            transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.35s ease;
-        }
-        .es-dot:hover .es-dot-pip { background-color: rgba(78, 129, 250, 0.7); }
-        .es-dot.is-active .es-dot-pip {
-            height: 1.5rem;
-            background: linear-gradient(180deg, #4E81FA, #22D3EE);
-        }
-
-        /* --------------------------------------------------------------
-           AI card replay (hover re-runs the flyer-to-fields animation)
-           -------------------------------------------------------------- */
-
-        .es-replaying .es-ai-field {
-            opacity: 0 !important;
-            transform: translateY(8px) !important;
-            transition: none !important;
-        }
-
-        /* Pause marquee for keyboard users on the CSS fallback too */
-        .es-marquee:focus-within .es-marquee-track { animation-play-state: paused; }
-
-        /* --------------------------------------------------------------
-           Finale
-           -------------------------------------------------------------- */
-
-        .es-finale-panel {
-            background:
-                radial-gradient(110% 130% at 50% 0%, rgba(23, 37, 84, 0.9) 0%, rgba(10, 10, 15, 0.98) 58%),
-                #0a0a0f;
-        }
-        .es-claim:focus-within {
-            border-color: rgba(78, 129, 250, 0.8);
-            box-shadow: 0 0 0 4px rgba(78, 129, 250, 0.25);
-        }
-
-        /* --------------------------------------------------------------
-           Reduced motion: freeze every homepage animation. The reveal
-           system is already handled globally in marketing.css.
+           Reduced motion for the homepage-exclusive effects (the shared
+           es-* kills live in marketing.css).
            -------------------------------------------------------------- */
 
         @media (prefers-reduced-motion: reduce) {
-            .es-aurora,
             .es-wall-track,
-            .es-cue-dot,
-            .es-marquee-track,
-            .es-laser,
-            .es-sync-dot,
             .es-ring-1,
             .es-ring-2,
             .es-orbit-logo,
             .es-pulse,
             .es-play-ring,
-            .es-caret,
-            .es-gradient-anim {
+            .es-caret {
                 animation: none !important;
             }
-            .es-marquee-track {
-                width: auto;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            .es-marquee-mask {
-                mask-image: none;
-                -webkit-mask-image: none;
-            }
-            .es-bar { transform: scaleY(1); transition: none; }
-            .es-ai-field, .es-pop, .es-scene { opacity: 1; transform: none; transition: none; }
-            .es-spot { display: none; }
+            .es-pop, .es-scene { opacity: 1; transform: none; transition: none; }
         }
     </style>
 
@@ -867,21 +510,6 @@
         <div class="es-hero-scrim pointer-events-none absolute inset-0 hidden lg:block" aria-hidden="true"></div>
         <div class="es-spot pointer-events-none absolute inset-0 z-[3]" aria-hidden="true"></div>
 
-        @if (count($wallEventCards))
-            <div class="pointer-events-none absolute top-6 z-10 hidden lg:block ltr:right-6 rtl:left-6" aria-hidden="true">
-                <div class="glass flex items-center gap-2 rounded-full px-3.5 py-1.5">
-                    <span class="relative flex h-2 w-2">
-                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                        <span class="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
-                    </span>
-                    <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Live from the community</span>
-                </div>
-            </div>
-        @endif
-
-        <div class="es-fade-up es-d-5 pointer-events-none absolute bottom-7 left-1/2 z-10 hidden -translate-x-1/2 lg:block" aria-hidden="true">
-            <div class="es-cue"><span class="es-cue-dot"></span></div>
-        </div>
     </section>
 
     <!-- ============================================================ -->
@@ -1497,7 +1125,7 @@
                 </div>
 
                 <div class="mt-8 flex flex-col items-center gap-3 px-4">
-                    <a href="{{ marketing_url('/browse') }}" data-magnetic="0.14" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-7 py-3.5 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-shadow hover:shadow-xl hover:shadow-blue-500/40">
+                    <a href="{{ marketing_url('/browse') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-7 py-3.5 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-xl hover:shadow-blue-500/40">
                         Browse all events
                         <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -1858,7 +1486,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up') }}" data-magnetic="0.14" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-shadow hover:shadow-2xl hover:shadow-cyan-500/40">
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
                             <span class="relative z-10 flex items-center gap-2">
                                 Claim it free
                                 <svg class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>

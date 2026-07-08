@@ -140,48 +140,101 @@
     </x-slot>
 
 
+    <style {!! nonce_attr() !!}>
+        .text-gradient-pricing {
+            background: linear-gradient(135deg, #10b981 0%, #0ea5e9 50%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-pricing {
+            background: linear-gradient(135deg, #34d399 0%, #38bdf8 50%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .es-finale-panel .text-gradient-pricing {
+            background: linear-gradient(135deg, #34d399 0%, #38bdf8 50%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Billing toggle: a single .is-annual class on #pricing-plans drives every state (no framework) */
+        .bt-track { background: #d1d5db; transition: background .2s; }
+        .dark .bt-track { background: #4b5563; }
+        #pricing-plans.is-annual .bt-track { background: #3b82f6; }
+        .bt-knob { transform: translateX(0); transition: transform .2s; }
+        #pricing-plans.is-annual .bt-knob { transform: translateX(1.5rem); }
+        .bt-lbl-month { color: #111827; }
+        .dark .bt-lbl-month { color: #fff; }
+        .bt-lbl-year { color: #9ca3af; }
+        .dark .bt-lbl-year { color: #6b7280; }
+        #pricing-plans.is-annual .bt-lbl-month { color: #9ca3af; }
+        .dark #pricing-plans.is-annual .bt-lbl-month { color: #6b7280; }
+        #pricing-plans.is-annual .bt-lbl-year { color: #111827; }
+        .dark #pricing-plans.is-annual .bt-lbl-year { color: #fff; }
+        .bt-save { opacity: 0; transition: opacity .2s; }
+        #pricing-plans.is-annual .bt-save { opacity: 1; }
+        /* Price + note swapping */
+        .bt-price-year, .bt-note-year { display: none; }
+        #pricing-plans.is-annual .bt-price-month, #pricing-plans.is-annual .bt-note-month { display: none; }
+        #pricing-plans.is-annual .bt-price-year { display: flex; }
+        #pricing-plans.is-annual .bt-note-year { display: block; }
+        .bt-period-year { display: none; }
+        #pricing-plans.is-annual .bt-period-month { display: none; }
+        #pricing-plans.is-annual .bt-period-year { display: inline; }
+    </style>
+
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="es-hero relative flex min-h-[calc(58svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(16, 185, 129, 0.28), rgba(16, 185, 129, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                <svg aria-hidden="true" class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">No hidden fees</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">No hidden fees</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Simple, transparent<br>
-                <span class="text-gradient">pricing</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Simple, transparent</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-pricing">pricing</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 Start free and upgrade when you need more. No surprises.
             </p>
         </div>
     </section>
 
     <!-- Pricing Cards -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24" x-data="{ annual: false }">
+    <section class="bg-white dark:bg-[#0a0a0f] py-24" id="pricing-plans">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <!-- Monthly/Annual Toggle -->
+            <!-- Monthly/Annual Toggle (vanilla JS: toggles .is-annual on #pricing-plans) -->
             <div class="relative flex items-center justify-center gap-3 mb-16">
-                <span class="text-sm font-semibold transition-colors" :class="annual ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'">Monthly</span>
-                <button @click="annual = !annual" role="switch" :aria-checked="annual.toString()" aria-label="Toggle annual billing" class="relative w-14 h-8 rounded-full transition-colors cursor-pointer flex-shrink-0" :class="annual ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'">
-                    <span class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200" :class="annual ? 'translate-x-6' : 'translate-x-0'"></span>
+                <span class="bt-lbl-month text-sm font-semibold">Monthly</span>
+                <button id="billing-toggle" type="button" role="switch" aria-checked="false" aria-label="Toggle annual billing" class="bt-track relative w-14 h-8 rounded-full cursor-pointer flex-shrink-0">
+                    <span class="bt-knob absolute top-1 left-1 w-6 h-6 bg-white rounded-full shadow-md"></span>
                 </button>
-                <span class="text-sm font-semibold transition-colors" :class="annual ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'">Annual</span>
-                <span class="absolute left-1/2 ml-[108px] px-2.5 py-1 text-xs font-semibold rounded-full transition-opacity duration-200" :class="annual ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 opacity-100' : 'opacity-0'">Save up to $30</span>
+                <span class="bt-lbl-year text-sm font-semibold">Annual</span>
+                <span class="bt-save absolute left-1/2 ml-[108px] px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">Save up to $30</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-[auto_1fr_auto] gap-8 md:gap-y-0">
 
@@ -201,7 +254,7 @@
                     <div>
                         <div class="flex items-baseline gap-2 mb-2">
                             <span class="text-6xl font-bold text-gray-900 dark:text-white">$0</span>
-                            <span class="text-gray-500 dark:text-gray-400" x-text="annual ? '/year' : '/month'">/year</span>
+                            <span class="text-gray-500 dark:text-gray-400"><span class="bt-period-month">/month</span><span class="bt-period-year">/year</span></span>
                         </div>
                         <p class="text-gray-500 dark:text-gray-400">Perfect for getting started</p>
                     </div>
@@ -330,17 +383,17 @@
 
                     <div>
                         <div class="mb-2 relative h-[68px]">
-                            <div x-show="annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2">
+                            <div class="bt-price-year absolute inset-0 items-baseline gap-2">
                                 <span class="text-6xl font-bold text-gray-900 dark:text-white">$50</span>
                                 <span class="text-gray-500 dark:text-gray-400">/year</span>
                             </div>
-                            <div x-show="!annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2" x-cloak>
+                            <div class="bt-price-month absolute inset-0 flex items-baseline gap-2">
                                 <span class="text-6xl font-bold text-gray-900 dark:text-white">$5</span>
                                 <span class="text-gray-500 dark:text-gray-400">/month</span>
                             </div>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $4.17/month, billed annually after your free trial</p>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free trial</p>
+                        <p class="bt-note-year text-gray-500 dark:text-gray-400">Just $4.17/month, billed annually after your free trial</p>
+                        <p class="bt-note-month text-gray-500 dark:text-gray-400">Billed monthly after your free trial</p>
                     </div>
                     </div>
 
@@ -483,17 +536,17 @@
 
                     <div>
                         <div class="mb-2 relative h-[68px]">
-                            <div x-show="annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2">
+                            <div class="bt-price-year absolute inset-0 items-baseline gap-2">
                                 <span class="text-6xl font-bold text-gray-900 dark:text-white">$150</span>
                                 <span class="text-gray-500 dark:text-gray-400">/year</span>
                             </div>
-                            <div x-show="!annual" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 transform -translate-y-1" x-transition:enter-end="opacity-100 transform translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 transform translate-y-0" x-transition:leave-end="opacity-0 transform translate-y-1" class="absolute inset-0 flex items-baseline gap-2" x-cloak>
+                            <div class="bt-price-month absolute inset-0 flex items-baseline gap-2">
                                 <span class="text-6xl font-bold text-gray-900 dark:text-white">$15</span>
                                 <span class="text-gray-500 dark:text-gray-400">/month</span>
                             </div>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="annual">Just $12.50/month, billed annually after your free trial</p>
-                        <p class="text-gray-500 dark:text-gray-400" x-show="!annual" x-cloak>Billed monthly after your free trial</p>
+                        <p class="bt-note-year text-gray-500 dark:text-gray-400">Just $12.50/month, billed annually after your free trial</p>
+                        <p class="bt-note-month text-gray-500 dark:text-gray-400">Billed monthly after your free trial</p>
                     </div>
                     </div>
 
@@ -626,107 +679,69 @@
                 </p>
             </div>
 
-            <div class="space-y-4" x-data="{ open: null }">
-                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is there really a free plan?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open === 1" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want to remove branding, sell tickets, or access advanced features.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            How does the free trial work?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open === 2" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won't be charged until the trial ends. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What is the difference between Pro and Enterprise?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open === 3" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Pro includes a full ticketing suite with check-in dashboard, Stripe payments, promo/discount codes, sales CSV export, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds custom domains, private and password-protected events, multiple team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I cancel anytime?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open === 4" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Absolutely. You can cancel your subscription at any time and you'll keep access until the end of your billing period.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Do you take a cut of ticket sales?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300" :class="{ 'rotate-180': open === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div x-show="open === 5" x-collapse>
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            No! We don't charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).
-                        </p>
-                    </div>
-                </div>
+            <div class="space-y-4" data-reveal-group="80">
+                @php
+                    $faqs = [
+                        ['Is there really a free plan?', 'Yes! The free plan includes unlimited events and all core features. You only need to upgrade if you want to remove branding, sell tickets, or access advanced features.'],
+                        ['How does the free trial work?', 'When you sign up for Pro or Enterprise, you get a 7-day free trial. Enter your card to start, and you won\'t be charged until the trial ends. After that, Pro is $5/month or $50/year, and Enterprise is $15/month or $150/year. You can cancel anytime.'],
+                        ['What is the difference between Pro and Enterprise?', 'Pro includes a full ticketing suite with check-in dashboard, Stripe payments, promo/discount codes, sales CSV export, white-label branding, event graphics, event boosting with ads, custom fields, custom CSS styling, REST API & webhooks, and 100 newsletter emails per month. Enterprise adds custom domains, private and password-protected events, multiple team members, WhatsApp event creation, email scheduling, agenda scanning, availability management, 1,000 newsletter emails per month, and priority support.'],
+                        ['Can I cancel anytime?', 'Absolutely. You can cancel your subscription at any time and you\'ll keep access until the end of your billing period.'],
+                        ['Do you take a cut of ticket sales?', 'No! We don\'t charge any fees on ticket sales. You only pay the standard Stripe processing fees (typically 2.9% + $0.30 per transaction).'],
+                    ];
+                @endphp
+                @foreach ($faqs as [$q, $a])
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <svg aria-hidden="true" class="ml-4 h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                    </details>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 grid-overlay"></div>
+    <!-- ============================================================ -->
+    <!-- Finale                                                      -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-gray-100 px-2 py-16 dark:bg-black/30 sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Start sharing your events today
-            </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Create your free schedule in seconds. Start your free trial today.
-            </p>
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Get Started Free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Start sharing your events <span class="text-gradient-pricing">today</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Create your free schedule in seconds. Start your free trial today.
+                    </p>
+
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get Started Free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -742,4 +757,21 @@
     </section>
 
     <x-marketing.related-pages />
+
+    <!-- Billing toggle (vanilla JS, no framework dependency) -->
+    <script {!! nonce_attr() !!}>
+        (function () {
+            var wrap = document.getElementById('pricing-plans');
+            var btn = document.getElementById('billing-toggle');
+            if (!wrap || !btn) return;
+            btn.addEventListener('click', function () {
+                var annual = wrap.classList.toggle('is-annual');
+                btn.setAttribute('aria-checked', annual ? 'true' : 'false');
+            });
+        })();
+    </script>
+
+    <!-- Local confetti (no CDN) + motion engines -->
+    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

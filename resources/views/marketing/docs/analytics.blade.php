@@ -35,26 +35,33 @@
 
     @include('marketing.docs.partials.styles')
 
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="es-hero relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5 noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 22% 58%, rgba(16, 185, 129, 0.20), rgba(16, 185, 129, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 32%, rgba(20, 184, 166, 0.16), rgba(20, 184, 166, 0) 65%);"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <x-docs-breadcrumb currentTitle="Analytics" />
 
-            <div class="flex items-center gap-4 mb-4">
+            <div class="es-fade-up es-d-1 flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/20">
                     <svg aria-hidden="true" class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"><span class="text-gradient-blue">Analytics</span></h1>
             </div>
-            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
+            <p class="es-fade-up es-d-2 text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Track how your audience discovers and interacts with your schedule. View trends, compare periods, and understand what drives engagement.
             </p>
         </div>

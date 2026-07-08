@@ -35,11 +35,32 @@
 
     @include('marketing.docs.partials.styles')
 
+    <style {!! nonce_attr() !!}>
+        .text-gradient-docs {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-docs {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5 noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 20% 45%, rgba(6, 182, 212, 0.22), rgba(6, 182, 212, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 55%, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0) 65%);"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
@@ -47,12 +68,12 @@
             <x-docs-breadcrumb currentTitle="Event Graphics" />
 
             <div class="flex items-center gap-4 mb-4">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-rose-500/20">
-                    <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/20">
+                    <svg aria-hidden="true" class="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Event Graphics</h1>
+                <h1 class="es-fade-up es-balance text-3xl md:text-4xl font-black tracking-tight text-gray-900 dark:text-white"><span class="text-gradient-docs">Event Graphics</span></h1>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
@@ -126,7 +147,7 @@
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Schedule Variables</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                Header and footer text support a small set of schedule-wide variables. Unlike the per-event variables used in <a href="#text-template" class="text-rose-400 hover:text-rose-300">Text Template</a> or overlay text, these reflect the schedule or generation context as a whole, not any single event.
+                                Header and footer text support a small set of schedule-wide variables. Unlike the per-event variables used in <a href="#text-template" class="text-cyan-400 hover:text-cyan-300">Text Template</a> or overlay text, these reflect the schedule or generation context as a whole, not any single event.
                             </p>
                             <div class="overflow-x-auto mb-6">
                                 <table class="min-w-full text-sm text-left text-gray-600 dark:text-gray-300">
@@ -217,39 +238,39 @@ https://example.com/event/summer-concert</code></pre>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Event Basics</h4>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><code class="text-rose-300">{event_name}</code> <span class="text-gray-500">Event Name</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{short_description}</code> <span class="text-gray-500">Short Description</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{url}</code> <span class="text-gray-500">Event link</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{description}</code> <span class="text-gray-500">Description</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{event_name}</code> <span class="text-gray-500">Event Name</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{short_description}</code> <span class="text-gray-500">Short Description</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{url}</code> <span class="text-gray-500">Event link</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{description}</code> <span class="text-gray-500">Description</span></div>
                                     </div>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Date & Time</h4>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><code class="text-rose-300">{day_name}</code> <span class="text-gray-500">Wednesday</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{date_dmy}</code> <span class="text-gray-500">15/3</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{time}</code> <span class="text-gray-500">20:00</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{day_name}</code> <span class="text-gray-500">Wednesday</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{date_dmy}</code> <span class="text-gray-500">15/3</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{time}</code> <span class="text-gray-500">20:00</span></div>
                                     </div>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Location</h4>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><code class="text-rose-300">{venue}</code> <span class="text-gray-500">Venue name</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{city}</code> <span class="text-gray-500">City</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{address}</code> <span class="text-gray-500">Street</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{venue}</code> <span class="text-gray-500">Venue name</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{city}</code> <span class="text-gray-500">City</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{address}</code> <span class="text-gray-500">Street</span></div>
                                     </div>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Tickets</h4>
                                     <div class="space-y-2 text-sm">
-                                        <div class="flex justify-between"><code class="text-rose-300">{price}</code> <span class="text-gray-500">10 or Free</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{currency}</code> <span class="text-gray-500">USD</span></div>
-                                        <div class="flex justify-between"><code class="text-rose-300">{coupon_code}</code> <span class="text-gray-500">SAVE20</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{price}</code> <span class="text-gray-500">10 or Free</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{currency}</code> <span class="text-gray-500">USD</span></div>
+                                        <div class="flex justify-between"><code class="text-cyan-300">{coupon_code}</code> <span class="text-gray-500">SAVE20</span></div>
                                     </div>
                                 </div>
                             </div>
 
-                            <p class="text-gray-400 text-sm">See <a href="#variables" class="text-rose-400 hover:text-rose-300">All Variables</a> below for the complete list including date formats, end times, and more.</p>
+                            <p class="text-gray-400 text-sm">See <a href="#variables" class="text-cyan-400 hover:text-cyan-300">All Variables</a> below for the complete list including date formats, end times, and more.</p>
                         </section>
 
                         <!-- Variables -->
@@ -471,7 +492,7 @@ https://example.com/event/summer-concert</code></pre>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Custom Fields <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Pro</span></h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-rose-400 hover:text-rose-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
+                                If you have defined <a href="{{ marketing_url('/features/custom-fields') }}" class="text-cyan-400 hover:text-cyan-300">Event Custom Fields</a> in your schedule settings, you can include their values in graphics using numbered variables.
                             </p>
 
                             @if (!empty($customFieldsData))
@@ -562,7 +583,7 @@ https://example.com/event/summer-concert</code></pre>
                                 AI Text Prompt
                             </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-rose-500/20 text-rose-300 mr-2">Enterprise Feature</span>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-500/20 text-cyan-300 mr-2">Enterprise Feature</span>
                                 Use AI to transform the generated text with custom instructions.
                             </p>
 
@@ -580,13 +601,13 @@ https://example.com/event/summer-concert</code></pre>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Example Prompts</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <code class="text-rose-300">Add a calendar emoji before each date and a pin emoji before each venue</code>
+                                    <code class="text-cyan-300">Add a calendar emoji before each date and a pin emoji before each venue</code>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <code class="text-rose-300">Translate to Spanish</code>
+                                    <code class="text-cyan-300">Translate to Spanish</code>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <code class="text-rose-300">Add relevant hashtags for Instagram</code>
+                                    <code class="text-cyan-300">Add relevant hashtags for Instagram</code>
                                 </div>
                             </div>
 

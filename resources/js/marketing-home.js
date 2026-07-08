@@ -3,7 +3,7 @@
  *
  * Scroll reveals, scrubbed scroll scenes (video straighten, horizontal
  * gallery, how-it-works story), pointer choreography (hero spotlight,
- * chip parallax, 3D card tilt, magnetic buttons), velocity-reactive
+ * chip parallax, 3D card tilt), velocity-reactive
  * marquee, odometer stats, count-ups, the video facade, the URL claim
  * input, and the confetti finale.
  *
@@ -293,47 +293,6 @@ function initPointer() {
             inner.style.transform = '';
         });
     });
-
-    // Magnetic buttons: pull toward the cursor, spring back on leave.
-    document.querySelectorAll('[data-magnetic]').forEach((btn) => {
-        const strength = parseFloat(btn.getAttribute('data-magnetic')) || 0.22;
-        btn.addEventListener('pointermove', (e) => {
-            const r = btn.getBoundingClientRect();
-            const dx = e.clientX - (r.left + r.width / 2);
-            const dy = e.clientY - (r.top + r.height / 2);
-            btn.style.transition = 'transform 0.1s linear';
-            btn.style.transform = 'translate(' + (dx * strength).toFixed(1) + 'px, ' + (dy * strength).toFixed(1) + 'px)';
-        });
-        btn.addEventListener('pointerleave', () => {
-            btn.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
-            btn.style.transform = '';
-        });
-    });
-
-    // One-time confetti puff when the cursor first reaches the claim button.
-    const claimBtn = document.querySelector('#claim a[data-magnetic]');
-    if (claimBtn) {
-        let puffed = false;
-        claimBtn.addEventListener('pointerenter', () => {
-            if (puffed || typeof window.confetti !== 'function') {
-                return;
-            }
-            puffed = true;
-            const r = claimBtn.getBoundingClientRect();
-            window.confetti({
-                particleCount: 26,
-                spread: 55,
-                startVelocity: 28,
-                gravity: 1.2,
-                origin: {
-                    x: (r.left + r.width / 2) / window.innerWidth,
-                    y: r.top / window.innerHeight,
-                },
-                colors: ['#4E81FA', '#0EA5E9', '#22D3EE', '#ffffff'],
-                disableForReducedMotion: true,
-            });
-        });
-    }
 
     // Replay the AI card's flyer-to-fields animation on hover.
     const aiCard = document.querySelector('.es-ai-replay');

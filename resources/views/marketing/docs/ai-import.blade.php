@@ -35,26 +35,33 @@
 
     @include('marketing.docs.partials.styles')
 
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-amber-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-yellow-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="es-hero relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5 noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 22% 58%, rgba(217, 119, 6, 0.20), rgba(217, 119, 6, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 32%, rgba(202, 138, 4, 0.16), rgba(202, 138, 4, 0) 65%);"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <x-docs-breadcrumb currentTitle="AI Import" />
 
-            <div class="flex items-center gap-4 mb-4">
+            <div class="es-fade-up es-d-1 flex items-center gap-4 mb-4">
                 <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/20">
                     <svg aria-hidden="true" class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">AI Import</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white"><span class="text-gradient-blue">AI Import</span></h1>
             </div>
-            <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
+            <p class="es-fade-up es-d-2 text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Save hours of manual data entry. Paste text or upload images and let AI extract event details automatically.
             </p>
         </div>

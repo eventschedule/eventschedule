@@ -25,35 +25,59 @@
     </script>
     </x-slot>
 
-    {{-- Hero Section --}}
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background blobs -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-        </div>
-        <div class="absolute inset-0 grid-pattern"></div>
+    <style {!! nonce_attr() !!}>
+        .text-gradient-search {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-search {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
 
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                <svg aria-hidden="true" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    {{-- Hero + Search --}}
+    <section class="es-hero relative overflow-hidden bg-white py-20 dark:bg-[#0a0a0f] noise sm:py-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
+        </div>
+
+        <div class="relative z-10 mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">{{ __('messages.discover') }}</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">{{ __('messages.discover') }}</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                {{ __('messages.find_schedules_and_events') }}
+            <h1 class="es-balance es-fade-up es-d-2 mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+                <span class="text-gradient-search">{{ __('messages.find_schedules_and_events') }}</span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-3 mx-auto mb-10 max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
                 {{ __('messages.search_page_subtitle') }}
             </p>
 
-            <form action="{{ marketing_url('/search') }}" method="GET" class="max-w-2xl mx-auto animate-reveal delay-300" style="opacity: 0;">
+            <form action="{{ marketing_url('/search') }}" method="GET" class="es-fade-up es-d-4 mx-auto max-w-2xl">
                 <div class="flex gap-3">
                     <div class="relative flex-1">
-                        <svg aria-hidden="true" class="absolute ltr:left-4 rtl:right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="absolute top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 ltr:left-4 rtl:right-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <input
@@ -61,11 +85,11 @@
                             name="q"
                             value="{{ $query }}"
                             placeholder="{{ __('messages.search') }}..."
-                            class="w-full ltr:pl-12 rtl:pr-12 ltr:pr-4 rtl:pl-4 py-4 text-lg rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent"
+                            class="w-full rounded-2xl border border-gray-200 bg-white py-4 text-lg text-gray-900 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-white ltr:pl-12 ltr:pr-4 rtl:pl-4 rtl:pr-12"
                             autofocus
                         >
                     </div>
-                    <button type="submit" class="px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-[#4E81FA] to-sky-500 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+                    <button type="submit" class="rounded-2xl bg-gradient-to-r from-[#4E81FA] to-sky-500 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:scale-105">
                         {{ __('messages.search') }}
                     </button>
                 </div>
@@ -74,9 +98,7 @@
     </section>
 
     @if($query)
-    <div class="h-24 section-fade-to-gray"></div>
-
-    <section class="bg-gray-50 dark:bg-[#0d0d14] py-24">
+    <section class="bg-gray-50 py-24 dark:bg-[#0d0d14]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             @if($searched && $schedules->count() > 0)
@@ -91,7 +113,7 @@
                     @foreach($schedules as $schedule)
                     @php $scheduleUrl = $schedule->getGuestUrl(); @endphp
                     @if($scheduleUrl)
-                    <a href="{{ $scheduleUrl }}" target="_blank" rel="noopener" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
+                    <a href="{{ $scheduleUrl }}" target="_blank" rel="noopener" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:-translate-y-1 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
                         <div class="p-6 flex flex-col flex-1">
                             <div class="flex items-center gap-4 mb-4">
                                 @if($schedule->profile_image_url)
@@ -136,7 +158,7 @@
                     @foreach($events as $event)
                     @php $eventUrl = $event->getGuestUrl(); @endphp
                     @if($eventUrl)
-                    <a href="{{ $eventUrl }}" target="_blank" rel="noopener" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
+                    <a href="{{ $eventUrl }}" target="_blank" rel="noopener" class="group flex flex-col bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 hover:-translate-y-1 hover:shadow-lg hover:border-blue-400/50 dark:hover:border-blue-400/30 transition-all overflow-hidden">
                         <div class="p-6 flex flex-col flex-1">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">{{ $event->name }}</h3>
                             @if($event->short_description)
@@ -205,13 +227,12 @@
             @endif
         </div>
     </section>
-    <div class="h-24 section-fade-to-white"></div>
     @endif
 
     {{-- Bottom CTA --}}
     <section class="bg-white dark:bg-[#0a0a0f] py-24">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl mb-6">
                 {{ __('messages.create_your_own_schedule') }}
             </h2>
             <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">

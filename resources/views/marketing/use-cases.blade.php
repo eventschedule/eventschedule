@@ -308,34 +308,63 @@
     </script>
     </x-slot>
 
+    <style {!! nonce_attr() !!}>
+        .text-gradient-usecases {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-usecases {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .es-finale-panel .text-gradient-usecases {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="es-hero relative flex min-h-[calc(66svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                <svg aria-hidden="true" class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Use Cases</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Use Cases</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Event scheduling for every<br>
-                <span class="text-gradient">stage and venue</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Event scheduling for every</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-usecases">stage and venue</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
                 Whether you're a performer sharing gigs or a venue filling seats, Event Schedule is designed for you.
             </p>
         </div>
+
     </section>
 
     <!-- Intro Section -->
@@ -364,9 +393,9 @@
             </div>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, let venues add you to their lineup through booking requests, and email your fans directly when new dates are announced.</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div data-reveal-group="60" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Musicians -->
-                <a href="{{ marketing_url('/for-musicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-musicians') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Musicians</h3>
@@ -383,7 +412,7 @@
                 </a>
 
                 <!-- DJs -->
-                <a href="{{ marketing_url('/for-djs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-djs') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">DJs</h3>
@@ -400,7 +429,7 @@
                 </a>
 
                 <!-- Comedians -->
-                <a href="{{ marketing_url('/for-comedians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-comedians') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Comedians</h3>
@@ -417,8 +446,8 @@
                 </a>
 
                 <!-- Circus & Acrobatics -->
-                <a href="{{ marketing_url('/for-circus-acrobatics') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-rose-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-circus-acrobatics') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Circus & Acrobatics</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Showcase performances and manage tour dates with ease.</p>
@@ -434,7 +463,7 @@
                 </a>
 
                 <!-- Magicians -->
-                <a href="{{ marketing_url('/for-magicians') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-magicians') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Magicians</h3>
@@ -451,7 +480,7 @@
                 </a>
 
                 <!-- Spoken Word -->
-                <a href="{{ marketing_url('/for-spoken-word') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-spoken-word') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-teal-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Spoken Word</h3>
@@ -468,7 +497,7 @@
                 </a>
 
                 <!-- Dance Groups -->
-                <a href="{{ marketing_url('/for-dance-groups') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-rose-100 dark:from-cyan-900 dark:to-rose-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-dance-groups') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Dance Groups</h3>
@@ -485,7 +514,7 @@
                 </a>
 
                 <!-- Theater Performers -->
-                <a href="{{ marketing_url('/for-theater-performers') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-theater-performers') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theater Performers</h3>
@@ -502,7 +531,7 @@
                 </a>
 
                 <!-- Food Trucks & Vendors -->
-                <a href="{{ marketing_url('/for-food-trucks-and-vendors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-food-trucks-and-vendors') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Food Trucks & Vendors</h3>
@@ -519,7 +548,7 @@
                 </a>
 
                 <!-- Fitness & Yoga Instructors -->
-                <a href="{{ marketing_url('/for-fitness-and-yoga') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-fitness-and-yoga') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Fitness & Yoga Instructors</h3>
@@ -536,7 +565,7 @@
                 </a>
 
                 <!-- Workshop Instructors -->
-                <a href="{{ marketing_url('/for-workshop-instructors') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-workshop-instructors') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Workshop Instructors</h3>
@@ -553,7 +582,7 @@
                 </a>
 
                 <!-- Visual Artists -->
-                <a href="{{ marketing_url('/for-visual-artists') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-visual-artists') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Visual Artists</h3>
@@ -585,9 +614,9 @@
             </div>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Bars, clubs, theaters, and event spaces that host regular events and need to keep their calendar updated. Set up recurring weekly events, accept booking requests from performers, send newsletters to your regulars, and sell tickets with QR code check-in.</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div data-reveal-group="60" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Bars & Pubs -->
-                <a href="{{ marketing_url('/for-bars') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-bars') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Bars & Pubs</h3>
@@ -604,7 +633,7 @@
                 </a>
 
                 <!-- Nightclubs -->
-                <a href="{{ marketing_url('/for-nightclubs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-nightclubs') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Nightclubs</h3>
@@ -621,7 +650,7 @@
                 </a>
 
                 <!-- Music Venues -->
-                <a href="{{ marketing_url('/for-music-venues') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-music-venues') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Music Venues</h3>
@@ -638,7 +667,7 @@
                 </a>
 
                 <!-- Theaters -->
-                <a href="{{ marketing_url('/for-theaters') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-100 to-rose-100 dark:from-red-900 dark:to-rose-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-theaters') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-100 to-amber-100 dark:from-red-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theaters</h3>
@@ -655,7 +684,7 @@
                 </a>
 
                 <!-- Comedy Clubs -->
-                <a href="{{ marketing_url('/for-comedy-clubs') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-comedy-clubs') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-yellow-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Comedy Clubs</h3>
@@ -672,7 +701,7 @@
                 </a>
 
                 <!-- Restaurants -->
-                <a href="{{ marketing_url('/for-restaurants') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-restaurants') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Restaurants</h3>
@@ -689,8 +718,8 @@
                 </a>
 
                 <!-- Breweries & Wineries -->
-                <a href="{{ marketing_url('/for-breweries-and-wineries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-lime-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-breweries-and-wineries') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Breweries & Wineries</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share tastings, tap takeovers, live music, and seasonal events.</p>
@@ -706,7 +735,7 @@
                 </a>
 
                 <!-- Art Galleries -->
-                <a href="{{ marketing_url('/for-art-galleries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-art-galleries') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Art Galleries</h3>
@@ -723,7 +752,7 @@
                 </a>
 
                 <!-- Community Centers -->
-                <a href="{{ marketing_url('/for-community-centers') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-community-centers') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Community Centers</h3>
@@ -740,8 +769,8 @@
                 </a>
 
                 <!-- Farmers Markets -->
-                <a href="{{ marketing_url('/for-farmers-markets') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-green-100 dark:from-lime-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-lime-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-farmers-markets') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Farmers Markets</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your market schedule and build a loyal shopper community.</p>
@@ -757,7 +786,7 @@
                 </a>
 
                 <!-- Hotels & Resorts -->
-                <a href="{{ marketing_url('/for-hotels-and-resorts') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-amber-100 dark:from-slate-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-hotels-and-resorts') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-amber-100 dark:from-slate-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Hotels & Resorts</h3>
@@ -774,7 +803,7 @@
                 </a>
 
                 <!-- Libraries -->
-                <a href="{{ marketing_url('/for-libraries') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-libraries') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Libraries</h3>
@@ -883,9 +912,9 @@
             </div>
             <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Webinars, virtual conferences, live streams, and online classes. Schedule events with built-in registration, ticketing, and streaming platform integration.</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div data-reveal-group="60" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Webinars -->
-                <a href="{{ marketing_url('/for-webinars') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-webinars') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Webinars</h3>
@@ -902,7 +931,7 @@
                 </a>
 
                 <!-- Online Classes -->
-                <a href="{{ marketing_url('/for-online-classes') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-online-classes') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Online Classes</h3>
@@ -919,7 +948,7 @@
                 </a>
 
                 <!-- Virtual Conferences -->
-                <a href="{{ marketing_url('/for-virtual-conferences') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-virtual-conferences') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Virtual Conferences</h3>
@@ -936,7 +965,7 @@
                 </a>
 
                 <!-- Live Q&A Sessions -->
-                <a href="{{ marketing_url('/for-live-qa-sessions') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-live-qa-sessions') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Q&A Sessions</h3>
@@ -953,8 +982,8 @@
                 </a>
 
                 <!-- Watch Parties -->
-                <a href="{{ marketing_url('/for-watch-parties') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-rose-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <a href="{{ marketing_url('/for-watch-parties') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Watch Parties</h3>
                         <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Schedule watch parties with registration, ticketing, and streaming platform integration.</p>
@@ -970,7 +999,7 @@
                 </a>
 
                 <!-- Live Concerts -->
-                <a href="{{ marketing_url('/for-live-concerts') }}" class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
+                <a href="{{ marketing_url('/for-live-concerts') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
                     <div class="absolute inset-0 bg-gradient-to-br from-teal-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="relative flex flex-col h-full">
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Concerts</h3>
@@ -1029,16 +1058,16 @@
     <section class="bg-gray-100 dark:bg-black/30 py-24">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient-usecases">questions</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Common questions about Event Schedule.
                 </p>
             </div>
 
-            <div class="space-y-4">
-                <details name="faq" class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+            <div class="space-y-4" data-reveal-group="80">
+                <details name="faq" data-reveal class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
                     <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Is Event Schedule free?
@@ -1052,7 +1081,7 @@
                     </p>
                 </details>
 
-                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                <details name="faq" data-reveal class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
                     <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             What types of events can I manage?
@@ -1066,7 +1095,7 @@
                     </p>
                 </details>
 
-                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                <details name="faq" data-reveal class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
                     <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Can I sell tickets with Event Schedule?
@@ -1080,7 +1109,7 @@
                     </p>
                 </details>
 
-                <details name="faq" class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                <details name="faq" data-reveal class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
                     <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Does Event Schedule work for online events?
@@ -1094,7 +1123,7 @@
                     </p>
                 </details>
 
-                <details name="faq" class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
+                <details name="faq" data-reveal class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
                     <summary class="flex items-center justify-between p-6 cursor-pointer">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Is Event Schedule open source?
@@ -1111,17 +1140,48 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="bg-gray-50 dark:bg-[#0d0d14] py-24">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-6">Ready to share your events?</h2>
-            <p class="text-xl text-gray-600 dark:text-gray-400 mb-10">Create your free schedule and start reaching your audience today.</p>
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
-                Get started for free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+    <!-- ============================================================ -->
+    <!-- Finale                                                      -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-gray-50 px-2 py-16 dark:bg-[#0d0d14] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
+
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Ready to share <span class="text-gradient-usecases">your events?</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Create your free schedule and start reaching your audience today.
+                    </p>
+
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get started for free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    <!-- Local confetti (no CDN) + motion engines -->
+    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

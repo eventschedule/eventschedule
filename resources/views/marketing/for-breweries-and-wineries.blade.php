@@ -98,436 +98,410 @@
     </script>
     </x-slot>
 
-    <!-- Hero Section with Floating Release Card -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background with copper/amber and purple tones -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-amber-700/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-800/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-40 right-1/3 w-[250px] h-[250px] bg-amber-600/15 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 2s;"></div>
-        </div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
+    <style {!! nonce_attr() !!}>
+        /* For-breweries-and-wineries "From Grain to Glass" styles. The shared
+           es-* motion system lives in marketing.css; this holds only the copper
+           gradient text, the drifting release card, and rising carbonation. */
+        .text-gradient-copper {
+            background: linear-gradient(135deg, #d97706, #92400e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-copper {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @keyframes es-cask-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .es-cask-float { animation: es-cask-float 6s ease-in-out infinite; }
 
-        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col lg:flex-row items-center gap-12">
-                <div class="flex-1 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                        <svg aria-hidden="true" class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                        <span class="text-sm text-gray-600 dark:text-gray-300">For Breweries, Wineries & Tasting Rooms</span>
-                    </div>
+        /* Rising carbonation bubbles */
+        .es-fizz { pointer-events: none; overflow: hidden; }
+        .es-fizz span {
+            position: absolute;
+            bottom: -14px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, rgba(251, 191, 36, 0.9), rgba(217, 119, 6, 0.35));
+            opacity: 0;
+            animation: es-fizz var(--fizz-dur, 8s) ease-in infinite;
+            animation-delay: var(--fizz-delay, 0s);
+        }
+        @keyframes es-fizz {
+            0% { transform: translateY(0) scale(0.9); opacity: 0; }
+            12% { opacity: var(--fizz-op, 0.5); }
+            88% { opacity: var(--fizz-op, 0.5); }
+            100% { transform: translateY(-150px) scale(1.35); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .es-cask-float { animation: none !important; }
+            .es-fizz span { animation: none !important; opacity: 0.35; transform: none; }
+        }
+    </style>
 
-                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                        Every pour<br>
-                        <span class="text-gradient-copper">deserves an audience.</span>
-                    </h1>
+    @php
+        // Rising bubbles: [left, size(px), duration, delay, opacity]
+        $fizz = [
+            ['8%', 6, '8s', '0s', '0.4'],
+            ['18%', 10, '10.5s', '1.6s', '0.5'],
+            ['29%', 5, '7s', '3s', '0.35'],
+            ['41%', 8, '9s', '0.8s', '0.45'],
+            ['53%', 12, '11.5s', '2.4s', '0.5'],
+            ['64%', 6, '8s', '4.2s', '0.4'],
+            ['74%', 9, '10s', '1.1s', '0.45'],
+            ['85%', 7, '9s', '2.9s', '0.4'],
+            ['93%', 5, '7.5s', '3.7s', '0.35'],
+        ];
+    @endphp
 
-                    <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-xl mb-12 animate-reveal delay-200" style="opacity: 0;">
-                        New release hitting taps? Hosting a tasting this weekend? Email your fans directly - no paying Facebook to reach people who already love your craft.
-                    </p>
-
-                    <div class="flex flex-wrap justify-center lg:justify-start gap-4">
-                        <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-amber-600 to-amber-800 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-amber-500/25">
-                            Create your tasting room calendar
-                            <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </a>
-                    </div>
-
-                    <!-- Venue type tags -->
-                    <div class="mt-12 flex flex-wrap justify-center lg:justify-start gap-2">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs font-medium border border-amber-500/30">Craft Brewery</span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs font-medium border border-blue-500/30">Winery</span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-xs font-medium border border-orange-500/30">Cidery</span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 text-xs font-medium border border-yellow-500/30">Meadery</span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs font-medium border border-rose-500/30">Distillery</span>
-                    </div>
-                </div>
-
-                <!-- Floating Release Card Visual -->
-                <div class="flex-shrink-0 hidden lg:block">
-                    <div class="relative animate-float">
-                        <!-- Main release card -->
-                        <div class="bg-gradient-to-br from-amber-900/80 to-orange-900/80 rounded-2xl border border-amber-400/40 p-6 w-72 shadow-2xl shadow-amber-900/50 backdrop-blur-sm">
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-amber-300 text-xs font-semibold tracking-wider uppercase">Limited Release</span>
-                                <div class="flex items-center gap-1 px-2 py-1 rounded-full bg-red-500/20 border border-red-500/30">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></div>
-                                    <span class="text-red-300 text-[10px] font-medium">SELLING FAST</span>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <div class="text-white text-xl font-bold mb-1">Barrel-Aged Imperial Stout</div>
-                                <div class="text-amber-200/70 text-sm">18 months in bourbon barrels</div>
-                            </div>
-                            <div class="flex items-center justify-between mb-4 p-3 rounded-xl bg-black/30 border border-white/10">
-                                <div>
-                                    <div class="text-gray-400 text-xs">Available</div>
-                                    <div class="text-white text-lg font-bold">47 <span class="text-gray-400 text-sm font-normal">/ 200</span></div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-gray-400 text-xs">Release Date</div>
-                                    <div class="text-amber-300 text-sm font-medium">This Saturday</div>
-                                </div>
-                            </div>
-                            <button class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white text-sm font-semibold rounded-xl hover:scale-[1.02] transition-transform">
-                                Notify Me When Available
-                            </button>
-                        </div>
-                        <!-- Decorative floating elements -->
-                        <div class="absolute -top-4 -right-4 w-16 h-16 bg-blue-500/20 rounded-full blur-xl"></div>
-                        <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-amber-500/20 rounded-full blur-xl"></div>
-                    </div>
-                </div>
+    <!-- ============================================================ -->
+    <!-- 1. Hero: every pour                                          -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(217, 119, 6, 0.34), rgba(217, 119, 6, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(234, 88, 12, 0.3), rgba(234, 88, 12, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <div class="es-fizz absolute inset-x-0 bottom-0 top-1/3">
+                @foreach ($fizz as [$l, $s, $d, $dl, $op])
+                    <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; --fizz-dur: {{ $d }}; --fizz-delay: {{ $dl }}; --fizz-op: {{ $op }};"></span>
+                @endforeach
             </div>
         </div>
-    </section>
 
-    <!-- The Release Cycle - UNIQUE TO PRODUCERS -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    From grain to glass, vine to bottle
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    You don't just serve drinks - you create them. Your fans want to follow the journey, from first brew day to release party.
-                </p>
+        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Breweries, Wineries & Tasting Rooms</span>
             </div>
 
-            <!-- The Release Cycle Journey -->
-            <div class="relative">
-                <!-- Connection line (desktop) -->
-                <div class="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-500/50 via-blue-500/50 to-amber-500/50 -translate-y-1/2"></div>
+            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Every pour</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-copper es-gradient-anim">deserves an audience.</span></span></span>
+            </h1>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Phase 1: The Craft -->
-                    <div class="relative bg-gradient-to-br from-amber-100/40 to-yellow-100/40 dark:from-amber-900/40 dark:to-yellow-900/40 rounded-2xl border border-amber-500/20 p-6 hover:border-amber-500/40 transition-colors">
-                        <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">1</div>
-                        <div class="text-center lg:pt-6">
-                            <div class="text-3xl mb-3">&#127806;</div>
-                            <div class="text-amber-700 dark:text-amber-300 text-sm font-semibold tracking-wider uppercase mb-2">The Craft</div>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Share behind-the-scenes: harvest updates, brew day photos, barrel selection. Build anticipation from day one.</p>
-                        </div>
-                    </div>
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+                New release hitting taps? Hosting a tasting this weekend? Email your fans directly - no paying Facebook to reach people who already love your craft.
+            </p>
 
-                    <!-- Phase 2: The Wait -->
-                    <div class="relative bg-gradient-to-br from-blue-100/40 to-sky-100/40 dark:from-blue-900/40 dark:to-sky-900/40 rounded-2xl border border-blue-500/20 p-6 hover:border-blue-500/40 transition-colors">
-                        <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">2</div>
-                        <div class="text-center lg:pt-6">
-                            <div class="text-3xl mb-3">&#127866;</div>
-                            <div class="text-blue-700 dark:text-blue-300 text-sm font-semibold tracking-wider uppercase mb-2">The Wait</div>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Aging in barrels, fermenting in tanks. Tease your members with early samples and first-access previews.</p>
-                        </div>
-                    </div>
-
-                    <!-- Phase 3: The Release -->
-                    <div class="relative bg-gradient-to-br from-rose-100/40 to-orange-100/40 dark:from-rose-900/40 dark:to-orange-900/40 rounded-2xl border border-rose-500/20 p-6 hover:border-rose-500/40 transition-colors">
-                        <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-rose-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">3</div>
-                        <div class="text-center lg:pt-6">
-                            <div class="text-3xl mb-3">&#127881;</div>
-                            <div class="text-rose-700 dark:text-rose-300 text-sm font-semibold tracking-wider uppercase mb-2">The Release</div>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">The moment arrives. Email blast, release party, allocations ship. Your fans showed up because you told them first.</p>
-                        </div>
-                    </div>
-
-                    <!-- Phase 4: The Community -->
-                    <div class="relative bg-gradient-to-br from-emerald-100/40 to-teal-100/40 dark:from-emerald-900/40 dark:to-teal-900/40 rounded-2xl border border-emerald-500/20 p-6 hover:border-emerald-500/40 transition-colors">
-                        <div class="lg:absolute lg:-top-3 lg:left-1/2 lg:-translate-x-1/2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-white text-sm font-bold mb-4 lg:mb-0 mx-auto lg:mx-0">4</div>
-                        <div class="text-center lg:pt-6">
-                            <div class="text-3xl mb-3">&#129346;</div>
-                            <div class="text-emerald-700 dark:text-emerald-300 text-sm font-semibold tracking-wider uppercase mb-2">The Community</div>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Taproom visits, club events, share nights. The relationship continues until the next release.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Producer focus note -->
-            <div class="mt-10 text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                    <svg aria-hidden="true" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                    Tour the taproom
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                </a>
+                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-800 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
+                    Create your tasting room calendar
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                    <span class="text-gray-500 dark:text-gray-400 text-sm">You make what you sell. That story is worth sharing.</span>
+                </a>
+            </div>
+
+            <!-- Producer-type marquee -->
+            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                        <div class="es-marquee-track">
+                            @for ($tc = 0; $tc < 2; $tc++)
+                                @foreach (['Craft Brewery', 'Winery', 'Cidery', 'Meadery', 'Distillery', 'Taproom', 'Vineyard', 'Brewpub'] as $tag)
+                                    <span class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100/80 px-4 py-1.5 text-xs font-semibold text-amber-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400"></span>
+                                        {{ $tag }}
+                                    </span>
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2. The release cycle (dark band)                             -->
+    <!-- ============================================================ -->
+    @php
+        $phases = [
+            ['1', '&#127806;', 'The Craft', 'Share behind-the-scenes: harvest updates, brew day photos, barrel selection. Build anticipation from day one.', 'from-amber-500 to-amber-700', 'text-amber-300'],
+            ['2', '&#127866;', 'The Wait', 'Aging in barrels, fermenting in tanks. Tease your members with early samples and first-access previews.', 'from-blue-500 to-blue-700', 'text-blue-300'],
+            ['3', '&#127881;', 'The Release', 'The moment arrives. Email blast, release party, allocations ship. Your fans showed up because you told them first.', 'from-rose-500 to-rose-700', 'text-rose-300'],
+            ['4', '&#129346;', 'The Community', 'Taproom visits, club events, share nights. The relationship continues until the next release.', 'from-emerald-500 to-emerald-700', 'text-emerald-300'],
+        ];
+    @endphp
+    <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
+        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(217, 119, 6, 0.28), rgba(217, 119, 6, 0) 60%); opacity: 0.65;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(234, 88, 12, 0.24), rgba(234, 88, 12, 0) 60%); opacity: 0.55;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="es-fizz absolute inset-0">
+                    @foreach ($fizz as [$l, $s, $d, $dl, $op])
+                        <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; --fizz-dur: {{ $d }}; --fizz-delay: {{ $dl }}; --fizz-op: {{ $op }};"></span>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-2xl text-center">
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
+                        From grain to glass, <span class="text-gradient-copper">vine to bottle</span>
+                    </h2>
+                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                        You don't just serve drinks - you create them. Your fans want to follow the journey, from first brew day to release party.
+                    </p>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute left-0 right-0 top-8 hidden h-0.5 bg-gradient-to-r from-amber-500/50 via-rose-500/50 to-emerald-500/50 lg:block" aria-hidden="true"></div>
+                    <div class="relative grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" data-reveal-group="90">
+                        @foreach ($phases as [$num, $emoji, $title, $desc, $grad, $text])
+                            <div data-reveal class="text-center">
+                                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl {{ $grad }}">
+                                    {!! $emoji !!}
+                                </div>
+                                <div class="mb-2 text-xs font-semibold uppercase tracking-wider {{ $text }}">{{ $title }}</div>
+                                <p class="text-sm text-gray-400">{{ $desc }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center" data-reveal>
+                    <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">
+                        <svg aria-hidden="true" class="h-4 w-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span class="text-sm text-gray-300">You make what you sell. That story is worth sharing.</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Bento Grid Features -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- ============================================================ -->
+    <!-- 3. Bento features                                            -->
+    <!-- ============================================================ -->
+    <section id="features" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Everything to fill the <span class="text-gradient-copper">tasting room</span>
+                </h2>
+            </div>
 
-                <!-- Release Announcements - HERO FEATURE (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-amber-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                Release Announcements
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
+
+                <!-- Release announcements (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
+                            <div class="flex-1">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    Release Announcements
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Limited release? Your fans know first.</h3>
+                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">That bourbon barrel stout you've been aging for 18 months? The reserve Pinot from the best vintage in a decade? One click sends it straight to everyone who wants to know - before it's gone.</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Skip the algorithm</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Straight from the source</span>
+                                </div>
                             </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Limited release? Your fans know first.</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">That bourbon barrel stout you've been aging for 18 months? The reserve Pinot from the best vintage in a decade? One click sends it straight to everyone who wants to know - before it's gone.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Skip the algorithm</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Straight from the source</span>
-                            </div>
-                        </div>
-                        <div class="flex-shrink-0 w-full lg:w-auto">
-                            <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-amber-950 to-orange-950 rounded-2xl border border-amber-400/30 p-4 max-w-xs">
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
-                                            <svg aria-hidden="true" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                            </svg>
+                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
+                                <div class="animate-float">
+                                    <div class="max-w-xs rounded-2xl border border-amber-400/30 bg-gradient-to-br from-amber-950 to-orange-950 p-4">
+                                        <div class="mb-4 flex items-center gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
+                                            <div><div class="text-sm font-medium text-white">Barrel Room Release!</div><div class="text-xs text-amber-300">Sending to 2,341 fans...</div></div>
                                         </div>
-                                        <div>
-                                            <div class="text-white text-sm font-medium">Barrel Room Release!</div>
-                                            <div class="text-amber-300 text-xs">Sending to 2,341 fans...</div>
-                                        </div>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                                            <span class="text-gray-300 text-xs">Bourbon Barrel Stout</span>
-                                            <span class="ml-auto text-amber-300 text-[10px]">47 left</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                            <span class="text-gray-300 text-xs">Reserve Pinot Noir</span>
-                                            <span class="ml-auto text-blue-300 text-[10px]">12 cases</span>
-                                        </div>
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-white/10">
-                                            <div class="w-2 h-2 rounded-full bg-orange-400"></div>
-                                            <span class="text-gray-300 text-xs">Maple Porter</span>
-                                            <span class="ml-auto text-orange-300 text-[10px]">SOLD OUT</span>
+                                        <div class="space-y-2">
+                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white/10 p-2" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-xs text-gray-300">Bourbon Barrel Stout</span><span class="ml-auto text-[10px] text-amber-300">47 left</span></div>
+                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white/10 p-2" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-blue-400"></div><span class="text-xs text-gray-300">Reserve Pinot Noir</span><span class="ml-auto text-[10px] text-blue-300">12 cases</span></div>
+                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white/10 p-2" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-orange-400"></div><span class="text-xs text-gray-300">Maple Porter</span><span class="ml-auto text-[10px] text-orange-300">SOLD OUT</span></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Club Members First / Allocation -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-cyan-100 dark:from-rose-900 dark:to-cyan-900 border border-rose-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                        </svg>
-                        First Access
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Club members get first dibs</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Limited releases sell out fast. Your loyal fans - mug club, wine club, followers - get the heads up before anyone else.</p>
-
-                    <!-- Waitlist visual -->
-                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-gray-500 dark:text-gray-400 text-xs">2024 Reserve Allocation</span>
-                            <span class="text-rose-700 dark:text-rose-300 text-xs font-medium">47 spots left</span>
+                <!-- Club members first / allocation -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-800/30 dark:bg-rose-900/40 dark:text-rose-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                            First Access
                         </div>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-[10px] font-bold">M</div>
-                                <span class="text-gray-900 dark:text-white text-xs flex-1">Wine Club Member</span>
-                                <span class="text-emerald-400 text-[10px]">Confirmed</span>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Club members get first dibs</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Limited releases sell out fast. Your loyal fans - mug club, wine club, followers - get the heads up before anyone else.</p>
+                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                            <div class="mb-3 flex items-center justify-between">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">2024 Reserve Allocation</span>
+                                <span class="text-xs font-medium text-rose-700 dark:text-rose-300">47 spots left</span>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-[10px] font-bold">J</div>
-                                <span class="text-gray-600 dark:text-gray-300 text-xs flex-1">Email Subscriber</span>
-                                <span class="text-amber-400 text-[10px]">Waitlist #3</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ticketed Tastings -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-blue-100 dark:from-blue-900 dark:to-blue-900 border border-blue-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                        </svg>
-                        Ticketing
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Tastings worth paying for</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Barrel room tours, vertical tastings, winemaker dinners. Sell tickets, limit capacity, scan at the door.</p>
-
-                    <!-- Ticket card visual -->
-                    <div class="flex justify-center">
-                        <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-xl border border-blue-300/50 p-4 w-44 shadow-lg transform rotate-2 hover:rotate-0 transition-transform">
-                            <div class="text-center">
-                                <div class="text-blue-800 text-[10px] tracking-widest uppercase">Exclusive Tasting</div>
-                                <div class="text-blue-900 text-sm font-serif font-semibold mt-1">Barrel Room Tour</div>
-                                <div class="text-blue-700 text-xl font-bold mt-2">$45<span class="text-xs font-normal">pp</span></div>
-                                <div class="text-blue-600 text-[10px] mt-1">Sat, Oct 14 &bull; 2:00 PM</div>
-                                <div class="text-blue-500 text-[9px] mt-1">Only 8 spots left</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Private Events & Tours (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                Booking Inbox
-                            </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Tours and private events come to you</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-4">Corporate team outings, bachelorette parties, private tastings. They submit the request, you approve. No email ping-pong.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Group tours</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Private parties</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Buyouts</span>
-                            </div>
-                        </div>
-                        <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl p-5 border border-gray-200 dark:border-white/10">
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">Booking Requests</div>
                             <div class="space-y-2">
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-sky-500/20 border border-sky-400/30">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-xs font-semibold">AT</div>
-                                    <div class="flex-1">
-                                        <div class="text-gray-900 dark:text-white text-sm font-medium">Acme Tech - Team Outing</div>
-                                        <div class="text-sky-700 dark:text-sky-300 text-xs">Nov 3 &bull; 25 people &bull; Private tour</div>
-                                    </div>
-                                    <div class="flex gap-1">
-                                        <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                                            <svg aria-hidden="true" class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <div class="es-ai-field flex items-center gap-2" style="--i: 0;">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-[10px] font-bold text-white">M</div>
+                                    <span class="flex-1 text-xs text-gray-900 dark:text-white">Wine Club Member</span>
+                                    <span class="text-[10px] text-emerald-500 dark:text-emerald-400">Confirmed</span>
+                                </div>
+                                <div class="es-ai-field flex items-center gap-2" style="--i: 1;">
+                                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-[10px] font-bold text-white">J</div>
+                                    <span class="flex-1 text-xs text-gray-600 dark:text-gray-300">Email Subscriber</span>
+                                    <span class="text-[10px] text-amber-500 dark:text-amber-400">Waitlist #3</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Ticketed tastings -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                            Ticketing
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Tastings worth paying for</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Barrel room tours, vertical tastings, winemaker dinners. Sell tickets, limit capacity, scan at the door.</p>
+                        <div class="mt-auto flex justify-center" aria-hidden="true">
+                            <div class="w-44 rotate-2 rounded-xl border border-sky-300/50 bg-gradient-to-br from-sky-100 to-blue-50 p-4 text-center shadow-lg transition-transform group-hover:rotate-0">
+                                <div class="text-[10px] uppercase tracking-widest text-sky-800">Exclusive Tasting</div>
+                                <div class="mt-1 font-serif text-sm font-semibold text-sky-900">Barrel Room Tour</div>
+                                <div class="mt-2 text-xl font-bold text-sky-700">$45<span class="text-xs font-normal">pp</span></div>
+                                <div class="mt-1 text-[10px] text-sky-600">Sat, Oct 14 &bull; 2:00 PM</div>
+                                <div class="mt-1 text-[9px] text-sky-500">Only 8 spots left</div>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Private events & tours (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="grid items-center gap-8 md:grid-cols-2">
+                            <div>
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    Booking Inbox
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Tours and private events come to you</h3>
+                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Corporate team outings, bachelorette parties, private tastings. They submit the request, you approve. No email ping-pong.</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Group tours</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Private parties</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Buyouts</span>
+                                </div>
+                            </div>
+                            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">Booking Requests</div>
+                                <div class="space-y-2">
+                                    <div class="es-ai-field flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-100 p-3 dark:border-blue-400/30 dark:bg-blue-500/20" style="--i: 0;">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-xs font-semibold text-white">AT</div>
+                                        <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Acme Tech - Team Outing</div><div class="text-xs text-blue-600 dark:text-blue-300">Nov 3 &bull; 25 people &bull; Private tour</div></div>
+                                        <div class="flex gap-1">
+                                            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
+                                            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20"><svg aria-hidden="true" class="h-3 w-3 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
                                         </div>
-                                        <div class="w-6 h-6 rounded-full bg-red-500/20 flex items-center justify-center">
-                                            <svg aria-hidden="true" class="w-3 h-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                        </div>
                                     </div>
-                                </div>
-                                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-white/5">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-rose-500 flex items-center justify-center text-white text-xs font-semibold">JM</div>
-                                    <div class="flex-1">
-                                        <div class="text-gray-600 dark:text-gray-300 text-sm font-medium">Jamie's Bachelorette</div>
-                                        <div class="text-gray-500 dark:text-gray-400 text-xs">Oct 28 &bull; 12 people</div>
+                                    <div class="es-ai-field flex items-center gap-3 rounded-xl bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-rose-500 text-xs font-semibold text-white">JM</div>
+                                        <div class="flex-1"><div class="text-sm font-medium text-gray-600 dark:text-gray-300">Jamie's Bachelorette</div><div class="text-xs text-gray-500 dark:text-gray-400">Oct 28 &bull; 12 people</div></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Multiple Spaces -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 border border-emerald-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                        Spaces
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Taproom. Patio. Barrel room.</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Separate calendars for each space. Visitors see what's happening where.</p>
-
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
-                            <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-                            <span class="text-gray-900 dark:text-white text-sm">Taproom</span>
-                            <span class="ml-auto text-emerald-700 dark:text-emerald-300 text-xs">6 events</span>
+                <!-- Multiple spaces -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                            Spaces
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                            <span class="text-gray-600 dark:text-gray-300 text-sm">Patio & Beer Garden</span>
-                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">4 events</span>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Taproom. Patio. Barrel room.</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Separate calendars for each space. Visitors see what's happening where.</p>
+                        <div class="mt-auto space-y-2" aria-hidden="true">
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-100 p-2 dark:border-emerald-500/30 dark:bg-emerald-500/20" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-emerald-400"></div><span class="text-sm text-gray-900 dark:text-white">Taproom</span><span class="ml-auto text-xs text-emerald-600 dark:text-emerald-300">6 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Patio & Beer Garden</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">4 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-blue-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Barrel Room</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">2 events</span></div>
                         </div>
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-100 dark:bg-white/5">
-                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                            <span class="text-gray-600 dark:text-gray-300 text-sm">Barrel Room</span>
-                            <span class="ml-auto text-gray-500 dark:text-gray-400 text-xs">2 events</span>
-                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- What's Pouring Today - QR Code Feature -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 border border-orange-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h2M4 12h2m10 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                        </svg>
-                        Live Menu
+                <!-- What's pouring / QR -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-800/30 dark:bg-orange-900/40 dark:text-orange-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
+                            Live Menu
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">What's pouring today</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">QR code for your current tap list. Visitors scan, you update. No printed menus to change.</p>
+                        <div class="mt-auto flex justify-center" aria-hidden="true">
+                            <div class="text-center">
+                                <div class="mb-2 h-24 w-24 rounded-lg bg-white p-2 shadow-sm"><div class="h-full w-full bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%23c2410c%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div></div>
+                                <div class="text-[10px] font-semibold text-orange-600 dark:text-orange-300">SCAN FOR TAP LIST</div>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">What's pouring today</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">QR code for your current tap list. Visitors scan, you update. No printed menus to change.</p>
+                </div>
 
-                    <!-- QR code visual -->
-                    <div class="flex justify-center">
-                        <div class="bg-white rounded-xl p-3 shadow-lg">
-                            <div class="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center relative overflow-hidden">
-                                <!-- Simplified QR pattern -->
-                                <div class="grid grid-cols-5 gap-1">
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-300 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
-                                    <div class="w-3 h-3 bg-gray-800 rounded-sm"></div>
+                <!-- Event graphics (bottom right) -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            Graphics
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Ready for social</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate promo graphics for release parties. Download and post in seconds.</p>
+                        <div class="mt-auto flex justify-center" aria-hidden="true">
+                            <div class="relative h-32 w-32 rounded-xl border border-amber-200 bg-amber-100 p-2 dark:border-amber-400/30 dark:bg-amber-500/25">
+                                <div class="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-amber-600/50 to-orange-700/50">
+                                    <div class="mb-1 text-[10px] font-semibold text-white">THIS SATURDAY</div>
+                                    <div class="text-xs font-bold text-white">IPA Release</div>
+                                    <div class="mt-1 text-[8px] text-white/80">Taproom 4pm</div>
+                                </div>
+                                <div class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500">
+                                    <svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                 </div>
                             </div>
-                            <div class="text-center mt-2">
-                                <div class="text-gray-800 text-[10px] font-semibold">SCAN FOR TAP LIST</div>
-                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Event Graphics - BOTTOM RIGHT -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-cyan-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Graphics
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Ready for social</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Auto-generate promo graphics for release parties. Download and post in seconds.</p>
-
-                    <div class="flex justify-center">
-                        <div class="relative w-32 h-32 bg-gradient-to-br from-amber-500/30 to-orange-500/30 rounded-xl border border-amber-400/30 p-2">
-                            <div class="w-full h-full bg-gradient-to-br from-amber-600/40 to-orange-700/40 rounded-lg flex flex-col items-center justify-center">
-                                <div class="text-white text-[10px] font-semibold mb-1">THIS SATURDAY</div>
-                                <div class="text-amber-200 text-xs font-bold">IPA Release</div>
-                                <div class="text-gray-400 text-[8px] mt-1">Taproom 4pm</div>
-                            </div>
-                            <div class="absolute -bottom-2 -right-2 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center">
-                                <svg aria-hidden="true" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                </svg>
-                            </div>
-                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
@@ -535,79 +509,61 @@
         </div>
     </section>
 
-    <!-- Virtual Tastings Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[300px] h-[300px] bg-sky-600/20 rounded-full blur-[100px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[200px] h-[200px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-        </div>
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-3xl border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.02] transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+    <!-- ============================================================ -->
+    <!-- 4. Virtual tastings                                          -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-20">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <a href="{{ marketing_url('/features/online-events') }}" data-reveal="panel" class="es-bento group block">
+                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
+                    <div class="flex flex-col items-center gap-8 lg:flex-row">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
+                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
+                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                 Online Events
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Virtual tastings go global</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-lg mb-4">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
-                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-4">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Live tastings</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Sell tickets worldwide</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Any platform</span>
+                            <h2 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400 lg:text-3xl">Virtual tastings go global</h2>
+                            <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Ship your product, host a live tasting. Fans anywhere can join, pay, and taste along. Turn your taproom into a worldwide experience.</p>
+                            <div class="mb-4 flex flex-wrap justify-center gap-3 lg:justify-start">
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Live tastings</span>
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Sell tickets worldwide</span>
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Any platform</span>
                             </div>
-                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center gap-2 font-medium text-sky-600 transition-all group-hover:gap-3 dark:text-sky-400">
                                 Learn more
-                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
+                                <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             </span>
                         </div>
-                        <div class="flex-shrink-0">
-                            <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-2xl border border-gray-200 dark:border-white/10 p-6 w-52">
-                                <div class="flex items-center justify-between mb-4">
-                                    <span class="text-gray-600 dark:text-gray-300 text-xs">Virtual Tasting</span>
-                                    <div class="flex items-center gap-1">
-                                        <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
-                                        <span class="text-red-400 text-[10px]">LIVE</span>
-                                    </div>
-                                </div>
-                                <div class="bg-gradient-to-br from-amber-600/30 to-orange-600/30 rounded-lg p-4 text-center mb-3">
-                                    <div class="text-2xl mb-1">&#127866;</div>
-                                    <div class="text-gray-900 dark:text-white text-sm font-medium">IPA Flight</div>
-                                    <div class="text-gray-500 dark:text-gray-400 text-xs">with Brewmaster Mike</div>
-                                </div>
-                                <div class="flex items-center justify-center gap-2 text-gray-500 dark:text-gray-400 text-xs">
-                                    <svg aria-hidden="true" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span>89 viewers</span>
-                                </div>
+                        <div class="shrink-0" aria-hidden="true">
+                            <div class="w-52 rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-[#0f0f14]">
+                                <div class="mb-4 flex items-center justify-between"><span class="text-xs text-gray-600 dark:text-gray-300">Virtual Tasting</span><div class="flex items-center gap-1"><div class="h-2 w-2 animate-pulse rounded-full bg-red-500"></div><span class="text-[10px] text-red-500">LIVE</span></div></div>
+                                <div class="mb-3 rounded-lg bg-gradient-to-br from-amber-600/30 to-orange-600/30 p-4 text-center"><div class="mb-1 text-2xl">&#127866;</div><div class="text-sm font-medium text-gray-900 dark:text-white">IPA Flight</div><div class="text-xs text-gray-500 dark:text-gray-400">with Brewmaster Mike</div></div>
+                                <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400"><svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span>89 viewers</span></div>
                             </div>
                         </div>
                     </div>
+                    <div class="es-glare" aria-hidden="true"></div>
+                    <div class="es-ring-glow" aria-hidden="true"></div>
                 </div>
             </a>
         </div>
     </section>
 
-    <!-- Perfect For Section -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Perfect for all types of craft beverage makers
+    <!-- ============================================================ -->
+    <!-- 5. Perfect for (shared sub-audience cards)                   -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Perfect for all types of <span class="text-gradient-copper">craft beverage makers</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From small-batch breweries to estate wineries, Event Schedule fits your operation.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Craft Breweries -->
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
                     name="Craft Breweries"
                     description="Release parties, tap takeovers, and brewery tours. Your fans followed you for your IPAs - make sure they know when the new batch drops."
@@ -621,7 +577,6 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Brewpubs -->
                 <x-sub-audience-card
                     name="Brewpubs & Taprooms"
                     description="Live music, trivia nights, and food pop-ups. Turn your taproom into a destination every night of the week."
@@ -635,7 +590,6 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Wineries -->
                 <x-sub-audience-card
                     name="Wineries & Vineyards"
                     description="Wine releases, harvest dinners, and vineyard tours. From first crush to final pour, keep your wine club in the loop."
@@ -649,7 +603,6 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Cideries -->
                 <x-sub-audience-card
                     name="Cideries & Orchards"
                     description="Apple picking events, seasonal releases, and cider tastings. The orchard-to-glass story your fans want to be part of."
@@ -663,7 +616,6 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Meaderies & Distilleries -->
                 <x-sub-audience-card
                     name="Meaderies & Distilleries"
                     description="Mead tastings, cocktail classes, and spirit releases. Educate visitors about your ancient craft or your small-batch spirits."
@@ -677,7 +629,6 @@
                     </x-slot:icon>
                 </x-sub-audience-card>
 
-                <!-- Taproom-Only -->
                 <x-sub-audience-card
                     name="Taproom-Only Breweries"
                     description="No distribution? No problem. Your taproom is your stage. Fill it with fans who came specifically to try your latest creation."
@@ -694,110 +645,73 @@
         </div>
     </section>
 
-    <!-- How it Works -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    How it works
+    <!-- ============================================================ -->
+    <!-- 6. How it works                                              -->
+    <!-- ============================================================ -->
+    @php
+        $steps = [
+            ['1', 'Add your brewery or winery', 'Upload your logo, add your spaces (taproom, patio, barrel room), and customize your branding.'],
+            ['2', 'Post your events', 'Release parties, tastings, live music. Add tickets if needed. Set recurring events once and forget about them.'],
+            ['3', 'Grow your following', 'Visitors follow your calendar. When you post a new release, it goes straight to their inbox. No middleman.'],
+        ];
+    @endphp
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-2xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
+                    How it <span class="text-gradient-copper">works</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Get your tasting room calendar online in three steps.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
-                        1
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($steps as [$num, $title, $desc])
+                    <div data-reveal class="text-center">
+                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-2xl font-bold text-white shadow-lg shadow-amber-500/25">
+                            {{ $num }}
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $desc }}</p>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Add your brewery or winery</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Upload your logo, add your spaces (taproom, patio, barrel room), and customize your branding.
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
-                        2
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Post your events</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Release parties, tastings, live music. Add tickets if needed. Set recurring events once and forget about them.
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-br from-amber-600 to-amber-800 text-white text-2xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/25">
-                        3
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Grow your following</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">
-                        Visitors follow your calendar. When you post a new release, it goes straight to their inbox. No middleman.
-                    </p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- Key Features -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
-            <div class="space-y-3">
-                <x-feature-link-card
-                    name="Ticketing"
-                    description="Sell tickets with QR check-in and zero platform fees"
-                    :url="marketing_url('/features/ticketing')"
-                    icon-color="sky"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Newsletters"
-                    description="Send event updates directly to followers' inboxes"
-                    :url="marketing_url('/features/newsletters')"
-                    icon-color="green"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Analytics"
-                    description="Track page views, devices, and traffic sources"
-                    :url="marketing_url('/features/analytics')"
-                    icon-color="emerald"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Sub-Schedules"
-                    description="Organize events into categories and groups"
-                    :url="marketing_url('/features/sub-schedules')"
-                    icon-color="rose"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
+    <!-- ============================================================ -->
+    <!-- 7. Key features                                              -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <div class="space-y-3" data-reveal-group="70">
+                <div data-reveal>
+                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -807,52 +721,29 @@
 
     @include('marketing.partials.pricing-nudge')
 
-    <!-- Related Pages -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-20">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related pages</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="{{ marketing_url('/for-bars') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Bars</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-restaurants') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Restaurants</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-farmers-markets') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Farmers Markets</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-food-trucks-and-vendors') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Food Trucks & Vendors</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+    <!-- ============================================================ -->
+    <!-- 8. Related pages                                             -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+                @foreach ([['/for-bars', 'Bars'], ['/for-restaurants', 'Restaurants'], ['/for-farmers-markets', 'Farmers Markets'], ['/for-food-trucks-and-vendors', 'Food Trucks & Vendors']] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                        <div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                        </div>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -860,128 +751,89 @@
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
+    <!-- ============================================================ -->
+    <!-- 9. FAQ                                                       -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient-copper">questions</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything breweries and wineries ask about Event Schedule.
                 </p>
             </div>
 
-            <div class="space-y-4">
-                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is Event Schedule free for breweries and wineries?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule is free forever for sharing your tasting events, live music nights, and seasonal happenings. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I manage tastings, live music, and seasonal events together?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Use sub-schedules to organize events by type - tastings, live music, seasonal releases, food pairings, and private events. Each event can include descriptions, images, pricing, and ticket options all in one place.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            How do customers discover our events?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Customers can follow your schedule and receive email notifications when you add new events. Embed your calendar on your website, share the link on social media, or send newsletters to followers with your upcoming calendar.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Does it sync with Google Calendar?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Two-way Google Calendar sync keeps your events updated across platforms. Add an event in either place and it appears in both. Your staff and customers always see the latest schedule.
-                        </p>
-                </details>
+            <div class="space-y-4" data-reveal-group="80">
+                @foreach ([
+                    ['Is Event Schedule free for breweries and wineries?', 'Yes. Event Schedule is free forever for sharing your tasting events, live music nights, and seasonal happenings. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.'],
+                    ['Can I manage tastings, live music, and seasonal events together?', 'Yes. Use sub-schedules to organize events by type - tastings, live music, seasonal releases, food pairings, and private events. Each event can include descriptions, images, pricing, and ticket options all in one place.'],
+                    ['How do customers discover our events?', 'Customers can follow your schedule and receive email notifications when you add new events. Embed your calendar on your website, share the link on social media, or send newsletters to followers with your upcoming calendar.'],
+                    ['Does it sync with Google Calendar?', 'Yes. Two-way Google Calendar sync keeps your events updated across platforms. Add an event in either place and it appears in both. Your staff and customers always see the latest schedule.'],
+                ] as [$q, $a])
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                    </details>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-amber-700 to-amber-900 py-24 overflow-hidden">
-        <div class="absolute inset-0 grid-overlay"></div>
-        <!-- Subtle copper glow -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-orange-500/15 rounded-full blur-[100px]"></div>
+    <!-- ============================================================ -->
+    <!-- 10. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.32), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="es-fizz absolute inset-0">
+                        @foreach ($fizz as [$l, $s, $d, $dl, $op])
+                            <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; --fizz-dur: {{ $d }}; --fizz-delay: {{ $dl }}; --fizz-op: {{ $op }};"></span>
+                        @endforeach
+                    </div>
+                </div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Your fans. Direct reach. No middleman.
-            </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                You make the product. You own the relationship. Email your fans directly - no algorithm in the way.
-            </p>
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-amber-700 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Get Started Free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Your fans. Direct reach. <span class="text-gradient-copper">No middleman.</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        You make the product. You own the relationship. Email your fans directly - no algorithm in the way.
+                    </p>
+
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-brewery" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-600 to-amber-800 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-amber-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get Started Free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+
+                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                </div>
+            </div>
         </div>
     </section>
 
-
-    <style {!! nonce_attr() !!}>
-        .text-gradient-copper {
-            background: linear-gradient(135deg, #d97706, #92400e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .dark .text-gradient-copper {
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Float animation for cards */
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
-        }
-    </style>
+    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

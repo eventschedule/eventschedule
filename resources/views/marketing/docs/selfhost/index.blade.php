@@ -52,12 +52,20 @@
         }
     </style>
 
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden">
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden noise">
         <!-- Animated background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0) 62%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0) 62%);"></div>
+            <div class="es-rays absolute inset-0"></div>
         </div>
 
         <!-- Grid -->
@@ -74,18 +82,18 @@
             </nav>
 
             <div class="text-center">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
+                <div class="es-fade-up es-d-1 inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                     <svg aria-hidden="true" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
                     </svg>
                     <span class="text-sm text-gray-600 dark:text-gray-300">Selfhost Documentation</span>
                 </div>
 
-                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+                <h1 class="es-fade-up es-d-2 es-balance text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                     Selfhost <span class="text-gradient">Installation</span>
                 </h1>
 
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+                <p class="es-fade-up es-d-3 text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
                     Deploy Event Schedule on your own server. Full control, complete customization, no vendor lock-in.
                 </p>
             </div>
@@ -174,15 +182,15 @@
 
                 <!-- Email Setup -->
                 <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-900 dark:to-pink-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-rose-100 dark:bg-rose-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-teal-100 dark:bg-teal-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Email Setup</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure SMTP or other mail drivers for ticket confirmations, newsletters, and notifications.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-rose-600 dark:text-rose-400">
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-teal-600 dark:text-teal-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -193,15 +201,15 @@
 
                 <!-- AI Setup -->
                 <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-violet-100 dark:bg-violet-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-blue-100 dark:bg-blue-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">AI Setup</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Connect Google Gemini and OpenAI to enable AI-powered event importing, agenda scanning, translations, and image generation.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-violet-600 dark:text-violet-400">
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
                             Read Guide
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -251,15 +259,15 @@
 
                 <!-- All documentation -->
                 <a href="{{ route('marketing.docs') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900 dark:to-violet-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-indigo-100 dark:bg-indigo-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">All documentation</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Browse the full docs hub for user guides, SaaS setup, developer API, and more.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
                             Open docs
                             <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

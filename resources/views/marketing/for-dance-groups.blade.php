@@ -98,392 +98,346 @@
     </script>
     </x-slot>
 
-    <!-- Hero Section - Movement/Flow Theme -->
-    <section class="relative bg-gradient-to-b from-white via-gray-50 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-950 py-32 overflow-hidden">
-        <!-- Flowing gradient shapes suggesting movement -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 -left-20 w-[500px] h-[800px] bg-gradient-to-br from-rose-500/20 via-cyan-500/10 to-transparent rounded-full blur-3xl transform -rotate-12"></div>
-            <div class="absolute bottom-0 -right-20 w-[600px] h-[600px] bg-gradient-to-tl from-sky-500/15 via-rose-500/10 to-transparent rounded-full blur-3xl"></div>
-            <div class="absolute top-1/3 right-1/4 w-[300px] h-[500px] bg-gradient-to-b from-cyan-400/10 to-transparent rounded-full blur-2xl transform rotate-45"></div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <style {!! nonce_attr() !!}>
+        /* For-dance-groups "In Motion" styles. The shared es-* motion system
+           lives in marketing.css; this holds only the rose->cyan->sky gradient
+           text and the drifting motion lines behind the hero. */
+        .text-gradient-dance {
+            background: linear-gradient(120deg, #f43f5e, #06b6d4, #0ea5e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-dance {
+            background: linear-gradient(120deg, #fda4af, #67e8f9, #7dd3fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @keyframes es-flow {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(12px) translateY(-8px); }
+        }
+        .es-flow { animation: es-flow 9s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+            .es-flow { animation: none !important; }
+        }
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: in motion                                           -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 32%, rgba(244, 63, 94, 0.34), rgba(244, 63, 94, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(6, 182, 212, 0.4), rgba(6, 182, 212, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 70%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <svg class="es-flow absolute left-6 top-24 h-64 w-64 text-rose-400/40" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.3"/>
+            </svg>
+            <svg class="es-flow absolute bottom-24 right-10 h-52 w-52 text-cyan-400/40" style="animation-delay: 2s;" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+            </svg>
         </div>
 
-        <!-- Abstract flowing lines suggesting dance movement -->
-        <div class="absolute inset-0 overflow-hidden opacity-20">
-            <svg aria-hidden="true" class="absolute top-20 left-10 w-64 h-64 text-rose-300" viewBox="0 0 200 200" fill="none">
-                <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
-                <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1" fill="none" opacity="0.3"/>
-            </svg>
-            <svg aria-hidden="true" class="absolute bottom-32 right-20 w-48 h-48 text-cyan-300" viewBox="0 0 200 200" fill="none">
-                <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1" fill="none" opacity="0.5"/>
-            </svg>
-        </div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm animate-reveal" style="opacity: 0;">
-                <span class="text-sm text-rose-600 dark:text-rose-200/80">For Dance Companies, Troupes & Studios</span>
+        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <span class="h-2 w-2 rounded-full bg-gradient-to-r from-rose-400 to-cyan-400"></span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Dance Companies, Troupes & Studios</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-light text-gray-900 dark:text-white mb-6 leading-tight tracking-tight animate-reveal delay-100" style="opacity: 0;">
-                From studio<br>
-                <span class="font-normal bg-gradient-to-r from-rose-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">to stage</span>
+            <h1 class="es-balance mb-8 text-[2.75rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">From studio</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-dance es-gradient-anim">to stage</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-stone-500 dark:text-stone-400 max-w-2xl mx-auto mb-12 font-light animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 One schedule for rehearsals, performances, and classes. One link for your audience to find you.
             </p>
 
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-cyan-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
-                Create your schedule
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                    See how it flows
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                </a>
+                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-rose-500/40">
+                    Create your schedule
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Dance-style marquee -->
+            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                        <div class="es-marquee-track">
+                            @for ($tc = 0; $tc < 2; $tc++)
+                                @foreach (['Ballet', 'Hip-Hop', 'Contemporary', 'Ballroom', 'Tap', 'Jazz', 'Folk', 'Latin'] as $tag)
+                                    <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-rose-400 to-cyan-400"></span>
+                                        {{ $tag }}
+                                    </span>
+                                @endforeach
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </section>
 
-    <!-- The Dance Life Section - Unique to dancers -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8 text-center">
-                <div class="p-6">
-                    <div class="text-4xl mb-3">🩰</div>
-                    <div class="text-stone-500 dark:text-stone-400 text-sm">Rehearsals sync to your public schedule</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl mb-3">🎭</div>
-                    <div class="text-stone-500 dark:text-stone-400 text-sm">Sell tickets to performances directly</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl mb-3">📧</div>
-                    <div class="text-stone-500 dark:text-stone-400 text-sm">Email your fans directly, own the relationship</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl mb-3">🎓</div>
-                    <div class="text-stone-500 dark:text-stone-400 text-sm">Fill your classes and workshops</div>
-                </div>
+    <!-- ============================================================ -->
+    <!-- 2. The dance life (emoji stats)                              -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-4" data-reveal-group="70">
+                @foreach ([['🩰', 'Rehearsals sync to your public schedule'], ['🎭', 'Sell tickets to performances directly'], ['📧', 'Email your fans directly, own the relationship'], ['🎓', 'Fill your classes and workshops']] as [$emoji, $text])
+                    <div data-reveal class="rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-3 text-4xl">{{ $emoji }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $text }}</div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- Main Feature: Season Planning -->
-    <section class="bg-white dark:bg-stone-900 py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300 text-sm font-medium mb-6 border border-rose-500/20">
+    <!-- ============================================================ -->
+    <!-- 3. Season planning                                           -->
+    <!-- ============================================================ -->
+    <section id="features" class="scroll-mt-24 bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-16 lg:grid-cols-2">
+                <div data-reveal>
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
                         Season Planning
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
-                        Your entire season,<br>
-                        <span class="text-rose-300">one view</span>
+                    <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
+                        Your entire season, <span class="text-gradient-dance">one view</span>
                     </h2>
-                    <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
+                    <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
                         Fall program. Winter showcase. Spring recital. Nutcracker run. Import from Google Calendar or add performances manually. Your audience sees everything in one place.
                     </p>
                     <ul class="space-y-4">
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-stone-600 dark:text-stone-300">Two-way Google Calendar sync for rehearsals and shows</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-stone-600 dark:text-stone-300">Multiple venues - theater, studio, outdoor stages</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg aria-hidden="true" class="w-5 h-5 text-rose-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span class="text-stone-600 dark:text-stone-300">Share one link everywhere - programs, posters, social bios</span>
-                        </li>
+                        @foreach (['Two-way Google Calendar sync for rehearsals and shows', 'Multiple venues - theater, studio, outdoor stages', 'Share one link everywhere - programs, posters, social bios'] as $item)
+                            <li class="flex items-start gap-3">
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                <span class="text-gray-600 dark:text-gray-300">{{ $item }}</span>
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
-                <div class="relative">
-                    <!-- Season calendar mockup -->
-                    <div class="bg-gray-50 dark:bg-stone-950 rounded-2xl border border-gray-200 dark:border-stone-800 p-6 shadow-2xl">
-                        <div class="flex items-center justify-between mb-6">
-                            <span class="text-gray-900 dark:text-white font-medium">2025-26 Season</span>
-                            <span class="text-xs text-stone-500">City Dance Company</span>
+                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
+                    <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-2xl dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                        <div class="mb-6 flex items-center justify-between">
+                            <span class="font-medium text-gray-900 dark:text-white">2025-26 Season</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">City Dance Company</span>
                         </div>
                         <div class="space-y-3">
-                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-transparent border-l-2 border-amber-400">
-                                <div class="text-center w-12">
-                                    <div class="text-amber-700 dark:text-amber-300 text-xs">OCT</div>
-                                    <div class="text-gray-900 dark:text-white font-medium">18-20</div>
+                            @foreach ([
+                                ['OCT', '18-20', 'Fall Repertory', 'Mainstage Theater', 'border-amber-400', 'from-amber-500/10', 'text-amber-700 dark:text-amber-300'],
+                                ['DEC', '6-22', 'The Nutcracker', 'Historic Opera House', 'border-rose-400', 'from-rose-500/10', 'text-rose-700 dark:text-rose-300'],
+                                ['MAR', '14-16', 'Contemporary Showcase', 'Black Box Studio', 'border-cyan-400', 'from-cyan-500/10', 'text-cyan-700 dark:text-cyan-300'],
+                                ['MAY', '30-31', 'Spring Gala', 'City Amphitheater', 'border-sky-400', 'from-sky-500/10', 'text-sky-700 dark:text-sky-300'],
+                            ] as $idx => [$mo, $day, $name, $venue, $bcls, $gcls, $tcls])
+                                <div class="es-ai-field flex items-center gap-4 rounded-xl border-l-2 {{ $bcls }} bg-gradient-to-r {{ $gcls }} to-transparent p-3" style="--i: {{ $idx }};">
+                                    <div class="w-12 text-center"><div class="text-xs {{ $tcls }}">{{ $mo }}</div><div class="font-medium text-gray-900 dark:text-white">{{ $day }}</div></div>
+                                    <div><div class="text-sm font-medium text-gray-900 dark:text-white">{{ $name }}</div><div class="text-xs text-gray-500 dark:text-gray-500">{{ $venue }}</div></div>
                                 </div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Fall Repertory</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Mainstage Theater</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-rose-500/10 to-transparent border-l-2 border-rose-400">
-                                <div class="text-center w-12">
-                                    <div class="text-rose-700 dark:text-rose-300 text-xs">DEC</div>
-                                    <div class="text-gray-900 dark:text-white font-medium">6-22</div>
-                                </div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm font-medium">The Nutcracker</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Historic Opera House</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-cyan-500/10 to-transparent border-l-2 border-cyan-400">
-                                <div class="text-center w-12">
-                                    <div class="text-cyan-700 dark:text-cyan-300 text-xs">MAR</div>
-                                    <div class="text-gray-900 dark:text-white font-medium">14-16</div>
-                                </div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Contemporary Showcase</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Black Box Studio</div>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-4 p-3 rounded-xl bg-gradient-to-r from-sky-500/10 to-transparent border-l-2 border-sky-400">
-                                <div class="text-center w-12">
-                                    <div class="text-sky-700 dark:text-sky-300 text-xs">MAY</div>
-                                    <div class="text-gray-900 dark:text-white font-medium">30-31</div>
-                                </div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm font-medium">Spring Gala</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">City Amphitheater</div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Classes & Workshops Section - Unique to dance -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-stone-800/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
+    <!-- ============================================================ -->
+    <!-- 4. Classes & workshops                                       -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-16 lg:grid-cols-2">
                 <div class="order-2 lg:order-1">
-                    <!-- Class schedule mockup -->
-                    <div class="bg-white dark:bg-stone-900 rounded-2xl border border-gray-200 dark:border-stone-800 p-6 shadow-2xl">
-                        <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-4">Weekly Classes</div>
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
-                                    <span class="text-gray-900 dark:text-white text-sm">Ballet Fundamentals</span>
+                    <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
+                        <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
+                            <div class="mb-4 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Weekly Classes</div>
+                            <div class="space-y-2">
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 0;">
+                                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-cyan-400"></span><span class="text-sm text-gray-900 dark:text-white">Ballet Fundamentals</span></div>
+                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Mon/Wed 6pm</div><div class="text-xs text-emerald-500 dark:text-emerald-400">3 spots left</div></div>
                                 </div>
-                                <div class="text-right">
-                                    <div class="text-stone-500 dark:text-stone-400 text-xs">Mon/Wed 6pm</div>
-                                    <div class="text-emerald-400 text-xs">3 spots left</div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
+                                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-blue-400"></span><span class="text-sm text-gray-900 dark:text-white">Contemporary Technique</span></div>
+                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Tue/Thu 7pm</div><div class="text-xs text-emerald-500 dark:text-emerald-400">5 spots left</div></div>
                                 </div>
-                            </div>
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-2 h-2 rounded-full bg-blue-400"></div>
-                                    <span class="text-gray-900 dark:text-white text-sm">Contemporary Technique</span>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-stone-500 dark:text-stone-400 text-xs">Tue/Thu 7pm</div>
-                                    <div class="text-emerald-400 text-xs">5 spots left</div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 2;">
+                                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-amber-400"></span><span class="text-sm text-gray-900 dark:text-white">Hip-Hop Foundations</span></div>
+                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Sat 2pm</div><div class="text-xs text-gray-400 dark:text-gray-500">FULL</div></div>
                                 </div>
                             </div>
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-stone-800/50">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-2 h-2 rounded-full bg-amber-400"></div>
-                                    <span class="text-gray-900 dark:text-white text-sm">Hip-Hop Foundations</span>
-                                </div>
-                                <div class="text-right">
-                                    <div class="text-stone-500 dark:text-stone-400 text-xs">Sat 2pm</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">FULL</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-stone-700">
-                            <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-3">Upcoming Workshops</div>
-                            <div class="p-3 rounded-lg bg-gradient-to-r from-rose-500/10 to-sky-500/10 border border-rose-500/20">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-gray-900 dark:text-white text-sm font-medium">Partnering Intensive</div>
-                                        <div class="text-stone-500 dark:text-stone-400 text-xs">Feb 15-16 with Guest Artist</div>
+                            <div class="mt-4 border-t border-gray-200 pt-4 dark:border-white/10">
+                                <div class="mb-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Upcoming Workshops</div>
+                                <div class="rounded-lg border border-rose-500/20 bg-gradient-to-r from-rose-500/10 to-sky-500/10 p-3">
+                                    <div class="flex items-center justify-between">
+                                        <div><div class="text-sm font-medium text-gray-900 dark:text-white">Partnering Intensive</div><div class="text-xs text-gray-500 dark:text-gray-400">Feb 15-16 with Guest Artist</div></div>
+                                        <div class="text-sm font-medium text-rose-500 dark:text-rose-300">$85</div>
                                     </div>
-                                    <div class="text-rose-300 text-sm font-medium">$85</div>
                                 </div>
                             </div>
+                            <div class="es-glare" aria-hidden="true"></div>
+                            <div class="es-ring-glow" aria-hidden="true"></div>
                         </div>
                     </div>
                 </div>
-                <div class="order-1 lg:order-2">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 text-sm font-medium mb-6 border border-sky-500/20">
+                <div class="order-1 lg:order-2" data-reveal>
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
                         Classes & Workshops
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
-                        Teach and perform<br>
-                        <span class="text-sky-300">from one schedule</span>
+                    <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
+                        Teach and perform <span class="text-gradient-dance">from one schedule</span>
                     </h2>
-                    <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
+                    <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
                         Most dance groups teach alongside performing. List your weekly classes, drop-ins, and intensive workshops. Sell registrations with zero platform fees - you keep everything.
                     </p>
                     <div class="flex flex-wrap gap-3">
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Weekly technique</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Drop-in classes</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Masterclasses</span>
-                        <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-sm border border-gray-200 dark:border-stone-700">Summer intensives</span>
+                        @foreach (['Weekly technique', 'Drop-in classes', 'Masterclasses', 'Summer intensives'] as $tag)
+                            <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">{{ $tag }}</span>
+                        @endforeach
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- The Algorithm Problem - Unique messaging -->
-    <section class="bg-white dark:bg-stone-900 py-24">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl font-light text-gray-900 dark:text-white mb-6">
-                Stop relying on the algorithm
+    <!-- ============================================================ -->
+    <!-- 5. Stop relying on the algorithm                             -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+            <h2 class="es-balance mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
+                Stop relying on the <span class="text-gradient-dance">algorithm</span>
             </h2>
-            <p class="text-xl text-stone-500 dark:text-stone-400 mb-12 max-w-2xl mx-auto">
-                You post about your show. Facebook shows it to 3% of your followers. Unless you pay. <span class="text-rose-300">There's a better way.</span>
+            <p class="mx-auto mb-12 max-w-2xl text-xl text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                You post about your show. Facebook shows it to 3% of your followers. Unless you pay. <span class="font-semibold text-rose-500 dark:text-rose-300">There's a better way.</span>
             </p>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
-                    <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="90">
+                @foreach ([
+                    ['M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'Email your fans directly', 'Fans follow your schedule. You email them directly - no algorithm in the way.'],
+                    ['M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', 'Notify on new shows', 'New performance? Email goes out. Everyone who wants to know, knows.'],
+                    ['M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'Zero platform fees', 'Sell tickets directly. Stripe processes payment. You keep 100%.'],
+                ] as [$icon, $title, $desc])
+                    <div data-reveal class="rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10">
+                            <svg aria-hidden="true" class="h-6 w-6 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" /></svg>
+                        </div>
+                        <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
                     </div>
-                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Email your fans directly</h3>
-                    <p class="text-stone-500 dark:text-stone-400 text-sm">Fans follow your schedule. You email them directly - no algorithm in the way.</p>
-                </div>
-                <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
-                    <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                    </div>
-                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Notify on new shows</h3>
-                    <p class="text-stone-500 dark:text-stone-400 text-sm">New performance? Email goes out. Everyone who wants to know, knows.</p>
-                </div>
-                <div class="bg-gray-100 dark:bg-stone-800/50 rounded-2xl p-6 border border-gray-200 dark:border-stone-700">
-                    <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mx-auto mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-gray-900 dark:text-white font-medium mb-2">Zero platform fees</h3>
-                    <p class="text-stone-500 dark:text-stone-400 text-sm">Sell tickets directly. Stripe processes payment. You keep 100%.</p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- Virtual Performances - Link to online events -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24 border-t border-gray-200 dark:border-stone-800/50">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" class="group block">
-                <div class="bg-gradient-to-br from-gray-100 dark:from-stone-900 to-gray-50 dark:to-stone-800 rounded-3xl border border-gray-200 dark:border-stone-700 p-8 lg:p-12 hover:border-sky-500/30 transition-all duration-300">
-                    <div class="flex flex-col lg:flex-row gap-8 items-center">
+    <!-- ============================================================ -->
+    <!-- 6. Virtual performances                                      -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-20">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <a href="{{ marketing_url('/features/online-events') }}" data-reveal="panel" class="es-bento group block">
+                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-12">
+                    <div class="flex flex-col items-center gap-8 lg:flex-row">
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300 text-sm font-medium mb-4 border border-sky-500/20">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
+                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
+                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                 Livestream
                             </div>
-                            <h3 class="text-2xl lg:text-3xl font-light text-gray-900 dark:text-white mb-3 group-hover:text-sky-200 transition-colors">
-                                Perform for audiences anywhere
-                            </h3>
-                            <p class="text-stone-500 dark:text-stone-400 text-lg mb-4">
-                                Livestream your showcase. Host a virtual masterclass. Reach audiences who can't make it to the theater - and sell tickets to viewers worldwide.
-                            </p>
-                            <span class="inline-flex items-center text-sky-400 text-sm font-medium group-hover:gap-3 gap-2 transition-all">
+                            <h3 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400 lg:text-3xl">Perform for audiences anywhere</h3>
+                            <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Livestream your showcase. Host a virtual masterclass. Reach audiences who can't make it to the theater - and sell tickets to viewers worldwide.</p>
+                            <span class="inline-flex items-center gap-2 font-medium text-sky-600 transition-all group-hover:gap-3 dark:text-sky-400">
                                 Learn about online events
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
+                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             </span>
                         </div>
-                        <div class="flex-shrink-0">
-                            <div class="w-48 h-32 bg-gray-50 dark:bg-stone-950 rounded-xl border border-gray-200 dark:border-stone-700 flex items-center justify-center relative overflow-hidden">
-                                <div class="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-sky-500/10"></div>
+                        <div class="shrink-0" aria-hidden="true">
+                            <div class="relative flex h-32 w-48 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-[#0f0f14]">
+                                <div class="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-cyan-500/10"></div>
                                 <div class="relative text-center">
-                                    <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center mx-auto mb-2 animate-pulse">
-                                        <div class="w-2 h-2 rounded-full bg-white"></div>
-                                    </div>
-                                    <div class="text-gray-900 dark:text-white text-xs font-medium">LIVE</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-[10px]">347 watching</div>
+                                    <div class="mx-auto mb-2 flex h-8 w-8 animate-pulse items-center justify-center rounded-full bg-red-500"><div class="h-2 w-2 rounded-full bg-white"></div></div>
+                                    <div class="text-xs font-medium text-gray-900 dark:text-white">LIVE</div>
+                                    <div class="text-[10px] text-gray-500 dark:text-gray-500">347 watching</div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="es-glare" aria-hidden="true"></div>
+                    <div class="es-ring-glow" aria-hidden="true"></div>
                 </div>
             </a>
         </div>
     </section>
 
-    <!-- Team Coordination -->
-    <section class="bg-white dark:bg-stone-900 py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-16 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300 text-sm font-medium mb-6 border border-blue-500/20">
+    <!-- ============================================================ -->
+    <!-- 7. Team coordination                                         -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-16 lg:grid-cols-2">
+                <div data-reveal>
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
                         Company Management
                     </div>
-                    <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
-                        Coordinate your<br>
-                        <span class="text-blue-300">entire company</span>
+                    <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
+                        Coordinate your <span class="text-gradient-dance">entire company</span>
                     </h2>
-                    <p class="text-lg text-stone-500 dark:text-stone-400 mb-8 leading-relaxed">
+                    <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
                         Invite your artistic director, choreographers, rehearsal directors, and company managers. Everyone can update the schedule. Changes sync everywhere instantly.
                     </p>
                     <div class="space-y-3">
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-100 dark:bg-stone-800/50 border border-gray-200 dark:border-stone-700">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-medium">AD</div>
-                            <div class="flex-1">
-                                <div class="text-gray-900 dark:text-white text-sm">Sarah Chen</div>
-                                <div class="text-stone-500 dark:text-stone-500 text-xs">Artistic Director</div>
-                            </div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 text-xs">Owner</span>
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-medium text-white">AD</div>
+                            <div class="flex-1"><div class="text-sm text-gray-900 dark:text-white">Sarah Chen</div><div class="text-xs text-gray-500 dark:text-gray-500">Artistic Director</div></div>
+                            <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">Owner</span>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-cyan-600 flex items-center justify-center text-white text-sm font-medium">MR</div>
-                            <div class="flex-1">
-                                <div class="text-stone-600 dark:text-stone-300 text-sm">Marcus Rivera</div>
-                                <div class="text-stone-500 dark:text-stone-500 text-xs">Choreographer</div>
-                            </div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-xs">Admin</span>
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200/50 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/5">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-cyan-600 text-sm font-medium text-white">MR</div>
+                            <div class="flex-1"><div class="text-sm text-gray-600 dark:text-gray-300">Marcus Rivera</div><div class="text-xs text-gray-500 dark:text-gray-500">Choreographer</div></div>
+                            <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700 dark:bg-rose-500/20 dark:text-rose-300">Admin</span>
                         </div>
-                        <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-stone-800/30 border border-gray-200/50 dark:border-stone-700/50">
-                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white text-sm font-medium">JT</div>
-                            <div class="flex-1">
-                                <div class="text-stone-600 dark:text-stone-300 text-sm">Jamie Torres</div>
-                                <div class="text-stone-500 dark:text-stone-500 text-xs">Company Manager</div>
-                            </div>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 text-xs">Admin</span>
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200/50 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/5">
+                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-sm font-medium text-white">JT</div>
+                            <div class="flex-1"><div class="text-sm text-gray-600 dark:text-gray-300">Jamie Torres</div><div class="text-xs text-gray-500 dark:text-gray-500">Company Manager</div></div>
+                            <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">Admin</span>
                         </div>
                     </div>
                 </div>
                 <div class="flex justify-center">
-                    <div class="bg-gray-50 dark:bg-stone-950 rounded-2xl border border-gray-200 dark:border-stone-800 p-6 max-w-sm">
-                        <div class="text-stone-500 dark:text-stone-400 text-xs uppercase tracking-wider mb-4">Recent Activity</div>
-                        <div class="space-y-4">
-                            <div class="flex gap-3">
-                                <div class="w-1 rounded-full bg-blue-500"></div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm">Sarah added "Spring Gala"</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">2 hours ago</div>
-                                </div>
+                    <div class="es-bento group relative w-full max-w-sm" data-tilt="5" data-reveal="panel">
+                        <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                            <div class="mb-4 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Recent Activity</div>
+                            <div class="space-y-4">
+                                <div class="es-ai-field flex gap-3" style="--i: 0;"><div class="w-1 rounded-full bg-blue-500"></div><div><div class="text-sm text-gray-900 dark:text-white">Sarah added "Spring Gala"</div><div class="text-xs text-gray-500 dark:text-gray-500">2 hours ago</div></div></div>
+                                <div class="es-ai-field flex gap-3" style="--i: 1;"><div class="w-1 rounded-full bg-rose-500"></div><div><div class="text-sm text-gray-900 dark:text-white">Marcus updated rehearsal times</div><div class="text-xs text-gray-500 dark:text-gray-500">Yesterday</div></div></div>
+                                <div class="es-ai-field flex gap-3" style="--i: 2;"><div class="w-1 rounded-full bg-amber-500"></div><div><div class="text-sm text-gray-900 dark:text-white">Jamie added ticket link</div><div class="text-xs text-gray-500 dark:text-gray-500">2 days ago</div></div></div>
                             </div>
-                            <div class="flex gap-3">
-                                <div class="w-1 rounded-full bg-rose-500"></div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm">Marcus updated rehearsal times</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">Yesterday</div>
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div class="w-1 rounded-full bg-amber-500"></div>
-                                <div>
-                                    <div class="text-gray-900 dark:text-white text-sm">Jamie added ticket link</div>
-                                    <div class="text-stone-500 dark:text-stone-500 text-xs">2 days ago</div>
-                                </div>
-                            </div>
+                            <div class="es-glare" aria-hidden="true"></div>
+                            <div class="es-ring-glow" aria-hidden="true"></div>
                         </div>
                     </div>
                 </div>
@@ -491,19 +445,21 @@
         </div>
     </section>
 
-    <!-- Perfect For Section - 6 Dance Sub-types -->
-    <section class="bg-stone-50 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-light text-stone-900 dark:text-white mb-4">
-                    Built for every style of dance
+    <!-- ============================================================ -->
+    <!-- 8. Perfect for (shared sub-audience cards)                   -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Built for every style of <span class="text-gradient-dance">dance</span>
                 </h2>
-                <p class="text-lg text-stone-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From classical technique to street dance, we understand how you work.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <!-- Ballet Companies -->
                 <x-sub-audience-card
                     name="Ballet Companies"
@@ -579,148 +535,107 @@
         </div>
     </section>
 
-    <!-- Social Promo Graphics -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-stone-100 dark:border-stone-800/50">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-600 text-sm font-medium mb-6 border border-orange-500/20">
+    <!-- ============================================================ -->
+    <!-- 9. Social promo graphics                                     -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div data-reveal>
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400">
                         Promo Graphics
                     </div>
-                    <h2 class="text-3xl md:text-4xl font-light text-stone-900 dark:text-white mb-6">
+                    <h2 class="es-balance mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
                         Share-ready images for every performance
                     </h2>
-                    <p class="text-lg text-stone-600 dark:text-gray-400 mb-6">
+                    <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">
                         Auto-generate promotional graphics sized perfectly for Instagram, Facebook, and stories. No design skills needed - just download and post.
                     </p>
-                    <ul class="space-y-3 text-stone-600 dark:text-gray-400">
-                        <li class="flex items-center gap-2">
-                            <svg aria-hidden="true" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Square posts for feed
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg aria-hidden="true" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Vertical for stories
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg aria-hidden="true" class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Your branding, automatically applied
-                        </li>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-400">
+                        @foreach (['Square posts for feed', 'Vertical for stories', 'Your branding, automatically applied'] as $item)
+                            <li class="flex items-center gap-2">
+                                <svg aria-hidden="true" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                                {{ $item }}
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
-                <div class="flex justify-center gap-4">
-                    <div class="w-36 h-36 bg-gradient-to-br from-rose-100 to-cyan-100 rounded-xl border border-rose-200 p-3 flex flex-col items-center justify-center text-center shadow-lg transform rotate-[-4deg]">
-                        <div class="text-[10px] text-rose-600 uppercase tracking-wider mb-1">Spring Gala</div>
-                        <div class="text-stone-800 text-sm font-semibold">City Dance Co.</div>
-                        <div class="text-stone-500 text-[10px] mt-1">May 30 • 7:30pm</div>
-                        <div class="text-rose-600 text-[10px] font-medium mt-2">Tickets Available</div>
+                <div class="flex justify-center gap-4" data-reveal aria-hidden="true">
+                    <div class="flex h-36 w-36 rotate-[-4deg] flex-col items-center justify-center rounded-xl border border-rose-200 bg-gradient-to-br from-rose-100 to-cyan-100 p-3 text-center shadow-lg">
+                        <div class="mb-1 text-[10px] uppercase tracking-wider text-rose-600">Spring Gala</div>
+                        <div class="text-sm font-semibold text-stone-800">City Dance Co.</div>
+                        <div class="mt-1 text-[10px] text-stone-500">May 30 · 7:30pm</div>
+                        <div class="mt-2 text-[10px] font-medium text-rose-600">Tickets Available</div>
                     </div>
-                    <div class="w-24 h-40 bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl border border-sky-200 p-2 flex flex-col items-center justify-center text-center shadow-lg transform rotate-[4deg] mt-8">
-                        <div class="text-[8px] text-sky-600 uppercase tracking-wider mb-1">Story</div>
-                        <div class="text-stone-800 text-xs font-semibold">Tonight!</div>
-                        <div class="text-stone-500 text-[8px] mt-1">Nutcracker</div>
-                        <div class="text-sky-600 text-[8px] mt-2">Swipe up</div>
+                    <div class="mt-8 flex h-40 w-24 rotate-[4deg] flex-col items-center justify-center rounded-xl border border-sky-200 bg-gradient-to-br from-sky-100 to-blue-100 p-2 text-center shadow-lg">
+                        <div class="mb-1 text-[8px] uppercase tracking-wider text-sky-600">Story</div>
+                        <div class="text-xs font-semibold text-stone-800">Tonight!</div>
+                        <div class="mt-1 text-[8px] text-stone-500">Nutcracker</div>
+                        <div class="mt-2 text-[8px] text-sky-600">Swipe up</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- How it Works -->
-    <section class="bg-stone-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-light text-stone-900 dark:text-white mb-4">
-                    From sign-up to sold-out
-                </h2>
+    <!-- ============================================================ -->
+    <!-- 10. How it works (dark band)                                 -->
+    <!-- ============================================================ -->
+    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
+        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.26), rgba(244, 63, 94, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.55;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-cyan-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
-                        1
-                    </div>
-                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Add your season</h3>
-                    <p class="text-stone-500 dark:text-gray-400 text-sm">
-                        Import from Google Calendar or add performances manually. Classes, workshops, shows - all in one place.
-                    </p>
+            <div class="relative z-10 mx-auto max-w-4xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
+                        From sign-up to <span class="text-gradient-dance">sold-out</span>
+                    </h2>
                 </div>
 
-                <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-cyan-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
-                        2
-                    </div>
-                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Share your link</h3>
-                    <p class="text-stone-500 dark:text-gray-400 text-sm">
-                        Put it on your website, in programs, on posters, in your social bios. One URL that's always current.
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-rose-500 to-cyan-600 text-white text-xl font-medium rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-rose-500/25">
-                        3
-                    </div>
-                    <h3 class="text-lg font-medium text-stone-900 dark:text-white mb-2">Fill your seats</h3>
-                    <p class="text-stone-500 dark:text-gray-400 text-sm">
-                        Fans subscribe and get notified about new performances. Sell tickets directly. Build your audience.
-                    </p>
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
+                    @foreach ([['1', 'Add your season', 'Import from Google Calendar or add performances manually. Classes, workshops, shows - all in one place.'], ['2', 'Share your link', 'Put it on your website, in programs, on posters, in your social bios. One URL that\'s always current.'], ['3', 'Fill your seats', 'Fans subscribe and get notified about new performances. Sell tickets directly. Build your audience.']] as [$n, $title, $desc])
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
+                            <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-cyan-600 text-xl font-bold text-white shadow-lg shadow-rose-500/30">{{ $n }}</div>
+                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
+                            <p class="text-sm text-gray-400">{{ $desc }}</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Key Features -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
-            <div class="space-y-3">
-                <x-feature-link-card
-                    name="Ticketing"
-                    description="Sell tickets with QR check-in and zero platform fees"
-                    :url="marketing_url('/features/ticketing')"
-                    icon-color="sky"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Newsletters"
-                    description="Send event updates directly to followers' inboxes"
-                    :url="marketing_url('/features/newsletters')"
-                    icon-color="green"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Calendar Sync"
-                    description="Two-way sync with Google Calendar"
-                    :url="marketing_url('/features/calendar-sync')"
-                    icon-color="blue"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
+    <!-- ============================================================ -->
+    <!-- 11. Key features                                             -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <div class="space-y-3" data-reveal-group="70">
+                <div data-reveal>
+                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google Calendar" :url="marketing_url('/features/calendar-sync')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -730,52 +645,29 @@
 
     @include('marketing.partials.pricing-nudge')
 
-    <!-- Related Pages -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-20">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related pages</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="{{ marketing_url('/for-musicians') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Musicians</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-theater-performers') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Theater Performers</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-fitness-and-yoga') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Fitness & Yoga</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-circus-acrobatics') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Circus & Acrobatics</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+    <!-- ============================================================ -->
+    <!-- 12. Related pages                                            -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+                @foreach ([['/for-musicians', 'Musicians'], ['/for-theater-performers', 'Theater Performers'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-circus-acrobatics', 'Circus & Acrobatics']] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                        <div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                        </div>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -783,105 +675,86 @@
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
+    <!-- ============================================================ -->
+    <!-- 13. FAQ                                                      -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient-dance">questions</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything dance groups ask about Event Schedule.
                 </p>
             </div>
 
-            <div class="space-y-4">
-                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is Event Schedule free for dance groups?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Event Schedule is free forever for sharing your performance and class schedule, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.
-                    </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I manage performances, classes, and rehearsals together?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Use sub-schedules to organize by type - performances, classes, workshops, auditions, and rehearsals. Each event can include details, images, and ticket options. Keep public events visible while keeping rehearsals private.
-                    </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            How do audiences discover our performances?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Fans can follow your dance group's schedule and receive email notifications for new performances. Share your schedule link on social media, embed it on your website, or send newsletters to followers with upcoming shows.
-                    </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I sell tickets to performances and recitals?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Connect your Stripe account and sell tickets directly from your schedule. Set up different pricing for adults, students, and groups. Event Schedule charges zero platform fees - every dollar goes to your dance group.
-                    </p>
-                </details>
+            <div class="space-y-4" data-reveal-group="80">
+                @foreach ([
+                    ['Is Event Schedule free for dance groups?', 'Yes. Event Schedule is free forever for sharing your performance and class schedule, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.'],
+                    ['Can I manage performances, classes, and rehearsals together?', 'Yes. Use sub-schedules to organize by type - performances, classes, workshops, auditions, and rehearsals. Each event can include details, images, and ticket options. Keep public events visible while keeping rehearsals private.'],
+                    ['How do audiences discover our performances?', 'Fans can follow your dance group\'s schedule and receive email notifications for new performances. Share your schedule link on social media, embed it on your website, or send newsletters to followers with upcoming shows.'],
+                    ['Can I sell tickets to performances and recitals?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Set up different pricing for adults, students, and groups. Event Schedule charges zero platform fees - every dollar goes to your dance group.'],
+                ] as [$q, $a])
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                    </details>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative bg-gray-50 dark:bg-stone-950 py-24 overflow-hidden">
-        <!-- Flowing gradient background -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-rose-500/15 to-transparent rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-gradient-to-tl from-sky-500/15 to-transparent rounded-full blur-3xl"></div>
-        </div>
+    <!-- ============================================================ -->
+    <!-- 14. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-rose-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 35% 25%, rgba(244, 63, 94, 0.3), rgba(244, 63, 94, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 65% 70%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.6;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
 
-        <div class="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p class="text-stone-500 dark:text-stone-500 text-sm uppercase tracking-wider mb-6">Free forever</p>
+                <div class="relative z-10">
+                    <p class="mb-6 text-sm uppercase tracking-[0.2em] text-gray-400">Free forever</p>
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
+                        Let audiences find <span class="text-gradient-dance">your next performance</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
+                        Join dance companies, studios, and troupes who've simplified how they share their schedule.
+                    </p>
 
-            <h2 class="text-4xl md:text-5xl font-light text-gray-900 dark:text-white mb-6 leading-tight">
-                Let audiences find<br>
-                <span class="bg-gradient-to-r from-rose-300 via-cyan-300 to-sky-300 bg-clip-text text-transparent">your next performance</span>
-            </h2>
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-company" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-rose-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Create Your Schedule
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
 
-            <p class="text-lg text-stone-500 dark:text-stone-400 mb-10 max-w-xl mx-auto">
-                Join dance companies, studios, and troupes who've simplified how they share their schedule.
-            </p>
-
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-gradient-to-r from-rose-500 to-cyan-600 rounded-full hover:scale-105 transition-all shadow-lg shadow-rose-500/25 hover:shadow-rose-500/40">
-                Create Your Schedule
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                </div>
+            </div>
         </div>
     </section>
 
+    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

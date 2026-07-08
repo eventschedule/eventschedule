@@ -58,31 +58,38 @@
         }
     </style>
 
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-20">
+    <section class="es-hero relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden noise">
         <!-- Animated background -->
-        <div class="absolute inset-0 overflow-hidden">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 0.75s;"></div>
+        <div class="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(8, 145, 178, 0.2), rgba(8, 145, 178, 0) 60%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 75%, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0) 60%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.16), rgba(37, 99, 235, 0) 60%);"></div>
         </div>
 
         <!-- Grid -->
         <div class="absolute inset-0 grid-pattern"></div>
 
         <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
+            <div class="es-fade-up es-d-1 inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
                 <svg aria-hidden="true" class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 <span class="text-sm text-gray-600 dark:text-gray-300">Documentation</span>
             </div>
 
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+            <h1 class="es-fade-up es-d-2 text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
                 <span class="text-gradient">Event Schedule</span> Knowledge Base
             </h1>
 
-            <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">
+            <p class="es-fade-up es-d-3 text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10">
                 Everything you need to get started, selfhost your own instance, or build integrations.
             </p>
 

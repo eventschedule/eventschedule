@@ -78,53 +78,82 @@
         .feature-banner:hover {
             transform: scale(1.01);
         }
+
+        /* Page accent gradient (blue to sky to cyan) */
+        .text-gradient-features {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-features {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .es-finale-panel .text-gradient-features {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 
-    <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1.5s;"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-600/10 rounded-full blur-[150px] parallax-blob" data-parallax-speed="0.2"></div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- Hero                                                        -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(78svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
+        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
                 <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
                 </span>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Everything you need</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Everything you need</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Built for people who<br>
-                <span class="text-gradient">run events</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Built for people who</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-features">run events</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12 animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 Everything you need to fill seats, from calendars and ticketing to newsletters and analytics.
             </p>
 
-            <div class="flex flex-wrap justify-center gap-4 animate-reveal delay-300" style="opacity: 0;">
-                <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-sky-600 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-blue-500/25">
+            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                     Start for free
-                    <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-                <a href="#features" class="inline-flex items-center px-8 py-4 text-lg font-semibold text-gray-900 dark:text-white glass border border-gray-200 dark:border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+                <a href="#features" class="group inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
                     Explore features
-                    <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-y-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </a>
             </div>
         </div>
+
     </section>
 
     <!-- Feature Banners -->
@@ -139,7 +168,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/ticketing') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/ticketing') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -213,7 +242,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/ai') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/ai') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -283,7 +312,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('marketing.newsletters') }}" class="feature-banner group block">
+                <a href="{{ route('marketing.newsletters') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -366,7 +395,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/calendar-sync') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/calendar-sync') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -438,7 +467,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('marketing.analytics') }}" class="feature-banner group block">
+                <a href="{{ route('marketing.analytics') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -497,29 +526,29 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-lime-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute top-20 right-1/4 w-[400px] h-[400px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
                 <div class="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-green-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.2s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/recurring-events') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/recurring-events') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-lime-100 text-lime-700 dark:bg-lime-500/20 dark:text-lime-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300 text-sm font-medium mb-4">
                                 <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                                 Recurring Events
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-lime-600 dark:group-hover:text-lime-300 transition-colors">Automate your week</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-teal-600 dark:group-hover:text-teal-300 transition-colors">Automate your week</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Set events to repeat weekly on your chosen days. Three end conditions, per-occurrence tickets, and Google Calendar sync.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly recurrence</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-event tickets</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Google Sync</span>
                             </div>
-                            <span class="inline-flex items-center text-lime-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-teal-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -530,20 +559,20 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.5s;">
-                                <div class="bg-gradient-to-br from-lime-50 to-green-50 dark:from-lime-900 dark:to-green-900 rounded-xl border border-lime-200 dark:border-lime-500/30 p-5 w-56">
+                                <div class="bg-gradient-to-br from-teal-50 to-green-50 dark:from-teal-900 dark:to-green-900 rounded-xl border border-teal-200 dark:border-teal-500/30 p-5 w-56">
                                     <!-- Day picker -->
                                     <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Repeat on</div>
                                     <div class="flex gap-1.5 mb-3">
                                         <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">S</div>
-                                        <div class="w-7 h-7 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-medium">M</div>
+                                        <div class="w-7 h-7 rounded-full bg-teal-500 text-white flex items-center justify-center text-[10px] font-medium">M</div>
                                         <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">T</div>
-                                        <div class="w-7 h-7 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-medium">W</div>
+                                        <div class="w-7 h-7 rounded-full bg-teal-500 text-white flex items-center justify-center text-[10px] font-medium">W</div>
                                         <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">T</div>
-                                        <div class="w-7 h-7 rounded-full bg-lime-500 text-white flex items-center justify-center text-[10px] font-medium">F</div>
+                                        <div class="w-7 h-7 rounded-full bg-teal-500 text-white flex items-center justify-center text-[10px] font-medium">F</div>
                                         <div class="w-7 h-7 rounded-full bg-gray-200 dark:bg-white/10 flex items-center justify-center text-gray-500 dark:text-gray-400 text-[10px]">S</div>
                                     </div>
                                     <!-- Repeats badge -->
-                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-lime-100 dark:bg-lime-500/20 text-lime-700 dark:text-lime-300 text-xs">
+                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 text-xs">
                                         <svg aria-hidden="true" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
@@ -588,7 +617,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/team-scheduling') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/team-scheduling') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -657,7 +686,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('marketing.private_events') }}" class="feature-banner group block">
+                <a href="{{ route('marketing.private_events') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -738,7 +767,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/custom-fields') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/custom-fields') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -804,7 +833,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/event-graphics') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/event-graphics') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -877,7 +906,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/boost') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/boost') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -940,16 +969,16 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
                 <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-orange-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.3s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/fan-videos') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/fan-videos') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                                 <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
@@ -969,7 +998,7 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.5s;">
-                                <div class="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-900 dark:to-orange-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-cyan-50 to-orange-50 dark:from-cyan-900 dark:to-orange-900 rounded-xl border border-cyan-200 dark:border-cyan-500/30 p-4 w-56">
                                     <!-- Event card mini -->
                                     <div class="text-xs text-gray-500 dark:text-white/70 mb-2">Jazz Night</div>
                                     <div class="text-[10px] text-gray-400 dark:text-gray-500 mb-3">Fri, Mar 15 at 8 PM</div>
@@ -984,7 +1013,7 @@
                                     <!-- Comments -->
                                     <div class="space-y-2">
                                         <div class="flex items-start gap-2">
-                                            <div class="w-5 h-5 rounded-full bg-rose-300 dark:bg-rose-500/40 flex-shrink-0"></div>
+                                            <div class="w-5 h-5 rounded-full bg-cyan-300 dark:bg-cyan-500/40 flex-shrink-0"></div>
                                             <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Amazing show!</div>
                                         </div>
                                         <div class="flex items-start gap-2">
@@ -1009,7 +1038,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/polls') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/polls') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -1091,7 +1120,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/docs/tickets#feedback') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/docs/tickets#feedback') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -1167,7 +1196,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/online-events') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/online-events') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -1224,28 +1253,28 @@
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->
             <div class="absolute inset-0">
-                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-rose-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
+                <div class="absolute top-20 right-1/3 w-[400px] h-[400px] bg-cyan-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.35"></div>
                 <div class="absolute bottom-20 left-1/4 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.25" style="animation-delay: 1.4s;"></div>
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/features/sub-schedules') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/features/sub-schedules') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300 text-sm font-medium mb-4">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
                                 <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                 </svg>
                                 Sub-schedules
                             </div>
-                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-rose-600 dark:group-hover:text-rose-300 transition-colors">Organize your events</h2>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Organize your events</h2>
                             <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create sub-schedules to categorize events by room, stage, series, or any way you like.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Multiple rooms</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Event categories</span>
                             </div>
-                            <span class="inline-flex items-center text-rose-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                            <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
                                 Learn more
                                 <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -1256,11 +1285,11 @@
                         <!-- Visual side -->
                         <div class="flex-shrink-0">
                             <div class="animate-float" style="animation-delay: 0.4s;">
-                                <div class="bg-gradient-to-br from-rose-50 to-cyan-50 dark:from-rose-900 dark:to-cyan-900 rounded-xl border border-rose-200 dark:border-rose-500/30 p-4 w-56">
+                                <div class="bg-gradient-to-br from-cyan-50 to-cyan-50 dark:from-cyan-900 dark:to-cyan-900 rounded-xl border border-cyan-200 dark:border-cyan-500/30 p-4 w-56">
                                     <div class="text-xs text-gray-500 dark:text-white/70 mb-3">Sub-schedules</div>
                                     <div class="space-y-2">
-                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30">
-                                            <div class="w-2 h-2 rounded-full bg-rose-400"></div>
+                                        <div class="flex items-center gap-2 p-2 rounded-lg bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-500/30">
+                                            <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
                                             <span class="text-gray-900 dark:text-white text-sm">Main Stage</span>
                                         </div>
                                         <div class="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-white/5">
@@ -1293,7 +1322,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ route('marketing.custom_domain') }}" class="feature-banner group block">
+                <a href="{{ route('marketing.custom_domain') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -1355,7 +1384,7 @@
             </div>
 
             <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <a href="{{ marketing_url('/open-source') }}" class="feature-banner group block">
+                <a href="{{ marketing_url('/open-source') }}" data-reveal class="feature-banner group block">
                     <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
                         <!-- Text side -->
                         <div class="flex-1 text-center lg:text-left">
@@ -1409,23 +1438,44 @@
 
     </div>
 
-    <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 grid-overlay"></div>
+    <!-- ============================================================ -->
+    <!-- Finale                                                      -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Ready to get started?
-            </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Create your free event schedule in seconds. No credit card required.
-            </p>
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Start for free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Ready to <span class="text-gradient-features">get started?</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Create your free event schedule in seconds. No credit card required.
+                    </p>
+
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Start for free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -1460,4 +1510,8 @@
         updateParallax();
     })();
     </script>
+
+    <!-- Local confetti (no CDN) + motion engines -->
+    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

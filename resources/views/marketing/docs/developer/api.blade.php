@@ -21,6 +21,28 @@
     @include('marketing.docs.partials.styles')
 
     <style {!! nonce_attr() !!}>
+        .text-gradient-docs {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-docs {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+
+    <style {!! nonce_attr() !!}>
     /* API two-panel layout */
     .api-endpoint-row { margin-bottom: 0; }
     @media (min-width: 1024px) {
@@ -112,10 +134,10 @@
     </style>
 
     <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5">
-        <div class="absolute inset-0">
-            <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-1/4 w-[300px] h-[300px] bg-teal-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    <section class="relative bg-white dark:bg-[#0a0a0f] py-16 overflow-hidden border-b border-gray-200 dark:border-white/5 noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 20% 45%, rgba(16, 185, 129, 0.22), rgba(16, 185, 129, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 55%, rgba(20, 184, 166, 0.18), rgba(20, 184, 166, 0) 65%);"></div>
         </div>
         <div class="absolute inset-0 grid-pattern"></div>
         <div class="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -126,7 +148,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                     </svg>
                 </div>
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">API Reference</h1>
+                <h1 class="es-fade-up es-balance text-3xl md:text-4xl font-black tracking-tight text-gray-900 dark:text-white"><span class="text-gradient-docs">API Reference</span></h1>
             </div>
             <p class="text-lg text-gray-500 dark:text-gray-400 max-w-3xl">
                 Programmatically manage schedules and events with the Event Schedule REST API. Write operations require a Pro plan. A machine-readable <a href="/api/openapi.json" class="text-cyan-400 hover:text-cyan-300">OpenAPI spec</a> is also available.

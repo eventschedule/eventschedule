@@ -70,6 +70,26 @@
     </x-slot>
 
     <style {!! nonce_attr() !!}>
+        /* Page accent gradient (blue to sky to cyan) */
+        .text-gradient-compare {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-compare {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .es-finale-panel .text-gradient-compare {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         .compare-table-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -138,62 +158,102 @@
                 z-index: 30;
             }
         }
+
+        /* Signature motif: a row of comparison verdict marks (check vs cross) */
+        .es-verdict {
+            flex: 0 0 auto;
+            animation: es-verdict-pulse var(--vd-dur, 2.8s) ease-in-out infinite;
+            animation-delay: var(--vd-delay, 0s);
+        }
+        @keyframes es-verdict-pulse {
+            0%, 100% { opacity: 0.2; transform: scale(0.82); }
+            50% { opacity: 0.9; transform: scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-verdict, .animate-pulse-slow { animation: none !important; }
+            .es-verdict { opacity: 0.55; transform: none; }
+        }
     </style>
 
-    <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero                                                     -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(68svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
+
+            <!-- Verdict motif along the bottom edge (check vs cross) -->
+            <div class="es-verdicts absolute bottom-6 left-0 right-0 mx-auto hidden h-14 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
+                @for ($i = 0; $i < 14; $i++)
+                    @php $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.28; $win = $i % 3 !== 2; $sz = [20, 26, 18, 24][$i % 4]; @endphp
+                    <span class="es-verdict {{ $win ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-600' }}" style="--vd-dur: {{ $dur }}s; --vd-delay: {{ $delay }}s;">
+                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            @if ($win)
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            @endif
+                        </svg>
+                    </span>
+                @endfor
+            </div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                <svg aria-hidden="true" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Platform comparison</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Platform comparison</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                How we<br>
-                <span class="text-gradient">compare</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">How we</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-compare">compare</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 See how Event Schedule stacks up against Eventbrite, Luma, Ticket Tailor, and Google Calendar.
             </p>
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-gray h-24"></div>
-
-    <!-- Comparison Table -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="compare-table-wrapper rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
+    <!-- ============================================================ -->
+    <!-- 2. Comparison Table + Fee Calculator                        -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-100 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div data-reveal class="compare-table-wrapper rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
                 <table class="compare-table w-full text-left">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-white/10">
-                            <th class="bg-white dark:bg-[#0f0f14] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[180px]">Feature</th>
-                            <th class="px-6 py-5 text-sm font-semibold text-blue-600 dark:text-blue-400 min-w-[160px] bg-blue-50/50 dark:bg-blue-500/5">
+                            <th class="min-w-[180px] bg-white px-6 py-5 text-sm font-semibold text-gray-900 dark:bg-[#0f0f14] dark:text-white">Feature</th>
+                            <th class="min-w-[160px] bg-blue-50/50 px-6 py-5 text-sm font-semibold text-blue-600 dark:bg-blue-500/5 dark:text-blue-400">
                                 Event Schedule
                             </th>
-                            <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Eventbrite</th>
-                            <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Luma</th>
-                            <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Ticket Tailor</th>
-                            <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[160px]">Google Calendar</th>
+                            <th class="min-w-[160px] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white">Eventbrite</th>
+                            <th class="min-w-[160px] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white">Luma</th>
+                            <th class="min-w-[160px] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white">Ticket Tailor</th>
+                            <th class="min-w-[160px] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white">Google Calendar</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                         @foreach ($sections as $sectionName => $rows)
                             <tr class="section-header">
-                                <td class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <td class="bg-gray-50 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-white/[0.03] dark:text-gray-400">
                                     {{ $sectionName }}
                                 </td>
                                 <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
@@ -203,26 +263,26 @@
                                 <td class="bg-gray-50 dark:bg-white/[0.03]"></td>
                             </tr>
                             @foreach ($rows as $row)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
-                                    <td class="bg-white dark:bg-[#0f0f14] px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $row[0] }}</td>
+                                <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                                    <td class="bg-white px-6 py-4 text-sm font-medium text-gray-900 dark:bg-[#0f0f14] dark:text-white">{{ $row[0] }}</td>
                                     @for ($i = 1; $i <= 5; $i++)
                                     <td class="px-6 py-4 text-sm {{ $i === 1 ? 'bg-blue-50/50 dark:bg-blue-500/5' : '' }}">
                                         @if (str_starts_with($row[$i], 'Yes'))
                                             <span class="inline-flex items-center gap-1.5 {{ $i === 1 ? 'font-medium' : '' }}">
-                                                <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                                 @if (strlen($row[$i]) > 3)
-                                                    <span class="text-emerald-600/70 dark:text-emerald-400/70 text-xs">{{ substr($row[$i], 4) }}</span>
+                                                    <span class="text-xs text-emerald-600/70 dark:text-emerald-400/70">{{ substr($row[$i], 4) }}</span>
                                                 @endif
                                             </span>
                                         @elseif (str_starts_with($row[$i], 'No'))
                                             <span class="inline-flex items-center gap-1.5">
-                                                <svg aria-hidden="true" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                                 @if (strlen($row[$i]) > 2)
-                                                    <span class="text-gray-400 dark:text-gray-500 text-xs">{{ trim(substr($row[$i], 2)) }}</span>
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ trim(substr($row[$i], 2)) }}</span>
                                                 @endif
                                             </span>
                                         @else
@@ -237,330 +297,165 @@
                 </table>
             </div>
 
-            <!-- Fee Calculator -->
+            <!-- Fee Calculator (vanilla JS, no Vue compiler dependency) -->
             <div id="fee-calculator" class="mt-16">
-                <div class="text-center mb-8">
-                    <h3 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">Fee Calculator</h3>
-                    <p class="text-gray-500 dark:text-gray-400">See how much you'd pay each month on each platform.</p>
+                <div class="mb-8 text-center">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">Fee Calculator</h3>
+                    <p class="mt-3 text-gray-500 dark:text-gray-400">See how much you'd pay each month on each platform.</p>
                 </div>
 
                 <!-- Inputs -->
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10">
+                <div class="mb-10 flex flex-col items-center justify-center gap-6 sm:flex-row">
                     <div class="flex items-center gap-3">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Ticket price</label>
+                        <label for="fc-price" class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">Ticket price</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">$</span>
-                            <input type="number" v-model.number="price" min="1" max="10000" class="w-28 pl-7 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 dark:text-gray-500">$</span>
+                            <input id="fc-price" type="number" value="10" min="1" max="10000" class="w-28 rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-white">
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Tickets per month</label>
-                        <input type="number" v-model.number="tickets" min="1" max="100000" class="w-28 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-[var(--brand-blue)] focus:border-transparent">
+                        <label for="fc-tickets" class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-300">Tickets per month</label>
+                        <input id="fc-tickets" type="number" value="100" min="1" max="100000" class="w-28 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-white">
                     </div>
                 </div>
 
                 <!-- Results Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Event Schedule -->
-                    <div class="relative rounded-2xl border-2 border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-500/5 p-6">
-                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-500 text-white text-xs font-semibold whitespace-nowrap">Best value</span>
-                        <div class="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">Event Schedule</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(esTotal)"></div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="relative rounded-2xl border-2 border-blue-500 bg-blue-50/50 p-6 dark:border-blue-400 dark:bg-blue-500/5">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-blue-500 px-3 py-0.5 text-xs font-semibold text-white">Best value</span>
+                        <div class="mb-1 text-sm font-semibold text-blue-600 dark:text-blue-400">Event Schedule</div>
+                        <div id="fc-es" class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">$0.00</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">$5/mo + Stripe fees</div>
                     </div>
 
-                    <!-- Eventbrite -->
-                    <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Eventbrite</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(ebTotal)"></div>
+                    <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+                        <div class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Eventbrite</div>
+                        <div id="fc-eb" class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">$0.00</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">3.7% + $1.79/ticket</div>
                     </div>
 
-                    <!-- Luma -->
-                    <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Luma</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(lumaTotal)"></div>
+                    <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+                        <div class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Luma</div>
+                        <div id="fc-luma" class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">$0.00</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">
-                            <span v-show="lumaIsFree">Free plan (5% + Stripe)</span>
-                            <span v-show="!lumaIsFree">Plus plan ($59/mo + Stripe)</span>
+                            <span id="fc-luma-free">Free plan (5% + Stripe)</span>
+                            <span id="fc-luma-plus" class="hidden">Plus plan ($59/mo + Stripe)</span>
                         </div>
                     </div>
 
-                    <!-- Ticket Tailor -->
-                    <div class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 p-6">
-                        <div class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Ticket Tailor</div>
-                        <div class="text-3xl font-bold text-gray-900 dark:text-white mb-2" v-text="fmt(ttTotal)"></div>
+                    <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+                        <div class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Ticket Tailor</div>
+                        <div id="fc-tt" class="mb-2 text-3xl font-bold text-gray-900 dark:text-white">$0.00</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400">~$0.41/ticket + Stripe fees</div>
                     </div>
                 </div>
 
                 <!-- Savings Summary -->
-                <div v-show="maxSavings > 0" class="mt-6 text-center">
-                    <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
-                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div id="fc-savings-wrap" class="mt-6 text-center" style="display: none;">
+                    <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2.5 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                        <svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                         <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                            You save up to <span class="font-bold" v-text="fmt(maxSavings)"></span>/month with Event Schedule
+                            You save up to <span id="fc-savings" class="font-bold">$0.00</span>/month with Event Schedule
                         </span>
                     </div>
                 </div>
 
-                <p class="text-xs text-gray-400 dark:text-gray-500 text-center mt-4">
+                <p class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
                     Stripe fees (2.9% + $0.30/ticket) apply to Event Schedule, Luma, and Ticket Tailor. Eventbrite includes payment processing in their fees.
                 </p>
             </div>
             <script {!! nonce_attr() !!}>
-            document.addEventListener('DOMContentLoaded', function() {
-                if (window.Vue) {
-                    window.Vue.createApp({
-                        data() {
-                            return {
-                                price: 10,
-                                tickets: 100,
-                            };
-                        },
-                        computed: {
-                            revenue() { return this.price * this.tickets; },
-                            esTotal() { return 5 + (this.revenue * 0.029) + (this.tickets * 0.30); },
-                            ebTotal() { return (this.revenue * 0.037) + (this.tickets * 1.79); },
-                            lumaFree() { return (this.revenue * 0.05) + (this.revenue * 0.029) + (this.tickets * 0.30); },
-                            lumaPlus() { return 59 + (this.revenue * 0.029) + (this.tickets * 0.30); },
-                            lumaTotal() { return Math.min(this.lumaFree, this.lumaPlus); },
-                            lumaIsFree() { return this.lumaFree <= this.lumaPlus; },
-                            ttTotal() { return (this.tickets * 0.41) + (this.revenue * 0.029) + (this.tickets * 0.30); },
-                            maxSavings() { return Math.max(this.ebTotal - this.esTotal, this.lumaTotal - this.esTotal, this.ttTotal - this.esTotal); },
-                        },
-                        methods: {
-                            fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); },
-                        },
-                    }).mount('#fee-calculator');
+            (function () {
+                var priceEl = document.getElementById('fc-price');
+                var ticketsEl = document.getElementById('fc-tickets');
+                if (!priceEl || !ticketsEl) return;
+                function fmt(n) { return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+                function calc() {
+                    var price = parseFloat(priceEl.value) || 0;
+                    var tickets = parseFloat(ticketsEl.value) || 0;
+                    var revenue = price * tickets;
+                    var esTotal = 5 + (revenue * 0.029) + (tickets * 0.30);
+                    var ebTotal = (revenue * 0.037) + (tickets * 1.79);
+                    var lumaFree = (revenue * 0.05) + (revenue * 0.029) + (tickets * 0.30);
+                    var lumaPlus = 59 + (revenue * 0.029) + (tickets * 0.30);
+                    var lumaTotal = Math.min(lumaFree, lumaPlus);
+                    var lumaIsFree = lumaFree <= lumaPlus;
+                    var ttTotal = (tickets * 0.41) + (revenue * 0.029) + (tickets * 0.30);
+                    var maxSavings = Math.max(ebTotal - esTotal, lumaTotal - esTotal, ttTotal - esTotal);
+                    document.getElementById('fc-es').textContent = fmt(esTotal);
+                    document.getElementById('fc-eb').textContent = fmt(ebTotal);
+                    document.getElementById('fc-luma').textContent = fmt(lumaTotal);
+                    document.getElementById('fc-tt').textContent = fmt(ttTotal);
+                    document.getElementById('fc-luma-free').classList.toggle('hidden', !lumaIsFree);
+                    document.getElementById('fc-luma-plus').classList.toggle('hidden', lumaIsFree);
+                    document.getElementById('fc-savings').textContent = fmt(maxSavings);
+                    document.getElementById('fc-savings-wrap').style.display = maxSavings > 0 ? '' : 'none';
                 }
-            });
+                priceEl.addEventListener('input', calc);
+                ticketsEl.addEventListener('input', calc);
+                calc();
+            })();
             </script>
         </div>
     </section>
 
-    <!-- Detailed Comparisons -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Detailed Comparisons
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Dive deeper into how Event Schedule compares with each platform.
-                </p>
+    <!-- ============================================================ -->
+    <!-- 3. Detailed Comparisons                                     -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Detailed <span class="text-gradient-compare">comparisons</span></h2>
+                <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Dive deeper into how Event Schedule compares with each platform.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <a href="{{ route('marketing.compare_eventbrite') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Eventbrite</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">0% platform fees vs 3.7% + $1.79/ticket. Plus custom domains, AI features, and open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
+            @php
+                $comparisons = [
+                    ['marketing.compare_eventbrite', 'Eventbrite', '0% platform fees vs 3.7% + $1.79/ticket. Plus custom domains, AI features, and open source.'],
+                    ['marketing.compare_luma', 'Luma', 'From $5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.'],
+                    ['marketing.compare_ticket_tailor', 'Ticket Tailor', 'From $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.'],
+                    ['marketing.compare_google_calendar', 'Google Calendar', 'Purpose-built event platform vs personal scheduling tool. Ticketing, public pages, and AI features.'],
+                    ['marketing.compare_meetup', 'Meetup', 'Free forever vs $14.99+/mo organizer fees. Custom domains, full branding, and open source.'],
+                    ['marketing.compare_dice', 'DICE', 'Zero platform fees vs buyer service fees. Full page control, calendar sync, and open source.'],
+                    ['marketing.compare_brown_paper_tickets', 'Brown Paper Tickets', 'Modern, reliable platform vs dated design. Zero fees, AI features, and active development.'],
+                    ['marketing.compare_splash', 'Splash', '$5/mo vs enterprise pricing. Instant setup, AI features, and open source flexibility.'],
+                    ['marketing.compare_sched', 'Sched', '$5/mo vs $50+/mo. Zero platform fees, calendar sync, and AI features included.'],
+                    ['marketing.compare_whova', 'Whova', 'Transparent $5/mo vs custom quotes. Zero platform fees, open source, and full API access.'],
+                    ['marketing.compare_tito', 'Tito', '$5/mo flat vs 3% per ticket. Calendar sync, newsletters, and selfhosting included.'],
+                    ['marketing.compare_pretix', 'Pretix', 'Both open source, but Event Schedule adds calendar sync, newsletters, AI, and flat pricing.'],
+                    ['marketing.compare_accelevents', 'Accelevents', '$5/mo vs $7,500+/year. Instant setup, zero fees, and open source flexibility.'],
+                    ['marketing.compare_addevent', 'AddEvent', 'Complete event platform with ticketing vs calendar buttons only. $5/mo vs $29/mo.'],
+                    ['marketing.compare_humanitix', 'Humanitix', '$5/mo flat vs 5% + $1.29/ticket. Zero platform fees, calendar sync, AI, and open source.'],
+                    ['marketing.compare_eventzilla', 'Eventzilla', '$5/mo flat vs per-ticket fees. Zero platform fees, calendar sync, AI, and open source.'],
+                ];
+            @endphp
 
-                <a href="{{ route('marketing.compare_luma') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Luma</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">From $5/mo vs $59/mo for comparable features. Zero platform fees and fully open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_ticket_tailor') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Ticket Tailor</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">From $5/mo vs per-ticket fees. Plus calendar sync, newsletters, and selfhosting.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_google_calendar') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Google Calendar</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Purpose-built event platform vs personal scheduling tool. Ticketing, public pages, and AI features.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <a href="{{ route('marketing.compare_meetup') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Meetup</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Free forever vs $14.99+/mo organizer fees. Custom domains, full branding, and open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_dice') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">DICE</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Zero platform fees vs buyer service fees. Full page control, calendar sync, and open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_brown_paper_tickets') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Brown Paper Tickets</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Modern, reliable platform vs dated design. Zero fees, AI features, and active development.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_splash') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Splash</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo vs enterprise pricing. Instant setup, AI features, and open source flexibility.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <a href="{{ route('marketing.compare_sched') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Sched</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo vs $50+/mo. Zero platform fees, calendar sync, and AI features included.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_whova') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Whova</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Transparent $5/mo vs custom quotes. Zero platform fees, open source, and full API access.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_tito') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Tito</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo flat vs 3% per ticket. Calendar sync, newsletters, and selfhosting included.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_pretix') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Pretix</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Both open source, but Event Schedule adds calendar sync, newsletters, AI, and flat pricing.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <a href="{{ route('marketing.compare_accelevents') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Accelevents</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo vs $7,500+/year. Instant setup, zero fees, and open source flexibility.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_addevent') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">AddEvent</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">Complete event platform with ticketing vs calendar buttons only. $5/mo vs $29/mo.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_humanitix') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Humanitix</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo flat vs 5% + $1.29/ticket. Zero platform fees, calendar sync, AI, and open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
-
-                <a href="{{ route('marketing.compare_eventzilla') }}" class="group p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-blue-500/5 transition-all flex flex-col">
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Event Schedule vs</div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-3">Eventzilla</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 flex-grow">$5/mo flat vs per-ticket fees. Zero platform fees, calendar sync, AI, and open source.</p>
-                    <span class="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all mt-auto">
-                        Compare
-                        <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </span>
-                </a>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="60">
+                @foreach ($comparisons as $c)
+                    <a href="{{ route($c[0]) }}" data-reveal class="group flex flex-col rounded-2xl border border-gray-200 bg-gray-50 p-8 transition-all hover:-translate-y-1 hover:border-blue-300 hover:bg-blue-50/50 hover:shadow-lg dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                        <div class="mb-2 text-sm text-gray-500 dark:text-gray-400">Event Schedule vs</div>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $c[1] }}</h3>
+                        <p class="mb-4 flex-grow text-sm text-gray-500 dark:text-gray-400">{{ $c[2] }}</p>
+                        <span class="mt-auto inline-flex items-center text-sm font-medium text-blue-600 transition-all group-hover:gap-2 dark:text-blue-400">
+                            Compare
+                            <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                    </a>
+                @endforeach
             </div>
 
             <!-- Cross-link to Replace -->
-            <div class="max-w-3xl mx-auto mt-16 text-center p-8 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
-                <p class="text-gray-600 dark:text-gray-400 mb-4">
+            <div class="mx-auto mt-16 max-w-3xl rounded-2xl border border-gray-200 bg-gray-50 p-8 text-center dark:border-white/10 dark:bg-white/5" data-reveal>
+                <p class="mb-4 text-gray-600 dark:text-gray-400">
                     Using general-purpose tools for events? See what Event Schedule can replace.
                 </p>
-                <a href="{{ route('marketing.replace') }}" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors">
+                <a href="{{ route('marketing.replace') }}" class="inline-flex items-center gap-2 font-medium text-blue-600 transition-colors hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
                     View tools we replace
-                    <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -568,218 +463,120 @@
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-gray h-24"></div>
-
-    <!-- Why Event Schedule -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Why Event Schedule?
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Key advantages that set us apart from the competition.
-                </p>
+    <!-- ============================================================ -->
+    <!-- 4. Why Event Schedule                                       -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-100 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Why <span class="text-gradient-compare">Event Schedule?</span></h2>
+                <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Key advantages that set us apart from the competition.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                <!-- 0% Platform Fees -->
-                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl p-8 border border-emerald-200 dark:border-emerald-500/20">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center mb-5">
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            @php
+                $advantages = [
+                    ['from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30', 'border-emerald-200 dark:border-emerald-500/20', 'bg-emerald-100 dark:bg-emerald-500/20', 'text-emerald-600 dark:text-emerald-400', '0% Platform Fees', 'We never take a cut of your ticket sales. You only pay standard Stripe processing fees (2.9% + $0.30).', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                    ['from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30', 'border-blue-200 dark:border-blue-500/20', 'bg-blue-100 dark:bg-blue-500/20', 'text-blue-600 dark:text-blue-400', 'Open Source', 'Fully open source and selfhostable. No vendor lock-in. Your data stays yours, always.', 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4'],
+                    ['from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30', 'border-sky-200 dark:border-sky-500/20', 'bg-blue-100 dark:bg-blue-500/20', 'text-blue-600 dark:text-blue-400', 'Self-Hosting', 'Deploy on your own server for complete control. No other platform in this comparison offers that.', 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01'],
+                    ['from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border-sky-200 dark:border-sky-500/20', 'bg-sky-100 dark:bg-sky-500/20', 'text-sky-600 dark:text-sky-400', 'AI Event Parsing', 'Paste event details in any format and our AI extracts dates, times, locations, and descriptions automatically.', 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'],
+                    ['from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30', 'border-amber-200 dark:border-amber-500/20', 'bg-amber-100 dark:bg-amber-500/20', 'text-amber-600 dark:text-amber-400', 'Calendar Sync', 'Two-way Google Calendar and CalDAV sync included free. No other platform offers both.', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                    ['from-cyan-50 to-blue-50 dark:from-cyan-900/30 dark:to-blue-900/30', 'border-cyan-200 dark:border-cyan-500/20', 'bg-cyan-100 dark:bg-cyan-500/20', 'text-cyan-600 dark:text-cyan-400', 'Event Graphics', 'Generate shareable event graphics automatically. No design skills required, unique to Event Schedule.', 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                ];
+            @endphp
+
+            <div class="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                @foreach ($advantages as $adv)
+                    <div data-reveal class="rounded-2xl border bg-gradient-to-br p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg {{ $adv[0] }} {{ $adv[1] }}">
+                        <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl {{ $adv[2] }}">
+                            <svg aria-hidden="true" class="h-6 w-6 {{ $adv[3] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $adv[6] }}" />
+                            </svg>
+                        </div>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">{{ $adv[4] }}</h3>
+                        <p class="text-gray-600 dark:text-gray-400">{{ $adv[5] }}</p>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">0% Platform Fees</h3>
-                    <p class="text-gray-600 dark:text-gray-400">We never take a cut of your ticket sales. You only pay standard Stripe processing fees (2.9% + $0.30).</p>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. FAQ                                                      -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Frequently asked <span class="text-gradient-compare">questions</span></h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Common questions about Event Schedule and how it compares.</p>
+            </div>
+
+            <div class="space-y-4" data-reveal-group="80">
+                @php
+                    $faqs = [
+                        ['How does Event Schedule pricing compare to other platforms?', 'Event Schedule starts at $5/month for Pro with zero platform fees. Competitors like Eventbrite charge 3.7% + $1.79 per ticket, Luma charges 5% or $59/month, and Ticket Tailor charges per-ticket fees. You only pay standard Stripe processing (2.9% + $0.30).'],
+                        ['Does Event Schedule charge platform fees on ticket sales?', 'No. Event Schedule charges zero platform fees at every plan level. You keep 100% of your ticket revenue minus standard Stripe payment processing fees (2.9% + $0.30 per transaction).'],
+                        ['Can I import events from other platforms to Event Schedule?', 'Yes. Event Schedule supports auto-import from Eventbrite, transferring event details, ticket types, venues, and images automatically. For other platforms, you can use AI event parsing to paste event details in any format and have them extracted automatically.'],
+                        ['Is Event Schedule open source?', 'Yes. Event Schedule is fully open source and can be selfhosted on your own server. No other major event platform in this comparison offers both open source code and a selfhosting option.'],
+                        ['What features does Event Schedule have that competitors don\'t?', 'Event Schedule uniquely offers AI event parsing and flyer generation, two-way Google Calendar and CalDAV sync, automatic event graphics generation, sub-schedules for organizing events, fan videos and comments, carpool matching, and WhatsApp event creation. It is also the only platform in its class that is fully open source with a selfhosting option.'],
+                    ];
+                @endphp
+                @foreach ($faqs as [$q, $a])
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <svg aria-hidden="true" class="ml-4 h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
 
-                <!-- Open Source -->
-                <div class="bg-gradient-to-br from-blue-50 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/30 rounded-2xl p-8 border border-blue-200 dark:border-blue-500/20">
-                    <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mb-5">
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Open Source</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Fully open source and selfhostable. No vendor lock-in. Your data stays yours, always.</p>
-                </div>
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Ready to <span class="text-gradient-compare">switch?</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Create your free schedule today. No credit card required, no platform fees ever.
+                    </p>
 
-                <!-- Self-Hosting -->
-                <div class="bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 rounded-2xl p-8 border border-sky-200 dark:border-sky-500/20">
-                    <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mb-5">
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                        </svg>
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get Started Free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Self-Hosting</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Deploy on your own server for complete control. No other platform in this comparison offers that.</p>
-                </div>
-
-                <!-- AI Features -->
-                <div class="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30 rounded-2xl p-8 border border-sky-200 dark:border-sky-500/20">
-                    <div class="w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-500/20 flex items-center justify-center mb-5">
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">AI Event Parsing</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Paste event details in any format and our AI extracts dates, times, locations, and descriptions automatically.</p>
-                </div>
-
-                <!-- Calendar Sync -->
-                <div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-2xl p-8 border border-amber-200 dark:border-amber-500/20">
-                    <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center mb-5">
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Calendar Sync</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Two-way Google Calendar and CalDAV sync included free. No other platform offers both.</p>
-                </div>
-
-                <!-- Event Graphics -->
-                <div class="bg-gradient-to-br from-rose-50 to-cyan-50 dark:from-rose-900/30 dark:to-cyan-900/30 rounded-2xl p-8 border border-rose-200 dark:border-rose-500/20">
-                    <div class="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center mb-5">
-                        <svg aria-hidden="true" class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Event Graphics</h3>
-                    <p class="text-gray-600 dark:text-gray-400">Generate shareable event graphics automatically. No design skills required, unique to Event Schedule.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-white h-24"></div>
-
-    <!-- FAQ Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Common questions about Event Schedule and how it compares.
-                </p>
-            </div>
-
-            <div id="compare-faq" class="space-y-4">
-                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 1 ? null : 1" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            How does Event Schedule pricing compare to other platforms?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div v-show="open === 1" class="faq-answer">
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Event Schedule starts at $5/month for Pro with zero platform fees. Competitors like Eventbrite charge 3.7% + $1.79 per ticket, Luma charges 5% or $59/month, and Ticket Tailor charges per-ticket fees. You only pay standard Stripe processing (2.9% + $0.30).
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 2 ? null : 2" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Does Event Schedule charge platform fees on ticket sales?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div v-show="open === 2" class="faq-answer">
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            No. Event Schedule charges zero platform fees at every plan level. You keep 100% of your ticket revenue minus standard Stripe payment processing fees (2.9% + $0.30 per transaction).
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 3 ? null : 3" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I import events from other platforms to Event Schedule?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 3 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div v-show="open === 3" class="faq-answer">
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule supports auto-import from Eventbrite, transferring event details, ticket types, venues, and images automatically. For other platforms, you can use AI event parsing to paste event details in any format and have them extracted automatically.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 4 ? null : 4" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is Event Schedule open source?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 4 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div v-show="open === 4" class="faq-answer">
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule is fully open source and can be selfhosted on your own server. No other major event platform in this comparison offers both open source code and a selfhosting option.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden">
-                    <button @click="open = open === 5 ? null : 5" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What features does Event Schedule have that competitors don't?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === 5 }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </button>
-                    <div v-show="open === 5" class="faq-answer">
-                        <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Event Schedule uniquely offers AI event parsing and flyer generation, two-way Google Calendar and CalDAV sync, automatic event graphics generation, sub-schedules for organizing events, fan videos and comments, carpool matching, and WhatsApp event creation. It is also the only platform in its class that is fully open source with a selfhosting option.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <script {!! nonce_attr() !!}>
-            document.addEventListener('DOMContentLoaded', function() {
-                if (window.Vue) {
-                    window.Vue.createApp({
-                        data() {
-                            return { open: null };
-                        }
-                    }).mount('#compare-faq');
-                }
-            });
-            </script>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 grid-overlay"></div>
-
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Ready to switch?
-            </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Create your free schedule today. No credit card required, no platform fees ever.
-            </p>
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Get Started Free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
-        </div>
-    </section>
+    <!-- Local confetti (no CDN) + motion engines -->
+    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

@@ -100,382 +100,461 @@
         }
     }
     </script>
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to host a virtual conference with Event Schedule",
+        "description": "Three steps to schedule and host your virtual conference online.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Build your agenda",
+                "text": "Add sessions, speakers, and streaming links. Organize by day and track."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Share your conference",
+                "text": "One link for the full schedule. Sell tickets with tiered pricing."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Go live",
+                "text": "Attendees join sessions from the agenda. You focus on content."
+            }
+        ]
+    }
+    </script>
     </x-slot>
 
-    <!-- Hero Section - Mesh Gradient -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Mesh gradient background -->
-        <div class="absolute inset-0">
-            <div class="absolute bottom-0 left-[-20%] w-[70%] h-[70%] bg-sky-600/20 rounded-full blur-[120px]"></div>
-            <div class="absolute top-0 right-[-10%] w-[50%] h-[60%] bg-blue-600/20 rounded-full blur-[120px]"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40%] h-[40%] bg-indigo-600/10 rounded-full blur-[100px]"></div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <style {!! nonce_attr() !!}>
+        /* For-virtual-conferences "The Agenda" styles. The shared es-* motion system
+           lives in marketing.css; this holds the conference glow gradient, the
+           drifting multi-day agenda card, and the multi-track agenda-board motif. */
+        .text-gradient-conference {
+            background: linear-gradient(135deg, #0284c7, #2563eb, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(2, 132, 199, 0.3);
+        }
+        .dark .text-gradient-conference {
+            background: linear-gradient(135deg, #38bdf8, #60a5fa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+        }
+        @keyframes es-conf-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .es-conf-float { animation: es-conf-float 6s ease-in-out infinite; }
+
+        /* Agenda board: session tiles across a timeline illuminate in a wave,
+           like a multi-track conference program coming together. */
+        .es-agenda { display: flex; align-items: center; }
+        .es-agenda-tile {
+            flex: 0 0 auto;
+            height: 10px; border-radius: 3px;
+            background: linear-gradient(to right, rgba(56, 189, 248, 0.65), rgba(37, 99, 235, 0.65));
+            animation: es-agenda-glow var(--ag-dur, 3s) ease-in-out infinite;
+            animation-delay: var(--ag-delay, 0s);
+        }
+        @keyframes es-agenda-glow {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.9; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .es-conf-float, .es-agenda-tile { animation: none !important; }
+            .es-agenda-tile { opacity: 0.55; }
+        }
+    </style>
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: your whole conference on one page                   -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(2, 132, 199, 0.3), rgba(2, 132, 199, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <!-- Agenda timeline along the bottom edge -->
+            <div class="es-agenda absolute bottom-0 left-0 right-0 hidden h-20 items-center justify-center gap-1.5 px-8 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+                @for ($i = 0; $i < 32; $i++)
+                    @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; @endphp
+                    <span class="es-agenda-tile" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
+                @endfor
+            </div>
         </div>
 
-        <!-- Grid overlay for texture -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- Badge -->
-            <div class="inline-flex items-center gap-3 px-5 py-2.5 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 backdrop-blur-sm">
-                <div class="relative">
-                    <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                </div>
-                <span class="text-sm text-gray-600 dark:text-gray-300 font-medium tracking-wide">For Conference Organizers & Event Planners</span>
+        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Conference Organizers & Event Planners</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight">
-                Host virtual conferences that feel professional.<br>
-                <span class="conference-glow-text">Zero platform fees.</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Host virtual conferences that feel professional.</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-conference">Zero platform fees.</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
+            <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 Multi-day virtual conference agendas, multiple ticket types, speaker lineups. Schedule your conference, sell tickets, and let attendees browse the full agenda from one link.
             </p>
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-base text-gray-400 dark:text-gray-500">
+                The virtual conference platform with built-in multi-day scheduling, tiered ticketing, attendee email notifications, and payment processing for conference organizers.
+            </p>
 
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-blue-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-lg shadow-sky-500/25">
+            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <a href="#journey" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                    See how it scales
+                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                </a>
+                <a href="{{ app_url('/sign_up') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
                     Create your conference schedule
-                    <svg aria-hidden="true" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
             </div>
 
-            <p class="mt-8 text-base text-gray-400 dark:text-gray-500 max-w-2xl mx-auto">
-                The virtual conference platform with built-in multi-day scheduling, tiered ticketing, attendee email notifications, and payment processing for conference organizers.
-            </p>
-
-            <!-- Type tags -->
-            <div class="mt-14 flex flex-wrap justify-center gap-2">
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-800/50">Tech Summits</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Industry Conferences</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 text-xs font-medium border border-indigo-200 dark:border-indigo-800/50">Company Retreats</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300 text-xs font-medium border border-cyan-200 dark:border-cyan-800/50">Professional Summits</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 text-xs font-medium border border-sky-200 dark:border-sky-800/50">Annual Meetings</span>
-                <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-medium border border-blue-200 dark:border-blue-800/50">Panel Events</span>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-16 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-3 gap-6 text-center">
-                <div class="p-6">
-                    <div class="text-4xl font-bold text-sky-400 mb-2">~73%</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-sm">of organizations now host virtual or hybrid events</div>
-                </div>
-                <div class="p-6 border-x border-gray-200 dark:border-white/5">
-                    <div class="text-4xl font-bold text-blue-400 mb-2">3-5x</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-sm">wider reach compared to in-person only</div>
-                </div>
-                <div class="p-6">
-                    <div class="text-4xl font-bold text-indigo-400 mb-2">$0</div>
-                    <div class="text-gray-500 dark:text-gray-400 text-sm">platform fees on conference tickets</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Bento Grid -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
-                Everything you need to run a virtual conference
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                <!-- Multi-day conference schedule (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-sky-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="absolute top-0 right-0 w-96 h-96 bg-sky-500/5 rounded-full blur-[100px]"></div>
-
-                    <div class="relative flex flex-col lg:flex-row gap-8 items-center">
-                        <div class="flex-1">
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-100 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 text-sm font-medium mb-5 border border-sky-200 dark:border-sky-800/30">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Multi-Day Agenda
-                            </div>
-                            <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">Multi-day conference schedule</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Organize keynotes, breakout sessions, and workshops across multiple days of your virtual conference. Attendees browse the full agenda and find the sessions they care about. Have a printed conference program? Scan it with AI to populate all your sessions automatically.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Keynotes</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Breakout sessions</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Workshops</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">AI agenda scanning</span>
-                            </div>
+            <!-- Conference-type marquee -->
+            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+                <div class="es-marquee-mask">
+                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                        <div class="es-marquee-track">
+                            @for ($tc = 0; $tc < 2; $tc++)
+                                @foreach (['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events', 'Developer Cons', 'Hybrid Events'] as $tag)
+                                    <span class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100/80 px-4 py-1.5 text-xs font-semibold text-sky-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-400"></span>
+                                        {{ $tag }}
+                                    </span>
+                                @endforeach
+                            @endfor
                         </div>
-                        <div class="flex-shrink-0 w-full lg:w-auto">
-                            <div class="relative animate-float">
-                                <div class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-950 dark:to-blue-950 rounded-2xl border border-sky-300 dark:border-sky-400/30 p-4 max-w-xs">
-                                    <div class="flex items-center gap-3 mb-3">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold">TC</div>
-                                        <div>
-                                            <div class="text-gray-900 dark:text-white font-semibold text-sm">Tech Conference 2025</div>
-                                            <div class="text-sky-600 dark:text-sky-300 text-xs">3-day agenda</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2. Stats                                                     -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="grid gap-6 text-center md:grid-cols-3" data-reveal-group="90">
+                <div data-reveal class="p-6">
+                    <div class="mb-2 text-4xl font-black text-sky-500 dark:text-sky-400">~<span data-count-to="73">73</span>%</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">of organizations now host virtual or hybrid events</div>
+                </div>
+                <div data-reveal class="border-gray-200 p-6 dark:border-white/5 md:border-x">
+                    <div class="mb-2 text-4xl font-black text-blue-500 dark:text-blue-400">3-5x</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">wider reach compared to in-person only</div>
+                </div>
+                <div data-reveal class="p-6">
+                    <div class="mb-2 text-4xl font-black text-cyan-500 dark:text-cyan-400">$0</div>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">platform fees on conference tickets</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. Bento features                                            -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Everything you need to run a <span class="text-gradient-conference">virtual conference</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
+
+                <!-- Multi-day agenda (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
+                            <div class="flex-1">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    Multi-Day Agenda
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Multi-day conference schedule</h3>
+                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Organize keynotes, breakout sessions, and workshops across multiple days of your virtual conference. Attendees browse the full agenda and find the sessions they care about. Have a printed conference program? Scan it with AI to populate all your sessions automatically.</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Keynotes</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Breakout sessions</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Workshops</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">AI agenda scanning</span>
+                                </div>
+                            </div>
+                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
+                                <div class="animate-float">
+                                    <div class="max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-100 to-blue-100 p-4 dark:border-sky-400/30 dark:from-sky-950 dark:to-blue-950">
+                                        <div class="mb-3 flex items-center gap-3">
+                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-sm font-semibold text-white">TC</div>
+                                            <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Tech Conference 2026</div><div class="text-xs text-sky-600 dark:text-sky-300">3-day agenda</div></div>
                                         </div>
-                                    </div>
-                                    <div class="space-y-1.5">
-                                        <div class="bg-gradient-to-br from-sky-600/30 to-blue-600/30 rounded-lg p-2 border border-sky-400/20">
-                                            <div class="text-gray-900 dark:text-white text-[10px] font-semibold">DAY 1 - Opening Keynote</div>
-                                            <div class="text-gray-500 dark:text-gray-400 text-[9px] mt-0.5">9:00 AM - Main Stage</div>
-                                        </div>
-                                        <div class="bg-gradient-to-br from-blue-600/20 to-indigo-600/20 rounded-lg p-2 border border-blue-400/20">
-                                            <div class="text-gray-900 dark:text-white text-[10px] font-semibold">DAY 2 - AI Workshop</div>
-                                            <div class="text-gray-500 dark:text-gray-400 text-[9px] mt-0.5">10:00 AM - Track B</div>
-                                        </div>
-                                        <div class="bg-gradient-to-br from-indigo-600/20 to-sky-600/20 rounded-lg p-2 border border-indigo-400/20">
-                                            <div class="text-gray-900 dark:text-white text-[10px] font-semibold">DAY 3 - Closing Panel</div>
-                                            <div class="text-gray-500 dark:text-gray-400 text-[9px] mt-0.5">2:00 PM - Main Stage</div>
+                                        <div class="space-y-1.5">
+                                            <div class="es-ai-field rounded-lg border border-sky-400/20 bg-gradient-to-br from-sky-600/30 to-blue-600/30 p-2" style="--i: 0;">
+                                                <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 1 - Opening Keynote</div>
+                                                <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">9:00 AM - Main Stage</div>
+                                            </div>
+                                            <div class="es-ai-field rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 p-2" style="--i: 1;">
+                                                <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 2 - AI Workshop</div>
+                                                <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">10:00 AM - Track B</div>
+                                            </div>
+                                            <div class="es-ai-field rounded-lg border border-cyan-400/20 bg-gradient-to-br from-cyan-600/20 to-sky-600/20 p-2" style="--i: 2;">
+                                                <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 3 - Closing Panel</div>
+                                                <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">2:00 PM - Main Stage</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Sell tiered tickets -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900 border border-indigo-200 dark:border-white/10 p-8">
-                    <div class="absolute bottom-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px]"></div>
-                    <div class="relative">
-                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-sm font-medium mb-5 border border-indigo-200 dark:border-indigo-800/30">
-                            <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                            </svg>
+                <!-- Tiered tickets -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
                             Tiered Tickets
                         </div>
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Sell tiered conference tickets</h3>
-                        <p class="text-gray-500 dark:text-gray-400 mb-6">General admission, VIP, speaker passes, early bird pricing. 100% of Stripe payments go to you. See all <a href="{{ route('marketing.ticketing') }}" class="text-indigo-600 dark:text-indigo-400 underline hover:no-underline">ticketing features</a>.</p>
-
-                        <div class="bg-indigo-500/20 rounded-xl border border-indigo-400/30 p-4">
-                            <div class="space-y-2 mb-3">
-                                <div class="flex items-center justify-between p-2 rounded-lg bg-indigo-400/20">
-                                    <span class="text-gray-900 dark:text-white text-xs font-medium">General Admission</span>
-                                    <span class="text-indigo-600 dark:text-indigo-400 text-xs font-semibold">$49</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg bg-blue-400/20">
-                                    <span class="text-gray-900 dark:text-white text-xs font-medium">VIP Pass</span>
-                                    <span class="text-blue-600 dark:text-blue-400 text-xs font-semibold">$149</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg bg-sky-400/20">
-                                    <span class="text-gray-900 dark:text-white text-xs font-medium">Early Bird</span>
-                                    <span class="text-sky-600 dark:text-sky-400 text-xs font-semibold">$29</span>
-                                </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell tiered conference tickets</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">General admission, VIP, speaker passes, early bird pricing. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-blue-600 underline hover:no-underline dark:text-blue-400">ticketing features</a>.</p>
+                        <div class="mt-auto rounded-xl border border-blue-400/30 bg-blue-500/15 p-4" aria-hidden="true">
+                            <div class="mb-3 space-y-2">
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-blue-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">General Admission</span><span class="text-xs font-semibold text-blue-600 dark:text-blue-400">$49</span></div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-sky-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">VIP Pass</span><span class="text-xs font-semibold text-sky-600 dark:text-sky-400">$149</span></div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-cyan-400/20 p-2" style="--i: 2;"><span class="text-xs font-medium text-gray-900 dark:text-white">Early Bird</span><span class="text-xs font-semibold text-cyan-600 dark:text-cyan-400">$29</span></div>
                             </div>
-                            <div class="border-t border-indigo-400/20 pt-3">
+                            <div class="border-t border-blue-400/20 pt-3">
                                 <div class="flex justify-between text-xs">
                                     <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
-                                    <span class="text-indigo-600 dark:text-indigo-400 font-semibold">$0</span>
+                                    <span class="font-semibold text-blue-600 dark:text-blue-400">$0</span>
                                 </div>
                             </div>
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- One link for your conference -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-cyan-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 text-sm font-medium mb-5 border border-cyan-200 dark:border-cyan-800/30">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                        Share Link
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">One link for your conference</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Share a single URL that attendees use to browse the full agenda, buy tickets, and join sessions.</p>
-
-                    <div class="bg-gray-100 dark:bg-[#0f0f14] rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                        <div class="flex items-center gap-2 p-2 rounded-lg bg-cyan-500/20 border border-cyan-400/30 mb-3">
-                            <svg aria-hidden="true" class="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                            <span class="text-gray-900 dark:text-white text-xs font-mono">eventschedule.com/yourconf</span>
+                <!-- One link -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            Share Link
                         </div>
-                        <div class="grid grid-cols-3 gap-1 text-center">
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-cyan-700 dark:text-cyan-300 text-[10px]">Website</div>
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-cyan-700 dark:text-cyan-300 text-[10px]">LinkedIn</div>
-                            <div class="p-1.5 rounded bg-gray-100 dark:bg-white/5 text-cyan-700 dark:text-cyan-300 text-[10px]">Email</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Works with any streaming platform (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-sky-100 dark:from-teal-900 dark:to-sky-900 border border-teal-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 text-sm font-medium mb-5 border border-teal-200 dark:border-teal-800/30">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                Any Platform
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">One link for your conference</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Share a single URL that attendees use to browse the full agenda, buy tickets, and join sessions.</p>
+                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                            <div class="mb-3 flex items-center gap-2 rounded-lg border border-cyan-400/30 bg-cyan-500/20 p-2">
+                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-cyan-500 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                                <span class="truncate font-mono text-xs text-gray-900 dark:text-white">yourconf.eventschedule.com</span>
                             </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Works with any streaming platform</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Zoom, Microsoft Teams, YouTube Live, or custom RTMP. Add your streaming link per session, attendees join from the agenda. Learn more about <a href="{{ route('marketing.online_events') }}" class="text-teal-600 dark:text-teal-400 underline hover:no-underline">online event features</a>.</p>
+                            <div class="grid grid-cols-3 gap-1 text-center">
+                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-cyan-600 dark:bg-white/5 dark:text-cyan-300">Website</div>
+                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-cyan-600 dark:bg-white/5 dark:text-cyan-300">LinkedIn</div>
+                                <div class="rounded bg-gray-200 p-1.5 text-[10px] text-cyan-600 dark:bg-white/5 dark:text-cyan-300">Email</div>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-center">
-                            <div class="flex items-center gap-4">
-                                <div class="bg-teal-100 dark:bg-teal-500/20 rounded-xl border border-teal-400/30 p-4 w-36">
-                                    <div class="text-teal-700 dark:text-teal-300 text-xs text-center mb-2 font-semibold">Your Agenda</div>
-                                    <div class="space-y-1.5">
-                                        <div class="h-2 bg-gray-300 dark:bg-white/20 rounded"></div>
-                                        <div class="h-2 bg-teal-400/40 rounded w-3/4"></div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Works with any platform (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="grid items-center gap-8 md:grid-cols-2">
+                            <div>
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                                    Any Platform
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Works with any streaming platform</h3>
+                                <p class="text-lg text-gray-500 dark:text-gray-400">Zoom, Microsoft Teams, YouTube Live, or custom RTMP. Add your streaming link per session, attendees join from the agenda. Learn more about <a href="{{ marketing_url('/features/online-events') }}" class="text-teal-600 underline hover:no-underline dark:text-teal-400">online event features</a>.</p>
+                            </div>
+                            <div class="flex items-center justify-center" aria-hidden="true">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-36 rounded-xl border border-teal-400/30 bg-teal-500/15 p-4">
+                                        <div class="mb-2 text-center text-xs font-semibold text-teal-600 dark:text-teal-300">Your Agenda</div>
+                                        <div class="space-y-1.5">
+                                            <div class="h-2 rounded bg-gray-300 dark:bg-white/20"></div>
+                                            <div class="h-2 w-3/4 rounded bg-teal-400/40"></div>
+                                        </div>
+                                        <div class="mt-3 rounded-lg border border-teal-400/30 bg-teal-400/20 p-2">
+                                            <div class="text-center text-[10px] font-medium text-teal-800 dark:text-white">Opening Keynote</div>
+                                            <div class="mt-0.5 text-center text-[8px] text-teal-700 dark:text-teal-300">Day 1 - 9:00 AM</div>
+                                        </div>
                                     </div>
-                                    <div class="mt-3 p-2 rounded-lg bg-teal-200 dark:bg-teal-400/20 border border-teal-400/30">
-                                        <div class="text-[10px] text-gray-900 dark:text-white text-center font-medium">Opening Keynote</div>
-                                        <div class="text-[8px] text-teal-700 dark:text-teal-300 text-center mt-0.5">Day 1 - 9:00 AM</div>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                        <span class="text-[10px] text-teal-500 dark:text-teal-400">stream link</span>
                                     </div>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <svg aria-hidden="true" class="w-6 h-6 text-teal-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                    <span class="text-teal-600 dark:text-teal-400 text-[10px]">stream link</span>
-                                </div>
-                                <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-4 w-36">
-                                    <div class="text-gray-600 dark:text-gray-300 text-xs text-center mb-2 font-semibold">Platform</div>
-                                    <div class="space-y-2 text-center">
-                                        <div class="p-1.5 rounded bg-blue-400/20 text-[10px] text-blue-700 dark:text-blue-300">Zoom</div>
-                                        <div class="p-1.5 rounded bg-sky-400/20 text-[10px] text-sky-700 dark:text-sky-300">MS Teams</div>
-                                        <div class="p-1.5 rounded bg-red-400/20 text-[10px] text-red-700 dark:text-red-300">YouTube Live</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Email all attendees -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-sky-100 dark:from-amber-900 dark:to-sky-900 border border-amber-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 text-sm font-medium mb-5 border border-amber-200 dark:border-amber-800/30">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                Email Attendees
-                            </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Email all attendees</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg">Send updates, schedule changes, speaker announcements, and post-conference resources directly to attendees.</p>
-                        </div>
-                        <div class="bg-amber-500/20 rounded-xl border border-amber-400/30 p-3">
-                            <div class="space-y-1.5">
-                                <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/20">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                                    <span class="text-gray-900 dark:text-white text-[10px] font-medium">Schedule update</span>
-                                </div>
-                                <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/10">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                                    <span class="text-gray-600 dark:text-gray-300 text-[10px]">Speaker announcement</span>
-                                </div>
-                                <div class="flex items-center gap-2 p-1.5 rounded bg-amber-400/10">
-                                    <div class="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
-                                    <span class="text-gray-600 dark:text-gray-300 text-[10px]">Post-conference resources</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Google Calendar Sync -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-blue-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-sm font-medium mb-5 border border-blue-200 dark:border-blue-800/30">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Calendar Sync
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Google Calendar sync</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Two-way sync keeps conference sessions organized alongside your other meetings and planning.</p>
-
-                    <div class="flex items-center justify-center gap-3">
-                        <div class="bg-blue-500/20 rounded-xl border border-blue-400/30 p-3 w-20">
-                            <div class="text-[10px] text-blue-700 dark:text-blue-300 mb-1 text-center">Schedule</div>
-                            <div class="space-y-1">
-                                <div class="h-1.5 bg-sky-400/80 dark:bg-sky-400/40 rounded text-[6px] text-white px-1">Session</div>
-                                <div class="h-1.5 bg-amber-400/80 dark:bg-amber-400/40 rounded text-[6px] text-white px-1">Prep</div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col items-center gap-0.5">
-                            <svg aria-hidden="true" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                            <svg aria-hidden="true" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                        </div>
-                        <div class="bg-gray-200 dark:bg-white/10 rounded-xl border border-gray-300 dark:border-white/20 p-3 w-20">
-                            <div class="text-[10px] text-gray-600 dark:text-gray-300 mb-1 text-center">Google</div>
-                            <div class="space-y-1">
-                                <div class="h-1.5 bg-blue-400/40 rounded"></div>
-                                <div class="h-1.5 bg-green-400/40 rounded"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Attendees follow your events -->
-                <div class="bento-card relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-sky-100 dark:from-slate-900 dark:to-sky-900 border border-slate-200 dark:border-white/10 p-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900/40 text-slate-700 dark:text-slate-300 text-sm font-medium mb-5 border border-slate-200 dark:border-slate-800/30">
-                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        Followers
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Attendees follow your events</h3>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">Followers get notified for next year's conference or related events you organize.</p>
-
-                    <div class="flex items-center justify-center">
-                        <div class="flex -space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-blue-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">A</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">B</div>
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-white text-xs">C</div>
-                            <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-white/20 border-2 border-gray-200 dark:border-[#0a0a0f] flex items-center justify-center text-gray-600 dark:text-white text-xs">+520</div>
-                        </div>
-                    </div>
-                    <div class="text-center mt-3 text-slate-600 dark:text-slate-400 text-xs">523 attendees following your conference</div>
-                </div>
-
-                <!-- Attendee Feedback (spans 2 cols) -->
-                <div class="bento-card lg:col-span-2 relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-100 to-orange-100 dark:from-rose-900 dark:to-orange-900 border border-rose-200 dark:border-white/10 p-8 lg:p-10">
-                    <div class="grid md:grid-cols-2 gap-8 items-center">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-sm font-medium mb-5 border border-rose-200 dark:border-rose-800/30">
-                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                                Attendee Feedback
-                            </div>
-                            <h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Attendee feedback</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Let attendees leave comments on individual sessions. All feedback is approved by you before going live.</p>
-                            <div class="flex flex-wrap gap-3">
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Per-session comments</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Organizer approval</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-center">
-                            <div class="bg-gradient-to-br from-rose-50 to-orange-50 dark:from-rose-950 dark:to-orange-950 rounded-2xl border border-rose-300 dark:border-rose-400/30 p-4 max-w-xs">
-                                <div class="text-xs text-gray-500 dark:text-white/70 mb-2">AI Workshop - Day 2</div>
-                                <div class="space-y-2">
-                                    <div class="flex items-start gap-2">
-                                        <div class="w-5 h-5 rounded-full bg-rose-300 dark:bg-rose-500/40 flex-shrink-0 mt-0.5"></div>
-                                        <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Great session on LLMs!</div>
-                                    </div>
-                                    <div class="flex items-start gap-2">
-                                        <div class="w-5 h-5 rounded-full bg-orange-300 dark:bg-orange-500/40 flex-shrink-0 mt-0.5"></div>
-                                        <div class="bg-white dark:bg-white/10 rounded-lg px-2 py-1 text-[10px] text-gray-600 dark:text-gray-300">Very practical demos</div>
-                                    </div>
-                                    <div class="flex items-center gap-1 pt-1">
-                                        <svg aria-hidden="true" class="w-3 h-3 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span class="text-rose-600 dark:text-rose-400 text-[10px]">Approved by organizer</span>
+                                    <div class="w-36 rounded-xl border border-gray-300 bg-gray-200 p-4 dark:border-white/20 dark:bg-white/10">
+                                        <div class="mb-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">Platform</div>
+                                        <div class="space-y-2 text-center">
+                                            <div class="es-ai-field rounded bg-blue-400/20 p-1.5 text-[10px] text-blue-700 dark:text-blue-300" style="--i: 0;">Zoom</div>
+                                            <div class="es-ai-field rounded bg-sky-400/20 p-1.5 text-[10px] text-sky-700 dark:text-sky-300" style="--i: 1;">MS Teams</div>
+                                            <div class="es-ai-field rounded bg-red-400/20 p-1.5 text-[10px] text-red-700 dark:text-red-300" style="--i: 2;">YouTube Live</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Email all attendees (2 cols) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="grid items-center gap-8 md:grid-cols-2">
+                            <div>
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                                    Email Attendees
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Email all attendees</h3>
+                                <p class="text-lg text-gray-500 dark:text-gray-400">Send updates, schedule changes, speaker announcements, and post-conference resources directly to attendees.</p>
+                            </div>
+                            <div class="rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
+                                <div class="space-y-1.5">
+                                    <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Schedule update</span></div>
+                                    <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Speaker announcement</span></div>
+                                    <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Post-conference resources</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Google Calendar sync -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            Calendar Sync
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Google Calendar sync</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Two-way sync keeps conference sessions organized alongside your other meetings and planning.</p>
+                        <div class="mt-auto flex items-center justify-center gap-3" aria-hidden="true">
+                            <div class="w-20 rounded-xl border border-blue-400/30 bg-blue-500/15 p-3">
+                                <div class="mb-1 text-center text-[10px] text-blue-600 dark:text-blue-300">Schedule</div>
+                                <div class="space-y-1">
+                                    <div class="es-sync-dot h-1.5 rounded bg-sky-400/60"></div>
+                                    <div class="es-sync-dot h-1.5 rounded bg-amber-400/60" style="--i: 1;"></div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center gap-0.5">
+                                <svg aria-hidden="true" class="h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                <svg aria-hidden="true" class="h-4 w-4 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            </div>
+                            <div class="w-20 rounded-xl border border-gray-300 bg-gray-200 p-3 dark:border-white/20 dark:bg-white/10">
+                                <div class="mb-1 text-center text-[10px] text-gray-600 dark:text-gray-300">Google</div>
+                                <div class="space-y-1">
+                                    <div class="es-sync-dot h-1.5 rounded bg-blue-400/60" style="--i: 2;"></div>
+                                    <div class="es-sync-dot h-1.5 rounded bg-green-400/60" style="--i: 3;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Attendees follow -->
+                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-slate-700/40 dark:bg-slate-800/40 dark:text-slate-300">
+                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                            Followers
+                        </div>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Attendees follow your events</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Followers get notified for next year's conference or related events you organize.</p>
+                        <div class="mt-auto" aria-hidden="true">
+                            <div class="flex items-center justify-center">
+                                <div class="flex -space-x-2">
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-sky-500 to-blue-500 text-xs text-white dark:border-[#0a0a0f]">A</div>
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-cyan-500 text-xs text-white dark:border-[#0a0a0f]">B</div>
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-cyan-500 to-teal-500 text-xs text-white dark:border-[#0a0a0f]">C</div>
+                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-300 text-xs text-gray-600 dark:border-[#0a0a0f] dark:bg-white/20 dark:text-white">+520</div>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-center text-xs text-slate-600 dark:text-slate-400">523 attendees following your conference</div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Attendee feedback (2 cols, bottom) -->
+                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <div class="grid items-center gap-8 md:grid-cols-2">
+                            <div>
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                    Attendee Feedback
+                                </div>
+                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Attendee feedback</h3>
+                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Let attendees leave comments on individual sessions. All feedback is approved by you before going live.</p>
+                                <div class="flex flex-wrap gap-3">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Per-session comments</span>
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Organizer approval</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-center" aria-hidden="true">
+                                <div class="max-w-xs rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 dark:border-emerald-400/30 dark:from-emerald-950 dark:to-sky-950">
+                                    <div class="mb-2 text-xs text-gray-500 dark:text-white/70">AI Workshop - Day 2</div>
+                                    <div class="space-y-2">
+                                        <div class="es-ai-field flex items-start gap-2" style="--i: 0;">
+                                            <div class="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-emerald-300 dark:bg-emerald-500/40"></div>
+                                            <div class="rounded-lg bg-white px-2 py-1 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Great session on LLMs!</div>
+                                        </div>
+                                        <div class="es-ai-field flex items-start gap-2" style="--i: 1;">
+                                            <div class="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-sky-300 dark:bg-sky-500/40"></div>
+                                            <div class="rounded-lg bg-white px-2 py-1 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Very practical demos</div>
+                                        </div>
+                                        <div class="flex items-center gap-1 pt-1">
+                                            <svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400">Approved by organizer</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
@@ -483,102 +562,73 @@
         </div>
     </section>
 
-    <!-- Journey Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    From your first virtual event to a conference series
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Event Schedule grows with your conference program
-                </p>
+    <!-- ============================================================ -->
+    <!-- 4. Journey (dark band)                                       -->
+    <!-- ============================================================ -->
+    @php
+        $journey = [
+            ['First virtual meetup', 'Share a link and host your first online session. Free registration gets attendees in the door.', 'border-sky-500/20 bg-sky-500/10', 'text-sky-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+            ['Single-day summit', 'Organize multiple sessions in one day. Attendees browse the agenda and join the talks they want.', 'border-blue-500/20 bg-blue-500/10', 'text-blue-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
+            ['Paid conference', 'Start selling tickets. Offer tiered pricing for general admission, VIP, and speaker passes.', 'border-cyan-500/20 bg-cyan-500/10', 'text-cyan-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+            ['Multi-day conference', 'Keynotes, breakouts, and workshops across multiple days. Organize tracks for different audiences.', 'border-teal-500/20 bg-teal-500/10', 'text-teal-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />'],
+            ['Conference series', 'Run quarterly or annual conferences. Followers get notified when you announce the next edition.', 'border-amber-500/20 bg-amber-500/10', 'text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />'],
+            ['Hybrid events', 'Combine in-person and virtual attendance. Sell different ticket types for on-site and remote participants.', 'border-sky-500/20 bg-sky-500/10', 'text-sky-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+        ];
+    @endphp
+    <section id="journey" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
+        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(2, 132, 199, 0.26), rgba(2, 132, 199, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0) 60%); opacity: 0.55;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="es-agenda absolute bottom-0 left-0 right-0 flex h-16 items-center justify-center gap-1.5 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+                    @for ($i = 0; $i < 32; $i++)
+                        @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; @endphp
+                        <span class="es-agenda-tile" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
+                    @endfor
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- First virtual meetup -->
-                <div class="bg-gradient-to-br from-sky-100 to-sky-50 dark:from-[#0f1520] dark:to-[#0a0a0f] rounded-2xl p-6 border border-sky-200 dark:border-sky-900/20 hover:border-sky-300 dark:hover:border-sky-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-sky-100 dark:bg-sky-900/30 mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">First virtual meetup</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Share a link and host your first online session. Free registration gets attendees in the door.</p>
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-2xl text-center">
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
+                        From your first virtual event to a <span class="text-gradient-conference">conference series</span>
+                    </h2>
+                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Event Schedule grows with your conference program.
+                    </p>
                 </div>
 
-                <!-- Single-day summit -->
-                <div class="bg-gradient-to-br from-blue-100 to-blue-50 dark:from-[#0f1520] dark:to-[#0a0a0f] rounded-2xl p-6 border border-blue-200 dark:border-blue-900/20 hover:border-blue-300 dark:hover:border-blue-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Single-day summit</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Organize multiple sessions in one day. Attendees browse the agenda and join the talks they want.</p>
-                </div>
-
-                <!-- Paid conference -->
-                <div class="bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-[#0f1220] dark:to-[#0a0a0f] rounded-2xl p-6 border border-indigo-200 dark:border-indigo-900/20 hover:border-indigo-300 dark:hover:border-indigo-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Paid conference</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Start selling tickets. Offer tiered pricing for general admission, VIP, and speaker passes.</p>
-                </div>
-
-                <!-- Multi-day conference -->
-                <div class="bg-gradient-to-br from-cyan-100 to-cyan-50 dark:from-[#0f1a1c] dark:to-[#0a0a0f] rounded-2xl p-6 border border-cyan-200 dark:border-cyan-900/20 hover:border-cyan-300 dark:hover:border-cyan-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Multi-day conference</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Keynotes, breakouts, and workshops across multiple days. Organize tracks for different audiences.</p>
-                </div>
-
-                <!-- Conference series -->
-                <div class="bg-gradient-to-br from-teal-100 to-teal-50 dark:from-[#0f1a1a] dark:to-[#0a0a0f] rounded-2xl p-6 border border-teal-200 dark:border-teal-900/20 hover:border-teal-300 dark:hover:border-teal-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-teal-100 dark:bg-teal-900/30 mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Conference series</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Run quarterly or annual conferences. Followers get notified when you announce the next edition.</p>
-                </div>
-
-                <!-- Hybrid events -->
-                <div class="bg-gradient-to-br from-amber-100 to-amber-50 dark:from-[#1a1510] dark:to-[#0a0a0f] rounded-2xl p-6 border border-amber-200 dark:border-amber-900/20 hover:border-amber-300 dark:hover:border-amber-800/40 transition-colors">
-                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 mb-4">
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Hybrid events</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Combine in-person and virtual attendance. Sell different ticket types for on-site and remote participants.</p>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                    @foreach ($journey as [$title, $desc, $iconBg, $iconText, $icon])
+                        <div data-reveal class="rounded-2xl border border-white/10 bg-white/[0.04] p-6 transition-all hover:-translate-y-1 hover:bg-white/[0.07]">
+                            <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl border {{ $iconBg }}">
+                                <svg aria-hidden="true" class="h-6 w-6 {{ $iconText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
+                            </div>
+                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
+                            <p class="text-sm text-gray-400">{{ $desc }}</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Perfect For Section -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Perfect for every type of virtual conference
+    <!-- ============================================================ -->
+    <!-- 5. Perfect for (shared sub-audience cards)                   -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Perfect for every type of <span class="text-gradient-conference">virtual conference</span>
                 </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Whether it's a tech summit or an annual meeting, Event Schedule works for conference organizers of all kinds. Also see <a href="{{ route('marketing.for_webinars') }}" class="text-gray-600 dark:text-gray-300 underline hover:no-underline">Event Schedule for Webinars</a>.
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Whether it's a tech summit or an annual meeting, Event Schedule works for conference organizers of all kinds. Also see <a href="{{ marketing_url('/for-webinars') }}" class="text-gray-600 underline hover:no-underline dark:text-gray-300">Event Schedule for Webinars</a>.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <!-- Tech Companies -->
                 <x-sub-audience-card
                     name="Tech Companies"
@@ -666,167 +716,65 @@
         </div>
     </section>
 
-    <!-- How it Works -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Three steps to your virtual conference
+    <!-- ============================================================ -->
+    <!-- 6. How it works                                              -->
+    <!-- ============================================================ -->
+    @php
+        $steps = [
+            ['1', 'Build your agenda', 'Add sessions, speakers, and streaming links. Organize by day and track.'],
+            ['2', 'Share your conference', 'One link for the full schedule. Sell tickets with tiered pricing.'],
+            ['3', 'Go live', 'Attendees join sessions from the agenda. You focus on content.'],
+        ];
+    @endphp
+    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-2xl text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
+                    Three steps to your <span class="text-gradient-conference">virtual conference</span>
                 </h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-sky-600 to-blue-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-sky-600/25">
-                        1
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($steps as [$num, $title, $desc])
+                    <div data-reveal class="text-center">
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-600 to-blue-600 text-xl font-bold text-white shadow-lg shadow-sky-600/25">
+                            {{ $num }}
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Build your agenda</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        Add sessions, speakers, and streaming links. Organize by day and track.
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-sky-600 to-blue-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-sky-600/25">
-                        2
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Share your conference</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        One link for the full schedule. Sell tickets with tiered pricing.
-                    </p>
-                </div>
-
-                <div class="text-center">
-                    <div class="w-14 h-14 bg-gradient-to-br from-sky-600 to-blue-600 text-white text-xl font-bold rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-sky-600/25">
-                        3
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Go live</h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                        Attendees join sessions from the agenda. You focus on content.
-                    </p>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Everything conference organizers ask about Event Schedule.
-                </p>
-            </div>
-
-            <div class="space-y-4">
-                <details name="faq" class="bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 rounded-2xl border border-cyan-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I schedule a multi-day virtual conference?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Add sessions across as many days as you need. Organize them into groups or tracks so attendees can browse by day, topic, or session type. Your full virtual conference agenda lives on one shareable page - a complete online conference schedule your attendees can bookmark.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-900 dark:to-emerald-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What streaming platforms work with Event Schedule?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Any platform that gives you a meeting or streaming link. Zoom, Microsoft Teams, Google Meet, YouTube Live, Twitch, and any other platform. Event Schedule is platform-agnostic - just paste your link and attendees join from the conference agenda.
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-emerald-100 to-cyan-100 dark:from-emerald-900 dark:to-cyan-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I sell different ticket types for my conference?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Create multiple virtual conference ticket types with different prices - general admission, VIP, early bird, speaker passes, or any custom tier. You keep 100% of the revenue. Event Schedule charges zero platform fees at any plan level. Stripe charges its standard processing fee (2.9% + $0.30).
-                        </p>
-                </details>
-
-                <details name="faq" class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is Event Schedule free for virtual conferences?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                            Yes. Event Schedule is free virtual conference software. The free plan includes unlimited events, attendee email notifications, follower features, and Google Calendar sync. There are zero platform fees on payments at any plan level. You only pay Stripe's standard processing fee if you charge for tickets.
-                        </p>
-                </details>
-            </div>
-        </div>
-    </section>
-
-    <!-- Key Features -->
-    <section class="bg-gray-50 dark:bg-[#0f0f14] py-20 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Key features</h2>
-            <div class="space-y-3">
-                <x-feature-link-card
-                    name="Online Events"
-                    description="Host virtual events with any streaming platform"
-                    :url="marketing_url('/features/online-events')"
-                    icon-color="sky"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Analytics"
-                    description="Track page views, devices, and traffic sources"
-                    :url="marketing_url('/features/analytics')"
-                    icon-color="emerald"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
-                <x-feature-link-card
-                    name="Newsletters"
-                    description="Send event updates directly to followers' inboxes"
-                    :url="marketing_url('/features/newsletters')"
-                    icon-color="green"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-feature-link-card>
+    <!-- ============================================================ -->
+    <!-- 7. Key features                                              -->
+    <!-- ============================================================ -->
+    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <div class="space-y-3" data-reveal-group="70">
+                <div data-reveal>
+                    <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -836,52 +784,29 @@
 
     @include('marketing.partials.pricing-nudge')
 
-    <!-- Related Pages -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-20">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Related pages</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <a href="{{ marketing_url('/for-webinars') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Webinars</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-online-classes') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Online Classes</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-live-qa-sessions') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Live Q&A Sessions</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-                <a href="{{ marketing_url('/for-watch-parties') }}" class="group flex items-center justify-between p-5 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
-                    <div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Watch Parties</div>
-                    </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+    <!-- ============================================================ -->
+    <!-- 8. Related pages                                             -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+                @foreach ([['/for-webinars', 'Webinars'], ['/for-online-classes', 'Online Classes'], ['/for-live-qa-sessions', 'Live Q&A Sessions'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                        <div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                        </div>
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                    </a>
+                @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -889,73 +814,90 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-24 overflow-hidden border-t border-sky-200 dark:border-sky-900/20">
-        <!-- Mesh gradient background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-0 left-[-10%] w-[50%] h-[60%] bg-sky-600/15 rounded-full blur-[120px]"></div>
-            <div class="absolute bottom-0 right-[-10%] w-[50%] h-[60%] bg-blue-600/15 rounded-full blur-[120px]"></div>
-        </div>
+    <!-- ============================================================ -->
+    <!-- 9. FAQ                                                       -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient-conference">questions</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything conference organizers ask about Event Schedule.
+                </p>
+            </div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                Your conference. Your audience. No middleman.
-            </h2>
-            <p class="text-xl text-gray-500 dark:text-gray-400 mb-10 max-w-2xl mx-auto">
-                Stop paying platform fees. Start hosting virtual conferences.<br class="hidden md:block">Free forever.
-            </p>
-            <a href="{{ app_url('/sign_up') }}" class="group inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-sky-600 to-blue-600 rounded-2xl hover:scale-105 transition-transform duration-150 will-change-transform shadow-xl shadow-sky-500/20">
-                Get Started Free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
-            <p class="mt-6 text-gray-500 text-sm">No credit card required</p>
+            <div class="space-y-4" data-reveal-group="80">
+                @foreach ([
+                    ['Can I schedule a multi-day virtual conference?', 'Yes. Add sessions across as many days as you need. Organize them into groups or tracks so attendees can browse by day, topic, or session type. Your full virtual conference agenda lives on one shareable page - a complete online conference schedule your attendees can bookmark.'],
+                    ['What streaming platforms work with Event Schedule?', 'Any platform that gives you a meeting or streaming link. Zoom, Microsoft Teams, Google Meet, YouTube Live, Twitch, and any other platform. Event Schedule is platform-agnostic - just paste your link and attendees join from the conference agenda.'],
+                    ['Can I sell different ticket types for my conference?', 'Yes. Create multiple virtual conference ticket types with different prices - general admission, VIP, early bird, speaker passes, or any custom tier. You keep 100% of the revenue. Event Schedule charges zero platform fees at any plan level. Stripe charges its standard processing fee (2.9% + $0.30).'],
+                    ['Is Event Schedule free for virtual conferences?', 'Yes. Event Schedule is free virtual conference software. The free plan includes unlimited events, attendee email notifications, follower features, and Google Calendar sync. There are zero platform fees on payments at any plan level. You only pay Stripe\'s standard processing fee if you charge for tickets.'],
+                ] as [$q, $a])
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                    </details>
+                @endforeach
+            </div>
         </div>
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 10. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-sky-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(2, 132, 199, 0.3), rgba(2, 132, 199, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="es-agenda absolute bottom-0 left-0 right-0 flex h-14 items-center justify-center gap-1.5 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
+                        @for ($i = 0; $i < 26; $i++)
+                            @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; @endphp
+                            <span class="es-agenda-tile" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
+                        @endfor
+                    </div>
+                </div>
 
-    <!-- HowTo Schema for Rich Snippets -->
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "HowTo",
-        "name": "How to host a virtual conference with Event Schedule",
-        "description": "Three steps to schedule and host your virtual conference online.",
-        "step": [
-            {
-                "@type": "HowToStep",
-                "name": "Build your agenda",
-                "text": "Add sessions, speakers, and streaming links. Organize by day and track."
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Share your conference",
-                "text": "One link for the full schedule. Sell tickets with tiered pricing."
-            },
-            {
-                "@type": "HowToStep",
-                "name": "Go live",
-                "text": "Attendees join sessions from the agenda. You focus on content."
-            }
-        ]
-    }
-    </script>
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Your conference. Your audience. <span class="text-gradient-conference">No middleman.</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Stop paying platform fees. Start hosting virtual conferences. Free forever.
+                    </p>
 
-    <style {!! nonce_attr() !!}>
-        .conference-glow-text {
-            background: linear-gradient(135deg, #0284c7, #2563eb, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(2, 132, 199, 0.3);
-        }
-        .dark .conference-glow-text {
-            background: linear-gradient(135deg, #38bdf8, #60a5fa, #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
-        }
-    </style>
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-conf" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get Started Free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+
+                    <p class="mt-6 text-sm text-gray-400">No credit card required</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

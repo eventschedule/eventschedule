@@ -20,10 +20,43 @@
     </script>
     </x-slot>
 
-    <section class="py-16 bg-gray-50 dark:bg-gray-800/50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ __('accessibility.h1') }}</h1>
-            <p class="text-gray-600 dark:text-gray-400">{{ __('accessibility.company_lead') }}</p>
+    <style {!! nonce_attr() !!}>
+        .text-gradient-legal {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-legal {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <section class="es-hero relative overflow-hidden bg-white py-20 dark:bg-[#0a0a0f] noise sm:py-24">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 20% 60%, rgba(37, 99, 235, 0.24), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 30%, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
+        </div>
+        <div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
+                <svg aria-hidden="true" class="h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5a3 3 0 100 6 3 3 0 000-6zM3.75 9.75l4.5 1.5m12-1.5l-4.5 1.5m-3.75 0v3m0 0l-2.25 6m2.25-6l2.25 6" />
+                </svg>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Accessibility</span>
+            </div>
+            <h1 class="es-balance es-fade-up es-d-2 text-4xl font-black tracking-tight sm:text-5xl"><span class="text-gradient-legal">{{ __('accessibility.h1') }}</span></h1>
+            <p class="es-fade-up es-d-3 mt-4 text-lg text-gray-600 dark:text-gray-400">{{ __('accessibility.company_lead') }}</p>
         </div>
     </section>
 

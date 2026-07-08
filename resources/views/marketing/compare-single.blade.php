@@ -111,6 +111,27 @@
     </x-slot>
 
     <style {!! nonce_attr() !!}>
+        /* Page accent gradient (blue to sky to cyan) */
+        .text-gradient-compare {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-compare {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .es-finale-panel .text-gradient-compare {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Comparison table: horizontal scroll + sticky first column */
         .compare-table-wrapper {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -139,74 +160,109 @@
                 z-index: 20;
             }
         }
+
+        /* Signature motif: a row of comparison verdict marks (check vs cross) */
+        .es-verdict {
+            flex: 0 0 auto;
+            animation: es-verdict-pulse var(--vd-dur, 2.8s) ease-in-out infinite;
+            animation-delay: var(--vd-delay, 0s);
+        }
+        @keyframes es-verdict-pulse {
+            0%, 100% { opacity: 0.2; transform: scale(0.82); }
+            50% { opacity: 0.9; transform: scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-verdict, .animate-pulse-slow { animation: none !important; }
+            .es-verdict { opacity: 0.55; transform: none; }
+        }
     </style>
 
-    <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-32 overflow-hidden">
-        <!-- Animated background -->
-        <div class="absolute inset-0">
-            <div class="absolute top-20 left-1/4 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div class="absolute bottom-20 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow" style="animation-delay: 1.5s;"></div>
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present,
+         so no-JS visitors, crawlers, and reduced-motion users always see everything. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero                                                     -->
+    <!-- ============================================================ -->
+    <section class="es-hero relative flex min-h-[calc(72svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
+            <div class="es-rays absolute inset-0"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
+
+            <!-- Verdict motif along the bottom edge (check vs cross) -->
+            <div class="es-verdicts absolute bottom-6 left-0 right-0 mx-auto hidden h-14 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
+                @for ($i = 0; $i < 14; $i++)
+                    @php $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.28; $win = $i % 3 !== 2; $sz = [20, 26, 18, 24][$i % 4]; @endphp
+                    <span class="es-verdict {{ $win ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-600' }}" style="--vd-dur: {{ $dur }}s; --vd-delay: {{ $delay }}s;">
+                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            @if ($win)
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            @else
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            @endif
+                        </svg>
+                    </span>
+                @endfor
+            </div>
         </div>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <!-- Breadcrumb -->
-            <div class="mb-6">
-                <a href="{{ route('marketing.compare') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+        <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-6">
+                <a href="{{ route('marketing.compare') }}" class="text-sm text-gray-500 transition-colors hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
                     &larr; Compare all platforms
                 </a>
             </div>
 
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8 animate-reveal" style="opacity: 0;">
-                <svg aria-hidden="true" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-300">Platform comparison</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Platform comparison</span>
             </div>
 
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 dark:text-white mb-8 leading-tight animate-reveal delay-100" style="opacity: 0;">
-                Event Schedule<br>
-                <span class="text-gradient">vs {{ $name }}</span>
+            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Event Schedule</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-compare">vs {{ $name }}</span></span></span>
             </h1>
 
-            <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto animate-reveal delay-200" style="opacity: 0;">
+            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 {{ $tagline }}
             </p>
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-gray h-24"></div>
-
     @if (!empty($auto_import))
-    <!-- Auto-Import Section -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] pt-24 pb-12">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <!-- Left Column -->
-                <div>
-                    <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 text-sm font-medium mb-6">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <!-- ============================================================ -->
+    <!-- 2. Auto-Import                                              -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div data-reveal>
+                    <span class="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                         Import from {{ $name }}
                     </span>
-
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
                         {{ $auto_import['title'] }}
                     </h2>
-
-                    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+                    <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">
                         {{ $auto_import['description'] }}
                     </p>
-
                     <ul class="space-y-3">
                         @foreach ($auto_import['bullets'] as $bullet)
                         <li class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                            <svg class="w-5 h-5 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg class="h-5 w-5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
                             {{ $bullet }}
@@ -215,15 +271,14 @@
                     </ul>
                 </div>
 
-                <!-- Right Column: Steps -->
-                <div class="space-y-4">
+                <div class="space-y-4" data-reveal-group="90">
                     @foreach ($auto_import['steps'] as $index => $step)
-                    <div class="relative flex items-start gap-5 bg-white dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 p-6">
-                        <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                    <div data-reveal class="relative flex items-start gap-5 rounded-2xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/5">
+                        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 text-sm font-bold text-white shadow-lg">
                             {{ $index + 1 }}
                         </div>
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $step['title'] }}</h3>
+                            <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-white">{{ $step['title'] }}</h3>
                             <p class="text-gray-600 dark:text-gray-400">{{ $step['description'] }}</p>
                         </div>
                     </div>
@@ -234,24 +289,31 @@
     </section>
     @endif
 
-    <!-- Comparison Table -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="compare-table-wrapper rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5">
+    <!-- ============================================================ -->
+    <!-- 3. Comparison Table                                         -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-100 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Feature-by-feature <span class="text-gradient-compare">comparison</span></h2>
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">How Event Schedule stacks up against {{ $name }}.</p>
+            </div>
+
+            <div data-reveal class="compare-table-wrapper rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
                 <table class="compare-table w-full text-left">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-white/10">
-                            <th class="bg-white dark:bg-[#0f0f14] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[180px]">Feature</th>
-                            <th class="px-6 py-5 text-sm font-semibold text-blue-600 dark:text-blue-400 min-w-[180px] bg-blue-50/50 dark:bg-blue-500/5">
+                            <th class="min-w-[180px] bg-white px-6 py-5 text-sm font-semibold text-gray-900 dark:bg-[#0f0f14] dark:text-white">Feature</th>
+                            <th class="min-w-[180px] bg-blue-50/50 px-6 py-5 text-sm font-semibold text-blue-600 dark:bg-blue-500/5 dark:text-blue-400">
                                 Event Schedule
                             </th>
-                            <th class="px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white min-w-[180px]">{{ $name }}</th>
+                            <th class="min-w-[180px] px-6 py-5 text-sm font-semibold text-gray-900 dark:text-white">{{ $name }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                         @foreach ($sections as $sectionName => $rows)
                             <tr>
-                                <td colspan="3" class="bg-gray-50 dark:bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <td colspan="3" class="bg-gray-50 px-6 py-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:bg-white/[0.03] dark:text-gray-400">
                                     {{ $sectionName }}
                                 </td>
                             </tr>
@@ -259,25 +321,25 @@
                                 @php
                                     $esWins = $row[3] ?? false;
                                 @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
-                                    <td class="bg-white dark:bg-[#0f0f14] px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ $row[0] }}</td>
+                                <tr class="transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                                    <td class="bg-white px-6 py-4 text-sm font-medium text-gray-900 dark:bg-[#0f0f14] dark:text-white">{{ $row[0] }}</td>
                                     <td class="px-6 py-4 text-sm {{ $esWins ? 'bg-emerald-50/50 dark:bg-emerald-500/5' : 'bg-blue-50/50 dark:bg-blue-500/5' }}">
                                         @if (str_starts_with($row[1], 'Yes'))
                                             <span class="inline-flex items-center gap-1.5 font-medium">
-                                                <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                                 @if (strlen($row[1]) > 3)
-                                                    <span class="text-emerald-600/70 dark:text-emerald-400/70 text-xs">{{ substr($row[1], 4) }}</span>
+                                                    <span class="text-xs text-emerald-600/70 dark:text-emerald-400/70">{{ substr($row[1], 4) }}</span>
                                                 @endif
                                             </span>
                                         @elseif (str_starts_with($row[1], 'No'))
                                             <span class="inline-flex items-center gap-1.5">
-                                                <svg aria-hidden="true" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                                 @if (strlen($row[1]) > 2)
-                                                    <span class="text-gray-400 dark:text-gray-500 text-xs">{{ trim(substr($row[1], 2)) }}</span>
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ trim(substr($row[1], 2)) }}</span>
                                                 @endif
                                             </span>
                                         @else
@@ -287,20 +349,20 @@
                                     <td class="px-6 py-4 text-sm">
                                         @if (str_starts_with($row[2], 'Yes'))
                                             <span class="inline-flex items-center gap-1.5">
-                                                <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                                 @if (strlen($row[2]) > 3)
-                                                    <span class="text-emerald-600/70 dark:text-emerald-400/70 text-xs">{{ substr($row[2], 4) }}</span>
+                                                    <span class="text-xs text-emerald-600/70 dark:text-emerald-400/70">{{ substr($row[2], 4) }}</span>
                                                 @endif
                                             </span>
                                         @elseif (str_starts_with($row[2], 'No'))
                                             <span class="inline-flex items-center gap-1.5">
-                                                <svg aria-hidden="true" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
                                                 @if (strlen($row[2]) > 2)
-                                                    <span class="text-gray-400 dark:text-gray-500 text-xs">{{ trim(substr($row[2], 2)) }}</span>
+                                                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ trim(substr($row[2], 2)) }}</span>
                                                 @endif
                                             </span>
                                         @else
@@ -316,25 +378,23 @@
         </div>
     </section>
 
-    <!-- Where Event Schedule Shines -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Where Event Schedule Shines
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Key advantages over {{ $name }} that make Event Schedule a strong alternative.
-                </p>
+    <!-- ============================================================ -->
+    <!-- 4. Where Event Schedule Shines                              -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Where Event Schedule <span class="text-gradient-compare">shines</span></h2>
+                <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Key advantages over {{ $name }} that make Event Schedule a strong alternative.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <div class="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
                 @foreach ($key_advantages as $advantage)
-                    <div class="bg-gradient-to-br {{ $advantage['gradient'] }} rounded-2xl p-8 border {{ $advantage['border'] }}">
-                        <div class="w-12 h-12 rounded-xl {{ $advantage['icon_bg'] }} flex items-center justify-center mb-5">
+                    <div data-reveal class="rounded-2xl border bg-gradient-to-br p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg {{ $advantage['gradient'] }} {{ $advantage['border'] }}">
+                        <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl {{ $advantage['icon_bg'] }}">
                             <x-marketing-icon :icon="$advantage['icon']" :class="'w-6 h-6 ' . $advantage['icon_color']" />
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ $advantage['title'] }}</h3>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">{{ $advantage['title'] }}</h3>
                         <p class="text-gray-600 dark:text-gray-400">{{ $advantage['description'] }}</p>
                     </div>
                 @endforeach
@@ -342,26 +402,20 @@
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-gray h-24"></div>
-
-    <!-- About Competitor -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- About the competitor -->
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                        About {{ $name }}
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">
-                        {{ $about }}
-                    </p>
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $name }}'s strengths</h3>
+    <!-- ============================================================ -->
+    <!-- 5. About Competitor + Why Choose                            -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-50 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+                <div data-reveal>
+                    <h2 class="mb-6 text-3xl font-bold text-gray-900 dark:text-white">About {{ $name }}</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-400">{{ $about }}</p>
+                    <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">{{ $name }}'s strengths</h3>
                     <ul class="space-y-3">
                         @foreach ($competitor_strengths as $strength)
                             <li class="flex items-start gap-3">
-                                <svg aria-hidden="true" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                                 <span class="text-gray-600 dark:text-gray-400">{{ $strength }}</span>
@@ -370,12 +424,9 @@
                     </ul>
                 </div>
 
-                <!-- Why switch to ES -->
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                        Why choose Event Schedule?
-                    </h2>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">
+                <div data-reveal style="--reveal-delay: 0.1s;">
+                    <h2 class="mb-6 text-3xl font-bold text-gray-900 dark:text-white">Why choose Event Schedule?</h2>
+                    <p class="mb-6 text-gray-600 dark:text-gray-400">
                         {{ $why_choose['summary'] ?? 'Event Schedule offers a unique combination of features that no other platform matches: zero platform fees, open source transparency, and powerful AI tools.' }}
                     </p>
                     @php
@@ -389,7 +440,7 @@
                     <ul class="space-y-3">
                         @foreach ($whyChoosePoints as $point)
                             <li class="flex items-start gap-3">
-                                <svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                                 <span class="text-gray-600 dark:text-gray-400">{{ $point }}</span>
@@ -401,19 +452,14 @@
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-white h-24"></div>
-
-    <!-- How to Switch -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    How to switch in 3 steps
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Get started in minutes. No migration or data import needed.
-                </p>
+    <!-- ============================================================ -->
+    <!-- 6. How to Switch                                            -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 text-center">
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>How to switch in <span class="text-gradient-compare">3 steps</span></h2>
+                <p class="mx-auto mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Get started in minutes. No migration or data import needed.</p>
             </div>
 
             @php
@@ -424,13 +470,13 @@
                 ];
             @endphp
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div class="mx-auto grid max-w-4xl grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as $index => $step)
-                    <div class="text-center">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center mx-auto mb-5">
-                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ $index + 1 }}</span>
+                    <div data-reveal class="text-center">
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/25">
+                            {{ $index + 1 }}
                         </div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $step['title'] }}</h3>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $step['title'] }}</h3>
                         <p class="text-gray-500 dark:text-gray-400">{{ $step['description'] }}</p>
                     </div>
                 @endforeach
@@ -438,82 +484,49 @@
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-gray h-24"></div>
-
-    <!-- FAQ Section -->
-    <section class="bg-gray-100 dark:bg-[#0f0f14] py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                    Frequently asked questions
-                </h2>
-                <p class="text-xl text-gray-500 dark:text-gray-400">
-                    Common questions about switching from {{ $name }}.
-                </p>
+    <!-- ============================================================ -->
+    <!-- 7. FAQ                                                      -->
+    <!-- ============================================================ -->
+    <section class="bg-gray-100 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-16 text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Frequently asked <span class="text-gradient-compare">questions</span></h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Common questions about switching from {{ $name }}.</p>
             </div>
 
-            @php
-                $faqColors = [
-                    ['gradient' => 'from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900', 'border' => 'border-blue-200'],
-                    ['gradient' => 'from-emerald-100 to-teal-100 dark:from-emerald-900 dark:to-teal-900', 'border' => 'border-emerald-200'],
-                    ['gradient' => 'from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900', 'border' => 'border-amber-200'],
-                ];
-            @endphp
-
-            <div id="faq-accordion" class="space-y-4">
+            <div class="space-y-4" data-reveal-group="80">
                 @foreach ($faq as $index => $item)
-                    <div class="bg-gradient-to-br {{ $faqColors[$index % 3]['gradient'] }} rounded-2xl border {{ $faqColors[$index % 3]['border'] }} dark:border-white/10 shadow-sm overflow-hidden">
-                        <button @click="open = open === {{ $index + 1 }} ? null : {{ $index + 1 }}" class="w-full flex items-center justify-between p-6 text-left cursor-pointer">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $item['question'] }}
-                            </h3>
-                            <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 flex-shrink-0 ml-4" :class="{ 'rotate-180': open === {{ $index + 1 }} }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $item['question'] }}</h3>
+                            <svg aria-hidden="true" class="ml-4 h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
-                        <div v-show="open === {{ $index + 1 }}" class="faq-answer">
-                            <p class="px-6 pb-6 text-gray-600 dark:text-gray-400">
-                                {{ $item['answer'] }}
-                            </p>
-                        </div>
-                    </div>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $item['answer'] }}</p>
+                    </details>
                 @endforeach
             </div>
-            <script {!! nonce_attr() !!}>
-            document.addEventListener('DOMContentLoaded', function() {
-                if (window.Vue) {
-                    window.Vue.createApp({
-                        data() {
-                            return { open: null };
-                        }
-                    }).mount('#faq-accordion');
-                }
-            });
-            </script>
         </div>
     </section>
 
-    <!-- Transition -->
-    <div class="section-fade-to-white h-24"></div>
-
-    <!-- Cross-links -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-12">
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    Also compare with
-                </h2>
+    <!-- ============================================================ -->
+    <!-- 8. Cross-links                                              -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl" data-reveal>Also compare with</h2>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div class="mx-auto grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-3" data-reveal-group="80">
                 @foreach ($cross_links as $link)
-                    <a href="{{ route($link['route']) }}" class="group flex items-center justify-between p-6 rounded-2xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 hover:bg-blue-50 dark:hover:bg-blue-500/5 transition-all">
+                    <a href="{{ route($link['route']) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-6 transition-all hover:-translate-y-1 hover:border-blue-300 hover:bg-blue-50 dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule vs</div>
-                            <div class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{{ $link['name'] }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $link['name'] }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="h-5 w-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
@@ -522,23 +535,48 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="relative bg-gradient-to-br from-blue-600 to-sky-700 py-24 overflow-hidden">
-        <div class="absolute inset-0 grid-overlay"></div>
+    <!-- ============================================================ -->
+    <!-- 9. Finale                                                   -->
+    <!-- ============================================================ -->
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+                <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
 
-        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-                Ready to switch?
-            </h2>
-            <p class="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
-                Create your free schedule today. No credit card required, no platform fees ever.
-            </p>
-            <a href="{{ app_url('/sign_up') }}" class="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-blue-600 bg-white rounded-2xl hover:scale-105 transition-all shadow-xl">
-                Get Started Free
-                <svg aria-hidden="true" class="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-            </a>
+                <div class="relative z-10">
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Ready to <span class="text-gradient-compare">switch?</span>
+                    </h2>
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
+                        Create your free schedule today. No credit card required, no platform fees ever.
+                    </p>
+
+                    <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
+                        <label for="es-claim-input" class="sr-only">Your schedule name</label>
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                            <input id="es-claim-input" type="text" placeholder="your-schedule" autocomplete="off" spellcheck="false" maxlength="30"
+                                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
+                            <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
+                        </div>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Get Started Free
+                                <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    <!-- Local confetti (no CDN) + motion engines -->
+    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

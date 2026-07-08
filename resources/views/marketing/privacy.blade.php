@@ -24,11 +24,44 @@
     </script>
     </x-slot>
 
+    <style {!! nonce_attr() !!}>
+        .text-gradient-legal {
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-legal {
+            background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+
+    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
+    <script {!! nonce_attr() !!}>
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('es-anim');
+        }
+    </script>
+
     <!-- Header -->
-    <section class="py-16 bg-gray-50 dark:bg-gray-800/50">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Privacy Policy</h1>
-            <p class="text-gray-600 dark:text-gray-400">Event Schedule LLC</p>
+    <section class="es-hero relative overflow-hidden bg-white py-20 dark:bg-[#0a0a0f] noise sm:py-24">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 20% 60%, rgba(37, 99, 235, 0.24), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 80% 30%, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="absolute inset-0 grid-pattern"></div>
+        </div>
+        <div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="es-fade-up es-d-1 mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2">
+                <svg aria-hidden="true" class="h-4 w-4 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Privacy</span>
+            </div>
+            <h1 class="es-balance es-fade-up es-d-2 text-4xl font-black tracking-tight text-gray-900 dark:text-white sm:text-5xl">Privacy <span class="text-gradient-legal">Policy</span></h1>
+            <p class="es-fade-up es-d-3 mt-4 text-lg text-gray-600 dark:text-gray-400">Event Schedule LLC</p>
         </div>
     </section>
 
