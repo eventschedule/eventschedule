@@ -49,9 +49,11 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.querySelector('form').requestSubmit()");
 
-        $browser->waitForLocation('/dashboard', 30)
-            ->assertPathIs('/dashboard')
-            ->assertSee($name);
+        // Fresh organizer signups land on the focused schedule-type chooser
+        // (the getting-started heading greets the user by first name only)
+        $browser->waitForLocation('/getting-started', 30)
+            ->assertPathIs('/getting-started')
+            ->assertSee(explode(' ', $name)[0]);
     }
 
     /**
@@ -192,11 +194,11 @@ trait AccountSetupTrait
             ->pause(1000);
 
         // Configure ticket via Vue (more reliable than DOM type in headless Chrome)
-        $browser->script("
+        $browser->script('
             var v = window.vueApp;
             v.tickets[0].price = 10;
             v.tickets[0].quantity = 50;
-        ");
+        ');
 
         // Ensure tickets_enabled is set (radio click may not reliably trigger Vue watcher)
         $browser->script("
@@ -264,7 +266,7 @@ trait AccountSetupTrait
     /**
      * Login user
      */
-    protected function loginUser(Browser $browser, string $email, string $password): void
+    protected function loginUser(Browser $browser, string $email, string $password, string $expectedPath = '/dashboard'): void
     {
         $browser->visit('/login')
             ->waitFor('#email', 5)
@@ -291,8 +293,10 @@ trait AccountSetupTrait
         // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
         $browser->script("document.querySelector('form').requestSubmit()");
 
-        $browser->waitForLocation('/dashboard', 15)
-            ->assertPathIs('/dashboard');
+        // Zero-schedule users get forwarded to /getting-started; callers pass
+        // the expected landing when the user has no schedules yet
+        $browser->waitForLocation($expectedPath, 15)
+            ->assertPathIs($expectedPath);
     }
 
     /**

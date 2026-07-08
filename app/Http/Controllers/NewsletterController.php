@@ -826,6 +826,7 @@ class NewsletterController extends Controller
                 'email' => $email,
                 'name' => $validated['name'] ?? '',
                 'is_subscribed' => true,
+                'signup_intent' => 'subscriber',
             ]);
         }
 
@@ -1182,6 +1183,7 @@ class NewsletterController extends Controller
                         'email' => $email,
                         'name' => $entry['name'] ?? '',
                         'is_subscribed' => true,
+                        'signup_intent' => 'subscriber',
                     ]);
                     $existingUsers->put($email, $user);
                 }

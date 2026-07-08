@@ -2379,6 +2379,9 @@ class RoleController extends Controller
             $user->password = null;
             $user->timezone = $request->user()->timezone;
             $user->language_code = $request->user()->language_code;
+            // Invited members run someone else's schedule; keep them out of the
+            // organizer onboarding funnel (selfhost verifies these immediately)
+            $user->signup_intent = 'team';
 
             if (! config('app.hosted')) {
                 $user->email_verified_at = now();

@@ -34,6 +34,23 @@ class HomeController extends Controller
         return redirect(route('home'));
     }
 
+    /**
+     * Focused post-signup onboarding step: pick a schedule type without the
+     * dashboard chrome. Users who already belong to a schedule or hold tickets
+     * have a real dashboard, so bounce them home (this also guards against
+     * redirect loops: home() only forwards users this page will render for).
+     */
+    public function gettingStarted(Request $request)
+    {
+        $user = $request->user();
+
+        if (is_demo_mode() || $user->member()->exists() || $user->tickets()->count() > 0) {
+            return redirect()->route('home');
+        }
+
+        return view('getting-started');
+    }
+
     public function home(Request $request)
     {
         if ($pending = session()->pull('pending_fan_content')) {
@@ -55,12 +72,36 @@ class HomeController extends Controller
             return redirect()->route('role.follow', ['subdomain' => $subdomain]);
         }
 
+        $user = $request->user();
+
+        if ($request->boolean('skip_onboarding')) {
+            session(['onboarding_skipped' => true]);
+        }
+
+        // Pull (and thereby clean up) any marketing-page type choice.
+        $signupType = session()->pull('signup_role_type');
+
+        // Focused onboarding: brand-new organizer-intent users go to the type
+        // chooser (or straight to the create form when they already picked a
+        // type on the marketing site) instead of an empty dashboard. Attendee
+        // signups (follow/ticket/etc.) keep their dashboard.
+        if (! is_demo_mode()
+            && ! session('onboarding_skipped')
+            && in_array($user->signup_intent, [null, 'organizer'], true)
+            && ! $user->member()->exists()
+            && $user->tickets()->count() === 0) {
+            if (in_array($signupType, ['talent', 'venue', 'curator'], true)) {
+                return redirect()->route('new', ['type' => $signupType]);
+            }
+
+            return redirect()->route('getting-started');
+        }
+
         $events = [];
         $month = DateUtils::normalizeMonth($request->month);
         $year = DateUtils::normalizeYear($request->year);
         $startOfMonth = '';
 
-        $user = $request->user();
         $timezone = $user->timezone ?? 'UTC';
 
         // Calculate month boundaries in user's timezone, then convert to UTC for database query

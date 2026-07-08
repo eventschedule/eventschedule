@@ -892,12 +892,28 @@
                 <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $title }}
                 </h2>
+                @if (! $role->exists)
+                <div class="mt-2 flex items-center justify-end gap-2">
+                    <span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">{{ __('messages.' . $role->type) }}</span>
+                    @if (auth()->user()->member()->doesntExist())
+                        <x-link href="{{ route('getting-started') }}" class="text-xs">{{ __('messages.choose_different_type') }}</x-link>
+                    @endif
+                </div>
+                @endif
             </div>
         @else
             <div>
                 <h2 class="text-xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:truncate sm:text-2xl sm:tracking-tight">
                     {{ $title }}
                 </h2>
+                @if (! $role->exists)
+                <div class="mt-2 flex items-center gap-2">
+                    <span class="inline-block px-3 py-1 text-xs font-medium rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">{{ __('messages.' . $role->type) }}</span>
+                    @if (auth()->user()->member()->doesntExist())
+                        <x-link href="{{ route('getting-started') }}" class="text-xs">{{ __('messages.choose_different_type') }}</x-link>
+                    @endif
+                </div>
+                @endif
             </div>
 
             <div class="hidden lg:flex items-center gap-3">

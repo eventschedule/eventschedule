@@ -30,12 +30,13 @@ class AuthExtraTest extends TestCase
         Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
         $this->get(route('auth.google.callback'))
-            ->assertRedirect(route('home', absolute: false));
+            ->assertRedirect(route('getting-started', absolute: false));
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', [
             'email' => 'newgoogler@gmail.com',
             'google_oauth_id' => 'google-oauth-123',
+            'signup_intent' => 'organizer',
         ]);
     }
 

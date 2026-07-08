@@ -138,8 +138,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-6">A schedule is your event calendar - it's where all your events live. Each schedule gets its own unique URL that you can share with your audience.</p>
 
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>After logging in, click <strong class="text-gray-900 dark:text-white">"New Schedule"</strong> from your dashboard</li>
-                                <li>Choose a schedule type (see below)</li>
+                                <li>Right after signing up you are asked to choose a schedule type (see below); you can also click <strong class="text-gray-900 dark:text-white">"New Schedule"</strong> from your dashboard at any time</li>
                                 <li>Enter your schedule name and pick a unique URL</li>
                                 <li>Add optional details like location, description, and logo</li>
                                 <li>Click <strong class="text-gray-900 dark:text-white">"Create"</strong> to finish</li>
@@ -358,7 +357,7 @@
             {
                 "@type": "HowToStep",
                 "name": "Create Your Schedule",
-                "text": "Click 'New Schedule' from your dashboard, choose a schedule type, enter your schedule name and pick a unique URL, then click Create.",
+                "text": "Choose a schedule type right after signing up (or click 'New Schedule' from your dashboard), enter your schedule name and pick a unique URL, then click Create.",
                 "url": "{{ url(route('marketing.docs.getting_started')) }}#create-schedule"
             },
             {

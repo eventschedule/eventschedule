@@ -889,6 +889,7 @@ class TicketController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
                 'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+                'signup_intent' => 'ticket',
             ]);
 
             session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);
@@ -1538,6 +1539,7 @@ class TicketController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
                 'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+                'signup_intent' => 'ticket',
             ]);
 
             session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page']);

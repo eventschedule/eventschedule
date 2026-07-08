@@ -569,7 +569,7 @@ class AdminController extends Controller
         $recentSignups = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->orderByDesc('created_at')
-            ->paginate(20, ['name', 'email', 'created_at', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer_url', 'landing_page'])
+            ->paginate(20, ['name', 'email', 'created_at', 'signup_intent', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'referrer_url', 'landing_page'])
             ->withQueryString();
 
         // Onboarding conversion funnel (marketing visit -> first event)
@@ -1382,6 +1382,11 @@ class AdminController extends Controller
         return User::query()
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            // Attendee-intent signups (follow/ticket/request/...) never meant to
+            // create a schedule; NULL = pre-tracking rows, treated as organizer.
+            ->where(function ($query) {
+                $query->whereNull('signup_intent')->orWhere('signup_intent', 'organizer');
+            })
             ->whereBetween('created_at', [$startDate, $endDate]);
     }
 
@@ -1429,6 +1434,19 @@ class AdminController extends Controller
 
         // Cohort stages (3, 5, 7): account created, saved a schedule, saved an event.
         $accounts = $this->funnelCohort($startDate, $endDate)->count();
+
+        // Verified attendee-intent signups excluded from the cohort above, shown as a
+        // note under the account stage so the funnel number stays explainable.
+        $excludedIntents = User::query()
+            ->whereNotNull('email_verified_at')
+            ->where('email', '!=', DemoService::DEMO_EMAIL)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->whereNotNull('signup_intent')
+            ->where('signup_intent', '!=', 'organizer')
+            ->select('signup_intent', DB::raw('COUNT(*) as total'))
+            ->groupBy('signup_intent')
+            ->orderByDesc('total')
+            ->pluck('total', 'signup_intent');
         $savedSchedule = $this->funnelCohort($startDate, $endDate)->whereHas('createdRoles', $scheduleFilter)->count();
         $savedEvent = $this->funnelCohort($startDate, $endDate)->whereHas('createdEvents', $eventFilter)->count();
 
@@ -1539,6 +1557,7 @@ class AdminController extends Controller
         return [
             'stages' => $stages,
             'cohort_size' => $accounts,
+            'excluded_intents' => $excludedIntents,
             'first_event_conv' => $firstEventConv,
             'first_event_conv_change' => $firstEventConvChange,
             'visitor_to_event_conv' => $visitorToEventConv,
@@ -1650,6 +1669,10 @@ class AdminController extends Controller
         return User::query()
             ->whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
+            // Same intent restriction as funnelCohort(): the queue tracks organizer onboarding
+            ->where(function ($query) {
+                $query->whereNull('signup_intent')->orWhere('signup_intent', 'organizer');
+            })
             ->withCount([
                 'createdRoles as schedules_count' => $scheduleFilter,
                 'createdEvents as events_count' => $eventFilter,

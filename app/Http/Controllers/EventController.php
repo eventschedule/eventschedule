@@ -2416,10 +2416,14 @@ class EventController extends Controller
             'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
         ];
 
+        // The guest-submit flow is an event request on someone else's schedule;
+        // stubs keep their original acquisition context (team invite, subscriber)
         if ($isStub) {
+            $attributes['signup_intent'] = $existingUser->signup_intent ?? 'request';
             $existingUser->update($attributes);
             $user = $existingUser;
         } else {
+            $attributes['signup_intent'] = 'request';
             $user = User::create(array_merge($attributes, ['email' => $email]));
         }
 
@@ -2564,6 +2568,7 @@ class EventController extends Controller
             'utm_term' => $utmParams['utm_term'] ?? null,
             'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
             'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+            'signup_intent' => 'request',
         ]);
 
         session()->forget(['utm_params', 'utm_referrer_url', 'utm_landing_page', 'guest_language']);

@@ -309,6 +309,67 @@ if (! function_exists('restore_pending_action')) {
     }
 }
 
+if (! function_exists('signup_intent_from_session')) {
+    /**
+     * Classify why the visitor is creating an account, based on the pending-action
+     * session markers captured before they were sent to sign up.
+     */
+    function signup_intent_from_session(): string
+    {
+        if (session()->has('pending_follow')) {
+            return 'follow';
+        }
+
+        if (session()->has('pending_request')) {
+            return 'request';
+        }
+
+        if (session()->has('pending_fan_content')) {
+            return 'fan';
+        }
+
+        if (session()->has('sms_token')) {
+            return 'claim';
+        }
+
+        return 'organizer';
+    }
+}
+
+if (! function_exists('post_signup_redirect_url')) {
+    /**
+     * Destination right after account creation. Attendee flows (follow/request/
+     * fan content) and users who already hold schedules (sms claims, upgraded
+     * stubs with memberships) keep the normal home flow; organizer signups go
+     * to the schedule-type chooser, or straight to the create form when they
+     * picked a type on the marketing site. When passed to redirect()->intended()
+     * this still runs (and consumes the type) even if a stored URL wins - that
+     * is intentional session cleanup.
+     */
+    function post_signup_redirect_url(\App\Models\User $user): string
+    {
+        // roles() (any pivot level) is intentionally broader than the member()
+        // check used by home()/gettingStarted(): claimRolesByPhone() preserves
+        // the stub's original level, so a claim can land the user as a follower
+        // rather than an owner. Either way they already have a schedule tie and
+        // should go home, not to the "create your first schedule" chooser.
+        if (session()->has('pending_follow')
+            || session()->has('pending_request')
+            || session()->has('pending_fan_content')
+            || $user->roles()->exists()) {
+            return route('home', absolute: false);
+        }
+
+        $type = session()->pull('signup_role_type');
+
+        if ($type && in_array($type, ['talent', 'venue', 'curator'], true)) {
+            return route('new', ['type' => $type], false);
+        }
+
+        return route('getting-started', absolute: false);
+    }
+}
+
 if (! function_exists('is_demo_mode')) {
     /**
      * Check if the current session is in demo mode

@@ -28,9 +28,9 @@ class GeneralTest extends DuskTestCase
             // Log out
             $this->logoutUser($browser, $name);
 
-            // Log back in
-            $this->loginUser($browser, $email, $password);
-            $browser->assertSee($name);
+            // Log back in (no schedule yet, so login lands on the type chooser)
+            $this->loginUser($browser, $email, $password, '/getting-started');
+            $browser->assertSee(explode(' ', $name)[0]);
 
             // Create/edit venue using the trait
             $this->createTestVenue($browser);

@@ -41,13 +41,14 @@ class RegistrationTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect(route('home', absolute: false));
+            ->assertRedirect(route('getting-started', absolute: false));
 
         $this->assertAuthenticated();
         $this->assertDatabaseCount('users', 1);
         $this->assertDatabaseHas('users', [
             'name' => 'Test User',
             'email' => 'test@gmail.com',
+            'signup_intent' => 'organizer',
         ]);
     }
 }

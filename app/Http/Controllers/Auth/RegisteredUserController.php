@@ -39,6 +39,13 @@ class RegisteredUserController extends Controller
             session(['sms_token' => $smsToken]);
         }
 
+        // Preserve the marketing-page schedule-type choice across validation
+        // failures and the Google OAuth round-trip (same mechanism as sms_token)
+        $requestedType = request('type');
+        if (in_array($requestedType, ['talent', 'venue', 'curator'], true)) {
+            session(['signup_role_type' => $requestedType]);
+        }
+
         if (! config('app.hosted') && config('app.url') && ! config('app.is_testing') && ! selfhost_needs_setup() && User::exists()) {
             return redirect()->route('login');
         }
@@ -346,6 +353,13 @@ class RegisteredUserController extends Controller
             $utmParams = json_decode($request->cookie('utm_params'), true) ?? [];
         }
 
+        // Classify the signup before any session keys are consumed below; the
+        // hidden sms_token input is a fallback for when the session copy is gone
+        $signupIntent = signup_intent_from_session();
+        if ($signupIntent === 'organizer' && $request->filled('sms_token')) {
+            $signupIntent = 'claim';
+        }
+
         $email = strtolower($request->email);
         $existingUser = User::where('email', $email)->first();
 
@@ -371,6 +385,9 @@ class RegisteredUserController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
                 'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+                // Keep the stub's original acquisition context (team invite,
+                // newsletter subscriber) rather than re-labeling it organizer
+                'signup_intent' => $existingUser->signup_intent ?? $signupIntent,
             ]);
             $user = $existingUser;
         } else {
@@ -388,6 +405,7 @@ class RegisteredUserController extends Controller
                 'utm_term' => $utmParams['utm_term'] ?? null,
                 'referrer_url' => session('utm_referrer_url') ?? $request->cookie('utm_referrer_url'),
                 'landing_page' => session('utm_landing_page') ?? $request->cookie('utm_landing_page'),
+                'signup_intent' => $signupIntent,
             ]);
         }
 
@@ -446,6 +464,6 @@ class RegisteredUserController extends Controller
 
         AuditService::log(AuditService::AUTH_REGISTER, $user->id, 'User', $user->id);
 
-        return redirect(route('home', absolute: false));
+        return redirect(post_signup_redirect_url($user));
     }
 }

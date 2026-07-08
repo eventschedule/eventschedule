@@ -158,6 +158,14 @@
                                          style="width: {{ $barWidth }}%; {{ $isTraffic ? 'background: var(--brand-blue-light);' : 'background: linear-gradient(90deg, var(--brand-button-bg-light), var(--brand-button-bg));' }}"></div>
                                 @endif
                             </div>
+
+                            {{-- Verified attendee-intent signups (follow/ticket/...) excluded from the cohort --}}
+                            @if($stage['key'] === 'account' && ! empty($funnel['excluded_intents']) && $funnel['excluded_intents']->isNotEmpty())
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                    @lang('messages.funnel_excluded_intents'):
+                                    {{ $funnel['excluded_intents']->map(fn ($total, $intent) => number_format($total) . ' ' . __('messages.signup_intent_' . $intent))->implode(', ') }}
+                                </p>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -448,6 +456,7 @@
                         <thead>
                             <tr class="border-b border-gray-200 dark:border-gray-700">
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.name')</th>
+                                <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.signup_intent')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.date')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.source')</th>
                                 <th class="text-start py-2 pe-4 font-medium text-gray-500 dark:text-gray-400">@lang('messages.medium')</th>
@@ -462,6 +471,13 @@
                             @foreach($recentSignups as $signup)
                                 <tr class="border-b border-gray-100 dark:border-gray-700/50">
                                     <td class="py-2 pe-4 text-gray-900 dark:text-white">{{ $signup->name }}</td>
+                                    <td class="py-2 pe-4">
+                                        @if($signup->signup_intent)
+                                            <span class="inline-block px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-[#2d2d30] text-gray-600 dark:text-gray-300 whitespace-nowrap">{{ __('messages.signup_intent_' . $signup->signup_intent) }}</span>
+                                        @else
+                                            <span class="text-gray-600 dark:text-gray-400">-</span>
+                                        @endif
+                                    </td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $signup->created_at->format('M j, Y') }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_source ?? '-' }}</td>
                                     <td class="py-2 pe-4 text-gray-600 dark:text-gray-400">{{ $signup->utm_medium ?? '-' }}</td>

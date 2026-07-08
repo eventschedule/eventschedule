@@ -817,9 +817,9 @@ class Role extends Model implements MustVerifyEmail
     {
         return match ($this->background) {
             'gradient' => filled($this->background_colors),
-            'solid'    => filled($this->background_color),
-            'image'    => filled($this->background_image) || filled($this->background_image_url),
-            default    => false,
+            'solid' => filled($this->background_color),
+            'image' => filled($this->background_image) || filled($this->background_image_url),
+            default => false,
         };
     }
 
@@ -978,6 +978,7 @@ class Role extends Model implements MustVerifyEmail
             'api',
             'faq',
             'demo',
+            'getting-started',
             'thenightowls',
             'marketing',
             'features',

@@ -136,6 +136,7 @@ class SocialAuthController extends Controller
             'utm_term' => $utmParams['utm_term'] ?? null,
             'referrer_url' => session('utm_referrer_url') ?? request()->cookie('utm_referrer_url'),
             'landing_page' => session('utm_landing_page') ?? request()->cookie('utm_landing_page'),
+            'signup_intent' => signup_intent_from_session(),
         ]);
 
         $user->profile_image_url = $googleUser->getAvatar();
@@ -168,7 +169,7 @@ class SocialAuthController extends Controller
         $this->processSmsClaim($user);
         AuditService::log(AuditService::AUTH_GOOGLE_LOGIN, $user->id, 'User', $user->id, null, null, 'new_account');
 
-        return redirect()->intended(route('home', absolute: false));
+        return redirect()->intended(post_signup_redirect_url($user));
     }
 
     private function processSmsClaim(User $user): void

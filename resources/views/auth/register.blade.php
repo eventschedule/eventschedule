@@ -384,6 +384,14 @@
         </div>
         @endif
 
+        @if (in_array(session('signup_role_type'), ['talent', 'venue', 'curator'], true))
+        <div class="mb-4 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-700 rounded-lg">
+            <p class="text-sm text-blue-700 dark:text-blue-300 text-center">
+                {{ __('messages.setting_up_your_schedule', ['type' => __('messages.' . session('signup_role_type'))]) }}
+            </p>
+        </div>
+        @endif
+
         @if (selfhost_needs_setup())
 
             @if (!is_writable(base_path('.env')))

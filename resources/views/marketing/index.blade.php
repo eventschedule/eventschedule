@@ -371,9 +371,12 @@
              rules as the rail), padded with decorative demo flyers. Decorative
              cards never carry names or links. --}}
         @php
+            // 5 columns x 5 rows: aim for up to 25 unique posters so the wall fills
+            // without obvious repeats (demo flyers only backfill any remaining slots).
+            $wallTarget = 25;
             $wallEventCards = [];
             foreach ($discoverEvents as $wallEvent) {
-                if (count($wallEventCards) >= 12) {
+                if (count($wallEventCards) >= $wallTarget) {
                     break;
                 }
                 $wallUrl = $wallEvent->getGuestUrl();
@@ -393,7 +396,7 @@
             $wallCards = $wallEventCards;
             $wallDemoFlyers = ['jazz', 'party', 'rock', 'dj', 'comedy', 'openmic', 'special'];
             $wallDemoIndex = 0;
-            while (count($wallCards) < 12) {
+            while (count($wallCards) < $wallTarget) {
                 $wallCards[] = [
                     'url' => null,
                     'img' => asset('images/demo/demo_flyer_' . $wallDemoFlyers[$wallDemoIndex % count($wallDemoFlyers)] . '.webp'),
@@ -464,11 +467,11 @@
                                 @foreach ($wallCards as $stripCard)
                                     @if ($stripCard['url'])
                                         <a href="{{ $stripCard['url'] }}" target="_blank" rel="noopener" @if ($stripCopy === 1) aria-hidden="true" tabindex="-1" @endif class="block w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] dark:ring-white/10" aria-label="{{ $stripCard['name'] }}">
-                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="lazy" decoding="async" fetchpriority="low">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripCopy === 0 ? 'auto' : 'low' }}">
                                         </a>
                                     @else
                                         <div class="w-24 shrink-0 overflow-hidden rounded-lg shadow-md ring-1 ring-black/5 dark:ring-white/10" aria-hidden="true">
-                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="lazy" decoding="async" fetchpriority="low">
+                                            <img src="{{ $stripCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="96" height="128" loading="{{ $stripCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $stripCopy === 0 ? 'auto' : 'low' }}">
                                         </div>
                                     @endif
                                 @endforeach
@@ -491,7 +494,7 @@
                                 @foreach ($wallColumnCards as $wallCard)
                                     @if ($wallCard['url'])
                                         <a href="{{ $wallCard['url'] }}" target="_blank" rel="noopener" @if ($wallCopy === 1) aria-hidden="true" tabindex="-1" @endif class="es-wall-card group relative block bg-gray-200 focus-visible:outline-none dark:bg-white/10" aria-label="{{ $wallCard['name'] }}">
-                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="lazy" decoding="async" fetchpriority="low">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallCopy === 0 ? 'auto' : 'low' }}">
                                             <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-3 pb-2.5 pt-8">
                                                 <span class="block truncate text-xs font-bold text-white">{{ $wallCard['name'] }}</span>
                                                 <span class="block text-[10px] text-white/75">{{ $wallCard['date'] }}</span>
@@ -499,7 +502,7 @@
                                         </a>
                                     @else
                                         <div class="es-wall-card relative bg-gray-200 dark:bg-white/10" aria-hidden="true">
-                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="lazy" decoding="async" fetchpriority="low">
+                                            <img src="{{ $wallCard['img'] }}" alt="" class="aspect-[3/4] w-full object-cover" width="208" height="277" loading="{{ $wallCopy === 0 ? 'eager' : 'lazy' }}" decoding="async" fetchpriority="{{ $wallCopy === 0 ? 'auto' : 'low' }}">
                                         </div>
                                     @endif
                                 @endforeach
@@ -1099,7 +1102,7 @@
             @if ($discoverEvents->count() > 0)
                 <div class="es-rail-clip w-full" tabindex="0" aria-label="Upcoming events across the community">
                     <div class="es-rail items-stretch gap-5 px-6 lg:gap-7 lg:px-[7vw]">
-                        @foreach ($discoverEvents as $event)
+                        @foreach ($discoverEvents->take(12) as $event)
                             @include('marketing.partials.event-poster-card', ['event' => $event])
                         @endforeach
 

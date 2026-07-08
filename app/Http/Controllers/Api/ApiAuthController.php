@@ -142,13 +142,14 @@ class ApiAuthController extends Controller
                 ], 422);
             }
 
-            // Upgrade stub user
+            // Upgrade stub user (keep its original acquisition context if set)
             $existingUser->update([
                 'name' => $request->name,
                 'password' => Hash::make($request->password),
                 'timezone' => $request->timezone ?? 'America/New_York',
                 'language_code' => $request->language_code ?? 'en',
                 'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'signup_intent' => $existingUser->signup_intent ?? 'api',
             ]);
             $user = $existingUser;
         } else {
@@ -159,6 +160,7 @@ class ApiAuthController extends Controller
                 'timezone' => $request->timezone ?? 'America/New_York',
                 'language_code' => $request->language_code ?? 'en',
                 'use_24_hour_time' => detect_24_hour_time($request->timezone, $request->language_code),
+                'signup_intent' => 'api',
             ]);
         }
 
