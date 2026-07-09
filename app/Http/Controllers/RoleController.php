@@ -1193,38 +1193,43 @@ class RoleController extends Controller
         }
 
         if ($slug) {
-            // Check if slug is a social platform vanity URL
-            if (in_array($slug, UrlUtils::getUniquePlatforms())) {
+            // Check if slug is a social platform vanity URL. An event id in the URL means the
+            // slug names an event, even one named after a platform, so don't redirect off-site.
+            if (! $eventIdParam && in_array($slug, UrlUtils::getUniquePlatforms())) {
                 return $this->handleSocialRedirect($role, $slug, $request);
             }
 
-            // Check if slug is a group slug first
-            if ($role->groups) {
-                $group = $role->groups->where('slug', $slug)->first();
+            // An event id identifies an event, so resolve it before treating the slug as a group
+            // slug. Otherwise an event sharing its sub-schedule's slug is shadowed by the group.
+            if ($eventIdParam) {
+                $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
+
+                // Fallback: allow schedule members to view pending (not yet accepted) or draft events
+                if (! $event && $user && $user->isMember($subdomain)) {
+                    $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
+                        ->where('id', $eventIdParam)
+                        ->where(function ($q) use ($role) {
+                            $q->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
+                                ->orWhere(function ($q) use ($role) {
+                                    $q->where('is_draft', true)
+                                        ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id));
+                                });
+                        })
+                        ->first();
+                }
+            }
+
+            // No event resolved, so check if slug is a group slug
+            if (! $event) {
+                $group = $role->groups ? $role->groups->where('slug', $slug)->first() : null;
+
                 if ($group) {
                     $selectedGroup = $group;
                     $slug = ''; // Clear slug since it's a group, not an event
-                } else {
+                } elseif (! $eventIdParam) {
                     // Try to find event by slug
                     $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
                 }
-            } else {
-                // Try to find event by slug
-                $event = $this->eventRepo->getEvent($subdomain, $slug, $date, $eventIdParam, $role);
-            }
-
-            // Fallback: allow schedule members to view pending (not yet accepted) or draft events
-            if (! $event && $eventIdParam && $user && $user->isMember($subdomain)) {
-                $event = Event::with(['roles', 'parts.approvedVideos.user', 'parts.approvedComments.user', 'parts.approvedPhotos.user', 'tickets', 'addons', 'user', 'approvedVideos.user', 'approvedComments.user', 'approvedPhotos.user', 'polls' => fn ($q) => $q->withCount('votes')])
-                    ->where('id', $eventIdParam)
-                    ->where(function ($q) use ($role) {
-                        $q->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->whereNull('is_accepted'))
-                            ->orWhere(function ($q) use ($role) {
-                                $q->where('is_draft', true)
-                                    ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id));
-                            });
-                    })
-                    ->first();
             }
 
             if ($event) {

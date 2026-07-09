@@ -338,8 +338,9 @@
                 {{-- Mobile Filters Button (always shown when filters exist) --}}
                 <template v-if="dynamicFilterCount > 0">
                     <button @click="showFiltersDrawer = true"
+                            :style="activeFilterCount > 0 ? 'background-color: var(--brand-button-bg); color: #fff; border-color: var(--brand-button-bg);' : ''"
                             class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
-                                   border border-gray-300 dark:border-gray-600 rounded-md
+                                   border border-gray-300 dark:border-gray-600 rounded-md transition-all duration-200
                                    bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                                    text-base font-semibold {{ rtl_class($role ?? null, 'rtl', '', $isAdminRoute) }}">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
@@ -347,7 +348,8 @@
                         </svg>
                         {{ $label('filters') }}
                         <span v-if="activeFilterCount > 0"
-                              class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-button-bg)] text-white rounded-full">
+                              class="ms-1 px-1.5 py-0.5 text-xs bg-white rounded-full"
+                              style="color: var(--brand-button-bg);">
                             @{{ activeFilterCount }}
                         </span>
                     </button>
@@ -380,8 +382,9 @@
             <template v-if="dynamicFilterCount > 0">
                 <button @click="showDesktopFiltersModal = true"
                         :class="currentView === 'list' ? 'md:!inline-flex' : ''"
+                        :style="activeFilterCount > 0 ? 'background-color: var(--brand-button-bg); color: #fff; border-color: var(--brand-button-bg);' : ''"
                         class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2.5
-                               border border-gray-300 dark:border-gray-600 rounded-md
+                               border border-gray-300 dark:border-gray-600 rounded-md transition-all duration-200
                                bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
                                text-base font-semibold hover:bg-gray-50 dark:hover:bg-gray-700
                                relative">
@@ -391,7 +394,8 @@
                     {{ $label('filters') }}
                     {{-- Active filter count badge --}}
                     <span v-if="activeFilterCount > 0"
-                          class="ms-1 px-1.5 py-0.5 text-xs bg-[var(--brand-button-bg)] text-white rounded-full">
+                          class="ms-1 px-1.5 py-0.5 text-xs bg-white rounded-full"
+                          style="color: var(--brand-button-bg);">
                         @{{ activeFilterCount }}
                     </span>
                 </button>
@@ -3851,6 +3855,7 @@ function updateHeroFiltersButton() {
     if (window.calendarVueApp) {
         const showBtn = window.calendarVueApp.dynamicFilterCount > 0;
         const count = window.calendarVueApp.activeFilterCount;
+        const active = count > 0;
 
         // Desktop hero button
         if (btn) {
@@ -3861,10 +3866,26 @@ function updateHeroFiltersButton() {
                 btn.classList.remove('md:flex');
                 btn.style.display = 'none';
             }
+            // Active = filled accent (clearly on); inactive = outline (accent border + icon)
+            const accent = btn.dataset.accent;
+            const contrast = btn.dataset.contrast;
+            btn.style.borderColor = accent;
+            if (active) {
+                btn.style.backgroundColor = accent;
+                btn.style.color = contrast;
+            } else {
+                btn.style.backgroundColor = 'transparent';
+                btn.style.color = accent;
+            }
         }
         if (badge) {
-            if (count > 0) {
+            if (active) {
                 badge.textContent = count;
+                // Legible inverse pill against the accent-filled button
+                if (btn) {
+                    badge.style.backgroundColor = btn.dataset.contrast;
+                    badge.style.color = btn.dataset.accent;
+                }
                 badge.classList.remove('hidden');
                 badge.classList.add('flex');
             } else {
@@ -3880,10 +3901,26 @@ function updateHeroFiltersButton() {
             } else {
                 btnMobile.style.display = 'none';
             }
+            // Active = filled accent; inactive = fall back to default white/gray classes
+            const accentM = btnMobile.dataset.accent;
+            const contrastM = btnMobile.dataset.contrast;
+            if (active) {
+                btnMobile.style.backgroundColor = accentM;
+                btnMobile.style.color = contrastM;
+                btnMobile.style.borderColor = accentM;
+            } else {
+                btnMobile.style.backgroundColor = '';
+                btnMobile.style.color = '';
+                btnMobile.style.borderColor = '';
+            }
         }
         if (badgeMobile) {
-            if (count > 0) {
+            if (active) {
                 badgeMobile.textContent = count;
+                if (btnMobile) {
+                    badgeMobile.style.backgroundColor = btnMobile.dataset.contrast;
+                    badgeMobile.style.color = btnMobile.dataset.accent;
+                }
                 badgeMobile.classList.remove('hidden');
                 badgeMobile.classList.add('inline-flex');
             } else {

@@ -3433,7 +3433,7 @@ class EventController extends Controller
                 'name' => $e->name,
                 'starts_at' => $e->starts_at ? $e->getShortDateRangeDisplay('D, M j, Y') : null,
                 'image_url' => $e->getImageUrl(),
-                'view_url' => route('event.view_guest', ['subdomain' => $subdomain, 'slug' => $e->slug]),
+                'view_url' => route('event.view_guest_with_id', ['subdomain' => $subdomain, 'slug' => $e->slug, 'id' => UrlUtils::encodeId($e->id)]),
             ];
         });
 
@@ -3484,7 +3484,7 @@ class EventController extends Controller
             'success' => true,
             'message' => __('messages.agenda_saved'),
             'edit_url' => route('event.edit', ['subdomain' => $subdomain, 'hash' => UrlUtils::encodeId($event->id)]),
-            'view_url' => route('event.view_guest', ['subdomain' => $subdomain, 'slug' => $event->slug]),
+            'view_url' => route('event.view_guest_with_id', ['subdomain' => $subdomain, 'slug' => $event->slug, 'id' => UrlUtils::encodeId($event->id)]),
         ]);
     }
 

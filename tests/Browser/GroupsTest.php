@@ -387,4 +387,95 @@ class GroupsTest extends DuskTestCase
             'data' => $data,
         ];
     }
+
+    /**
+     * An event whose slug matches a sub-schedule slug on the same schedule must still
+     * open its own guest page, rather than being shadowed by the sub-schedule listing.
+     */
+    public function test_event_url_not_shadowed_by_matching_group_slug(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->setupTestAccount($browser, 'Test User', 'test@gmail.com', 'password');
+            $this->createTestTalent($browser);
+
+            $role = Role::where('subdomain', 'talent')->first();
+            $this->assertNotNull($role);
+
+            // Sub-schedule slugs aren't auto-generated, so set it explicitly
+            $group = $role->groups()->create([
+                'name' => 'The Sip Society',
+                'slug' => 'the-sip-society',
+            ]);
+
+            // Same name means the event slug matches the sub-schedule slug
+            $this->createEventNamed($browser, 'The Sip Society');
+
+            $event = Event::where('name', 'The Sip Society')->first();
+            $this->assertNotNull($event);
+            $this->assertEquals('the-sip-society', $event->slug);
+
+            $eventRole = EventRole::where('event_id', $event->id)
+                ->where('role_id', $role->id)
+                ->first();
+            $eventRole->group_id = $group->id;
+            $eventRole->save();
+
+            $encodedId = \App\Utils\UrlUtils::encodeId($event->id);
+            $eventUrl = $event->getGuestUrl('talent');
+
+            // The event page, not the sub-schedule listing
+            $browser->visit($eventUrl)
+                ->waitFor('#desktop-cta-buttons', 15)
+                ->assertPathIs('/talent/the-sip-society/'.$encodedId)
+                ->assertNotPresent('#calendar-panel-wrapper');
+
+            // Carrying the sub-schedule filter over must not flip it back
+            $browser->visit($eventUrl.'?schedule=the-sip-society')
+                ->waitFor('#desktop-cta-buttons', 15)
+                ->assertNotPresent('#calendar-panel-wrapper');
+
+            // Without an event id the slug still resolves to the sub-schedule listing
+            $browser->visit('/talent/the-sip-society')
+                ->waitFor('#calendar-panel-wrapper', 15)
+                ->assertNotPresent('#desktop-cta-buttons');
+        });
+    }
+
+    /**
+     * Create an event on the talent role with the given name
+     */
+    protected function createEventNamed(Browser $browser, string $eventName): void
+    {
+        $browser->visit('/talent/add-event?date='.date('Y-m-d', strtotime('+7 days')))
+            ->waitFor('#event_name', 15)
+            ->pause(1000);
+
+        $name = json_encode($eventName);
+
+        // Set event name via JS (more reliable than Dusk type in headless Chrome)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            nameField.value = {$name};
+            nameField.dispatchEvent(new Event('input', { bubbles: true }));
+        ");
+
+        // Ensure name was set (JS fallback for headless Chrome flakiness)
+        $browser->script("
+            var nameField = document.getElementById('event_name');
+            if (!nameField.value || nameField.value !== {$name}) {
+                nameField.value = {$name};
+                nameField.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        ");
+
+        // Use JavaScript to submit form (avoids click-targeting issues in headless Chrome)
+        $browser->script("
+            window._skipUnsavedWarning = true;
+            document.getElementById('edit-form').requestSubmit();
+        ");
+
+        $browser->waitForLocation('/talent/schedule', 45)
+            ->pause(1000)
+            ->assertSee($eventName);
+    }
 }
