@@ -58,6 +58,6 @@
         </a>
     </div>
 </div>
-<div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="flex-shrink-0 w-40 self-stretch">
+<div v-if="(event.image_url || event.flyer_url) && !event.is_password_protected" class="flex-shrink-0 w-40 max-w-[50%] self-stretch">
     <img :src="event.flyer_url || event.image_url" :class="event._isPast ? 'grayscale' : ''" class="w-full h-full object-cover" :alt="event.name">
 </div>

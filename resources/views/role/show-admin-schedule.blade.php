@@ -34,10 +34,22 @@
                     <li class="text-gray-500 dark:text-gray-400">{{ str_replace(':count', $timezoneMismatchEvents->count() - 10, __('messages.and_n_more')) }}</li>
                     @endif
                 </ul>
-                <form method="POST" action="{{ route('role.timezone_warning_dismiss', ['subdomain' => $role->subdomain]) }}" class="mt-2">
-                    @csrf
-                    <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline">{{ __('messages.dismiss') }}</button>
-                </form>
+                <div class="mt-2 flex flex-wrap items-center gap-4">
+                    <form method="POST" action="{{ route('role.timezone_warning_dismiss', ['subdomain' => $role->subdomain]) }}">
+                        @csrf
+                        <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline">{{ __('messages.dismiss') }}</button>
+                    </form>
+                    @if($timezoneMismatchAdoptTz)
+                    <form method="POST" action="{{ route('role.timezone_warning_adopt', ['subdomain' => $role->subdomain]) }}"
+                          data-confirm="{{ str_replace(':timezone', $timezoneMismatchAdoptTz, __('messages.timezone_adopt_confirm')) }}">
+                        @csrf
+                        {{-- Echo back the timezone the confirmation dialog named, so the action can
+                             refuse if the events changed and the candidate is no longer that one. --}}
+                        <input type="hidden" name="timezone" value="{{ $timezoneMismatchAdoptTz }}">
+                        <button type="submit" class="text-xs font-medium text-amber-700 dark:text-amber-300 underline hover:no-underline">{{ str_replace(':timezone', $timezoneMismatchAdoptTz, __('messages.timezone_adopt_button')) }}</button>
+                    </form>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

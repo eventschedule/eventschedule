@@ -2285,7 +2285,13 @@ class EventController extends Controller
             }
 
             $name = trim((string) $request->input('schedule_name')) ?: $user->name;
-            $talent = $this->createTalentSchedule($user, $name, $request->input('timezone') ?: $role->timezone, $user->language_code);
+
+            // A schedule created solely to post to this curator inherits the curator's timezone, not
+            // the guest's browser timezone: its events are entered as curator-local times, and the
+            // talent's own guest page renders them in its own timezone (Event::getStartDateTime()
+            // falls back to creatorRole->timezone for logged-out viewers). The form warns the guest
+            // when their device timezone differs. The user *account* still keeps the browser value.
+            $talent = $this->createTalentSchedule($user, $name, $role->timezone, $user->language_code);
         }
 
         // Auto-follow the curator (the form discloses this). Demo users never follow.
@@ -2302,7 +2308,10 @@ class EventController extends Controller
             || ($role->approved_subdomains && in_array($talent->subdomain, $role->approved_subdomains));
 
         try {
-            $event = $this->eventRepo->saveEvent($talent, $request, null, false);
+            // The event saves onto the submitter's talent schedule, but the time they typed is the
+            // event's local time on the curator's page, so anchor the capture to the curator. Without
+            // the override an existing talent schedule in another timezone shifts the published time.
+            $event = $this->eventRepo->saveEvent($talent, $request, null, false, $role->timezone);
 
             $this->attachGuestFlyerImage($request, $event);
 

@@ -321,12 +321,18 @@ class EventRepo
         }
     }
 
-    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true)
+    public function saveEvent($currentRole, $request, $event = null, $followNewRoles = true, ?string $timezoneOverride = null)
     {
         $this->validatePassConfiguration($request);
 
         $user = $request->user();
         $venue = null;
+
+        // The timezone the entered wall-clock is anchored to, and the timezone any schedule created
+        // along the way inherits. Normally the schedule being saved onto, but guest submissions save
+        // onto the submitter's own talent schedule while the time they typed is the curator's local
+        // time, so that caller overrides this with the curator's timezone.
+        $captureTimezone = $timezoneOverride ?? $currentRole?->timezone;
 
         // Set creator_role_id to the current role
         $creatorRoleId = $currentRole ? $currentRole->id : null;
@@ -390,7 +396,7 @@ class EventRepo
                 $countryCode = $request->venue_country_code ? $request->venue_country_code : $currentRole->country_code;
                 $venue->country_code = $countryCode ? strtolower($countryCode) : null;
                 $venue->language_code = $request->venue_language_code ? $request->venue_language_code : $currentRole->language_code;
-                $venue->timezone = $currentRole->timezone;
+                $venue->timezone = $captureTimezone;
                 $venue->website = $request->venue_website;
                 $venue->background_colors = ColorUtils::randomGradient();
                 $venue->background_rotation = rand(0, 359);
@@ -523,7 +529,7 @@ class EventRepo
                     $role->phone = isset($member['phone']) && $member['phone'] !== '' ? $member['phone'] : null;
                     $role->subdomain = Role::generateSubdomain($member['name']);
                     $role->type = $request->role_type ? $request->role_type : 'talent';
-                    $role->timezone = $currentRole->timezone;
+                    $role->timezone = $captureTimezone;
                     $role->language_code = $request->language_code ? $request->language_code : $currentRole->language_code;
                     $countryCode = $request->country_code ? $request->country_code : $currentRole->country_code;
                     $role->country_code = $countryCode ? strtolower($countryCode) : null;
@@ -779,7 +785,7 @@ class EventRepo
         // schedule's must not silently shift the saved time. Record the timezone used so the stored
         // UTC instant is self-describing and off-timezone events are detectable later.
         if ($event->starts_at) {
-            $timezone = $currentRole?->timezone ?? $venue?->timezone ?? $user?->timezone ?? config('app.timezone');
+            $timezone = $captureTimezone ?? $venue?->timezone ?? $user?->timezone ?? config('app.timezone');
             $event->starts_at = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, $timezone)
                 ->setTimezone('UTC')
                 ->format('Y-m-d H:i:s');

@@ -173,6 +173,19 @@
                   </div>
                 </div>
 
+                @if ($role->timezone)
+                <p class="-mt-2 mb-4 text-sm text-gray-500 dark:text-gray-400" v-pre>
+                  {{ __('messages.times_are_in_timezone') }} <span class="font-medium">{{ $role->timezone }}</span>.
+                </p>
+
+                <div v-if="timezoneMismatch" class="mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                  <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                  <p class="text-sm text-amber-700 dark:text-amber-300">@{{ timezoneMismatchMessage }}</p>
+                </div>
+                @endif
+
                 {{-- Location --}}
                 <div class="mb-4">
                   <div class="flex items-center gap-6">
@@ -561,6 +574,11 @@
                 },
                 currencies: @json(collect($currencies)->map(fn($c) => ['value' => $c->value])->values()),
                 importFields: @json($importFields),
+                // Times typed into this form are read as the curator schedule's local time. Resolved
+                // in mounted() so we can warn a guest whose device sits in a different timezone.
+                scheduleTimezone: @json($role->timezone),
+                deviceTimezone: '',
+                timezoneMismatchText: @json(__('messages.guest_submit_timezone_mismatch')),
                 requiredFields: @json($requiredImportFields),
                 groups: @json(($role->groups ?? collect())->map(fn($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->translatedName()])->values()),
                 categoryIds: @json(array_map('strval', array_keys(get_translated_categories($role)))),
@@ -632,6 +650,10 @@
         },
 
         mounted() {
+            try {
+                this.deviceTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+            } catch (e) { /* very old browsers */ }
+
             this.$nextTick(() => {
                 document.getElementById('event-submit-app').classList.add('loaded');
 
@@ -718,6 +740,17 @@
         },
 
         computed: {
+            timezoneMismatch() {
+                return !! (this.scheduleTimezone && this.deviceTimezone
+                    && this.deviceTimezone !== this.scheduleTimezone);
+            },
+
+            timezoneMismatchMessage() {
+                return this.timezoneMismatchText
+                    .replace(':from', this.deviceTimezone)
+                    .replace(':to', this.scheduleTimezone);
+            },
+
             needsPageName() {
                 if (this.accountMode === 'login') return false;
                 return this.talents.length === 0;
