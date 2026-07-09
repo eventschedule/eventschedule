@@ -105,15 +105,149 @@
         }
     </script>
 
+    <style {!! nonce_attr() !!}>
+        /* ==============================================================
+           For-talent "Center Stage" styles. The shared es-* motion
+           system (aurora, reveals, bento, marquee, finale) lives in
+           marketing.css; this block holds only this page's own theme:
+           the multi-gel "Center Stage" heading gradient (amber -> rose
+           -> sky), converging spotlight beams reused across the hero,
+           dark band and finale, gel-washed availability states, and the
+           themed CTA / step / link treatments. Broader palette than any
+           single niche page: this is the every-performer front door.
+           ============================================================== */
+
+        /* Center Stage multi-gel heading gradient */
+        .text-gradient-stage {
+            background: linear-gradient(120deg, #f59e0b, #fb7185 52%, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-stage {
+            background: linear-gradient(120deg, #fbbf24, #fda4af 52%, #7dd3fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Converging spotlight beams (hero, dark band, finale). Angled
+           from the top corners so the cones cross mid-surface, each a
+           different stage gel. */
+        .es-spotbeam {
+            position: absolute;
+            top: -10%;
+            width: 52%;
+            height: 150%;
+            pointer-events: none;
+            transform-origin: 50% 0;
+            animation: es-spot-pan 12s ease-in-out infinite alternate;
+        }
+        .es-spotbeam-1 { left: -6%; background: conic-gradient(from 150deg at 50% 0%, transparent 0deg, rgba(245, 158, 11, 0.13) 13deg, transparent 27deg); }
+        .es-spotbeam-2 { right: -6%; background: conic-gradient(from 194deg at 50% 0%, transparent 0deg, rgba(56, 189, 248, 0.13) 13deg, transparent 27deg); animation-delay: -4.5s; animation-duration: 14s; }
+        .es-spotbeam-3 { left: 30%; background: conic-gradient(from 172deg at 50% 0%, transparent 0deg, rgba(251, 113, 133, 0.11) 10deg, transparent 22deg); animation-delay: -7s; animation-duration: 16s; }
+        .dark .es-spotbeam-1 { background: conic-gradient(from 150deg at 50% 0%, transparent 0deg, rgba(245, 158, 11, 0.18) 13deg, transparent 27deg); }
+        .dark .es-spotbeam-2 { background: conic-gradient(from 194deg at 50% 0%, transparent 0deg, rgba(56, 189, 248, 0.17) 13deg, transparent 27deg); }
+        .dark .es-spotbeam-3 { background: conic-gradient(from 172deg at 50% 0%, transparent 0deg, rgba(251, 113, 133, 0.15) 10deg, transparent 22deg); }
+        @keyframes es-spot-pan {
+            from { transform: rotate(-6deg); }
+            to   { transform: rotate(6deg); }
+        }
+
+        /* Multi-gel CTA (hero + finale), tuned deep so white text stays legible */
+        .es-stage-cta {
+            background-image: linear-gradient(115deg, #b45309, #e11d48 50%, #0369a1);
+            box-shadow: 0 10px 25px -6px rgba(245, 158, 11, 0.35);
+        }
+        .es-stage-cta:hover {
+            box-shadow: 0 20px 45px -8px rgba(251, 113, 133, 0.45);
+        }
+        .dark .es-stage-cta {
+            background-image: linear-gradient(115deg, #c2410c, #e11d48 50%, #0284c7);
+            box-shadow: 0 10px 25px -6px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Step-number badges (dark band) */
+        .es-stage-step {
+            background-image: linear-gradient(135deg, #ea580c, #e11d48 52%, #0284c7);
+            box-shadow: 0 10px 20px -6px rgba(251, 113, 133, 0.4);
+        }
+
+        /* Finale panel gel glow */
+        .es-stage-finale {
+            box-shadow: 0 25px 55px -12px rgba(245, 158, 11, 0.28);
+        }
+        .dark .es-stage-finale {
+            box-shadow: 0 25px 60px -12px rgba(251, 113, 133, 0.3);
+        }
+
+        /* Roster cards: gel-glow hover (per-card icon colors are kept) */
+        .es-roster-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .es-roster-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(245, 158, 11, 0.45);
+            box-shadow: 0 16px 34px -12px rgba(245, 158, 11, 0.28), 0 0 0 1px rgba(56, 189, 248, 0.18);
+        }
+        .dark .es-roster-card:hover {
+            border-color: rgba(251, 113, 133, 0.4);
+            box-shadow: 0 18px 38px -12px rgba(56, 189, 248, 0.3), 0 0 0 1px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Availability grid: stage-native day states */
+        .es-gel-available { background: rgba(56, 189, 248, 0.22); color: #0369a1; }
+        .es-gel-booked { background: rgba(245, 158, 11, 0.24); color: #b45309; }
+        .es-gel-blocked { background: rgba(251, 113, 133, 0.22); color: #be123c; }
+        .dark .es-gel-available { background: rgba(56, 189, 248, 0.28); color: #7dd3fc; }
+        .dark .es-gel-booked { background: rgba(245, 158, 11, 0.3); color: #fcd34d; }
+        .dark .es-gel-blocked { background: rgba(251, 113, 133, 0.28); color: #fda4af; }
+        .es-gel-dot-available { background: #38bdf8; }
+        .es-gel-dot-booked { background: #f59e0b; }
+        .es-gel-dot-blocked { background: #fb7185; }
+
+        /* Small gel bullet (eyebrows, marquee) */
+        .es-gel-bullet { background-image: linear-gradient(120deg, #f59e0b, #fb7185 55%, #38bdf8); }
+
+        /* Themed inline "see all" links */
+        .es-stage-link { color: #b45309; }
+        .es-stage-link:hover { text-decoration: underline; }
+        .dark .es-stage-link { color: #fbbf24; }
+
+        /* Related-page cards: gel hover */
+        .es-related-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-related-card:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+            background-color: rgba(245, 158, 11, 0.06);
+        }
+        .dark .es-related-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            background-color: rgba(56, 189, 248, 0.07);
+        }
+        .es-related-card:hover .es-related-title,
+        .es-related-card:hover .es-related-arrow { color: #b45309; }
+        .dark .es-related-card:hover .es-related-title,
+        .dark .es-related-card:hover .es-related-arrow { color: #fbbf24; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-spotbeam { animation: none !important; }
+        }
+    </style>
+
     <!-- ============================================================ -->
     <!-- 1. Hero: the lineup                                          -->
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(78, 129, 250, 0.5), rgba(78, 129, 250, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.45), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.42), rgba(245, 158, 11, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(56, 189, 248, 0.4), rgba(56, 189, 248, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3"></div>
             <div class="es-rays absolute inset-0"></div>
+            <div class="es-spotbeam es-spotbeam-1"></div>
+            <div class="es-spotbeam es-spotbeam-2"></div>
+            <div class="es-spotbeam es-spotbeam-3"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
@@ -127,7 +261,7 @@
 
             <h1 class="es-balance mb-8 text-[2.75rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Share your shows</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">with fans</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-stage es-gradient-anim">with fans</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -139,7 +273,7 @@
                     See what you get
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="group es-stage-cta pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create your schedule
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -155,7 +289,7 @@
                             @for ($tc = 0; $tc < 2; $tc++)
                                 @foreach (['Musicians', 'DJs', 'Comedians', 'Dancers', 'Magicians', 'Poets', 'Acrobats', 'Actors', 'Bands', 'Instructors', 'Artists', 'Vendors'] as $tag)
                                     <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-sky-400"></span>
+                                        <span class="h-1.5 w-1.5 rounded-full es-gel-bullet"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -175,11 +309,11 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-sky-400" aria-hidden="true"></span>
+                    <span class="h-1.5 w-1.5 rounded-full es-gel-bullet" aria-hidden="true"></span>
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Everything included</span>
                 </div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    One home for your whole <span class="text-gradient">performing life</span>
+                    One home for your whole <span class="text-gradient-stage">performing life</span>
                 </h2>
             </div>
 
@@ -323,18 +457,18 @@
                                 <div class="text-gray-500 dark:text-gray-400">F</div>
                                 <div class="text-gray-500 dark:text-gray-400">S</div>
                                 <div class="text-gray-500 dark:text-gray-400">S</div>
-                                <div class="rounded bg-emerald-200 p-1 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">1</div>
-                                <div class="rounded bg-emerald-200 p-1 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">2</div>
-                                <div class="rounded bg-red-200 p-1 text-red-700 dark:bg-red-500/30 dark:text-red-300">3</div>
-                                <div class="rounded bg-emerald-200 p-1 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">4</div>
-                                <div class="rounded bg-blue-200 p-1 text-blue-700 dark:bg-blue-500/30 dark:text-blue-300">5</div>
-                                <div class="rounded bg-blue-200 p-1 text-blue-700 dark:bg-blue-500/30 dark:text-blue-300">6</div>
-                                <div class="rounded bg-emerald-200 p-1 text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">7</div>
+                                <div class="rounded es-gel-available p-1">1</div>
+                                <div class="rounded es-gel-available p-1">2</div>
+                                <div class="rounded es-gel-blocked p-1">3</div>
+                                <div class="rounded es-gel-available p-1">4</div>
+                                <div class="rounded es-gel-booked p-1">5</div>
+                                <div class="rounded es-gel-booked p-1">6</div>
+                                <div class="rounded es-gel-available p-1">7</div>
                             </div>
                             <div class="mt-4 flex gap-4 text-xs">
-                                <div class="flex items-center gap-1"><div class="h-2 w-2 rounded bg-emerald-500"></div><span class="text-gray-500 dark:text-gray-400">Available</span></div>
-                                <div class="flex items-center gap-1"><div class="h-2 w-2 rounded bg-blue-500"></div><span class="text-gray-500 dark:text-gray-400">Booked</span></div>
-                                <div class="flex items-center gap-1"><div class="h-2 w-2 rounded bg-red-500"></div><span class="text-gray-500 dark:text-gray-400">Blocked</span></div>
+                                <div class="flex items-center gap-1"><div class="h-2 w-2 rounded es-gel-dot-available"></div><span class="text-gray-500 dark:text-gray-400">Available</span></div>
+                                <div class="flex items-center gap-1"><div class="h-2 w-2 rounded es-gel-dot-booked"></div><span class="text-gray-500 dark:text-gray-400">Booked</span></div>
+                                <div class="flex items-center gap-1"><div class="h-2 w-2 rounded es-gel-dot-blocked"></div><span class="text-gray-500 dark:text-gray-400">Blocked</span></div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -426,11 +560,11 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-sky-400" aria-hidden="true"></span>
+                    <span class="h-1.5 w-1.5 rounded-full es-gel-bullet" aria-hidden="true"></span>
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">The lineup</span>
                 </div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Perfect for all types of <span class="text-gradient">performers</span>
+                    Perfect for all types of <span class="text-gradient-stage">performers</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.14s;">
                     Whether you're a solo act or a full ensemble, Event Schedule works for you.
@@ -439,7 +573,7 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="60">
                 @foreach ($roster as $r)
-                    <a href="{{ route($r['route']) }}" data-reveal class="group block rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg {{ $r['hover'] }} dark:border-white/10 dark:bg-white/[0.04]">
+                    <a href="{{ route($r['route']) }}" data-reveal class="es-roster-card group block rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl {{ $r['chip'] }} transition-transform group-hover:scale-110">
                             <svg aria-hidden="true" class="h-6 w-6 {{ $r['text'] }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $r['svg'] !!}</svg>
                         </div>
@@ -507,8 +641,9 @@
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="opacity: 0.28;"></div>
-                <div class="es-aurora es-aurora-2" style="opacity: 0.22;"></div>
+                <div class="es-spotbeam es-spotbeam-1"></div>
+                <div class="es-spotbeam es-spotbeam-2"></div>
+                <div class="es-spotbeam es-spotbeam-3"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
             </div>
 
@@ -519,23 +654,23 @@
                         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">Quick setup</span>
                     </div>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                        Get your schedule online in <span class="text-gradient">three steps</span>
+                        Get your schedule online in <span class="text-gradient-stage">three steps</span>
                     </h2>
                 </div>
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/30">1</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-stage-step text-xl font-bold text-white">1</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Create Your Schedule</h3>
                         <p class="text-sm text-gray-400">Sign up and add your upcoming shows. Import from Google Calendar or add them manually.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/30">2</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-stage-step text-xl font-bold text-white">2</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Share Your Link</h3>
                         <p class="text-sm text-gray-400">Get a custom URL for your schedule. Add it to your bio, website, or social profiles.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/30">3</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-stage-step text-xl font-bold text-white">3</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Build Your Audience</h3>
                         <p class="text-sm text-gray-400">Fans can follow your schedule, get notified about new shows, and share videos and comments on your events (all approved by you before going live).</p>
                     </div>
@@ -568,7 +703,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="es-stage-link inline-flex items-center font-medium">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -588,19 +723,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-curators', 'Curators'], ['/for-musicians', 'Musicians'], ['/for-comedians', 'Comedians'], ['/for-venues', 'Venues']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-related-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-stage-link inline-flex items-center font-medium">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -617,7 +752,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="text-gradient-stage">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything performers ask about Event Schedule.
@@ -650,15 +785,17 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel es-stage-finale noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
+                    <div class="es-spotbeam es-spotbeam-1"></div>
+                    <div class="es-spotbeam es-spotbeam-2"></div>
+                    <div class="es-spotbeam es-spotbeam-3"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Let fans know where <span class="text-gradient">you're playing</span>
+                        Let fans know where <span class="text-gradient-stage">you're playing</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Create your schedule in minutes. Free forever.
@@ -671,7 +808,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group es-stage-cta relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

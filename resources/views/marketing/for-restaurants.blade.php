@@ -108,8 +108,10 @@
 
     <style {!! nonce_attr() !!}>
         /* For-restaurants "The Table" styles. The shared es-* motion system
-           lives in marketing.css; this holds only the burgundy gradient text
-           and the gently drifting tasting-menu card. */
+           lives in marketing.css; this holds the burgundy gradient text plus
+           the candlelit dining motifs: a flickering flame, steam wisps, a
+           linen weave, serif menu eyebrows, reservation time chips, and the
+           burgundy link recolors. */
         .text-gradient-burgundy {
             background: linear-gradient(135deg, #be123c, #7f1d1d);
             -webkit-background-clip: text;
@@ -122,13 +124,123 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        @keyframes es-menu-float {
-            0%, 100% { transform: translateY(0px) rotate(3deg); }
-            50% { transform: translateY(-10px) rotate(3deg); }
+
+        /* Serif small-caps menu eyebrows / course labels */
+        .es-menu-eyebrow {
+            font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+            font-variant: small-caps;
+            letter-spacing: 0.09em;
         }
-        .es-menu-float { animation: es-menu-float 6s ease-in-out infinite; }
+
+        /* Candlelit tasting table: a teardrop flame that flickers */
+        .es-candle { position: relative; width: 16px; }
+        .es-flame {
+            display: block;
+            width: 14px;
+            height: 20px;
+            margin: 0 auto 1px;
+            border-radius: 50% 50% 50% 50% / 62% 62% 40% 40%;
+            background: radial-gradient(ellipse at 50% 78%, #fffbeb 0%, #fde68a 22%, #fb923c 58%, #b91c1c 100%);
+            box-shadow: 0 0 12px 3px rgba(251, 146, 60, 0.55), 0 0 26px 10px rgba(245, 158, 11, 0.30);
+            transform-origin: 50% 92%;
+            animation: es-flame-flicker 2.3s ease-in-out infinite;
+        }
+        .dark .es-flame {
+            background: radial-gradient(ellipse at 50% 78%, #fff7ed 0%, #fcd34d 24%, #fb923c 60%, #dc2626 100%);
+        }
+        .es-candle-body {
+            display: block;
+            width: 9px;
+            height: 30px;
+            margin: 0 auto;
+            border-radius: 3px 3px 2px 2px;
+            background: linear-gradient(to bottom, #fde68a, #f59e0b 45%, #b45309);
+            box-shadow: inset -2px 0 2px rgba(120, 53, 15, 0.4);
+        }
+        .dark .es-candle-body {
+            background: linear-gradient(to bottom, #fcd34d, #d97706 45%, #92400e);
+        }
+        @keyframes es-flame-flicker {
+            0%, 100% { transform: scaleY(1) skewX(0deg); opacity: 0.95; }
+            30% { transform: scaleY(1.08) skewX(3deg); opacity: 1; }
+            55% { transform: scaleY(0.93) skewX(-3deg); opacity: 0.82; }
+            80% { transform: scaleY(1.04) skewX(2deg); opacity: 1; }
+        }
+
+        /* Steam wisps rising over the dining-year band */
+        .es-steam { pointer-events: none; overflow: hidden; }
+        .es-steam span {
+            position: absolute;
+            bottom: 0;
+            width: 8px;
+            height: 60px;
+            border-radius: 9999px;
+            background: linear-gradient(to top, rgba(190, 18, 60, 0), rgba(251, 113, 133, 0.28) 40%, rgba(255, 255, 255, 0.35));
+            filter: blur(5px);
+            opacity: 0;
+            animation: es-steam-rise var(--steam-dur, 9s) ease-in infinite;
+            animation-delay: var(--steam-delay, 0s);
+        }
+        .dark .es-steam span {
+            background: linear-gradient(to top, rgba(190, 18, 60, 0), rgba(251, 113, 133, 0.22) 40%, rgba(255, 255, 255, 0.20));
+        }
+        @keyframes es-steam-rise {
+            0% { transform: translateY(10px) scaleX(1); opacity: 0; }
+            20% { opacity: var(--steam-op, 0.5); }
+            80% { opacity: var(--steam-op, 0.5); }
+            100% { transform: translateY(-70px) scaleX(1.6); opacity: 0; }
+        }
+
+        /* Linen weave tint for the candlelit dark band */
+        .es-linen {
+            background-image:
+                repeating-linear-gradient(0deg, rgba(255, 245, 235, 0.045) 0px, rgba(255, 245, 235, 0.045) 1px, transparent 1px, transparent 4px),
+                repeating-linear-gradient(90deg, rgba(255, 245, 235, 0.04) 0px, rgba(255, 245, 235, 0.04) 1px, transparent 1px, transparent 4px);
+            mix-blend-mode: soft-light;
+        }
+
+        /* Reservation-style time chips */
+        .es-time-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            border: 1px solid rgba(159, 18, 57, 0.35);
+            background: rgba(255, 241, 242, 0.8);
+            padding: 1px 6px;
+            font-size: 8px;
+            font-weight: 700;
+            color: #9f1239;
+        }
+        .es-time-chip-active {
+            border-color: transparent;
+            background: linear-gradient(135deg, #be123c, #7f1d1d);
+            color: #fff;
+        }
+        .dark .es-time-chip {
+            border-color: rgba(251, 113, 133, 0.4);
+            background: rgba(190, 18, 60, 0.18);
+            color: #fda4af;
+        }
+        .dark .es-time-chip-active {
+            background: linear-gradient(135deg, #fb7185, #e11d48);
+            color: #4c0519;
+        }
+
+        /* Burgundy recolor for the hard-coded blue links */
+        .es-link-accent { color: #be123c; }
+        .es-link-accent:hover { color: #9f1239; }
+        .dark .es-link-accent { color: #fb7185; }
+        .dark .es-link-accent:hover { color: #fda4af; }
+
+        /* Related-page cards: burgundy hover */
+        .es-rel-card:hover { border-color: #fecdd3; background-color: #fff1f2; }
+        .dark .es-rel-card:hover { border-color: rgba(190, 18, 60, 0.4); background-color: rgba(190, 18, 60, 0.08); }
+        .group:hover .es-rel-accent { color: #be123c; }
+        .dark .group:hover .es-rel-accent { color: #fb7185; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-menu-float { animation: none !important; }
+            .es-flame { animation: none !important; }
+            .es-steam span { animation: none !important; opacity: 0.28; transform: none; }
         }
     </style>
 
@@ -206,8 +318,14 @@
             ['Oct - Dec', '&#127810;', 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/40', 'border-yellow-200 dark:border-yellow-500/20', 'text-yellow-600 dark:text-yellow-300', [['bg-orange-400', 'Harvest Menu', true], ['bg-yellow-400', 'Thanksgiving Feast', false], ['bg-amber-400', 'NYE Champagne Gala', false]]],
         ];
     @endphp
-    <section class="bg-gray-50 py-24 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <section class="relative overflow-hidden bg-gray-50 py-24 dark:bg-[#0f0f14]">
+        <div class="es-steam pointer-events-none absolute inset-x-0 top-8 h-44" aria-hidden="true">
+            <span style="left: 20%; --steam-dur: 9s; --steam-delay: 0s; --steam-op: 0.5;"></span>
+            <span style="left: 40%; height: 80px; --steam-dur: 11s; --steam-delay: 1.6s; --steam-op: 0.45;"></span>
+            <span style="left: 60%; --steam-dur: 10s; --steam-delay: 3s; --steam-op: 0.4;"></span>
+            <span style="left: 78%; height: 72px; --steam-dur: 12s; --steam-delay: 2.2s; --steam-op: 0.5;"></span>
+        </div>
+        <div class="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-2xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
                     The dining year, <span class="text-gradient-burgundy">planned</span>
@@ -221,7 +339,7 @@
                 @foreach ($diningYear as [$quarter, $emoji, $bg, $border, $text, $items])
                     <div data-reveal class="group relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 transition-all hover:-translate-y-1 {{ $bg }} {{ $border }}">
                         <div class="absolute right-2 top-2 text-4xl text-rose-300/40 dark:text-white/10">{!! $emoji !!}</div>
-                        <div class="mb-3 text-xs font-semibold uppercase tracking-wider {{ $text }}">{{ $quarter }}</div>
+                        <div class="es-menu-eyebrow mb-3 text-xs font-semibold uppercase tracking-wider {{ $text }}">{{ $quarter }}</div>
                         <div class="space-y-2">
                             @foreach ($items as [$dot, $name, $bold])
                                 <div class="flex items-center gap-2">
@@ -302,13 +420,22 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Wine dinners that sell out</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">5-course tastings, chef's tables, pairing dinners. Sell tickets, manage capacity, scan at the door.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
+                        <div class="mt-auto flex items-end justify-center gap-3" aria-hidden="true">
+                            <div class="es-candle mb-3">
+                                <span class="es-flame"></span>
+                                <span class="es-candle-body"></span>
+                            </div>
                             <div class="w-44 -rotate-2 rounded-xl border border-amber-300/50 bg-gradient-to-br from-amber-100 to-amber-50 p-4 text-center shadow-lg transition-transform group-hover:rotate-0">
-                                <div class="text-[10px] uppercase tracking-widest text-amber-800">Tasting Menu</div>
+                                <div class="es-menu-eyebrow text-[10px] uppercase tracking-widest text-amber-800">Tasting Menu</div>
                                 <div class="mt-1 font-serif text-sm font-semibold text-amber-900">5-Course Pairing</div>
                                 <div class="mt-2 text-xl font-bold text-amber-700">$125<span class="text-xs font-normal">pp</span></div>
                                 <div class="mt-1 text-[10px] text-amber-600">Sat, Nov 15 · 7:30 PM</div>
                                 <div class="mt-1 text-[9px] text-amber-500">Only 4 seats left</div>
+                                <div class="mt-2 flex justify-center gap-1">
+                                    <span class="es-time-chip">5:30</span>
+                                    <span class="es-time-chip es-time-chip-active">7:30</span>
+                                    <span class="es-time-chip">8:45</span>
+                                </div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -467,6 +594,12 @@
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(190, 18, 60, 0.26), rgba(190, 18, 60, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(245, 158, 11, 0.24), rgba(245, 158, 11, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="es-linen absolute inset-0 opacity-70"></div>
+                <div class="absolute inset-x-0 bottom-6 flex items-end justify-center gap-8 sm:gap-12 lg:gap-16">
+                    @for ($cf = 0; $cf < 7; $cf++)
+                        <span class="es-flame" style="animation-delay: {{ $cf * 0.4 }}s;"></span>
+                    @endfor
+                </div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-5xl">
@@ -487,7 +620,7 @@
                                 <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm">
                                     <svg aria-hidden="true" class="h-7 w-7 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
                                 </div>
-                                <h4 class="mb-2 font-semibold text-white">{{ $title }}</h4>
+                                <h4 class="es-menu-eyebrow mb-2 font-semibold text-white">{{ $title }}</h4>
                                 <p class="text-sm text-gray-400">{{ $desc }}</p>
                             </div>
                         @endforeach
@@ -662,7 +795,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -682,19 +815,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-bars', 'Bars'], ['/for-hotels-and-resorts', 'Hotels & Resorts'], ['/for-breweries-and-wineries', 'Breweries & Wineries'], ['/for-food-trucks-and-vendors', 'Food Trucks & Vendors']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-accent text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-accent w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -748,6 +881,16 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(190, 18, 60, 0.32), rgba(190, 18, 60, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                </div>
+                <div class="pointer-events-none absolute right-8 top-8 z-20 hidden items-end gap-2 sm:flex" aria-hidden="true">
+                    <div class="es-candle">
+                        <span class="es-flame"></span>
+                        <span class="es-candle-body"></span>
+                    </div>
+                    <div class="es-candle" style="transform: scale(0.82);">
+                        <span class="es-flame" style="animation-delay: 0.7s;"></span>
+                        <span class="es-candle-body"></span>
+                    </div>
                 </div>
 
                 <div class="relative z-10">

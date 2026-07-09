@@ -106,16 +106,25 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-visual-artists "The Studio Wall" styles. The shared es-* motion
-           system lives in marketing.css; this holds the artist glow gradient,
-           the framed badge, the hanging gallery-wall cards, the drifting easel
-           card, and the drifting paint-dab motif. */
+        /* For-visual-artists "The Studio Wall" styles - the maker's studio.
+           The shared es-* motion system lives in marketing.css; this holds the
+           painterly pigment gradient (vermilion / ochre / teal, sampled from the
+           drifting dabs), the framed badge, the hanging gallery-wall cards, the
+           drifting easel card, the paint-dab motif, the self-drawing brushstroke
+           underline, the paint-smear edge and the stretched-canvas frame. */
         .text-gradient-artist {
-            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #22D3EE);
+            background: linear-gradient(135deg, #ef4444, #d97706, #14b8a6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 40px rgba(78, 129, 250, 0.3);
+            text-shadow: 0 0 40px rgba(20, 184, 166, 0.25);
+        }
+        .dark .text-gradient-artist {
+            background: linear-gradient(135deg, #f87171, #fbbf24, #2dd4bf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(45, 212, 191, 0.3);
         }
         .artist-frame-badge {
             border: 2px solid rgba(161, 98, 7, 0.3);
@@ -131,12 +140,6 @@
         .dark .gallery-wall-card {
             box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.3), -1px -1px 4px rgba(0, 0, 0, 0.1);
         }
-        @keyframes es-easel-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-easel-float { animation: es-easel-float 6s ease-in-out infinite; }
-
         /* Drifting paint dabs */
         .es-dab { pointer-events: none; overflow: hidden; }
         .es-dab span {
@@ -153,23 +156,103 @@
             85% { opacity: var(--dab-op, 0.5); }
             100% { transform: translateY(-180px) translateX(16px); opacity: 0; }
         }
+        /* Warm-pigment CTA fill: vermilion to orange, white text */
+        .es-btn-artist {
+            background-image: linear-gradient(to right, #dc2626, #ea580c);
+            box-shadow: 0 10px 22px -6px rgba(220, 38, 38, 0.45);
+        }
+        .es-btn-artist:hover { box-shadow: 0 18px 36px -8px rgba(234, 88, 12, 0.5); }
+        .dark .es-btn-artist { background-image: linear-gradient(to right, #ef4444, #f97316); }
+
+        /* Teal accent recolor for the hard-coded blue text links */
+        .es-accent-link { color: #0d9488; }
+        .es-accent-link:hover { color: #0f766e; }
+        .dark .es-accent-link { color: #2dd4bf; }
+        .dark .es-accent-link:hover { color: #5eead4; }
+
+        /* Related-page card hover in studio teal */
+        .es-related-card:hover { border-color: rgba(13, 148, 136, 0.4); background-color: rgba(20, 184, 166, 0.06); }
+        .dark .es-related-card:hover { border-color: rgba(45, 212, 191, 0.3); background-color: rgba(45, 212, 191, 0.06); }
+        .es-related-title, .es-related-arrow { transition: color 0.2s; }
+        .es-related-card:hover .es-related-title, .es-related-card:hover .es-related-arrow { color: #0d9488; }
+        .dark .es-related-card:hover .es-related-title, .dark .es-related-card:hover .es-related-arrow { color: #2dd4bf; }
+
+        /* Frame-badge chip label (bronze frame, ochre text) */
+        .es-frame-chip { color: #b45309; }
+        .dark .es-frame-chip { color: #fbbf24; }
+
+        /* Paint-smear edge: a soft multicolor pigment strip along one border */
+        .es-smear { position: relative; }
+        .es-smear::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            bottom: 10%;
+            left: -3px;
+            width: 6px;
+            border-radius: 9999px;
+            background: linear-gradient(to bottom, #ef4444, #d97706 45%, #14b8a6);
+            filter: blur(2px);
+            opacity: 0.85;
+            pointer-events: none;
+        }
+        .dark .es-smear::before { opacity: 0.9; }
+
+        /* Stretched-canvas frame around the promo-image mock */
+        .es-canvas-frame {
+            border: 6px solid #e7e5e4;
+            border-radius: 2px;
+            box-shadow: inset 0 0 0 1px rgba(120, 113, 108, 0.45), 0 6px 14px rgba(0, 0, 0, 0.18);
+        }
+        .dark .es-canvas-frame {
+            border-color: #57534e;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Self-drawing brushstroke underline (pure CSS stroke-dashoffset) */
+        .es-brush { position: relative; display: inline-block; }
+        .es-brush-stroke {
+            position: absolute;
+            left: -0.03em;
+            right: -0.03em;
+            bottom: -0.2em;
+            width: calc(100% + 0.06em);
+            height: 0.42em;
+            overflow: visible;
+            pointer-events: none;
+        }
+        .es-brush-stroke path {
+            fill: none;
+            stroke: #d97706;
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1;
+            stroke-dashoffset: 0;
+        }
+        .dark .es-brush-stroke path { stroke: #fbbf24; }
+        html.es-anim .es-brush-stroke path { stroke-dashoffset: 1; }
+        html.es-anim [data-reveal].is-revealed .es-brush-stroke path { animation: es-brush-draw 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes es-brush-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-easel-float, .es-dab span { animation: none !important; }
+            .es-dab span { animation: none !important; }
             .es-dab span { opacity: 0.3; transform: none; }
+            .es-brush-stroke path { animation: none !important; stroke-dashoffset: 0 !important; }
         }
     </style>
 
     @php
         // Drifting paint dabs: [left, size(px), duration, delay, opacity, color]
         $dabs = [
-            ['10%', 6, '10s', '0s', '0.5', 'rgba(56, 189, 248, 0.9)'],
-            ['22%', 8, '12s', '2s', '0.45', 'rgba(34, 211, 238, 0.9)'],
-            ['35%', 5, '9s', '3.4s', '0.4', 'rgba(251, 113, 133, 0.9)'],
-            ['47%', 7, '11s', '1s', '0.5', 'rgba(56, 189, 248, 0.9)'],
-            ['59%', 6, '10.5s', '2.6s', '0.45', 'rgba(251, 191, 36, 0.9)'],
-            ['70%', 5, '9.5s', '4s', '0.4', 'rgba(34, 211, 238, 0.9)'],
-            ['82%', 8, '12s', '1.3s', '0.5', 'rgba(56, 189, 248, 0.9)'],
-            ['92%', 5, '9s', '3s', '0.4', 'rgba(251, 113, 133, 0.9)'],
+            ['10%', 6, '10s', '0s', '0.5', 'rgba(239, 68, 68, 0.9)'],
+            ['22%', 8, '12s', '2s', '0.45', 'rgba(20, 184, 166, 0.9)'],
+            ['35%', 5, '9s', '3.4s', '0.4', 'rgba(217, 119, 6, 0.9)'],
+            ['47%', 7, '11s', '1s', '0.5', 'rgba(20, 184, 166, 0.9)'],
+            ['59%', 6, '10.5s', '2.6s', '0.45', 'rgba(239, 68, 68, 0.9)'],
+            ['70%', 5, '9.5s', '4s', '0.4', 'rgba(217, 119, 6, 0.9)'],
+            ['82%', 8, '12s', '1.3s', '0.5', 'rgba(20, 184, 166, 0.9)'],
+            ['92%', 5, '9s', '3s', '0.4', 'rgba(239, 68, 68, 0.9)'],
         ];
     @endphp
 
@@ -178,9 +261,9 @@
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 35%, rgba(34, 211, 238, 0.28), rgba(34, 211, 238, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 55%, rgba(251, 113, 133, 0.14), rgba(251, 113, 133, 0) 60%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 35%, rgba(20, 184, 166, 0.24), rgba(20, 184, 166, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 55%, rgba(217, 119, 6, 0.14), rgba(217, 119, 6, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
             <!-- Canvas weave texture -->
             <div class="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]">
@@ -225,7 +308,7 @@
                     See the tools
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl es-btn-artist px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
                     Create your schedule
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -283,7 +366,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to grow your <span class="text-gradient-artist">collector base</span>
+                    Everything to grow your <span class="es-brush"><span class="text-gradient-artist">collector base</span><svg class="es-brush-stroke" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M5,9 C70,3 130,12 185,6 C235,1 275,9 296,5"></path></svg></span>
                 </h2>
             </div>
 
@@ -308,7 +391,7 @@
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-100 to-cyan-100 p-4 dark:border-sky-400/30 dark:from-sky-950 dark:to-cyan-950">
+                                    <div class="es-smear max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-100 to-cyan-100 p-4 dark:border-sky-400/30 dark:from-sky-950 dark:to-cyan-950">
                                         <div class="mb-3 flex items-center gap-3">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-cyan-500 text-sm font-semibold text-white">EM</div>
                                             <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Elena Martinez</div><div class="text-xs text-sky-600 dark:text-sky-300">Upcoming Exhibition</div></div>
@@ -397,7 +480,11 @@
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Galleries add your show, it auto-appears</h3>
                                 <p class="text-lg text-gray-500 dark:text-gray-400">When a gallery adds your exhibition to their calendar, it automatically appears on yours. One listing, both schedules updated.</p>
                             </div>
-                            <div class="flex items-center justify-center" aria-hidden="true">
+                            <div class="flex flex-col items-center justify-center gap-3" aria-hidden="true">
+                                <span class="artist-frame-badge es-frame-chip glass inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">
+                                    <svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    Now on view
+                                </span>
                                 <div class="flex items-center gap-4">
                                     <div class="w-32 rounded-xl border border-blue-400/30 bg-blue-500/15 p-4">
                                         <div class="mb-2 text-center text-xs font-semibold text-blue-600 dark:text-blue-300">Gallery</div>
@@ -444,7 +531,7 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Share exhibition announcements on social media instantly. No design tools needed.</p>
                         <div class="mt-auto flex justify-center" aria-hidden="true">
                             <div class="relative">
-                                <div class="flex h-32 w-32 flex-col items-center justify-center rounded-lg border border-sky-700 bg-gradient-to-br from-sky-800 to-cyan-900 p-3 text-center">
+                                <div class="es-canvas-frame flex h-32 w-32 flex-col items-center justify-center bg-gradient-to-br from-sky-800 to-cyan-900 p-3 text-center">
                                     <div class="mb-1 text-[8px] uppercase tracking-wider text-sky-300">Exhibition</div>
                                     <div class="text-xs font-semibold text-white">Fragments of Light</div>
                                     <div class="mt-1 text-[8px] text-sky-300">Gallery Row / Mar 15</div>
@@ -542,8 +629,8 @@
     <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-24 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(14, 165, 233, 0.24), rgba(14, 165, 233, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(251, 113, 133, 0.16), rgba(251, 113, 133, 0) 60%); opacity: 0.5;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(20, 184, 166, 0.22), rgba(20, 184, 166, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(239, 68, 68, 0.16), rgba(239, 68, 68, 0) 60%); opacity: 0.5;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 <div class="es-dab absolute inset-0">
                     @foreach ($dabs as [$l, $s, $d, $dl, $op, $col])
@@ -555,7 +642,7 @@
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-16 max-w-2xl text-center">
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Plan your <span class="text-gradient-artist">exhibition season</span>
+                        Plan your <span class="es-brush"><span class="text-gradient-artist">exhibition season</span><svg class="es-brush-stroke" viewBox="0 0 300 14" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M5,9 C70,4 130,11 185,6 C235,2 275,8 296,5"></path></svg></span>
                     </h2>
                     <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         One schedule for every show throughout the year.
@@ -699,7 +786,7 @@
             <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-600 to-cyan-600 text-xl font-bold text-white shadow-lg shadow-sky-600/25">
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-btn-artist text-xl font-bold text-white shadow-lg">
                             {{ $num }}
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
@@ -734,7 +821,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -754,19 +841,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-art-galleries', 'Art Galleries'], ['/for-dance-groups', 'Dance Groups'], ['/for-circus-acrobatics', 'Circus & Acrobatics'], ['/for-musicians', 'Musicians']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors es-related-title dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -816,9 +903,9 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-sky-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.32), rgba(14, 165, 233, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(20, 184, 166, 0.3), rgba(20, 184, 166, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     <div class="es-dab absolute inset-0">
                         @foreach ($dabs as [$l, $s, $d, $dl, $op, $col])
@@ -842,7 +929,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl es-btn-artist px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

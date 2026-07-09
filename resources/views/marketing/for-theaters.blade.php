@@ -106,8 +106,11 @@
 
     <style {!! nonce_attr() !!}>
         /* For-theaters "The Marquee" styles. The shared es-* motion system
-           lives in marketing.css; this holds only the rose->amber marquee
-           gradient text and the chasing marquee bulbs along the top edge. */
+           lives in marketing.css; this holds the rose->amber marquee gradient
+           text, the chasing marquee bulbs (now the exclusive owner of this
+           motif: hero, how-it-works band, and finale), red-velvet curtain
+           folds, a playbill serif, a gilded season-pass frame, and the
+           rose/amber bento chips and hover states. */
         .text-gradient-stage {
             background: linear-gradient(90deg, #e11d48, #dc2626, #d97706);
             -webkit-background-clip: text;
@@ -120,6 +123,8 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
+
+        /* Chasing marquee bulbs */
         @keyframes es-marquee-bulb {
             0%, 100% { opacity: 0.3; box-shadow: 0 0 2px rgba(251, 191, 36, 0.3); }
             50% { opacity: 1; box-shadow: 0 0 8px rgba(251, 191, 36, 0.8), 0 0 12px rgba(251, 191, 36, 0.4); }
@@ -128,6 +133,77 @@
             animation: es-marquee-bulb 1.6s ease-in-out infinite;
             animation-delay: var(--d, 0s);
         }
+
+        /* Red-velvet curtain: soft vertical folds at the hero and finale edges */
+        .stage-curtain {
+            background-image: repeating-linear-gradient(90deg,
+                rgba(120, 12, 20, 0.00) 0px,
+                rgba(150, 20, 28, 0.30) 8px,
+                rgba(74, 8, 14, 0.46) 16px,
+                rgba(150, 20, 28, 0.30) 24px,
+                rgba(120, 12, 20, 0.00) 32px);
+        }
+        .dark .stage-curtain {
+            background-image: repeating-linear-gradient(90deg,
+                rgba(140, 14, 22, 0.00) 0px,
+                rgba(162, 24, 32, 0.44) 8px,
+                rgba(52, 5, 10, 0.68) 16px,
+                rgba(162, 24, 32, 0.44) 24px,
+                rgba(140, 14, 22, 0.00) 32px);
+        }
+        .stage-curtain-l {
+            -webkit-mask-image: linear-gradient(90deg, #000 8%, transparent);
+            mask-image: linear-gradient(90deg, #000 8%, transparent);
+        }
+        .stage-curtain-r {
+            -webkit-mask-image: linear-gradient(-90deg, #000 8%, transparent);
+            mask-image: linear-gradient(-90deg, #000 8%, transparent);
+        }
+
+        /* Playbill serif with act/scene small caps for the show-run mock */
+        .playbill { font-family: Georgia, 'Times New Roman', serif; }
+        .playbill-caps {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-variant: small-caps;
+            letter-spacing: 0.08em;
+        }
+
+        /* Gilded frame edge for the season-pass / show-run card */
+        .gilded-frame {
+            box-shadow:
+                inset 0 0 0 1px rgba(253, 224, 138, 0.55),
+                inset 0 0 0 4px rgba(202, 138, 4, 0.18),
+                inset 0 2px 22px rgba(217, 168, 74, 0.12),
+                0 8px 24px -12px rgba(180, 132, 47, 0.45);
+        }
+        .dark .gilded-frame {
+            box-shadow:
+                inset 0 0 0 1px rgba(253, 224, 138, 0.45),
+                inset 0 0 0 4px rgba(180, 132, 47, 0.30),
+                inset 0 2px 26px rgba(217, 168, 74, 0.16),
+                0 8px 28px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Rose / amber bento chips */
+        .stage-chip { background-color: #ffe4e6; color: #9f1239; }
+        .dark .stage-chip { background-color: rgba(244, 63, 94, 0.14); color: #fda4af; }
+        .stage-chip-amber { background-color: #fef3c7; color: #92400e; }
+        .dark .stage-chip-amber { background-color: rgba(245, 158, 11, 0.14); color: #fcd34d; }
+
+        /* Rose hover for related-page cards and FAQ rows */
+        .stage-rel { transition: border-color 0.2s ease, background-color 0.2s ease; }
+        .stage-rel:hover { border-color: #fda4af; background-color: #fff1f2; }
+        .dark .stage-rel:hover { border-color: rgba(244, 63, 94, 0.35); background-color: rgba(244, 63, 94, 0.06); }
+        .stage-rel:hover .stage-rel-title,
+        .stage-rel:hover .stage-rel-arrow { color: #e11d48; }
+        .dark .stage-rel:hover .stage-rel-title,
+        .dark .stage-rel:hover .stage-rel-arrow { color: #fb7185; }
+        .stage-faq { transition: border-color 0.2s ease; }
+        .stage-faq:hover { border-color: #fda4af; }
+        .dark .stage-faq:hover { border-color: rgba(244, 63, 94, 0.35); }
+        .stage-faq summary:hover h3 { color: #e11d48; }
+        .dark .stage-faq summary:hover h3 { color: #fb7185; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-bulb { animation: none !important; opacity: 0.7 !important; }
         }
@@ -152,6 +228,10 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
+
+        <!-- Red-velvet curtains at the wings -->
+        <div class="stage-curtain stage-curtain-l pointer-events-none absolute left-0 top-0 h-full w-32" aria-hidden="true"></div>
+        <div class="stage-curtain stage-curtain-r pointer-events-none absolute right-0 top-0 h-full w-32" aria-hidden="true"></div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
@@ -233,20 +313,20 @@
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Opening night to closing curtain</h3>
                                 <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Set up your production once with all performance dates. Thursday preview, weekend matinees, final Sunday - all linked together. Patrons see the full run at a glance.</p>
                                 <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Show runs</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Season passes</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Multi-performance</span>
+                                    <span class="stage-chip inline-flex items-center rounded-full px-3 py-1 text-sm">Show runs</span>
+                                    <span class="stage-chip-amber inline-flex items-center rounded-full px-3 py-1 text-sm">Season passes</span>
+                                    <span class="stage-chip inline-flex items-center rounded-full px-3 py-1 text-sm">Multi-performance</span>
                                 </div>
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-rose-300 bg-gradient-to-br from-rose-50 to-red-50 p-4 dark:border-rose-400/30 dark:from-rose-950 dark:to-red-950">
-                                        <div class="mb-3 text-center"><div class="font-semibold text-gray-900 dark:text-white">Hamlet</div><div class="text-sm text-rose-500 dark:text-rose-300">March 2024 Run</div></div>
+                                    <div class="playbill gilded-frame max-w-xs rounded-2xl border border-rose-300 bg-gradient-to-br from-rose-50 to-red-50 p-4 dark:border-rose-400/30 dark:from-rose-950 dark:to-red-950">
+                                        <div class="mb-3 text-center"><div class="playbill-caps text-lg font-semibold text-gray-900 dark:text-white">Hamlet</div><div class="playbill-caps text-sm text-rose-500 dark:text-rose-300">March 2024 Run</div></div>
                                         <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-500/15 p-2" style="--i: 0;"><div class="w-12 font-mono text-xs text-amber-600 dark:text-amber-300">Mar 7</div><span class="text-sm text-gray-900 dark:text-white">Preview</span><span class="ml-auto text-xs text-amber-600 dark:text-amber-300">$25</span></div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-rose-400/30 bg-rose-500/15 p-2" style="--i: 1;"><div class="w-12 font-mono text-xs text-rose-600 dark:text-rose-300">Mar 8</div><span class="text-sm text-gray-900 dark:text-white">Opening Night</span><span class="ml-auto text-xs text-rose-600 dark:text-rose-300">$45</span></div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="w-12 font-mono text-xs text-gray-500 dark:text-gray-400">Mar 9</div><span class="text-sm text-gray-600 dark:text-gray-300">Sat Matinee</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">$35</span></div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="w-12 font-mono text-xs text-gray-500 dark:text-gray-400">Mar 9</div><span class="text-sm text-gray-600 dark:text-gray-300">Sat Evening</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">$40</span></div>
+                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-500/15 p-2" style="--i: 0;"><div class="w-12 font-mono text-xs text-amber-600 dark:text-amber-300">Mar 7</div><span class="playbill-caps text-sm text-gray-900 dark:text-white">Preview</span><span class="ml-auto text-xs text-amber-600 dark:text-amber-300">$25</span></div>
+                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-rose-400/30 bg-rose-500/15 p-2" style="--i: 1;"><div class="w-12 font-mono text-xs text-rose-600 dark:text-rose-300">Mar 8</div><span class="playbill-caps text-sm text-gray-900 dark:text-white">Opening Night</span><span class="ml-auto text-xs text-rose-600 dark:text-rose-300">$45</span></div>
+                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="w-12 font-mono text-xs text-gray-500 dark:text-gray-400">Mar 9</div><span class="playbill-caps text-sm text-gray-600 dark:text-gray-300">Sat Matinee</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">$35</span></div>
+                                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="w-12 font-mono text-xs text-gray-500 dark:text-gray-400">Mar 9</div><span class="playbill-caps text-sm text-gray-600 dark:text-gray-300">Sat Evening</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">$40</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -310,9 +390,9 @@
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Scan tickets at the door</h3>
                                 <p class="text-lg text-gray-500 dark:text-gray-400">Use any smartphone as a box office scanner. See who's checked in, catch duplicates, track attendance. No expensive hardware.</p>
                                 <div class="mt-6 flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Will call</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">E-tickets</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Any device</span>
+                                    <span class="stage-chip inline-flex items-center rounded-full px-3 py-1 text-sm">Will call</span>
+                                    <span class="stage-chip-amber inline-flex items-center rounded-full px-3 py-1 text-sm">E-tickets</span>
+                                    <span class="stage-chip inline-flex items-center rounded-full px-3 py-1 text-sm">Any device</span>
                                 </div>
                             </div>
                             <div class="flex justify-center" aria-hidden="true">
@@ -420,9 +500,9 @@
                             <h2 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-rose-600 dark:text-white dark:group-hover:text-rose-400 lg:text-3xl">Stream to the world</h2>
                             <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Can't make it to the theater? Sell tickets to viewers at home. Live stream your productions worldwide. Virtual ticket buyers get the link, everyone else stays out.</p>
                             <div class="mb-4 flex flex-wrap justify-center gap-3 lg:justify-start">
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Live streaming</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Virtual tickets</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Global reach</span>
+                                <span class="stage-chip inline-flex items-center rounded-full px-3 py-1 text-sm">Live streaming</span>
+                                <span class="stage-chip-amber inline-flex items-center rounded-full px-3 py-1 text-sm">Virtual tickets</span>
+                                <span class="stage-chip inline-flex items-center rounded-full px-3 py-1 text-sm">Global reach</span>
                             </div>
                             <span class="inline-flex items-center gap-2 font-medium text-rose-600 transition-all group-hover:gap-3 dark:text-rose-400">
                                 Learn more
@@ -545,6 +625,13 @@
     <!-- ============================================================ -->
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="absolute left-0 right-0 top-0 z-20 flex justify-center overflow-hidden" aria-hidden="true">
+                <div class="flex gap-4 px-8 py-1.5">
+                    @for ($i = 0; $i < 30; $i++)
+                        <span class="es-bulb h-2 w-2 shrink-0 rounded-full bg-amber-400" style="--d: {{ $i * 0.1 }}s;"></span>
+                    @endfor
+                </div>
+            </div>
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(225, 29, 72, 0.26), rgba(225, 29, 72, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(245, 158, 11, 0.24), rgba(245, 158, 11, 0) 60%); opacity: 0.55;"></div>
@@ -576,7 +663,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-stage">Key features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -595,7 +682,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-rose-600 hover:underline dark:text-rose-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -612,22 +699,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-stage">Related pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-venues', 'Venues'], ['/for-theater-performers', 'Theater Performers'], ['/for-community-centers', 'Community Centers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="stage-rel flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="stage-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="stage-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-rose-600 hover:underline dark:text-rose-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -658,9 +745,9 @@
                     ['How do theatergoers discover our shows?', 'Audiences can follow your theater\'s schedule and receive email notifications when new productions are announced. Embed your season calendar on your website, share on social media, or send newsletters to subscribers.'],
                     ['Can I sell tickets with different seating options?', 'Yes. Create multiple ticket types per show - orchestra, mezzanine, balcony, student rush, or group rates. Connect your Stripe account and sell directly with zero platform fees. Every ticket includes a QR code for door scanning.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="stage-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -682,6 +769,8 @@
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(225, 29, 72, 0.32), rgba(225, 29, 72, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
+                <div class="stage-curtain stage-curtain-l pointer-events-none absolute left-0 top-0 h-full w-32" aria-hidden="true"></div>
+                <div class="stage-curtain stage-curtain-r pointer-events-none absolute right-0 top-0 h-full w-32" aria-hidden="true"></div>
                 <div class="absolute left-0 right-0 top-0 z-20 flex justify-center overflow-hidden" aria-hidden="true">
                     <div class="flex gap-4 px-8 py-1.5">
                         @for ($i = 0; $i < 24; $i++)

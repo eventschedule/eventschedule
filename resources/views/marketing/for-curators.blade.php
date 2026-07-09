@@ -104,6 +104,166 @@
         }
     </script>
 
+    <style {!! nonce_attr() !!}>
+        /* For-curators "The Guide" styles. The shared es-* motion system lives
+           in marketing.css; this holds the saffron-to-coral guide gradient, the
+           city-map pin-network motif (dotted routes that draw themselves, one
+           pin pulsing), the city-search map grid, the APPROVED stamp, and the
+           accent recolor for the See-all links and related-page cards. */
+        .text-gradient-guide {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-guide {
+            background: linear-gradient(135deg, #fbbf24, #fb923c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* City-map pin network: 5 pins joined by dotted routes that draw
+           themselves, one pin pulsing. A network, deliberately unlike a single
+           roaming ping. */
+        .es-mapnet { width: 100%; height: auto; overflow: visible; opacity: 0.4; }
+        .dark .es-mapnet { opacity: 0.55; }
+        .es-net-route {
+            fill: none;
+            stroke: #f97316;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+            stroke-dasharray: 0.5 5;
+        }
+        .dark .es-net-route { stroke: #fb923c; }
+        .es-net-body { fill: #ea580c; }
+        .dark .es-net-body { fill: #fb923c; }
+        .es-net-eye { fill: rgba(255, 248, 237, 0.92); }
+        .es-net-ring { fill: none; stroke: #f97316; stroke-width: 1.4; }
+        .dark .es-net-ring { stroke: #fdba74; }
+        .es-net-pin { transform-box: fill-box; transform-origin: center; }
+        .es-net-pulse { transform-box: fill-box; transform-origin: center; opacity: 0; }
+
+        /* Motion on: routes stream in, pins pop, one pin pulses. Gated behind
+           .es-anim so no-JS / crawlers / reduced-motion see the network drawn. */
+        .es-anim .es-net-route {
+            opacity: 0;
+            stroke-dashoffset: 130;
+            animation: es-net-draw 2.6s ease-out forwards;
+        }
+        .es-anim .es-net-route.r2 { animation-delay: 0.4s; }
+        .es-anim .es-net-route.r3 { animation-delay: 0.8s; }
+        .es-anim .es-net-route.r4 { animation-delay: 1.2s; }
+        .es-anim .es-net-route.r5 { animation-delay: 1.5s; }
+        .es-anim .es-net-pin { opacity: 0; animation: es-net-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .es-anim .es-net-pin.p1 { animation-delay: 0.25s; }
+        .es-anim .es-net-pin.p2 { animation-delay: 0.7s; }
+        .es-anim .es-net-pin.p3 { animation-delay: 1s; }
+        .es-anim .es-net-pin.p4 { animation-delay: 1.3s; }
+        .es-anim .es-net-pin.p5 { animation-delay: 1.6s; }
+        .es-anim .es-net-pulse { animation: es-net-pulse 2.6s ease-out infinite; animation-delay: 2s; }
+        @keyframes es-net-draw {
+            0% { opacity: 0; stroke-dashoffset: 130; }
+            30% { opacity: 1; }
+            100% { opacity: 1; stroke-dashoffset: 0; }
+        }
+        @keyframes es-net-pop {
+            0% { opacity: 0; transform: translateY(-4px) scale(0.4); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes es-net-pulse {
+            0% { transform: scale(0.6); opacity: 0.55; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        /* Faint map grid behind the city-search card (sits behind content via
+           the z-index:-1 within .es-tilt-inner's will-change stacking context) */
+        .es-mapgrid {
+            z-index: -1;
+            background-image:
+                linear-gradient(to right, rgba(245, 158, 11, 0.10) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(245, 158, 11, 0.10) 1px, transparent 1px);
+            background-size: 22px 22px;
+            -webkit-mask-image: radial-gradient(ellipse 85% 75% at 72% 28%, #000 22%, transparent 78%);
+            mask-image: radial-gradient(ellipse 85% 75% at 72% 28%, #000 22%, transparent 78%);
+        }
+        .dark .es-mapgrid {
+            background-image:
+                linear-gradient(to right, rgba(251, 146, 60, 0.13) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(251, 146, 60, 0.13) 1px, transparent 1px);
+        }
+
+        /* APPROVED stamp on the approval mock */
+        .es-stamp {
+            position: absolute;
+            top: -0.6rem;
+            right: 0.25rem;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.15rem 0.45rem;
+            border: 2px solid rgba(234, 88, 12, 0.55);
+            border-radius: 0.4rem;
+            background: rgba(245, 158, 11, 0.10);
+            color: #ea580c;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            transform: rotate(-8deg);
+        }
+        .es-stamp svg { width: 0.7rem; height: 0.7rem; }
+        .dark .es-stamp {
+            border-color: rgba(251, 146, 60, 0.6);
+            background: rgba(251, 146, 60, 0.12);
+            color: #fdba74;
+        }
+        .es-anim .es-stamp-float {
+            animation: es-stamp-in 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+            animation-delay: 0.5s;
+        }
+        @keyframes es-stamp-in {
+            0% { opacity: 0; transform: rotate(10deg) scale(1.8); }
+            60% { opacity: 1; }
+            100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+        }
+
+        /* Accent recolor for the hard-coded blue See-all links + related cards */
+        .guide-link { color: #ea580c; }
+        .dark .guide-link { color: #fb923c; }
+        .guide-rel { transition: all 0.2s ease; }
+        .guide-rel:hover { border-color: rgba(245, 158, 11, 0.45); background-color: rgba(245, 158, 11, 0.06); }
+        .dark .guide-rel:hover { border-color: rgba(249, 115, 22, 0.35); background-color: rgba(249, 115, 22, 0.07); }
+        .guide-rel:hover .guide-rel-ink { color: #ea580c; }
+        .dark .guide-rel:hover .guide-rel-ink { color: #fb923c; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-net-route, .es-net-pin, .es-net-pulse, .es-stamp-float { animation: none !important; }
+            .es-net-route { opacity: 0.85 !important; stroke-dashoffset: 0 !important; }
+            .es-net-pin { opacity: 1 !important; }
+            .es-net-pulse { opacity: 0 !important; }
+            .es-stamp-float { opacity: 1 !important; transform: rotate(-8deg) !important; }
+        }
+    </style>
+
+    @php
+        $esPinNetwork = <<<'SVG'
+<svg class="es-mapnet" viewBox="0 0 220 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path class="es-net-route r1" d="M38,66 Q62,50 92,44" />
+<path class="es-net-route r2" d="M92,44 Q124,48 150,62" />
+<path class="es-net-route r3" d="M38,66 Q50,92 72,112" />
+<path class="es-net-route r4" d="M72,112 Q126,122 176,110" />
+<path class="es-net-route r5" d="M150,62 Q170,84 176,110" />
+<g transform="translate(38,66)"><g class="es-net-pin p1"><path class="es-net-body" d="M0,0 C-2.2,-3.6 -6,-6.6 -6,-11 A6,6 0 1,1 6,-11 C6,-6.6 2.2,-3.6 0,0 Z" /><circle class="es-net-eye" cx="0" cy="-11" r="2.3" /></g></g>
+<g transform="translate(92,44)"><circle class="es-net-pulse es-net-ring" cx="0" cy="-11" r="6" /><g class="es-net-pin p2"><path class="es-net-body" d="M0,0 C-2.2,-3.6 -6,-6.6 -6,-11 A6,6 0 1,1 6,-11 C6,-6.6 2.2,-3.6 0,0 Z" /><circle class="es-net-eye" cx="0" cy="-11" r="2.3" /></g></g>
+<g transform="translate(150,62)"><g class="es-net-pin p3"><path class="es-net-body" d="M0,0 C-2.2,-3.6 -6,-6.6 -6,-11 A6,6 0 1,1 6,-11 C6,-6.6 2.2,-3.6 0,0 Z" /><circle class="es-net-eye" cx="0" cy="-11" r="2.3" /></g></g>
+<g transform="translate(72,112)"><g class="es-net-pin p4"><path class="es-net-body" d="M0,0 C-2.2,-3.6 -6,-6.6 -6,-11 A6,6 0 1,1 6,-11 C6,-6.6 2.2,-3.6 0,0 Z" /><circle class="es-net-eye" cx="0" cy="-11" r="2.3" /></g></g>
+<g transform="translate(176,110)"><g class="es-net-pin p5"><path class="es-net-body" d="M0,0 C-2.2,-3.6 -6,-6.6 -6,-11 A6,6 0 1,1 6,-11 C6,-6.6 2.2,-3.6 0,0 Z" /><circle class="es-net-eye" cx="0" cy="-11" r="2.3" /></g></g>
+</svg>
+SVG;
+    @endphp
+
     <!-- ============================================================ -->
     <!-- 1. Hero: the feed                                            -->
     <!-- ============================================================ -->
@@ -114,6 +274,7 @@
             <div class="es-aurora es-aurora-3"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <div class="pointer-events-none absolute inset-0 flex items-center justify-center"><div class="w-full max-w-2xl">{!! $esPinNetwork !!}</div></div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -126,7 +287,7 @@
 
             <h1 class="es-balance mb-8 text-[2.75rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Build the ultimate</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">local guide</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-guide es-gradient-anim">local guide</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -178,7 +339,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">The curator's toolkit</span>
                 </div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything happening, <span class="text-gradient">in one place</span>
+                    Everything happening, <span class="text-gradient-guide">in one place</span>
                 </h2>
             </div>
 
@@ -234,6 +395,7 @@
                 <!-- City Search Import -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="es-mapgrid absolute inset-0" aria-hidden="true"></div>
                         <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             City Search
@@ -272,7 +434,11 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Review before publishing</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Events from external sources go to your inbox. Review, edit, and approve before they appear on your schedule.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
+                        <div class="relative mt-auto space-y-2" aria-hidden="true">
+                            <div class="es-stamp es-stamp-float">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                Approved
+                            </div>
                             <div class="es-ai-field flex items-center gap-3 rounded-xl border border-sky-400/30 bg-sky-500/15 p-3" style="--i: 0;">
                                 <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Jazz Night @ Blue Note</div><div class="text-xs text-sky-600 dark:text-sky-300">Pending review</div></div>
                                 <div class="flex gap-1">
@@ -336,8 +502,8 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Email schedule graphics</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Generate shareable graphics of your weekly or monthly schedule. Perfect for newsletters and social media.</p>
-                        <div class="mt-auto rounded-xl border border-blue-300 bg-gradient-to-br from-blue-50 to-sky-50 p-3 dark:border-blue-400/30 dark:from-blue-950 dark:to-sky-950" aria-hidden="true">
-                            <div class="mb-2 text-center text-xs text-blue-600 dark:text-blue-300">This Week in Austin</div>
+                        <div class="mt-auto rounded-xl border border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 p-3 dark:border-amber-400/30 dark:from-amber-950 dark:to-orange-950" aria-hidden="true">
+                            <div class="mb-2 text-center text-xs text-amber-600 dark:text-amber-300">This Week in Austin</div>
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2 text-xs"><span class="w-8 text-gray-500 dark:text-gray-400">Fri</span><span class="text-gray-900 dark:text-white">Jazz @ Blue Note</span></div>
                                 <div class="flex items-center gap-2 text-xs"><span class="w-8 text-gray-500 dark:text-gray-400">Sat</span><span class="text-gray-900 dark:text-white">Comedy @ Roxy</span></div>
@@ -412,7 +578,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Already have a community?
+                    Already have a <span class="text-gradient-guide">community</span>?
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     If you're sharing events in a WhatsApp group, Facebook group, or anywhere else, you're already a curator.
@@ -559,6 +725,105 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- Perfect for (curator types)                                  -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Perfect for every kind of <span class="text-gradient-guide">curator</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    However you gather what's happening, Event Schedule gives your guide a permanent home.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                <!-- City Guides -->
+                <x-sub-audience-card
+                    name="City Guides"
+                    description="Aggregate every gig, market, and pop-up in your city into one guide locals actually check."
+                    icon-color="amber"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Festival Programmers -->
+                <x-sub-audience-card
+                    name="Festival Programmers"
+                    description="Publish your full multi-stage lineup and let attendees follow set times as they firm up."
+                    icon-color="rose"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Scene Blogs -->
+                <x-sub-audience-card
+                    name="Scene Blogs"
+                    description="Turn your niche coverage into a living calendar. Import events straight from posts and flyers."
+                    icon-color="sky"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Campus Calendars -->
+                <x-sub-audience-card
+                    name="Campus Calendars"
+                    description="Pull together club nights, lectures, and games so students never miss what's on."
+                    icon-color="emerald"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Tourism & Visitor Boards -->
+                <x-sub-audience-card
+                    name="Tourism & Visitor Boards"
+                    description="Show visitors everything happening this week, updated automatically as venues post."
+                    icon-color="cyan"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18 15 15 0 010-18z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <!-- Community Newsletters -->
+                <x-sub-audience-card
+                    name="Community Newsletters"
+                    description="Curate a weekly roundup and send the highlights straight to your subscribers' inboxes."
+                    icon-color="orange"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 5. How it works (dark band)                                  -->
     <!-- ============================================================ -->
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
@@ -567,6 +832,7 @@
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.3), rgba(245, 158, 11, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(249, 115, 22, 0.26), rgba(249, 115, 22, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="pointer-events-none absolute inset-0 flex items-center justify-center"><div class="w-full max-w-2xl">{!! $esPinNetwork !!}</div></div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-4xl">
@@ -576,7 +842,7 @@
                         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">Quick setup</span>
                     </div>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                        Start curating events in <span class="text-gradient">three steps</span>
+                        Start curating events in <span class="text-gradient-guide">three steps</span>
                     </h2>
                 </div>
 
@@ -625,7 +891,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="guide-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -645,19 +911,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-talent', 'Talent'], ['/for-venues', 'Venues'], ['/for-community-centers', 'Community Centers'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group guide-rel flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="guide-rel-ink text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="guide-rel-ink w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="guide-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -674,7 +940,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="text-gradient-guide">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything curators ask about Event Schedule.
@@ -711,11 +977,12 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.32), rgba(245, 158, 11, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="pointer-events-none absolute inset-0 flex items-center justify-center"><div class="w-full max-w-2xl">{!! $esPinNetwork !!}</div></div>
                 </div>
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Become the go-to <span class="text-gradient">local guide</span>
+                        Become the go-to <span class="text-gradient-guide">local guide</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Start curating in minutes. Free forever.

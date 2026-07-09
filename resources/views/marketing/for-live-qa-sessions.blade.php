@@ -137,8 +137,10 @@
 
     <style {!! nonce_attr() !!}>
         /* For-live-qa-sessions "The Conversation" styles. The shared es-* motion
-           system lives in marketing.css; this holds the warm Q&A glow gradient,
-           the drifting live-questions card, and the rising chat-bubble motif. */
+           system lives in marketing.css; this holds the warm amber Q&A gradient plus
+           the two-voice system - questions in amber, answers in cool sky - carried
+           through the rising speech-bubble field, a raised-hand pulse, an upvote
+           tick, and a stack of pre-submitted questions. */
         .text-gradient-qa {
             background: linear-gradient(135deg, #d97706, #f59e0b, #ea580c);
             -webkit-background-clip: text;
@@ -153,30 +155,78 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(251, 191, 36, 0.3);
         }
-        @keyframes es-qa-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-qa-float { animation: es-qa-float 6s ease-in-out infinite; }
 
-        /* Live-questions motif: speech bubbles rise and glow in a staggered wave,
-           like questions streaming into a live Q&A. */
+        /* Live-questions motif: speech bubbles rise and glow in a staggered wave.
+           Question bubbles are warm amber with a bottom-left tail; answer bubbles
+           (.is-a) are cool sky with a mirrored bottom-right tail, so the rising
+           field reads as a back-and-forth conversation. */
         .es-qbubble { display: flex; align-items: flex-end; }
         .es-qbubble-dot {
             flex: 0 0 auto;
             width: 14px; height: 11px;
             border-radius: 6px 6px 6px 2px;
-            background: linear-gradient(to right, rgba(245, 158, 11, 0.6), rgba(234, 88, 12, 0.6));
+            background: var(--qb-bg, linear-gradient(to right, rgba(245, 158, 11, 0.6), rgba(234, 88, 12, 0.6)));
             animation: es-qbubble var(--qb-dur, 2.8s) ease-in-out infinite;
             animation-delay: var(--qb-delay, 0s);
         }
+        .es-qbubble-dot.is-a {
+            border-radius: 6px 6px 2px 6px;
+            --qb-bg: linear-gradient(to right, rgba(56, 189, 248, 0.6), rgba(14, 165, 233, 0.6));
+            --qb-glow: rgba(56, 189, 248, 0.5);
+        }
         @keyframes es-qbubble {
             0%, 100% { opacity: 0.2; transform: translateY(4px) scale(0.85); }
-            50% { opacity: 0.9; transform: translateY(0) scale(1); box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+            50% { opacity: 0.9; transform: translateY(0) scale(1); box-shadow: 0 0 8px var(--qb-glow, rgba(245, 158, 11, 0.5)); }
         }
+
+        /* Raised-hand pulse in the dark band - a hand waving to be called on. */
+        @keyframes es-hand-raise {
+            0%, 100% { transform: translateY(0) rotate(-5deg); opacity: 0.55; }
+            50% { transform: translateY(-6px) rotate(5deg); opacity: 1; }
+        }
+        .es-hand { color: rgba(251, 191, 36, 0.8); transform-origin: bottom center; animation: es-hand-raise 3s ease-in-out infinite; }
+
+        /* Upvote tick: the answer-voice vote chip nudges up on a loop. */
+        @keyframes es-upvote { 0%, 55%, 100% { transform: translateY(0); } 28% { transform: translateY(-3px); } }
+        .es-upvote-tick { animation: es-upvote 2.6s ease-in-out infinite; }
+
+        /* Stacked pre-submitted question cards. */
+        .es-qstack { position: relative; height: 2.7rem; margin-top: 0.65rem; }
+        .es-qstack-layer { position: absolute; border-radius: 0.5rem; height: 1.9rem; }
+        .es-qstack-1 { left: 10px; right: 10px; top: 9px; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .es-qstack-2 { left: 5px; right: 5px; top: 4.5px; background: rgba(245, 158, 11, 0.16); border: 1px solid rgba(245, 158, 11, 0.25); }
+        .es-qstack-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; border-radius: 0.5rem; padding: 0.4rem 0.55rem; background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(245, 158, 11, 0.3); }
+        .dark .es-qstack-top { background: rgba(255, 255, 255, 0.1); }
+        .es-qstack-q { font-size: 10px; color: #92400e; }
+        .dark .es-qstack-q { color: #fcd34d; }
+        .es-upvote { display: inline-flex; align-items: center; gap: 2px; border-radius: 0.3rem; padding: 1px 6px; font-size: 9px; font-weight: 700; background: rgba(56, 189, 248, 0.2); color: #0284c7; }
+        .dark .es-upvote { color: #7dd3fc; }
+        .es-upvote svg { width: 9px; height: 9px; }
+
+        /* Speech-bubble corner tail for the bento mock cards. */
+        .es-bubble-tail { position: relative; }
+        .es-bubble-tail::after {
+            content: ""; position: absolute; bottom: -8px; left: 22px;
+            width: 0; height: 0;
+            border-left: 8px solid transparent; border-right: 8px solid transparent;
+            border-top: 8px solid var(--tail-color, rgba(245, 158, 11, 0.5));
+        }
+
+        /* Accent link + related-card hover recolor (warm amber, not brand blue). */
+        .qa-link { color: #b45309; font-weight: 500; }
+        .qa-link:hover { text-decoration: underline; }
+        .dark .qa-link { color: #fbbf24; }
+        .qa-related-card:hover { border-color: #fcd34d; background-color: #fffbeb; }
+        .dark .qa-related-card:hover { border-color: rgba(251, 191, 36, 0.3); background-color: rgba(251, 191, 36, 0.06); }
+        .qa-related-card:hover .qa-related-title { color: #d97706; }
+        .dark .qa-related-card:hover .qa-related-title { color: #fbbf24; }
+        .qa-related-card:hover .qa-related-arrow { color: #d97706; }
+        .dark .qa-related-card:hover .qa-related-arrow { color: #fbbf24; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-qa-float, .es-qbubble-dot { animation: none !important; }
+            .es-qbubble-dot, .es-hand, .es-upvote-tick { animation: none !important; }
             .es-qbubble-dot { opacity: 0.55; transform: none; }
+            .es-hand { transform: none; opacity: 0.8; }
         }
     </style>
 
@@ -193,8 +243,8 @@
             <!-- Rising questions along the bottom edge -->
             <div class="es-qbubble absolute bottom-0 left-0 right-0 hidden h-20 items-end justify-center gap-2 px-8 pb-6 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                 @for ($i = 0; $i < 26; $i++)
-                    @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; @endphp
-                    <span class="es-qbubble-dot" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
+                    @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp
+                    <span class="es-qbubble-dot {{ $voice }}" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
                 @endfor
             </div>
         </div>
@@ -307,7 +357,7 @@
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-4 dark:border-amber-400/30 dark:from-amber-950 dark:to-orange-950">
+                                    <div class="es-bubble-tail max-w-xs rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-100 to-orange-100 p-4 dark:border-amber-400/30 dark:from-amber-950 dark:to-orange-950" style="--tail-color: rgba(245, 158, 11, 0.55);">
                                         <div class="mb-3 flex items-center gap-3">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-sm font-semibold text-white">QA</div>
                                             <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Q&A Host</div><div class="text-xs text-amber-600 dark:text-amber-300">Session reminder</div></div>
@@ -320,6 +370,14 @@
                                         <div class="mt-3 flex gap-4 text-xs">
                                             <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-emerald-500 dark:text-emerald-400">72%</span> opened</div>
                                             <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-amber-500 dark:text-amber-400">38%</span> clicked</div>
+                                        </div>
+                                        <div class="es-qstack" aria-hidden="true">
+                                            <div class="es-qstack-layer es-qstack-1"></div>
+                                            <div class="es-qstack-layer es-qstack-2"></div>
+                                            <div class="es-qstack-top">
+                                                <span class="es-qstack-q">Pre-submitted question</span>
+                                                <span class="es-upvote es-upvote-tick"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" /></svg>42</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -396,7 +454,7 @@
                             </div>
                             <div class="flex items-center justify-center" aria-hidden="true">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-36 rounded-xl border border-teal-400/30 bg-teal-500/15 p-4">
+                                    <div class="es-bubble-tail w-36 rounded-xl border border-teal-400/30 bg-teal-500/15 p-4" style="--tail-color: rgba(20, 184, 166, 0.5);">
                                         <div class="mb-2 text-center text-xs font-semibold text-teal-600 dark:text-teal-300">Your Schedule</div>
                                         <div class="space-y-1.5">
                                             <div class="h-2 rounded bg-gray-300 dark:bg-white/20"></div>
@@ -439,9 +497,9 @@
                         <div class="mt-auto rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
                             <div class="space-y-1.5">
                                 <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Fri - Office Hours</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-sky-400/20 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-sky-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-sky-400/20 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-sky-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Office Hours</span></div>
                             </div>
                             <div class="mt-2 text-center text-[10px] text-amber-600 dark:text-amber-300">Repeats weekly</div>
                         </div>
@@ -532,10 +590,15 @@
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(217, 119, 6, 0.26), rgba(217, 119, 6, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(234, 88, 12, 0.2), rgba(234, 88, 12, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="es-hand absolute right-8 top-24 z-10 hidden lg:block" aria-hidden="true">
+                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12" />
+                    </svg>
+                </div>
                 <div class="es-qbubble absolute bottom-0 left-0 right-0 flex h-16 items-end justify-center gap-2 px-8 pb-4 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                     @for ($i = 0; $i < 26; $i++)
-                        @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; @endphp
-                        <span class="es-qbubble-dot" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
+                        @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp
+                        <span class="es-qbubble-dot {{ $voice }}" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
                     @endfor
                 </div>
             </div>
@@ -704,7 +767,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-qa">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
@@ -723,7 +786,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="qa-link inline-flex items-center">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -740,22 +803,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-qa">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-webinars', 'Webinars'], ['/for-virtual-conferences', 'Virtual Conferences'], ['/for-online-classes', 'Online Classes'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="qa-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="qa-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="qa-related-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="qa-link inline-flex items-center">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -811,8 +874,8 @@
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     <div class="es-qbubble absolute bottom-0 left-0 right-0 flex h-14 items-end justify-center gap-2 px-8 pb-4 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                         @for ($i = 0; $i < 22; $i++)
-                            @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; @endphp
-                            <span class="es-qbubble-dot" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
+                            @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp
+                            <span class="es-qbubble-dot {{ $voice }}" style="--qb-dur: {{ $dur }}s; --qb-delay: {{ $delay }}s;"></span>
                         @endfor
                     </div>
                 </div>

@@ -109,17 +109,133 @@
         /* ==============================================================
            For-magicians "The Reveal" styles. The shared es-* motion
            system (aurora, reveals, bento, finale) lives in
-           marketing.css; this block holds only this page's own effects:
-           the blue gradient text and the twinkling sparkles.
+           marketing.css; this block holds this page's black-velvet stage
+           identity: the champagne text gradient, the fanning-card motif,
+           the gold-foil poster frame, the conjure-from-blur reveal, and
+           the twinkling sparkles that sit as the secondary layer.
            ============================================================== */
 
-        .text-gradient-blue {
-            background: linear-gradient(135deg, #4E81FA, #0EA5E9);
+        /* Champagne accent: old gold -> champagne, over midnight black */
+        .text-gradient-champagne {
+            background: linear-gradient(135deg, #b45309, #d97706, #fcd34d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-champagne {
+            background: linear-gradient(135deg, #fcd34d, #fde68a, #fef3c7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
+        /* Champagne inline links (recolored from the hard-coded blue) */
+        .es-accent-link { color: #b45309; transition: color 0.2s ease; }
+        .es-accent-link:hover { color: #92400e; }
+        .dark .es-accent-link { color: #fcd34d; }
+        .dark .es-accent-link:hover { color: #fef3c7; }
+
+        /* Champagne primary button (recolored from blue -> sky) */
+        .es-btn-gold {
+            background-image: linear-gradient(to right, #b45309, #ea580c);
+            box-shadow: 0 10px 15px -3px rgba(180, 83, 9, 0.28), 0 4px 6px -4px rgba(180, 83, 9, 0.28);
+        }
+        .es-btn-gold:hover {
+            background-image: linear-gradient(to right, #92400e, #d9480c);
+            box-shadow: 0 22px 32px -10px rgba(217, 119, 6, 0.5);
+        }
+        .dark .es-btn-gold { background-image: linear-gradient(to right, #b45309, #f97316); }
+        .dark .es-btn-gold:hover { background-image: linear-gradient(to right, #92400e, #ea580c); }
+
+        /* Midnight-velvet vignette for the black hero and finale */
+        .es-velvet { background: radial-gradient(ellipse 80% 60% at 50% 32%, rgba(252, 211, 77, 0.05), transparent 70%); }
+        .dark .es-velvet {
+            background:
+                radial-gradient(ellipse 90% 70% at 50% 28%, rgba(252, 211, 77, 0.07), transparent 55%),
+                radial-gradient(ellipse 120% 90% at 50% 120%, rgba(0, 0, 0, 0.6), transparent 60%);
+        }
+
+        /* Warm the shared bento hover glints from blue to champagne */
+        .es-bento .es-glare {
+            background: radial-gradient(620px circle at var(--gx, 50%) var(--gy, 50%), rgba(217, 119, 6, 0.1), transparent 45%);
+        }
+        .dark .es-bento .es-glare {
+            background: radial-gradient(620px circle at var(--gx, 50%) var(--gy, 50%), rgba(252, 211, 77, 0.1), transparent 45%);
+        }
+        @supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+            .es-bento .es-ring-glow {
+                background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 50%), rgba(252, 211, 77, 0.6), rgba(180, 83, 9, 0.25) 45%, transparent 70%);
+            }
+        }
+
+        /* Card-fan: thin playing cards fanning open behind the hero */
+        .es-fan { position: absolute; left: 50%; top: 44%; width: 0; height: 0; }
+        .es-fan-card {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 4.5rem; height: 6.5rem;
+            margin-left: -2.25rem;
+            border-radius: 0.55rem;
+            transform-origin: bottom center;
+            transform: rotate(var(--rot, 0deg));
+            opacity: var(--op, 0.4);
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(250, 240, 214, 0.7));
+            border: 1.5px solid rgba(180, 83, 9, 0.55);
+            box-shadow: 0 8px 20px -8px rgba(180, 83, 9, 0.4);
+        }
+        .dark .es-fan-card {
+            background: linear-gradient(160deg, #15151f, #0d0d14);
+            border-color: rgba(252, 211, 77, 0.5);
+            box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.8);
+        }
+        .es-fan-pip {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: #b45309;
+        }
+        .dark .es-fan-pip { color: #fcd34d; }
+        html.es-anim .es-fan-card {
+            animation: es-fan-open 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation-delay: var(--fd, 0s);
+        }
+        @keyframes es-fan-open {
+            from { opacity: 0; transform: rotate(0deg) translateY(26px) scale(0.86); }
+            to { opacity: var(--op, 0.4); transform: rotate(var(--rot, 0deg)) translateY(0) scale(1); }
+        }
+
+        /* Gold-foil frame around the promo-poster mock */
+        .es-foil {
+            padding: 2px;
+            border-radius: 0.85rem;
+            background: linear-gradient(135deg, #b45309, #fcd34d 30%, #fef3c7 50%, #d97706 70%, #b45309);
+            background-size: 220% 220%;
+            animation: es-foil-shift 7s linear infinite;
+        }
+        @keyframes es-foil-shift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 220% 50%; }
+        }
+
+        /* Conjure: mock artwork materializes from blur on first reveal */
+        html.es-anim [data-reveal] .es-conjure {
+            opacity: 0;
+            filter: blur(12px);
+            transition: opacity 0.85s ease 0.15s, filter 0.85s ease 0.15s;
+        }
+        html.es-anim [data-reveal].is-revealed .es-conjure {
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        /* Champagne hover accents for venue + related-page cards */
+        .es-venue-card:hover { border-color: rgba(217, 119, 6, 0.4); }
+        .dark .es-venue-card:hover { border-color: rgba(252, 211, 77, 0.3); }
+        .es-rel-card:hover { border-color: rgba(217, 119, 6, 0.45); background-color: rgba(254, 243, 199, 0.55); }
+        .dark .es-rel-card:hover { border-color: rgba(252, 211, 77, 0.3); background-color: rgba(252, 211, 77, 0.05); }
+        .es-rel-card:hover .es-rel-title, .es-rel-card:hover .es-rel-arrow { color: #b45309; }
+        .dark .es-rel-card:hover .es-rel-title, .dark .es-rel-card:hover .es-rel-arrow { color: #fcd34d; }
+
+        /* Sparkles: the secondary layer over the velvet */
         @keyframes es-sparkle {
             0%, 100% { opacity: 0.25; transform: scale(0.8) rotate(0deg); }
             50% { opacity: 1; transform: scale(1.2) rotate(20deg); }
@@ -134,6 +250,9 @@
 
         @media (prefers-reduced-motion: reduce) {
             .es-sparkle { animation: none !important; }
+            .es-fan-card { animation: none !important; }
+            .es-foil { animation: none !important; }
+            html.es-anim [data-reveal] .es-conjure { opacity: 1 !important; filter: none !important; transition: none !important; }
         }
     </style>
 
@@ -151,11 +270,22 @@
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(78, 129, 250, 0.5), rgba(78, 129, 250, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.45), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(217, 119, 6, 0.42), rgba(217, 119, 6, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(252, 211, 77, 0.4), rgba(252, 211, 77, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3"></div>
+            <div class="es-velvet absolute inset-0"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+
+            {{-- Card-fan: thin cards fanning open from a shared corner --}}
+            <div class="es-fan">
+                @foreach ([['-32deg', '0s', '0.28'], ['-16deg', '0.08s', '0.34'], ['0deg', '0.16s', '0.42'], ['16deg', '0.24s', '0.34'], ['32deg', '0.32s', '0.28']] as [$rot, $fd, $op])
+                    <div class="es-fan-card" style="--rot: {{ $rot }}; --fd: {{ $fd }}; --op: {{ $op }};">
+                        <span class="es-fan-pip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="h-5 w-5"><path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9z"/></svg></span>
+                    </div>
+                @endforeach
+            </div>
+
             @foreach ($heroSparkles as [$pos, $size, $delay])
                 <span class="es-sparkle" style="{{ $pos }};width:{{ $size }};height:{{ $size }};--d:{{ $delay }};">{!! $sparkleSvg !!}</span>
             @endforeach
@@ -170,7 +300,7 @@
             </div>
 
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line"><span class="text-gradient-blue es-gradient-anim">Make your bookings appear.</span></span></span>
+                <span class="es-mask"><span class="es-mask-line"><span class="text-gradient-champagne es-gradient-anim">Make your bookings appear.</span></span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line">Like magic.</span></span>
             </h1>
 
@@ -183,7 +313,7 @@
                     See the trick
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto es-btn-gold inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create your performance schedule
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -199,7 +329,7 @@
                             @for ($tc = 0; $tc < 2; $tc++)
                                 @foreach (['Close-up', 'Stage', 'Mentalism', 'Illusion', 'Corporate', 'Kids Shows', 'Weddings', 'Variety', 'Escape', 'Hypnosis'] as $tag)
                                     <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-sky-400"></span>
+                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -219,11 +349,11 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-sky-400" aria-hidden="true"></span>
+                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400" aria-hidden="true"></span>
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">The whole act</span>
                 </div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything a working performer <span class="text-gradient-blue">needs</span>
+                    Everything a working performer <span class="text-gradient-champagne">needs</span>
                 </h2>
             </div>
 
@@ -247,7 +377,7 @@
                                 </div>
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
+                                <div class="animate-float es-conjure">
                                     <div class="max-w-xs rounded-2xl border border-blue-300 bg-gradient-to-br from-blue-50 to-sky-50 p-4 shadow-lg dark:border-blue-400/30 dark:from-blue-950 dark:to-sky-950">
                                         <div class="mb-3 text-[10px] font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-300">Booking Inquiry</div>
                                         <div class="space-y-3">
@@ -403,14 +533,16 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Share-ready images</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate promotional graphics for social media. Perfect for Instagram and Facebook.</p>
                         <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="relative h-32 w-32 -rotate-3 rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-500/25 to-orange-500/25 p-2 transition-transform duration-300 group-hover:rotate-0">
-                                <div class="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-blue-600/50 to-sky-600/50">
-                                    <div class="mb-1 text-[10px] font-semibold text-white">MAGIC SHOW</div>
-                                    <div class="text-xs font-bold text-amber-300">The Amazing David</div>
-                                    <div class="mt-1 text-[8px] text-white/80">Sat 8PM · Grand Theater</div>
-                                </div>
-                                <div class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500">
-                                    <svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <div class="es-foil -rotate-3 transition-transform duration-300 group-hover:rotate-0">
+                                <div class="es-conjure relative h-32 w-32 rounded-xl bg-gradient-to-br from-amber-500/25 to-orange-500/25 p-2">
+                                    <div class="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-gray-900 to-black">
+                                        <div class="mb-1 text-[10px] font-semibold text-white">MAGIC SHOW</div>
+                                        <div class="text-xs font-bold text-amber-300">The Amazing David</div>
+                                        <div class="mt-1 text-[8px] text-white/80">Sat 8PM · Grand Theater</div>
+                                    </div>
+                                    <div class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500">
+                                        <svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -440,13 +572,13 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-10 max-w-3xl text-center">
                 <h2 class="es-balance mb-3 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Where magic happens
+                    Where magic <span class="text-gradient-champagne">happens</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">One schedule for every venue and event type</p>
             </div>
             <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6" data-reveal-group="60">
                 @foreach ($magicVenues as [$mName, $mChip, $mText, $mIcon])
-                    <div data-reveal class="group rounded-2xl border border-gray-200 bg-white p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:border-blue-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/30">
+                    <div data-reveal class="es-venue-card group rounded-2xl border border-gray-200 bg-white p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl {{ $mChip }} transition-transform group-hover:scale-110">
                             <svg aria-hidden="true" class="h-6 w-6 {{ $mText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $mIcon !!}</svg>
                         </div>
@@ -460,36 +592,82 @@
     <!-- ============================================================ -->
     <!-- 4. Perfect for                                               -->
     <!-- ============================================================ -->
-    @php
-        $magicPerformers = [
-            ['Close-Up Magicians', 'Card tricks, coin magic, sleight of hand for intimate gatherings and table-hopping at events.', 'bg-blue-100 dark:bg-blue-500/20', 'text-blue-600 dark:text-blue-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />'],
-            ['Stage Illusionists', 'Large-scale illusions and theatrical magic shows that fill theaters and wow audiences.', 'bg-blue-100 dark:bg-blue-500/20', 'text-blue-600 dark:text-blue-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />'],
-            ['Mentalists', 'Mind reading, predictions, and psychological entertainment that leaves audiences amazed.', 'bg-sky-100 dark:bg-sky-500/20', 'text-sky-600 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />'],
-            ["Children's Entertainers", 'Birthday parties, school shows, and family events with fun, interactive magic for kids.', 'bg-cyan-100 dark:bg-cyan-500/20', 'text-cyan-600 dark:text-cyan-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-            ['Corporate Magicians', 'Trade shows, conferences, and product launches with customized magic presentations.', 'bg-amber-100 dark:bg-amber-500/20', 'text-amber-600 dark:text-amber-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />'],
-            ['Variety Artists', 'Ventriloquists, escape artists, hypnotists, and specialty acts that defy categorization.', 'bg-sky-100 dark:bg-sky-500/20', 'text-sky-600 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />'],
-        ];
-    @endphp
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient-blue">magic performers</span>
+                    Perfect for all types of <span class="text-gradient-champagne">magic performers</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whether you're doing close-up magic or grand illusions, Event Schedule works for you.
                 </p>
             </div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                @foreach ($magicPerformers as [$pName, $pDesc, $pChip, $pText, $pIcon])
-                    <div data-reveal class="rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl {{ $pChip }}">
-                            <svg aria-hidden="true" class="h-6 w-6 {{ $pText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $pIcon !!}</svg>
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $pName }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $pDesc }}</p>
-                    </div>
-                @endforeach
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                <x-sub-audience-card
+                    name="Close-Up Magicians"
+                    description="Card tricks, coin magic, sleight of hand for intimate gatherings and table-hopping at events."
+                    icon-color="amber"
+                    blog-slug="for-close-up-magicians"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Stage Illusionists"
+                    description="Large-scale illusions and theatrical magic shows that fill theaters and wow audiences."
+                    icon-color="yellow"
+                    blog-slug="for-stage-illusionists"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" /></svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Mentalists"
+                    description="Mind reading, predictions, and psychological entertainment that leaves audiences amazed."
+                    icon-color="amber"
+                    blog-slug="for-mentalists"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Children's Entertainers"
+                    description="Birthday parties, school shows, and family events with fun, interactive magic for kids."
+                    icon-color="orange"
+                    blog-slug="for-childrens-entertainers"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Corporate Magicians"
+                    description="Trade shows, conferences, and product launches with customized magic presentations."
+                    icon-color="amber"
+                    blog-slug="for-corporate-magicians"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Variety Artists"
+                    description="Ventriloquists, escape artists, hypnotists, and specialty acts that defy categorization."
+                    icon-color="yellow"
+                    blog-slug="for-variety-artists"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
             </div>
         </div>
     </section>
@@ -500,8 +678,8 @@
     <section class="relative bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="opacity: 0.28;"></div>
-                <div class="es-aurora es-aurora-2" style="opacity: 0.22;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(217, 119, 6, 0.28), rgba(217, 119, 6, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(252, 211, 77, 0.24), rgba(252, 211, 77, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 @foreach ([['top:14%;left:10%','1.4rem','0s'],['top:22%;right:12%','1rem','0.7s'],['bottom:18%;left:16%','1.2rem','1.3s'],['bottom:24%;right:14%','0.9rem','1.9s']] as [$pos,$size,$delay])
                     <span class="es-sparkle" style="{{ $pos }};width:{{ $size }};height:{{ $size }};--d:{{ $delay }};">{!! $sparkleSvg !!}</span>
@@ -515,23 +693,23 @@
                         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">Quick setup</span>
                     </div>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                        Get your performance schedule online in <span class="text-gradient-blue">three steps</span>
+                        Get your performance schedule online in <span class="text-gradient-champagne">three steps</span>
                     </h2>
                 </div>
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/30">1</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-btn-gold text-xl font-bold text-white shadow-lg">1</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Add your shows</h3>
                         <p class="text-sm text-gray-400">Performances, private bookings, recurring gigs. Import from Google Calendar or add manually.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/30">2</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-btn-gold text-xl font-bold text-white shadow-lg">2</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Share one link</h3>
                         <p class="text-sm text-gray-400">Add to your website, social bios, and EPK. Planners see your availability instantly.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-blue-500/30">3</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl es-btn-gold text-xl font-bold text-white shadow-lg">3</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Build your audience</h3>
                         <p class="text-sm text-gray-400">Fans follow your schedule and get notified about shows near them.</p>
                     </div>
@@ -591,7 +769,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-champagne">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -610,7 +788,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -627,22 +805,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-champagne">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-comedians', 'Comedians'], ['/for-circus-acrobatics', 'Circus & Acrobatics'], ['/for-theater-performers', 'Theater Performers'], ['/for-spoken-word', 'Spoken Word Artists']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -659,7 +837,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-blue">questions</span>
+                    Frequently asked <span class="text-gradient-champagne">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything magicians ask about Event Schedule.
@@ -692,9 +870,10 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.32), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-velvet absolute inset-0"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     @foreach ([['top:16%;left:12%','1.4rem','0s'],['top:24%;right:14%','1rem','0.8s'],['bottom:20%;left:18%','1.2rem','1.5s']] as [$pos,$size,$delay])
                         <span class="es-sparkle" style="{{ $pos }};width:{{ $size }};height:{{ $size }};--d:{{ $delay }};">{!! $sparkleSvg !!}</span>
@@ -703,7 +882,7 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        The secret to more bookings? <span class="text-gradient-blue">Let them find you.</span>
+                        The secret to more bookings? <span class="text-gradient-champagne">Let them find you.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Your magic deserves an audience. Free forever.
@@ -716,7 +895,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl es-btn-gold px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

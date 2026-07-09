@@ -107,33 +107,29 @@
     <style {!! nonce_attr() !!}>
         /* ==============================================================
            For-venues "The House" styles. The shared es-* motion system
-           (aurora, reveals, bento, marquee, odometer, finale) lives in
-           marketing.css; this block holds only this page's own effects:
-           the chasing marquee bulbs and the panning house lights.
+           (aurora, reveals, bento, marquee, finale) lives in marketing.css;
+           this block holds this page's own colour identity and motifs:
+           the sky-to-cyan "house" text gradient, the panning house lights,
+           and the floor-plan blueprint (a thin room line-drawing with a
+           soft pulse on the booked room).
            ============================================================== */
 
-        /* Theater marquee bulbs (a row of dots that light up in sequence) */
-        .es-bulbs {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        /* House accent gradient. Light mode uses deeper sky/cyan stops so
+           headings stay legible on white; dark mode lightens them. */
+        .text-gradient-house {
+            background: linear-gradient(135deg, #0284c7, #0891b2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .es-bulbs i {
-            width: 7px;
-            height: 7px;
-            border-radius: 9999px;
-            background: rgba(14, 165, 233, 0.35);
-            animation: es-bulb 1.4s ease-in-out infinite;
-            animation-delay: calc(var(--i, 0) * 0.12s);
+        .dark .text-gradient-house {
+            background: linear-gradient(135deg, #38bdf8, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        @keyframes es-bulb {
-            0%, 100% { background: rgba(14, 165, 233, 0.3); box-shadow: none; }
-            50% { background: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.9); }
-        }
-        .es-bulbs-sm i { width: 5px; height: 5px; }
 
-        /* Panning house lights (dark surfaces) */
+        /* Panning house lights (dark surfaces) - the recoloured secondary motif */
         .es-houselight {
             position: absolute;
             top: -12%;
@@ -143,18 +139,80 @@
             transform-origin: 50% 0;
             animation: es-house-pan 10s ease-in-out infinite alternate;
         }
-        .es-houselight-1 { left: 3%; background: conic-gradient(from 197deg at 50% 0%, transparent 0deg, rgba(56, 189, 248, 0.15) 11deg, transparent 24deg); }
-        .es-houselight-2 { right: 3%; background: conic-gradient(from 149deg at 50% 0%, transparent 0deg, rgba(34, 211, 238, 0.13) 11deg, transparent 24deg); animation-delay: -4s; animation-duration: 12s; }
-        .es-houselight-3 { left: 33%; background: conic-gradient(from 178deg at 50% 0%, transparent 0deg, rgba(78, 129, 250, 0.11) 9deg, transparent 20deg); animation-delay: -7s; animation-duration: 14s; }
+        .es-houselight-1 { left: 3%; background: conic-gradient(from 197deg at 50% 0%, transparent 0deg, rgba(56, 189, 248, 0.16) 11deg, transparent 24deg); }
+        .es-houselight-2 { right: 3%; background: conic-gradient(from 149deg at 50% 0%, transparent 0deg, rgba(34, 211, 238, 0.14) 11deg, transparent 24deg); animation-delay: -4s; animation-duration: 12s; }
+        .es-houselight-3 { left: 33%; background: conic-gradient(from 178deg at 50% 0%, transparent 0deg, rgba(14, 165, 233, 0.12) 9deg, transparent 20deg); animation-delay: -7s; animation-duration: 14s; }
         @keyframes es-house-pan { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
 
+        /* Floor-plan blueprint motif - a thin line drawing of the rooms.
+           Colour drives the wall strokes/labels; the booked room pulses. */
+        .es-blueprint { color: rgba(2, 132, 199, 0.14); }
+        .dark .es-blueprint { color: rgba(56, 189, 248, 0.13); }
+        .es-blueprint svg, .es-blueprint-legend svg { width: 100%; height: 100%; display: block; }
+        .es-blueprint-room { fill: rgba(2, 132, 199, 0.16); animation: es-room-pulse 4.5s ease-in-out infinite; }
+        .dark .es-blueprint-room { fill: rgba(56, 189, 248, 0.16); }
+        @keyframes es-room-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* Blueprint reused as a foreground legend on the room-filter mock */
+        .es-blueprint-legend { color: rgba(2, 132, 199, 0.5); }
+        .dark .es-blueprint-legend { color: rgba(56, 189, 248, 0.5); }
+        .es-blueprint-legend .es-blueprint-room { fill: rgba(2, 132, 199, 0.22); }
+        .dark .es-blueprint-legend .es-blueprint-room { fill: rgba(56, 189, 248, 0.26); }
+
+        /* ACCEPTED stamp on the booking-inbox mock */
+        .es-stamp {
+            transform: rotate(-9deg);
+            border: 2px solid rgba(5, 150, 105, 0.6);
+            color: #059669;
+            background: rgba(16, 185, 129, 0.08);
+            letter-spacing: 0.14em;
+        }
+        .dark .es-stamp {
+            border-color: rgba(52, 211, 153, 0.55);
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        /* Related-page cards - house-accent hover wash (light + dark) */
+        .es-relcard:hover { background-color: #f0f9ff; }
+        .dark .es-relcard:hover { background-color: rgba(56, 189, 248, 0.06); }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-bulbs i,
-            .es-houselight {
+            .es-houselight,
+            .es-blueprint-room {
                 animation: none !important;
             }
         }
     </style>
+
+    @php
+    $esBlueprint = <<<'SVG'
+<svg viewBox="0 0 480 320" fill="none" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <rect class="es-blueprint-room" x="18" y="18" width="280" height="190" rx="8"/>
+  <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="16" y="16" width="448" height="288" rx="12"/>
+    <path d="M300 16 V210"/>
+    <path d="M16 210 H300"/>
+    <path d="M300 150 H464"/>
+    <path d="M300 74 A24 24 0 0 1 324 98" opacity="0.6"/>
+    <path d="M118 210 A22 22 0 0 0 140 188" opacity="0.6"/>
+    <rect x="40" y="150" width="120" height="34" rx="6" opacity="0.75"/>
+    <circle cx="210" cy="70" r="7" opacity="0.65"/>
+    <circle cx="248" cy="70" r="7" opacity="0.65"/>
+    <circle cx="210" cy="104" r="7" opacity="0.65"/>
+    <circle cx="248" cy="104" r="7" opacity="0.65"/>
+    <path d="M356 214 v66" opacity="0.5"/>
+    <path d="M384 244 h48" opacity="0.5"/>
+  </g>
+  <g fill="currentColor" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" letter-spacing="1.5">
+    <text x="34" y="42">MAIN STAGE</text>
+    <text x="34" y="238">BACK ROOM</text>
+    <text x="316" y="42">ROOFTOP</text>
+    <text x="316" y="176">PATIO</text>
+  </g>
+</svg>
+SVG;
+    @endphp
 
     <!-- ============================================================ -->
     <!-- 1. Hero: the house lights come up                            -->
@@ -168,24 +226,20 @@
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
-        <!-- Marquee bulbs along the base -->
-        <div class="pointer-events-none absolute inset-x-0 bottom-8 opacity-70 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]" aria-hidden="true">
-            <div class="es-bulbs">
-                @for ($i = 0; $i < 40; $i++)
-                    <i style="--i: {{ $i % 10 }};"></i>
-                @endfor
-            </div>
+        <!-- Floor-plan blueprint motif behind the headline -->
+        <div class="es-blueprint pointer-events-none absolute" aria-hidden="true" style="left: 50%; top: 54%; width: min(760px, 94%); height: 460px; transform: translate(-50%, -50%); -webkit-mask-image: radial-gradient(ellipse 68% 70% at 50% 50%, black 42%, transparent 82%); mask-image: radial-gradient(ellipse 68% 70% at 50% 50%, black 42%, transparent 82%);">
+            {!! $esBlueprint !!}
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="es-bulbs es-bulbs-sm" aria-hidden="true"><i style="--i:0;"></i><i style="--i:1;"></i><i style="--i:2;"></i></span>
+                <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-cyan-400" aria-hidden="true"></span>
                 <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Bars, Clubs & Event Spaces</span>
             </div>
 
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Fill your calendar</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">with great events</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-house es-gradient-anim">with great events</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -237,7 +291,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Front of house to back office</span>
                 </div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything to run a <span class="text-gradient">packed room</span>
+                    Everything to run a <span class="text-gradient-house">packed room</span>
                 </h2>
             </div>
 
@@ -265,9 +319,9 @@
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
                                     <div class="max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-50 to-cyan-50 p-4 shadow-lg dark:border-sky-400/30 dark:from-sky-950 dark:to-cyan-950">
-                                        <div class="mb-3 text-center">
-                                            <div class="font-semibold text-gray-900 dark:text-white">The Blue Note</div>
-                                            <div class="text-sm text-sky-600 dark:text-sky-300">March 2024</div>
+                                        <div class="mb-3 rounded-lg bg-gradient-to-r from-sky-500 to-cyan-500 px-3 py-2 text-center shadow-sm">
+                                            <div class="font-semibold text-white">The Blue Note</div>
+                                            <div class="text-xs text-white/80">March 2024</div>
                                         </div>
                                         <div class="space-y-2">
                                             <div class="es-ai-field flex items-center gap-3 rounded-lg border border-sky-400/30 bg-sky-500/15 p-2" style="--i: 0;">
@@ -309,7 +363,8 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Artists can request to play at your venue. Review, approve, or decline right from your dashboard.</p>
 
                         <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-3 rounded-xl border border-sky-400/30 bg-sky-500/15 p-3" style="--i: 0;">
+                            <div class="es-ai-field relative flex items-center gap-3 rounded-xl border border-sky-400/30 bg-sky-500/15 p-3" style="--i: 0;">
+                                <div class="es-stamp absolute -top-2 right-2 rounded-md px-2 py-0.5 text-[10px] font-black uppercase">Accepted</div>
                                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-xs font-semibold text-white">SJ</div>
                                 <div class="flex-1">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">Sarah Johnson Trio</div>
@@ -378,25 +433,32 @@
                                 <p class="text-lg text-gray-500 dark:text-gray-400">Organize events by space. Main stage, rooftop bar, private room. Each gets its own filterable schedule.</p>
                             </div>
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">Filter by room</div>
+                                <div class="mb-3 flex items-center gap-2">
+                                    <svg class="h-4 w-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                                    <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">Floor plan</span>
+                                    <span class="ml-auto text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500">Filter by room</span>
+                                </div>
+                                <div class="es-blueprint-legend relative mb-4 overflow-hidden rounded-xl border border-sky-400/30 bg-white dark:bg-white/5" style="height: 132px;">
+                                    {!! $esBlueprint !!}
+                                </div>
                                 <div class="space-y-2">
-                                    <div class="es-ai-field flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/15 p-2" style="--i: 0;">
-                                        <div class="h-2 w-2 rounded-full bg-emerald-400"></div>
+                                    <div class="es-ai-field flex items-center gap-2 rounded-lg border border-sky-400/30 bg-sky-500/15 p-2" style="--i: 0;">
+                                        <div class="h-2 w-2 rounded-full bg-sky-400"></div>
                                         <span class="text-sm text-gray-900 dark:text-white">Main Stage</span>
-                                        <span class="ml-auto text-xs text-emerald-700 dark:text-emerald-300">12 events</span>
+                                        <span class="ml-auto text-xs text-sky-700 dark:text-sky-300">12 events</span>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;">
-                                        <div class="h-2 w-2 rounded-full bg-teal-400"></div>
+                                        <div class="h-2 w-2 rounded-full bg-cyan-400"></div>
                                         <span class="text-sm text-gray-600 dark:text-gray-300">Rooftop Bar</span>
                                         <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">8 events</span>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;">
-                                        <div class="h-2 w-2 rounded-full bg-cyan-400"></div>
+                                        <div class="h-2 w-2 rounded-full bg-blue-400"></div>
                                         <span class="text-sm text-gray-600 dark:text-gray-300">Acoustic Lounge</span>
                                         <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">5 events</span>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;">
-                                        <div class="h-2 w-2 rounded-full bg-green-400"></div>
+                                        <div class="h-2 w-2 rounded-full bg-teal-400"></div>
                                         <span class="text-sm text-gray-600 dark:text-gray-300">Private Room</span>
                                         <span class="ml-auto text-xs text-gray-500 dark:text-gray-400">3 events</span>
                                     </div>
@@ -591,7 +653,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient">venues</span>
+                    Perfect for all types of <span class="text-gradient-house">venues</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From intimate lounges to large event spaces, Event Schedule adapts to your needs.
@@ -678,23 +740,19 @@
                 <div class="es-houselight es-houselight-2"></div>
                 <div class="es-houselight es-houselight-3"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
-            </div>
-            <div class="pointer-events-none absolute inset-x-0 bottom-6 opacity-70 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]" aria-hidden="true">
-                <div class="es-bulbs">
-                    @for ($i = 0; $i < 40; $i++)
-                        <i style="--i: {{ $i % 10 }};"></i>
-                    @endfor
+                <div class="es-blueprint absolute" style="right: 4%; top: 9%; width: 300px; height: 200px; opacity: 0.85; -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 45%, transparent 85%); mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 45%, transparent 85%);">
+                    {!! $esBlueprint !!}
                 </div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-1.5" data-reveal>
-                        <span class="es-bulbs es-bulbs-sm" aria-hidden="true"><i style="--i:0;"></i><i style="--i:1;"></i><i style="--i:2;"></i></span>
+                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-cyan-400" aria-hidden="true"></span>
                         <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">Quick setup</span>
                     </div>
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                        Get your venue calendar online in <span class="text-gradient">three steps</span>
+                        Get your venue calendar online in <span class="text-gradient-house">three steps</span>
                     </h2>
                 </div>
 
@@ -798,7 +856,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-sky-600 hover:underline dark:text-sky-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -818,19 +876,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-music-venues', 'Music Venues'], ['/for-comedy-clubs', 'Comedy Clubs'], ['/for-theaters', 'Theaters'], ['/for-bars', 'Bars']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-sky-500/30">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-sky-600 dark:group-hover:text-sky-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-sky-600 hover:underline dark:text-sky-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -847,7 +905,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="text-gradient-house">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything venues ask about Event Schedule.
@@ -885,18 +943,14 @@
                     <div class="es-houselight es-houselight-1"></div>
                     <div class="es-houselight es-houselight-2"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
-                <div class="pointer-events-none absolute inset-x-0 bottom-6 opacity-70 [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]" aria-hidden="true">
-                    <div class="es-bulbs">
-                        @for ($i = 0; $i < 40; $i++)
-                            <i style="--i: {{ $i % 10 }};"></i>
-                        @endfor
+                    <div class="es-blueprint absolute" style="left: 50%; top: 50%; width: min(680px, 88%); height: 380px; transform: translate(-50%, -50%); opacity: 0.7; -webkit-mask-image: radial-gradient(ellipse 66% 68% at 50% 50%, black 40%, transparent 80%); mask-image: radial-gradient(ellipse 66% 68% at 50% 50%, black 40%, transparent 80%);">
+                        {!! $esBlueprint !!}
                     </div>
                 </div>
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Keep your venue calendar <span class="text-gradient">packed</span>
+                        Keep your venue calendar <span class="text-gradient-house">packed</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Create your calendar in minutes. Free forever.

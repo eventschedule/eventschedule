@@ -110,36 +110,30 @@
            lives in marketing.css; this holds the sky gradient, the library-card
            badge, the card-catalog cards, the drifting programs card, and the
            dust-mote-in-lamplight motif. */
-        .text-gradient-sky {
-            background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+        .text-gradient-lamp {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .dark .text-gradient-sky {
-            background: linear-gradient(135deg, #38bdf8, #60a5fa);
+        .dark .text-gradient-lamp {
+            background: linear-gradient(135deg, #fcd34d, #f59e0b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         .library-card-badge {
             background: rgba(255, 251, 235, 0.8);
-            border: 1px solid rgba(14, 165, 233, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.28);
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         .dark .library-card-badge {
             background: rgba(15, 23, 42, 0.6);
-            border-color: rgba(14, 165, 233, 0.2);
+            border-color: rgba(245, 158, 11, 0.28);
         }
         .catalog-card { transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s; }
         .catalog-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
         .dark .catalog-card:hover { box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35); }
-
-        @keyframes es-book-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-book-float { animation: es-book-float 6s ease-in-out infinite; }
 
         /* Dust motes in lamplight */
         .es-mote { pointer-events: none; overflow: hidden; }
@@ -158,8 +152,122 @@
             85% { opacity: var(--mote-op, 0.5); }
             100% { transform: translateY(-200px) translateX(18px); opacity: 0; }
         }
+
+        /* --- The Catalog: lamplight amber accent (matching the motes) --- */
+        .lamp-cta {
+            background-image: linear-gradient(to right, #d97706, #b45309);
+            box-shadow: 0 10px 22px -6px rgba(217, 119, 6, 0.50);
+        }
+        .lamp-cta:hover { box-shadow: 0 18px 32px -8px rgba(217, 119, 6, 0.60); }
+        .dark .lamp-cta { background-image: linear-gradient(to right, #f59e0b, #d97706); }
+        .lamp-step {
+            background-image: linear-gradient(to bottom right, #f59e0b, #d97706);
+            box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.30);
+        }
+
+        /* Amber text links + related-card hovers */
+        .lamp-textlink { color: #b45309; }
+        .lamp-textlink:hover { color: #d97706; }
+        .dark .lamp-textlink { color: #fbbf24; }
+        .dark .lamp-textlink:hover { color: #fcd34d; }
+        .lamp-relcard:hover { border-color: #fcd34d; background-color: #fffbeb; }
+        .dark .lamp-relcard:hover { border-color: rgba(245, 158, 11, 0.35); background-color: rgba(245, 158, 11, 0.07); }
+        .lamp-relcard:hover .lamp-relcard-title,
+        .lamp-relcard:hover .lamp-relcard-arrow { color: #b45309; }
+        .dark .lamp-relcard:hover .lamp-relcard-title,
+        .dark .lamp-relcard:hover .lamp-relcard-arrow { color: #fbbf24; }
+
+        /* Bookish serif section eyebrows */
+        .lamp-eyebrow {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-style: italic;
+            letter-spacing: 0.04em;
+            color: #b45309;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .dark .lamp-eyebrow { color: #fbbf24; }
+        .lamp-eyebrow-ondark { color: #fbbf24; }
+        .lamp-eyebrow::before,
+        .lamp-eyebrow::after {
+            content: "";
+            width: 1.75rem;
+            height: 1px;
+            background-color: currentColor;
+            opacity: 0.5;
+        }
+
+        /* Hero + marquee chips warmed to lamplight */
+        .lamp-chip { border-color: #fcd34d; background-color: rgba(254, 243, 199, 0.80); color: #92400e; }
+        .dark .lamp-chip { border-color: rgba(255, 255, 255, 0.10); background-color: rgba(255, 255, 255, 0.06); color: #d1d5db; }
+        .lamp-dot { background-image: linear-gradient(to right, #fbbf24, #f59e0b); }
+
+        /* Date-due stamp for the catalog band corner (decorative red) */
+        .lamp-duestamp {
+            color: #b91c1c;
+            border: 2px solid rgba(185, 28, 28, 0.60);
+            background: rgba(185, 28, 28, 0.06);
+            border-radius: 4px;
+            padding: 4px 10px;
+            text-align: center;
+            transform: rotate(-8deg);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+        .dark .lamp-duestamp { color: #f87171; border-color: rgba(248, 113, 113, 0.50); background: rgba(248, 113, 113, 0.09); }
+        .lamp-duestamp-label {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 8px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85;
+        }
+        .lamp-duestamp-date {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 14px; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase; line-height: 1.05;
+        }
+
+        /* Card-catalog tab styling extended to the author-visit bento mock */
+        .lamp-tab {
+            position: absolute; top: -1px; left: 1rem;
+            height: 0.625rem; width: 3rem;
+            border-bottom-left-radius: 0.125rem; border-bottom-right-radius: 0.125rem;
+            background-color: #f59e0b;
+        }
+        .dark .lamp-tab { background-color: #fbbf24; }
+        .lamp-dewey {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 9px; color: #b45309;
+        }
+        .dark .lamp-dewey { color: #fcd34d; }
+        .lamp-parchment { border-color: rgba(217, 119, 6, 0.35); background-image: linear-gradient(to bottom right, #fef3c7, #fffbeb); }
+        .dark .lamp-parchment { border-color: rgba(245, 158, 11, 0.30); background-image: linear-gradient(to bottom right, #451a03, #3a2410); }
+        .lamp-ink-label { color: #92400e; }
+        .dark .lamp-ink-label { color: #fcd34d; }
+        .lamp-ink { color: #78350f; }
+        .dark .lamp-ink { color: #fef3c7; }
+        .lamp-ink-soft { color: #b45309; }
+        .dark .lamp-ink-soft { color: #fbbf24; }
+        .lamp-ink-faint { color: #d97706; }
+        .dark .lamp-ink-faint { color: #f59e0b; }
+        .lamp-icon-tile { background-image: linear-gradient(to bottom right, #fde68a, #fbbf24); }
+        .dark .lamp-icon-tile { background-image: linear-gradient(to bottom right, #78350f, #92400e); }
+        .lamp-ink-icon { color: #b45309; }
+        .dark .lamp-ink-icon { color: #fcd34d; }
+
+        /* Shelf-spine divider (thin multicolor book spines on a shelf line) */
+        .lamp-shelf {
+            display: flex; align-items: flex-end; justify-content: center;
+            gap: 2px; height: 48px; padding: 0 1rem;
+            border-bottom: 3px solid #8a5a2b; overflow: hidden;
+        }
+        .dark .lamp-shelf { border-bottom-color: #3a2410; }
+        .lamp-spine {
+            width: 7px;
+            border-top-left-radius: 2px; border-top-right-radius: 2px;
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.15);
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-book-float, .es-mote span { animation: none !important; }
+            .es-mote span { animation: none !important; }
             .es-mote span { opacity: 0.3; transform: none; }
         }
     </style>
@@ -192,8 +300,8 @@
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 30%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(59, 130, 246, 0.28), rgba(59, 130, 246, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 30%, rgba(245, 158, 11, 0.30), rgba(245, 158, 11, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(217, 119, 6, 0.26), rgba(217, 119, 6, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3"></div>
             <div class="es-rays absolute inset-0"></div>
             <!-- Reading lamp warm glow -->
@@ -220,17 +328,17 @@
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div class="es-fade-up es-d-1 library-card-badge mb-8 inline-flex flex-col items-center rounded-sm px-5 py-2.5 backdrop-blur-sm">
                 <div class="flex items-center gap-2">
-                    <svg aria-hidden="true" class="h-4 w-4 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="h-4 w-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
                     <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Libraries</span>
                 </div>
-                <div class="mt-1.5 h-px w-full bg-sky-400/30"></div>
+                <div class="mt-1.5 h-px w-full" style="background-color: rgba(245, 158, 11, 0.35);"></div>
             </div>
 
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Your programs. Your patrons.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-sky es-gradient-anim">Always booked.</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-lamp es-gradient-anim">Always booked.</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -242,7 +350,7 @@
                     Browse the catalog
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-sky-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                <a href="{{ app_url('/sign_up?type=venue') }}" class="group lamp-cta pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create your program calendar
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -257,8 +365,8 @@
                         <div class="es-marquee-track">
                             @for ($tc = 0; $tc < 2; $tc++)
                                 @foreach (['Author Readings', 'Book Clubs', 'Story Time', 'Film Screenings', 'Workshops', 'Maker Space', 'Lectures', 'Literacy Programs'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100/80 px-4 py-1.5 text-xs font-semibold text-sky-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-sky-400 to-blue-400"></span>
+                                    <span class="lamp-chip inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
+                                        <span class="lamp-dot h-1.5 w-1.5 rounded-full"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -277,8 +385,9 @@
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="lamp-eyebrow mb-4 text-sm" data-reveal>At the Reference Desk</div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to fill your <span class="text-gradient-sky">programs</span>
+                    Everything to fill your <span class="text-gradient-lamp">programs</span>
                 </h2>
             </div>
 
@@ -344,21 +453,23 @@
                 <!-- Author events -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                             Author Events
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Showcase visiting authors</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Author readings, book signings, and Q&A sessions. Let patrons register and never miss an event.</p>
                         <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="w-48 -rotate-2 rounded-xl border border-blue-300/50 bg-gradient-to-br from-blue-100 to-blue-50 p-4 text-center shadow-lg transition-transform group-hover:rotate-0 dark:border-blue-600/30 dark:from-blue-800 dark:to-blue-900">
-                                <div class="text-[10px] uppercase tracking-widest text-blue-800 dark:text-blue-200">Author Visit</div>
-                                <div class="mt-1 font-serif text-sm font-semibold text-blue-900 dark:text-blue-100">Jane Smith</div>
-                                <div class="mx-auto mt-2 flex h-20 w-16 items-center justify-center rounded bg-gradient-to-br from-blue-200 to-blue-300 dark:from-blue-700 dark:to-blue-800">
-                                    <svg aria-hidden="true" class="h-8 w-8 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                            <div class="lamp-parchment relative w-48 -rotate-2 rounded-xl border p-4 pt-5 text-center shadow-lg transition-transform group-hover:rotate-0">
+                                <div class="lamp-tab"></div>
+                                <div class="lamp-dewey">808.0</div>
+                                <div class="lamp-ink-label text-[10px] uppercase tracking-widest">Author Visit</div>
+                                <div class="lamp-ink mt-1 font-serif text-sm font-semibold">Jane Smith</div>
+                                <div class="lamp-icon-tile mx-auto mt-2 flex h-20 w-16 items-center justify-center rounded">
+                                    <svg aria-hidden="true" class="lamp-ink-icon h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
                                 </div>
-                                <div class="mt-2 text-[10px] text-blue-600 dark:text-blue-300">Sat, Mar 15 &bull; 2 PM</div>
-                                <div class="mt-1 text-[9px] text-blue-500 dark:text-blue-400">Reading & Signing</div>
+                                <div class="lamp-ink-soft mt-2 text-[10px]">Sat, Mar 15 &bull; 2 PM</div>
+                                <div class="lamp-ink-faint mt-1 text-[9px]">Reading & Signing</div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -472,8 +583,12 @@
     <!-- ============================================================ -->
     <section id="catalog" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="lamp-duestamp absolute right-5 top-5 z-20 hidden sm:block" aria-hidden="true">
+                <div class="lamp-duestamp-label">Date Due</div>
+                <div class="lamp-duestamp-date">Mar 21</div>
+            </div>
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(14, 165, 233, 0.24), rgba(14, 165, 233, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(217, 119, 6, 0.14), rgba(217, 119, 6, 0) 60%); opacity: 0.5;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 <div class="es-mote absolute inset-0">
@@ -485,8 +600,9 @@
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-2xl text-center">
+                    <div class="lamp-eyebrow lamp-eyebrow-ondark mb-4 text-sm" data-reveal>The Card Catalog</div>
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Your month of <span class="text-gradient-sky">programs</span>
+                        Your month of <span class="text-gradient-lamp">programs</span>
                     </h2>
                     <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         Every program, every age group, every week. Patrons see what's happening and sign up in seconds.
@@ -525,8 +641,9 @@
     <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="lamp-eyebrow mb-4 text-sm" data-reveal>Every Branch</div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient-sky">libraries</span>
+                    Perfect for all types of <span class="text-gradient-lamp">libraries</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From public branches to university collections.
@@ -618,6 +735,23 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- Shelf-spine divider (thin multicolor book spines)            -->
+    <!-- ============================================================ -->
+    @php
+        $spinePalette = ['#f59e0b', '#d97706', '#b45309', '#1e3a5f', '#334155', '#0d9488', '#b91c1c', '#64748b', '#fbbf24', '#78350f'];
+        $spineHeights = [34, 42, 28, 46, 38, 30, 44, 36, 40, 26, 43, 32];
+    @endphp
+    <div class="bg-white py-8 dark:bg-[#0a0a0f]" aria-hidden="true">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="lamp-shelf">
+                @for ($si = 0; $si < 44; $si++)
+                    <span class="lamp-spine" style="height: {{ $spineHeights[$si % count($spineHeights)] }}px; background-color: {{ $spinePalette[$si % count($spinePalette)] }};"></span>
+                @endfor
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
     <!-- 5. How it works                                              -->
     <!-- ============================================================ -->
     @php
@@ -630,8 +764,9 @@
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-2xl text-center">
+                <div class="lamp-eyebrow mb-4 text-sm" data-reveal>Check It Out</div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="text-gradient-sky">works</span>
+                    How it <span class="text-gradient-lamp">works</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Get your library's program calendar online in three steps.
@@ -641,7 +776,7 @@
             <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-2xl font-bold text-white shadow-lg shadow-sky-500/25">
+                        <div class="lamp-step mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-bold text-white">
                             {{ $num }}
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
@@ -657,7 +792,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-lamp">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Embed Calendar" description="Add your schedule to any website with one snippet" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
@@ -676,7 +811,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="lamp-textlink inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -693,22 +828,22 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-lamp">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-community-centers', 'Community Centers'], ['/for-spoken-word', 'Spoken Word'], ['/for-workshop-instructors', 'Workshop Instructors'], ['/for-theaters', 'Theaters']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group lamp-relcard flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="lamp-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="lamp-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="lamp-textlink inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -724,8 +859,9 @@
     <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="lamp-eyebrow mb-4 text-sm" data-reveal>Ask a Librarian</div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-sky">questions</span>
+                    Frequently asked <span class="text-gradient-lamp">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything librarians ask about Event Schedule.
@@ -760,7 +896,7 @@
         <div class="mx-auto max-w-6xl">
             <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-sky-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.30), rgba(245, 158, 11, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     <div class="es-mote absolute inset-0">
                         @foreach ($motes as [$l, $s, $d, $dl, $op])
@@ -771,7 +907,7 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your patrons deserve better than a <span class="text-gradient-sky">bulletin board</span>
+                        Your patrons deserve better than a <span class="text-gradient-lamp">bulletin board</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Email your community directly. Fill your programs. Free forever.
@@ -784,7 +920,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group lamp-cta relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

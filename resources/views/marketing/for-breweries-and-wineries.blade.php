@@ -108,8 +108,10 @@
 
     <style {!! nonce_attr() !!}>
         /* For-breweries-and-wineries "From Grain to Glass" styles. The shared
-           es-* motion system lives in marketing.css; this holds only the copper
-           gradient text, the drifting release card, and rising carbonation. */
+           es-* motion system lives in marketing.css; this holds the copper
+           gradient text, rising carbonation, and the matte craft materials:
+           foam-cream caps, wood-grain eyebrows, tap-handle silhouettes, a wax
+           seal, and the copper link recolors. */
         .text-gradient-copper {
             background: linear-gradient(135deg, #d97706, #92400e);
             -webkit-background-clip: text;
@@ -122,11 +124,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        @keyframes es-cask-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-cask-float { animation: es-cask-float 6s ease-in-out infinite; }
 
         /* Rising carbonation bubbles */
         .es-fizz { pointer-events: none; overflow: hidden; }
@@ -145,8 +142,88 @@
             88% { opacity: var(--fizz-op, 0.5); }
             100% { transform: translateY(-150px) scale(1.35); opacity: 0; }
         }
+
+        /* Foam-cream head: a soft off-white cap for the release band + finale */
+        .es-foam-cap {
+            border-top-left-radius: 2.5rem;
+            border-top-right-radius: 2.5rem;
+            background: linear-gradient(to bottom, rgba(255, 251, 235, 0.9), rgba(253, 230, 138, 0.28) 45%, rgba(253, 230, 138, 0));
+        }
+        .dark .es-foam-cap {
+            background: linear-gradient(to bottom, rgba(255, 251, 235, 0.72), rgba(251, 191, 36, 0.14) 45%, rgba(251, 191, 36, 0));
+        }
+
+        /* Matte wood-grain texture layered over eyebrow badges. Color-safe: it
+           sets only background-image, so the element keeps its own bg color. */
+        .es-woodgrain {
+            background-image:
+                repeating-linear-gradient(90deg, rgba(120, 53, 15, 0.12) 0px, rgba(120, 53, 15, 0.12) 1px, transparent 1px, transparent 3px),
+                repeating-linear-gradient(90deg, rgba(146, 64, 14, 0.07) 0px, rgba(146, 64, 14, 0.07) 2px, transparent 2px, transparent 8px);
+        }
+        .dark .es-woodgrain {
+            background-image:
+                repeating-linear-gradient(90deg, rgba(251, 191, 36, 0.12) 0px, rgba(251, 191, 36, 0.12) 1px, transparent 1px, transparent 3px),
+                repeating-linear-gradient(90deg, rgba(217, 119, 6, 0.08) 0px, rgba(217, 119, 6, 0.08) 2px, transparent 2px, transparent 8px);
+        }
+
+        /* Stubby tap-handle silhouettes for the tap-list bento strip */
+        .es-tap-handle {
+            position: relative;
+            display: inline-block;
+            width: 10px;
+            height: var(--tap-h, 26px);
+            border-radius: 5px 5px 2px 2px;
+            background: linear-gradient(to bottom, #a16207, #78350f);
+            box-shadow: inset -1.5px 0 1.5px rgba(0, 0, 0, 0.28), 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+        .es-tap-handle::before {
+            content: "";
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            width: 13px;
+            height: 8px;
+            transform: translateX(-50%);
+            border-radius: 9999px;
+            background: linear-gradient(to bottom, #ca8a04, #92400e);
+        }
+        .dark .es-tap-handle { background: linear-gradient(to bottom, #d97706, #78350f); }
+        .dark .es-tap-handle::before { background: linear-gradient(to bottom, #f59e0b, #b45309); }
+
+        /* Wax seal stamped on the club allocation mock */
+        .es-wax-seal {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            border: 1px solid rgba(120, 53, 15, 0.6);
+            background: radial-gradient(circle at 38% 32%, #b45309, #7c2d12 68%, #5b1a0a);
+            color: rgba(255, 237, 213, 0.85);
+            font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+            font-size: 9px;
+            font-variant: small-caps;
+            letter-spacing: 0.04em;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.25), inset 0 -2px 3px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .dark .es-wax-seal {
+            background: radial-gradient(circle at 38% 32%, #d97706, #92400e 68%, #7c2d12);
+        }
+
+        /* Copper recolor for the hard-coded blue links */
+        .es-link-accent { color: #b45309; }
+        .es-link-accent:hover { color: #92400e; }
+        .dark .es-link-accent { color: #fbbf24; }
+        .dark .es-link-accent:hover { color: #fcd34d; }
+
+        /* Related-page cards: copper hover */
+        .es-rel-card:hover { border-color: #fed7aa; background-color: #fffbeb; }
+        .dark .es-rel-card:hover { border-color: rgba(217, 119, 6, 0.4); background-color: rgba(217, 119, 6, 0.08); }
+        .group:hover .es-rel-accent { color: #b45309; }
+        .dark .group:hover .es-rel-accent { color: #fbbf24; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-cask-float { animation: none !important; }
             .es-fizz span { animation: none !important; opacity: 0.35; transform: none; }
         }
     </style>
@@ -184,7 +261,7 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+            <div class="es-woodgrain es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
                 <svg aria-hidden="true" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
@@ -257,6 +334,7 @@
                     @endforeach
                 </div>
             </div>
+            <div class="es-foam-cap pointer-events-none absolute inset-x-0 top-0 h-16" aria-hidden="true"></div>
 
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-2xl text-center">
@@ -284,7 +362,7 @@
                 </div>
 
                 <div class="mt-12 text-center" data-reveal>
-                    <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">
+                    <div class="es-woodgrain inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 backdrop-blur-sm">
                         <svg aria-hidden="true" class="h-4 w-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -354,7 +432,8 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Club members get first dibs</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Limited releases sell out fast. Your loyal fans - mug club, wine club, followers - get the heads up before anyone else.</p>
-                        <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                        <div class="mt-auto relative rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
+                            <div class="es-wax-seal absolute -right-3 -top-3 rotate-12">Club</div>
                             <div class="mb-3 flex items-center justify-between">
                                 <span class="text-xs text-gray-500 dark:text-gray-400">2024 Reserve Allocation</span>
                                 <span class="text-xs font-medium text-rose-700 dark:text-rose-300">47 spots left</span>
@@ -468,7 +547,13 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">What's pouring today</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">QR code for your current tap list. Visitors scan, you update. No printed menus to change.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
+                        <div class="mt-auto flex flex-col items-center gap-4" aria-hidden="true">
+                            <div class="flex items-end justify-center gap-2">
+                                <span class="es-tap-handle" style="--tap-h: 22px;"></span>
+                                <span class="es-tap-handle" style="--tap-h: 30px;"></span>
+                                <span class="es-tap-handle" style="--tap-h: 18px;"></span>
+                                <span class="es-tap-handle" style="--tap-h: 26px;"></span>
+                            </div>
                             <div class="text-center">
                                 <div class="mb-2 h-24 w-24 rounded-lg bg-white p-2 shadow-sm"><div class="h-full w-full bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%23c2410c%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div></div>
                                 <div class="text-[10px] font-semibold text-orange-600 dark:text-orange-300">SCAN FOR TAP LIST</div>
@@ -669,7 +754,7 @@
             <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-2xl font-bold text-white shadow-lg shadow-amber-500/25">
+                        <div class="es-woodgrain mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 text-2xl font-bold text-white shadow-lg shadow-amber-500/25">
                             {{ $num }}
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
@@ -709,7 +794,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -729,19 +814,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-bars', 'Bars'], ['/for-restaurants', 'Restaurants'], ['/for-farmers-markets', 'Farmers Markets'], ['/for-food-trucks-and-vendors', 'Food Trucks & Vendors']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-accent text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-accent w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -801,6 +886,7 @@
                         @endforeach
                     </div>
                 </div>
+                <div class="es-foam-cap pointer-events-none absolute inset-x-0 top-0 h-16" aria-hidden="true"></div>
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">

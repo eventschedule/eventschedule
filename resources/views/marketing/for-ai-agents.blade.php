@@ -106,11 +106,49 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(34, 211, 238, 0.3);
         }
-        @keyframes es-agent-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        /* Blinking terminal block caret after the hero headline. Stepped, not
+           faded - it reads as a real console cursor rather than a soft pulse. */
+        .es-caret {
+            display: inline-block;
+            width: 0.62ch; height: 0.92em;
+            margin-left: 0.14em;
+            vertical-align: -0.07em;
+            border-radius: 1px;
+            background: linear-gradient(135deg, #06b6d4, #10b981);
+            animation: es-caret-blink 1.1s infinite;
         }
-        .es-agent-float { animation: es-agent-float 6s ease-in-out infinite; }
+        .dark .es-caret { background: linear-gradient(135deg, #22d3ee, #34d399); }
+        @keyframes es-caret-blink {
+            0%, 50% { opacity: 1; }
+            50.01%, 100% { opacity: 0; }
+        }
+
+        /* HTTP status-code chips - decorative accents on a couple of feature
+           cards, in the same mono/emerald language as the syntax highlighting. */
+        .es-status {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.68rem; font-weight: 600; line-height: 1;
+            padding: 0.28rem 0.55rem; border-radius: 0.5rem;
+            color: #059669; background: rgba(16, 185, 129, 0.10);
+            border: 1px solid rgba(16, 185, 129, 0.35); white-space: nowrap;
+        }
+        .es-status::before {
+            content: ''; width: 6px; height: 6px; border-radius: 9999px;
+            background: currentColor; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+        }
+        .dark .es-status {
+            color: #34d399; background: rgba(16, 185, 129, 0.14);
+            border-color: rgba(52, 211, 153, 0.35);
+        }
+
+        /* Related-page cards: recolor the hover accent from blue to agent cyan.
+           Done in CSS because these exact hover/opacity variants are not in the
+           prebuilt Tailwind bundle. */
+        .es-rel:hover { border-color: #67e8f9; background-color: #ecfeff; }
+        .dark .es-rel:hover { border-color: rgba(6, 182, 212, 0.3); background-color: rgba(6, 182, 212, 0.05); }
+        .es-rel:hover .es-rel-accent { color: #0891b2; }
+        .dark .es-rel:hover .es-rel-accent { color: #22d3ee; }
 
         /* Data-packet stream: request packets flow through the pipe in a wave,
            like API calls streaming between agent and server. */
@@ -127,8 +165,8 @@
             50% { opacity: 0.95; transform: translateX(2px) scale(1.1); box-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
         }
         @media (prefers-reduced-motion: reduce) {
-            .es-agent-float, .es-packet { animation: none !important; }
-            .es-packet { opacity: 0.5; transform: none; }
+            .es-packet { animation: none !important; opacity: 0.5; transform: none; }
+            .es-caret { animation: none; opacity: 1; }
         }
     </style>
 
@@ -161,7 +199,7 @@
 
             <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Schedule events.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-agent">Programmatically.</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-agent">Programmatically.</span><span class="es-caret" aria-hidden="true"></span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -225,7 +263,7 @@
                     <div class="text-sm text-gray-500 dark:text-gray-400">platform fees on ticket sales</div>
                 </div>
                 <div data-reveal class="p-6">
-                    <div class="mb-2 text-4xl font-black text-sky-500 dark:text-sky-400">&lt; 5 min</div>
+                    <div class="mb-2 text-4xl font-black text-amber-500 dark:text-amber-400">&lt; 5 min</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">to your first API call</div>
                 </div>
             </div>
@@ -253,9 +291,12 @@
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
                         <div class="flex flex-col items-center gap-8 lg:flex-row">
                             <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                                    REST API
+                                <div class="mb-5 flex flex-wrap items-center gap-2">
+                                    <div class="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
+                                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                                        REST API
+                                    </div>
+                                    <span class="es-status" aria-hidden="true">200 OK</span>
                                 </div>
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Full REST API</h3>
                                 <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Create, read, update, and delete schedules, events, tickets, and sub-schedules. Standard HTTP methods, JSON responses, and predictable URL structure. Webhooks for real-time event notifications.</p>
@@ -349,9 +390,12 @@
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
                         <div class="flex flex-col items-center gap-8 lg:flex-row">
                             <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                                    Ticketing
+                                <div class="mb-5 flex flex-wrap items-center gap-2">
+                                    <div class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
+                                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
+                                        Ticketing
+                                    </div>
+                                    <span class="es-status" aria-hidden="true">201 Created</span>
                                 </div>
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Ticket management</h3>
                                 <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Create ticket types, set prices, and track sales through the API. Zero platform fees on all ticket sales.</p>
@@ -692,7 +736,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-cyan-600 hover:underline dark:text-cyan-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -712,19 +756,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-webinars', 'Webinars'], ['/for-virtual-conferences', 'Virtual Conferences'], ['/for-curators', 'Curators'], ['/for-online-classes', 'Online Classes']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-accent text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-accent w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-cyan-600 hover:underline dark:text-cyan-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

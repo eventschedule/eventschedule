@@ -313,6 +313,24 @@
                             <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 mb-6">
                                 <p class="text-gray-600 dark:text-gray-300 text-sm">The setup wizard will guide you through the initial configuration and run database migrations automatically.</p>
                             </div>
+
+                            <h3 id="reverse-proxy" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Running Behind a Reverse Proxy</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If Event Schedule sits behind a reverse proxy or CDN (Nginx, Apache, Cloudflare, or a control panel such as HestiaCP), tell it which proxies to trust so it reads the <code class="doc-inline-code">X-Forwarded-Proto</code> and <code class="doc-inline-code">X-Forwarded-For</code> headers those proxies set:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>.env</span>
+                                    <button class="doc-copy-btn">Copy</button>
+                                </div>
+                                <pre><code>TRUSTED_PROXIES=*</code></pre>
+                            </div>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use <code class="doc-inline-code">*</code> to trust any proxy, or a comma-separated list of proxy IPs or CIDR ranges (for example <code class="doc-inline-code">10.0.0.0/8,192.168.1.1</code>) when the origin server is reachable directly from the internet.</p>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Symptoms of a missing value</div>
+                                <p>Without this setting the application treats every request as plain HTTP even when the browser is on HTTPS, which can produce redirect loops, and it records the proxy's IP address as the visitor's IP in analytics and rate limiting.</p>
+                            </div>
                         </section>
 
                         <!-- 5. Set Up Cron Job -->

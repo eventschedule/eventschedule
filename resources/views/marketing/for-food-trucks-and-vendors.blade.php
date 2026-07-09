@@ -107,8 +107,11 @@
 
     <style {!! nonce_attr() !!}>
         /* For-food-trucks-and-vendors "On the Route" styles. The shared es-*
-           motion system lives in marketing.css; this holds the food gradient
-           text, the drifting location card, and the map-pin ping motif. */
+           motion system lives in marketing.css; this holds the street-food
+           gradient text, the map-pin ping + the single travelling pin that
+           bobs on the hero route, the dashed street route, the dotted
+           road-line section dividers, the serving-window awning, the road
+           sign chips, and the bumper-sticker QR frame. */
         .text-gradient-food {
             background: linear-gradient(135deg, #f97316, #eab308);
             -webkit-background-clip: text;
@@ -121,11 +124,13 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        @keyframes es-truck-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+
+        /* The single travelling pin bobs above the route (repurposed float) */
+        @keyframes es-pin-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
-        .es-truck-float { animation: es-truck-float 6s ease-in-out infinite; }
+        .es-pin-bob { animation: es-pin-bob 3s ease-in-out infinite; }
 
         /* Map-pin ping - concentric rings from a "you are here" pin */
         .es-ping span {
@@ -146,8 +151,70 @@
             0% { transform: scale(0.3); opacity: 0.7; }
             100% { transform: scale(4.5); opacity: 0; }
         }
+
+        /* Dashed street route snaking behind the hero headline */
+        .es-route { color: rgba(249, 115, 22, 0.55); }
+        .dark .es-route { color: rgba(251, 146, 60, 0.5); }
+        .es-route-path {
+            stroke-dasharray: 10 12;
+            animation: es-route-dash 22s linear infinite;
+        }
+        @keyframes es-route-dash { to { stroke-dashoffset: -264; } }
+
+        /* Dotted center-line road divider between sections */
+        .es-roadline {
+            height: 4px;
+            background-image: repeating-linear-gradient(to right, rgba(249, 115, 22, 0.6) 0 24px, transparent 24px 44px);
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+        }
+        .dark .es-roadline {
+            background-image: repeating-linear-gradient(to right, rgba(251, 146, 60, 0.5) 0 24px, transparent 24px 44px);
+        }
+
+        /* Serving-window awning (striped canopy) */
+        .es-awning {
+            height: 22px;
+            border-radius: 14px 14px 2px 2px;
+            background: repeating-linear-gradient(to right, #ea580c 0 15px, #fde3c4 15px 30px);
+            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.12);
+        }
+        .dark .es-awning {
+            background: repeating-linear-gradient(to right, #9a3412 0 15px, #b45309 15px 30px);
+        }
+
+        /* Road-sign chip (rounded diamond) for the Perfect-for icons */
+        .es-signchip {
+            transform: rotate(45deg);
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.06);
+        }
+        .dark .es-signchip { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08); }
+        .es-signchip > svg { transform: rotate(-45deg); }
+
+        /* Bumper-sticker QR frame (rotated with a peeled corner) */
+        .es-sticker {
+            transform: translateX(-50%) rotate(-3deg);
+            border: 3px solid #ffffff;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        .es-sticker::after {
+            content: "";
+            position: absolute;
+            right: -3px;
+            bottom: -3px;
+            width: 22px;
+            height: 22px;
+            background: linear-gradient(135deg, transparent 46%, rgba(0, 0, 0, 0.12) 50%, #e5e7eb 54%);
+            border-bottom-right-radius: 10px;
+            pointer-events: none;
+        }
+
+        /* Related-page cards - street-food accent hover wash (light + dark) */
+        .es-relcard:hover { background-color: #fff7ed; }
+        .dark .es-relcard:hover { background-color: rgba(249, 115, 22, 0.06); }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-truck-float, .es-ping span { animation: none !important; }
+            .es-pin-bob, .es-route-path, .es-ping span { animation: none !important; }
             .es-ping span { opacity: 0; }
         }
     </style>
@@ -162,6 +229,24 @@
             <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 75%, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <!-- Dashed street route snaking behind the headline -->
+            <div class="es-route absolute inset-0" style="-webkit-mask-image: radial-gradient(ellipse 84% 74% at 50% 46%, black 28%, transparent 80%); mask-image: radial-gradient(ellipse 84% 74% at 50% 46%, black 28%, transparent 80%);">
+                <svg class="h-full w-full" viewBox="0 0 1200 600" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M-60 400 C 180 180, 340 540, 560 340 S 940 140, 1260 320" stroke="currentColor" stroke-width="26" stroke-linecap="round" opacity="0.12"/>
+                    <path class="es-route-path" d="M-60 400 C 180 180, 340 540, 560 340 S 940 140, 1260 320" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- One travelling map pin, bobbing on the route -->
+        <div class="es-pin-bob absolute hidden sm:block" aria-hidden="true" style="right: 9%; top: 6.5rem; z-index: 6;">
+            <span class="es-ping relative flex h-10 w-10 items-center justify-center">
+                <span style="--ping-dur: 3s; --ping-delay: 0s;"></span>
+                <span style="--ping-dur: 3s; --ping-delay: 1.5s;"></span>
+                <svg class="relative h-9 w-9 text-orange-500 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
+                </svg>
+            </span>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -221,8 +306,9 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
             <div class="mb-10 text-center">
-                <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Sound familiar?</h2>
+                <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Sound <span class="text-gradient-food">familiar?</span></h2>
             </div>
 
             <div class="mx-auto mb-8 max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
@@ -345,6 +431,7 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
             <div class="es-bento group relative" data-reveal="panel">
                 <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
                     <div class="grid items-center gap-12 md:grid-cols-2">
@@ -353,7 +440,7 @@
                                 <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
                                 QR Code
                             </div>
-                            <h2 class="mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Put this on your truck</h2>
+                            <h2 class="mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Put this on your <span class="text-gradient-food">truck</span></h2>
                             <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Print the QR code and stick it on your window. Customers scan once, follow your truck forever. No app download needed.</p>
                             <ul class="space-y-3 text-gray-500 dark:text-gray-400">
                                 @foreach (['They follow once, never miss you again', "Build an audience that's YOURS, not Facebook's", 'Get notified when they book catering'] as $point)
@@ -369,7 +456,7 @@
                             <div class="relative">
                                 <div class="relative h-80 w-64 overflow-hidden rounded-t-3xl border-4 border-gray-600 bg-gradient-to-b from-gray-700 to-gray-800">
                                     <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
-                                    <div class="absolute left-1/2 top-8 -translate-x-1/2 rounded-xl bg-white p-3 shadow-2xl">
+                                    <div class="es-sticker absolute left-1/2 top-8 rounded-xl bg-white p-3">
                                         <div class="h-28 w-28 bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%23c2410c%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div>
                                         <div class="mt-2 text-center">
                                             <div class="text-xs font-bold text-gray-800">SCAN TO FOLLOW</div>
@@ -411,16 +498,19 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Announce your week's spots in one click</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">No algorithm. 100% of your followers see it. Send your Monday-Friday locations every Sunday night.</p>
-                        <div class="mt-auto rounded-xl border border-orange-500/20 bg-gray-100 p-4 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-3 flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
-                                <div><div class="font-medium text-gray-900 dark:text-white">This Week's Spots</div><div class="text-sm text-orange-600 dark:text-orange-300">Sending to 1,247 hungry fans...</div></div>
-                            </div>
-                            <div class="space-y-1 text-sm">
-                                <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 0;"><span class="text-orange-500 dark:text-orange-400">Mon:</span> Downtown Food Park</div>
-                                <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 1;"><span class="text-orange-500 dark:text-orange-400">Tue:</span> Tech Campus</div>
-                                <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 2;"><span class="text-orange-500 dark:text-orange-400">Wed:</span> Farmers Market</div>
-                                <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 3;"><span class="text-orange-500 dark:text-orange-400">Fri:</span> Brewery District</div>
+                        <div class="mt-auto" aria-hidden="true">
+                            <div class="es-awning"></div>
+                            <div class="rounded-xl border border-orange-500/20 bg-gray-100 p-4 dark:bg-[#0f0f14]" style="border-top-left-radius: 0; border-top-right-radius: 0; border-top-width: 0;">
+                                <div class="mb-3 flex items-center gap-3">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
+                                    <div><div class="font-medium text-gray-900 dark:text-white">This Week's Spots</div><div class="text-sm text-orange-600 dark:text-orange-300">Sending to 1,247 hungry fans...</div></div>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 0;"><span class="text-orange-500 dark:text-orange-400">Mon:</span> Downtown Food Park</div>
+                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 1;"><span class="text-orange-500 dark:text-orange-400">Tue:</span> Tech Campus</div>
+                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 2;"><span class="text-orange-500 dark:text-orange-400">Wed:</span> Farmers Market</div>
+                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 3;"><span class="text-orange-500 dark:text-orange-400">Fri:</span> Brewery District</div>
+                                </div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -511,6 +601,7 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
                     Built for every <span class="text-gradient-food">kitchen on wheels</span>
@@ -520,86 +611,36 @@
                 </p>
             </div>
 
+            @php
+                $vendorTypes = [
+                    ['Taco Trucks', 'Authentic tacos, burritos, and Mexican street food - let fans track your daily location and specials.', 'for-taco-trucks', 'bg-orange-100 dark:bg-orange-500/20', 'text-orange-600 dark:text-orange-400', 'hover:border-orange-200 dark:hover:border-orange-500/30', 'text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />'],
+                    ['Coffee & Beverage Carts', 'Mobile espresso, smoothies, juice bars - let caffeine seekers find their morning fix.', 'for-coffee-beverage-carts', 'bg-amber-100 dark:bg-amber-500/20', 'text-amber-600 dark:text-amber-400', 'hover:border-amber-200 dark:hover:border-amber-500/30', 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />'],
+                    ['BBQ & Smoker Trucks', 'Low and slow on the go. Share when the brisket\'s ready and where fans can find it.', 'for-bbq-smoker-trucks', 'bg-red-100 dark:bg-red-500/20', 'text-red-600 dark:text-red-400', 'hover:border-red-200 dark:hover:border-red-500/30', 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />'],
+                    ['Catering Businesses', 'Private events and corporate lunches. Take bookings and manage your catering calendar in one place.', 'for-mobile-catering-businesses', 'bg-emerald-100 dark:bg-emerald-500/20', 'text-emerald-600 dark:text-emerald-400', 'hover:border-emerald-200 dark:hover:border-emerald-500/30', 'text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />'],
+                    ['Pop-up Kitchens', 'Temporary restaurant experiences. Announce your next pop-up and build anticipation.', 'for-popup-kitchens', 'bg-blue-100 dark:bg-blue-500/20', 'text-blue-600 dark:text-blue-400', 'hover:border-blue-200 dark:hover:border-blue-500/30', 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />'],
+                    ['Festival Vendors', 'Music festivals, county fairs, and outdoor events - let fans know which festivals you\'ll be serving at.', 'for-festival-vendors', 'bg-teal-100 dark:bg-teal-500/20', 'text-teal-600 dark:text-teal-400', 'hover:border-teal-200 dark:hover:border-teal-500/30', 'text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />'],
+                ];
+            @endphp
+
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                <x-sub-audience-card
-                    name="Taco Trucks"
-                    description="Authentic tacos, burritos, and Mexican street food - let fans track your daily location and specials."
-                    icon-color="orange"
-                    blog-slug="for-taco-trucks"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Coffee & Beverage Carts"
-                    description="Mobile espresso, smoothies, juice bars - let caffeine seekers find their morning fix."
-                    icon-color="amber"
-                    blog-slug="for-coffee-beverage-carts"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="BBQ & Smoker Trucks"
-                    description="Low and slow on the go. Share when the brisket's ready and where fans can find it."
-                    icon-color="red"
-                    blog-slug="for-bbq-smoker-trucks"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Catering Businesses"
-                    description="Private events and corporate lunches. Take bookings and manage your catering calendar in one place."
-                    icon-color="emerald"
-                    blog-slug="for-mobile-catering-businesses"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Pop-up Kitchens"
-                    description="Temporary restaurant experiences. Announce your next pop-up and build anticipation."
-                    icon-color="violet"
-                    blog-slug="for-popup-kitchens"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <x-sub-audience-card
-                    name="Festival Vendors"
-                    description="Music festivals, county fairs, and outdoor events - let fans know which festivals you'll be serving at."
-                    icon-color="teal"
-                    blog-slug="for-festival-vendors"
-                >
-                    <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                    </x-slot:icon>
-                </x-sub-audience-card>
+                @foreach ($vendorTypes as [$vName, $vDesc, $vSlug, $vBg, $vText, $vBorderHover, $vLink, $vIcon])
+                    @php $vPost = get_sub_audience_blog($vSlug); @endphp
+                    <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-lg {{ $vBorderHover }} dark:border-white/10 dark:bg-white/5">
+                        <div class="mb-4 flex h-12 w-12 items-center justify-center">
+                            <div class="es-signchip flex h-11 w-11 items-center justify-center rounded-lg {{ $vBg }}">
+                                <svg aria-hidden="true" class="h-6 w-6 {{ $vText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $vIcon !!}</svg>
+                            </div>
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $vName }}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $vDesc }}</p>
+                        @if ($vPost)
+                            <a href="{{ blog_url('/' . $vPost->slug) }}" class="group mt-auto inline-flex items-center pt-3 text-sm font-medium {{ $vLink }}">
+                                Learn more
+                                <svg aria-hidden="true" class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -616,6 +657,7 @@
     @endphp
     <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
             <div class="mx-auto mb-14 max-w-2xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
                     How it <span class="text-gradient-food">works</span>
@@ -663,7 +705,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-orange-600 hover:underline dark:text-orange-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -683,19 +725,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-farmers-markets', 'Farmers Markets'], ['/for-breweries-and-wineries', 'Breweries & Wineries'], ['/for-restaurants', 'Restaurants'], ['/for-bars', 'Bars']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-orange-500/30">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-orange-600 hover:underline dark:text-orange-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

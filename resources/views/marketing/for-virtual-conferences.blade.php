@@ -138,45 +138,112 @@
 
     <style {!! nonce_attr() !!}>
         /* For-virtual-conferences "The Agenda" styles. The shared es-* motion system
-           lives in marketing.css; this holds the conference glow gradient, the
-           drifting multi-day agenda card, and the multi-track agenda-board motif. */
+           lives in marketing.css; this holds the navy-plus-electric-cyan conference
+           gradient (separating it from the site's brand blue), the color-coded
+           multi-track agenda tiles, a hanging lanyard badge that sways in the hero,
+           and the ticket-foil and approved-check moments. */
         .text-gradient-conference {
-            background: linear-gradient(135deg, #0284c7, #2563eb, #06b6d4);
+            background: linear-gradient(135deg, #1e3a8a, #0e7490, #0891b2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 40px rgba(2, 132, 199, 0.3);
+            text-shadow: 0 0 40px rgba(8, 145, 178, 0.25);
         }
         .dark .text-gradient-conference {
-            background: linear-gradient(135deg, #38bdf8, #60a5fa, #22d3ee);
+            background: linear-gradient(135deg, #60a5fa, #22d3ee, #67e8f9);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
+            text-shadow: 0 0 40px rgba(34, 211, 238, 0.35);
         }
-        @keyframes es-conf-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-conf-float { animation: es-conf-float 6s ease-in-out infinite; }
 
-        /* Agenda board: session tiles across a timeline illuminate in a wave,
-           like a multi-track conference program coming together. */
+        /* Agenda board: session tiles across a timeline illuminate in a wave, now
+           color-coded by track (electric cyan / amber / emerald) so the multi-track
+           conference program reads at a glance. */
         .es-agenda { display: flex; align-items: center; }
         .es-agenda-tile {
             flex: 0 0 auto;
             height: 10px; border-radius: 3px;
-            background: linear-gradient(to right, rgba(56, 189, 248, 0.65), rgba(37, 99, 235, 0.65));
+            background: var(--ag-bg, linear-gradient(to right, rgba(56, 189, 248, 0.65), rgba(37, 99, 235, 0.65)));
             animation: es-agenda-glow var(--ag-dur, 3s) ease-in-out infinite;
             animation-delay: var(--ag-delay, 0s);
         }
+        .es-agenda-tile.is-cyan { --ag-bg: linear-gradient(to right, rgba(34, 211, 238, 0.7), rgba(6, 182, 212, 0.6)); --ag-glow: rgba(34, 211, 238, 0.55); }
+        .es-agenda-tile.is-amber { --ag-bg: linear-gradient(to right, rgba(251, 191, 36, 0.7), rgba(245, 158, 11, 0.6)); --ag-glow: rgba(251, 191, 36, 0.5); }
+        .es-agenda-tile.is-emerald { --ag-bg: linear-gradient(to right, rgba(52, 211, 153, 0.7), rgba(16, 185, 129, 0.6)); --ag-glow: rgba(52, 211, 153, 0.5); }
         @keyframes es-agenda-glow {
             0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.9; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
+            50% { opacity: 0.9; box-shadow: 0 0 8px var(--ag-glow, rgba(56, 189, 248, 0.5)); }
         }
+
+        /* Multi-track tabs on the 3-day agenda mock rows. */
+        .es-track-tab { position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 3px; }
+        .es-track-cyan { background: #22d3ee; box-shadow: 0 0 6px rgba(34, 211, 238, 0.6); }
+        .es-track-amber { background: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+        .es-track-emerald { background: #34d399; box-shadow: 0 0 6px rgba(52, 211, 153, 0.5); }
+
+        /* Hanging conference badge: a card on a thin lanyard that sways like a slow
+           pendulum from the clip at the top. */
+        @keyframes es-lanyard-sway {
+            0%, 100% { transform: rotate(-3.5deg); }
+            50% { transform: rotate(3.5deg); }
+        }
+        .es-lanyard { transform-origin: top center; animation: es-lanyard-sway 5s ease-in-out infinite; }
+        .es-lanyard-strap { width: 2px; height: 2.5rem; margin: 0 auto; background: linear-gradient(to bottom, rgba(34, 211, 238, 0.75), rgba(37, 99, 235, 0.75)); }
+        .es-lanyard-clip { width: 1.75rem; height: 0.5rem; margin: -3px auto 0; border-radius: 9999px; background: linear-gradient(to right, #22d3ee, #2563eb); }
+        .es-badge { width: 11rem; margin-top: 0.55rem; border-radius: 0.9rem; padding: 0.85rem; background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(34, 211, 238, 0.4); box-shadow: 0 14px 30px rgba(8, 145, 178, 0.25); backdrop-filter: blur(8px); }
+        .dark .es-badge { background: rgba(255, 255, 255, 0.06); border-color: rgba(34, 211, 238, 0.3); box-shadow: 0 14px 30px rgba(34, 211, 238, 0.18); }
+        .es-badge-chip { display: inline-block; border-radius: 9999px; padding: 2px 9px; font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #fff; background: linear-gradient(to right, #06b6d4, #2563eb); }
+        .es-badge-name { margin-top: 0.5rem; font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+        .dark .es-badge-name { color: #fff; }
+        .es-badge-role { font-size: 10px; font-weight: 600; color: #0891b2; }
+        .dark .es-badge-role { color: #67e8f9; }
+        .es-badge-strip { margin-top: 0.6rem; height: 1.4rem; border-radius: 0.35rem; background: repeating-linear-gradient(90deg, rgba(34, 211, 238, 0.4) 0 3px, transparent 3px 7px); }
+
+        /* Badge-level chips on the tiered-ticket mock. */
+        .es-tier-chip { display: inline-block; margin-left: 6px; border-radius: 9999px; padding: 1px 7px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; vertical-align: middle; }
+        .es-tier-std { background: rgba(30, 58, 138, 0.14); color: #1e3a8a; }
+        .dark .es-tier-std { background: rgba(96, 165, 250, 0.2); color: #93c5fd; }
+        .es-tier-vip { background: linear-gradient(to right, rgba(34, 211, 238, 0.3), rgba(37, 99, 235, 0.25)); color: #0e7490; }
+        .dark .es-tier-vip { color: #a5f3fc; }
+        .es-tier-early { background: rgba(6, 182, 212, 0.18); color: #0891b2; }
+        .dark .es-tier-early { background: rgba(34, 211, 238, 0.2); color: #67e8f9; }
+
+        /* VIP foil edge: a cyan metallic ring with a slow light sweep. */
+        @keyframes es-foil { 0% { background-position: 180% 0; } 100% { background-position: -80% 0; } }
+        .es-vip-foil { position: relative; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.55), 0 0 12px rgba(34, 211, 238, 0.22); }
+        .es-vip-foil::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.5) 50%, transparent 62%);
+            background-size: 220% 100%;
+            animation: es-foil 3.6s ease-in-out infinite;
+        }
+
+        /* Approved-check pop on the attendee-feedback mock. */
+        @keyframes es-approve-pop {
+            0%, 35% { transform: scale(0.2); opacity: 0; }
+            55% { transform: scale(1.25); opacity: 1; }
+            70% { transform: scale(0.9); }
+            85%, 100% { transform: scale(1); opacity: 1; }
+        }
+        .es-approve-check { transform-origin: center; animation: es-approve-pop 3.2s ease-in-out infinite; }
+
+        /* Accent link + related-card hover recolor (navy/cyan, not brand blue). */
+        .vc-link { color: #0e7490; font-weight: 500; }
+        .vc-link:hover { text-decoration: underline; }
+        .dark .vc-link { color: #22d3ee; }
+        .vc-related-card:hover { border-color: #67e8f9; background-color: #ecfeff; }
+        .dark .vc-related-card:hover { border-color: rgba(34, 211, 238, 0.3); background-color: rgba(34, 211, 238, 0.06); }
+        .vc-related-card:hover .vc-related-title { color: #0891b2; }
+        .dark .vc-related-card:hover .vc-related-title { color: #22d3ee; }
+        .vc-related-card:hover .vc-related-arrow { color: #0891b2; }
+        .dark .vc-related-card:hover .vc-related-arrow { color: #22d3ee; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-conf-float, .es-agenda-tile { animation: none !important; }
+            .es-agenda-tile, .es-lanyard, .es-approve-check { animation: none !important; }
             .es-agenda-tile { opacity: 0.55; }
+            .es-lanyard { transform: none; }
+            .es-vip-foil::after { animation: none; opacity: 0; }
         }
     </style>
 
@@ -193,9 +260,21 @@
             <!-- Agenda timeline along the bottom edge -->
             <div class="es-agenda absolute bottom-0 left-0 right-0 hidden h-20 items-center justify-center gap-1.5 px-8 opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                 @for ($i = 0; $i < 32; $i++)
-                    @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; @endphp
-                    <span class="es-agenda-tile" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
+                    @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; $track = ['is-cyan', 'is-amber', 'is-emerald'][$i % 3]; @endphp
+                    <span class="es-agenda-tile {{ $track }}" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
                 @endfor
+            </div>
+        </div>
+
+        <!-- Hanging conference badge on a lanyard -->
+        <div class="es-lanyard absolute right-8 top-24 z-20 hidden opacity-90 lg:block" aria-hidden="true">
+            <div class="es-lanyard-strap"></div>
+            <div class="es-lanyard-clip"></div>
+            <div class="es-badge">
+                <div><span class="es-badge-chip">All Access</span></div>
+                <div class="es-badge-name">Alex Rivera</div>
+                <div class="es-badge-role">Keynote Speaker</div>
+                <div class="es-badge-strip"></div>
             </div>
         </div>
 
@@ -314,15 +393,18 @@
                                             <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Tech Conference 2026</div><div class="text-xs text-sky-600 dark:text-sky-300">3-day agenda</div></div>
                                         </div>
                                         <div class="space-y-1.5">
-                                            <div class="es-ai-field rounded-lg border border-sky-400/20 bg-gradient-to-br from-sky-600/30 to-blue-600/30 p-2" style="--i: 0;">
+                                            <div class="es-ai-field relative rounded-lg border border-sky-400/20 bg-gradient-to-br from-sky-600/30 to-blue-600/30 p-2 pl-3" style="--i: 0;">
+                                                <span class="es-track-tab es-track-cyan" aria-hidden="true"></span>
                                                 <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 1 - Opening Keynote</div>
                                                 <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">9:00 AM - Main Stage</div>
                                             </div>
-                                            <div class="es-ai-field rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 p-2" style="--i: 1;">
+                                            <div class="es-ai-field relative rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-600/20 to-cyan-600/20 p-2 pl-3" style="--i: 1;">
+                                                <span class="es-track-tab es-track-amber" aria-hidden="true"></span>
                                                 <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 2 - AI Workshop</div>
                                                 <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">10:00 AM - Track B</div>
                                             </div>
-                                            <div class="es-ai-field rounded-lg border border-cyan-400/20 bg-gradient-to-br from-cyan-600/20 to-sky-600/20 p-2" style="--i: 2;">
+                                            <div class="es-ai-field relative rounded-lg border border-cyan-400/20 bg-gradient-to-br from-cyan-600/20 to-sky-600/20 p-2 pl-3" style="--i: 2;">
+                                                <span class="es-track-tab es-track-emerald" aria-hidden="true"></span>
                                                 <div class="text-[10px] font-semibold text-gray-900 dark:text-white">DAY 3 - Closing Panel</div>
                                                 <div class="mt-0.5 text-[9px] text-gray-500 dark:text-gray-400">2:00 PM - Main Stage</div>
                                             </div>
@@ -347,9 +429,9 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">General admission, VIP, speaker passes, early bird pricing. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-blue-600 underline hover:no-underline dark:text-blue-400">ticketing features</a>.</p>
                         <div class="mt-auto rounded-xl border border-blue-400/30 bg-blue-500/15 p-4" aria-hidden="true">
                             <div class="mb-3 space-y-2">
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-blue-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">General Admission</span><span class="text-xs font-semibold text-blue-600 dark:text-blue-400">$49</span></div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-sky-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">VIP Pass</span><span class="text-xs font-semibold text-sky-600 dark:text-sky-400">$149</span></div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-cyan-400/20 p-2" style="--i: 2;"><span class="text-xs font-medium text-gray-900 dark:text-white">Early Bird</span><span class="text-xs font-semibold text-cyan-600 dark:text-cyan-400">$29</span></div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-blue-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">General Admission<span class="es-tier-chip es-tier-std">Standard</span></span><span class="text-xs font-semibold text-blue-600 dark:text-blue-400">$49</span></div>
+                                <div class="es-ai-field es-vip-foil flex items-center justify-between rounded-lg bg-sky-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">VIP Pass<span class="es-tier-chip es-tier-vip">Premium</span></span><span class="text-xs font-semibold text-sky-600 dark:text-sky-400">$149</span></div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-cyan-400/20 p-2" style="--i: 2;"><span class="text-xs font-medium text-gray-900 dark:text-white">Early Bird<span class="es-tier-chip es-tier-early">Limited</span></span><span class="text-xs font-semibold text-cyan-600 dark:text-cyan-400">$29</span></div>
                             </div>
                             <div class="border-t border-blue-400/20 pt-3">
                                 <div class="flex justify-between text-xs">
@@ -546,7 +628,7 @@
                                             <div class="rounded-lg bg-white px-2 py-1 text-[10px] text-gray-600 dark:bg-white/10 dark:text-gray-300">Very practical demos</div>
                                         </div>
                                         <div class="flex items-center gap-1 pt-1">
-                                            <svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <svg aria-hidden="true" class="es-approve-check h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             <span class="text-[10px] text-emerald-600 dark:text-emerald-400">Approved by organizer</span>
                                         </div>
                                     </div>
@@ -583,8 +665,8 @@
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 <div class="es-agenda absolute bottom-0 left-0 right-0 flex h-16 items-center justify-center gap-1.5 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                     @for ($i = 0; $i < 32; $i++)
-                        @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; @endphp
-                        <span class="es-agenda-tile" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
+                        @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; $track = ['is-cyan', 'is-amber', 'is-emerald'][$i % 3]; @endphp
+                        <span class="es-agenda-tile {{ $track }}" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
                     @endfor
                 </div>
             </div>
@@ -753,7 +835,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-conference">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
@@ -772,7 +854,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="vc-link inline-flex items-center">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -789,22 +871,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-conference">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-webinars', 'Webinars'], ['/for-online-classes', 'Online Classes'], ['/for-live-qa-sessions', 'Live Q&A Sessions'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="vc-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="vc-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="vc-related-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="vc-link inline-flex items-center">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -860,8 +942,8 @@
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     <div class="es-agenda absolute bottom-0 left-0 right-0 flex h-14 items-center justify-center gap-1.5 px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                         @for ($i = 0; $i < 26; $i++)
-                            @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; @endphp
-                            <span class="es-agenda-tile" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
+                            @php $w = [26, 40, 54, 34, 46][$i % 5]; $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.16; $track = ['is-cyan', 'is-amber', 'is-emerald'][$i % 3]; @endphp
+                            <span class="es-agenda-tile {{ $track }}" style="width: {{ $w }}px; --ag-dur: {{ $dur }}s; --ag-delay: {{ $delay }}s;"></span>
                         @endfor
                     </div>
                 </div>

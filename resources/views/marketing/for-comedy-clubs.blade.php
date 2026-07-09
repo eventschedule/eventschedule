@@ -108,13 +108,102 @@
 
     <style {!! nonce_attr() !!}>
         /* For-comedy-clubs "The Room" styles. The shared es-* motion system
-           lives in marketing.css; this holds only the amber->yellow spotlight
-           gradient text. */
+           lives in marketing.css; this holds the amber->yellow->gold sign
+           gradient, the brick-wall backdrop, and the changeable letterboard.
+           Brick red is the secondary accent. */
         .text-gradient-comedy {
             background: linear-gradient(135deg, #f59e0b, #eab308, #facc15);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+        .dark .text-gradient-comedy {
+            background: linear-gradient(135deg, #fbbf24, #fde047, #facc15);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Brick-wall backdrop (the classic stand-up backdrop). Low-contrast,
+           pure-CSS repeating gradients: mortar courses + half-offset joints. */
+        .es-brick {
+            --bw: 58px;
+            --bh: 26px;
+            --m1: rgba(124, 45, 45, 0.16);
+            --m2: rgba(124, 45, 45, 0.09);
+            background-image:
+                repeating-linear-gradient(0deg,  var(--m1) 0 2px, transparent 2px var(--bh)),
+                repeating-linear-gradient(90deg, var(--m1) 0 2px, transparent 2px var(--bw)),
+                repeating-linear-gradient(90deg, transparent 0 calc(var(--bw) / 2), var(--m2) calc(var(--bw) / 2) calc(var(--bw) / 2 + 2px), transparent calc(var(--bw) / 2 + 2px) var(--bw));
+            background-size: var(--bw) var(--bh);
+        }
+        .dark .es-brick {
+            --m1: rgba(255, 255, 255, 0.05);
+            --m2: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Changeable letterboard (the marquee sign) for the weekly lineup */
+        .es-letterboard {
+            background-color: #14110d;
+            background-image: repeating-linear-gradient(180deg,
+                rgba(255, 255, 255, 0.05) 0 1px,
+                transparent 1px 13px,
+                rgba(0, 0, 0, 0.45) 13px 14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 2px 22px rgba(0, 0, 0, 0.6), inset 0 0 70px rgba(0, 0, 0, 0.4);
+        }
+        .dark .es-letterboard {
+            background-color: #100d0a;
+            box-shadow: inset 0 2px 22px rgba(0, 0, 0, 0.75), inset 0 0 70px rgba(0, 0, 0, 0.55);
+        }
+        .es-letter-tile + .es-letter-tile { box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.05); }
+        .es-letter {
+            color: #f4f1e6;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-shadow: 0 1px 0 rgba(0, 0, 0, 0.7), 0 0 1px rgba(0, 0, 0, 0.5);
+        }
+        .es-letter-hot {
+            color: #fcd34d;
+            text-shadow: 0 0 7px rgba(252, 211, 77, 0.45), 0 1px 0 rgba(0, 0, 0, 0.7);
+        }
+        .es-letter-sub { color: rgba(230, 225, 210, 0.5); letter-spacing: 0.08em; text-transform: uppercase; }
+        .es-unlit { filter: brightness(0.5) saturate(0.55); }
+        .es-unlit .es-letter { color: #6b6b62; text-shadow: none; }
+
+        /* One tile caught mid-swap (split-flap) */
+        @keyframes es-letter-swap {
+            0%, 80%, 100% { transform: rotateX(0deg); opacity: 1; }
+            88% { transform: rotateX(-90deg); opacity: 0.5; }
+            95% { transform: rotateX(0deg); opacity: 1; }
+        }
+        .es-flip {
+            display: inline-block;
+            transform-origin: 50% 100%;
+            animation: es-letter-swap 5.5s ease-in-out infinite;
+            backface-visibility: hidden;
+        }
+
+        /* Spotlight dots on the ladder rungs (points of light, not a cone) */
+        .es-spot-dot {
+            width: 10px; height: 10px;
+            margin: 0 auto 0.85rem;
+            border-radius: 9999px;
+            background: radial-gradient(circle, #fde68a 0%, #f59e0b 58%, rgba(245, 158, 11, 0) 72%);
+            box-shadow: 0 0 12px 3px rgba(251, 191, 36, 0.5);
+        }
+        .dark .es-spot-dot { box-shadow: 0 0 15px 4px rgba(251, 191, 36, 0.55); }
+
+        /* Related-page cards: amber hover */
+        .es-rel-card:hover { border-color: rgba(245, 158, 11, 0.55); background-color: rgba(245, 158, 11, 0.08); }
+        .dark .es-rel-card:hover { border-color: rgba(251, 191, 36, 0.35); background-color: rgba(251, 191, 36, 0.08); }
+        .es-rel-card:hover .es-rel-title,
+        .es-rel-card:hover .es-rel-arrow { color: #d97706; }
+        .dark .es-rel-card:hover .es-rel-title,
+        .dark .es-rel-card:hover .es-rel-arrow { color: #fbbf24; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-flip { animation: none; }
         }
     </style>
 
@@ -123,6 +212,7 @@
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
+            <div class="es-brick absolute inset-0 [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
             <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.42), rgba(245, 158, 11, 0) 65%);"></div>
             <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(234, 179, 8, 0.4), rgba(234, 179, 8, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3"></div>
@@ -202,15 +292,15 @@
                 <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">Your weekly rhythm, automated. Set it once, it runs forever.</p>
             </div>
 
-            <div class="overflow-x-auto rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-100 to-gray-200 p-6 dark:border-white/10 dark:from-gray-900 dark:to-gray-800/30" data-reveal="panel">
+            <div class="es-letterboard overflow-x-auto rounded-2xl p-6" data-reveal="panel">
                 <div class="flex min-w-[700px] gap-3" data-reveal-group="50">
                     @foreach ($comedyWeek as [$day, $label, $detail, $dot, $text, $card])
-                        <div data-reveal class="flex-1 rounded-xl border p-4 text-center {{ $card }}">
-                            <div class="mb-2 text-xs font-semibold {{ $text }}">{{ $day }}</div>
+                        <div data-reveal class="es-letter-tile flex-1 rounded-xl p-4 text-center {{ $label === 'Dark' ? 'es-unlit' : '' }}">
+                            <div class="es-letter mb-2 text-xs font-semibold">{{ $day }}</div>
                             <div class="mx-auto mb-2 h-3 w-3 rounded-full {{ $dot }}"></div>
-                            <div class="text-xs font-medium {{ $label === 'Dark' ? 'text-gray-600 dark:text-gray-300' : $text }}">{{ $label }}</div>
+                            <div class="es-letter text-xs font-medium {{ $label === 'Headliner' ? 'es-letter-hot' : '' }} {{ $day === 'THU' ? 'es-flip' : '' }}">{{ $label }}</div>
                             @if ($detail)
-                                <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">{{ $detail }}</div>
+                                <div class="es-letter-sub mt-1 text-[10px]">{{ $detail }}</div>
                             @endif
                         </div>
                     @endforeach
@@ -446,16 +536,19 @@
 
             <div class="grid grid-cols-1 items-end gap-6 md:grid-cols-3" data-reveal-group="100">
                 <div data-reveal class="rounded-2xl border border-lime-500/30 bg-gradient-to-br from-lime-100/40 to-green-100/40 p-8 text-center dark:from-lime-900/30 dark:to-green-900/30">
+                    <div class="es-spot-dot" aria-hidden="true"></div>
                     <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-lime-500/20"><div class="h-6 w-6 rounded-full bg-lime-400/60"></div></div>
                     <h3 class="mb-2 text-xl font-bold text-lime-600 dark:text-lime-400">Open Mic</h3>
                     <p class="text-gray-500 dark:text-gray-400">5 minutes to prove yourself</p>
                 </div>
                 <div data-reveal class="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-100/40 to-orange-100/40 p-8 text-center dark:from-amber-900/30 dark:to-orange-900/30">
+                    <div class="es-spot-dot" aria-hidden="true"></div>
                     <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-500/20"><div class="h-10 w-10 rounded-full bg-amber-400/70"></div></div>
                     <h3 class="mb-2 text-xl font-bold text-amber-600 dark:text-amber-400">Feature</h3>
                     <p class="text-gray-500 dark:text-gray-400">25 minutes. The crowd knows your name.</p>
                 </div>
                 <div data-reveal class="rounded-2xl border border-yellow-500/40 bg-gradient-to-br from-yellow-100/50 to-amber-100/50 p-8 text-center shadow-lg shadow-yellow-500/10 dark:from-yellow-900/40 dark:to-amber-900/40">
+                    <div class="es-spot-dot" aria-hidden="true"></div>
                     <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-yellow-500/30 shadow-lg shadow-yellow-400/30"><div class="h-14 w-14 rounded-full bg-gradient-to-br from-yellow-400 to-amber-400"></div></div>
                     <h3 class="mb-2 text-2xl font-bold text-yellow-600 dark:text-yellow-400">Headliner</h3>
                     <p class="text-gray-500 dark:text-gray-400">Your name on the marquee</p>
@@ -474,6 +567,7 @@
                     <div class="flex flex-col items-center gap-8 lg:flex-row">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 dark:border-red-800/30 dark:bg-red-900/40 dark:text-red-300">
+                                <span class="h-2 w-2 animate-pulse rounded-full bg-red-500 dark:bg-red-400" aria-hidden="true"></span>
                                 <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                 Recording Nights
                             </div>
@@ -609,6 +703,7 @@
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-brick absolute inset-0"></div>
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.28), rgba(245, 158, 11, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(234, 179, 8, 0.26), rgba(234, 179, 8, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
@@ -639,7 +734,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-comedy">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -663,7 +758,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-amber-600 hover:underline dark:text-amber-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -680,22 +775,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-comedy">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-venues', 'Venues'], ['/for-bars', 'Bars'], ['/for-comedians', 'Comedians'], ['/for-nightclubs', 'Nightclubs']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-amber-600 hover:underline dark:text-amber-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -747,6 +842,7 @@
         <div class="mx-auto max-w-6xl">
             <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                    <div class="es-brick absolute inset-0"></div>
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.32), rgba(245, 158, 11, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>

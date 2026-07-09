@@ -109,50 +109,131 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-online-classes "The Studio" styles. The shared es-* motion system
-           lives in marketing.css; this holds the teaching glow gradient, the
-           drifting class-reminder card, and the curriculum progress rail motif. */
-        .text-gradient-classes {
-            background: linear-gradient(135deg, #059669, #10b981, #0d9488);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(5, 150, 105, 0.3);
-        }
-        .dark .text-gradient-classes {
-            background: linear-gradient(135deg, #34d399, #6ee7b7, #2dd4bf);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 40px rgba(52, 211, 153, 0.3);
-        }
-        @keyframes es-class-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-class-float { animation: es-class-float 6s ease-in-out infinite; }
+        /* For-online-classes "The Syllabus" styles. The shared es-* motion
+           system lives in marketing.css; this holds the notebook identity: an
+           amber highlighter-swipe accent paired with ink slate, paper-cream
+           surfaces, the ink + highlighter lesson-node rail (this page's motif),
+           ruled-line dividers, a spiral binding and a grade-book roster. */
 
-        /* Curriculum progress rail: lesson nodes light up in sequence,
-           like watching a course advance session by session. */
+        /* Highlighter swipe: the accent word keeps its own (legible) heading
+           colour and gets an amber marker stroke behind its lower half, so it
+           stays AA-contrast on light and always-dark (band/finale) surfaces.
+           box-decoration-break keeps the stroke intact across line wraps. */
+        .es-marker {
+            padding: 0 0.08em;
+            background-image: linear-gradient(180deg, transparent 46%, rgba(251, 191, 36, 0.5) 46%, rgba(251, 191, 36, 0.5) 92%, transparent 92%);
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+        }
+        .dark .es-marker {
+            background-image: linear-gradient(180deg, transparent 46%, rgba(251, 191, 36, 0.42) 46%, rgba(251, 191, 36, 0.42) 92%, transparent 92%);
+        }
+
+        /* Ink slate + light-ink text helpers for notebook copy. */
+        .es-ink { color: #334155; }
+        .dark .es-ink { color: #cbd5e1; }
+        .es-ink-soft { color: #64748b; }
+        .dark .es-ink-soft { color: #94a3b8; }
+
+        /* Lesson rail: amber highlighter nodes joined by ink pen lines. This
+           page's exclusive motif (hero, dark band and finale). */
         .es-lesson { display: flex; align-items: center; }
         .es-lesson-node {
             flex: 0 0 auto;
             width: 7px; height: 7px; border-radius: 9999px;
-            background: rgba(16, 185, 129, 0.85);
+            background: rgba(251, 191, 36, 0.9);
             animation: es-lesson-pulse var(--ln-dur, 2.4s) ease-in-out infinite;
             animation-delay: var(--ln-delay, 0s);
         }
         .es-lesson-link {
             flex: 1 1 auto; min-width: 8px; height: 2px;
-            background: linear-gradient(to right, rgba(16, 185, 129, 0.45), rgba(13, 148, 136, 0.45));
+            background: rgba(51, 65, 85, 0.5);
         }
+        .dark .es-lesson-link { background: rgba(203, 213, 225, 0.35); }
         @keyframes es-lesson-pulse {
-            0%, 100% { opacity: 0.25; transform: scale(0.8); box-shadow: 0 0 0 rgba(16, 185, 129, 0); }
-            50% { opacity: 1; transform: scale(1.35); box-shadow: 0 0 10px rgba(16, 185, 129, 0.7); }
+            0%, 100% { opacity: 0.25; transform: scale(0.8); box-shadow: 0 0 0 rgba(251, 191, 36, 0); }
+            50% { opacity: 1; transform: scale(1.35); box-shadow: 0 0 10px rgba(251, 191, 36, 0.7); }
         }
+
+        /* Paper-cream surface with faint ruled lines. Dark mode is a warm dark
+           paper (never a chalkboard - that identity belongs to workshops). */
+        .es-paper {
+            background-color: #fbf6ea;
+            background-image: repeating-linear-gradient(180deg, transparent, transparent 21px, rgba(51, 65, 85, 0.09) 21px, rgba(51, 65, 85, 0.09) 22px);
+        }
+        .dark .es-paper {
+            background-color: #201f26;
+            background-image: repeating-linear-gradient(180deg, transparent, transparent 21px, rgba(203, 213, 225, 0.08) 21px, rgba(203, 213, 225, 0.08) 22px);
+        }
+
+        /* Sticky highlight note: a cream card with an amber marker edge. */
+        .es-note { background-color: #fffdf5; border: 1px solid rgba(251, 191, 36, 0.4); }
+        .dark .es-note { background-color: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.3); }
+
+        /* Ink pen primary buttons + step/avatar badges (replace emerald fills). */
+        .es-ink-btn {
+            background-image: linear-gradient(to right, #334155, #1e293b);
+            box-shadow: 0 10px 15px -3px rgba(30, 41, 59, 0.35);
+        }
+        .es-ink-btn:hover { box-shadow: 0 20px 25px -5px rgba(30, 41, 59, 0.45); }
+        .dark .es-ink-btn {
+            background-image: linear-gradient(to right, #475569, #334155);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        .es-ink-badge { background-image: linear-gradient(to bottom right, #334155, #1e293b); }
+        .dark .es-ink-badge { background-image: linear-gradient(to bottom right, #475569, #334155); }
+
+        /* Outline ink pill (badge). */
+        .es-ink-tag { border-color: rgba(51, 65, 85, 0.25); background-color: rgba(51, 65, 85, 0.08); color: #334155; }
+        .dark .es-ink-tag { border-color: rgba(203, 213, 225, 0.2); background-color: rgba(203, 213, 225, 0.08); color: #cbd5e1; }
+
+        /* Ink chip for the dark-band journey icons where a Tailwind slate
+           border opacity utility is not in the bundle. */
+        .es-icon-ink { border-color: rgba(148, 163, 184, 0.3); background-color: rgba(148, 163, 184, 0.12); }
+
+        /* Spiral binding strip for the class-payments page mock. */
+        .es-spiral-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 0.4rem; padding: 0.35rem 0.75rem;
+            background-color: rgba(51, 65, 85, 0.06);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.12);
+        }
+        .dark .es-spiral-strip {
+            background-color: rgba(203, 213, 225, 0.05);
+            border-bottom-color: rgba(203, 213, 225, 0.1);
+        }
+        .es-spiral-ring {
+            width: 0.55rem; height: 0.55rem; border-radius: 9999px;
+            border: 1.5px solid rgba(51, 65, 85, 0.4);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.15);
+        }
+        .dark .es-spiral-ring { border-color: rgba(203, 213, 225, 0.35); }
+
+        /* Grade-book attendance marks: amber highlighter check (present),
+           open ink ring (absent). */
+        .es-punch-check { color: #b45309; }
+        .dark .es-punch-check { color: #fbbf24; }
+        .es-punch-dot { display: inline-block; border-radius: 9999px; border: 1.5px solid rgba(51, 65, 85, 0.35); }
+        .dark .es-punch-dot { border-color: rgba(203, 213, 225, 0.3); }
+
+        /* Ruled-line section divider: a thin ink baseline crossed by a short
+           red margin line, like the rule on notebook paper. */
+        .es-rule-wrap { position: relative; max-width: 48rem; margin: 0 auto; height: 1px; background-color: rgba(51, 65, 85, 0.18); }
+        .dark .es-rule-wrap { background-color: rgba(203, 213, 225, 0.14); }
+        .es-rule-margin { position: absolute; left: 16%; top: -8px; height: 18px; width: 1.5px; background-color: rgba(220, 38, 38, 0.55); }
+        .dark .es-rule-margin { background-color: rgba(248, 113, 113, 0.5); }
+
+        /* Inline text links + related-card hover recoloured to the amber accent
+           (custom so they never depend on Tailwind hover utilities). */
+        .es-link-accent { color: #b45309; }
+        .dark .es-link-accent { color: #fbbf24; }
+        .es-rel-card:hover { border-color: #fcd34d; background-color: #fffbeb; }
+        .es-rel-card:hover .es-rel-title, .es-rel-card:hover .es-rel-arrow { color: #b45309; }
+        .dark .es-rel-card:hover { border-color: rgba(251, 191, 36, 0.35); background-color: rgba(251, 191, 36, 0.06); }
+        .dark .es-rel-card:hover .es-rel-title, .dark .es-rel-card:hover .es-rel-arrow { color: #fbbf24; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-class-float, .es-lesson-node { animation: none !important; }
-            .es-lesson-node { opacity: 0.6; }
+            .es-lesson-node { animation: none !important; opacity: 0.6; }
         }
     </style>
 
@@ -161,9 +242,9 @@
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(5, 150, 105, 0.3), rgba(5, 150, 105, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(13, 148, 136, 0.3), rgba(13, 148, 136, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0) 60%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(251, 191, 36, 0.26), rgba(251, 191, 36, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(100, 116, 139, 0.28), rgba(100, 116, 139, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.12), rgba(251, 191, 36, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
             <!-- Curriculum progress rail along the bottom edge -->
@@ -180,7 +261,7 @@
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg aria-hidden="true" class="h-5 w-5 es-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
                 <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Instructors, Coaches & Educators</span>
@@ -188,11 +269,11 @@
 
             <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Teach online classes your way.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-classes">No platform fees.</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-marker">No platform fees.</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                From yoga sessions to coding bootcamps. Schedule recurring classes, manage enrollments, and get paid directly. Your students, your schedule.
+                From cooking classes to coding bootcamps. Schedule recurring classes, manage enrollments, and get paid directly. Your students, your schedule.
             </p>
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-base text-gray-400 dark:text-gray-500">
                 The online class scheduling platform with built-in student registration, recurring session management, email notifications, and payment processing for instructors and educators.
@@ -203,7 +284,7 @@
                     See how it grows
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/40">
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="group es-ink-btn pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create your class schedule
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -217,9 +298,9 @@
                     <div class="es-marquee" data-marquee="1" aria-hidden="true">
                         <div class="es-marquee-track">
                             @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Yoga & Fitness', 'Cooking Classes', 'Art & Music', 'Language Courses', 'Coding Bootcamps', 'Tutoring', 'Masterclasses', 'Kids Classes'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100/80 px-4 py-1.5 text-xs font-semibold text-emerald-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-emerald-400 to-teal-400"></span>
+                                @foreach (['Fitness & Wellness', 'Cooking Classes', 'Art & Music', 'Language Courses', 'Coding Bootcamps', 'Tutoring', 'Masterclasses', 'Kids Classes'] as $tag)
+                                    <span class="es-ink-tag inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
+                                        <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -239,11 +320,11 @@
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="grid gap-6 text-center md:grid-cols-3" data-reveal-group="90">
                 <div data-reveal class="p-6">
-                    <div class="mb-2 text-4xl font-black text-emerald-500 dark:text-emerald-400"><span data-count-to="62">62</span>%</div>
+                    <div class="mb-2 text-4xl font-black text-amber-500 dark:text-amber-400"><span data-count-to="62">62</span>%</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">of adults have taken an online class</div>
                 </div>
                 <div data-reveal class="border-gray-200 p-6 dark:border-white/5 md:border-x">
-                    <div class="mb-2 text-4xl font-black text-teal-500 dark:text-teal-400">2x</div>
+                    <div class="mb-2 text-4xl font-black es-ink">2x</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">higher retention with recurring class schedules</div>
                 </div>
                 <div data-reveal class="p-6">
@@ -259,9 +340,10 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="es-rule-wrap mb-12" aria-hidden="true"><span class="es-rule-margin"></span></div>
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything you need to teach <span class="text-gradient-classes">online classes</span>
+                    Everything you need to teach <span class="es-marker">online classes</span>
                 </h2>
             </div>
 
@@ -272,7 +354,7 @@
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
                         <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
                             <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
                                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                     Email Students
                                 </div>
@@ -286,19 +368,19 @@
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-100 to-teal-100 p-4 dark:border-emerald-400/30 dark:from-emerald-950 dark:to-teal-950">
+                                    <div class="es-paper max-w-xs rounded-2xl border border-slate-300 p-4 dark:border-white/10">
                                         <div class="mb-3 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-sm font-semibold text-white">YS</div>
-                                            <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Yoga Studio</div><div class="text-xs text-emerald-600 dark:text-emerald-300">Class reminder</div></div>
+                                            <div class="es-ink-badge flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white">YS</div>
+                                            <div><div class="text-sm font-semibold es-ink">Your Studio</div><div class="text-xs es-ink-soft">Class reminder</div></div>
                                         </div>
-                                        <div class="rounded-xl border border-emerald-400/20 bg-gradient-to-br from-emerald-600/30 to-teal-600/30 p-3 text-center">
-                                            <div class="mb-1 text-xs font-semibold text-gray-900 dark:text-white">TOMORROW AT 7 AM</div>
-                                            <div class="text-sm font-bold text-emerald-700 dark:text-emerald-300">Morning Flow Yoga</div>
-                                            <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">Join via Zoom - $12</div>
+                                        <div class="es-note rounded-xl p-3 text-center">
+                                            <div class="mb-1 text-xs font-semibold es-ink">TOMORROW AT 6 PM</div>
+                                            <div class="text-sm font-bold es-ink">Knife Skills 101</div>
+                                            <div class="mt-1 text-[10px] es-ink-soft">Join via Zoom - $20</div>
                                         </div>
                                         <div class="mt-3 flex gap-4 text-xs">
-                                            <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-emerald-500 dark:text-emerald-400">74%</span> opened</div>
-                                            <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-amber-500 dark:text-amber-400">51%</span> clicked</div>
+                                            <div class="es-ink-soft"><span class="font-semibold es-ink">74%</span> opened</div>
+                                            <div class="es-ink-soft"><span class="font-semibold text-amber-500 dark:text-amber-400">51%</span> clicked</div>
                                         </div>
                                     </div>
                                 </div>
@@ -317,16 +399,23 @@
                             Class Payments
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell class spots with zero fees</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Per-class pricing or free sessions. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-green-600 underline hover:no-underline dark:text-green-400">ticketing features</a>.</p>
-                        <div class="mt-auto rounded-xl border border-green-400/30 bg-green-500/15 p-4" aria-hidden="true">
-                            <div class="mb-3 space-y-2">
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-green-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">Drop-in Class</span><span class="text-xs font-semibold text-green-600 dark:text-green-400">$15</span></div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-emerald-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">Free Trial</span><span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Free</span></div>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Per-class pricing or free sessions. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="es-link-accent underline hover:no-underline">ticketing features</a>.</p>
+                        <div class="mt-auto overflow-hidden rounded-xl border border-slate-300 dark:border-white/10" aria-hidden="true">
+                            <div class="es-spiral-strip">
+                                @for ($sr = 0; $sr < 9; $sr++)
+                                    <span class="es-spiral-ring"></span>
+                                @endfor
                             </div>
-                            <div class="border-t border-green-400/20 pt-3">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
-                                    <span class="font-semibold text-green-600 dark:text-green-400">$0</span>
+                            <div class="bg-green-500/10 p-4">
+                                <div class="mb-3 space-y-2">
+                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-green-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">Drop-in Class</span><span class="text-xs font-semibold text-green-600 dark:text-green-400">$15</span></div>
+                                    <div class="es-ai-field flex items-center justify-between rounded-lg bg-green-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">Free Trial</span><span class="text-xs font-semibold text-green-600 dark:text-green-400">Free</span></div>
+                                </div>
+                                <div class="border-t border-green-400/20 pt-3">
+                                    <div class="flex justify-between text-xs">
+                                        <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
+                                        <span class="font-semibold text-green-600 dark:text-green-400">$0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -365,29 +454,29 @@
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
                         <div class="grid items-center gap-8 md:grid-cols-2">
                             <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
+                                <div class="es-ink-tag mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium">
                                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                                     Any Platform
                                 </div>
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Teach on any video platform</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Zoom, Google Meet, YouTube Live, or your own streaming setup. Add your class link, students join from your schedule. Learn more about <a href="{{ marketing_url('/features/online-events') }}" class="text-teal-600 underline hover:no-underline dark:text-teal-400">online event features</a>.</p>
+                                <p class="text-lg text-gray-500 dark:text-gray-400">Zoom, Google Meet, YouTube Live, or your own streaming setup. Add your class link, students join from your schedule. Learn more about <a href="{{ marketing_url('/features/online-events') }}" class="es-link-accent underline hover:no-underline">online event features</a>.</p>
                             </div>
                             <div class="flex items-center justify-center" aria-hidden="true">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-36 rounded-xl border border-teal-400/30 bg-teal-500/15 p-4">
-                                        <div class="mb-2 text-center text-xs font-semibold text-teal-600 dark:text-teal-300">Your Schedule</div>
+                                    <div class="es-paper w-36 rounded-xl border border-slate-300 p-4 dark:border-white/10">
+                                        <div class="mb-2 text-center text-xs font-semibold es-ink">Your Schedule</div>
                                         <div class="space-y-1.5">
                                             <div class="h-2 rounded bg-gray-300 dark:bg-white/20"></div>
-                                            <div class="h-2 w-3/4 rounded bg-teal-400/40"></div>
+                                            <div class="h-2 w-3/4 rounded bg-amber-400/60"></div>
                                         </div>
-                                        <div class="mt-3 rounded-lg border border-teal-400/30 bg-teal-400/20 p-2">
-                                            <div class="text-center text-[10px] font-medium text-teal-800 dark:text-white">Morning Yoga</div>
-                                            <div class="mt-0.5 text-center text-[8px] text-teal-700 dark:text-teal-300">Mon 7:00 AM</div>
+                                        <div class="es-note mt-3 rounded-lg p-2">
+                                            <div class="text-center text-[10px] font-medium es-ink">Intro to Python</div>
+                                            <div class="mt-0.5 text-center text-[8px] es-ink-soft">Mon 6:00 PM</div>
                                         </div>
                                     </div>
                                     <div class="flex flex-col items-center gap-1">
-                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                                        <span class="text-[10px] text-teal-500 dark:text-teal-400">class link</span>
+                                        <svg aria-hidden="true" class="es-sync-dot h-6 w-6 es-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                        <span class="text-[10px] es-ink-soft">class link</span>
                                     </div>
                                     <div class="w-36 rounded-xl border border-gray-300 bg-gray-200 p-4 dark:border-white/20 dark:bg-white/10">
                                         <div class="mb-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">Platform</div>
@@ -413,13 +502,13 @@
                             Recurring
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Schedule recurring classes automatically</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Weekly yoga, biweekly workshops, monthly masterclasses. Set it once and let students follow along.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Weekly language lessons, biweekly workshops, monthly masterclasses. Set it once and let students follow along.</p>
                         <div class="mt-auto rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
                             <div class="space-y-1.5">
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Mon - Morning Flow</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Wed - Power Vinyasa</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Restorative Yoga</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Sat - Weekend Workshop</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Mon - Knife Skills 101</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Wed - Conversational Spanish</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Intro to Python</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Sat - Watercolor Basics</span></div>
                             </div>
                             <div class="mt-2 text-center text-[10px] text-amber-600 dark:text-amber-300">Repeats weekly</div>
                         </div>
@@ -441,8 +530,8 @@
                             <div class="w-20 rounded-xl border border-blue-400/30 bg-blue-500/15 p-3">
                                 <div class="mb-1 text-center text-[10px] text-blue-600 dark:text-blue-300">Schedule</div>
                                 <div class="space-y-1">
-                                    <div class="es-sync-dot h-1.5 rounded bg-emerald-400/60"></div>
-                                    <div class="es-sync-dot h-1.5 rounded bg-amber-400/60" style="--i: 1;"></div>
+                                    <div class="es-sync-dot h-1.5 rounded bg-amber-400/60"></div>
+                                    <div class="es-sync-dot h-1.5 rounded bg-amber-400/20" style="--i: 1;"></div>
                                 </div>
                             </div>
                             <div class="flex flex-col items-center gap-0.5">
@@ -472,15 +561,27 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Students follow your class schedule</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Students get notified when you add new classes or update your schedule.</p>
                         <div class="mt-auto" aria-hidden="true">
-                            <div class="flex items-center justify-center">
-                                <div class="flex -space-x-2">
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-emerald-500 to-teal-500 text-xs text-white dark:border-[#0a0a0f]">A</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-teal-500 to-cyan-500 text-xs text-white dark:border-[#0a0a0f]">B</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-cyan-500 to-blue-500 text-xs text-white dark:border-[#0a0a0f]">C</div>
-                                    <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-300 text-xs text-gray-600 dark:border-[#0a0a0f] dark:bg-white/20 dark:text-white">+340</div>
+                            <div class="es-paper rounded-lg border border-slate-300 p-3 dark:border-white/10">
+                                <div class="mb-1.5 flex items-center justify-between border-b border-slate-300 pb-1 dark:border-white/10">
+                                    <span class="text-[10px] font-semibold uppercase tracking-wide es-ink-soft">Roster</span>
+                                    <div class="flex gap-1.5 text-[8px] es-ink-soft"><span class="w-3 text-center">1</span><span class="w-3 text-center">2</span><span class="w-3 text-center">3</span></div>
                                 </div>
+                                @foreach ([['Ava M.', [1, 1, 1]], ['Ben K.', [1, 1, 0]], ['Cara L.', [1, 1, 1]]] as [$sName, $marks])
+                                    <div class="flex items-center justify-between py-0.5">
+                                        <span class="text-[10px] es-ink">{{ $sName }}</span>
+                                        <div class="flex gap-1.5">
+                                            @foreach ($marks as $mk)
+                                                @if ($mk)
+                                                    <span class="es-punch-check flex h-3 w-3 items-center justify-center"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-2.5 w-2.5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg></span>
+                                                @else
+                                                    <span class="es-punch-dot h-3 w-3"></span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div class="mt-3 text-center text-xs text-cyan-600 dark:text-cyan-300">343 students following your schedule</div>
+                            <div class="mt-3 text-center text-xs es-ink-soft">343 students following your schedule</div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -496,19 +597,19 @@
     <!-- ============================================================ -->
     @php
         $journey = [
-            ['First online class', 'Share a link and start teaching. Free registration gets students in the door.', 'border-emerald-500/20 bg-emerald-500/10', 'text-emerald-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
-            ['Weekly class schedule', 'Set up recurring classes. Students follow your schedule and sign up each week.', 'border-teal-500/20 bg-teal-500/10', 'text-teal-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />'],
+            ['First online class', 'Share a link and start teaching. Free registration gets students in the door.', 'border-amber-500/20 bg-amber-500/10', 'text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+            ['Weekly class schedule', 'Set up recurring classes. Students follow your schedule and sign up each week.', 'es-icon-ink', 'text-slate-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />'],
             ['Paid classes', 'Start charging for your expertise. Sell individual class spots with zero platform fees.', 'border-green-500/20 bg-green-500/10', 'text-green-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
             ['Multi-level curriculum', 'Organize classes into beginner, intermediate, and advanced groups so students find the right level.', 'border-cyan-500/20 bg-cyan-500/10', 'text-cyan-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />'],
             ['Student community', 'Build a following. Students subscribe, get notified, and keep coming back week after week.', 'border-sky-500/20 bg-sky-500/10', 'text-sky-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />'],
-            ['Full teaching studio', 'A professional schedule with past and upcoming classes. Your online studio that students can browse.', 'border-emerald-500/20 bg-emerald-500/10', 'text-emerald-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
+            ['Full teaching studio', 'A professional schedule with past and upcoming classes. Your online studio that students can browse.', 'border-amber-500/20 bg-amber-500/10', 'text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
         ];
     @endphp
     <section id="journey" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(5, 150, 105, 0.26), rgba(5, 150, 105, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(13, 148, 136, 0.2), rgba(13, 148, 136, 0) 60%); opacity: 0.55;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(100, 116, 139, 0.18), rgba(100, 116, 139, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 <div class="es-lesson absolute bottom-0 left-0 right-0 flex h-16 items-center px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                     @for ($i = 0; $i < 28; $i++)
@@ -524,7 +625,7 @@
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-2xl text-center">
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        From your first class to a <span class="text-gradient-classes">full teaching business</span>
+                        From your first class to a <span class="es-marker">full teaching business</span>
                     </h2>
                     <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         Event Schedule grows with your online teaching practice.
@@ -551,9 +652,10 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="es-rule-wrap mb-12" aria-hidden="true"><span class="es-rule-margin"></span></div>
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for every type of <span class="text-gradient-classes">online class</span>
+                    Perfect for every type of <span class="es-marker">online class</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whether it's a fitness class or a coding bootcamp, Event Schedule works for instructors of all kinds. Also see Event Schedule for <a href="{{ marketing_url('/for-webinars') }}" class="text-gray-600 underline hover:no-underline dark:text-gray-300">Webinars</a> and <a href="{{ marketing_url('/for-virtual-conferences') }}" class="text-gray-600 underline hover:no-underline dark:text-gray-300">Virtual Conferences</a>.
@@ -662,14 +764,14 @@
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-2xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Three steps to your <span class="text-gradient-classes">first online class</span>
+                    Three steps to your <span class="es-marker">first online class</span>
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-emerald-600/25">
+                        <div class="es-ink-badge mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-bold text-white shadow-lg">
                             {{ $num }}
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
@@ -693,8 +795,8 @@
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
@@ -704,7 +806,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -724,19 +826,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-workshop-instructors', 'Workshop Instructors'], ['/for-webinars', 'Webinars'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-virtual-conferences', 'Virtual Conferences']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -751,9 +853,10 @@
     <!-- ============================================================ -->
     <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="es-rule-wrap mb-12" aria-hidden="true"><span class="es-rule-margin"></span></div>
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-classes">questions</span>
+                    Frequently asked <span class="es-marker">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything online instructors ask about Event Schedule.
@@ -786,9 +889,9 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-emerald-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(5, 150, 105, 0.3), rgba(5, 150, 105, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(251, 191, 36, 0.24), rgba(251, 191, 36, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     <div class="es-lesson absolute bottom-0 left-0 right-0 flex h-14 items-center px-8 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                         @for ($i = 0; $i < 24; $i++)
@@ -803,7 +906,7 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your classes. Your students. <span class="text-gradient-classes">No middleman.</span>
+                        Your classes. Your students. <span class="es-marker">No middleman.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Stop paying platform fees. Start teaching online. Free forever.
@@ -816,7 +919,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-emerald-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group es-ink-btn relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

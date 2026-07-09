@@ -105,16 +105,160 @@
         }
     </script>
 
+    <style {!! nonce_attr() !!}>
+        /* For-nightclubs "Peak Hour" styles. The shared es-* motion system
+           (aurora, reveals, bento, marquee, finale) lives in marketing.css;
+           this block holds only this page's own room-POV effects: the UV
+           blue-to-cyan accent gradient, overhead crossing laser beams, a rare
+           soft strobe swell, genre glows, a gold-foil VIP chip, a velvet-rope
+           divider, and laser-dot step numbers. Peak Hour = electric blue
+           #2563eb to cyan #22d3ee with a laser-red #ef4444 secondary. */
+
+        .text-gradient-peak {
+            background: linear-gradient(120deg, #2563eb 0%, #22d3ee 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-peak {
+            background: linear-gradient(120deg, #60a5fa 0%, #67e8f9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Near-black room surfaces (hero dark mode + finale panel) */
+        .dark .nc-void { background-color: #08080c; }
+        .nc-panel-deep { background-color: #08080c; }
+
+        /* Overhead crossing laser beams (room POV, lasers overhead) */
+        .nc-lasers { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        .nc-beam {
+            position: absolute;
+            top: -30%;
+            height: 160%;
+            width: 2px;
+            border-radius: 9999px;
+            opacity: 0.3;
+            transform-origin: 50% 0%;
+            animation: nc-sweep 22s ease-in-out infinite alternate;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 66%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 66%, transparent 100%);
+        }
+        .nc-beam::before {
+            content: "";
+            position: absolute;
+            inset: 0 -3px;
+            border-radius: inherit;
+            background: inherit;
+            filter: blur(5px);
+            opacity: 0.7;
+        }
+        .nc-beam-1 { left: 26%; background: linear-gradient(to bottom, transparent, #2563eb, transparent); --a1: -24deg; --a2: -4deg; animation-duration: 19s; }
+        .nc-beam-2 { left: 50%; background: linear-gradient(to bottom, transparent, #22d3ee, transparent); --a1: 16deg; --a2: -14deg; animation-duration: 24s; animation-delay: -7s; }
+        .nc-beam-3 { left: 72%; background: linear-gradient(to bottom, transparent, #ef4444, transparent); --a1: 28deg; --a2: 6deg; animation-duration: 29s; animation-delay: -13s; opacity: 0.2; }
+        @keyframes nc-sweep { from { transform: rotate(var(--a1)); } to { transform: rotate(var(--a2)); } }
+        .dark .nc-beam { opacity: 0.5; }
+        .dark .nc-beam-3 { opacity: 0.34; }
+
+        /* Rare, soft strobe swell (long interval, low contrast, never a harsh flash) */
+        .nc-strobe {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0;
+            --nc-sp: 0.2;
+            background: radial-gradient(ellipse 100% 55% at 50% -5%, rgba(125, 185, 255, 0.9), rgba(125, 185, 255, 0) 70%);
+            animation: nc-strobe 16s ease-in-out infinite;
+        }
+        .dark .nc-strobe { --nc-sp: 0.38; }
+        @keyframes nc-strobe {
+            0%, 80%, 100% { opacity: 0; }
+            88%, 92% { opacity: var(--nc-sp); }
+        }
+
+        /* Genre glows for the club-weekend cards (THU sky, FRI amber, SAT cyan) */
+        .nc-glow-thu { box-shadow: 0 0 24px -8px rgba(56, 189, 248, 0.55); }
+        .nc-glow-fri { box-shadow: 0 0 24px -8px rgba(245, 158, 11, 0.55); }
+        .nc-glow-sat { box-shadow: 0 0 24px -8px rgba(34, 211, 238, 0.6); }
+        .dark .nc-glow-thu { box-shadow: 0 0 32px -8px rgba(56, 189, 248, 0.65); }
+        .dark .nc-glow-fri { box-shadow: 0 0 32px -8px rgba(245, 158, 11, 0.6); }
+        .dark .nc-glow-sat { box-shadow: 0 0 32px -8px rgba(34, 211, 238, 0.7); }
+
+        /* Gold-foil VIP chip (sweeping foil sheen) */
+        .nc-vip-foil {
+            color: #5b3f0a;
+            background: linear-gradient(115deg, #fde68a 0%, #f59e0b 34%, #fffbeb 50%, #f59e0b 66%, #b45309 100%);
+            background-size: 220% 220%;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 1px 4px rgba(180, 120, 10, 0.45);
+            letter-spacing: 0.04em;
+            animation: nc-foil 5.5s ease-in-out infinite;
+        }
+        .dark .nc-vip-foil { color: #3d2a06; }
+        @keyframes nc-foil {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Velvet-rope divider (rope-and-post line drawing) */
+        .nc-rope-post { stroke: #94a3b8; stroke-width: 2; stroke-linecap: round; }
+        .dark .nc-rope-post { stroke: #64748b; }
+        .nc-rope-cap { fill: #f59e0b; }
+        .dark .nc-rope-cap { fill: #fbbf24; }
+        .nc-rope { stroke: #2563eb; stroke-width: 2.5; stroke-linecap: round; }
+        .dark .nc-rope { stroke: #38bdf8; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.55)); }
+
+        /* Laser-dot step numbers (radiating ping ring) */
+        .nc-step-dot::before {
+            content: "";
+            position: absolute;
+            inset: -5px;
+            border-radius: 1.25rem;
+            border: 1px solid rgba(96, 165, 250, 0.55);
+            opacity: 0;
+            animation: nc-ping 3.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+            animation-delay: var(--pd, 0s);
+        }
+        .dark .nc-step-dot::before { border-color: rgba(103, 232, 249, 0.6); }
+        @keyframes nc-ping {
+            0% { transform: scale(0.9); opacity: 0.7; }
+            70%, 100% { transform: scale(1.42); opacity: 0; }
+        }
+
+        /* Accent link + related-card hover recolor (replaces hard-coded blue) */
+        .nc-link { color: #2563eb; }
+        .dark .nc-link { color: #38bdf8; }
+        .nc-rel-card:hover { border-color: #7dd3fc; background-color: #ecfeff; }
+        .dark .nc-rel-card:hover { border-color: rgba(56, 189, 248, 0.35); background-color: rgba(56, 189, 248, 0.06); }
+        .nc-rel-card:hover .nc-rel-title,
+        .nc-rel-card:hover .nc-rel-arrow { color: #2563eb; }
+        .dark .nc-rel-card:hover .nc-rel-title,
+        .dark .nc-rel-card:hover .nc-rel-arrow { color: #38bdf8; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .nc-beam { animation: none !important; }
+            .nc-strobe { animation: none !important; opacity: 0 !important; }
+            .nc-vip-foil { animation: none !important; }
+            .nc-step-dot::before { animation: none !important; opacity: 0 !important; }
+        }
+    </style>
+
     <!-- ============================================================ -->
     <!-- 1. Hero: tonight's lineup                                    -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section class="es-hero nc-void relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
             <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 32%, rgba(34, 211, 238, 0.4), rgba(34, 211, 238, 0) 65%);"></div>
             <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(14, 165, 233, 0.42), rgba(14, 165, 233, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <div class="nc-lasers">
+                <span class="nc-beam nc-beam-1"></span>
+                <span class="nc-beam nc-beam-2"></span>
+                <span class="nc-beam nc-beam-3"></span>
+            </div>
+            <div class="nc-strobe"></div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -126,7 +270,7 @@
             </div>
 
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">Pack the dancefloor.</span></span></span>
+                <span class="es-mask"><span class="es-mask-line"><span class="text-gradient-peak es-gradient-anim">Pack the dancefloor.</span></span></span>
                 <span class="es-mask es-mask-2"><span class="es-mask-line">Own your crowd.</span></span>
             </h1>
 
@@ -179,7 +323,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Everything after dark</span>
                 </div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything to fill the <span class="text-gradient">floor</span>
+                    Everything to fill the <span class="text-gradient-peak">floor</span>
                 </h2>
             </div>
 
@@ -245,6 +389,15 @@
                                 <span class="inline-flex items-center rounded bg-emerald-300 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">Confirmed</span>
                             </div>
                         </div>
+                        <div class="nc-velvet mt-4" aria-hidden="true">
+                            <svg viewBox="0 0 260 40" fill="none" class="h-7 w-full">
+                                <path d="M30 38h-10m10 0h10m-10 0V14" class="nc-rope-post" />
+                                <circle cx="30" cy="10" r="4" class="nc-rope-cap" />
+                                <path d="M230 38h-10m10 0h10m-10 0V14" class="nc-rope-post" />
+                                <circle cx="230" cy="10" r="4" class="nc-rope-cap" />
+                                <path d="M30 13Q130 40 230 13" class="nc-rope" />
+                            </svg>
+                        </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
@@ -298,7 +451,7 @@
                                     <div class="es-ai-field flex items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-500/15 p-3" style="--i: 0;">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-[10px] font-semibold text-white">MR</div>
                                         <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Marco R.</div><div class="text-xs text-amber-600 dark:text-amber-300">Table for 8 &bull; $500 min</div></div>
-                                        <span class="inline-flex items-center rounded bg-amber-500/30 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-300">VIP</span>
+                                        <span class="nc-vip-foil inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold">VIP</span>
                                     </div>
                                     <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-[10px] font-semibold text-white">JT</div>
@@ -407,7 +560,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-2xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    The club <span class="text-gradient">weekend</span>
+                    The club <span class="text-gradient-peak">weekend</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Clubs run on a rhythm. Thursday builds momentum, Friday brings the theme, Saturday's the headliner. Show your crowd what's coming.
@@ -417,7 +570,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($clubWeekend as [$day, $title, $sub, $color, $points])
                     <div data-reveal class="rounded-2xl border p-6 transition-all hover:-translate-y-1 hover:shadow-lg
-                        {{ $color === 'sky' ? 'border-sky-200 bg-gradient-to-br from-sky-100 to-blue-100 dark:border-sky-500/30 dark:from-sky-900/40 dark:to-blue-900/40' : ($color === 'orange' ? 'border-orange-200 bg-gradient-to-br from-orange-100 to-amber-100 dark:border-orange-500/30 dark:from-orange-900/40 dark:to-amber-900/40' : 'border-cyan-200 bg-gradient-to-br from-cyan-100 to-rose-100 dark:border-cyan-500/30 dark:from-cyan-900/40 dark:to-rose-900/40') }}">
+                        {{ $color === 'sky' ? 'border-sky-200 bg-gradient-to-br from-sky-100 to-blue-100 dark:border-sky-500/30 dark:from-sky-900/40 dark:to-blue-900/40' : ($color === 'orange' ? 'border-orange-200 bg-gradient-to-br from-orange-100 to-amber-100 dark:border-orange-500/30 dark:from-orange-900/40 dark:to-amber-900/40' : 'border-cyan-200 bg-gradient-to-br from-cyan-100 to-rose-100 dark:border-cyan-500/30 dark:from-cyan-900/40 dark:to-rose-900/40') }} {{ $color === 'sky' ? 'nc-glow-thu' : ($color === 'orange' ? 'nc-glow-fri' : 'nc-glow-sat') }}">
                         <div class="mb-4 flex items-center gap-3">
                             <div class="flex h-12 w-12 items-center justify-center rounded-xl {{ $color === 'sky' ? 'bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400' : ($color === 'orange' ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400') }} text-lg font-bold">{{ $day }}</div>
                             <div>
@@ -446,7 +599,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient">clubs</span>
+                    Perfect for all types of <span class="text-gradient-peak">clubs</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From underground warehouses to rooftop lounges, Event Schedule fits your vibe.
@@ -596,19 +749,24 @@
                 <div class="es-aurora es-aurora-1" style="opacity: 0.28;"></div>
                 <div class="es-aurora es-aurora-2" style="opacity: 0.22;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="nc-lasers">
+                    <span class="nc-beam nc-beam-1"></span>
+                    <span class="nc-beam nc-beam-2"></span>
+                    <span class="nc-beam nc-beam-3"></span>
+                </div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Get your club's calendar online in <span class="text-gradient">three steps</span>
+                        Get your club's calendar online in <span class="text-gradient-peak">three steps</span>
                     </h2>
                 </div>
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
                     @foreach ([['1', 'Set up your club', 'Add your name, rooms (main floor, rooftop, VIP), and upload your logo. Takes two minutes.'], ['2', 'Add your lineup', 'Resident DJs, guest headliners, themed nights. Set recurring events or add one-offs as bookings come in.'], ['3', 'Let your crowd follow', 'Share your link. Clubbers follow. They get the week\'s lineup in their inbox - no checking Instagram required.']] as [$n, $title, $desc])
                         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                            <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-cyan-500/30">{{ $n }}</div>
+                            <div class="nc-step-dot relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-cyan-500/30" style="--pd: {{ ($n - 1) * 0.7 }}s;">{{ $n }}</div>
                             <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
                             <p class="text-sm text-gray-400">{{ $desc }}</p>
                         </div>
@@ -647,7 +805,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="nc-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -667,19 +825,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-music-venues', 'Music Venues'], ['/for-bars', 'Bars'], ['/for-djs', 'DJs'], ['/for-venues', 'Venues']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="nc-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="nc-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="nc-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="nc-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -696,7 +854,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="text-gradient-peak">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything nightclub owners ask about Event Schedule.
@@ -729,15 +887,20 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-cyan-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel nc-panel-deep noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-cyan-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="nc-lasers">
+                        <span class="nc-beam nc-beam-1"></span>
+                        <span class="nc-beam nc-beam-3"></span>
+                    </div>
+                    <div class="nc-strobe"></div>
                 </div>
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your crowd. Direct reach. <span class="text-gradient">Pack the floor.</span>
+                        Your crowd. Direct reach. <span class="text-gradient-peak">Pack the floor.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Email your crowd directly. Fill your dancefloor. Free forever.

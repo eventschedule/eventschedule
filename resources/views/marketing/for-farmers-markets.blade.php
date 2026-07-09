@@ -163,6 +163,56 @@
             85% { opacity: var(--seed-op, 0.5); }
             100% { transform: translateY(220px) translateX(22px) rotate(200deg); opacity: 0; }
         }
+        /* Small chalk price-sign tiles (market "by the numbers"). Deliberately
+           small market signage, NOT a full chalkboard surface. */
+        .price-sign {
+            background: linear-gradient(160deg, #244138, #14302a);
+            border: 2px solid rgba(146, 104, 58, 0.55);
+            border-radius: 0.65rem;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18), inset 0 0 18px rgba(0, 0, 0, 0.38);
+        }
+        .dark .price-sign {
+            border-color: rgba(158, 116, 66, 0.5);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 0 18px rgba(0, 0, 0, 0.5);
+        }
+        .chalk-num {
+            color: #f2fbf2;
+            text-shadow: 0 0 8px rgba(190, 242, 200, 0.35);
+            letter-spacing: 0.5px;
+        }
+        .price-sign-lime .chalk-num { color: #d9f99d; text-shadow: 0 0 9px rgba(163, 230, 53, 0.4); }
+        .price-sign-orange .chalk-num { color: #fed7aa; text-shadow: 0 0 9px rgba(251, 146, 60, 0.42); }
+        .chalk-sub { color: rgba(226, 240, 230, 0.68); }
+        /* Wooden crate slats between vendor-lineup rows */
+        .crate-slat {
+            height: 6px;
+            border-radius: 2px;
+            background:
+                repeating-linear-gradient(90deg, transparent 0, transparent 7px, rgba(120, 84, 44, 0.28) 7px, rgba(120, 84, 44, 0.28) 8px),
+                linear-gradient(180deg, rgba(164, 122, 72, 0.4), rgba(120, 84, 44, 0.28));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.12);
+        }
+        .dark .crate-slat {
+            background:
+                repeating-linear-gradient(90deg, transparent 0, transparent 7px, rgba(92, 62, 32, 0.45) 7px, rgba(92, 62, 32, 0.45) 8px),
+                linear-gradient(180deg, rgba(112, 80, 46, 0.5), rgba(80, 55, 30, 0.4));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        /* Lime accent for the See-all links, related-page cards, FAQ hovers */
+        .mkt-link { color: #4d7c0f; transition: color 0.2s ease; }
+        .mkt-link:hover { text-decoration: underline; }
+        .dark .mkt-link { color: #a3e635; }
+        .mkt-rel { transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+        .mkt-rel:hover { border-color: #a3d13a; background-color: rgba(132, 204, 22, 0.09); }
+        .dark .mkt-rel:hover { border-color: rgba(132, 204, 22, 0.35); background-color: rgba(132, 204, 22, 0.06); }
+        .group:hover .mkt-rel-title { color: #4d7c0f; }
+        .dark .group:hover .mkt-rel-title { color: #a3e635; }
+        .group:hover .mkt-rel-arrow { color: #4d7c0f; }
+        .dark .group:hover .mkt-rel-arrow { color: #a3e635; }
+        .mkt-faq { transition: border-color 0.2s ease; }
+        .mkt-faq:hover { border-color: rgba(132, 204, 22, 0.5); }
+        .dark .mkt-faq:hover { border-color: rgba(132, 204, 22, 0.32); }
+
         @media (prefers-reduced-motion: reduce) {
             .es-produce-float, .es-seed span { animation: none !important; }
             .es-produce-float { transform: rotate(-3deg); }
@@ -252,7 +302,7 @@
                             @for ($tc = 0; $tc < 2; $tc++)
                                 @foreach (['Organic Produce', 'Artisan Crafts', 'Baked Goods', 'Local Honey', 'Cut Flowers', 'Farm Fresh', 'Preserves', 'Seedlings'] as $tag)
                                     <span class="inline-flex items-center gap-2 rounded-full border border-lime-200 bg-lime-100/80 px-4 py-1.5 text-xs font-semibold text-lime-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-lime-400 to-green-400"></span>
+                                        <span class="h-1.5 w-1.5 rounded-full {{ $loop->index % 2 === 0 ? 'bg-gradient-to-r from-lime-400 to-green-400' : 'bg-gradient-to-r from-amber-400 to-orange-400' }}"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -274,6 +324,43 @@
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
                     Everything to grow your <span class="text-gradient-lime">market</span>
                 </h2>
+            </div>
+
+            <!-- Chalk price-signs: the market by the numbers -->
+            <div class="mx-auto mb-12 flex max-w-2xl flex-wrap items-center justify-center gap-4 sm:gap-6" data-reveal-group="80">
+                <div data-reveal class="price-sign price-sign-lime px-5 py-3 text-center" style="transform: rotate(-1.6deg);">
+                    <div class="mb-1 flex justify-center" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
+                            <path d="M12 21 V12" stroke="#65a30d" stroke-width="2" stroke-linecap="round" />
+                            <path d="M12 13 C 7 13 5 9 5 6 C 9 6 12 8 12 12 Z" fill="#84cc16" />
+                            <path d="M12 15 C 16 15 19 12 19 9 C 15 9 12 11 12 14 Z" fill="#a3e635" />
+                        </svg>
+                    </div>
+                    <div class="chalk-num text-2xl font-black leading-none sm:text-3xl">$0</div>
+                    <div class="chalk-sub mt-1 text-[10px] font-semibold uppercase tracking-wider">platform fees</div>
+                </div>
+                <div data-reveal class="price-sign price-sign-orange px-5 py-3 text-center" style="transform: rotate(1.4deg);">
+                    <div class="mb-1 flex justify-center" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
+                            <ellipse cx="12" cy="14" rx="7" ry="6.5" fill="#dc2626" />
+                            <path d="M9 7 Q 12 4 15 7" stroke="#16a34a" stroke-width="1.6" fill="none" stroke-linecap="round" />
+                            <path d="M12 7 V4" stroke="#16a34a" stroke-width="1.6" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="chalk-num text-2xl font-black leading-none sm:text-3xl">1-click</div>
+                    <div class="chalk-sub mt-1 text-[10px] font-semibold uppercase tracking-wider">market emails</div>
+                </div>
+                <div data-reveal class="price-sign price-sign-lime px-5 py-3 text-center" style="transform: rotate(-0.8deg);">
+                    <div class="mb-1 flex justify-center" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none">
+                            <ellipse cx="12" cy="14" rx="7.5" ry="6.5" fill="#f97316" />
+                            <ellipse cx="12" cy="14" rx="3" ry="6.5" fill="#ea580c" opacity="0.5" />
+                            <path d="M12 7 V4" stroke="#16a34a" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="chalk-num text-2xl font-black leading-none sm:text-3xl">100%</div>
+                    <div class="chalk-sub mt-1 text-[10px] font-semibold uppercase tracking-wider">your reach</div>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
@@ -361,10 +448,12 @@
                                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-lime-500 to-green-500 text-[9px] font-semibold text-white">GA</div>
                                 <div class="flex-1"><div class="text-xs font-medium text-gray-900 dark:text-white">Green Acres Farm</div><div class="text-[10px] text-amber-600 dark:text-amber-300">Produce</div></div>
                             </div>
+                            <div class="crate-slat" aria-hidden="true"></div>
                             <div class="es-ai-field flex items-center gap-2 rounded-lg border border-amber-400/30 bg-amber-500/15 p-2" style="--i: 1;">
                                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-[9px] font-semibold text-white">BD</div>
                                 <div class="flex-1"><div class="text-xs font-medium text-gray-900 dark:text-white">Baker's Dozen</div><div class="text-[10px] text-amber-600 dark:text-amber-300">Baked Goods</div></div>
                             </div>
+                            <div class="crate-slat" aria-hidden="true"></div>
                             <div class="es-ai-field flex items-center gap-2 rounded-lg border border-amber-400/30 bg-amber-500/15 p-2" style="--i: 2;">
                                 <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500 to-amber-500 text-[9px] font-semibold text-white">HB</div>
                                 <div class="flex-1"><div class="text-xs font-medium text-gray-900 dark:text-white">Honey Bee Apiary</div><div class="text-[10px] text-amber-600 dark:text-amber-300">Honey & Preserves</div></div>
@@ -499,6 +588,13 @@
                 </div>
             </div>
 
+            <div class="pointer-events-none absolute right-5 top-5 z-20 hidden lg:block" aria-hidden="true">
+                <div class="rustic-stamp es-produce-float px-5 py-2.5 text-center">
+                    <div class="text-lg font-black uppercase leading-none tracking-widest">Fresh</div>
+                    <div class="mt-0.5 text-[9px] font-bold uppercase tracking-wider">picked today</div>
+                </div>
+            </div>
+
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-2xl text-center">
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
@@ -578,11 +674,11 @@
                 <x-sub-audience-card
                     name="Artisan & Craft Markets"
                     description="Handmade goods, pottery, jewelry, and art. Showcase your makers and attract craft-loving shoppers."
-                    icon-color="amber"
+                    icon-color="orange"
                     blog-slug="for-artisan-craft-markets"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                     </x-slot:icon>
@@ -591,11 +687,11 @@
                 <x-sub-audience-card
                     name="Flea Markets & Swap Meets"
                     description="Vintage finds, collectibles, and one-of-a-kind treasures. Let bargain hunters know when you're open."
-                    icon-color="orange"
+                    icon-color="lime"
                     blog-slug="for-flea-markets"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-lime-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                         </svg>
                     </x-slot:icon>
@@ -604,11 +700,11 @@
                 <x-sub-audience-card
                     name="Holiday & Seasonal Markets"
                     description="Christmas markets, harvest festivals, and spring pop-ups. Build anticipation for your seasonal events."
-                    icon-color="red"
+                    icon-color="orange"
                     blog-slug="for-holiday-markets"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                         </svg>
                     </x-slot:icon>
@@ -617,11 +713,11 @@
                 <x-sub-audience-card
                     name="Night Markets"
                     description="Street food, live entertainment, and late-night shopping. Create buzz for your after-dark events."
-                    icon-color="violet"
+                    icon-color="lime"
                     blog-slug="for-night-markets"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-lime-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </x-slot:icon>
@@ -630,11 +726,11 @@
                 <x-sub-audience-card
                     name="Specialty Food Markets"
                     description="Organic co-ops, cheese markets, and gourmet food halls. Connect food lovers with local producers."
-                    icon-color="emerald"
+                    icon-color="orange"
                     blog-slug="for-specialty-food-markets"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0A2.704 2.704 0 003 15.546M9 6v2m3-2v2m3-2v2M9 3h6m-7 8h8a1 1 0 011 1v4a1 1 0 01-1 1H8a1 1 0 01-1-1v-4a1 1 0 011-1z" />
                         </svg>
                     </x-slot:icon>
@@ -683,7 +779,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-lime">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
@@ -702,7 +798,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="mkt-link inline-flex items-center font-medium">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -719,22 +815,22 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-lime">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-food-trucks-and-vendors', 'Food Trucks & Vendors'], ['/for-breweries-and-wineries', 'Breweries & Wineries'], ['/for-community-centers', 'Community Centers'], ['/for-curators', 'Curators']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="mkt-rel group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="mkt-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="mkt-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="mkt-link inline-flex items-center font-medium">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -765,7 +861,7 @@
                     ['How do shoppers find out about market days and events?', 'Shoppers can follow your market\'s schedule and receive email notifications for upcoming events. Embed your calendar on your website, share on social media, or send newsletters with weekly highlights and featured vendors.'],
                     ['Can I manage vendor applications and booth fees?', 'Yes. Use ticketing to manage vendor booth reservations and collect fees through Stripe with zero platform fees. Vendors receive confirmation with QR codes for check-in on market day.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="mkt-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -792,6 +888,16 @@
                         @foreach ($seeds as [$l, $s, $d, $dl, $op, $col])
                             <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; background: {{ $col }}; --seed-dur: {{ $d }}; --seed-delay: {{ $dl }}; --seed-op: {{ $op }};"></span>
                         @endforeach
+                    </div>
+                    <!-- Bunting along the finale top edge -->
+                    <div class="absolute inset-x-0 top-5 hidden h-12 overflow-hidden md:block">
+                        <svg class="w-full" height="52" viewBox="0 0 1200 52" preserveAspectRatio="none" fill="none">
+                            <path d="M0,8 Q300,22 600,8 Q900,22 1200,8" stroke="currentColor" stroke-width="1.5" class="text-white/20" fill="none" />
+                            @for ($p = 0; $p < 14; $p++)
+                                @php $x = 80 + $p * 80; $fill = $pennants[$p % 4]; @endphp
+                                <polygon points="{{ $x }},11 {{ $x + 20 }},46 {{ $x + 40 }},11" class="{{ $fill }}" />
+                            @endfor
+                        </svg>
                     </div>
                 </div>
 

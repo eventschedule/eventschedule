@@ -105,27 +105,290 @@
         }
     </script>
 
+    <style {!! nonce_attr() !!}>
+        /* For-music-venues "Soundcheck" styles. The shared es-* motion
+           system lives in marketing.css; this block holds only this page's
+           own effects: the VU-meter tri-gradient (green -> amber -> red)
+           heading text, the swinging analog VU needle gauge, the segmented
+           signal-strength meter, the red/green problem-solution tints, a
+           torn ticket stub, and faint stage-plot glyphs. */
+
+        /* VU-meter tri-gradient heading text. Legible in both modes; the
+           red end goes rose-tinted in dark mode for contrast. */
+        .text-gradient-soundcheck {
+            background: linear-gradient(100deg, #16a34a 0%, #d97706 52%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-soundcheck {
+            background: linear-gradient(100deg, #4ade80 0%, #fbbf24 50%, #fb7185 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* Always-dark surfaces (dark band, finale) keep the bright variant
+           even in light mode so the heading stays legible on the dark panel. */
+        .es-band-dark .text-gradient-soundcheck,
+        .es-finale-panel .text-gradient-soundcheck {
+            background: linear-gradient(100deg, #4ade80 0%, #fbbf24 50%, #fb7185 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* "In the green" go-zone CTA gradient (green -> lime -> amber, never red) */
+        .soundcheck-btn {
+            background-image: linear-gradient(110deg, #16a34a 0%, #65a30d 45%, #d97706 100%);
+            box-shadow: 0 10px 24px -6px rgba(217, 119, 6, 0.4), 0 4px 10px -4px rgba(22, 163, 74, 0.35);
+        }
+        .soundcheck-btn:hover {
+            box-shadow: 0 22px 44px -10px rgba(217, 119, 6, 0.5), 0 8px 18px -6px rgba(22, 163, 74, 0.4);
+        }
+        .dark .soundcheck-btn {
+            background-image: linear-gradient(110deg, #22c55e 0%, #84cc16 45%, #f59e0b 100%);
+        }
+
+        /* Accent link + hover recolors (amber mid-zone reads well both modes) */
+        .soundcheck-link { color: #b45309; }
+        .soundcheck-link:hover { text-decoration: underline; }
+        .dark .soundcheck-link { color: #fbbf24; }
+
+        .soundcheck-related:hover { border-color: #fcd34d; background-color: #fffbeb; }
+        .dark .soundcheck-related:hover { border-color: rgba(245, 158, 11, 0.35); background-color: rgba(245, 158, 11, 0.06); }
+        .soundcheck-related:hover .soundcheck-related-title,
+        .soundcheck-related:hover .soundcheck-related-ico { color: #d97706; }
+        .dark .soundcheck-related:hover .soundcheck-related-title,
+        .dark .soundcheck-related:hover .soundcheck-related-ico { color: #fbbf24; }
+
+        .soundcheck-tile:hover { border-color: #fcd34d; }
+        .dark .soundcheck-tile:hover { border-color: rgba(245, 158, 11, 0.3); }
+
+        .soundcheck-dot { background-image: linear-gradient(to right, #22c55e, #f59e0b); }
+
+        /* Recolored step badges on the dark band */
+        .soundcheck-step {
+            background-image: linear-gradient(135deg, #22c55e, #f59e0b);
+            box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Amber-tinted finale panel glow (replaces the stray blue glow) */
+        .soundcheck-finale-glow {
+            box-shadow: 0 25px 50px -12px rgba(217, 119, 6, 0.3);
+        }
+
+        /* Red "in the red" / green "in the green" problem-solution tints */
+        .soundcheck-red-panel {
+            border-radius: 1rem;
+            padding: 1.75rem;
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.06), rgba(239, 68, 68, 0.015));
+            border: 1px solid rgba(239, 68, 68, 0.18);
+        }
+        .dark .soundcheck-red-panel {
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.03));
+            border-color: rgba(239, 68, 68, 0.22);
+        }
+        .soundcheck-green-panel {
+            border-radius: 1rem;
+            padding: 1.75rem;
+            background: linear-gradient(180deg, rgba(34, 197, 94, 0.06), rgba(34, 197, 94, 0.015));
+            border: 1px solid rgba(34, 197, 94, 0.18);
+        }
+        .dark .soundcheck-green-panel {
+            background: linear-gradient(180deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.03));
+            border-color: rgba(34, 197, 94, 0.22);
+        }
+
+        /* Analog VU needle gauge motif (a gauge, not a bar array). The dark
+           faceplate keeps the light needle legible on light and dark pages
+           alike, including the always-dark band and finale. */
+        .es-vu {
+            position: relative;
+            display: inline-block;
+            width: 132px;
+            height: 74px;
+            border-radius: 0.7rem;
+            background: linear-gradient(180deg, #111827, #1f2937);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55), 0 8px 20px -10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        .es-vu-face {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 132px;
+            height: 66px;
+            background: conic-gradient(from 270deg at 50% 100%,
+                #22c55e 0deg, #22c55e 104deg,
+                #f59e0b 104deg, #f59e0b 140deg,
+                #ef4444 140deg, #ef4444 180deg,
+                transparent 180deg);
+            -webkit-mask: radial-gradient(circle at 50% 100%, transparent 0 46px, #000 47px 63px, transparent 64px);
+            mask: radial-gradient(circle at 50% 100%, transparent 0 46px, #000 47px 63px, transparent 64px);
+            opacity: 0.92;
+        }
+        .es-vu-needle {
+            position: absolute;
+            left: 50%;
+            bottom: 4px;
+            width: 2px;
+            height: 58px;
+            margin-left: -1px;
+            border-radius: 2px;
+            background: linear-gradient(to top, rgba(148, 163, 184, 0), #e5e7eb 30%, #f8fafc 100%);
+            transform-origin: 50% 100%;
+            transform: rotate(-52deg);
+            animation: es-vu-swing 3.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+        }
+        .es-vu-cap {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            width: 10px;
+            height: 10px;
+            margin-left: -5px;
+            border-radius: 50%;
+            background: #64748b;
+            box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
+        }
+        @keyframes es-vu-swing {
+            0% { transform: rotate(-52deg); }
+            28% { transform: rotate(58deg); }
+            40% { transform: rotate(42deg); }
+            52% { transform: rotate(50deg); }
+            100% { transform: rotate(-52deg); }
+        }
+
+        /* Segmented signal-strength meter (green -> red staircase, not a
+           bouncing equalizer) */
+        .es-signal {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 16px;
+        }
+        .es-signal i {
+            width: 3px;
+            border-radius: 1px;
+            background: currentColor;
+            transform-origin: bottom;
+            animation: es-signal-rise 1.6s ease-in-out infinite;
+        }
+        .es-signal i:nth-child(1) { height: 32%; color: #22c55e; animation-delay: 0s; }
+        .es-signal i:nth-child(2) { height: 52%; color: #22c55e; animation-delay: 0.12s; }
+        .es-signal i:nth-child(3) { height: 70%; color: #f59e0b; animation-delay: 0.24s; }
+        .es-signal i:nth-child(4) { height: 86%; color: #f59e0b; animation-delay: 0.36s; }
+        .es-signal i:nth-child(5) { height: 100%; color: #ef4444; animation-delay: 0.48s; }
+        @keyframes es-signal-rise {
+            0%, 100% { transform: scaleY(0.55); opacity: 0.55; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* Torn ticket stub (fee-comparison mid-page moment) */
+        .es-ticket-stub {
+            position: relative;
+            display: inline-flex;
+            align-items: stretch;
+            border-radius: 0.7rem;
+            overflow: hidden;
+            transform: rotate(-3deg);
+            box-shadow: 0 12px 26px -12px rgba(217, 119, 6, 0.55);
+        }
+        .es-ticket-stub-main {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #fff;
+            padding: 0.7rem 1rem;
+        }
+        .es-ticket-stub-stub {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.7rem 0.85rem;
+            background: linear-gradient(135deg, #d97706, #b45309);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            line-height: 1.15;
+            text-align: center;
+        }
+        .es-ticket-stub-perf {
+            position: relative;
+            width: 0;
+            border-left: 2px dashed rgba(255, 255, 255, 0.75);
+        }
+        .es-ticket-stub-perf::before,
+        .es-ticket-stub-perf::after {
+            content: '';
+            position: absolute;
+            left: -7px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+        }
+        .dark .es-ticket-stub-perf::before,
+        .dark .es-ticket-stub-perf::after {
+            background: #0a0a0f;
+        }
+        .es-ticket-stub-perf::before { top: -7px; }
+        .es-ticket-stub-perf::after { bottom: -7px; }
+
+        /* Faint stage-plot line glyphs on the deep-dive rows */
+        .es-stageplot-glyph {
+            position: absolute;
+            pointer-events: none;
+            color: #94a3b8;
+            opacity: 0.13;
+        }
+        .dark .es-stageplot-glyph {
+            color: #cbd5e1;
+            opacity: 0.09;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-vu-needle,
+            .es-signal i {
+                animation: none !important;
+            }
+        }
+    </style>
+
     <!-- ============================================================ -->
     <!-- 1. Hero: the stage                                           -->
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(78, 129, 250, 0.5), rgba(78, 129, 250, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.45), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(34, 197, 94, 0.45), rgba(34, 197, 94, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(239, 68, 68, 0.4), rgba(239, 68, 68, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 60%, rgba(245, 158, 11, 0.34), rgba(245, 158, 11, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
+        <!-- Soundcheck VU meter -->
+        <div class="absolute right-8 top-24 z-20 hidden opacity-90 sm:block md:right-16" aria-hidden="true">
+            <div class="rounded-2xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-white/[0.06]">
+                <div class="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em]">
+                    <span class="text-green-600 dark:text-green-400">-20</span>
+                    <span class="text-amber-600 dark:text-amber-400">0</span>
+                    <span class="text-red-600 dark:text-red-400">+3</span>
+                </div>
+                <span class="es-vu"><span class="es-vu-face"></span><span class="es-vu-needle"></span><span class="es-vu-cap"></span></span>
+                <div class="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Soundcheck</div>
+            </div>
+        </div>
+
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="h-2 w-2 animate-pulse rounded-full bg-blue-600 dark:bg-blue-400"></span>
                 <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Concert Halls & Live Music Venues</span>
+                <span class="es-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
             </div>
 
             <h1 class="es-balance mb-8 text-[2.4rem] font-black leading-[1.06] tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
                 <span class="es-mask"><span class="es-mask-line">The venue calendar that</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">pays you, not Ticketmaster</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-soundcheck es-gradient-anim">pays you, not Ticketmaster</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -137,7 +400,7 @@
                     See how it works
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl soundcheck-btn px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create Your Venue Calendar
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -153,7 +416,7 @@
                             @for ($tc = 0; $tc < 2; $tc++)
                                 @foreach (['Concert Halls', 'Jazz Clubs', 'Rock Venues', 'Folk Rooms', 'Amphitheaters', 'Listening Rooms', 'Indie Clubs', 'Acoustic'] as $tag)
                                     <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-blue-400 to-sky-400"></span>
+                                        <span class="soundcheck-dot h-1.5 w-1.5 rounded-full"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -172,7 +435,7 @@
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-start gap-12 md:grid-cols-2">
-                <div data-reveal>
+                <div data-reveal class="soundcheck-red-panel">
                     <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white"><span class="text-red-500 dark:text-red-400">Tired of this?</span></h2>
                     <div class="space-y-4">
                         @foreach ([['Ticketing platforms eating into your door revenue', 'Service fees, facility fees, processing fees...'], ['Endless email chains with booking agents', 'Back and forth for every show, every detail'], ['Paying to reach your own fans on social', 'Algorithm changes, boosted posts, declining reach']] as [$t, $sub])
@@ -183,7 +446,7 @@
                         @endforeach
                     </div>
                 </div>
-                <div data-reveal style="--reveal-delay: 0.1s;">
+                <div data-reveal style="--reveal-delay: 0.1s;" class="soundcheck-green-panel">
                     <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white"><span class="text-emerald-500 dark:text-emerald-400">Here's the fix</span></h2>
                     <div class="space-y-4">
                         @foreach ([['Sell tickets with $0 platform fees', "Just Stripe's 2.9% + 30c. That's it."], ['Artists apply with press kits built-in', 'Music samples, social links, everything in one place'], ['Email your fans directly for free', 'New show? One click reaches everyone who follows you']] as [$t, $sub])
@@ -205,13 +468,16 @@
         <div class="mx-auto max-w-6xl space-y-24 px-4 sm:px-6 lg:px-8 lg:space-y-32">
 
             <!-- Artist booking -->
-            <div class="grid items-center gap-12 lg:grid-cols-2">
+            <div class="relative grid items-center gap-12 lg:grid-cols-2">
+                <div class="es-stageplot-glyph hidden lg:block" style="left: 0; bottom: 0;" aria-hidden="true">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="6" width="16" height="30" rx="8"/><line x1="27" y1="14" x2="37" y2="14"/><line x1="27" y1="20" x2="37" y2="20"/><path d="M18 30a14 14 0 0 0 28 0"/><line x1="32" y1="44" x2="32" y2="54"/><line x1="24" y1="58" x2="40" y2="58"/></svg>
+                </div>
                 <div data-reveal>
                     <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
                         Artist Booking
                     </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Bands apply to play. You pick the good ones.</h2>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Bands apply to play. <span class="text-gradient-soundcheck">You pick the good ones.</span></h2>
                     <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">No more digging through email, DMs, and voicemails. Artists submit through your calendar with their music, videos, social stats, and draw history. Listen to their tracks, check their following, book or pass.</p>
                     <ul class="space-y-3">
                         @foreach (['Embedded music players (Spotify, SoundCloud, YouTube)', 'Social follower counts at a glance', 'One-click approve or decline'] as $item)
@@ -228,6 +494,10 @@
                                 <div class="text-lg font-semibold text-gray-900 dark:text-white">Midnight Sons</div>
                                 <div class="text-sm text-sky-600 dark:text-sky-300">Indie Rock / Brooklyn, NY</div>
                                 <div class="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400"><span>2.4K Spotify listeners</span><span>890 Instagram</span></div>
+                                <div class="mt-2 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 dark:border-white/10 dark:bg-white/[0.04]">
+                                    <span class="es-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Strong local draw</span>
+                                </div>
                             </div>
                         </div>
                         <div class="mb-4 rounded-xl bg-gray-100 p-3 dark:bg-[#0f0f14]">
@@ -249,7 +519,10 @@
             </div>
 
             <!-- Multi-stage -->
-            <div class="grid items-center gap-12 lg:grid-cols-2">
+            <div class="relative grid items-center gap-12 lg:grid-cols-2">
+                <div class="es-stageplot-glyph hidden lg:block" style="right: 0; bottom: 0;" aria-hidden="true">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 50 L54 50 L47 25 L21 29 Z"/><circle cx="33" cy="41" r="8"/><circle cx="28" cy="30" r="3"/></svg>
+                </div>
                 <div class="order-2 lg:order-1">
                     <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
                         <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
@@ -280,7 +553,7 @@
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                         Multiple Rooms
                     </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Main stage. Back room. Patio. All in one place.</h2>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Main stage. Back room. Patio. <span class="text-gradient-soundcheck">All in one place.</span></h2>
                     <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Run separate calendars for each performance space. Visitors filter by room. Artists know exactly where they're playing. No double-booking, no confusion at load-in.</p>
                     <ul class="space-y-3">
                         @foreach (['Separate capacities per room', 'Fans filter by their preferred space', 'Seasonal rooms (open/close as needed)'] as $item)
@@ -291,19 +564,32 @@
             </div>
 
             <!-- Ticket comparison -->
-            <div class="grid items-center gap-12 lg:grid-cols-2">
+            <div class="relative grid items-center gap-12 lg:grid-cols-2">
+                <div class="es-stageplot-glyph hidden lg:block" style="left: 0; bottom: 0;" aria-hidden="true">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="20" width="40" height="24" rx="3"/><circle cx="24" cy="32" r="4"/><circle cx="40" cy="32" r="4"/><line x1="16" y1="44" x2="16" y2="52"/><line x1="48" y1="44" x2="48" y2="52"/></svg>
+                </div>
                 <div data-reveal>
                     <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         Ticketing
                     </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Keep your door money. All of it.</h2>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Keep your door money. <span class="text-gradient-soundcheck">All of it.</span></h2>
                     <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">On a $35 ticket, the big platforms take $10-15 in fees. We take $0. Stripe handles payment processing at their standard rate, and the rest goes straight to your bank account.</p>
                     <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                         <div class="mb-2 font-medium text-emerald-600 dark:text-emerald-300">On 1,000 tickets at $35 each:</div>
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div><div class="text-gray-500 dark:text-gray-400">Ticketmaster</div><div class="font-semibold text-gray-900 dark:text-white">You keep: ~$25,000</div></div>
                             <div><div class="text-emerald-600 dark:text-emerald-300">Event Schedule</div><div class="font-semibold text-gray-900 dark:text-white">You keep: ~$33,950</div></div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-center lg:justify-start" aria-hidden="true">
+                        <div class="es-ticket-stub">
+                            <div class="es-ticket-stub-main">
+                                <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">Platform fee</div>
+                                <div class="text-2xl font-black leading-none">$0.00</div>
+                            </div>
+                            <div class="es-ticket-stub-perf"></div>
+                            <div class="es-ticket-stub-stub"><span>ADMIT<br>ONE</span></div>
                         </div>
                     </div>
                 </div>
@@ -329,7 +615,10 @@
             </div>
 
             <!-- Fan newsletter -->
-            <div class="grid items-center gap-12 lg:grid-cols-2">
+            <div class="relative grid items-center gap-12 lg:grid-cols-2">
+                <div class="es-stageplot-glyph hidden lg:block" style="right: 0; bottom: 0;" aria-hidden="true">
+                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="8" width="28" height="48" rx="3"/><circle cx="32" cy="24" r="9"/><circle cx="32" cy="44" r="5"/></svg>
+                </div>
                 <div class="order-2 lg:order-1">
                     <div class="es-bento group relative mx-auto max-w-md" data-tilt="4" data-reveal="panel">
                         <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
@@ -356,7 +645,7 @@
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
                         Fan Newsletter
                     </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Your fans. Your inbox. No algorithm in between.</h2>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Your fans. Your inbox. <span class="text-gradient-soundcheck">No algorithm in between.</span></h2>
                     <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">When someone follows your venue, they're opting in to hear from you. Announce a show, and it goes straight to their inbox - not buried in a feed, not paywalled behind boosted posts.</p>
                     <ul class="space-y-3">
                         @foreach (['One-click announcements to all followers', 'See open rates and engagement', 'Never pay to reach your own audience'] as $item)
@@ -386,12 +675,12 @@
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Also included</h2>
+                <h2 class="es-balance mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-soundcheck">Also included</span></h2>
                 <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">Everything else you need to run your room</p>
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="60">
                 @foreach ($alsoIncluded as [$name, $desc, $chip, $text, $icon])
-                    <div data-reveal class="rounded-xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-1 hover:border-blue-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/30">
+                    <div data-reveal class="soundcheck-tile rounded-xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg {{ $chip }}">
                             <svg aria-hidden="true" class="h-5 w-5 {{ $text }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
                         </div>
@@ -410,7 +699,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for every kind of <span class="text-gradient">music room</span>
+                    Built for every kind of <span class="text-gradient-soundcheck">music room</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     50 seats or 5,000 - if you book live music, this is for you.
@@ -505,22 +794,26 @@
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="opacity: 0.28;"></div>
-                <div class="es-aurora es-aurora-2" style="opacity: 0.22;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(34, 197, 94, 0.26), rgba(34, 197, 94, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(239, 68, 68, 0.22), rgba(239, 68, 68, 0) 60%); opacity: 0.5;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Get your venue calendar online in <span class="text-gradient">three steps</span>
+                        Get your venue calendar online in <span class="text-gradient-soundcheck">three steps</span>
                     </h2>
+                </div>
+
+                <div class="mb-14 flex justify-center" data-reveal aria-hidden="true">
+                    <span class="es-vu"><span class="es-vu-face"></span><span class="es-vu-needle"></span><span class="es-vu-cap"></span></span>
                 </div>
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
                     @foreach ([['1', 'Create Your Calendar', 'Sign up and add your venue details. Set up stages or rooms as sub-schedules if you have multiple spaces.'], ['2', 'Add Your Events', 'Add events manually, import from Google Calendar, or accept booking requests from performers.'], ['3', 'Share & Sell', 'Embed on your website, share on social, and start selling tickets with QR check-in.']] as [$n, $title, $desc])
                         <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                            <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">{{ $n }}</div>
+                            <div class="soundcheck-step mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-bold text-white">{{ $n }}</div>
                             <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
                             <p class="text-sm text-gray-400">{{ $desc }}</p>
                         </div>
@@ -535,7 +828,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-soundcheck">Key features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -559,7 +852,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="soundcheck-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -576,22 +869,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-soundcheck">Related pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-venues', 'Venues'], ['/for-nightclubs', 'Nightclubs'], ['/for-bars', 'Bars'], ['/for-musicians', 'Musicians']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="soundcheck-related group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="soundcheck-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="soundcheck-related-ico w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="soundcheck-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -608,7 +901,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="text-gradient-soundcheck">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything music venues ask about Event Schedule.
@@ -641,15 +934,19 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel soundcheck-finale-glow noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 35%, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0) 60%); opacity: 0.55;"></div>
+                    <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 60%, rgba(239, 68, 68, 0.24), rgba(239, 68, 68, 0) 60%); opacity: 0.5;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
 
                 <div class="relative z-10">
+                    <div class="mb-8 flex justify-center" aria-hidden="true">
+                        <span class="es-vu"><span class="es-vu-face"></span><span class="es-vu-needle"></span><span class="es-vu-cap"></span></span>
+                    </div>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop paying to fill your <span class="text-gradient">own room</span>
+                        Stop paying to fill your <span class="text-gradient-soundcheck">own room</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Your venue. Your calendar. Your ticket revenue. Free forever.
@@ -662,7 +959,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl soundcheck-btn px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
                                 Create Your Venue Calendar
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

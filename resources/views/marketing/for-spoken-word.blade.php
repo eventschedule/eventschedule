@@ -107,10 +107,14 @@
 
     <style {!! nonce_attr() !!}>
         /* For-spoken-word "The Reading" styles. The shared es-* motion system
-           lives in marketing.css; this holds only the warm amber->rose gradient
-           text and the faint serif words drifting behind the hero. */
+           lives in marketing.css; this holds the deepened ink-and-sepia gradient
+           text (sepia #92400e -> rose #e11d48, so it reads darker than the
+           brighter for-comedians amber-rose), the faint serif words, a serif
+           pull-quote, small serif pilcrows, and one gentle motion: an ink
+           underline that draws itself under gradient headings on reveal.
+           Type does the work; motion stays minimal. */
         .text-gradient-poetry {
-            background: linear-gradient(135deg, #d97706, #e11d48);
+            background: linear-gradient(135deg, #92400e, #e11d48);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -129,6 +133,73 @@
             user-select: none;
         }
         .dark .es-word { color: rgba(253, 230, 138, 0.05); }
+
+        /* Ink underline: a hairline of sepia-rose ink that draws itself under
+           gradient heading words when the section reveals. Falls back to fully
+           drawn for no-JS / reduced-motion visitors. */
+        .es-ink-underline { position: relative; }
+        .es-ink-underline::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -0.12em;
+            height: 3px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #92400e, #e11d48);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+            transition-delay: 0.2s;
+        }
+        .dark .es-ink-underline::after {
+            background: linear-gradient(90deg, #fcd34d, #fb7185);
+        }
+        [data-reveal].is-revealed .es-ink-underline::after,
+        html:not(.es-anim) .es-ink-underline::after {
+            transform: scaleX(1);
+        }
+
+        /* Oversized serif quotation mark for the mid-page pull-quote. */
+        .es-quote-mark {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 5rem;
+            line-height: 0.7;
+            background: linear-gradient(135deg, #92400e, #e11d48);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .es-quote-mark {
+            background: linear-gradient(135deg, #fcd34d, #fb7185);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (min-width: 768px) {
+            .es-quote-mark { font-size: 6.5rem; }
+        }
+
+        /* Small serif pilcrow markers leading each FAQ question. */
+        .es-pilcrow {
+            font-family: Georgia, 'Times New Roman', serif;
+            color: #b45309;
+        }
+        .dark .es-pilcrow { color: #fcd34d; }
+
+        /* Accent recolor for the hard-coded links and related-page card hovers. */
+        .es-link-poetry { color: #b45309; }
+        .dark .es-link-poetry { color: #fcd34d; }
+        .es-relcard:hover { border-color: #fcd34d; background-color: #fffbeb; }
+        .dark .es-relcard:hover { border-color: rgba(252, 211, 77, 0.3); background-color: rgba(252, 211, 77, 0.06); }
+        .es-relcard:hover .es-relcard-title,
+        .es-relcard:hover .es-relcard-arrow { color: #b45309; }
+        .dark .es-relcard:hover .es-relcard-title,
+        .dark .es-relcard:hover .es-relcard-arrow { color: #fcd34d; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .es-ink-underline::after { transform: scaleX(1); transition: none; }
+        }
     </style>
 
     <!-- ============================================================ -->
@@ -205,8 +276,19 @@
     <!-- ============================================================ -->
     <!-- 2. The reality (stats)                                       -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-white py-16 dark:border-white/5 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <section class="relative overflow-hidden border-t border-gray-200 bg-white py-16 dark:border-white/5 dark:bg-[#0a0a0f]">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <span class="es-word text-6xl italic" style="top:6%;left:6%;transform:rotate(-6deg);">stanza</span>
+            <span class="es-word text-5xl" style="bottom:10%;right:9%;transform:rotate(5deg);">breath</span>
+            <span class="es-word text-4xl italic" style="top:22%;right:16%;transform:rotate(-9deg);">verse</span>
+        </div>
+        <div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <figure class="mx-auto mb-14 max-w-3xl text-center" data-reveal>
+                <div class="es-quote-mark mb-1" aria-hidden="true">&ldquo;</div>
+                <blockquote class="es-balance font-serif text-2xl font-medium italic leading-snug text-gray-800 dark:text-gray-100 md:text-3xl">
+                    Real people in real rooms, listening.
+                </blockquote>
+            </figure>
             <div class="grid grid-cols-1 gap-8 text-center md:grid-cols-3" data-reveal-group="90">
                 <div data-reveal>
                     <div class="mb-2 font-serif text-3xl text-amber-600 dark:text-amber-300">3 venues</div>
@@ -235,7 +317,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">The whole reading life</span>
                 </div>
                 <h2 class="es-balance font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything but the <span class="text-gradient-poetry">writing</span>
+                    Everything but the <span class="text-gradient-poetry es-ink-underline">writing</span>
                 </h2>
             </div>
 
@@ -461,7 +543,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-10 max-w-3xl text-center">
                 <h2 class="es-balance mb-3 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Where poetry happens
+                    Where poetry <span class="text-gradient-poetry es-ink-underline">happens</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">From open mics to festival stages</p>
             </div>
@@ -485,7 +567,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for how poets <span class="text-gradient-poetry">actually work</span>
+                    Built for how poets <span class="text-gradient-poetry es-ink-underline">actually work</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whether you're on the slam circuit or launching a collection
@@ -594,7 +676,7 @@
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <h2 class="es-balance font-serif text-3xl font-bold tracking-tight text-white md:text-5xl" data-reveal>
-                        Three <span class="text-gradient-poetry">steps</span>
+                        Three <span class="text-gradient-poetry es-ink-underline">steps</span>
                     </h2>
                 </div>
 
@@ -643,7 +725,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="es-link-poetry inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -663,19 +745,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-comedians', 'Comedians'], ['/for-musicians', 'Musicians'], ['/for-theater-performers', 'Theater Performers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-link-poetry inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -692,7 +774,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-poetry">questions</span>
+                    Frequently asked <span class="text-gradient-poetry es-ink-underline">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything spoken word artists ask about Event Schedule.
@@ -707,8 +789,11 @@
                     ['Can I sell tickets to featured shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Set different prices for general admission and featured seating. Event Schedule charges zero platform fees.'],
                 ] as [$q, $a])
                     <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="flex items-baseline gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+                                <span class="es-pilcrow shrink-0 font-serif" aria-hidden="true">&para;</span>
+                                <span>{{ $q }}</span>
+                            </h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -736,7 +821,7 @@
                 <div class="relative z-10">
                     <p class="mb-6 text-sm uppercase tracking-[0.2em] text-gray-400">Free forever</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl font-serif text-3xl font-bold tracking-tight text-white md:text-5xl">
-                        Stop shouting into <span class="text-gradient-poetry italic">the algorithm.</span>
+                        Stop shouting into <span class="text-gradient-poetry es-ink-underline italic">the algorithm.</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
                         Your words already found their audience once. Help them find you again.

@@ -151,8 +151,129 @@
             0% { transform: scale(0.2); opacity: 0.6; }
             100% { transform: scale(6); opacity: 0; }
         }
+
+        /* Broadcast-studio hardware layer: a slow-pulsing red ON-AIR tally light,
+           a mic-check VU strip (one amber peak), a control-room monitor frame,
+           and steel-slate eyebrow / episode chips, plus teal link / hover / FAQ
+           states. */
+        .webinar-tally {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 9999px;
+            background: #ef4444;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+            animation: es-tally 2.6s ease-in-out infinite;
+        }
+        @keyframes es-tally {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); opacity: 1; }
+            50% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); opacity: 0.6; }
+        }
+        .webinar-onair {
+            top: 1.25rem;
+            right: 1.25rem;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        .webinar-vu {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 14px;
+        }
+        .webinar-vu i {
+            display: block;
+            width: 3px;
+            border-radius: 1px;
+            background: #0d9488;
+            transform-origin: bottom;
+            animation: es-vu 1.1s ease-in-out infinite;
+        }
+        .dark .webinar-vu i { background: #2dd4bf; }
+        .webinar-vu i:nth-child(1) { height: 55%; animation-delay: 0s; }
+        .webinar-vu i:nth-child(2) { height: 90%; animation-delay: 0.15s; }
+        .webinar-vu i:nth-child(3) { height: 40%; animation-delay: 0.3s; background: #f59e0b; }
+        .dark .webinar-vu i:nth-child(3) { background: #fbbf24; }
+        .webinar-vu i:nth-child(4) { height: 72%; animation-delay: 0.45s; }
+        .webinar-vu i:nth-child(5) { height: 50%; animation-delay: 0.6s; }
+        @keyframes es-vu {
+            0%, 100% { transform: scaleY(0.4); }
+            50% { transform: scaleY(1); }
+        }
+        .webinar-monitor {
+            position: relative;
+            border-radius: 0.9rem;
+            padding: 0.4rem;
+            background: linear-gradient(180deg, #e2e8f0, #cbd5e1);
+            border: 1px solid rgba(100, 116, 139, 0.35);
+            box-shadow: 0 8px 20px -8px rgba(15, 23, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+        .dark .webinar-monitor {
+            background: linear-gradient(180deg, #2d2d30, #1e1e1e);
+            border-color: rgba(148, 163, 184, 0.2);
+            box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+        .webinar-monitor-stand {
+            width: 34%;
+            height: 11px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #cbd5e1, #94a3b8);
+            border-radius: 0 0 6px 6px;
+        }
+        .dark .webinar-monitor-stand { background: linear-gradient(180deg, #3a3a3d, #232326); }
+        .webinar-monitor-base {
+            width: 52%;
+            height: 5px;
+            margin: 3px auto 0;
+            border-radius: 9999px;
+            background: #94a3b8;
+        }
+        .dark .webinar-monitor-base { background: #3a3a3d; }
+        .webinar-eyebrow {
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            box-shadow: inset 0 0 8px rgba(100, 116, 139, 0.08);
+        }
+        .dark .webinar-eyebrow {
+            border-color: rgba(148, 163, 184, 0.22);
+            box-shadow: inset 0 0 8px rgba(148, 163, 184, 0.06);
+        }
+        .webinar-ep-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 4px;
+            padding: 0 0.3rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: rgba(100, 116, 139, 0.16);
+            color: #475569;
+            border: 1px solid rgba(100, 116, 139, 0.28);
+        }
+        .dark .webinar-ep-chip {
+            background: rgba(148, 163, 184, 0.16);
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+        .webinar-link-accent { color: #0d9488; }
+        .dark .webinar-link-accent { color: #2dd4bf; }
+        .webinar-related-card:hover {
+            border-color: rgba(13, 148, 136, 0.4);
+            background-color: rgba(13, 148, 136, 0.06);
+        }
+        .dark .webinar-related-card:hover {
+            border-color: rgba(45, 212, 191, 0.28);
+            background-color: rgba(45, 212, 191, 0.06);
+        }
+        .group:hover .webinar-related-title { color: #0d9488; }
+        .dark .group:hover .webinar-related-title { color: #2dd4bf; }
+        .group:hover .webinar-related-arrow { color: #0d9488; }
+        .dark .group:hover .webinar-related-arrow { color: #2dd4bf; }
+        .webinar-faq { transition: border-color 0.2s ease; }
+        .webinar-faq:hover { border-color: rgba(13, 148, 136, 0.35); }
+        .dark .webinar-faq:hover { border-color: rgba(45, 212, 191, 0.28); }
         @media (prefers-reduced-motion: reduce) {
-            .es-reg-float, .es-signal span { animation: none !important; }
+            .es-reg-float, .es-signal span, .webinar-tally, .webinar-vu i { animation: none !important; }
             .es-signal span { opacity: 0; }
         }
     </style>
@@ -176,11 +297,15 @@
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+            <div class="es-fade-up es-d-1 webinar-eyebrow mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
                 <svg aria-hidden="true" class="h-5 w-5 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
                 <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Webinar Hosts & Organizers</span>
+                <span class="inline-flex items-center gap-1.5" aria-hidden="true">
+                    <span class="webinar-tally"></span>
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-red-500 dark:text-red-400">On Air</span>
+                </span>
             </div>
 
             <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
@@ -272,6 +397,7 @@
                                 <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-100 px-3 py-1.5 text-sm font-medium text-teal-700 dark:border-teal-800/30 dark:bg-teal-900/40 dark:text-teal-300">
                                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                                     Email Attendees
+                                    <span class="webinar-vu ml-1" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
                                 </div>
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Email webinar attendees directly</h3>
                                 <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Notify registrants before you go live. Send reminders, share materials, and follow up after sessions. Your audience, your inbox.</p>
@@ -387,13 +513,19 @@
                                         <svg aria-hidden="true" class="es-sync-dot h-6 w-6 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                                         <span class="text-[10px] text-blue-500 dark:text-blue-400">join link</span>
                                     </div>
-                                    <div class="w-36 rounded-xl border border-gray-300 bg-gray-200 p-4 dark:border-white/20 dark:bg-white/10">
-                                        <div class="mb-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">Streaming</div>
-                                        <div class="space-y-2 text-center">
-                                            <div class="es-ai-field rounded bg-blue-400/20 p-1.5 text-[10px] text-blue-700 dark:text-blue-300" style="--i: 0;">Zoom</div>
-                                            <div class="es-ai-field rounded bg-green-400/20 p-1.5 text-[10px] text-green-700 dark:text-green-300" style="--i: 1;">Google Meet</div>
-                                            <div class="es-ai-field rounded bg-purple-400/20 p-1.5 text-[10px] text-purple-700 dark:text-purple-300" style="--i: 2;">Teams</div>
+                                    <div class="flex flex-col items-center">
+                                        <div class="webinar-monitor w-36">
+                                            <div class="rounded-lg bg-gray-200 p-3 dark:bg-white/10">
+                                                <div class="mb-2 text-center text-xs font-semibold text-gray-600 dark:text-gray-300">Streaming</div>
+                                                <div class="space-y-2 text-center">
+                                                    <div class="es-ai-field rounded bg-blue-400/20 p-1.5 text-[10px] text-blue-700 dark:text-blue-300" style="--i: 0;">Zoom</div>
+                                                    <div class="es-ai-field rounded bg-green-400/20 p-1.5 text-[10px] text-green-700 dark:text-green-300" style="--i: 1;">Google Meet</div>
+                                                    <div class="es-ai-field rounded bg-purple-400/20 p-1.5 text-[10px] text-purple-700 dark:text-purple-300" style="--i: 2;">Teams</div>
+                                                </div>
+                                            </div>
                                         </div>
+                                        <div class="webinar-monitor-stand"></div>
+                                        <div class="webinar-monitor-base"></div>
                                     </div>
                                 </div>
                             </div>
@@ -414,10 +546,10 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Weekly or monthly sessions. Set it once and let attendees follow along.</p>
                         <div class="mt-auto rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
                             <div class="space-y-1.5">
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Mon - Product Update</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Mon - Product Update</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Mon - Product Update</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Mon - Product Update</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="webinar-ep-chip">E01</span><span class="text-[10px] font-medium text-gray-900 dark:text-white">Mon - Product Update</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="webinar-ep-chip">E02</span><span class="text-[10px] text-gray-600 dark:text-gray-300">Mon - Product Update</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="webinar-ep-chip">E03</span><span class="text-[10px] text-gray-600 dark:text-gray-300">Mon - Product Update</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="webinar-ep-chip">E04</span><span class="text-[10px] text-gray-600 dark:text-gray-300">Mon - Product Update</span></div>
                             </div>
                             <div class="mt-2 text-center text-[10px] text-amber-600 dark:text-amber-300">Repeats weekly</div>
                         </div>
@@ -470,7 +602,7 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Track webinar registrations</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Track registrations and know your audience before going live.</p>
                         <div class="mt-auto" aria-hidden="true">
-                            <div class="flex items-center justify-center">
+                            <div class="es-reg-float flex items-center justify-center">
                                 <div class="flex -space-x-2">
                                     <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-teal-500 to-cyan-500 text-xs text-white dark:border-[#0a0a0f]">A</div>
                                     <div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-cyan-500 to-blue-500 text-xs text-white dark:border-[#0a0a0f]">B</div>
@@ -513,6 +645,11 @@
                     <span style="--sig-dur: 5s; --sig-delay: 1.6s;"></span>
                     <span style="--sig-dur: 5s; --sig-delay: 3.2s;"></span>
                 </div>
+            </div>
+
+            <div class="webinar-onair pointer-events-none absolute z-10 hidden items-center gap-1.5 rounded-full px-2.5 py-1 backdrop-blur-sm sm:inline-flex" aria-hidden="true">
+                <span class="webinar-tally"></span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-red-400">On Air</span>
             </div>
 
             <div class="relative z-10 mx-auto max-w-5xl">
@@ -673,7 +810,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-webinar">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
@@ -692,7 +829,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium hover:underline webinar-link-accent">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -709,22 +846,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-webinar">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-virtual-conferences', 'Virtual Conferences'], ['/for-online-classes', 'Online Classes'], ['/for-live-qa-sessions', 'Live Q&A Sessions'], ['/for-workshop-instructors', 'Workshop Instructors']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group webinar-related-card flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors webinar-related-title dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors webinar-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium hover:underline webinar-link-accent">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -755,7 +892,7 @@
                     ['Can I schedule a recurring webinar series?', 'Yes. Set up weekly, biweekly, or monthly webinar series with a single recurring event. Attendees can follow your schedule and get notified when new sessions are added.'],
                     ['Is Event Schedule free for hosting webinars?', 'Yes. The free plan includes unlimited events, attendee email notifications, and registration features. There are zero platform fees on ticket sales at any plan level. You only pay Stripe\'s standard processing fee if you sell tickets.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="webinar-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -174,9 +174,95 @@
             45% { opacity: 0.95; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
             55% { opacity: 0.6; }
         }
+        /* NOW PLAYING lower-third: a broadcast chyron floating over the hero,
+           red-orange tag + theater-black caption. Uses es-wp-float to drift. */
+        .es-lower-third { position: absolute; left: 1.5rem; bottom: 6rem; z-index: 20; display: none; pointer-events: none; }
+        @media (min-width: 768px) { .es-lower-third { display: block; } }
+        @media (min-width: 1024px) { .es-lower-third { left: 3.5rem; } }
+        .es-lt { display: flex; align-items: stretch; overflow: hidden; border-radius: 8px;
+            box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06); }
+        .es-lt-tag { display: flex; align-items: center; gap: 0.4rem; padding: 0.55rem 0.7rem;
+            background: linear-gradient(135deg, #dc2626, #f97316); }
+        .dark .es-lt-tag { background: linear-gradient(135deg, #ef4444, #fb923c); }
+        .es-lt-label { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; }
+        .es-rec-dot { width: 8px; height: 8px; border-radius: 9999px; background: #fff;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.9); animation: es-rec-blink 1.4s steps(1) infinite; }
+        @keyframes es-rec-blink { 0%, 55% { opacity: 1; } 55.01%, 100% { opacity: 0.25; } }
+        .es-lt-body { display: flex; flex-direction: column; justify-content: center; gap: 1px;
+            padding: 0.4rem 0.8rem; background: rgba(10, 10, 15, 0.86); backdrop-filter: blur(8px); }
+        .es-lt-title { font-size: 12px; font-weight: 600; color: #fff; line-height: 1.25; }
+        .es-lt-sub { font-size: 10px; color: #cbd5e1; line-height: 1.25; }
+
+        /* Film-leader countdown frames: the how-it-works step numbers become
+           crosshair leader frames with a sweeping second hand. Numbers stay 1-2-3. */
+        .es-leader { position: relative; overflow: hidden; border-radius: 9999px;
+            background: radial-gradient(circle at 50% 45%, #1c1408 0%, #0a0a0f 78%);
+            border: 1.5px solid rgba(245, 158, 11, 0.55);
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12), inset 0 0 14px rgba(0, 0, 0, 0.65); }
+        .dark .es-leader { background: radial-gradient(circle at 50% 45%, #1c1408 0%, #060608 78%);
+            border-color: rgba(251, 191, 36, 0.5); }
+        .es-leader::before { content: ''; position: absolute; inset: -2px; z-index: 1;
+            background: conic-gradient(from 0deg, rgba(249, 115, 22, 0.7) 0deg, rgba(249, 115, 22, 0.1) 26deg, transparent 72deg, transparent 360deg);
+            animation: es-leader-sweep 3.6s linear infinite; }
+        .es-leader::after { content: ''; position: absolute; inset: 0; z-index: 2;
+            background:
+              linear-gradient(to right, transparent calc(50% - 0.75px), rgba(245, 245, 245, 0.45) calc(50% - 0.75px), rgba(245, 245, 245, 0.45) calc(50% + 0.75px), transparent calc(50% + 0.75px)),
+              linear-gradient(to bottom, transparent calc(50% - 0.75px), rgba(245, 245, 245, 0.45) calc(50% - 0.75px), rgba(245, 245, 245, 0.45) calc(50% + 0.75px), transparent calc(50% + 0.75px)); }
+        .es-leader-num { position: relative; z-index: 3; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85); }
+        @keyframes es-leader-sweep { to { transform: rotate(360deg); } }
+
+        /* Projector beam + drifting dust from the dark band's top edge, plus a
+           theater-black vignette that deepens the dark surfaces. */
+        .es-projector { position: absolute; inset: 0; overflow: hidden; }
+        .es-beam { position: absolute; top: -3%; left: 50%; width: 54%; height: 82%;
+            transform: translateX(-50%); clip-path: polygon(47% 0%, 53% 0%, 82% 100%, 18% 100%);
+            background: linear-gradient(to bottom, rgba(249, 115, 22, 0.15), rgba(245, 158, 11, 0.05) 45%, rgba(245, 158, 11, 0));
+            filter: blur(9px); animation: es-beam-flicker 6s ease-in-out infinite; }
+        .dark .es-beam { background: linear-gradient(to bottom, rgba(251, 146, 60, 0.17), rgba(251, 191, 36, 0.06) 45%, rgba(245, 158, 11, 0)); }
+        @keyframes es-beam-flicker { 0%, 100% { opacity: 0.85; } 48% { opacity: 1; } 52% { opacity: 0.72; } }
+        .es-dust { position: absolute; top: 8%; width: 3px; height: 3px; border-radius: 9999px;
+            background: rgba(251, 191, 36, 0.55); box-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+            opacity: 0; animation: es-dust-drift var(--dd, 9s) linear infinite; animation-delay: var(--ddelay, 0s); }
+        @keyframes es-dust-drift {
+            0% { transform: translate(0, 0); opacity: 0; }
+            12% { opacity: 0.7; }
+            88% { opacity: 0.45; }
+            100% { transform: translate(-16px, 230px); opacity: 0; }
+        }
+        .es-vignette { position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(ellipse 100% 78% at 50% 28%, transparent 42%, rgba(0, 0, 0, 0.45) 100%); }
+        .dark .es-vignette { background: radial-gradient(ellipse 100% 78% at 50% 28%, transparent 40%, rgba(0, 0, 0, 0.6) 100%); }
+
+        /* Ticket-stub perforation: dashed amber edge + punched side notches. */
+        .es-ticket-stub { position: relative; border: 1.5px dashed rgba(245, 158, 11, 0.55); border-radius: 12px; }
+        .es-ticket-stub::before, .es-ticket-stub::after {
+            content: ''; position: absolute; top: 50%; width: 16px; height: 16px;
+            border-radius: 9999px; transform: translateY(-50%); background: #ffffff; z-index: 2; }
+        .es-ticket-stub::before { left: -9px; }
+        .es-ticket-stub::after { right: -9px; }
+        .dark .es-ticket-stub::before, .dark .es-ticket-stub::after { background: #0d0d12; }
+
+        /* Cinema seat-row chips on the recurring movie-night rows. */
+        .es-seat { margin-left: auto; flex: 0 0 auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 9px; font-weight: 700; line-height: 1; letter-spacing: 0.02em;
+            padding: 2px 5px; border-radius: 4px; color: #b45309;
+            background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.4); }
+        .dark .es-seat { color: #fcd34d; background: rgba(245, 158, 11, 0.16); border-color: rgba(251, 191, 36, 0.35); }
+
+        /* Related-page cards: recolor the hover accent from blue to cinema red.
+           Done in CSS because these exact hover/opacity variants are not in the
+           prebuilt Tailwind bundle. */
+        .es-rel:hover { border-color: #fca5a5; background-color: #fef2f2; }
+        .dark .es-rel:hover { border-color: rgba(239, 68, 68, 0.3); background-color: rgba(239, 68, 68, 0.05); }
+        .es-rel:hover .es-rel-accent { color: #dc2626; }
+        .dark .es-rel:hover .es-rel-accent { color: #f87171; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-wp-float, .es-screen-tile { animation: none !important; }
             .es-screen-tile { opacity: 0.5; }
+            .es-leader::before, .es-rec-dot, .es-beam { animation: none !important; }
+            .es-dust { animation: none !important; opacity: 0.4; }
         }
     </style>
 
@@ -196,6 +282,20 @@
                     @php $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.17; @endphp
                     <span class="es-screen-tile" style="--sc-dur: {{ $dur }}s; --sc-delay: {{ $delay }}s;"></span>
                 @endfor
+            </div>
+        </div>
+
+        <!-- NOW PLAYING lower-third chip -->
+        <div class="es-lower-third es-wp-float" aria-hidden="true">
+            <div class="es-lt">
+                <div class="es-lt-tag">
+                    <span class="es-rec-dot"></span>
+                    <span class="es-lt-label">Now Playing</span>
+                </div>
+                <div class="es-lt-body">
+                    <span class="es-lt-title">Friday Movie Night</span>
+                    <span class="es-lt-sub">8:00 PM &middot; 214 watching</span>
+                </div>
             </div>
         </div>
 
@@ -340,7 +440,7 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell tickets to premium screenings</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Charge for paid premieres or exclusive screenings. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-emerald-600 underline hover:no-underline dark:text-emerald-400">ticketing features</a>.</p>
-                        <div class="mt-auto rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-4" aria-hidden="true">
+                        <div class="es-ticket-stub mt-auto bg-emerald-500/15 p-4" aria-hidden="true">
                             <div class="mb-3 text-center">
                                 <div class="text-xs text-emerald-700 dark:text-emerald-300">You keep</div>
                                 <div class="text-3xl font-bold text-gray-900 dark:text-white">100%</div>
@@ -439,10 +539,10 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Weekly movie nights or monthly screenings. Set it once and let viewers follow along.</p>
                         <div class="mt-auto rounded-xl border border-amber-400/30 bg-amber-500/15 p-3" aria-hidden="true">
                             <div class="space-y-1.5">
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Fri - Movie Night</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Movie Night</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Movie Night</span></div>
-                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Movie Night</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/20 p-1.5" style="--i: 0;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] font-medium text-gray-900 dark:text-white">Fri - Movie Night</span><span class="es-seat">A1</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 1;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Movie Night</span><span class="es-seat">B4</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 2;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Movie Night</span><span class="es-seat">C2</span></div>
+                                <div class="es-ai-field flex items-center gap-2 rounded bg-amber-400/10 p-1.5" style="--i: 3;"><div class="h-1.5 w-1.5 rounded-full bg-amber-400"></div><span class="text-[10px] text-gray-600 dark:text-gray-300">Fri - Movie Night</span><span class="es-seat">D7</span></div>
                             </div>
                             <div class="mt-2 text-center text-[10px] text-amber-600 dark:text-amber-300">Repeats weekly</div>
                         </div>
@@ -533,6 +633,14 @@
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(220, 38, 38, 0.26), rgba(220, 38, 38, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(249, 115, 22, 0.2), rgba(249, 115, 22, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
+                <div class="es-projector">
+                    <div class="es-beam"></div>
+                    @for ($p = 0; $p < 9; $p++)
+                        @php $px = 32 + $p * 4.4; $pd = 7 + ($p % 5) * 1.4; $pdl = ($p % 6) * 1.1; @endphp
+                        <span class="es-dust" style="left: {{ $px }}%; --dd: {{ $pd }}s; --ddelay: {{ $pdl }}s;"></span>
+                    @endfor
+                </div>
+                <div class="es-vignette"></div>
                 <div class="es-screen absolute bottom-0 left-0 right-0 flex h-16 items-center justify-center gap-2 px-8 pb-3 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                     @for ($i = 0; $i < 24; $i++)
                         @php $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.17; @endphp
@@ -690,8 +798,8 @@
             <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-orange-600 text-xl font-bold text-white shadow-lg shadow-red-600/25">
-                            {{ $num }}
+                        <div class="es-leader mx-auto mb-5 flex h-14 w-14 items-center justify-center text-xl font-bold text-white">
+                            <span class="es-leader-num">{{ $num }}</span>
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
@@ -706,7 +814,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-watchparty">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Online Events" description="Host virtual events with any streaming platform" :url="marketing_url('/features/online-events')" icon-color="sky">
@@ -725,7 +833,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-red-600 hover:underline dark:text-red-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -742,22 +850,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-watchparty">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-live-concerts', 'Live Concerts'], ['/for-bars', 'Bars'], ['/for-online-classes', 'Online Classes'], ['/for-live-qa-sessions', 'Live Q&A Sessions']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-accent text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-accent w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-red-600 hover:underline dark:text-red-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -815,6 +923,14 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.3), rgba(220, 38, 38, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="es-projector">
+                        <div class="es-beam"></div>
+                        @for ($p = 0; $p < 7; $p++)
+                            @php $px = 34 + $p * 4.6; $pd = 7 + ($p % 5) * 1.4; $pdl = ($p % 6) * 1.1; @endphp
+                            <span class="es-dust" style="left: {{ $px }}%; --dd: {{ $pd }}s; --ddelay: {{ $pdl }}s;"></span>
+                        @endfor
+                    </div>
+                    <div class="es-vignette"></div>
                     <div class="es-screen absolute bottom-0 left-0 right-0 flex h-14 items-center justify-center gap-2 px-8 pb-3 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                         @for ($i = 0; $i < 20; $i++)
                             @php $dur = 2.6 + ($i % 5) * 0.3; $delay = ($i % 8) * 0.17; @endphp

@@ -234,10 +234,61 @@
             .es-tour-stop { left: 50%; margin-left: -0.625rem; }
         }
 
+        /* Bento eyebrow micro-equalizer: frozen bars in the card chrome that
+           only dance while the card is hovered. */
+        .es-eq-mini {
+            position: absolute;
+            top: 1.25rem;
+            inset-inline-end: 1.25rem;
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 15px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .es-eq-mini i {
+            width: 3px;
+            height: 100%;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #22d3ee, #14b8a6);
+            transform-origin: bottom;
+            transform: scaleY(0.5);
+        }
+        .es-eq-mini i:nth-child(1) { transform: scaleY(0.4); }
+        .es-eq-mini i:nth-child(2) { transform: scaleY(0.8); }
+        .es-eq-mini i:nth-child(3) { transform: scaleY(0.55); }
+        .es-eq-mini i:nth-child(4) { transform: scaleY(1); }
+        .es-eq-mini i:nth-child(5) { transform: scaleY(0.68); }
+        .es-bento:hover .es-eq-mini i {
+            animation: es-eq-bounce 1.15s ease-in-out infinite;
+            animation-delay: calc(var(--i, 0) * 0.12s);
+        }
+
+        /* Teal accent (recolored from the hard-coded blue) so the stage theme
+           carries through the "See all" links and related-page card hovers. */
+        .es-accent-link { color: #0d9488; transition: color 0.2s ease; }
+        .es-accent-link:hover { color: #0f766e; }
+        .dark .es-accent-link { color: #2dd4bf; }
+        .dark .es-accent-link:hover { color: #5eead4; }
+        .es-related-card:hover {
+            border-color: #5eead4;
+            background-color: #f0fdfa;
+        }
+        .dark .es-related-card:hover {
+            border-color: rgba(45, 212, 191, 0.3);
+            background-color: rgba(45, 212, 191, 0.06);
+        }
+        .es-related-card:hover .es-related-title,
+        .es-related-card:hover .es-related-arrow { color: #0d9488; }
+        .dark .es-related-card:hover .es-related-title,
+        .dark .es-related-card:hover .es-related-arrow { color: #2dd4bf; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-stagelight,
             .es-eq i,
-            .es-eq-edge i {
+            .es-eq-edge i,
+            .es-eq-mini i {
                 animation: none !important;
             }
         }
@@ -372,7 +423,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Built for the road</span>
                 </div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything a working musician <span class="text-gradient">actually needs</span>
+                    Everything a working musician <span class="stage-glow-text">actually needs</span>
                 </h2>
             </div>
 
@@ -381,6 +432,7 @@
                 <!-- Newsletter - Tour Announcements (spans 2 cols) -->
                 <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="relative flex flex-col gap-8 lg:flex-row lg:items-center">
                             <div class="flex-1">
                                 <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
@@ -430,6 +482,7 @@
                 <!-- Zero Platform Fees -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -460,6 +513,7 @@
                 <!-- One Link for Everything -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -490,6 +544,7 @@
                 <!-- Venue Sync (spans 2 cols) -->
                 <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="grid items-center gap-8 md:grid-cols-2">
                             <div>
                                 <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
@@ -538,6 +593,7 @@
                 <!-- Team Collaboration -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -572,6 +628,7 @@
                 <!-- Google Calendar Sync -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -613,6 +670,7 @@
                 <!-- Fans Follow Your Tour -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <span class="es-eq-mini" aria-hidden="true"><i style="--i: 0;"></i><i style="--i: 1;"></i><i style="--i: 2;"></i><i style="--i: 3;"></i><i style="--i: 4;"></i></span>
                         <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -706,7 +764,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient">musicians</span>
+                    Perfect for all types of <span class="stage-glow-text">musicians</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whether you're a solo artist or a touring band, Event Schedule works for you.
@@ -810,47 +868,59 @@
     <!-- ============================================================ -->
     <!-- 6. How it works                                              -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-teal-400" aria-hidden="true"></span>
-                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Quick setup</span>
-                </div>
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Three steps to <span class="text-gradient">packed shows</span>
-                </h2>
+    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
+        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-stagelight es-stagelight-1"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
+            <div class="es-eq-edge" aria-hidden="true">
+                @for ($i = 0; $i < 24; $i++)
+                    <i style="--i: {{ $i % 8 }};"></i>
+                @endfor
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
-                <div class="text-center" data-reveal>
-                    <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
-                        1
+            <div class="relative z-10 mx-auto max-w-4xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-1.5" data-reveal>
+                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-teal-400" aria-hidden="true"></span>
+                        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-300">Quick setup</span>
                     </div>
-                    <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Add your gigs</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Import from Google Calendar or add tour dates manually. Set up ticket sales if you want.
-                    </p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
+                        Three steps to <span class="stage-glow-text">packed shows</span>
+                    </h2>
                 </div>
 
-                <div class="text-center" data-reveal>
-                    <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
-                        2
+                <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
+                    <div class="text-center" data-reveal>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
+                            1
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-white">Add your gigs</h3>
+                        <p class="text-sm text-gray-400">
+                            Import from Google Calendar or add tour dates manually. Set up ticket sales if you want.
+                        </p>
                     </div>
-                    <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Share your link</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you.
-                    </p>
-                </div>
 
-                <div class="text-center" data-reveal>
-                    <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
-                        3
+                    <div class="text-center" data-reveal>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
+                            2
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-white">Share your link</h3>
+                        <p class="text-sm text-gray-400">
+                            Add it to your Spotify bio, Bandcamp, EPK, or anywhere fans find you.
+                        </p>
                     </div>
-                    <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">Grow your fanbase</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs (all approved by you before going live). Build your audience on your terms.
-                    </p>
+
+                    <div class="text-center" data-reveal>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 text-xl font-bold text-white shadow-lg shadow-cyan-600/25">
+                            3
+                        </div>
+                        <h3 class="mb-2 text-lg font-semibold text-white">Grow your fanbase</h3>
+                        <p class="text-sm text-gray-400">
+                            Fans follow your schedule, get notified about shows near them, and share videos and comments after your gigs (all approved by you before going live). Build your audience on your terms.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -868,10 +938,10 @@
                         name="Ticketing"
                         description="Sell tickets with QR check-in and zero platform fees"
                         :url="marketing_url('/features/ticketing')"
-                        icon-color="sky"
+                        icon-color="teal"
                     >
                         <x-slot:icon>
-                            <svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                             </svg>
                         </x-slot:icon>
@@ -882,10 +952,10 @@
                         name="Newsletters"
                         description="Send event updates directly to followers' inboxes"
                         :url="marketing_url('/features/newsletters')"
-                        icon-color="green"
+                        icon-color="teal"
                     >
                         <x-slot:icon>
-                            <svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                         </x-slot:icon>
@@ -896,10 +966,10 @@
                         name="Calendar Sync"
                         description="Two-way sync with Google Calendar"
                         :url="marketing_url('/features/calendar-sync')"
-                        icon-color="blue"
+                        icon-color="teal"
                     >
                         <x-slot:icon>
-                            <svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                         </x-slot:icon>
@@ -910,10 +980,10 @@
                         name="Boost"
                         description="Promote events with Facebook and Instagram ads"
                         :url="marketing_url('/features/boost')"
-                        icon-color="orange"
+                        icon-color="teal"
                     >
                         <x-slot:icon>
-                            <svg aria-hidden="true" class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                             </svg>
                         </x-slot:icon>
@@ -921,7 +991,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -940,45 +1010,45 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                <a href="{{ marketing_url('/for-comedians') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                <a href="{{ marketing_url('/for-comedians') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 es-related-card">
                     <div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">Comedians</div>
+                        <div class="text-lg font-semibold text-gray-900 transition-colors dark:text-white es-related-title">Comedians</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-                <a href="{{ marketing_url('/for-djs') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                <a href="{{ marketing_url('/for-djs') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 es-related-card">
                     <div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">DJs</div>
+                        <div class="text-lg font-semibold text-gray-900 transition-colors dark:text-white es-related-title">DJs</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-                <a href="{{ marketing_url('/for-spoken-word') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                <a href="{{ marketing_url('/for-spoken-word') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 es-related-card">
                     <div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">Spoken Word Artists</div>
+                        <div class="text-lg font-semibold text-gray-900 transition-colors dark:text-white es-related-title">Spoken Word Artists</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
-                <a href="{{ marketing_url('/for-dance-groups') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                <a href="{{ marketing_url('/for-dance-groups') }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 es-related-card">
                     <div>
                         <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                        <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">Dance Groups</div>
+                        <div class="text-lg font-semibold text-gray-900 transition-colors dark:text-white es-related-title">Dance Groups</div>
                     </div>
-                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -995,7 +1065,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="stage-glow-text">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything musicians ask about Event Schedule.

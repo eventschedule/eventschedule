@@ -122,12 +122,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        @keyframes es-board-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-board-float { animation: es-board-float 6s ease-in-out infinite; }
-
         /* Gathering ripple - concentric rings spreading from a center point */
         .es-ripple span {
             position: absolute;
@@ -147,8 +141,117 @@
             0% { transform: scale(0.2); opacity: 0.55; }
             100% { transform: scale(9); opacity: 0; }
         }
+
+        /* --- The Gathering Place: corkboard + terracotta warmth --- */
+        /* Warm terracotta secondary (#c2410c family) paired with the teal accent */
+        .cc-terra { color: #c2410c; }
+        .dark .cc-terra { color: #fb923c; }
+        .cc-teal { color: #0d9488; }
+        .dark .cc-teal { color: #2dd4bf; }
+        .cc-bg-terra { background-color: #c2410c; }
+        .dark .cc-bg-terra { background-color: #fb923c; }
+        .cc-bg-teal { background-color: #0d9488; }
+        .dark .cc-bg-teal { background-color: #2dd4bf; }
+        .cc-chip-terra { border-color: rgba(194, 65, 12, 0.30); background-color: rgba(194, 65, 12, 0.10); }
+        .dark .cc-chip-terra { border-color: rgba(251, 146, 60, 0.32); background-color: rgba(251, 146, 60, 0.13); }
+        .cc-chip-teal { border-color: rgba(13, 148, 136, 0.30); background-color: rgba(13, 148, 136, 0.10); }
+        .dark .cc-chip-teal { border-color: rgba(45, 212, 191, 0.32); background-color: rgba(45, 212, 191, 0.13); }
+
+        /* Hand-drawn wobbly underline tucked beneath gradient words */
+        .cc-wobble { position: relative; display: inline-block; }
+        .cc-wobble-line {
+            position: absolute;
+            left: -3%;
+            bottom: -0.26em;
+            width: 106%;
+            height: 0.34em;
+            color: #c2410c;
+            overflow: visible;
+        }
+        .dark .cc-wobble-line { color: #fb923c; }
+
+        /* Stamped "Approved" chip for the facility-rental mock */
+        .cc-stamp {
+            display: inline-flex;
+            align-items: center;
+            color: #c2410c;
+            border: 2px solid rgba(194, 65, 12, 0.55);
+            background: rgba(194, 65, 12, 0.07);
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            transform: rotate(-11deg);
+            box-shadow: 0 1px 2px rgba(60, 30, 10, 0.15);
+        }
+        .dark .cc-stamp {
+            color: #fb923c;
+            border-color: rgba(251, 146, 60, 0.50);
+            background: rgba(251, 146, 60, 0.10);
+        }
+
+        /* Kraft corkboard that holds the community week */
+        .cc-corkboard {
+            background-color: #caa877;
+            background-image:
+                radial-gradient(circle at 15% 25%, rgba(99, 61, 26, 0.30) 0, rgba(99, 61, 26, 0.30) 1.5px, transparent 2px),
+                radial-gradient(circle at 55% 12%, rgba(99, 61, 26, 0.18) 0, rgba(99, 61, 26, 0.18) 1px, transparent 2px),
+                radial-gradient(circle at 82% 55%, rgba(99, 61, 26, 0.24) 0, rgba(99, 61, 26, 0.24) 1.5px, transparent 2px),
+                radial-gradient(circle at 35% 78%, rgba(99, 61, 26, 0.16) 0, rgba(99, 61, 26, 0.16) 1px, transparent 2px),
+                radial-gradient(circle at 68% 88%, rgba(99, 61, 26, 0.22) 0, rgba(99, 61, 26, 0.22) 1.5px, transparent 2px);
+            background-size: 90px 90px, 70px 70px, 110px 110px, 80px 80px, 100px 100px;
+            box-shadow:
+                inset 0 0 0 4px rgba(124, 74, 33, 0.55),
+                inset 0 2px 12px rgba(60, 33, 12, 0.45),
+                0 12px 30px rgba(0, 0, 0, 0.30);
+        }
+        .dark .cc-corkboard {
+            background-color: #5a4022;
+            background-image:
+                radial-gradient(circle at 15% 25%, rgba(28, 16, 6, 0.45) 0, rgba(28, 16, 6, 0.45) 1.5px, transparent 2px),
+                radial-gradient(circle at 55% 12%, rgba(28, 16, 6, 0.30) 0, rgba(28, 16, 6, 0.30) 1px, transparent 2px),
+                radial-gradient(circle at 82% 55%, rgba(28, 16, 6, 0.38) 0, rgba(28, 16, 6, 0.38) 1.5px, transparent 2px),
+                radial-gradient(circle at 35% 78%, rgba(28, 16, 6, 0.26) 0, rgba(28, 16, 6, 0.26) 1px, transparent 2px),
+                radial-gradient(circle at 68% 88%, rgba(28, 16, 6, 0.34) 0, rgba(28, 16, 6, 0.34) 1.5px, transparent 2px);
+            box-shadow:
+                inset 0 0 0 4px rgba(58, 36, 16, 0.70),
+                inset 0 2px 12px rgba(0, 0, 0, 0.55),
+                0 12px 30px rgba(0, 0, 0, 0.45);
+        }
+
+        /* Pinned flyer cards (cream paper, slight rotation applied inline) */
+        .cc-flyer { background: #fdfaf1; box-shadow: 0 5px 12px rgba(45, 26, 8, 0.35); }
+        .cc-flyer-day { color: #b45309; }
+        .cc-flyer-title { color: #3f3a34; }
+        .cc-flyer-sub { color: #6b6157; }
+        .dark .cc-flyer { background: #f2ead9; box-shadow: 0 6px 14px rgba(0, 0, 0, 0.50); }
+
+        /* Pushpins holding the flyers (alternating terracotta / teal) */
+        .cc-pin {
+            height: 12px;
+            width: 12px;
+            border-radius: 9999px;
+            background: radial-gradient(circle at 35% 30%, #fca5a5, #c2410c 70%);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.40);
+        }
+        .cc-pin-teal { background: radial-gradient(circle at 35% 30%, #99f6e4, #0d9488 70%); }
+
+        /* Accent text links + related-card hovers (teal, warming to terracotta) */
+        .cc-textlink { color: #0d9488; }
+        .cc-textlink:hover { color: #c2410c; }
+        .dark .cc-textlink { color: #2dd4bf; }
+        .dark .cc-textlink:hover { color: #fb923c; }
+        .cc-relcard:hover { border-color: #5eead4; background-color: #f0fdfa; }
+        .dark .cc-relcard:hover { border-color: rgba(45, 212, 191, 0.35); background-color: rgba(20, 184, 166, 0.07); }
+        .cc-relcard:hover .cc-relcard-title,
+        .cc-relcard:hover .cc-relcard-arrow { color: #0d9488; }
+        .dark .cc-relcard:hover .cc-relcard-title,
+        .dark .cc-relcard:hover .cc-relcard-arrow { color: #2dd4bf; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-board-float, .es-ripple span { animation: none !important; }
+            .es-ripple span { animation: none !important; }
             .es-ripple span { opacity: 0; }
         }
     </style>
@@ -235,6 +338,9 @@
             ['Sat', 'text-sky-300', [['bg-sky-400', 'Kids Camp', true], ['bg-blue-400', 'Family Event', false]]],
             ['Sun', 'text-sky-300', [['bg-sky-400', 'Open Gym', true], ['bg-blue-400', 'Craft Fair', false]]],
         ];
+        // Slight per-flyer rotations for the corkboard, plus a shared hand-drawn underline
+        $ccRots = [-3.5, 2.5, -2, 3, -1.5, 2, -3];
+        $ccWobble = '<svg class="cc-wobble-line" viewBox="0 0 200 9" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M2 6 C 20 3, 35 3, 52 5.5 S 88 8, 108 5 S 150 2.5, 170 5.5 S 194 6.5, 198 4.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     @endphp
     <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
@@ -252,27 +358,32 @@
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-2xl text-center">
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        The community week, <span class="text-gradient-teal">organized</span>
+                        The community week, <span class="cc-wobble"><span class="text-gradient-teal">organized</span>{!! $ccWobble !!}</span>
                     </h2>
                     <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         Senior fitness Monday morning. Youth basketball Tuesday evening. Art classes Wednesday. Keep every program visible and every room booked.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7" data-reveal-group="60">
-                    @foreach ($week as [$day, $text, $items])
-                        <div data-reveal class="rounded-xl border border-white/10 bg-white/[0.05] p-4 backdrop-blur-sm transition-all hover:-translate-y-1 hover:bg-white/[0.08]">
-                            <div class="mb-3 text-xs font-semibold uppercase tracking-wider {{ $text }}">{{ $day }}</div>
-                            <div class="space-y-2">
-                                @foreach ($items as [$dot, $name, $bold])
-                                    <div class="flex items-center gap-1.5">
-                                        <div class="h-1.5 w-1.5 rounded-full {{ $dot }}"></div>
-                                        <span class="text-xs {{ $bold ? 'font-medium text-white' : 'text-gray-400' }}">{{ $name }}</span>
+                <div class="cc-corkboard rounded-2xl p-5 md:p-7" data-reveal="panel">
+                    <div class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-7" data-reveal-group="60">
+                        @foreach ($week as $wi => [$day, $text, $items])
+                            <div data-reveal>
+                                <div class="cc-flyer relative rounded-sm px-3 pb-3 pt-6 text-center" style="transform: rotate({{ $ccRots[$wi] }}deg);">
+                                    <span class="cc-pin {{ $wi % 2 === 0 ? '' : 'cc-pin-teal' }} absolute left-1/2 top-2 -translate-x-1/2"></span>
+                                    <div class="cc-flyer-day mb-2 text-[11px] font-bold uppercase tracking-wider">{{ $day }}</div>
+                                    <div class="space-y-1.5 text-left">
+                                        @foreach ($items as [$dot, $name, $bold])
+                                            <div class="flex items-center gap-1.5">
+                                                <div class="h-1.5 w-1.5 shrink-0 rounded-full {{ $dot }}"></div>
+                                                <span class="text-[11px] {{ $bold ? 'cc-flyer-title font-semibold' : 'cc-flyer-sub' }}">{{ $name }}</span>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </div>
 
                 <div class="mt-10 text-center" data-reveal>
@@ -294,7 +405,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to run your <span class="text-gradient-teal">center</span>
+                    Everything to run your <span class="cc-wobble"><span class="text-gradient-teal">center</span>{!! $ccWobble !!}</span>
                 </h2>
             </div>
 
@@ -316,8 +427,13 @@
                                     <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">No middleman</span>
                                 </div>
                             </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
+                            <div class="relative w-full shrink-0 lg:w-auto" aria-hidden="true">
+                                <div class="es-ripple pointer-events-none absolute left-1/2 top-1/2 h-0 w-0 -translate-x-1/2 -translate-y-1/2">
+                                    <span style="--rip-dur: 8s; --rip-delay: 0s;"></span>
+                                    <span style="--rip-dur: 8s; --rip-delay: 2.6s;"></span>
+                                    <span style="--rip-dur: 8s; --rip-delay: 5.2s;"></span>
+                                </div>
+                                <div class="animate-float relative">
                                     <div class="max-w-xs rounded-2xl border border-teal-300 bg-gradient-to-br from-teal-50 to-cyan-50 p-4 dark:border-teal-400/30 dark:from-teal-950 dark:to-cyan-950">
                                         <div class="mb-4 flex items-center gap-3">
                                             <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
@@ -346,7 +462,8 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Facility rental requests come to you</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Groups submit requests online. Review, approve, or decline from your dashboard.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
+                        <div class="relative mt-auto space-y-2" aria-hidden="true">
+                            <div class="cc-stamp absolute -top-3 right-1 z-10">Approved</div>
                             <div class="es-ai-field flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-100 p-3 dark:border-sky-400/30 dark:bg-sky-500/20" style="--i: 0;">
                                 <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-xs font-semibold text-white">PTA</div>
                                 <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Lincoln PTA</div><div class="text-xs text-sky-600 dark:text-sky-300">Meeting Room &bull; Oct 15</div></div>
@@ -433,10 +550,10 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Every room at a glance</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Gym, meeting rooms, activity rooms, outdoor spaces. Filter by room and avoid scheduling conflicts.</p>
                         <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-100 p-2 dark:border-amber-500/30 dark:bg-amber-500/20" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-sm text-gray-900 dark:text-white">Gymnasium</span><span class="ml-auto text-xs text-amber-600 dark:text-amber-300">12 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-orange-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Meeting Room A</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">8 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-yellow-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Activity Room</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">15 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="h-2 w-2 rounded-full bg-green-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Outdoor Pavilion</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">4 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-terra p-2" style="--i: 0;"><div class="h-2 w-2 rounded-full cc-bg-terra"></div><span class="text-sm text-gray-900 dark:text-white">Gymnasium</span><span class="cc-terra ml-auto text-xs">12 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-teal p-2" style="--i: 1;"><div class="h-2 w-2 rounded-full cc-bg-teal"></div><span class="text-sm text-gray-900 dark:text-white">Meeting Room A</span><span class="cc-teal ml-auto text-xs">8 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-terra p-2" style="--i: 2;"><div class="h-2 w-2 rounded-full cc-bg-terra"></div><span class="text-sm text-gray-900 dark:text-white">Activity Room</span><span class="cc-terra ml-auto text-xs">15 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg border cc-chip-teal p-2" style="--i: 3;"><div class="h-2 w-2 rounded-full cc-bg-teal"></div><span class="text-sm text-gray-900 dark:text-white">Outdoor Pavilion</span><span class="cc-teal ml-auto text-xs">4 events</span></div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -540,7 +657,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient-teal">community centers</span>
+                    Perfect for all types of <span class="cc-wobble"><span class="text-gradient-teal">community centers</span>{!! $ccWobble !!}</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From recreation facilities to neighborhood gathering spaces.
@@ -670,7 +787,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-teal">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Embed Calendar" description="Add your schedule to any website with one snippet" :url="marketing_url('/features/embed-calendar')" icon-color="blue">
@@ -689,7 +806,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="cc-textlink inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -706,22 +823,22 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-teal">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-libraries', 'Libraries'], ['/for-theaters', 'Theaters'], ['/for-workshop-instructors', 'Workshop Instructors'], ['/for-fitness-and-yoga', 'Fitness & Yoga']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group cc-relcard flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="cc-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="cc-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="cc-textlink inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -784,7 +901,7 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop hoping members <span class="text-gradient-teal">check Facebook</span>
+                        Stop hoping members <span class="cc-wobble"><span class="text-gradient-teal">check Facebook</span>{!! $ccWobble !!}</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Email your community directly. Fill your programs. Free forever.

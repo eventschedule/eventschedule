@@ -108,8 +108,10 @@
 
     <style {!! nonce_attr() !!}>
         /* For-dance-groups "In Motion" styles. The shared es-* motion system
-           lives in marketing.css; this holds only the rose->cyan->sky gradient
-           text and the drifting motion lines behind the hero. */
+           lives in marketing.css; this holds the rose->cyan->sky gradient text,
+           the drifting motion lines (now carried from the hero through the dark
+           band and finale), motion-trail card hovers, and a curtain-to-curtain
+           season progress line. Motion trails stay exclusive to this page. */
         .text-gradient-dance {
             background: linear-gradient(120deg, #f43f5e, #06b6d4, #0ea5e9);
             -webkit-background-clip: text;
@@ -127,8 +129,49 @@
             50% { transform: translateX(12px) translateY(-8px); }
         }
         .es-flow { animation: es-flow 9s ease-in-out infinite; }
+
+        /* Motion-trail hover: the card slides a few pixels and a rose edge
+           lags behind and fades, like a body leaving a trail through a move. */
+        .es-trail { position: relative; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+        .es-trail::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            border: 1.5px solid rgba(244, 63, 94, 0.45);
+            opacity: 0;
+            transform: translate(0, 0);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+        }
+        .es-trail:hover { transform: translate(3px, -3px); }
+        .es-trail:hover::after { opacity: 1; transform: translate(-6px, 6px); }
+
+        /* Curtain-to-curtain season progress line; fills on reveal. */
+        .es-season-progress {
+            width: 0;
+            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+            transition-delay: 0.35s;
+        }
+        [data-reveal].is-revealed .es-season-progress,
+        html:not(.es-anim) .es-season-progress { width: 62%; }
+
+        /* Accent recolor for the hard-coded links and related-page card hovers. */
+        .es-link-dance { color: #0891b2; }
+        .dark .es-link-dance { color: #67e8f9; }
+        .es-relcard:hover { border-color: #fda4af; background-color: #fff1f2; }
+        .dark .es-relcard:hover { border-color: rgba(244, 63, 94, 0.3); background-color: rgba(244, 63, 94, 0.06); }
+        .es-relcard:hover .es-relcard-title,
+        .es-relcard:hover .es-relcard-arrow { color: #e11d48; }
+        .dark .es-relcard:hover .es-relcard-title,
+        .dark .es-relcard:hover .es-relcard-arrow { color: #fda4af; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-flow { animation: none !important; }
+            .es-season-progress { width: 62%; transition: none; }
+            .es-trail, .es-trail::after { transition: none; }
+            .es-trail:hover { transform: none; }
+            .es-trail:hover::after { opacity: 0; transform: none; }
         }
     </style>
 
@@ -206,9 +249,14 @@
     <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-4" data-reveal-group="70">
-                @foreach ([['🩰', 'Rehearsals sync to your public schedule'], ['🎭', 'Sell tickets to performances directly'], ['📧', 'Email your fans directly, own the relationship'], ['🎓', 'Fill your classes and workshops']] as [$emoji, $text])
-                    <div data-reveal class="rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-3 text-4xl">{{ $emoji }}</div>
+                @foreach ([
+                    ['text-rose-500 dark:text-rose-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />', 'Rehearsals sync to your public schedule'],
+                    ['text-cyan-500 dark:text-cyan-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />', 'Sell tickets to performances directly'],
+                    ['text-sky-500 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />', 'Email your fans directly, own the relationship'],
+                    ['text-rose-500 dark:text-rose-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />', 'Fill your classes and workshops'],
+                ] as [$statColor, $statIcon, $text])
+                    <div data-reveal class="es-trail rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
+                        <svg aria-hidden="true" class="mx-auto mb-3 h-8 w-8 {{ $statColor }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">{!! $statIcon !!}</svg>
                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ $text }}</div>
                     </div>
                 @endforeach
@@ -260,6 +308,27 @@
                                 </div>
                             @endforeach
                         </div>
+                        <div class="mt-5 border-t border-gray-200 pt-4 dark:border-white/10">
+                            <div class="flex items-center gap-2">
+                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 4v10a3 3 0 003-3V4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 4v10a3 3 0 01-3-3V4" />
+                                </svg>
+                                <div class="relative h-1.5 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+                                    <div class="es-season-progress h-full rounded-full bg-gradient-to-r from-rose-400 via-cyan-400 to-sky-400"></div>
+                                </div>
+                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 4v10a3 3 0 003-3V4" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 4v10a3 3 0 01-3-3V4" />
+                                </svg>
+                            </div>
+                            <div class="mt-2 flex justify-between text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                <span>Curtain up</span>
+                                <span>Season close</span>
+                            </div>
+                        </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
@@ -281,15 +350,15 @@
                             <div class="space-y-2">
                                 <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 0;">
                                     <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-cyan-400"></span><span class="text-sm text-gray-900 dark:text-white">Ballet Fundamentals</span></div>
-                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Mon/Wed 6pm</div><div class="text-xs text-emerald-500 dark:text-emerald-400">3 spots left</div></div>
+                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Mon/Wed 6pm</div><div class="mt-1"><span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-[10px] font-semibold text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">3 spots left</span></div></div>
                                 </div>
                                 <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
                                     <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-blue-400"></span><span class="text-sm text-gray-900 dark:text-white">Contemporary Technique</span></div>
-                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Tue/Thu 7pm</div><div class="text-xs text-emerald-500 dark:text-emerald-400">5 spots left</div></div>
+                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Tue/Thu 7pm</div><div class="mt-1"><span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">5 spots left</span></div></div>
                                 </div>
                                 <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 2;">
                                     <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-amber-400"></span><span class="text-sm text-gray-900 dark:text-white">Hip-Hop Foundations</span></div>
-                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Sat 2pm</div><div class="text-xs text-gray-400 dark:text-gray-500">FULL</div></div>
+                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Sat 2pm</div><div class="mt-1"><span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">FULL</span></div></div>
                                 </div>
                             </div>
                             <div class="mt-4 border-t border-gray-200 pt-4 dark:border-white/10">
@@ -343,7 +412,7 @@
                     ['M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', 'Notify on new shows', 'New performance? Email goes out. Everyone who wants to know, knows.'],
                     ['M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'Zero platform fees', 'Sell tickets directly. Stripe processes payment. You keep 100%.'],
                 ] as [$icon, $title, $desc])
-                    <div data-reveal class="rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]">
+                    <div data-reveal class="es-trail rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]">
                         <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10">
                             <svg aria-hidden="true" class="h-6 w-6 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" /></svg>
                         </div>
@@ -586,6 +655,13 @@
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.26), rgba(244, 63, 94, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.55;"></div>
+                <svg class="es-flow absolute -left-10 top-8 h-72 w-72 text-rose-400/40" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                    <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
+                    <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.4"/>
+                </svg>
+                <svg class="es-flow absolute -right-8 bottom-6 h-64 w-64 text-cyan-400/40" style="animation-delay: 2.4s;" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                    <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.55"/>
+                </svg>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
             </div>
 
@@ -633,7 +709,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="es-link-dance inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -653,19 +729,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-musicians', 'Musicians'], ['/for-theater-performers', 'Theater Performers'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-circus-acrobatics', 'Circus & Acrobatics']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-link-dance inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -719,6 +795,12 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 35% 25%, rgba(244, 63, 94, 0.3), rgba(244, 63, 94, 0) 60%); opacity: 0.7;"></div>
                     <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 65% 70%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.6;"></div>
+                    <svg class="es-flow absolute -left-8 top-6 h-64 w-64 text-rose-400/40" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                        <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                    </svg>
+                    <svg class="es-flow absolute -right-6 bottom-4 h-56 w-56 text-cyan-400/40" style="animation-delay: 1.8s;" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+                        <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
+                    </svg>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
 

@@ -113,15 +113,29 @@
            waveform, and panning club lights.
            ============================================================== */
 
+        /* Heading gradient - the booth's ice-cyan identity. Light mode uses a
+           deeper teal-to-cyan so it stays legible on white; dark mode opens up
+           to ice cyan -> near-white for the club-dark surfaces. */
         .text-gradient-neon {
-            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #22D3EE);
+            background: linear-gradient(135deg, #155e75, #0e7490, #0891b2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .text-gradient-neon {
+            background: linear-gradient(135deg, #22d3ee, #a5f3fc, #e0f2fe);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
         .neon-glow {
-            box-shadow: 0 0 20px rgba(78, 129, 250, 0.45), 0 0 40px rgba(14, 165, 233, 0.28);
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.45), 0 0 40px rgba(8, 145, 178, 0.3);
         }
+        /* Ice-cyan booth CTA - overrides the shared blue gradient utilities */
+        .es-dj-cta { background-image: linear-gradient(to right, #0e7490, #0891b2); }
+        .es-dj-cta:hover { background-image: linear-gradient(to right, #0891b2, #06b6d4); }
+        .dark .es-dj-cta { background-image: linear-gradient(to right, #0891b2, #06b6d4); }
+        .dark .es-dj-cta:hover { background-image: linear-gradient(to right, #06b6d4, #22d3ee); }
 
         /* Spinning vinyl badge */
         .es-vinyl {
@@ -137,7 +151,7 @@
             position: absolute;
             inset: 32%;
             border-radius: 9999px;
-            background: linear-gradient(135deg, #0EA5E9, #22D3EE);
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
         }
         .es-vinyl::after {
             content: "";
@@ -159,7 +173,7 @@
         .es-wave i {
             width: 4px;
             border-radius: 9999px;
-            background: linear-gradient(180deg, #22D3EE, #4E81FA);
+            background: linear-gradient(180deg, #22d3ee, #0891b2);
             transform-origin: center;
             animation: es-wave-bounce 1.1s ease-in-out infinite;
             animation-delay: calc(var(--i, 0) * 0.06s);
@@ -180,15 +194,69 @@
             transform-origin: 50% 0;
             animation: es-club-pan 9s ease-in-out infinite alternate;
         }
-        .es-clublight-1 { left: 3%; background: conic-gradient(from 197deg at 50% 0%, transparent 0deg, rgba(14, 165, 233, 0.15) 11deg, transparent 24deg); }
-        .es-clublight-2 { right: 3%; background: conic-gradient(from 149deg at 50% 0%, transparent 0deg, rgba(78, 129, 250, 0.14) 11deg, transparent 24deg); animation-delay: -3.5s; animation-duration: 11s; }
-        .es-clublight-3 { left: 33%; background: conic-gradient(from 178deg at 50% 0%, transparent 0deg, rgba(34, 211, 238, 0.11) 9deg, transparent 20deg); animation-delay: -6s; animation-duration: 13s; }
+        .es-clublight-1 { left: 3%; background: conic-gradient(from 197deg at 50% 0%, transparent 0deg, rgba(34, 211, 238, 0.16) 11deg, transparent 24deg); }
+        .es-clublight-2 { right: 3%; background: conic-gradient(from 149deg at 50% 0%, transparent 0deg, rgba(8, 145, 178, 0.15) 11deg, transparent 24deg); animation-delay: -3.5s; animation-duration: 11s; }
+        .es-clublight-3 { left: 33%; background: conic-gradient(from 178deg at 50% 0%, transparent 0deg, rgba(245, 158, 11, 0.13) 9deg, transparent 20deg); animation-delay: -6s; animation-duration: 13s; }
         @keyframes es-club-pan { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+
+        /* BPM beat ruler - a dotted beat grid under the residency header with an
+           amber booth-lamp playhead stepping across on the beat */
+        .es-bpm {
+            position: relative;
+            height: 8px;
+            max-width: 15rem;
+            margin-top: 0.85rem;
+            border-radius: 9999px;
+            background-image: repeating-linear-gradient(to right, rgba(8, 145, 178, 0.55) 0 2px, transparent 2px 11px);
+        }
+        .dark .es-bpm {
+            background-image: repeating-linear-gradient(to right, rgba(34, 211, 238, 0.5) 0 2px, transparent 2px 11px);
+        }
+        .es-bpm::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 7px;
+            height: 7px;
+            margin-top: -3.5px;
+            border-radius: 9999px;
+            background: #f59e0b;
+            box-shadow: 0 0 9px 2px rgba(245, 158, 11, 0.65);
+            animation: es-bpm-tick 2.4s steps(8, end) infinite;
+        }
+        @keyframes es-bpm-tick {
+            from { left: 0; }
+            to { left: calc(100% - 7px); }
+        }
+
+        /* Residency mock rows (ice cyan) + recolored inner-mock surfaces */
+        .es-res-row { border: 1px solid rgba(34, 211, 238, 0.22); background: rgba(34, 211, 238, 0.1); }
+        .es-res-date { color: #0e7490; }
+        .dark .es-res-date { color: #7dd3fc; }
+        .es-cyan-box { border: 1px solid rgba(6, 182, 212, 0.4); background: rgba(6, 182, 212, 0.06); }
+        .dark .es-cyan-box { border-color: rgba(34, 211, 238, 0.3); background: rgba(34, 211, 238, 0.1); }
+        .es-lamp-box { border: 1px solid rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.07); }
+        .dark .es-lamp-box { border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+
+        /* Ice-cyan hover for FAQ items and related-page cards */
+        .es-cyan-hover { transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+        .es-cyan-hover:hover { border-color: #67e8f9; background-color: rgba(6, 182, 212, 0.06); }
+        .dark .es-cyan-hover:hover { border-color: rgba(34, 211, 238, 0.35); background-color: rgba(34, 211, 238, 0.06); }
+        .es-cyan-hover:hover .es-cyan-hover-title { color: #0891b2; }
+        .dark .es-cyan-hover:hover .es-cyan-hover-title { color: #22d3ee; }
+        .es-cyan-hover:hover .es-cyan-hover-arrow { color: #0891b2; }
+        .dark .es-cyan-hover:hover .es-cyan-hover-arrow { color: #22d3ee; }
+
+        /* Solid ice-cyan inline link (replaces the hard-coded blue) */
+        .es-cyan-link { color: #0e7490; }
+        .dark .es-cyan-link { color: #22d3ee; }
 
         @media (prefers-reduced-motion: reduce) {
             .es-vinyl,
             .es-wave i,
-            .es-clublight {
+            .es-clublight,
+            .es-bpm::after {
                 animation: none !important;
             }
         }
@@ -235,7 +303,7 @@
                     See the setup
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group neon-glow pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="group neon-glow pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl es-dj-cta px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create your DJ schedule
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -286,13 +354,14 @@
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
                         <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
                             <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
                                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
                                     Residency Tracker
                                 </div>
                                 <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Track your residencies & guest spots</h3>
+                                <div class="es-bpm mb-5" aria-hidden="true"></div>
                                 <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Weekly residency at Output? Monthly at Basement? One schedule shows everything - your regular slots AND one-off bookings.</p>
                                 <div class="flex flex-wrap gap-3">
                                     <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Weekly residencies</span>
@@ -305,26 +374,29 @@
                                     <div class="max-w-xs rounded-2xl border border-sky-300 bg-gradient-to-br from-sky-50 to-blue-50 p-4 shadow-lg dark:border-sky-400/30 dark:from-sky-950 dark:to-blue-950">
                                         <div class="mb-3 text-xs font-semibold text-sky-600 dark:text-sky-300">DECEMBER</div>
                                         <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-sky-400/20 bg-sky-500/15 p-2" style="--i: 0;">
-                                                <div class="w-12 text-xs font-bold text-sky-600 dark:text-sky-300">FRI 6</div>
+                                            <div class="es-ai-field es-res-row flex items-center gap-3 rounded-lg p-2" style="--i: 0;">
+                                                <div class="w-12 text-xs font-bold es-res-date">FRI 6</div>
                                                 <div class="flex-1">
                                                     <div class="text-sm font-semibold text-gray-900 dark:text-white">Fabric</div>
                                                     <div class="text-[10px] text-gray-500 dark:text-gray-400">Every Friday</div>
                                                 </div>
+                                                <div class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">11 PM</div>
                                             </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-blue-400/20 bg-blue-500/15 p-2" style="--i: 1;">
-                                                <div class="w-12 text-xs font-bold text-blue-600 dark:text-blue-300">SAT 14</div>
+                                            <div class="es-ai-field es-res-row flex items-center gap-3 rounded-lg p-2" style="--i: 1;">
+                                                <div class="w-12 text-xs font-bold es-res-date">SAT 14</div>
                                                 <div class="flex-1">
                                                     <div class="text-sm font-semibold text-gray-900 dark:text-white">Berghain</div>
                                                     <div class="text-[10px] text-gray-500 dark:text-gray-400">Guest spot</div>
                                                 </div>
+                                                <div class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">2 AM</div>
                                             </div>
-                                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-sky-400/20 bg-sky-500/15 p-2" style="--i: 2;">
-                                                <div class="w-12 text-xs font-bold text-sky-600 dark:text-sky-300">FRI 20</div>
+                                            <div class="es-ai-field es-res-row flex items-center gap-3 rounded-lg p-2" style="--i: 2;">
+                                                <div class="w-12 text-xs font-bold es-res-date">FRI 20</div>
                                                 <div class="flex-1">
                                                     <div class="text-sm font-semibold text-gray-900 dark:text-white">Fabric</div>
                                                     <div class="text-[10px] text-gray-500 dark:text-gray-400">Every Friday</div>
                                                 </div>
+                                                <div class="shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">11 PM</div>
                                             </div>
                                         </div>
                                     </div>
@@ -339,7 +411,7 @@
                 <!-- Late Night Ready (1 col) -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
@@ -348,12 +420,12 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Built for late nights</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Sets that start at 11 PM and end at 6 AM? No problem. We handle overnight events correctly.</p>
 
-                        <div class="mt-auto rounded-xl border border-blue-300/50 bg-blue-50 p-4 text-center dark:border-blue-400/30 dark:bg-blue-500/10" aria-hidden="true">
-                            <svg aria-hidden="true" class="mx-auto mb-2 h-5 w-5 text-blue-500 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="mt-auto rounded-xl es-lamp-box p-4 text-center" aria-hidden="true">
+                            <svg aria-hidden="true" class="mx-auto mb-2 h-5 w-5 text-amber-700 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
                             <div class="text-2xl font-black text-gray-900 dark:text-white">11 PM - 4 AM</div>
-                            <div class="mt-1 text-xs text-blue-600 dark:text-blue-300">Saturday into Sunday</div>
+                            <div class="mt-1 text-xs text-amber-700 dark:text-amber-300">Saturday into Sunday</div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -363,7 +435,7 @@
                 <!-- Club Sync (1 col) -->
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
+                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
@@ -373,17 +445,17 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">When promoters add you to their lineup, it auto-appears on your schedule. No double-entry.</p>
 
                         <div class="relative mt-auto flex items-center justify-center gap-8 py-2" aria-hidden="true">
-                            <div class="w-20 rounded-lg border border-sky-400/30 bg-sky-500/15 p-2">
-                                <div class="mb-1 text-center text-[10px] font-medium text-sky-600 dark:text-sky-300">Club</div>
+                            <div class="w-20 rounded-lg border border-cyan-400/30 bg-cyan-500/15 p-2">
+                                <div class="mb-1 text-center text-[10px] font-medium text-cyan-700 dark:text-cyan-300">Club</div>
                                 <div class="mb-1 h-1.5 rounded bg-gray-300/60 dark:bg-white/20"></div>
-                                <div class="h-1.5 w-3/4 rounded bg-sky-400/40"></div>
+                                <div class="h-1.5 w-3/4 rounded bg-cyan-400/40"></div>
                             </div>
                             <div class="absolute left-1/2 top-1/2 h-px w-10 -translate-x-1/2 -translate-y-1/2 border-t border-dashed border-sky-300 dark:border-sky-500/40"></div>
                             <div class="es-sync-dot" style="left: calc(50% - 24px);"></div>
                             <div class="w-20 rounded-lg border border-gray-300 bg-gray-100 p-2 dark:border-white/20 dark:bg-white/10">
                                 <div class="mb-1 text-center text-[10px] font-medium text-gray-600 dark:text-gray-300">You</div>
                                 <div class="mb-1 h-1.5 rounded bg-gray-300/60 dark:bg-white/20"></div>
-                                <div class="h-1.5 w-3/4 rounded bg-sky-400/40"></div>
+                                <div class="h-1.5 w-3/4 rounded bg-cyan-400/40"></div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -396,7 +468,7 @@
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
                         <div class="grid items-center gap-8 md:grid-cols-2">
                             <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
+                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
                                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                                     </svg>
@@ -407,16 +479,16 @@
                             </div>
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
                                 <div class="mb-2 text-xs text-gray-500 dark:text-gray-400">Your schedule link</div>
-                                <div class="flex items-center gap-2 rounded-xl border border-blue-400/30 bg-blue-500/15 p-3" dir="ltr">
-                                    <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-center gap-2 rounded-xl es-lamp-box p-3" dir="ltr">
+                                    <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                                     </svg>
                                     <span class="truncate font-mono text-sm text-gray-900 dark:text-white">djnova.eventschedule.com</span>
                                 </div>
                                 <div class="mt-3 flex gap-2">
-                                    <div class="flex-1 rounded-lg bg-gray-100 p-2 text-center text-xs font-medium text-blue-600 dark:bg-white/5 dark:text-blue-300">Resident Advisor</div>
-                                    <div class="flex-1 rounded-lg bg-gray-100 p-2 text-center text-xs font-medium text-blue-600 dark:bg-white/5 dark:text-blue-300">SoundCloud</div>
-                                    <div class="flex-1 rounded-lg bg-gray-100 p-2 text-center text-xs font-medium text-blue-600 dark:bg-white/5 dark:text-blue-300">Mixcloud</div>
+                                    <div class="flex-1 rounded-lg bg-gray-100 p-2 text-center text-xs font-medium text-amber-700 dark:bg-white/5 dark:text-amber-300">Resident Advisor</div>
+                                    <div class="flex-1 rounded-lg bg-gray-100 p-2 text-center text-xs font-medium text-amber-700 dark:bg-white/5 dark:text-amber-300">SoundCloud</div>
+                                    <div class="flex-1 rounded-lg bg-gray-100 p-2 text-center text-xs font-medium text-amber-700 dark:bg-white/5 dark:text-amber-300">Mixcloud</div>
                                 </div>
                             </div>
                         </div>
@@ -667,17 +739,17 @@
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">1</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">1</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Add your sets</h3>
                         <p class="text-sm text-gray-400">Import from Google Cal or add manually. Residencies auto-repeat weekly or monthly.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">2</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">2</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Drop your link</h3>
                         <p class="text-sm text-gray-400">Add to your RA profile, Linktree, SoundCloud bio. Anywhere fans find you.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">3</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-xl font-bold text-white shadow-lg shadow-sky-500/30">3</div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Pack the dancefloor</h3>
                         <p class="text-sm text-gray-400">Fans follow you, get notified when you're spinning, and show up ready to dance.</p>
                     </div>
@@ -691,7 +763,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-neon">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card
@@ -737,7 +809,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-cyan-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -754,22 +826,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-neon">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-musicians', 'Musicians'], ['/for-nightclubs', 'Nightclubs'], ['/for-bars', 'Bars'], ['/for-live-concerts', 'Live Concerts']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group es-cyan-hover flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-cyan-hover-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-cyan-hover-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-cyan-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -800,7 +872,7 @@
                     ['What happens when a club adds me to their lineup?', 'When a club or promoter adds you to their event on Event Schedule, it automatically appears on your schedule. No double-entry needed. Both calendars stay in sync so your fans always see your latest bookings.'],
                     ['Can I sell advance tickets to my sets?', 'Yes. Connect Stripe and sell tickets directly from your schedule with zero platform fees. Each ticket includes a unique QR code for check-in at the door. You keep 100% of the sale minus Stripe\'s standard processing fees.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="group/faq es-cyan-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -848,7 +920,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-sky-600 to-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl es-dj-cta px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-sky-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

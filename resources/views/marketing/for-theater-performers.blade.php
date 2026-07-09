@@ -108,31 +108,127 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-theater-performers "In Lights" styles. The shared es-* motion
-           system lives in marketing.css; this holds only the gold marquee
-           gradient text and the chasing marquee bulbs along the top edge. */
-        .text-gradient-marquee {
-            background: linear-gradient(90deg, #d97706, #ca8a04, #d97706);
+        /* For-theater-performers "The Ghost Light" styles. The shared es-*
+           motion system lives in marketing.css; this holds this page's own
+           effects: the warm ivory->amber ghost gradient, the single bare bulb
+           on a stand with its radial light pool, the slow curtain-sway shadow
+           at section boundaries, ghost-light timeline markers, ivory season
+           card stock, and the playbill serif. This page owns no marquee bulbs
+           (those now belong to for-theaters). */
+        .text-gradient-ghost {
+            background: linear-gradient(90deg, #b45309, #f59e0b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .dark .text-gradient-marquee {
-            background: linear-gradient(90deg, #fcd34d, #facc15, #fcd34d);
+        .dark .text-gradient-ghost {
+            background: linear-gradient(90deg, #fef3c7, #fbbf24);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        @keyframes es-marquee-bulb {
-            0%, 100% { opacity: 0.3; box-shadow: 0 0 2px rgba(251, 191, 36, 0.3); }
-            50% { opacity: 1; box-shadow: 0 0 8px rgba(251, 191, 36, 0.8), 0 0 12px rgba(251, 191, 36, 0.4); }
+
+        /* Ghost light: soft radial pool of warm light on the empty stage */
+        .ghost-pool {
+            background: radial-gradient(ellipse at 50% 42%,
+                rgba(254, 243, 199, 0.42) 0%,
+                rgba(245, 158, 11, 0.20) 24%,
+                rgba(245, 158, 11, 0.06) 46%,
+                transparent 70%);
         }
-        .es-bulb {
-            animation: es-marquee-bulb 1.5s ease-in-out infinite;
-            animation-delay: var(--d, 0s);
+        .dark .ghost-pool {
+            background: radial-gradient(ellipse at 50% 42%,
+                rgba(254, 243, 199, 0.30) 0%,
+                rgba(245, 158, 11, 0.17) 26%,
+                rgba(245, 158, 11, 0.05) 48%,
+                transparent 72%);
         }
+
+        /* The bare bulb on a stand */
+        .ghost-stand { display: block; width: 4.5rem; height: 9.5rem; }
+        .ghost-bulb {
+            fill: #fef3c7;
+            filter:
+                drop-shadow(0 0 6px rgba(254, 243, 199, 0.9))
+                drop-shadow(0 0 16px rgba(245, 158, 11, 0.7));
+            animation: ghost-breathe 5s ease-in-out infinite;
+        }
+        @keyframes ghost-breathe {
+            0%, 100% { opacity: 0.88; }
+            50% { opacity: 1; }
+        }
+
+        /* Ivory->amber dot (replaces the old gold marquee dot) */
+        .ghost-dot {
+            background: radial-gradient(circle at 30% 30%, #fef3c7, #f59e0b);
+        }
+
+        /* Ghost-light dot markers on the production timeline */
+        .ghost-node {
+            box-shadow:
+                0 0 0 4px rgba(245, 158, 11, 0.07),
+                0 0 18px rgba(245, 158, 11, 0.20);
+        }
+
+        /* Slow curtain-sway shadow at section boundaries */
+        .curtain-sway {
+            background:
+                linear-gradient(180deg, rgba(30, 12, 12, 0.30) 0%, rgba(30, 12, 12, 0.10) 45%, transparent 100%),
+                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.10) 0 18px, rgba(0, 0, 0, 0) 18px 40px);
+            background-size: 100% 100%, 180px 100%;
+            background-repeat: no-repeat, repeat-x;
+            animation: curtain-sway 11s ease-in-out infinite alternate;
+        }
+        .dark .curtain-sway {
+            background:
+                linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.18) 45%, transparent 100%),
+                repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0 18px, rgba(0, 0, 0, 0) 18px 40px);
+            background-size: 100% 100%, 180px 100%;
+            background-repeat: no-repeat, repeat-x;
+        }
+        @keyframes curtain-sway {
+            from { background-position: 0 0, -42px 0; opacity: 0.55; }
+            to   { background-position: 0 0, 42px 0; opacity: 0.85; }
+        }
+
+        /* Playbill serif with small caps for the show-run mock */
+        .playbill { font-family: Georgia, 'Times New Roman', serif; }
+        .playbill-caps {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-variant: small-caps;
+            letter-spacing: 0.08em;
+        }
+
+        /* Ivory card stock for the season announcement */
+        .ivory-card {
+            background: linear-gradient(180deg, #fbf4e4, #f3e7cf);
+            border: 1px solid rgba(180, 132, 47, 0.35);
+        }
+        .dark .ivory-card {
+            background: linear-gradient(180deg, #efe3cd, #e4d5b6);
+            border-color: rgba(180, 132, 47, 0.5);
+        }
+        .ivory-title { color: #2a1c10; }
+        .ivory-sub { color: #8a6b2f; }
+        .ivory-muted { color: #8c7a63; }
+
+        /* Amber hover for related-page cards and FAQ rows */
+        .ghost-rel { transition: border-color 0.2s ease, background-color 0.2s ease; }
+        .ghost-rel:hover { border-color: #fcd34d; background-color: #fffbeb; }
+        .dark .ghost-rel:hover { border-color: rgba(245, 158, 11, 0.35); background-color: rgba(245, 158, 11, 0.06); }
+        .ghost-rel:hover .ghost-rel-title,
+        .ghost-rel:hover .ghost-rel-arrow { color: #d97706; }
+        .dark .ghost-rel:hover .ghost-rel-title,
+        .dark .ghost-rel:hover .ghost-rel-arrow { color: #fbbf24; }
+        .ghost-faq { transition: border-color 0.2s ease; }
+        .ghost-faq:hover { border-color: #fcd34d; }
+        .dark .ghost-faq:hover { border-color: rgba(245, 158, 11, 0.35); }
+        .ghost-faq summary:hover h3 { color: #d97706; }
+        .dark .ghost-faq summary:hover h3 { color: #fbbf24; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-bulb { animation: none !important; opacity: 0.7 !important; }
+            .ghost-bulb,
+            .curtain-sway { animation: none !important; }
         }
     </style>
 
@@ -140,23 +236,30 @@
     <!-- 1. Hero: the marquee                                         -->
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <!-- Marquee bulbs along the top edge -->
-        <div class="absolute left-0 right-0 top-0 z-20 flex justify-center overflow-hidden" aria-hidden="true">
-            <div class="flex gap-4 px-8 py-1.5">
-                @for ($i = 0; $i < 30; $i++)
-                    <span class="es-bulb h-2 w-2 shrink-0 rounded-full bg-amber-400" style="--d: {{ $i * 0.1 }}s;"></span>
-                @endfor
-            </div>
-        </div>
+        <!-- Curtain-sway shadow at the top boundary -->
+        <div class="curtain-sway pointer-events-none absolute left-0 right-0 top-0" style="height: 3.5rem;" aria-hidden="true"></div>
 
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(220, 38, 38, 0.32), rgba(220, 38, 38, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(245, 158, 11, 0.42), rgba(245, 158, 11, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.30), rgba(245, 158, 11, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(254, 243, 199, 0.34), rgba(254, 243, 199, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <div class="absolute left-0 top-0 h-full w-32 bg-gradient-to-r from-red-500/10 to-transparent dark:from-red-950/60 md:w-48"></div>
-            <div class="absolute right-0 top-0 h-full w-32 bg-gradient-to-l from-red-500/10 to-transparent dark:from-red-950/60 md:w-48"></div>
+        </div>
+
+        <!-- The ghost light: one bare bulb on a stand, in its pool of warm light -->
+        <div class="pointer-events-none absolute left-0 right-0 top-0 h-full overflow-hidden" aria-hidden="true">
+            <div class="ghost-pool absolute" style="left: 50%; bottom: -6rem; width: 40rem; height: 40rem; transform: translateX(-50%);"></div>
+            <div class="absolute" style="left: 50%; bottom: 0; transform: translateX(-50%);">
+                <svg class="ghost-stand" viewBox="0 0 80 176" fill="none" aria-hidden="true">
+                    <ellipse cx="40" cy="170" rx="20" ry="4.5" fill="rgba(60, 52, 46, 0.45)"/>
+                    <path d="M30 170 L50 170 L47 150 L33 150 Z" fill="rgba(120, 110, 100, 0.85)"/>
+                    <rect x="37.5" y="54" width="5" height="98" rx="2.5" fill="rgba(120, 110, 100, 0.85)"/>
+                    <rect x="34" y="45" width="12" height="11" rx="2" fill="rgba(88, 80, 72, 0.9)"/>
+                    <circle class="ghost-bulb" cx="40" cy="31" r="16"/>
+                    <path d="M34 32 q6 -9 12 0" stroke="rgba(180, 83, 9, 0.65)" stroke-width="1.5" fill="none"/>
+                </svg>
+            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -167,7 +270,7 @@
 
             <h1 class="es-balance mb-8 text-[2.75rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Your name</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-marquee es-gradient-anim">in lights</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-ghost es-gradient-anim">in lights</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -195,7 +298,7 @@
                             @for ($tc = 0; $tc < 2; $tc++)
                                 @foreach (['Musical', 'Drama', 'Comedy', 'Improv', 'Fringe', 'Community Theater', 'Cabaret', 'Devised'] as $tag)
                                     <span class="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-100/80 px-4 py-1.5 text-xs font-semibold text-amber-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-yellow-400"></span>
+                                        <span class="ghost-dot h-1.5 w-1.5 rounded-full"></span>
                                         {{ $tag }}
                                     </span>
                                 @endforeach
@@ -227,7 +330,7 @@
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    From auditions to <span class="text-gradient-marquee">closing night</span>
+                    From auditions to <span class="text-gradient-ghost">closing night</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">Track every stage of your production journey</p>
             </div>
@@ -237,7 +340,7 @@
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8" data-reveal-group="60">
                     @foreach ($timeline as [$tName, $tSub, $tChip, $tBorder, $tText, $tIcon, $tHi])
                         <div data-reveal class="group relative text-center">
-                            <div class="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border-2 {{ $tChip }} {{ $tBorder }} transition-transform group-hover:scale-110 {{ $tHi ? 'shadow-lg shadow-amber-500/30' : '' }}">
+                            <div class="ghost-node mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border-2 {{ $tChip }} {{ $tBorder }} transition-transform group-hover:scale-110 {{ $tHi ? 'shadow-lg shadow-amber-500/30' : '' }}">
                                 <svg aria-hidden="true" class="h-7 w-7 {{ $tText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $tIcon !!}</svg>
                             </div>
                             <div class="text-sm font-medium {{ $tHi ? 'text-amber-600 dark:text-amber-300' : 'text-gray-900 dark:text-white' }}">{{ $tName }}</div>
@@ -252,7 +355,8 @@
     <!-- ============================================================ -->
     <!-- 3. Now playing (show run)                                    -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
+    <section class="relative bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
+        <div class="curtain-sway pointer-events-none absolute left-0 right-0 top-0" style="height: 3.5rem;" aria-hidden="true"></div>
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-2xl text-center">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-100 px-4 py-1.5 dark:border-red-700/30 dark:bg-red-900/30" data-reveal>
@@ -260,7 +364,7 @@
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-red-700 dark:text-red-300">Now Playing</span>
                 </div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Your entire run, <span class="text-gradient-marquee">one schedule</span>
+                    Your entire run, <span class="text-gradient-ghost">one schedule</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.14s;">
                     Preview to closing night. Matinees and evening shows. Audiences see availability at a glance.
@@ -268,12 +372,13 @@
             </div>
 
             <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
-                <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-amber-800/30 bg-gradient-to-b from-[#1a1515] to-[#0f0c0c] shadow-2xl" aria-hidden="true">
+                <div class="ghost-pool pointer-events-none absolute" style="left: 50%; top: 50%; width: 130%; height: 150%; transform: translate(-50%, -50%);" aria-hidden="true"></div>
+                <div class="playbill es-tilt-inner relative overflow-hidden rounded-2xl border border-amber-800/30 bg-gradient-to-b from-[#1a1515] to-[#0f0c0c] shadow-2xl" aria-hidden="true">
                     <div class="border-b border-amber-900/30 bg-gradient-to-r from-red-950 via-red-900 to-red-950 px-6 py-4">
                         <div class="flex items-center justify-between">
                             <div>
                                 <div class="mb-1 text-xs uppercase tracking-widest text-amber-200">Riverside Players presents</div>
-                                <div class="text-2xl font-semibold text-white">A Midsummer Night's Dream</div>
+                                <div class="playbill-caps text-2xl font-semibold text-white">A Midsummer Night's Dream</div>
                             </div>
                             <div class="text-right">
                                 <div class="text-xs text-stone-400">March 7 - 22</div>
@@ -320,7 +425,8 @@
     <!-- ============================================================ -->
     <!-- 4. Season announcement                                       -->
     <!-- ============================================================ -->
-    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
+    <section class="relative bg-white py-24 dark:bg-[#0a0a0f]">
+        <div class="curtain-sway pointer-events-none absolute left-0 right-0 top-0" style="height: 3.5rem;" aria-hidden="true"></div>
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="grid items-center gap-12 lg:grid-cols-2">
                 <div data-reveal>
@@ -328,7 +434,7 @@
                         Season Announcements
                     </div>
                     <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
-                        Announce your entire <span class="text-gradient-marquee">season at once</span>
+                        Announce your entire <span class="text-gradient-ghost">season at once</span>
                     </h2>
                     <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
                         Theater companies plan seasons in advance. Add all your upcoming productions to one schedule. Subscribers get notified of your full season - and can plan which shows to see.
@@ -344,34 +450,34 @@
                 </div>
 
                 <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-amber-900/30 bg-gradient-to-br from-[#1a1515] to-[#0f0c0c] p-6 shadow-2xl" aria-hidden="true">
-                        <div class="mb-6 border-b border-amber-900/20 pb-4 text-center">
-                            <div class="mb-1 text-xs uppercase tracking-widest text-amber-400">Riverside Players</div>
-                            <div class="text-2xl font-light text-white">2025-26 Season</div>
+                    <div class="playbill ivory-card es-tilt-inner relative overflow-hidden rounded-2xl p-6 shadow-2xl" aria-hidden="true">
+                        <div class="mb-6 border-b border-amber-800/25 pb-4 text-center">
+                            <div class="ivory-sub playbill-caps mb-1 text-xs">Riverside Players</div>
+                            <div class="ivory-title text-2xl font-light">2025-26 Season</div>
                         </div>
                         <div class="space-y-4">
-                            <div class="es-ai-field rounded-xl border-l-2 border-blue-500 bg-gradient-to-r from-blue-900/30 to-transparent p-4" style="--i: 0;">
-                                <div class="mb-1 text-xs uppercase tracking-wide text-blue-300">October 2025</div>
-                                <div class="font-medium text-white">The Crucible</div>
-                                <div class="text-sm text-stone-500">Arthur Miller</div>
+                            <div class="es-ai-field rounded-xl border-l-2 border-blue-500 p-4" style="--i: 0;">
+                                <div class="ivory-sub mb-1 text-xs uppercase tracking-wide">October 2025</div>
+                                <div class="ivory-title font-medium">The Crucible</div>
+                                <div class="ivory-muted text-sm">Arthur Miller</div>
                             </div>
-                            <div class="es-ai-field rounded-xl border-l-2 border-emerald-500 bg-gradient-to-r from-emerald-900/30 to-transparent p-4" style="--i: 1;">
-                                <div class="mb-1 text-xs uppercase tracking-wide text-emerald-300">December 2025</div>
-                                <div class="font-medium text-white">A Christmas Carol</div>
-                                <div class="text-sm text-stone-500">Charles Dickens, adapted</div>
+                            <div class="es-ai-field rounded-xl border-l-2 border-emerald-500 p-4" style="--i: 1;">
+                                <div class="ivory-sub mb-1 text-xs uppercase tracking-wide">December 2025</div>
+                                <div class="ivory-title font-medium">A Christmas Carol</div>
+                                <div class="ivory-muted text-sm">Charles Dickens, adapted</div>
                             </div>
-                            <div class="es-ai-field rounded-xl border-l-2 border-amber-500 bg-gradient-to-r from-amber-900/30 to-transparent p-4" style="--i: 2;">
-                                <div class="mb-1 text-xs uppercase tracking-wide text-amber-300">March 2026</div>
-                                <div class="font-medium text-white">A Midsummer Night's Dream</div>
-                                <div class="text-sm text-stone-500">William Shakespeare</div>
+                            <div class="es-ai-field rounded-xl border-l-2 border-amber-500 p-4" style="--i: 2;">
+                                <div class="ivory-sub mb-1 text-xs uppercase tracking-wide">March 2026</div>
+                                <div class="ivory-title font-medium">A Midsummer Night's Dream</div>
+                                <div class="ivory-muted text-sm">William Shakespeare</div>
                             </div>
-                            <div class="es-ai-field rounded-xl border-l-2 border-rose-500 bg-gradient-to-r from-rose-900/30 to-transparent p-4" style="--i: 3;">
-                                <div class="mb-1 text-xs uppercase tracking-wide text-rose-300">May 2026</div>
-                                <div class="font-medium text-white">Sweeney Todd</div>
-                                <div class="text-sm text-stone-500">Stephen Sondheim</div>
+                            <div class="es-ai-field rounded-xl border-l-2 border-rose-500 p-4" style="--i: 3;">
+                                <div class="ivory-sub mb-1 text-xs uppercase tracking-wide">May 2026</div>
+                                <div class="ivory-title font-medium">Sweeney Todd</div>
+                                <div class="ivory-muted text-sm">Stephen Sondheim</div>
                             </div>
                         </div>
-                        <div class="mt-6 border-t border-amber-900/20 pt-4 text-center"><span class="text-sm text-amber-400">Season subscriptions available</span></div>
+                        <div class="mt-6 border-t border-amber-800/25 pt-4 text-center"><span class="ivory-sub text-sm">Season subscriptions available</span></div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
@@ -387,7 +493,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything you need to <span class="text-gradient-marquee">fill the house</span>
+                    Everything you need to <span class="text-gradient-ghost">fill the house</span>
                 </h2>
             </div>
 
@@ -561,7 +667,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for <span class="text-gradient-marquee">every stage</span>
+                    Built for <span class="text-gradient-ghost">every stage</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From Broadway-style productions to black box experiments.
@@ -649,16 +755,17 @@
     <!-- ============================================================ -->
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="curtain-sway pointer-events-none absolute left-0 right-0 top-0" style="height: 4rem;" aria-hidden="true"></div>
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(220, 38, 38, 0.26), rgba(220, 38, 38, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(245, 158, 11, 0.26), rgba(245, 158, 11, 0) 60%); opacity: 0.55;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.26), rgba(245, 158, 11, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(254, 243, 199, 0.24), rgba(254, 243, 199, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
             </div>
 
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        From sign-up to <span class="text-gradient-marquee">sold-out</span>
+                        From sign-up to <span class="text-gradient-ghost">sold-out</span>
                     </h2>
                 </div>
 
@@ -681,7 +788,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-ghost">Key features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -700,7 +807,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-amber-600 hover:underline dark:text-amber-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -717,22 +824,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-ghost">Related pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-comedians', 'Comedians'], ['/for-dance-groups', 'Dance Groups'], ['/for-spoken-word', 'Spoken Word Artists'], ['/for-theaters', 'Theaters']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="ghost-rel flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="ghost-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="ghost-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-amber-600 hover:underline dark:text-amber-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -749,7 +856,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-marquee">questions</span>
+                    Frequently asked <span class="text-gradient-ghost">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything theater performers ask about Event Schedule.
@@ -763,9 +870,9 @@
                     ['How do audiences discover my performances?', 'Fans can follow your schedule and receive email notifications when you add new shows. Share your schedule link in your actor bio, on social media, or embed it on your personal website.'],
                     ['What happens when a theater casts me in a production?', 'When a theater adds you to their production on Event Schedule, it automatically appears on your personal schedule too. Both calendars stay in sync without duplicate data entry.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="ghost-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -787,18 +894,26 @@
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.32), rgba(245, 158, 11, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
-                <div class="absolute left-0 right-0 top-0 z-20 flex justify-center overflow-hidden" aria-hidden="true">
-                    <div class="flex gap-4 px-8 py-1.5">
-                        @for ($i = 0; $i < 24; $i++)
-                            <span class="es-bulb h-2 w-2 shrink-0 rounded-full bg-amber-400" style="--d: {{ $i * 0.1 }}s;"></span>
-                        @endfor
+                <div class="curtain-sway pointer-events-none absolute left-0 right-0 top-0" style="height: 4rem;" aria-hidden="true"></div>
+                <!-- The ghost light returns for the closing image -->
+                <div class="pointer-events-none absolute left-0 right-0 top-0 h-full overflow-hidden" aria-hidden="true">
+                    <div class="ghost-pool absolute" style="left: 50%; bottom: -8rem; width: 44rem; height: 44rem; transform: translateX(-50%);"></div>
+                    <div class="absolute" style="left: 50%; bottom: 0; transform: translateX(-50%);">
+                        <svg class="ghost-stand" viewBox="0 0 80 176" fill="none" aria-hidden="true">
+                            <ellipse cx="40" cy="170" rx="20" ry="4.5" fill="rgba(60, 52, 46, 0.5)"/>
+                            <path d="M30 170 L50 170 L47 150 L33 150 Z" fill="rgba(150, 140, 128, 0.8)"/>
+                            <rect x="37.5" y="54" width="5" height="98" rx="2.5" fill="rgba(150, 140, 128, 0.8)"/>
+                            <rect x="34" y="45" width="12" height="11" rx="2" fill="rgba(110, 100, 90, 0.9)"/>
+                            <circle class="ghost-bulb" cx="40" cy="31" r="16"/>
+                            <path d="M34 32 q6 -9 12 0" stroke="rgba(180, 83, 9, 0.65)" stroke-width="1.5" fill="none"/>
+                        </svg>
                     </div>
                 </div>
 
                 <div class="relative z-10">
                     <p class="mb-6 text-sm uppercase tracking-[0.2em] text-gray-400">Free forever</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
-                        The show must go on <span class="text-gradient-marquee">and audiences need to find it</span>
+                        The show must go on <span class="text-gradient-ghost">and audiences need to find it</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
                         Join theater companies and performers who've simplified sharing their schedule.

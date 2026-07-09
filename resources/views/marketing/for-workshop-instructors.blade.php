@@ -108,33 +108,46 @@
     <style {!! nonce_attr() !!}>
         /* For-workshop-instructors "The Workshop" styles. The shared es-* motion
            system and brand .text-gradient live in marketing.css; this holds the
-           chalkboard text, the post-it series cards, the drifting workshop card,
-           and the rising chalk-dust motif. */
+           unified chalk identity: chalk-white on-board text, the deep chalk-slate
+           heading gradient for light surfaces, the board-green stat surface, the
+           chalk strokes and bars, the post-it series cards, and the chalk-dust. */
+        /* Chalk-white gradient - reserved for text sitting on the dark board
+           surface (stat band, finale) and for dark mode. */
         .chalk-text {
-            background: linear-gradient(135deg, #4E81FA, #0EA5E9, #3b82f6);
+            background: linear-gradient(135deg, #eef5ff, #cfe3ff, #b7d6f5);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 0 10px rgba(191, 219, 254, 0.32);
         }
         .dark .chalk-text {
-            background: linear-gradient(135deg, #93c5fd, #bae6fd, #a5f3fc);
+            background: linear-gradient(135deg, #f1f7ff, #cbe3ff, #b6f0ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: 0 0 8px rgba(147, 197, 253, 0.3);
             filter: blur(0.2px);
         }
+        /* Heading gradient for light surfaces: deep board-green to chalk-slate so
+           it stays legible on white; flips to chalk-white in dark mode. */
+        .chalk-heading {
+            background: linear-gradient(135deg, #1f4a3d, #2b6b6e, #285f86);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .chalk-heading {
+            background: linear-gradient(135deg, #bfdcff, #d8ecff, #b8f1ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 10px rgba(147, 197, 253, 0.28);
+        }
         .postit-card {
             box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease;
         }
         .postit-card:hover { transform: rotate(0deg) !important; }
-
-        @keyframes es-chalk-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-chalk-float { animation: es-chalk-float 6s ease-in-out infinite; }
 
         /* Rising chalk dust */
         .es-chalk-dust { pointer-events: none; overflow: hidden; }
@@ -153,8 +166,76 @@
             85% { opacity: var(--dust-op, 0.5); }
             100% { transform: translateY(-170px) translateX(14px); opacity: 0; }
         }
+        /* Deep board-green surface for the stat band */
+        .chalk-board {
+            background:
+                radial-gradient(120% 100% at 50% 0%, rgba(31, 74, 61, 0.55) 0%, rgba(12, 30, 26, 0.6) 60%),
+                radial-gradient(120% 100% at 50% 0%, rgba(11, 20, 36, 0.9) 0%, rgba(5, 8, 8, 0.99) 62%),
+                #08110d;
+        }
+        /* Small chalkboard tile for the analytics chalk bar-chart */
+        .chalk-tile {
+            background: linear-gradient(160deg, rgba(36, 82, 68, 0.97), rgba(19, 46, 39, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), inset 0 0 22px rgba(0, 0, 0, 0.4);
+        }
+        .chalk-bar {
+            background: linear-gradient(180deg, rgba(240, 248, 255, 0.92), rgba(196, 221, 245, 0.6));
+            border-radius: 3px 3px 0 0;
+            box-shadow: 0 0 7px rgba(190, 225, 255, 0.35);
+        }
+        /* The chalkboard surfaces stay intentionally dark in both modes; these
+           deepen them a touch in dark mode so they nest into the page. */
+        .dark .chalk-board {
+            background:
+                radial-gradient(120% 100% at 50% 0%, rgba(28, 66, 55, 0.6) 0%, rgba(9, 24, 21, 0.72) 60%),
+                radial-gradient(120% 100% at 50% 0%, rgba(9, 16, 30, 0.94) 0%, rgba(4, 6, 6, 0.99) 62%),
+                #060d0a;
+        }
+        .dark .chalk-tile {
+            background: linear-gradient(160deg, rgba(31, 72, 60, 0.98), rgba(15, 40, 34, 0.99));
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+        .dark .chalk-bar {
+            background: linear-gradient(180deg, rgba(244, 250, 255, 0.95), rgba(205, 228, 248, 0.62));
+            box-shadow: 0 0 8px rgba(190, 225, 255, 0.4);
+        }
+        .chalk-ink { color: #e8f2ff; }
+        .chalk-ink-dim { color: rgba(226, 240, 255, 0.62); }
+        /* Hand-drawn chalk strokes (hero underline + how-it-works arrows).
+           currentColor renders the chalk; deep slate on light, chalk-white on dark. */
+        .chalk-stroke { color: #2b6b6e; opacity: 0.75; }
+        .dark .chalk-stroke { color: #bfe3ff; opacity: 0.6; }
+        /* Folded post-it corner for a bento mock */
+        .postit-fold {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, transparent 47%, rgba(0, 0, 0, 0.16) 49%);
+            border-bottom-right-radius: 1rem;
+        }
+        .dark .postit-fold {
+            background: linear-gradient(135deg, transparent 47%, rgba(0, 0, 0, 0.4) 49%);
+        }
+        /* Chalk-blue accent for the See-all links, related-page cards, FAQ hovers */
+        .chalk-link { color: #2f6ea3; transition: color 0.2s ease; }
+        .chalk-link:hover { text-decoration: underline; }
+        .dark .chalk-link { color: #93c5fd; }
+        .chalk-rel { transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+        .chalk-rel:hover { border-color: #7db5e6; background-color: rgba(125, 181, 230, 0.08); }
+        .dark .chalk-rel:hover { border-color: rgba(125, 181, 230, 0.35); background-color: rgba(125, 181, 230, 0.06); }
+        .group:hover .chalk-rel-title { color: #2f6ea3; }
+        .dark .group:hover .chalk-rel-title { color: #93c5fd; }
+        .group:hover .chalk-rel-arrow { color: #2f6ea3; }
+        .dark .group:hover .chalk-rel-arrow { color: #93c5fd; }
+        .chalk-faq { transition: border-color 0.2s ease; }
+        .chalk-faq:hover { border-color: rgba(125, 181, 230, 0.5); }
+        .dark .chalk-faq:hover { border-color: rgba(125, 181, 230, 0.35); }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-chalk-float, .es-chalk-dust span { animation: none !important; }
+            .es-chalk-dust span { animation: none !important; }
             .es-chalk-dust span { opacity: 0.3; transform: none; }
         }
     </style>
@@ -201,8 +282,15 @@
 
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Teach what you love.</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">Fill every seat.</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="chalk-heading es-gradient-anim">Fill every seat.</span></span></span>
             </h1>
+
+            <div class="chalk-stroke es-fade-up es-d-2 mx-auto -mt-2 mb-6 h-3 w-64 max-w-full" aria-hidden="true">
+                <svg viewBox="0 0 220 12" fill="none" preserveAspectRatio="none" class="h-full w-full">
+                    <path d="M4 7 Q 45 2 90 6 T 172 5 Q 198 7 216 4" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none" />
+                    <path d="M10 10 Q 70 8 130 9 T 210 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5" />
+                </svg>
+            </div>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
                 From pottery to photography, cooking to coding. One link for all your workshops. Reach students directly.
@@ -246,10 +334,10 @@
     <!-- 2. On the board (chalkboard dark band)                       -->
     <!-- ============================================================ -->
     <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+        <div class="es-band-dark chalk-board noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(14, 165, 233, 0.24), rgba(14, 165, 233, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0) 60%); opacity: 0.55;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(45, 138, 110, 0.32), rgba(45, 138, 110, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(74, 160, 132, 0.24), rgba(74, 160, 132, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 <div class="es-chalk-dust absolute inset-0">
                     @foreach ($dust as [$l, $s, $d, $dl, $op])
@@ -287,7 +375,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to fill every <span class="text-gradient">workshop</span>
+                    Everything to fill every <span class="chalk-heading">workshop</span>
                 </h2>
             </div>
 
@@ -403,7 +491,8 @@
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-blue-300 bg-gradient-to-br from-blue-100 to-sky-100 p-4 dark:border-blue-400/30 dark:from-blue-950 dark:to-sky-950">
+                                    <div class="relative max-w-xs overflow-hidden rounded-2xl border border-blue-300 bg-gradient-to-br from-blue-100 to-sky-100 p-4 dark:border-blue-400/30 dark:from-blue-950 dark:to-sky-950">
+                                        <div class="postit-fold" aria-hidden="true"></div>
                                         <div class="mb-3 flex items-center justify-between">
                                             <div class="text-[10px] font-semibold tracking-wide text-blue-600 dark:text-blue-300">POTTERY FUNDAMENTALS</div>
                                             <span class="inline-flex items-center rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-600 dark:border-green-500/30 dark:bg-green-500/20 dark:text-green-300">Series Discount</span>
@@ -493,19 +582,19 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Know what sells</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">See which workshops fill fastest, which days work best, and how your audience grows.</p>
-                        <div class="mt-auto" aria-hidden="true">
+                        <div class="mt-auto chalk-tile rounded-xl p-3" aria-hidden="true">
                             <div class="flex h-24 items-end gap-2">
-                                <div class="flex-1 rounded-t-lg bg-cyan-400/30" style="height: 40%"></div>
-                                <div class="flex-1 rounded-t-lg bg-cyan-400/40" style="height: 55%"></div>
-                                <div class="flex-1 rounded-t-lg bg-cyan-400/50" style="height: 45%"></div>
-                                <div class="flex-1 rounded-t-lg bg-cyan-400/60" style="height: 70%"></div>
-                                <div class="flex-1 rounded-t-lg bg-cyan-400/70" style="height: 85%"></div>
-                                <div class="flex-1 rounded-t-lg bg-cyan-400/80" style="height: 65%"></div>
-                                <div class="flex-1 rounded-t-lg bg-gradient-to-t from-cyan-500 to-cyan-400" style="height: 100%"></div>
+                                <div class="chalk-bar flex-1" style="height: 40%; opacity: 0.72;"></div>
+                                <div class="chalk-bar flex-1" style="height: 55%; opacity: 0.8;"></div>
+                                <div class="chalk-bar flex-1" style="height: 45%; opacity: 0.76;"></div>
+                                <div class="chalk-bar flex-1" style="height: 70%; opacity: 0.86;"></div>
+                                <div class="chalk-bar flex-1" style="height: 85%; opacity: 0.92;"></div>
+                                <div class="chalk-bar flex-1" style="height: 65%; opacity: 0.84;"></div>
+                                <div class="chalk-bar flex-1" style="height: 100%;"></div>
                             </div>
                             <div class="mt-2 flex items-center justify-between">
-                                <span class="text-[10px] text-gray-500">Mon</span>
-                                <span class="text-[10px] font-medium text-cyan-600 dark:text-cyan-400">This week: 47 bookings</span>
+                                <span class="chalk-ink-dim text-[10px]">Mon</span>
+                                <span class="chalk-ink text-[10px] font-medium">This week: 47 bookings</span>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -524,7 +613,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-2xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    See how a workshop series <span class="text-gradient">comes together</span>
+                    See how a workshop series <span class="chalk-heading">comes together</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Progressive skill building. Multi-session enrollment. Loyal students.
@@ -587,7 +676,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all <span class="text-gradient">workshop instructors</span>
+                    Perfect for all <span class="chalk-heading">workshop instructors</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whatever you teach, Event Schedule helps you fill every class.
@@ -598,7 +687,7 @@
                 <x-sub-audience-card
                     name="Cooking Class Instructors"
                     description="From pasta making to pastry arts. Share your recipes, sell spots, and build a community of food lovers."
-                    icon-color="indigo"
+                    icon-color="sky"
                     blog-slug="for-cooking-class-instructors"
                 >
                     <x-slot:icon>
@@ -611,7 +700,7 @@
                 <x-sub-audience-card
                     name="Pottery & Ceramics Teachers"
                     description="Wheel throwing, hand building, and glazing workshops. Manage studio capacity and skill levels."
-                    icon-color="violet"
+                    icon-color="blue"
                     blog-slug="for-pottery-ceramics-teachers"
                 >
                     <x-slot:icon>
@@ -652,7 +741,7 @@
                 <x-sub-audience-card
                     name="Art Teachers"
                     description="Painting, drawing, and mixed media classes. Showcase student work and build a creative community."
-                    icon-color="fuchsia"
+                    icon-color="cyan"
                     blog-slug="for-art-teachers"
                 >
                     <x-slot:icon>
@@ -692,14 +781,26 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-2xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="text-gradient">works</span>
+                    How it <span class="chalk-heading">works</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Get your workshops online in three steps.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
+            <div class="relative grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
+                <div class="chalk-stroke pointer-events-none absolute top-1/2 z-10 hidden -translate-y-1/2 md:block" style="left: 31.5%;" aria-hidden="true">
+                    <svg viewBox="0 0 64 24" fill="none" class="h-6 w-16">
+                        <path d="M4 13 Q 26 7 44 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                        <path d="M38 6 L 50 12 L 39 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    </svg>
+                </div>
+                <div class="chalk-stroke pointer-events-none absolute top-1/2 z-10 hidden -translate-y-1/2 md:block" style="left: 64.5%;" aria-hidden="true">
+                    <svg viewBox="0 0 64 24" fill="none" class="h-6 w-16">
+                        <path d="M4 12 Q 24 17 44 11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                        <path d="M38 5 L 50 11 L 40 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    </svg>
+                </div>
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
                         <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-500 text-2xl font-bold text-white shadow-lg shadow-sky-500/25">
@@ -718,7 +819,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="chalk-heading">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -737,7 +838,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="chalk-link inline-flex items-center font-medium">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -754,22 +855,22 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="chalk-heading">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-online-classes', 'Online Classes'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-community-centers', 'Community Centers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="chalk-rel group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="chalk-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="chalk-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="chalk-link inline-flex items-center font-medium">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -786,7 +887,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="chalk-heading">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything workshop instructors ask about Event Schedule.
@@ -800,7 +901,7 @@
                     ['How do students discover my workshops?', 'Students can follow your schedule and receive email notifications when you add new workshops. Share your schedule link on social media, embed it on your studio or school website, or send newsletters to followers with upcoming sessions.'],
                     ['Can I sell spots and manage registrations?', 'Yes. Connect your Stripe account and sell workshop spots directly from your schedule. Set per-workshop pricing, limit capacity, and check in attendees with QR codes. Event Schedule charges zero platform fees.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="chalk-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -832,7 +933,7 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your workshop deserves a <span class="text-gradient">full room</span>
+                        Your workshop deserves a <span class="chalk-text">full room</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Stop losing students to clunky booking systems. One link, zero fees, full classes. Free forever.

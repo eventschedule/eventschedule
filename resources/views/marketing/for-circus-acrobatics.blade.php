@@ -169,6 +169,34 @@
         }
         .dark .es-act-number { color: #FFD700; }
 
+        /* Big-top canvas-stripe dividers between major sections */
+        .es-canvas-stripes {
+            height: 0.75rem;
+            background: repeating-linear-gradient(90deg,
+                rgba(180, 83, 9, 0.16) 0, rgba(180, 83, 9, 0.16) 18px,
+                rgba(185, 28, 60, 0.16) 18px, rgba(185, 28, 60, 0.16) 36px);
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+        }
+        .dark .es-canvas-stripes {
+            background: repeating-linear-gradient(90deg,
+                rgba(255, 215, 0, 0.14) 0, rgba(255, 215, 0, 0.14) 18px,
+                rgba(220, 20, 60, 0.16) 18px, rgba(220, 20, 60, 0.16) 36px);
+        }
+
+        /* Serif act numerals stay bright gold on the dark how-it-works band */
+        .es-band-dark .es-act-number { color: #FFD700; }
+
+        /* Big-top accent for the hard-coded blue links + related-page cards */
+        .es-accent-link { color: #b45309; transition: color 0.2s ease; }
+        .es-accent-link:hover { color: #92400e; }
+        .dark .es-accent-link { color: #FFB300; }
+        .dark .es-accent-link:hover { color: #FFD700; }
+        .es-rel-card:hover { border-color: rgba(217, 119, 6, 0.45); background-color: rgba(254, 243, 199, 0.6); }
+        .dark .es-rel-card:hover { border-color: rgba(255, 165, 0, 0.3); background-color: rgba(255, 165, 0, 0.06); }
+        .es-rel-card:hover .es-rel-title, .es-rel-card:hover .es-rel-arrow { color: #b45309; }
+        .dark .es-rel-card:hover .es-rel-title, .dark .es-rel-card:hover .es-rel-arrow { color: #FFB300; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-silk, .es-twinkle { animation: none !important; }
         }
@@ -306,6 +334,7 @@
                         <div class="absolute -right-3 -top-3 animate-pulse rounded-full bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-1.5 text-xs font-bold text-white shadow-lg">
                             $25 tip from Sarah!
                         </div>
+                        <span class="es-silk bg-gradient-to-b from-rose-500/45 via-rose-500/15 to-transparent" style="left:12%;width:0.25rem;height:9rem;--d:0.4s;" aria-hidden="true"></span>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
@@ -364,6 +393,8 @@
             ['num' => 'VI', 'eyebrow' => 'Booking', 'title' => 'Event Planner Kit', 'desc' => 'One link with your availability, videos, specs, and rates. Perfect for corporate bookers and wedding planners.'],
         ];
     @endphp
+    <div class="es-canvas-stripes" aria-hidden="true"></div>
+
     <section id="features" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
@@ -415,7 +446,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-10 max-w-3xl text-center">
                 <h2 class="es-balance mb-3 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Where circus artists perform
+                    Where circus artists <span class="text-gradient-circus">perform</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">From street corners to the big top - one schedule for every stage</p>
             </div>
@@ -516,11 +547,11 @@
                 <x-sub-audience-card
                     name="Contortionists"
                     description="Showcase your flexibility performances and build a dedicated following."
-                    icon-color="fuchsia"
+                    icon-color="rose"
                     blog-slug="for-contortionists"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-7 h-7 text-sky-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" class="w-7 h-7 text-rose-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="18" cy="14" r="2" fill="currentColor"/>
                             <path d="M16 14C14 14 12 16 10 16C8 16 6 14 6 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                             <path d="M6 12C6 10 7 8 9 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -583,6 +614,8 @@
     <!-- ============================================================ -->
     <!-- 6. How it works (dark band)                                  -->
     <!-- ============================================================ -->
+    <div class="es-canvas-stripes" aria-hidden="true"></div>
+
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -606,17 +639,17 @@
 
                 <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-crimson text-xl font-bold text-white shadow-lg shadow-rose-500/30" style="--tw-gradient-to: #DC143C;">1</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/40 bg-white/[0.06] shadow-lg"><span class="es-act-number">I</span></div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Add your acts</h3>
                         <p class="text-sm text-gray-400">Shows, workshops, festival appearances. Import from Google Calendar or add manually.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-xl font-bold text-white shadow-lg shadow-amber-500/30">2</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/40 bg-white/[0.06] shadow-lg"><span class="es-act-number">II</span></div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Share one link</h3>
                         <p class="text-sm text-gray-400">Add to your website, social bios, and booking portfolio. Planners see everything.</p>
                     </div>
                     <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-amber-500 text-xl font-bold text-white shadow-lg shadow-rose-500/30">3</div>
+                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-400/40 bg-white/[0.06] shadow-lg"><span class="es-act-number">III</span></div>
                         <h3 class="mb-2 text-lg font-semibold text-white">Build your following</h3>
                         <p class="text-sm text-gray-400">Fans follow your schedule and get notified about performances in their area.</p>
                     </div>
@@ -630,7 +663,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-circus">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -649,7 +682,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -666,22 +699,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-circus">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-magicians', 'Magicians'], ['/for-dance-groups', 'Dance Groups'], ['/for-theater-performers', 'Theater Performers'], ['/for-visual-artists', 'Visual Artists']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -713,8 +746,11 @@
                     ['Can I sell tickets to my shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create different ticket types for different seating or experiences. Zero platform fees - you only pay Stripe\'s standard processing fees.'],
                 ] as [$q, $a])
                     <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                        <summary class="flex cursor-pointer items-center justify-between gap-3 p-6">
+                            <div class="flex items-center gap-3">
+                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
+                            </div>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>

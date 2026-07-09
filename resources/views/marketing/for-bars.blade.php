@@ -131,6 +131,69 @@
         }
         .es-neon { animation: es-neon-flicker 3s infinite; }
         .es-neon-text { text-shadow: 0 0 10px #f59e0b, 0 0 20px #f59e0b, 0 0 30px #f59e0b; }
+        .es-neon-glow { filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.85)); }
+
+        /* Coaster-ring chip glyph (the wet ring a pint leaves on the bar) */
+        .es-coaster {
+            display: inline-block;
+            width: 0.85rem;
+            height: 0.85rem;
+            border-radius: 9999px;
+            border: 1.5px solid rgba(234, 88, 12, 0.7);
+            box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.35);
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 32%, transparent 55%);
+        }
+        .dark .es-coaster {
+            border-color: rgba(249, 115, 22, 0.75);
+            box-shadow: inset 0 0 0 2px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Chalkboard weekly menu (dark board, chalk-white days, colored chalk) */
+        .es-chalkboard {
+            background-color: #17211b;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.4px),
+                radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1.4px),
+                linear-gradient(160deg, #1d2822, #131a15);
+            background-size: 24px 24px, 37px 37px, 100% 100%;
+            background-position: 0 0, 12px 18px, 0 0;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.55), 0 12px 34px -16px rgba(0, 0, 0, 0.5);
+        }
+        .dark .es-chalkboard {
+            background-color: #131a12;
+            box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.7), 0 12px 34px -16px rgba(0, 0, 0, 0.7);
+        }
+        .es-chalk-day {
+            color: #f3efe4;
+            text-shadow: 0 0 6px rgba(243, 239, 228, 0.3);
+        }
+        .es-chalk-cell {
+            border: 1px dashed rgba(243, 239, 228, 0.22);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .es-chalk-cell-pop {
+            border: 1px solid rgba(245, 158, 11, 0.55);
+            background: rgba(245, 158, 11, 0.12);
+            box-shadow: inset 0 0 22px rgba(245, 158, 11, 0.14);
+        }
+        .es-chalk { text-shadow: 0 0 5px rgba(255, 255, 255, 0.14); filter: saturate(1.2) brightness(1.18); }
+        .es-chalk-detail { color: rgba(230, 226, 214, 0.6); }
+
+        /* Amber analytics bars */
+        .es-bar-track { background: rgba(245, 158, 11, 0.18); }
+        .dark .es-bar-track { background: rgba(251, 191, 36, 0.16); }
+        .es-bar-amber { background: linear-gradient(90deg, #f59e0b, #ea580c); }
+        .dark .es-bar-amber { background: linear-gradient(90deg, #fbbf24, #f97316); }
+
+        /* Related-page cards: amber hover */
+        .es-rel-card:hover { border-color: rgba(245, 158, 11, 0.55); background-color: rgba(245, 158, 11, 0.08); }
+        .dark .es-rel-card:hover { border-color: rgba(251, 191, 36, 0.35); background-color: rgba(251, 191, 36, 0.08); }
+        .es-rel-card:hover .es-rel-title,
+        .es-rel-card:hover .es-rel-arrow { color: #d97706; }
+        .dark .es-rel-card:hover .es-rel-title,
+        .dark .es-rel-card:hover .es-rel-arrow { color: #fbbf24; }
+
         @media (prefers-reduced-motion: reduce) {
             .es-neon { animation: none; }
         }
@@ -213,7 +276,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400" aria-hidden="true"></span>
+                    <span class="es-coaster" aria-hidden="true"></span>
                     <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Last call for empty nights</span>
                 </div>
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
@@ -401,8 +464,8 @@
                             @foreach ([['Trivia', '90'], ['Live Music', '65'], ['Karaoke', '45']] as [$label, $pct])
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs text-gray-500 dark:text-gray-400">{{ $label }}</span>
-                                    <div class="h-2 w-20 overflow-hidden rounded-full bg-cyan-500/30">
-                                        <div class="h-full rounded-full bg-cyan-400" style="width: {{ $pct }}%;"></div>
+                                    <div class="es-bar-track h-2 w-20 overflow-hidden rounded-full">
+                                        <div class="es-bar-amber h-full rounded-full" style="width: {{ $pct }}%;"></div>
                                     </div>
                                 </div>
                             @endforeach
@@ -441,17 +504,17 @@
                 </p>
             </div>
 
-            <div class="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-100 to-orange-100 p-6 dark:border-white/10 dark:from-amber-900/30 dark:to-orange-900/30 md:p-8" data-reveal="panel">
+            <div class="es-chalkboard rounded-3xl p-6 md:p-8" data-reveal="panel">
                 <div class="grid grid-cols-7 gap-2 md:gap-4" data-reveal-group="60">
                     @foreach ($barWeek as [$day, $name, $detail, $textCls, $state])
                         <div data-reveal class="text-center">
-                            <div class="mb-2 text-xs font-medium md:mb-3 md:text-sm {{ $state === 'pop' ? 'font-bold text-amber-600 dark:text-amber-400' : ($state === 'accent' ? 'font-bold ' . $textCls : 'text-gray-600 dark:text-gray-400') }}">{{ $day }}</div>
-                            <div class="relative min-h-[80px] rounded-xl p-2 md:min-h-[100px] md:p-3 {{ $state === 'pop' ? 'border border-amber-500/50 bg-gradient-to-br from-amber-500/30 to-orange-500/30' : ($state === 'accent' ? 'border border-orange-300 bg-white/70 dark:border-orange-500/30 dark:bg-white/5' : 'bg-white/60 dark:bg-white/5') }}">
+                            <div class="es-chalk-day mb-2 text-xs md:mb-3 md:text-sm {{ $state === 'pop' || $state === 'accent' ? 'font-bold' : 'font-medium' }}">{{ $day }}</div>
+                            <div class="relative min-h-[80px] rounded-xl p-2 md:min-h-[100px] md:p-3 {{ $state === 'pop' ? 'es-chalk-cell-pop' : 'es-chalk-cell' }}">
                                 @if ($state === 'pop')
                                     <div class="absolute -top-2 right-1 rounded bg-amber-500 px-1.5 py-0.5 text-[8px] font-bold text-white md:right-2 md:text-[9px]">POPULAR</div>
                                 @endif
-                                <div class="text-[10px] font-semibold md:text-xs {{ $textCls }}">{{ $name }}</div>
-                                <div class="mt-1 text-[9px] text-gray-600 dark:text-gray-400 md:text-[10px]">{{ $detail }}</div>
+                                <div class="es-chalk text-[10px] font-semibold md:text-xs {{ $textCls }}">{{ $name }}</div>
+                                <div class="es-chalk-detail mt-1 text-[9px] md:text-[10px]">{{ $detail }}</div>
                             </div>
                         </div>
                     @endforeach
@@ -574,6 +637,14 @@
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
             </div>
 
+            <!-- Buzzing neon TONIGHT sign -->
+            <div class="es-neon absolute right-6 top-6 z-10 hidden opacity-90 md:block" aria-hidden="true">
+                <div class="flex items-center gap-2 rounded-lg border-2 border-amber-400 bg-amber-500/10 px-4 py-2 shadow-lg shadow-amber-500/20">
+                    <span class="es-neon-text text-sm font-bold tracking-[0.2em] text-amber-400">TONIGHT</span>
+                    <svg aria-hidden="true" class="es-neon-glow h-4 w-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </div>
+            </div>
+
             <div class="relative z-10 mx-auto max-w-4xl">
                 <div class="mx-auto mb-14 max-w-3xl text-center">
                     <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
@@ -599,7 +670,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-amber">features</span></h2>
             <div class="space-y-3" data-reveal-group="60">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -628,7 +699,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-amber-600 hover:underline dark:text-amber-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -645,22 +716,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-amber">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-music-venues', 'Music Venues'], ['/for-comedy-clubs', 'Comedy Clubs'], ['/for-nightclubs', 'Nightclubs'], ['/for-restaurants', 'Restaurants']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-amber-600 hover:underline dark:text-amber-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

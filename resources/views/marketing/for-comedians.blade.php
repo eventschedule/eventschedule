@@ -114,7 +114,16 @@
            the neon amber gradient and the single stage spotlight.
            ============================================================== */
 
+        /* Heading gradient - the amber-to-rose stage light. Light mode uses
+           deeper amber/orange/rose so it stays legible on white; dark mode
+           brightens to the original amber-rose with a warm glow over warm-black. */
         .neon-text {
+            background: linear-gradient(135deg, #d97706, #ea580c, #e11d48);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .dark .neon-text {
             background: linear-gradient(135deg, #fbbf24, #f59e0b, #fb7185);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -150,6 +159,46 @@
             background: #fde68a;
             box-shadow: 0 0 22px 6px rgba(251, 191, 36, 0.55);
         }
+
+        /* Mic-stand silhouette beside the lineup tracker (thin outline, amber rim-light) */
+        .es-micstand {
+            position: absolute;
+            bottom: 0;
+            left: 0.75rem;
+            width: 44px;
+            height: 150px;
+            color: rgba(180, 83, 9, 0.16);
+            filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.38));
+            pointer-events: none;
+        }
+        .dark .es-micstand { color: rgba(251, 191, 36, 0.24); }
+
+        /* Set-list paper edge on the lineup tracker mock (stacked pages behind) */
+        .es-setlist { box-shadow: 4px 5px 0 -1px #ecebe9, 9px 11px 0 -2px #e2e1de; }
+        .dark .es-setlist { box-shadow: 4px 5px 0 -1px #1b1b22, 9px 11px 0 -2px #141419; }
+
+        /* Spotlight-dot marker on the open-mic-to-headliner journey cards */
+        .es-spot-marker {
+            position: absolute;
+            top: 0.9rem;
+            right: 0.9rem;
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: #fde68a;
+            box-shadow: 0 0 14px 3px rgba(251, 191, 36, 0.5);
+        }
+
+        /* Amber hover for FAQ items and related-page cards + inline links */
+        .es-amber-hover { transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; }
+        .es-amber-hover:hover { border-color: #fcd34d; background-color: rgba(245, 158, 11, 0.06); }
+        .dark .es-amber-hover:hover { border-color: rgba(251, 191, 36, 0.4); background-color: rgba(251, 191, 36, 0.07); }
+        .es-amber-hover:hover .es-amber-hover-title { color: #d97706; }
+        .dark .es-amber-hover:hover .es-amber-hover-title { color: #fbbf24; }
+        .es-amber-hover:hover .es-amber-hover-arrow { color: #d97706; }
+        .dark .es-amber-hover:hover .es-amber-hover-arrow { color: #fbbf24; }
+        .es-amber-link { color: #b45309; }
+        .dark .es-amber-link { color: #fbbf24; }
 
         @media (prefers-reduced-motion: reduce) {
             .es-spot-cone { animation: none !important; }
@@ -278,9 +327,20 @@
             <!-- The Weekly Lineup Tracker -->
             <div class="es-bento group relative mb-4" data-tilt="2.5" data-reveal="panel">
                 <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-12">
-                    <div class="grid items-center gap-10 lg:grid-cols-2">
+                    <svg class="es-micstand" viewBox="0 0 44 150" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <rect x="15" y="6" width="14" height="26" rx="7" />
+                        <line x1="19" y1="13" x2="25" y2="13" />
+                        <line x1="19" y1="19" x2="25" y2="19" />
+                        <line x1="19" y1="25" x2="25" y2="25" />
+                        <path d="M9 26a13 12 0 0 0 26 0" />
+                        <line x1="22" y1="38" x2="22" y2="126" />
+                        <line x1="9" y1="140" x2="35" y2="140" />
+                        <line x1="22" y1="126" x2="11" y2="140" />
+                        <line x1="22" y1="126" x2="33" y2="140" />
+                    </svg>
+                    <div class="relative grid items-center gap-10 lg:grid-cols-2">
                         <div>
-                            <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 dark:border-red-800/30 dark:bg-red-900/40 dark:text-red-300">
+                            <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
                                 <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                                 </svg>
@@ -304,7 +364,7 @@
                             </ul>
                         </div>
 
-                        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40" aria-hidden="true">
+                        <div class="es-setlist rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-black/40" aria-hidden="true">
                             <div class="mb-4 flex items-center justify-between">
                                 <span class="text-sm font-medium text-gray-500 dark:text-gray-400">This Week</span>
                                 <span class="text-xs font-semibold text-amber-600 dark:text-amber-400"><span data-count-to="47">47</span> min stage time</span>
@@ -403,14 +463,14 @@
             <div class="grid gap-4 md:grid-cols-3" data-reveal-group="90">
                 <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40">
-                            <svg aria-hidden="true" class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                        <div class="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
+                            <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                         </div>
                         <h3 class="mb-2 text-lg font-bold text-gray-900 dark:text-white">Built for late nights</h3>
                         <p class="mb-4 text-sm text-gray-500 dark:text-gray-400">10:30 show? Midnight mic that runs until 2? We get it. No more calendar apps showing tomorrow's date for tonight's set.</p>
-                        <div class="mt-auto inline-flex items-center gap-2 self-start rounded-lg border border-blue-200 bg-blue-100 px-3 py-1.5 dark:border-blue-800/30 dark:bg-blue-900/30">
-                            <svg aria-hidden="true" class="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            <span class="text-sm font-medium text-blue-600 dark:text-blue-300">10:30 PM - 12:30 AM</span>
+                        <div class="mt-auto inline-flex items-center gap-2 self-start rounded-lg border border-amber-200 bg-amber-100 px-3 py-1.5 dark:border-amber-800/30 dark:bg-amber-900/30">
+                            <svg aria-hidden="true" class="h-4 w-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span class="text-sm font-medium text-amber-600 dark:text-amber-300">10:30 PM - 12:30 AM</span>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -481,7 +541,8 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 @foreach ($comedyJourney as [$jTitle, $jDesc, $jChip, $jText, $jIcon])
-                    <div data-reveal class="rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04]">
+                    <div data-reveal class="relative rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-white/[0.04]">
+                        <span class="es-spot-marker" aria-hidden="true"></span>
                         <div class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl {{ $jChip }}">
                             <svg aria-hidden="true" class="h-6 w-6 {{ $jText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $jIcon !!}</svg>
                         </div>
@@ -545,8 +606,11 @@
     <!-- ============================================================ -->
     <!-- 6. How it works                                              -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0606] lg:py-28">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <section class="relative overflow-hidden bg-white py-20 dark:bg-[#0a0606] lg:py-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-spot-cone"><span class="es-spot-dot"></span></div>
+        </div>
+        <div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
                     Three steps. More butts in <span class="neon-text">seats.</span>
@@ -578,7 +642,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="neon-text">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -597,7 +661,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-amber-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -614,22 +678,22 @@
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="neon-text">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-musicians', 'Musicians'], ['/for-magicians', 'Magicians'], ['/for-spoken-word', 'Spoken Word Artists'], ['/for-theater-performers', 'Theater Performers']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group es-amber-hover flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-amber-hover-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-amber-hover-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-amber-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -660,7 +724,7 @@
                     ['How do fans know when I have a show near them?', 'Fans follow your schedule and get notified when you add new shows. You can also send newsletters directly to your followers with upcoming dates. Share your schedule link in your social bios, on podcasts, or anywhere fans find you.'],
                     ['Can comedy clubs add me to their lineup?', 'Yes. When a comedy club adds you to their event on Event Schedule, the show automatically appears on your schedule too. No need to add the same gig in two places. Both calendars stay in sync so your fans always see your latest bookings.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="group/faq es-amber-hover overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

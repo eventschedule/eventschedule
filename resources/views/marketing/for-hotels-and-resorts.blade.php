@@ -171,6 +171,86 @@
             0%, 100% { opacity: 0; transform: scale(0.4); }
             50% { opacity: var(--tw-op, 0.7); transform: scale(1); }
         }
+
+        /* Concierge motif extensions: a brass key-card mock (with punched slot),
+           slate category chips, a hairline gold column rule between guest-week
+           days, and champagne link / hover / FAQ states. All static (no new
+           keyframes), so the reduced-motion switch below already covers us. */
+        .hotel-keycard {
+            background: linear-gradient(135deg, #f8fafc 0%, #fef3c7 55%, #fcd991 100%);
+            border: 1px solid rgba(217, 119, 6, 0.3);
+            box-shadow: 0 12px 26px -10px rgba(217, 119, 6, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+        .dark .hotel-keycard {
+            background: linear-gradient(135deg, #1f2937 0%, #3a2a17 60%, #4a3316 100%);
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 12px 26px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(251, 191, 36, 0.15);
+        }
+        .hotel-keycard-slot {
+            display: inline-block;
+            width: 22px;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(100, 116, 139, 0.3);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+        }
+        .dark .hotel-keycard-slot {
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
+        }
+        .hotel-keycard-muted { color: #64748b; }
+        .dark .hotel-keycard-muted { color: #94a3b8; }
+        .hotel-slate-chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 9999px;
+            padding: 0 0.4rem;
+            font-size: 9px;
+            line-height: 1.5;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            background: rgba(100, 116, 139, 0.14);
+            color: #475569;
+            border: 1px solid rgba(100, 116, 139, 0.25);
+        }
+        .dark .hotel-slate-chip {
+            background: rgba(148, 163, 184, 0.16);
+            color: #cbd5e1;
+            border-color: rgba(148, 163, 184, 0.28);
+        }
+        .hotel-link-accent { color: #b45309; }
+        .dark .hotel-link-accent { color: #fbbf24; }
+        .hotel-related-card:hover {
+            border-color: rgba(217, 119, 6, 0.4);
+            background-color: rgba(217, 119, 6, 0.06);
+        }
+        .dark .hotel-related-card:hover {
+            border-color: rgba(245, 158, 11, 0.3);
+            background-color: rgba(245, 158, 11, 0.06);
+        }
+        .group:hover .hotel-related-title { color: #b45309; }
+        .dark .group:hover .hotel-related-title { color: #fbbf24; }
+        .group:hover .hotel-related-arrow { color: #b45309; }
+        .dark .group:hover .hotel-related-arrow { color: #fbbf24; }
+        .hotel-faq { transition: border-color 0.2s ease; }
+        .hotel-faq:hover { border-color: rgba(217, 119, 6, 0.35); }
+        .dark .hotel-faq:hover { border-color: rgba(245, 158, 11, 0.28); }
+        @media (min-width: 1024px) {
+            .hotel-day-rule::after {
+                content: '';
+                position: absolute;
+                top: 14%;
+                bottom: 14%;
+                right: 0;
+                width: 1px;
+                background: linear-gradient(to bottom, rgba(217, 119, 6, 0), rgba(217, 119, 6, 0.4), rgba(217, 119, 6, 0));
+                pointer-events: none;
+            }
+            .dark .hotel-day-rule::after {
+                background: linear-gradient(to bottom, rgba(251, 191, 36, 0), rgba(251, 191, 36, 0.35), rgba(251, 191, 36, 0));
+            }
+            .hotel-day-rule:last-child::after { display: none; }
+        }
         @media (prefers-reduced-motion: reduce) {
             .hotel-shimmer-line::after, .es-activity-float, .es-gold-dust span { animation: none !important; }
             .es-gold-dust span { opacity: 0.35; transform: scale(0.7); }
@@ -336,8 +416,8 @@
                         <div class="mt-auto space-y-2" aria-hidden="true">
                             <div class="es-ai-field flex items-center gap-2 rounded-lg border border-sky-400/30 bg-sky-500/15 p-2" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-sky-400"></div><span class="text-sm text-gray-900 dark:text-white">Pool Deck</span><span class="ml-auto text-xs text-sky-600 dark:text-sky-300">8 events</span></div>
                             <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-blue-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Grand Ballroom</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">5 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-teal-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Spa & Wellness</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">12 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Restaurant Terrace</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">6 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-teal-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Spa & Wellness</span><span class="hotel-slate-chip ml-2">Wellness</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">12 events</span></div>
+                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 3;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Restaurant Terrace</span><span class="hotel-slate-chip ml-2">Dining</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">6 events</span></div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -354,12 +434,21 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sell tickets, keep 100%</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Ticketed wine dinners, cooking classes, spa packages. Sell directly to guests with no platform fees.</p>
                         <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="w-44 -rotate-2 rounded-xl border border-emerald-300/50 bg-gradient-to-br from-emerald-100 to-green-50 p-4 text-center shadow-lg transition-transform group-hover:rotate-0">
-                                <div class="text-[10px] uppercase tracking-widest text-emerald-800">VIP Experience</div>
-                                <div class="mt-1 font-serif text-sm font-semibold text-emerald-900">Wine Dinner</div>
-                                <div class="mt-2 text-xl font-bold text-emerald-700">$120<span class="text-xs font-normal">/guest</span></div>
-                                <div class="mt-1 text-[10px] text-emerald-600">Saturday &bull; 7 PM</div>
-                                <div class="mt-1 text-[9px] text-emerald-500">12 seats remaining</div>
+                            <div class="es-activity-float">
+                                <div class="hotel-keycard w-44 -rotate-2 rounded-xl p-4 text-center transition-transform group-hover:rotate-0">
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <span class="hotel-brass-badge inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[8px] font-semibold text-amber-700 dark:text-amber-300">
+                                            <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" class="h-3 w-3"><path d="M16,2 L19,11 L28,11 L21,17 L23,26 L16,21 L9,26 L11,17 L4,11 L13,11 Z" fill="#d97706" /></svg>
+                                            Concierge Pick
+                                        </span>
+                                        <span class="hotel-keycard-slot"></span>
+                                    </div>
+                                    <div class="hotel-keycard-muted text-[10px] uppercase tracking-widest">VIP Experience</div>
+                                    <div class="mt-1 font-serif text-sm font-semibold text-gray-900 dark:text-white">Wine Dinner</div>
+                                    <div class="mt-2 text-xl font-bold text-amber-700 dark:text-amber-300">$120<span class="text-xs font-normal">/guest</span></div>
+                                    <div class="hotel-keycard-muted mt-1 text-[10px]">Saturday &bull; 7 PM</div>
+                                    <div class="mt-1 text-[9px] text-amber-600 dark:text-amber-400">12 seats remaining</div>
+                                </div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
@@ -520,7 +609,7 @@
 
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7" data-reveal-group="70">
                     @foreach ($days as [$day, $activity, $time, $card, $accent, $dot, $concierge])
-                        <div data-reveal class="relative overflow-hidden rounded-xl border p-4 {{ $card }}">
+                        <div data-reveal class="hotel-day-rule relative overflow-hidden rounded-xl border p-4 {{ $card }}">
                             @if ($concierge)
                                 <div class="absolute -right-1 -top-1 h-8 w-8">
                                     <svg aria-hidden="true" viewBox="0 0 32 32" fill="none" class="h-full w-full"><path d="M16,2 L19,11 L28,11 L21,17 L23,26 L16,21 L9,26 L11,17 L4,11 L13,11 Z" fill="#d97706" opacity="0.85" /></svg>
@@ -686,7 +775,7 @@
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-slate-gold">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
@@ -710,7 +799,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium hover:underline hotel-link-accent">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -727,22 +816,22 @@
     <!-- ============================================================ -->
     <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-slate-gold">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-restaurants', 'Restaurants'], ['/for-venues', 'Venues'], ['/for-community-centers', 'Community Centers'], ['/for-bars', 'Bars']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group hotel-related-card flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors hotel-related-title dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors hotel-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium hover:underline hotel-link-accent">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -773,7 +862,7 @@
                     ['How do guests discover activities during their stay?', 'Share your activity calendar via QR codes at check-in, embed it on your hotel website, or include the link in pre-arrival emails. Guests can also follow your schedule and receive notifications for new activities.'],
                     ['Can I sell tickets to special events and experiences?', 'Yes. Connect your Stripe account to sell tickets for special dinners, spa packages, excursions, and entertainment shows. Create different pricing for hotel guests and external visitors. Zero platform fees on all sales.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="hotel-faq group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
                             <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -792,6 +881,9 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
+            <div class="mb-10 flex justify-center" data-reveal>
+                <div class="hotel-shimmer-line h-px w-48"></div>
+            </div>
             <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.3), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>

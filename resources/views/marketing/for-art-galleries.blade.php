@@ -106,14 +106,25 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-art-galleries "Now Showing" styles. The shared es-* motion system
-           and the brand .text-gradient live in marketing.css; this holds only the
-           drifting framed-artwork card and the sweeping gallery spotlight. */
-        @keyframes es-frame-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        /* For-art-galleries "Now Showing" styles - the exhibition room.
+           The shared es-* motion system lives in marketing.css; this holds the
+           gallery-amber accent gradient (warm amber over charcoal), the panning
+           spotlight beams, picture-frame corner marks on the bento cards, museum
+           wall-label meta, the mat-board season frames, and the red-dot SOLD chip. */
+
+        /* Gallery-amber accent: warm amber over charcoal (dark: amber over stone) */
+        .text-gradient-gallery {
+            background: linear-gradient(135deg, #d97706, #44403c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .es-frame-float { animation: es-frame-float 6s ease-in-out infinite; }
+        .dark .text-gradient-gallery {
+            background: linear-gradient(135deg, #fbbf24, #d6d3d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
         /* Gallery spotlight sway - a soft light beam that pans across the wall */
         @keyframes es-artlight {
@@ -124,8 +135,98 @@
             transform-origin: top center;
             animation: es-artlight 9s ease-in-out infinite;
         }
+
+        /* Gallery-amber CTA fill: warm amber to charcoal, white text */
+        .es-btn-gallery {
+            background-image: linear-gradient(to right, #b45309, #44403c);
+            box-shadow: 0 10px 20px -6px rgba(180, 83, 9, 0.35);
+        }
+        .es-btn-gallery:hover { box-shadow: 0 18px 35px -8px rgba(180, 83, 9, 0.45); }
+        .dark .es-btn-gallery {
+            background-image: linear-gradient(to right, #d97706, #57534e);
+            box-shadow: 0 10px 20px -6px rgba(217, 119, 6, 0.4);
+        }
+
+        /* Picture-frame corner marks on the bento cards (corners only, not full borders) */
+        #features .es-tilt-inner {
+            --fc: rgba(180, 83, 9, 0.55);
+            background-image:
+                linear-gradient(var(--fc), var(--fc)), linear-gradient(var(--fc), var(--fc)),
+                linear-gradient(var(--fc), var(--fc)), linear-gradient(var(--fc), var(--fc)),
+                linear-gradient(var(--fc), var(--fc)), linear-gradient(var(--fc), var(--fc)),
+                linear-gradient(var(--fc), var(--fc)), linear-gradient(var(--fc), var(--fc));
+            background-repeat: no-repeat;
+            background-position:
+                left 14px top 14px, left 14px top 14px,
+                right 14px top 14px, right 14px top 14px,
+                left 14px bottom 14px, left 14px bottom 14px,
+                right 14px bottom 14px, right 14px bottom 14px;
+            background-size:
+                18px 2px, 2px 18px, 18px 2px, 2px 18px,
+                18px 2px, 2px 18px, 18px 2px, 2px 18px;
+        }
+        .dark #features .es-tilt-inner { --fc: rgba(251, 191, 36, 0.5); }
+
+        /* Museum wall-label small-caps on the bento category meta */
+        #features .es-tilt-inner .inline-flex.rounded-full.border {
+            font-variant-caps: all-small-caps;
+            letter-spacing: 0.12em;
+        }
+
+        /* Mat-board double frame on the gallery-year season cards */
+        .es-matboard {
+            box-shadow:
+                inset 0 0 0 6px rgba(68, 64, 60, 0.4),
+                inset 0 0 0 7px rgba(217, 119, 6, 0.35);
+        }
+        .dark .es-matboard {
+            box-shadow:
+                inset 0 0 0 6px rgba(41, 37, 36, 0.55),
+                inset 0 0 0 7px rgba(251, 191, 36, 0.3);
+        }
+
+        /* Red-dot SOLD chip - the gallery "sold" marker */
+        .es-sold-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #dc2626;
+        }
+        .es-sold-chip::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+        }
+        .dark .es-sold-chip { color: #f87171; }
+        .dark .es-sold-chip::before { background: #ef4444; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.22); }
+
+        /* Accent recolor for the hard-coded blue text links */
+        .es-accent-link { color: #b45309; }
+        .es-accent-link:hover { color: #92400e; }
+        .dark .es-accent-link { color: #fbbf24; }
+        .dark .es-accent-link:hover { color: #fcd34d; }
+
+        /* Section heading that shifts to amber on the parent card hover */
+        .es-accent-grouphover { transition: color 0.2s; }
+        .group:hover .es-accent-grouphover { color: #b45309; }
+        .dark .group:hover .es-accent-grouphover { color: #fbbf24; }
+
+        /* Related-page card hover in gallery amber */
+        .es-related-card:hover { border-color: rgba(180, 83, 9, 0.4); background-color: rgba(217, 119, 6, 0.06); }
+        .dark .es-related-card:hover { border-color: rgba(251, 191, 36, 0.3); background-color: rgba(251, 191, 36, 0.06); }
+        .es-related-title, .es-related-arrow { transition: color 0.2s; }
+        .es-related-card:hover .es-related-title, .es-related-card:hover .es-related-arrow { color: #b45309; }
+        .dark .es-related-card:hover .es-related-title, .dark .es-related-card:hover .es-related-arrow { color: #fbbf24; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-frame-float, .es-artlight { animation: none !important; }
+            .es-artlight { animation: none !important; }
         }
     </style>
 
@@ -134,11 +235,14 @@
     <!-- ============================================================ -->
     <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(78, 129, 250, 0.32), rgba(78, 129, 250, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(217, 119, 6, 0.28), rgba(217, 119, 6, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(180, 83, 9, 0.26), rgba(180, 83, 9, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 75%, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+            <!-- Two converging gallery spotlight beams above the headline -->
+            <div class="es-artlight absolute" style="top: -4rem; left: 40%; height: 360px; width: 190px; transform: translateX(-50%); background: linear-gradient(to bottom, rgba(217, 119, 6, 0.16), rgba(217, 119, 6, 0) 72%); clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); filter: blur(10px);"></div>
+            <div class="es-artlight absolute" style="top: -4rem; left: 60%; height: 360px; width: 190px; transform: translateX(-50%); background: linear-gradient(to bottom, rgba(251, 191, 36, 0.14), rgba(251, 191, 36, 0) 72%); clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); filter: blur(10px); animation-delay: -4.5s;"></div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -151,7 +255,7 @@
 
             <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
                 <span class="es-mask"><span class="es-mask-line">Every opening night</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient es-gradient-anim">deserves an audience.</span></span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-gallery es-gradient-anim">deserves an audience.</span></span></span>
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
@@ -163,7 +267,7 @@
                     Walk the gallery
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl es-btn-gallery px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
                     Create your gallery's calendar
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -207,8 +311,8 @@
     <section class="bg-gray-50 px-2 py-14 dark:bg-[#0f0f14] sm:px-4 lg:py-20">
         <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
             <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 25%, rgba(78, 129, 250, 0.26), rgba(78, 129, 250, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(14, 165, 233, 0.22), rgba(14, 165, 233, 0) 60%); opacity: 0.55;"></div>
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 25%, rgba(217, 119, 6, 0.24), rgba(217, 119, 6, 0) 60%); opacity: 0.6;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(180, 83, 9, 0.2), rgba(180, 83, 9, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 <!-- Sweeping gallery spotlight -->
                 <div class="es-artlight absolute -top-10 left-1/2 h-[420px] w-[280px] -translate-x-1/2" style="background: linear-gradient(to bottom, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0) 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0% 100%); filter: blur(8px);"></div>
@@ -217,7 +321,7 @@
             <div class="relative z-10 mx-auto max-w-5xl">
                 <div class="mx-auto mb-14 max-w-2xl text-center">
                     <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        The gallery <span class="text-gradient">year</span>
+                        The gallery <span class="text-gradient-gallery">year</span>
                     </h2>
                     <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                         Exhibitions follow seasons. Spring solo shows, summer group exhibitions, fall art walks, and holiday markets. Your collectors want to know what's coming next.
@@ -226,7 +330,7 @@
 
                 <div class="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-5" data-reveal-group="80">
                     @foreach ($galleryYear as $i => [$season, $emoji, $text, $items])
-                        <div data-reveal class="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur-sm transition-all hover:-translate-y-1 hover:bg-white/[0.08] {{ $i === 4 ? 'col-span-2 lg:col-span-1' : '' }}">
+                        <div data-reveal class="es-matboard group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05] p-5 backdrop-blur-sm transition-all hover:-translate-y-1 hover:bg-white/[0.08] {{ $i === 4 ? 'col-span-2 lg:col-span-1' : '' }}">
                             <div class="absolute right-2 top-2 text-4xl text-white/10">{!! $emoji !!}</div>
                             <div class="mb-3 text-xs font-semibold uppercase tracking-wider {{ $text }}">{{ $season }}</div>
                             <div class="space-y-2">
@@ -260,7 +364,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to fill the <span class="text-gradient">gallery</span>
+                    Everything to fill the <span class="text-gradient-gallery">gallery</span>
                 </h2>
             </div>
 
@@ -363,7 +467,10 @@
                                 </div>
                             </div>
                             <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">Artist Submissions</div>
+                                <div class="mb-3 flex items-center justify-between">
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">Artist Submissions</span>
+                                    <span class="es-sold-chip">Sold</span>
+                                </div>
                                 <div class="space-y-2">
                                     <div class="es-ai-field flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-100 p-3 dark:border-sky-400/30 dark:bg-sky-500/20" style="--i: 0;">
                                         <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-xs font-semibold text-white">MK</div>
@@ -471,14 +578,14 @@
                                 <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                                 Global Reach
                             </div>
-                            <h2 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 lg:text-3xl">Take your gallery global</h2>
+                            <h2 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors es-accent-grouphover dark:text-white lg:text-3xl">Take your gallery global</h2>
                             <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Virtual exhibition tours let collectors anywhere experience your shows. Online art classes reach students worldwide. Sell tickets to viewers who can't visit in person.</p>
                             <div class="mb-4 flex flex-wrap justify-center gap-3 lg:justify-start">
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Virtual tours</span>
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Online classes</span>
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Artist talks</span>
                             </div>
-                            <span class="inline-flex items-center gap-2 font-medium text-blue-600 transition-all group-hover:gap-3 dark:text-blue-400">
+                            <span class="inline-flex items-center gap-2 font-medium es-accent-link transition-all group-hover:gap-3">
                                 Learn more about online events
                                 <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                             </span>
@@ -505,7 +612,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient">art spaces</span>
+                    Perfect for all types of <span class="text-gradient-gallery">art spaces</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     From contemporary galleries to community studios, Event Schedule fits your creative space.
@@ -610,7 +717,7 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-2xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="text-gradient">works</span>
+                    How it <span class="text-gradient-gallery">works</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Get your gallery calendar online in three steps.
@@ -620,7 +727,7 @@
             <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
                 @foreach ($steps as [$num, $title, $desc])
                     <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-2xl font-bold text-white shadow-lg shadow-blue-500/25">
+                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl es-btn-gallery text-2xl font-bold text-white shadow-lg">
                             {{ $num }}
                         </div>
                         <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
@@ -655,7 +762,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -675,19 +782,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-visual-artists', 'Visual Artists'], ['/for-venues', 'Venues'], ['/for-community-centers', 'Community Centers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-related-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors es-related-title dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -704,7 +811,7 @@
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient">questions</span>
+                    Frequently asked <span class="text-gradient-gallery">questions</span>
                 </h2>
                 <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Everything art galleries ask about Event Schedule.
@@ -737,16 +844,16 @@
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(78, 129, 250, 0.32), rgba(78, 129, 250, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-artlight absolute -top-10 left-1/2 h-[380px] w-[260px] -translate-x-1/2" style="background: linear-gradient(to bottom, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0) 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0% 100%); filter: blur(8px);"></div>
+                    <div class="es-artlight absolute -top-10 left-1/2 h-[380px] w-[260px] -translate-x-1/2" style="background: linear-gradient(to bottom, rgba(217, 119, 6, 0.22), rgba(217, 119, 6, 0) 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0% 100%); filter: blur(8px);"></div>
                 </div>
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop paying to reach your <span class="text-gradient">own collectors</span>
+                        Stop paying to reach your <span class="text-gradient-gallery">own collectors</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
                         Email your collectors directly. Fill your gallery. Free forever.
@@ -759,7 +866,7 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl es-btn-gallery px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl">
                             <span class="relative z-10 flex items-center gap-2">
                                 Get Started Free
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -555,11 +555,20 @@ class AdminController extends Controller
             ->count();
 
         // Top referrer domains (all time)
-        $topReferrerDomains = User::whereNotNull('email_verified_at')
+        // Extract the domain in a subquery, then group by that real column. Grouping directly
+        // on a select-list alias (or on the raw expression) trips ONLY_FULL_GROUP_BY with
+        // error 1055 on some engines; grouping on a derived table's column is valid on all.
+        $domainExpr = "SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(REPLACE(referrer_url, 'https://', ''), 'http://', ''), '/', 1), '?', 1)";
+
+        $referrerDomains = User::whereNotNull('email_verified_at')
             ->where('email', '!=', DemoService::DEMO_EMAIL)
             ->whereNotNull('referrer_url')
             ->where('referrer_url', '!=', '')
-            ->select(DB::raw("SUBSTRING_INDEX(SUBSTRING_INDEX(REPLACE(REPLACE(referrer_url, 'https://', ''), 'http://', ''), '/', 1), '?', 1) as domain"), DB::raw('COUNT(*) as count'))
+            ->select(DB::raw("{$domainExpr} as domain"));
+
+        $topReferrerDomains = DB::query()
+            ->fromSub($referrerDomains, 'referrer_domains')
+            ->select('domain', DB::raw('COUNT(*) as count'))
             ->groupBy('domain')
             ->orderByDesc('count')
             ->limit(10)

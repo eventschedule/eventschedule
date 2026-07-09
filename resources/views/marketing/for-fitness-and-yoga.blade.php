@@ -108,7 +108,9 @@
     <style {!! nonce_attr() !!}>
         /* For-fitness-and-yoga "The Flow" styles. The shared es-* motion system
            lives in marketing.css; this holds the emerald glow gradient, the
-           drifting class card, and the breathing-circle motif. */
+           breathing-circle motif, a warm dawn wash blended into the hero
+           aurora, a slower breath-cadence hero reveal, and the 1-3 intensity
+           dot / class-pass punch-card micro-language. */
         .text-gradient-fitness {
             background: linear-gradient(135deg, #10b981, #14b8a6, #059669);
             -webkit-background-clip: text;
@@ -123,12 +125,6 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(52, 211, 153, 0.3);
         }
-        @keyframes es-card-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-card-float { animation: es-card-float 6s ease-in-out infinite; }
-
         /* Breathing circles - inhale/exhale rhythm */
         @keyframes es-breathe {
             0%, 100% { transform: scale(0.95); opacity: 0.5; }
@@ -136,19 +132,78 @@
         }
         .es-breathe { animation: es-breathe 6s ease-in-out infinite; }
 
+        /* Dawn: a soft sunrise amber wash blended low into the hero aurora
+           field only. Static (no drift) so it reads as warm horizon light. */
+        .es-dawn {
+            width: 900px; height: 440px;
+            left: 50%; bottom: -14%; margin-left: -450px;
+            background: radial-gradient(ellipse at 50% 100%, rgba(251, 191, 36, 0.34), rgba(251, 191, 36, 0) 62%);
+        }
+        .dark .es-dawn {
+            background: radial-gradient(ellipse at 50% 100%, rgba(251, 191, 36, 0.28), rgba(251, 191, 36, 0) 62%);
+        }
+
+        /* Breath cadence: stretch the shared hero reveal to a ~4s inhale so the
+           headline and content rise on a slow, even breath. Scoped to this hero
+           and still gated behind html.es-anim (so reduced-motion sees none). */
+        html.es-anim .es-breath-reveal .es-mask .es-mask-line {
+            animation-duration: 1.7s;
+            animation-delay: 0.2s;
+            animation-timing-function: cubic-bezier(0.37, 0, 0.34, 1);
+        }
+        html.es-anim .es-breath-reveal .es-mask-2 .es-mask-line { animation-delay: 0.8s; }
+        html.es-anim .es-breath-reveal .es-fade-up {
+            animation-duration: 1.6s;
+            animation-timing-function: cubic-bezier(0.37, 0, 0.34, 1);
+        }
+        html.es-anim .es-breath-reveal .es-d-1 { animation-delay: 0.35s; }
+        html.es-anim .es-breath-reveal .es-d-2 { animation-delay: 1.15s; }
+        html.es-anim .es-breath-reveal .es-d-3 { animation-delay: 1.9s; }
+        html.es-anim .es-breath-reveal .es-d-4 { animation-delay: 2.55s; }
+
+        /* 1-3 intensity dots (from the week grid) reused in the analytics
+           bento, plus a class-pass punch-card row. Emerald throughline. */
+        .es-idot { display: inline-block; height: 0.375rem; width: 0.375rem; border-radius: 9999px; }
+        .es-idot-on { background-color: #059669; }
+        .es-idot-off { background-color: rgba(16, 185, 129, 0.2); }
+        .dark .es-idot-on { background-color: #34d399; }
+        .dark .es-idot-off { background-color: rgba(52, 211, 153, 0.22); }
+
+        .es-punch { display: inline-block; height: 0.7rem; width: 0.7rem; border-radius: 9999px; }
+        .es-punch-used {
+            background: radial-gradient(circle at 50% 38%, #34d399, #047857);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        .es-punch-open {
+            border: 1.5px dashed rgba(5, 150, 105, 0.5);
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        .dark .es-punch-open {
+            border-color: rgba(52, 211, 153, 0.45);
+            background-color: rgba(52, 211, 153, 0.07);
+        }
+
+        /* Related-page card hover recoloured from blue to emerald (custom so it
+           never depends on Tailwind hover utilities being in the bundle). */
+        .es-rel-card:hover { border-color: #6ee7b7; background-color: #ecfdf5; }
+        .es-rel-card:hover .es-rel-title, .es-rel-card:hover .es-rel-arrow { color: #059669; }
+        .dark .es-rel-card:hover { border-color: rgba(16, 185, 129, 0.3); background-color: rgba(16, 185, 129, 0.06); }
+        .dark .es-rel-card:hover .es-rel-title, .dark .es-rel-card:hover .es-rel-arrow { color: #34d399; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-card-float, .es-breathe { animation: none !important; }
+            .es-breathe { animation: none !important; }
         }
     </style>
 
     <!-- ============================================================ -->
     <!-- 1. Hero: your classes, your students                         -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section class="es-hero es-breath-reveal relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
         <div class="absolute inset-0" aria-hidden="true">
             <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(16, 185, 129, 0.32), rgba(16, 185, 129, 0) 65%);"></div>
             <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 30%, rgba(20, 184, 166, 0.3), rgba(20, 184, 166, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(5, 150, 105, 0.14), rgba(5, 150, 105, 0) 60%);"></div>
+            <div class="es-aurora es-dawn"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
             <!-- Breathing circles -->
@@ -303,6 +358,17 @@
                                 <div class="flex justify-between text-xs">
                                     <span class="text-gray-500 dark:text-gray-400">Platform fee</span>
                                     <span class="font-semibold text-green-500 dark:text-green-400">$0</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 border-t border-green-400/20 pt-3">
+                                <div class="mb-1.5 flex items-center justify-between text-xs">
+                                    <span class="text-gray-500 dark:text-gray-400">10-class pass</span>
+                                    <span class="font-semibold text-emerald-600 dark:text-emerald-400">3 used</span>
+                                </div>
+                                <div class="flex flex-wrap justify-center gap-1.5">
+                                    @for ($p = 0; $p < 10; $p++)
+                                        <span class="es-punch {{ $p < 3 ? 'es-punch-used' : 'es-punch-open' }}"></span>
+                                    @endfor
                                 </div>
                             </div>
                         </div>
@@ -463,7 +529,16 @@
                                 <div class="w-6 rounded-t border border-cyan-400/15 bg-cyan-500/20" style="height: 45%"><div class="mt-1 text-center text-[8px] text-gray-900 dark:text-white">Pilates</div></div>
                                 <div class="w-6 rounded-t border border-cyan-400/20 bg-cyan-500/30" style="height: 55%"><div class="mt-1 text-center text-[8px] text-gray-900 dark:text-white">Gentle</div></div>
                             </div>
-                            <div class="text-center text-[10px] text-gray-500 dark:text-gray-400">Class popularity this month</div>
+                            <div class="flex justify-center gap-1.5">
+                                @foreach ([3, 2, 3, 1, 1] as $intensity)
+                                    <div class="flex w-6 justify-center gap-0.5">
+                                        @for ($d = 0; $d < 3; $d++)
+                                            <span class="es-idot {{ $d < $intensity ? 'es-idot-on' : 'es-idot-off' }}"></span>
+                                        @endfor
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="text-center text-[10px] text-gray-500 dark:text-gray-400">Popularity and intensity this month</div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
@@ -689,7 +764,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-emerald-600 hover:underline dark:text-emerald-400">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -709,19 +784,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-workshop-instructors', 'Workshop Instructors'], ['/for-dance-groups', 'Dance Groups'], ['/for-online-classes', 'Online Classes'], ['/for-community-centers', 'Community Centers']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="es-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-emerald-600 hover:underline dark:text-emerald-400">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

@@ -109,8 +109,10 @@
 
     <style {!! nonce_attr() !!}>
         /* For-live-concerts "Live On Stage" styles. The shared es-* motion system
-           lives in marketing.css; this holds the concert glow gradient, the
-           drifting livestream card, and the dancing-equalizer motif. */
+           lives in marketing.css; this page owns the crowd-of-phone-lights motif
+           (warm lighters held up over a dark crowd), a livestream screen frame,
+           a pulsing LIVE badge, dual-ticket type chips, and the rose accent
+           recolor of the hard-coded blue links. */
         .text-gradient-concert {
             background: linear-gradient(135deg, #e11d48, #f59e0b, #ea580c);
             -webkit-background-clip: text;
@@ -125,29 +127,145 @@
             background-clip: text;
             text-shadow: 0 0 40px rgba(251, 113, 133, 0.3);
         }
-        @keyframes es-stage-float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        .es-stage-float { animation: es-stage-float 6s ease-in-out infinite; }
 
-        /* Dancing equalizer */
-        .es-eq { display: flex; align-items: flex-end; gap: 3px; }
-        .es-eq span {
-            width: 4px;
-            border-radius: 2px;
-            background: linear-gradient(to top, rgba(225, 29, 72, 0.55), rgba(245, 158, 11, 0.55));
-            height: 30%;
-            animation: es-eq var(--eq-dur, 0.9s) ease-in-out infinite alternate;
-            animation-delay: var(--eq-delay, 0s);
+        /* Crowd of phone lights: warm dots drifting and swaying above a dark
+           crowd-silhouette edge (lighters held up at a concert). */
+        .es-crowd {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
         }
-        @keyframes es-eq {
-            0% { height: 18%; }
-            100% { height: 100%; }
+        .es-phone-light {
+            position: absolute;
+            border-radius: 9999px;
+            background: radial-gradient(circle, #fde9b8 0%, #f59e0b 48%, rgba(245, 158, 11, 0) 72%);
+            box-shadow: 0 0 7px 1.5px rgba(245, 158, 11, 0.5);
+            opacity: 0.85;
+            animation: es-crowd-sway var(--sway-dur, 5s) ease-in-out infinite alternate;
+            animation-delay: var(--sway-delay, 0s);
+            will-change: transform, opacity;
         }
+        .es-phone-light--rose {
+            background: radial-gradient(circle, #fecdd3 0%, #fb7185 48%, rgba(251, 113, 133, 0) 72%);
+            box-shadow: 0 0 7px 1.5px rgba(251, 113, 133, 0.5);
+        }
+        @keyframes es-crowd-sway {
+            0%   { transform: translate3d(-2px, 3px, 0) scale(0.9); opacity: 0.5; }
+            50%  { opacity: 0.95; }
+            100% { transform: translate3d(2px, -5px, 0) scale(1.06); opacity: 0.8; }
+        }
+        .es-crowd-edge {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 52px;
+            color: rgba(18, 7, 14, 0.16);
+            background:
+                radial-gradient(24px 30px at 50% 100%, currentColor 60%, transparent 63%) 0 0 / 52px 52px repeat-x,
+                radial-gradient(19px 24px at 50% 100%, currentColor 60%, transparent 63%) 26px 0 / 44px 52px repeat-x,
+                linear-gradient(currentColor, currentColor) bottom / 100% 16px no-repeat;
+        }
+        .dark .es-crowd-edge { color: rgba(0, 0, 0, 0.5); }
+        .es-crowd--band .es-crowd-edge { color: rgba(0, 0, 0, 0.5); }
+
+        /* Livestream screen frame: stage-through-screen POV (bezel + glare) */
+        .es-stream-screen {
+            position: relative;
+            border-radius: 1.35rem;
+            padding: 8px;
+            background: linear-gradient(160deg, #2b2b31, #131316);
+            box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+        }
+        .dark .es-stream-screen {
+            background: linear-gradient(160deg, #2e2e35, #0d0d10);
+            box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+        .es-stream-glare {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 2;
+            background: linear-gradient(115deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 17%, rgba(255, 255, 255, 0) 42%);
+            mix-blend-mode: screen;
+        }
+
+        /* Pulsing LIVE badge for the hero livestream mock */
+        .es-live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex: none;
+            border-radius: 9999px;
+            padding: 2px 7px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #dc2626;
+            background: rgba(239, 68, 68, 0.14);
+        }
+        .dark .es-live-badge { color: #f87171; background: rgba(239, 68, 68, 0.2); }
+        .es-live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background: #ef4444;
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+            animation: es-live-pulse 1.6s ease-out infinite;
+        }
+        @keyframes es-live-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+            70%  { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* Dual-ticket type chips (in-person venue vs virtual stream) */
+        .es-tix-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            border-radius: 9999px;
+            padding: 1px 6px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            line-height: 1.5;
+        }
+        .es-tix-chip svg { width: 9px; height: 9px; }
+        .es-tix-chip--venue { color: #059669; background: rgba(16, 185, 129, 0.16); }
+        .dark .es-tix-chip--venue { color: #34d399; background: rgba(16, 185, 129, 0.22); }
+        .es-tix-chip--virtual { color: #d97706; background: rgba(245, 158, 11, 0.16); }
+        .dark .es-tix-chip--virtual { color: #fbbf24; background: rgba(245, 158, 11, 0.22); }
+
+        /* Rose accent (recolored from the hard-coded blue) for the "See all"
+           links and related-page card hovers. */
+        .es-accent-link { color: #e11d48; transition: color 0.2s ease; }
+        .es-accent-link:hover { color: #be123c; }
+        .dark .es-accent-link { color: #fb7185; }
+        .dark .es-accent-link:hover { color: #fda4af; }
+        .es-related-card:hover {
+            border-color: #fda4af;
+            background-color: #fff1f2;
+        }
+        .dark .es-related-card:hover {
+            border-color: rgba(251, 113, 133, 0.3);
+            background-color: rgba(251, 113, 133, 0.06);
+        }
+        .es-related-card:hover .es-related-title,
+        .es-related-card:hover .es-related-arrow { color: #e11d48; }
+        .dark .es-related-card:hover .es-related-title,
+        .dark .es-related-card:hover .es-related-arrow { color: #fb7185; }
+
         @media (prefers-reduced-motion: reduce) {
-            .es-stage-float, .es-eq span { animation: none !important; }
-            .es-eq span { height: 45%; }
+            .es-phone-light,
+            .es-live-dot { animation: none !important; }
         }
     </style>
 
@@ -161,12 +279,19 @@
             <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(234, 88, 12, 0.14), rgba(234, 88, 12, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Equalizer along the bottom edge -->
-            <div class="es-eq absolute bottom-0 left-0 right-0 hidden h-24 items-end justify-center opacity-40 md:flex" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                @for ($i = 0; $i < 48; $i++)
-                    @php $dur = 0.7 + ($i % 6) * 0.11; $delay = ($i % 9) * 0.07; @endphp
-                    <span style="--eq-dur: {{ $dur }}s; --eq-delay: {{ $delay }}s;"></span>
+            <!-- Crowd of phone lights held up over a dark crowd silhouette -->
+            <div class="es-crowd hidden md:flex" style="height: 12rem;" aria-hidden="true">
+                @for ($i = 0; $i < 44; $i++)
+                    @php
+                        $lx = round(fmod($i * 6.83 + 3, 100), 1);
+                        $by = 48 + (($i * 31) % 128);
+                        $sz = 5 + ($i % 3);
+                        $du = 3.4 + ($i % 7) * 0.5;
+                        $de = round(($i % 13) * 0.27, 2);
+                    @endphp
+                    <span class="es-phone-light @if ($i % 4 === 0) es-phone-light--rose @endif" style="left: {{ $lx }}%; bottom: {{ $by }}px; width: {{ $sz }}px; height: {{ $sz }}px; --sway-dur: {{ $du }}s; --sway-delay: {{ $de }}s;"></span>
                 @endfor
+                <div class="es-crowd-edge"></div>
             </div>
         </div>
 
@@ -278,19 +403,23 @@
                             </div>
                             <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
                                 <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-rose-300 bg-gradient-to-br from-rose-100 to-amber-100 p-4 dark:border-rose-400/30 dark:from-rose-950 dark:to-amber-950">
-                                        <div class="mb-3 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-amber-500 text-sm font-semibold text-white">LV</div>
-                                            <div><div class="text-sm font-semibold text-gray-900 dark:text-white">Live Venue</div><div class="text-xs text-rose-600 dark:text-rose-300">Tonight's livestream</div></div>
-                                        </div>
-                                        <div class="rounded-xl border border-rose-400/20 bg-gradient-to-br from-rose-600/30 to-amber-600/30 p-3 text-center">
-                                            <div class="mb-1 text-xs font-semibold text-gray-900 dark:text-white">TONIGHT AT 9 PM</div>
-                                            <div class="text-sm font-bold text-rose-700 dark:text-rose-300">Live from The Fillmore</div>
-                                            <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">Watch from home - $15</div>
-                                        </div>
-                                        <div class="mt-3 flex gap-4 text-xs">
-                                            <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-emerald-500 dark:text-emerald-400">72%</span> opened</div>
-                                            <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-amber-500 dark:text-amber-400">48%</span> clicked</div>
+                                    <div class="es-stream-screen">
+                                        <div class="es-stream-glare" aria-hidden="true"></div>
+                                        <div class="max-w-xs rounded-2xl border border-rose-300 bg-gradient-to-br from-rose-100 to-amber-100 p-4 dark:border-rose-400/30 dark:from-rose-950 dark:to-amber-950">
+                                            <div class="mb-3 flex items-center gap-3">
+                                                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-amber-500 text-sm font-semibold text-white">LV</div>
+                                                <div class="flex-1"><div class="text-sm font-semibold text-gray-900 dark:text-white">Live Venue</div><div class="text-xs text-rose-600 dark:text-rose-300">Tonight's livestream</div></div>
+                                                <span class="es-live-badge"><span class="es-live-dot"></span>Live</span>
+                                            </div>
+                                            <div class="rounded-xl border border-rose-400/20 bg-gradient-to-br from-rose-600/30 to-amber-600/30 p-3 text-center">
+                                                <div class="mb-1 text-xs font-semibold text-gray-900 dark:text-white">TONIGHT AT 9 PM</div>
+                                                <div class="text-sm font-bold text-rose-700 dark:text-rose-300">Live from The Fillmore</div>
+                                                <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">Watch from home - $15</div>
+                                            </div>
+                                            <div class="mt-3 flex gap-4 text-xs">
+                                                <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-emerald-500 dark:text-emerald-400">72%</span> opened</div>
+                                                <div class="text-gray-500 dark:text-gray-400"><span class="font-semibold text-amber-500 dark:text-amber-400">48%</span> clicked</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -312,8 +441,8 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">In-person + virtual stream. 100% of Stripe payments go to you. See all <a href="{{ marketing_url('/features/ticketing') }}" class="text-emerald-600 underline hover:no-underline dark:text-emerald-400">ticketing features</a>.</p>
                         <div class="mt-auto rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-4" aria-hidden="true">
                             <div class="mb-3 space-y-2">
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-emerald-400/20 p-2" style="--i: 0;"><span class="text-xs font-medium text-gray-900 dark:text-white">Venue Ticket</span><span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">$35</span></div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-amber-400/20 p-2" style="--i: 1;"><span class="text-xs font-medium text-gray-900 dark:text-white">Virtual Stream</span><span class="text-xs font-semibold text-amber-600 dark:text-amber-400">$15</span></div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-emerald-400/20 p-2" style="--i: 0;"><span class="flex items-center gap-2"><span class="text-xs font-medium text-gray-900 dark:text-white">Venue Ticket</span><span class="es-tix-chip es-tix-chip--venue"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></svg>In person</span></span><span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">$35</span></div>
+                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-amber-400/20 p-2" style="--i: 1;"><span class="flex items-center gap-2"><span class="text-xs font-medium text-gray-900 dark:text-white">Virtual Stream</span><span class="es-tix-chip es-tix-chip--virtual"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>Stream</span></span><span class="text-xs font-semibold text-amber-600 dark:text-amber-400">$15</span></div>
                             </div>
                             <div class="border-t border-emerald-400/20 pt-3">
                                 <div class="flex justify-between text-xs">
@@ -502,11 +631,18 @@
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(225, 29, 72, 0.26), rgba(225, 29, 72, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-eq absolute bottom-0 left-0 right-0 flex h-20 items-end justify-center opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                    @for ($i = 0; $i < 48; $i++)
-                        @php $dur = 0.7 + ($i % 6) * 0.11; $delay = ($i % 9) * 0.07; @endphp
-                        <span style="--eq-dur: {{ $dur }}s; --eq-delay: {{ $delay }}s;"></span>
+                <div class="es-crowd es-crowd--band" style="height: 9rem;" aria-hidden="true">
+                    @for ($i = 0; $i < 36; $i++)
+                        @php
+                            $lx = round(fmod($i * 7.19 + 4, 100), 1);
+                            $by = 42 + (($i * 29) % 92);
+                            $sz = 5 + ($i % 3);
+                            $du = 3.6 + ($i % 6) * 0.52;
+                            $de = round(($i % 11) * 0.29, 2);
+                        @endphp
+                        <span class="es-phone-light @if ($i % 4 === 0) es-phone-light--rose @endif" style="left: {{ $lx }}%; bottom: {{ $by }}px; width: {{ $sz }}px; height: {{ $sz }}px; --sway-dur: {{ $du }}s; --sway-delay: {{ $de }}s;"></span>
                     @endfor
+                    <div class="es-crowd-edge"></div>
                 </div>
             </div>
 
@@ -688,7 +824,7 @@
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -708,19 +844,19 @@
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-musicians', 'Musicians'], ['/for-music-venues', 'Music Venues'], ['/for-djs', 'DJs'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/30 dark:hover:bg-blue-500/5">
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5 es-related-card">
                         <div>
                             <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">{{ $relName }}</div>
+                            <div class="text-lg font-semibold text-gray-900 transition-colors dark:text-white es-related-title">{{ $relName }}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors es-related-arrow rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-blue-600 hover:underline dark:text-blue-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium es-accent-link hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -774,11 +910,18 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(225, 29, 72, 0.3), rgba(225, 29, 72, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-eq absolute bottom-0 left-0 right-0 flex h-16 items-end justify-center opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
-                        @for ($i = 0; $i < 40; $i++)
-                            @php $dur = 0.7 + ($i % 6) * 0.11; $delay = ($i % 9) * 0.07; @endphp
-                            <span style="--eq-dur: {{ $dur }}s; --eq-delay: {{ $delay }}s;"></span>
+                    <div class="es-crowd es-crowd--band" style="height: 8rem;" aria-hidden="true">
+                        @for ($i = 0; $i < 30; $i++)
+                            @php
+                                $lx = round(fmod($i * 8.11 + 5, 100), 1);
+                                $by = 38 + (($i * 33) % 78);
+                                $sz = 5 + ($i % 3);
+                                $du = 3.8 + ($i % 6) * 0.48;
+                                $de = round(($i % 9) * 0.31, 2);
+                            @endphp
+                            <span class="es-phone-light @if ($i % 4 === 0) es-phone-light--rose @endif" style="left: {{ $lx }}%; bottom: {{ $by }}px; width: {{ $sz }}px; height: {{ $sz }}px; --sway-dur: {{ $du }}s; --sway-delay: {{ $de }}s;"></span>
                         @endfor
+                        <div class="es-crowd-edge"></div>
                     </div>
                 </div>
 

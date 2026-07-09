@@ -53,6 +53,9 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     }
 
     Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
+        // Must be registered here, ahead of the domain-less marketing "/" routes below,
+        // otherwise those match first on every host and send schedule home pages to login.
+        Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
@@ -1305,11 +1308,9 @@ if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.ho
     Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 }
 
-if (config('app.hosted') && ! config('app.is_testing')) {
-    Route::domain('{subdomain}.'._base_domain())->where(['subdomain' => '^(?!www|app).*'])->group(function () {
-        Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
-    });
-} else {
+// The hosted counterparts of these routes live in the subdomain group near the top of this
+// file; role.view_guest in particular must register before the domain-less "/" routes above.
+if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');

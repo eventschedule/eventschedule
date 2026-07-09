@@ -349,6 +349,11 @@
                             <pre class="doc-code-block"><code>ONESIGNAL_APP_ID=your-onesignal-app-id
 ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Schedule owners on Pro/Enterprise plans can then enable push under <strong>Settings &rarr; Notifications</strong>. One OneSignal app serves the whole platform; tenants are segmented automatically. Note that enabling push loads the OneSignal SDK from their CDN and sends notification data to OneSignal, and that Apple iOS only supports web push for sites added to the home screen (iOS 16.4+).</p>
+
+                            <h3 id="reverse-proxy" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Running Behind a Reverse Proxy</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">A multi-tenant install almost always sits behind a reverse proxy or CDN (Nginx, Apache, Cloudflare, or a control panel such as HestiaCP). Tell Event Schedule which proxies to trust so it reads the <code class="doc-inline-code">X-Forwarded-Proto</code> and <code class="doc-inline-code">X-Forwarded-For</code> headers those proxies set:</p>
+                            <pre class="doc-code-block"><code>TRUSTED_PROXIES=*</code></pre>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Use <code class="doc-inline-code">*</code> to trust any proxy, or a comma-separated list of proxy IPs or CIDR ranges (for example <code class="doc-inline-code">10.0.0.0/8,192.168.1.1</code>) when the origin server is reachable directly from the internet. Without this setting the application treats every request as plain HTTP even when the browser is on HTTPS, which can produce redirect loops on tenant subdomains, and it records the proxy's IP address as the visitor's IP in analytics and rate limiting.</p>
                         </section>
 
                         <!-- DNS Configuration -->
