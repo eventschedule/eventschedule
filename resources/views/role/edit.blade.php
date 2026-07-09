@@ -3250,7 +3250,7 @@
                             {{ __('messages.engagement') }}
                         </h2>
 
-                        @php $showRequestsTab = $role->isCurator() || ((config('app.hosted') || config('app.is_testing')) && ($role->isVenue() || $role->isTalent())); @endphp
+                        @php $showRequestsTab = $role->isCurator() || $role->isVenue() || $role->isTalent(); @endphp
 
                         <!-- Tab Navigation -->
                         <div class="ap-tab-container border-b border-gray-200 dark:border-gray-700 mb-6">

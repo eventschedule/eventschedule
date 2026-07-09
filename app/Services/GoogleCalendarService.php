@@ -647,8 +647,22 @@ class GoogleCalendarService
                     }
 
                     if ($existingEvent) {
-                        // Skip updating existing events
-                        continue;
+                        $changed = $this->updateEventFromGoogle($existingEvent, $googleEvent, $role);
+
+                        // Backfill the sync mapping when the match came from the name+time
+                        // fallback (no CalendarSync row yet) so future syncs match reliably
+                        // by google_event_id even if the title or time later change.
+                        if (! $existingSync) {
+                            \App\Models\CalendarSync::firstOrCreate(
+                                ['user_id' => $role->user_id, 'event_id' => $existingEvent->id, 'role_id' => $role->id],
+                                ['google_event_id' => $googleEvent['id'], 'google_calendar_id' => $calendarId]
+                            );
+                        }
+
+                        if ($changed) {
+                            $results['updated']++;
+                            UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
+                        }
                     } else {
                         // Create new event
                         $this->createEventFromGoogle($googleEvent, $role, $calendarId);
@@ -754,7 +768,7 @@ class GoogleCalendarService
     /**
      * Update an EventSchedule event from Google Calendar event
      */
-    private function updateEventFromGoogle(Event $event, array $googleEvent, Role $role): void
+    private function updateEventFromGoogle(Event $event, array $googleEvent, Role $role): bool
     {
         $event->name = $googleEvent['summary'] ?: __('messages.untitled_event');
 
@@ -762,11 +776,13 @@ class GoogleCalendarService
             $event->description = MarkdownUtils::convertHtmlToMarkdown($googleEvent['description']);
         }
 
-        // Update start time
+        // Update start time. Format to a string (starts_at is not a date-cast attribute,
+        // so an object value never equals the stored string and isDirty() would always be
+        // true - defeating the no-op guard and inflating usage tracking on every sync).
         if ($googleEvent['start']->getDateTime()) {
-            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
+            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc()->format('Y-m-d H:i:s');
         } elseif ($googleEvent['start']->getDate()) {
-            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc();
+            $event->starts_at = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc()->format('Y-m-d H:i:s');
         }
 
         // Update duration
@@ -790,7 +806,13 @@ class GoogleCalendarService
             }
         }
 
+        if (! $event->isDirty()) {
+            return false;
+        }
+
         $event->save();
+
+        return true;
     }
 
     /**

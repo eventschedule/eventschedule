@@ -353,15 +353,16 @@ class CalDAVService
                 ->values()
                 ->toArray();
 
-            $existingUids = [];
+            // Map of caldav_event_uid => caldav_event_etag for O(1) lookup and
+            // change detection. A stored etag may legitimately be null.
+            $existingEtags = [];
             if (! empty($eventUids)) {
-                $existingUids = DB::table('event_role')
+                $existingEtags = DB::table('event_role')
                     ->where('role_id', $role->id)
                     ->whereIn('caldav_event_uid', $eventUids)
-                    ->pluck('caldav_event_uid')
-                    ->toArray();
+                    ->pluck('caldav_event_etag', 'caldav_event_uid')
+                    ->all();
             }
-            $existingUidsSet = array_flip($existingUids);
 
             foreach ($events as $eventData) {
                 try {
@@ -375,9 +376,25 @@ class CalDAVService
                         continue;
                     }
 
-                    // Check if event already exists by UID using pre-fetched set (O(1) lookup)
-                    if (isset($existingUidsSet[$eventData['uid']])) {
-                        // Skip existing events - updates from CalDAV not implemented to avoid conflicts
+                    // Check if event already exists by UID using the pre-fetched etag map.
+                    // Use array_key_exists (not isset) because a stored etag can be null.
+                    if (array_key_exists($eventData['uid'], $existingEtags)) {
+                        $storedEtag = $existingEtags[$eventData['uid']];
+                        $incomingEtag = $eventData['etag'] ?? null;
+
+                        // Fast path: etag present and unchanged means nothing changed, skip.
+                        if ($incomingEtag !== null && $incomingEtag === $storedEtag) {
+                            continue;
+                        }
+
+                        // Etag changed, or the server provides no etag, so reconcile the
+                        // fields. updateEventFromCalDAV guards its write with isDirty(), so
+                        // etag-less servers don't churn when nothing actually changed.
+                        if ($this->updateEventFromCalDAV($eventData, $role)) {
+                            $results['updated']++;
+                            UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
+                        }
+
                         continue;
                     }
 
@@ -404,8 +421,8 @@ class CalDAVService
                     $results['created']++;
                     UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
 
-                    // Add to existing set to prevent duplicates within the same sync batch
-                    $existingUidsSet[$eventData['uid']] = true;
+                    // Track within the same sync batch to prevent duplicate handling
+                    $existingEtags[$eventData['uid']] = $eventData['etag'] ?? null;
                 } catch (\Exception $e) {
                     Log::error('Failed to sync individual CalDAV event', [
                         'uid' => $eventData['uid'] ?? 'unknown',
@@ -727,6 +744,70 @@ class CalDAVService
             }
 
             return $event;
+        });
+    }
+
+    /**
+     * Update an existing EventSchedule event from a CalDAV event.
+     * Returns true if the event's own fields changed and were saved.
+     */
+    protected function updateEventFromCalDAV(array $eventData, Role $role): bool
+    {
+        return DB::transaction(function () use ($eventData, $role) {
+            $eventId = DB::table('event_role')
+                ->where('role_id', $role->id)
+                ->where('caldav_event_uid', $eventData['uid'])
+                ->value('event_id');
+
+            $event = $eventId ? Event::find($eventId) : null;
+
+            if (! $event) {
+                return false;
+            }
+
+            $event->name = $eventData['summary'] ?: __('messages.untitled_event');
+
+            // Only overwrite the description when the remote provides one, so an
+            // emptied CalDAV description does not blank a locally-enriched one.
+            // CalDAV descriptions may contain HTML; convert to Markdown (the storage
+            // format). XSS is sanitized when the Event saving hook renders to HTML.
+            if (! empty($eventData['description'])) {
+                $event->description = MarkdownUtils::convertHtmlToMarkdown($eventData['description']);
+            }
+
+            // Update start time
+            if ($eventData['start']) {
+                $event->starts_at = $eventData['start']->format('Y-m-d H:i:s');
+            }
+
+            // Update duration
+            $event->duration = $eventData['duration'] ?: 2;
+
+            // Handle location if present (adds a venue but never duplicates one)
+            if ($eventData['location']) {
+                $venue = $this->convertLocationToVenue($role, $eventData['location']);
+                if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
+                    $event->roles()->attach($venue->id, [
+                        'is_accepted' => $role->user?->isMember($venue->subdomain) ?? false,
+                    ]);
+                }
+            }
+
+            $changed = $event->isDirty();
+
+            if ($changed) {
+                $event->save();
+            }
+
+            // Advance the stored etag so an unchanged future sync takes the fast path.
+            // Only meaningful when the server actually provides an etag.
+            if (($eventData['etag'] ?? null) !== null) {
+                $event->roles()->updateExistingPivot($role->id, [
+                    'caldav_event_etag' => $eventData['etag'],
+                ]);
+            }
+
+            return $changed;
         });
     }
 

@@ -134,9 +134,9 @@
                 @php
                 $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
                 @endphp
-                @if (config('app.hosted') || config('app.is_testing'))
+                @if ($hasSubmitButton || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
-                  @if (($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests)
+                  @if ($hasSubmitButton)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center"
@@ -150,6 +150,7 @@
                     </button>
                   </a>
                   @endif
+                  @if (config('app.hosted') || config('app.is_testing'))
                   @if (! is_demo_mode() && (
                       ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
                       (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
@@ -181,6 +182,7 @@
                       {{ __('messages.manage') }}
                     </button>
                   </a>
+                  @endif
                   @endif
                 </div>
                 @endif
@@ -292,9 +294,9 @@
                 </div>
 
                 {{-- Action buttons --}}
-                @if (config('app.hosted') || config('app.is_testing'))
+                @if ($hasSubmitButton || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center flex-shrink-0">
-                  @if (($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests)
+                  @if ($hasSubmitButton)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
                     class="inline-flex items-center justify-center flex-shrink-0"
@@ -308,6 +310,7 @@
                     </button>
                   </a>
                   @endif
+                  @if (config('app.hosted') || config('app.is_testing'))
                   @if (! is_demo_mode() && (
                       ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||
                       (! $hasSubmitButton && (! auth()->user() || ! auth()->user()->isConnected($role->subdomain)))
@@ -339,6 +342,7 @@
                       {{ __('messages.manage') }}
                     </button>
                   </a>
+                  @endif
                   @endif
                 </div>
                 @endif
