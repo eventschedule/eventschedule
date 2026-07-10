@@ -902,10 +902,10 @@ Update the row when a phase merges (and add known-reds/inventories as indented n
 |-------|--------|--------|-----------|------|-------|
 | P0 | done - awaiting merge | refactor/p00-test-db-isolation | | 2026-07-10 | Suite green 2x (173 tests, 612 assertions, 3 documented skips - see TEST_COVERAGE.md); NO known reds. Dev DB proven untouched (table create-times + row counts identical). Extra: `<ini name="memory_limit" value="1G"/>` added to phpunit.xml - suite peaks ~165MB and the local CLI default (128M) made bare `php artisan test` exit 255 (pre-existing OOM noted in TEST_COVERAGE.md); CI already runs 1G. |
 | P1 | not started | | | | |
-| P2 | not started | | | | |
-| P3 | not started | | | | |
+| P2 | tests-first done (refactor pending) | refactor/tests-quick-wins | | 2026-07-10 | Golden fixtures committed (tests/fixtures/comparison_data.json + replacement_data.json, 16+12 keys, zero env-dependent URLs) + compare_*/replace_* route smokes in MarketingDataCharacterizationTest. |
+| P3 | tests-first done (refactor pending) | refactor/tests-quick-wins | | 2026-07-10 | EventGraphicStructuralTest: 3-class instantiation smoke (signature-collision fatal net) + per-layout valid-PNG/dimension checks for 1 and 3 events. Golden-image manifests stay session-local (Section 3.4). |
 | P4 | not started | | | | |
-| P5 | not started | | | | |
+| P5 | tests-first done (refactor pending) | refactor/tests-quick-wins | | 2026-07-10 | EncodedIdRoutingCharacterizationTest: 404-parity triples on event.edit + newsletter.edit. NOTE: the venue_id body-param site 404s on an invalid hash (chained findOrFail - it does NOT fall through to the no-venue path); the work order's nullable-find example was wrong for this site, trust the pinned test. |
 | P6 | not started | | | | |
 | P7 | not started | | | | |
 | P8 | not started | | | | |
@@ -926,7 +926,7 @@ Update the row when a phase merges (and add known-reds/inventories as indented n
 | F4 | not started | | | | |
 | F5 (opt) | not started | | | | |
 | O1 (stretch) | not started | | | | |
-| O2 (opt) | not started | | | | |
+| O2 (opt) | tests-first done (refactor pending) | refactor/tests-quick-wins | | 2026-07-10 | NoFakeEmailCharacterizationTest: blocked/allowed domains, example.com pre-check, substring-matching semantics pinned (do NOT "fix" to exact-domain), size pinned at 3632 (source-derived until the data file exists), message pinned. |
 | O3 (opt) | not started | | | | |
 | O4 (stretch) | not started | | | | |
 
