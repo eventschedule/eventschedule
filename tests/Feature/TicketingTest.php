@@ -291,8 +291,13 @@ class TicketingTest extends TestCase
 
         // 01:00 UTC is 9pm the previous day at the America/New_York venue, so the UTC calendar date
         // and the venue's differ. The fixture's noon-UTC default deliberately makes them equal.
+        //
+        // creator_role_id must be set explicitly: createEvent() only attaches the event_role pivot,
+        // and Event::scheduleTimezone() reads creatorRole. Without it the venue timezone resolves to
+        // config('app.timezone') (UTC) and the two dates collapse back together.
         $event = $this->createEvent($role, [
             'tickets_enabled' => true,
+            'creator_role_id' => $role->id,
             'starts_at' => \Carbon\Carbon::now()->addDays(7)->setTime(1, 0)->format('Y-m-d H:i:s'),
         ]);
         $ticket = $this->createTicket($event, ['price' => 0, 'quantity' => 100]);

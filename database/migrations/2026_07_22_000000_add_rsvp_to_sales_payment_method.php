@@ -10,7 +10,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE sales MODIFY COLUMN payment_method ENUM('cash', 'stripe', 'invoiceninja', 'payment_url', 'rsvp') DEFAULT 'cash'");
+        // 'import' belongs here even though this migration predates the sales importer. The
+        // filename is dated later than the two migrations that add 'import'
+        // (2026_04_16 and 2026_05_14), so on a fresh `migrate` this runs last and would drop
+        // 'import' back off the enum - every bulk attendee import then dies on "Data truncated
+        // for column 'payment_method'". Production migrated incrementally and ran this first, so
+        // it keeps 'import' from the later two; only fresh installs and CI saw the broken enum.
+        DB::statement("ALTER TABLE sales MODIFY COLUMN payment_method ENUM('cash', 'stripe', 'invoiceninja', 'payment_url', 'rsvp', 'import') DEFAULT 'cash'");
     }
 
     /**
@@ -18,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE sales MODIFY COLUMN payment_method ENUM('cash', 'stripe', 'invoiceninja', 'payment_url') DEFAULT 'cash'");
+        DB::statement("ALTER TABLE sales MODIFY COLUMN payment_method ENUM('cash', 'stripe', 'invoiceninja', 'payment_url', 'import') DEFAULT 'cash'");
     }
 };

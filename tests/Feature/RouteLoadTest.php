@@ -335,27 +335,43 @@ class RouteLoadTest extends TestCase
         $this->refreshApplication();
         $this->app['db']->connection()->beginTransaction();
 
-        [$user, $role] = $this->createUserWithSchedule('talent', 'testtalent');
+        try {
+            [$user, $role] = $this->createUserWithSchedule('talent', 'testtalent');
 
-        $baseUrl = 'http://testtalent.' . parse_url(config('app.url'), PHP_URL_HOST);
+            $baseUrl = 'http://testtalent.' . parse_url(config('app.url'), PHP_URL_HOST);
 
-        $urls = [
-            $baseUrl . '/',
-            $baseUrl . '/request',
-            $baseUrl . '/follow',
-            $baseUrl . '/guest-add',
-            $baseUrl . '/booking-request',
-            $baseUrl . '/feed/ical',
-            $baseUrl . '/feed/rss',
-        ];
+            $urls = [
+                $baseUrl . '/',
+                $baseUrl . '/request',
+                $baseUrl . '/follow',
+                $baseUrl . '/guest-add',
+                $baseUrl . '/booking-request',
+                $baseUrl . '/feed/ical',
+                $baseUrl . '/feed/rss',
+            ];
 
-        foreach ($urls as $url) {
-            $response = $this->get($url);
+            foreach ($urls as $url) {
+                $response = $this->get($url);
 
-            $this->assertTrue(
-                $response->status() < 500,
-                "Route {$url} returned status {$response->status()}"
-            );
+                $this->assertTrue(
+                    $response->status() < 500,
+                    "Route {$url} returned status {$response->status()}"
+                );
+            }
+        } finally {
+            // refreshApplication() swapped the database manager, so the transaction opened above is
+            // invisible to RefreshDatabase's teardown callback, which still holds the manager
+            // captured before the refresh. Close it here. Left open, the connection sits idle in a
+            // transaction holding metadata locks, and the next test class's migrate:fresh then
+            // blocks on DROP TABLE for lock_wait_timeout - a year by default in MySQL - so the
+            // suite hangs instead of failing.
+            $connection = $this->app['db']->connection();
+
+            if ($connection->getPdo() && $connection->getPdo()->inTransaction()) {
+                $connection->rollBack();
+            }
+
+            $connection->disconnect();
         }
     }
 

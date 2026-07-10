@@ -197,7 +197,9 @@ class ScheduleFeaturesTest extends TestCase
     public function test_guest_event_submission(): void
     {
         $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue', ['accept_requests' => true]);
+        // roles.require_account defaults to 1, and the guest_import.store validator then demands
+        // account_name/email/password. This test covers the no-account guest path, so opt out of it.
+        $role = $this->createRole($owner, 'venue', ['accept_requests' => true, 'require_account' => false]);
 
         $this->post(route('event.guest_import.store', ['subdomain' => $role->subdomain]), [
             'name' => 'Guest Submitted Event',
