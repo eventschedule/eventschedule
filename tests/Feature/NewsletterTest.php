@@ -124,7 +124,13 @@ class NewsletterTest extends TestCase
 
     public function test_newsletter_index_accessible_to_non_enterprise_role(): void
     {
-        config(['app.hosted' => true, 'app.is_testing' => false]);
+        // ResolveCustomDomain 404s any host outside _base_domain(), which derives from app.url.
+        // CI leaves APP_URL empty, so pin it rather than depend on the developer's .env.
+        config([
+            'app.hosted' => true,
+            'app.is_testing' => false,
+            'app.url' => 'https://eventschedule.test',
+        ]);
 
         $user = User::factory()->create();
 

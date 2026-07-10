@@ -22,9 +22,12 @@ class EventVenueTimeRenderingTest extends TestCase
     private function eveningShow(): Event
     {
         $event = new Event;
+        $event->name = 'Evening Show';
         $event->starts_at = '2026-07-11 01:00:00';
         $event->duration = 2;
         $event->setRelation('creatorRole', new Role(['timezone' => 'America/New_York']));
+        // The calendar URLs read getTitle(), whose venue accessor lazy-loads roles.
+        $event->setRelation('roles', collect());
 
         return $event;
     }
