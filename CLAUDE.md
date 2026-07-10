@@ -8,7 +8,8 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 
 ## Important Rules
 
-- **Never run tests without asking first** - Tests will empty the database
+- **`php artisan test` is safe to run locally** - PHPUnit uses the dedicated `eventschedule_test` MySQL database (forced in `phpunit.xml`); it never touches the `eventschedule` dev database. `tests/TestCase.php` refuses to run against any non-`*_test` database.
+- **Never run `php artisan dusk` locally without asking first** - Dusk swaps `.env` with `.env.dusk.local` and wipes the database it points at. Browser tests run in CI.
 - **Never run `npm install` without asking first** - Confirm before installing dependencies
 - **Never run `composer install` without asking first** - Confirm before installing dependencies
 - **Never delete migration files** - They may have already been run on production
@@ -100,10 +101,15 @@ php artisan storage:link
 
 ## Testing
 
-**Warning: Running tests will empty the database.** Tests run against a MySQL `eventschedule` database (configured in `phpunit.xml`).
+PHPUnit (Feature/Unit) tests run against the dedicated `eventschedule_test` MySQL database (forced in `phpunit.xml`) and are safe to run locally with `php artisan test`.
+
+**Warning: Dusk browser tests wipe the database `.env.dusk.local` points at.** Never run `php artisan dusk` locally without asking first; browser tests run in CI.
 
 ```bash
-# Run all browser tests
+# Run Feature & Unit tests (safe locally)
+php artisan test
+
+# Run all browser tests (CI only - see warning above)
 php artisan dusk
 
 # Run specific test file

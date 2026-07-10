@@ -900,7 +900,7 @@ Update the row when a phase merges (and add known-reds/inventories as indented n
 
 | Phase | Status | Branch | Merged sha | Date | Notes |
 |-------|--------|--------|-----------|------|-------|
-| P0 | not started | | | | |
+| P0 | done - awaiting merge | refactor/p00-test-db-isolation | | 2026-07-10 | Suite green 2x (173 tests, 612 assertions, 3 documented skips - see TEST_COVERAGE.md); NO known reds. Dev DB proven untouched (table create-times + row counts identical). Extra: `<ini name="memory_limit" value="1G"/>` added to phpunit.xml - suite peaks ~165MB and the local CLI default (128M) made bare `php artisan test` exit 255 (pre-existing OOM noted in TEST_COVERAGE.md); CI already runs 1G. |
 | P1 | not started | | | | |
 | P2 | not started | | | | |
 | P3 | not started | | | | |
