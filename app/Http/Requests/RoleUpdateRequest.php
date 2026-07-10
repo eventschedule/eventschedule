@@ -83,6 +83,9 @@ class RoleUpdateRequest extends FormRequest
             'email_settings.from_address' => ['nullable', 'email', 'max:255'],
             'email_settings.from_name' => ['nullable', 'string', 'max:255'],
             'custom_css' => ['nullable', 'string', 'max:10000'],
+            // Must be a plain hex color: it is interpolated into Vue :style expressions on
+            // guest-facing pages, which the runtime compiler evaluates as JS (CSTI otherwise).
+            'accent_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'font_family' => ['nullable', 'string', 'max:100'],
             'event_custom_fields' => ['nullable', 'array', 'max:10'],
             'event_custom_fields.*.name' => ['required_with:event_custom_fields', 'string', 'max:100'],

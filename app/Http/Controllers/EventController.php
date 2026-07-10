@@ -1458,11 +1458,18 @@ class EventController extends Controller
                 fn ($a, $b) => strcasecmp($a->name ?? '', $b->name ?? ''),
             ]);
 
+            // Only the fields the venue dropdown consumes. Never the full toData(): connected
+            // venues have no relationship to this user, so their contact email, phone, and
+            // billing columns must not be serialized into the page.
             $venues = array_values($allVenueRoles->map(function ($item) {
-                return array_merge($item->toData(), [
+                return [
+                    'id' => UrlUtils::encodeId($item->id),
+                    'name' => $item->name,
+                    'address1' => $item->address1,
+                    'city' => $item->city,
                     'is_member' => $item->pivot && in_array($item->pivot->level, ['owner', 'admin', 'viewer'], true),
                     'is_connected' => $item->pivot === null,
-                ]);
+                ];
             })->toArray());
         }
 
@@ -2112,10 +2119,18 @@ class EventController extends Controller
                 $isMember = $user->member()->where('roles.id', $venue->id)->exists();
                 $hasPivot = $isMember || $user->roles()->where('roles.id', $venue->id)->exists();
             }
-            $venueData = array_merge($venue->toData(), [
+            // Only the fields the venue dropdown consumes (the client pushes this into the
+            // same venues list). Never the full toData(): a connection-only matched venue has
+            // no relationship to this user, so its email, phone, and billing columns must not
+            // be serialized into the response. Matches the projection in showImport().
+            $venueData = [
+                'id' => UrlUtils::encodeId($venue->id),
+                'name' => $venue->name,
+                'address1' => $venue->address1,
+                'city' => $venue->city,
                 'is_member' => $isMember,
                 'is_connected' => ! $hasPivot,
-            ]);
+            ];
         }
 
         return response()->json([

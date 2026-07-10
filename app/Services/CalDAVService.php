@@ -364,6 +364,13 @@ class CalDAVService
                     ->all();
             }
 
+            // UIDs already handled in this batch. A recurring resource yields one VEVENT per
+            // instance sharing a single UID, but we store one event per UID, so once a UID is
+            // created or updated the remaining same-UID instances must be skipped - otherwise
+            // each one re-updates the same event (with an override occurrence's date/name) and
+            // inflates the updated count and usage tracking.
+            $processedUids = [];
+
             foreach ($events as $eventData) {
                 try {
                     // Skip events without UID - they cannot be reliably tracked for updates/deduplication
@@ -373,6 +380,10 @@ class CalDAVService
                             'role_id' => $role->id,
                         ]);
 
+                        continue;
+                    }
+
+                    if (isset($processedUids[$eventData['uid']])) {
                         continue;
                     }
 
@@ -394,6 +405,11 @@ class CalDAVService
                             $results['updated']++;
                             UsageTrackingService::track(UsageTrackingService::CALDAV_SYNC, $role->id);
                         }
+
+                        // Advance the in-memory etag and mark handled so later same-UID
+                        // instances in this batch don't reconcile the same event again.
+                        $existingEtags[$eventData['uid']] = $eventData['etag'] ?? null;
+                        $processedUids[$eventData['uid']] = true;
 
                         continue;
                     }
@@ -423,6 +439,7 @@ class CalDAVService
 
                     // Track within the same sync batch to prevent duplicate handling
                     $existingEtags[$eventData['uid']] = $eventData['etag'] ?? null;
+                    $processedUids[$eventData['uid']] = true;
                 } catch (\Exception $e) {
                     Log::error('Failed to sync individual CalDAV event', [
                         'uid' => $eventData['uid'] ?? 'unknown',
@@ -780,22 +797,32 @@ class CalDAVService
                 $event->starts_at = $eventData['start']->format('Y-m-d H:i:s');
             }
 
-            // Update duration
-            $event->duration = $eventData['duration'] ?: 2;
+            // Only overwrite the duration when the remote actually specified an end
+            // (DTEND/DURATION). parseVEvent() collapses "no end" to the default 2, so an
+            // unconditional assignment would silently reset a locally edited duration on
+            // every sync. Mirrors updateEventFromGoogle(), which leaves it alone too.
+            if (! empty($eventData['end'])) {
+                $event->duration = $eventData['duration'] ?: 2;
+            }
 
             // Handle location if present (adds a venue but never duplicates one)
+            $venueAttached = false;
             if ($eventData['location']) {
                 $venue = $this->convertLocationToVenue($role, $eventData['location']);
                 if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
                     $event->roles()->attach($venue->id, [
                         'is_accepted' => $role->user?->isMember($venue->subdomain) ?? false,
                     ]);
+                    $venueAttached = true;
                 }
             }
 
-            $changed = $event->isDirty();
+            // Attaching a venue is a real change but does not dirty the Event row, so count
+            // it explicitly; otherwise a location-only update is neither saved-as-changed nor
+            // usage-tracked by the caller.
+            $changed = $event->isDirty() || $venueAttached;
 
-            if ($changed) {
+            if ($event->isDirty()) {
                 $event->save();
             }
 

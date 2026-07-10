@@ -630,8 +630,10 @@
                                 v-model="preview.parsed[idx].category_id"
                                 v-bind:disabled="savedEvents[idx]">
                                 <option value="">{{ __('messages.please_select') }}</option>
+                                {{-- v-pre: custom category names are curator-controlled, and this select is
+                                     inside a Vue mount, so an unguarded mustache would be compiled as JS --}}
                                 @foreach(get_translated_categories($role ?? null) as $catId => $catName)
-                                <option value="{{ $catId }}">{{ $catName }}</option>
+                                <option v-pre value="{{ $catId }}">{{ $catName }}</option>
                                 @endforeach
                             </select>
                         </div>

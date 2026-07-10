@@ -85,10 +85,16 @@ class HomeController extends Controller
         // chooser (or straight to the create form when they already picked a
         // type on the marketing site) instead of an empty dashboard. Attendee
         // signups (follow/ticket/etc.) keep their dashboard.
+        //
+        // roles() (any pivot level), not member(): a user who only follows a schedule
+        // has a real dashboard and must not be bounced to the "create your first
+        // schedule" chooser. Matches post_signup_redirect_url(), and stays loop-safe
+        // because member() is a subset of roles(), so gettingStarted()'s member() guard
+        // never bounces a user this forwards.
         if (! is_demo_mode()
             && ! session('onboarding_skipped')
             && in_array($user->signup_intent, [null, 'organizer'], true)
-            && ! $user->member()->exists()
+            && ! $user->roles()->exists()
             && $user->tickets()->count() === 0) {
             if (in_array($signupType, ['talent', 'venue', 'curator'], true)) {
                 return redirect()->route('new', ['type' => $signupType]);

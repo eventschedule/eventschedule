@@ -318,8 +318,10 @@
                   <select id="submit_category_id" v-model="event.category_id" :class="errClass('category_id')"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
                     <option value="">{{ __('messages.please_select') }}</option>
+                    {{-- v-pre: custom category names are curator-controlled, and this select is
+                         inside a Vue mount, so an unguarded mustache would be compiled as JS --}}
                     @foreach (get_translated_categories($role) as $catId => $catName)
-                    <option value="{{ $catId }}">{{ $catName }}</option>
+                    <option v-pre value="{{ $catId }}">{{ $catName }}</option>
                     @endforeach
                   </select>
                 </div>

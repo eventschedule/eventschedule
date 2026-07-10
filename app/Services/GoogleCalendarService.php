@@ -797,17 +797,22 @@ class GoogleCalendarService
             $event->duration = $days > 1 ? $days * 24 : 0;
         }
 
+        $venueAttached = false;
         if ($googleEvent['location']) {
             $venue = $this->convertLocationToVenue($role, $googleEvent['location']);
             if ($venue && ! $event->roles()->where('type', 'venue')->exists()) {
                 $event->roles()->attach($venue->id, [
                     'is_accepted' => $role->user->isMember($venue->subdomain),
                 ]);
+                $venueAttached = true;
             }
         }
 
+        // Attaching a venue is a real change but does not dirty the Event row. Save only
+        // when the row itself changed, but report the venue attach so the caller still
+        // counts it as an update and tracks usage.
         if (! $event->isDirty()) {
-            return false;
+            return $venueAttached;
         }
 
         $event->save();

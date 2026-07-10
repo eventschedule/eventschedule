@@ -23,6 +23,13 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('sign_up');
         }
 
+        // Reaching the login page means this is not the register-with-type flow (a validation
+        // re-render returns to register, not here), so drop any schedule-type choice left over
+        // from an abandoned earlier /register?type= visit. Otherwise a later brand-new Google
+        // sign-in would be dropped straight into that stale type's create form. The
+        // register->Google path never passes through here, so its choice is preserved.
+        session()->forget('signup_role_type');
+
         restore_pending_action();
 
         return view('auth.login');

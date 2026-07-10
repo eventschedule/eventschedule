@@ -1208,12 +1208,16 @@ class RoleController extends Controller
             return redirect(app_url());
         }
 
-        if ($request->lang) {
-            // Validate the language code before setting it
-            if (is_valid_language_code($request->lang)) {
-                app()->setLocale($request->lang);
+        // Query params can arrive as arrays (?lang[]=en); is_valid_language_code() is typed
+        // ?string, so only honor a string value (matches the sibling submission methods).
+        $lang = is_string($request->lang) ? $request->lang : null;
 
-                if ($request->lang == 'en') {
+        if ($lang) {
+            // Validate the language code before setting it
+            if (is_valid_language_code($lang)) {
+                app()->setLocale($lang);
+
+                if ($lang == 'en') {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -4780,9 +4784,17 @@ class RoleController extends Controller
                     // session cookie won't carry to the subdomain).
                     $request->attributes->set('skip_location_rewrite', true);
 
+                    // Honor an explicit valid ?lang= (e.g. a shared localized link) so it is not
+                    // dropped on the hop to the subdomain; otherwise fall back to the session
+                    // translate flag or the schedule's own language. Matches the plain-subdomain
+                    // branch below, which also forwards the requested language.
+                    $lang = is_string($request->lang) && is_valid_language_code($request->lang)
+                        ? $request->lang
+                        : (session()->has('translate') ? 'en' : $role->language_code);
+
                     return redirect(route('event.guest_submit', [
                         'subdomain' => $role->subdomain,
-                        'lang' => session()->has('translate') ? 'en' : $role->language_code,
+                        'lang' => $lang,
                     ]));
                 }
 

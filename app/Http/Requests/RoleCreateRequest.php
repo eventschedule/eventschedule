@@ -32,6 +32,9 @@ class RoleCreateRequest extends FormRequest
             'background_image_url' => ['image', 'max:2500'],
             'header_image_url' => ['image', 'max:2500'],
             'custom_css' => ['nullable', 'string', 'max:10000'],
+            // Must be a plain hex color: it is interpolated into Vue :style expressions on
+            // guest-facing pages, which the runtime compiler evaluates as JS (CSTI otherwise).
+            'accent_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'header_style' => ['nullable', 'string', 'in:banner,compact'],
         ];
     }
