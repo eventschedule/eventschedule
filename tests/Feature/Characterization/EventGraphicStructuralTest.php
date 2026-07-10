@@ -40,9 +40,7 @@ class EventGraphicStructuralTest extends TestCase
         $this->assertInstanceOf(RowDesign::class, new RowDesign($role, $events));
     }
 
-    /**
-     * @dataProvider layoutProvider
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('layoutProvider')]
     public function test_layout_generates_valid_png_for_one_and_several_events(string $layout): void
     {
         $owner = $this->createOwner();
