@@ -911,7 +911,7 @@ Update the row when a phase merges (and add known-reds/inventories as indented n
 | P8 | not started | | | | |
 | P9 | not started | | | | |
 | P10 | not started | | | | |
-| P11 | not started | | | | |
+| P11 | done - awaiting merge | refactor/p11-saveevent-characterization | | 2026-07-10 | 43 tests / 6 classes in tests/Feature/Characterization/ (venue, members, schedule/recurrence, tickets, curators, lifecycle, custom-fields) + SavesEventsOverHttp driver trait + CreatesScheduleData helpers (createGroup/createCurator/createVenueWithAddress/createRecurringEvent/followRole). Found BUG-001 (claim_venue_ownership verified-at copy undone by Role::updating hook) - pinned, see BUGS_FOUND.md. Notable pinned quirks: non-pass tickets on one-time events store pass_usage_type='total'; new venues attach with is_accepted=null (require_approval default TRUE); the flyer upload field is flyer_image (flyer_image_url rule is vestigial); custom-field whitelisting is two-layer (FormRequest Rule::in on the form path, repo whitelist for synthesized requests). Full suite 220 passed / 3 skipped. |
 | P12 | not started | | | | |
 | P13 (opt) | not started | | | | |
 | P14 | not started | | | | |
