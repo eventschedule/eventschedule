@@ -3,6 +3,7 @@
 namespace Tests\Feature\Concerns;
 
 use App\Models\Event;
+use App\Models\Group;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
@@ -38,7 +39,7 @@ trait CreatesScheduleData
     protected function createRole(User $user, string $type = 'venue', array $attrs = []): Role
     {
         $role = new Role;
-        $role->subdomain = 'test' . strtolower(Str::random(10));
+        $role->subdomain = 'test'.strtolower(Str::random(10));
         $role->user_id = $user->id;
         $role->type = $type;
         $role->name = $attrs['name'] ?? 'Test Schedule';
@@ -79,7 +80,7 @@ trait CreatesScheduleData
         }
 
         if (! $event->slug) {
-            $event->slug = Str::slug($event->name) . '-' . strtolower(Str::random(4));
+            $event->slug = Str::slug($event->name).'-'.strtolower(Str::random(4));
         }
 
         $event->save();
@@ -153,6 +154,51 @@ trait CreatesScheduleData
         return $sale->fresh();
     }
 
+    /** Sub-schedule (Group) attached to the given schedule. */
+    protected function createGroup(Role $role, array $attrs = []): Group
+    {
+        $group = $role->groups()->create([
+            'name' => $attrs['name'] ?? 'Test Group',
+            'slug' => $attrs['slug'] ?? 'test-group-'.strtolower(Str::random(4)),
+        ] + $attrs);
+
+        return $group->fresh();
+    }
+
+    /** Curator schedule owned by the given user. */
+    protected function createCurator(User $user, array $attrs = []): Role
+    {
+        return $this->createRole($user, 'curator', $attrs);
+    }
+
+    /** Venue schedule with a full street address (populates the *_normalized dedup columns). */
+    protected function createVenueWithAddress(User $user, array $attrs = []): Role
+    {
+        return $this->createRole($user, 'venue', array_merge([
+            'name' => 'Address Venue',
+            'address1' => '123 Main St',
+            'city' => 'Springfield',
+            'state' => 'IL',
+            'postal_code' => '62701',
+            'country_code' => 'us',
+        ], $attrs));
+    }
+
+    /** Weekly recurring event (all days on unless days_of_week passed). */
+    protected function createRecurringEvent(Role $role, array $attrs = []): Event
+    {
+        return $this->createEvent($role, array_merge([
+            'days_of_week' => '1111111',
+            'recurring_frequency' => 'weekly',
+        ], $attrs));
+    }
+
+    /** Connect a user to a schedule at the given membership level. */
+    protected function followRole(User $user, Role $role, string $level = 'follower'): void
+    {
+        $user->roles()->attach($role->id, ['level' => $level, 'created_at' => now()]);
+    }
+
     /** Full guest event URL path: /{subdomain}/{slug}/{encodedId}[/{date}] */
     protected function guestEventUrl(Role $role, Event $event, ?string $date = null): string
     {
@@ -164,6 +210,7 @@ trait CreatesScheduleData
 
         if ($date) {
             $params['date'] = $date;
+
             return route('event.view_guest_full', $params);
         }
 
