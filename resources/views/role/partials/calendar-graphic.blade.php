@@ -77,17 +77,7 @@
                         <!-- QR Code Section -->
                         <div class="w-42 h-52 flex-shrink-0 p-6 bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
                             @php
-                                $qrCode = Endroid\QrCode\QrCode::create($event->getGuestUrl($role->subdomain))
-                                    ->setSize(200)
-                                    ->setMargin(10);
-
-                                $writer = new Endroid\QrCode\Writer\PngWriter();
-                                $result = $writer->write($qrCode);
-                                
-                                // Convert to base64 data URI for display in img tag
-                                $base64 = base64_encode($result->getString());
-                                $mimeType = $result->getMimeType();
-                                $dataUri = "data:{$mimeType};base64,{$base64}";
+                                $dataUri = \App\Utils\QrCodeUtils::dataUri($event->getGuestUrl($role->subdomain));
                             @endphp
                             
                             <div class="text-center">

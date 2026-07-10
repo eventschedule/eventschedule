@@ -26,14 +26,14 @@ use App\Services\WebhookService;
 use App\Utils\CsvUtils;
 use App\Utils\InvoiceNinja;
 use App\Utils\MoneyUtils;
+use App\Utils\QrCodeUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Stripe\StripeClient;
 
@@ -428,7 +428,7 @@ class TicketController extends Controller
                 }
             }
 
-            $endDateTime = $event->getEndDateTime($sale->event_date);
+            $endDateTime = $event->getEndDateTime($sale->event_date, true, $event->scheduleTimezone());
             if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
                 continue;
             }
@@ -580,7 +580,7 @@ class TicketController extends Controller
                     }
                 }
 
-                $endDateTime = $event->getEndDateTime($sale->event_date);
+                $endDateTime = $event->getEndDateTime($sale->event_date, true, $event->scheduleTimezone());
                 if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
                     continue;
                 }
@@ -665,7 +665,7 @@ class TicketController extends Controller
             }
 
             // Only cancel feedback for events that have already ended
-            $endDateTime = $event->getEndDateTime($sale->event_date);
+            $endDateTime = $event->getEndDateTime($sale->event_date, true, $event->scheduleTimezone());
             if ($endDateTime->isFuture() || $endDateTime->copy()->addDays(30)->isPast()) {
                 continue;
             }
@@ -2347,24 +2347,33 @@ class TicketController extends Controller
         // scanning at (needed for cross-event subscriptions). List the user's
         // events without a tickets-only filter, since a subscription may cover
         // free / ticketless events.
-        $events = Event::where('user_id', $user->id)
+        $events = Event::with('creatorRole')
+            ->where('user_id', $user->id)
             ->whereNotNull('starts_at')
             ->orderBy('starts_at', 'desc')
             ->limit(100)
             ->get();
 
-        $today = now()->format('Y-m-d');
-
-        $eventIdsWithTodaySales = Sale::whereIn('event_id', $events->pluck('id'))
-            ->where('event_date', $today)
+        // "Today" is each event's own calendar day at its venue, which is what
+        // sales.event_date holds. Listed events may sit in different timezones, so query the
+        // exact set of venue dates and match per event.
+        $salesDatesByEvent = Sale::whereIn('event_id', $events->pluck('id'))
+            ->whereIn('event_date', Event::scheduleTodayDates($events))
             ->where('status', 'paid')
             ->where('is_deleted', false)
-            ->pluck('event_id')
-            ->unique();
+            ->get(['event_id', 'event_date'])
+            ->groupBy('event_id')
+            ->map(fn ($rows) => $rows->pluck('event_date')->all());
+
+        $hasSalesToday = fn (Event $e) => in_array($e->scheduleToday(), $salesDatesByEvent[$e->id] ?? [], true);
+        $occursToday = fn (Event $e) => $e->matchesDate(
+            now()->setTimezone($e->scheduleTimezone())->startOfDay(),
+            $e->scheduleTimezone()
+        );
 
         // Prefer an event with sales today, then any event occurring today, else most recent.
-        $selectedEventId = $events->first(fn ($e) => $eventIdsWithTodaySales->contains($e->id))?->id
-            ?? $events->first(fn ($e) => $e->matchesDate(now()->startOfDay()))?->id
+        $selectedEventId = $events->first($hasSalesToday)?->id
+            ?? $events->first($occursToday)?->id
             ?? $events->first()?->id;
 
         $eventsData = $events->map(fn ($event) => [
@@ -2377,6 +2386,13 @@ class TicketController extends Controller
         return view('ticket.scan', [
             'events' => $eventsData,
             'selectedEventId' => $selectedEventId ? UrlUtils::encodeId($selectedEventId) : null,
+            // The scanner rebuilds its POST target from this rather than from the scanned
+            // QR's origin, so a base-path install (/public/...) and the hosted app subdomain
+            // both resolve correctly, and a foreign QR can't redirect the POST off-site.
+            'scanUrlTemplate' => route('ticket.scanned', [
+                'event_id' => '__EVENT_ID__',
+                'secret' => '__SECRET__',
+            ]),
         ]);
     }
 
@@ -2386,6 +2402,10 @@ class TicketController extends Controller
         $event = Event::with('creatorRole')->find(UrlUtils::decodeId($eventId));
 
         if (! $event) {
+            // Both "not valid" branches look identical to the operator; log which one fired
+            // so a failing install can be diagnosed without guessing.
+            Log::info('Ticket scan rejected: event not found', ['event_id' => $eventId]);
+
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
@@ -2396,6 +2416,8 @@ class TicketController extends Controller
             ->first();
 
         if (! $sale) {
+            Log::info('Ticket scan rejected: no matching sale for event', ['event_id' => $event->id]);
+
             return response()->json(['error' => __('messages.this_ticket_is_not_valid')], 200);
         }
 
@@ -2463,7 +2485,8 @@ class TicketController extends Controller
         $data = new \stdClass;
         $data->attendee = $sale->name;
         $data->event = $event->name;
-        $data->date = $event->localStartsAt(true, $sale->event_date);
+        // Venue-local time, matching the pass branch: the operator is standing at the door.
+        $data->date = $event->localStartsAt(true, $sale->event_date, false, $tz);
         $data->tickets = [];
 
         foreach ($sale->saleTickets as $saleTicket) {
@@ -2500,21 +2523,14 @@ class TicketController extends Controller
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
         $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
 
-        $url = route('ticket.view', ['event_id' => UrlUtils::encodeId($event->id), 'secret' => $secret]);
+        $url = canonical_url(route('ticket.view', [
+            'event_id' => UrlUtils::encodeId($event->id),
+            'secret' => $secret,
+        ], false));
 
-        $qrCode = QrCode::create($url)
-            ->setSize(200)
-            ->setMargin(10);
-
-        $writer = new PngWriter;
-        $result = $writer->write($qrCode);
-
-        header('Content-Type: '.$result->getMimeType());
-        header('X-Content-Type-Options: nosniff');
-
-        echo $result->getString();
-
-        exit;
+        return response(QrCodeUtils::png($url))
+            ->header('Content-Type', 'image/png')
+            ->header('X-Content-Type-Options', 'nosniff');
     }
 
     public function view($eventId, $secret)
@@ -3085,19 +3101,22 @@ class TicketController extends Controller
                 $hasEmailSettings = $emailSettingsRole && $emailSettingsRole->hasEmailSettings();
                 $tickets = $event->tickets->where('is_addon', false)->values();
 
+                // Offer venue-local occurrence dates: these land in sales.event_date, and the
+                // scanner rebuilds its check-in window from that column in the venue's timezone.
+                // A UTC date here puts an imported ticket's window a day out.
+                $eventTz = $event->scheduleTimezone();
+
                 if ($event->days_of_week) {
-                    $start = now()->startOfDay();
                     $end = now()->addYear();
-                    $cursor = $start->copy();
+                    $cursor = now()->setTimezone($eventTz)->startOfDay();
                     while ($cursor->lte($end) && count($eventDates) < 60) {
-                        if ($event->matchesDate($cursor)) {
+                        if ($event->matchesDate($cursor, $eventTz)) {
                             $eventDates[] = $cursor->format('Y-m-d');
                         }
                         $cursor->addDay();
                     }
                 } elseif ($event->starts_at) {
-                    $eventDates[] = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC')
-                        ->format('Y-m-d');
+                    $eventDates[] = $event->saleEventDateFromStartsAt();
                 }
             }
         }
@@ -3144,7 +3163,7 @@ class TicketController extends Controller
         $defaultStatus = $request->default_status;
         $sendEmails = $request->boolean('send_emails');
 
-        if ($eventDate && ! $event->matchesDate(Carbon::parse($eventDate))) {
+        if ($eventDate && ! $event->matchesDate(Carbon::parse($eventDate), $event->scheduleTimezone())) {
             return back()->withInput()->with('error', __('messages.invalid_event_date'));
         }
 

@@ -40,7 +40,10 @@ class FeedbackController extends Controller
             abort(404);
         }
 
-        $endDateTime = $event->getEndDateTime($sale->event_date);
+        // $sale->event_date is a venue-local calendar date, so the occurrence must be resolved
+        // in the venue's timezone. Without it the end instant lands a day early for any evening
+        // event west of UTC and the feedback page opens ~24h before the show.
+        $endDateTime = $event->getEndDateTime($sale->event_date, true, $event->scheduleTimezone());
         if ($endDateTime->isFuture()) {
             abort(404);
         }
@@ -79,7 +82,10 @@ class FeedbackController extends Controller
             abort(404);
         }
 
-        $endDateTime = $event->getEndDateTime($sale->event_date);
+        // $sale->event_date is a venue-local calendar date, so the occurrence must be resolved
+        // in the venue's timezone. Without it the end instant lands a day early for any evening
+        // event west of UTC and the feedback page opens ~24h before the show.
+        $endDateTime = $event->getEndDateTime($sale->event_date, true, $event->scheduleTimezone());
         if ($endDateTime->isFuture()) {
             abort(404);
         }

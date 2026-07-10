@@ -105,9 +105,12 @@ class EventChangeNotifier
     {
         $isRecurring = (bool) $event->days_of_week;
 
+        // sales.event_date is the venue's calendar date. now()->toDateString() is the app
+        // timezone's, so west of UTC it has already rolled over during the evening and would
+        // exclude tonight's attendees from the change notice.
         return $event->sales()
             ->where('status', 'paid')
             ->excludeTestEmails()
-            ->when($isRecurring, fn ($q) => $q->whereDate('event_date', '>=', now()->toDateString()));
+            ->when($isRecurring, fn ($q) => $q->whereDate('event_date', '>=', $event->scheduleToday()));
     }
 }

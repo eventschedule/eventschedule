@@ -44,11 +44,10 @@ use App\Utils\GeminiUtils;
 use App\Utils\ImageUtils;
 use App\Utils\OpenAIUtils;
 use App\Utils\PhoneUtils;
+use App\Utils\QrCodeUtils;
 use App\Utils\SlugPatternUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -4706,19 +4705,9 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
         $url = $role->getGuestUrl(true) ?: $role->getGuestUrl();
 
-        $qrCode = QrCode::create($url)
-            ->setSize(300)
-            ->setMargin(10);
-
-        $writer = new PngWriter;
-        $result = $writer->write($qrCode);
-
-        header('Content-Type: '.$result->getMimeType());
-        header('Content-Disposition: attachment; filename="qr-code.png"');
-
-        echo $result->getString();
-
-        exit;
+        return response(QrCodeUtils::png($url, 300))
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'attachment; filename="qr-code.png"');
     }
 
     public function verify(RoleEmailVerificationRequest $request, $subdomain)
@@ -5914,7 +5903,7 @@ class RoleController extends Controller
             'email' => $user->email,
             'secret' => Str::random(32),
             'event_id' => $event->id,
-            'event_date' => $event->starts_at ? Carbon::parse($event->starts_at)->format('Y-m-d') : now()->format('Y-m-d'),
+            'event_date' => $event->saleEventDateFromStartsAt() ?? $event->scheduleToday(),
             'subdomain' => $role->subdomain,
             'status' => 'paid',
         ]);

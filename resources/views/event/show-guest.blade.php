@@ -659,7 +659,8 @@
 
         {{-- Calendar date badge + time --}}
         @php
-          $startDt = $event->getStartDateTime($date, true);
+          // Venue-local: this feeds the machine-readable <time datetime> attribute below.
+          $startDt = $event->getStartDateTime($date, true, $event->scheduleTimezone());
           $endDt = $event->isMultiDay() ? (clone $startDt)->addMinutes($event->durationInMinutes()) : null;
         @endphp
         <div class="flex items-center gap-4 {{ $role->isRtl() ? 'rtl' : '' }}">

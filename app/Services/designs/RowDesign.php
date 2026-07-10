@@ -4,8 +4,7 @@ namespace App\Services\designs;
 
 use App\Models\Event;
 use App\Services\AbstractEventDesign;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
+use App\Utils\QrCodeUtils;
 
 class RowDesign extends AbstractEventDesign
 {
@@ -448,12 +447,7 @@ class RowDesign extends AbstractEventDesign
                 }
             }
 
-            $qrCode = QrCode::create($eventUrl)
-                ->setMargin(self::QR_CODE_MARGIN);
-
-            $writer = new PngWriter;
-            $result = $writer->write($qrCode);
-            $qrCodeImageData = $result->getString();
+            $qrCodeImageData = QrCodeUtils::png($eventUrl, 300, self::QR_CODE_MARGIN);
 
             $qrCodeImage = imagecreatefromstring($qrCodeImageData);
             if (! $qrCodeImage) {

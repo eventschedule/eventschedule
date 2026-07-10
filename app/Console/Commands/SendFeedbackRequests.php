@@ -81,8 +81,10 @@ class SendFeedbackRequests extends Command
                     }
                 }
 
-                // Check timing
-                $endDateTime = $event->getEndDateTime($sale->event_date);
+                // Check timing. $sale->event_date is a venue-local calendar date, so resolve the
+                // occurrence in the venue's timezone - otherwise the end instant lands a day early
+                // for an evening event west of UTC and the request goes out before the show.
+                $endDateTime = $event->getEndDateTime($sale->event_date, true, $event->scheduleTimezone());
 
                 // Don't send for events that ended more than 30 days ago
                 if ($endDateTime->copy()->addDays(30)->isPast()) {

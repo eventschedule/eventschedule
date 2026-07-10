@@ -11,8 +11,8 @@ use Tests\TestCase;
 
 class TicketingTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     public function test_free_ticket_checkout_creates_sale(): void
     {
@@ -278,19 +278,44 @@ class TicketingTest extends TestCase
 
     public function test_bulk_attendee_import(): void
     {
-        // NOTE: Import requires the posted event_date to match the event's *local*
-        // occurrence date (matchesDate uses the schedule timezone). Reliable coverage
-        // needs a fixed-timezone fixture; left for a follow-up. See TEST_COVERAGE notes.
-        $this->markTestSkipped('Bulk import date-matching is timezone-sensitive; needs a dedicated fixture.');
-
         $owner = $this->createOwner();
+
+        // The importer must sit in a DIFFERENT zone than the venue. createOwner() defaults to the
+        // venue's America/New_York, and the import's date gate used to resolve against the viewer's
+        // timezone - so with both in New York the buggy and fixed code agree and this test would
+        // pass either way.
+        $owner->timezone = 'UTC';
+        $owner->save();
+
         $role = $this->createRole($owner);
-        $event = $this->createEvent($role, ['tickets_enabled' => true]);
+
+        // 01:00 UTC is 9pm the previous day at the America/New_York venue, so the UTC calendar date
+        // and the venue's differ. The fixture's noon-UTC default deliberately makes them equal.
+        $event = $this->createEvent($role, [
+            'tickets_enabled' => true,
+            'starts_at' => \Carbon\Carbon::now()->addDays(7)->setTime(1, 0)->format('Y-m-d H:i:s'),
+        ]);
         $ticket = $this->createTicket($event, ['price' => 0, 'quantity' => 100]);
+
+        // sales.event_date is the venue's calendar date. Storing the UTC one puts the scanner's
+        // check-in window 24h out and the ticket reports "cannot be checked in yet".
+        $eventDate = $event->saleEventDateFromStartsAt();
+        $this->assertNotSame(
+            \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'),
+            $eventDate,
+            'fixture must make the UTC and venue dates differ, or this test cannot detect the bug'
+        );
+
+        // The import form must offer the venue date, not the UTC one - that is the code the fix
+        // touched. Posting the answer without checking this would bypass it entirely.
+        $offered = $this->actingAs($owner)
+            ->get(route('sales.import', ['role_id' => UrlUtils::encodeId($role->id), 'event_id' => UrlUtils::encodeId($event->id)]))
+            ->viewData('eventDates');
+        $this->assertSame([$eventDate], $offered);
 
         $this->actingAs($owner)->post(route('sales.import_store'), [
             'event_id' => UrlUtils::encodeId($event->id),
-            'event_date' => \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'),
+            'event_date' => $eventDate,
             'ticket_id' => UrlUtils::encodeId($ticket->id),
             'default_status' => 'paid',
             'send_emails' => false,
@@ -300,8 +325,8 @@ class TicketingTest extends TestCase
             ],
         ]);
 
-        $this->assertDatabaseHas('sales', ['email' => 'import1@example.com']);
-        $this->assertDatabaseHas('sales', ['email' => 'import2@example.com']);
+        $this->assertDatabaseHas('sales', ['email' => 'import1@example.com', 'event_date' => $eventDate]);
+        $this->assertDatabaseHas('sales', ['email' => 'import2@example.com', 'event_date' => $eventDate]);
     }
 
     public function test_sale_confirmation_email_is_sent(): void

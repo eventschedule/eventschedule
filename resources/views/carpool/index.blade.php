@@ -197,7 +197,9 @@
                     if ($event->is_multi_day) {
                         $offerExpired = $eventEnded;
                     } else {
-                        $st = $event->getStartDateTime($date);
+                        // Venue-local occurrence start, matching CarpoolController's gates.
+                        // Without the timezone this is a day early and expires the offer early.
+                        $st = $event->getStartDateTime($date, true, $event->scheduleTimezone());
                         $offerExpired = $st && $st->isPast();
                     }
                 } else {

@@ -161,26 +161,38 @@ class Event extends Model
             if ($model->isDirty('starts_at') && ! $model->days_of_week) {
                 $model->load(['tickets', 'addons', 'sales']);
 
-                DB::transaction(function () use ($model) {
-                    $allTickets = $model->tickets->merge($model->addons);
-                    $allTickets->each(function ($ticket) use ($model) {
-                        if ($ticket->sold) {
-                            $sold = json_decode($ticket->sold, true);
-                            if ($oldDate = array_key_first($sold)) {
-                                $quantity = $sold[$oldDate];
-                                $newDate = Carbon::parse($model->starts_at)->format('Y-m-d');
-                                $sold = [$newDate => $quantity];
-                                $ticket->sold = json_encode($sold);
-                                $ticket->save();
-                            }
-                        }
-                    });
+                // The occurrence moved, so re-key everything that hangs off its date. That key is
+                // the VENUE's calendar date (what checkout stores and the scanner reads back), not
+                // the UTC one - they differ for any evening event west of UTC.
+                $newDate = $model->saleEventDateFromStartsAt();
 
-                    $model->sales->each(function ($sale) use ($model) {
-                        $sale->event_date = Carbon::parse($model->starts_at)->format('Y-m-d');
-                        $sale->save();
+                if ($newDate) {
+                    DB::transaction(function () use ($model, $newDate) {
+                        $allTickets = $model->tickets->merge($model->addons);
+                        $allTickets->each(function ($ticket) use ($newDate) {
+                            // A pass's inventory lives in a single 'pass' bucket (Ticket::soldKey),
+                            // never under a date. Re-keying it to a date zeroes every pass sold.
+                            if ($ticket->is_pass) {
+                                return;
+                            }
+
+                            if ($ticket->sold) {
+                                $sold = json_decode($ticket->sold, true);
+                                if ($oldDate = array_key_first($sold)) {
+                                    $quantity = $sold[$oldDate];
+                                    $sold = [$newDate => $quantity];
+                                    $ticket->sold = json_encode($sold);
+                                    $ticket->save();
+                                }
+                            }
+                        });
+
+                        $model->sales->each(function ($sale) use ($newDate) {
+                            $sale->event_date = $newDate;
+                            $sale->save();
+                        });
                     });
-                });
+                }
             }
 
             if ($model->isDirty('name') && $model->exists) {
@@ -827,7 +839,11 @@ class Event extends Model
         return UrlUtils::encodeId($this->id);
     }
 
-    public function localStartsAt($pretty = false, $date = null, $endTime = false)
+    /**
+     * $timezone pins the rendering to a specific zone (pass scheduleTimezone() to show the
+     * event in the venue's local time); otherwise it follows the viewer's.
+     */
+    public function localStartsAt($pretty = false, $date = null, $endTime = false, ?string $timezone = null)
     {
         if (! $this->starts_at) {
             return '';
@@ -853,7 +869,7 @@ class Event extends Model
             }
         }
 
-        $startAt = $this->getStartDateTime($date, true);
+        $startAt = $this->getStartDateTime($date, true, $timezone);
 
         // Multi-day events in pretty mode: show date range instead of single datetime
         if ($pretty && $this->is_multi_day) {
@@ -948,15 +964,101 @@ class Event extends Model
             });
     }
 
-    public function matchesDate($date)
+    /**
+     * The timezone this event's calendar dates are expressed in: the schedule's, not the
+     * viewer's. An occurrence falls on a given day because of where the event happens, not
+     * because of who is looking at it.
+     */
+    public function scheduleTimezone(): string
+    {
+        return $this->creatorRole?->timezone ?? config('app.timezone');
+    }
+
+    /**
+     * Today's calendar date at the venue (Y-m-d).
+     *
+     * This is the date `sales.event_date` and `sale_tickets.pass_usages[].date` are keyed by,
+     * so anything matching against those columns must use this rather than `now()`, which is
+     * in the app timezone. For an evening event west of UTC the two disagree for exactly the
+     * hours the doors are open.
+     */
+    public function scheduleToday(?Carbon $now = null): string
+    {
+        return ($now ? $now->copy() : now())->setTimezone($this->scheduleTimezone())->format('Y-m-d');
+    }
+
+    /**
+     * The distinct venue-local "today" of each event in $events (Y-m-d).
+     *
+     * Use this to bound a query over `event_date` when the rows belong to schedules in
+     * different timezones, then match per event with scheduleToday(). Exact by construction -
+     * do not approximate it with a +/- 1 day window around the app timezone, which breaks once
+     * APP_TIMEZONE is set to an extreme offset.
+     *
+     * @param  \Illuminate\Support\Collection<int, Event>  $events
+     * @return string[]
+     */
+    public static function scheduleTodayDates($events, ?Carbon $now = null): array
+    {
+        return $events->map(fn (Event $event) => $event->scheduleToday($now))->unique()->values()->all();
+    }
+
+    /**
+     * The UTC instant at which this event's occurrence on $date starts.
+     *
+     * $date is a venue-local calendar date; the time of day comes from `starts_at`. Setting
+     * the date on the raw UTC datetime instead would be off by a day whenever the venue's
+     * date differs from the UTC date.
+     */
+    public function occurrenceStartUtc(string $date, ?string $timezone = null): Carbon
+    {
+        $tz = $timezone ?: $this->scheduleTimezone();
+
+        $startsAt = strlen((string) $this->starts_at) === 10
+            ? Carbon::createFromFormat('Y-m-d', $this->starts_at, 'UTC')->startOfDay()
+            : Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
+
+        $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
+
+        return Carbon::createFromFormat('Y-m-d H:i:s', $date.' '.$timeOfDay, $tz)->setTimezone('UTC');
+    }
+
+    /**
+     * The event's start as a naive Carbon holding local wall-clock time.
+     *
+     * Equivalent to Carbon::parse($this->localStartsAt()) when no timezone is passed. Callers
+     * that care which day an occurrence falls on should pass scheduleTimezone(); otherwise
+     * getStartDateTime() resolves against the authenticated user's timezone, and a late-evening
+     * event lands on tomorrow's date for an operator in a different zone.
+     */
+    protected function localStartCarbon(?string $timezone = null): Carbon
+    {
+        // A date-only starts_at is already the schedule's calendar date (see
+        // saleEventDateFromStartsAt()); treating it as midnight UTC and converting would
+        // slide it back a day for any negative-offset schedule.
+        if (strlen((string) $this->starts_at) === 10) {
+            return Carbon::parse($this->starts_at)->startOfDay();
+        }
+
+        return Carbon::parse($this->getStartDateTime(null, true, $timezone)->format('Y-m-d H:i:s'));
+    }
+
+    public function matchesDate($date, ?string $timezone = null)
     {
         if (! $this->starts_at) {
             return false;
         }
 
+        // Reduce $date to a bare calendar day before anything else. Callers pass a mix of naive
+        // and timezone-aware Carbons; localStartCarbon() always yields a naive one. Any instant
+        // comparison between the two silently mixes zones - matchesFrequency()'s every_n_weeks
+        // branch measures `startOfWeek()->diffInDays()`, so a +09:00 $date turns 14 days into
+        // 13.625 and floor(/7) loses a whole week, inverting every bi-weekly occurrence.
+        $date = Carbon::parse(Carbon::parse($date)->format('Y-m-d'))->startOfDay();
+
         if ($this->days_of_week) {
-            $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
-            $afterStartDate = $startDate->isSameDay($date) || $startDate->lessThanOrEqualTo($date);
+            $startDate = $this->localStartCarbon($timezone)->startOfDay();
+            $afterStartDate = $startDate->format('Y-m-d') <= $date->format('Y-m-d');
 
             if (! $afterStartDate) {
                 return false;
@@ -1003,11 +1105,13 @@ class Event extends Model
 
             return true;
         } else {
-            $startDate = Carbon::parse($this->localStartsAt())->startOfDay();
+            $startDate = $this->localStartCarbon($timezone)->startOfDay();
             if ($this->duration && $this->duration >= 24) {
-                $endDate = Carbon::parse($this->localStartsAt())->addMinutes($this->durationInMinutes())->startOfDay();
+                $endDate = $this->localStartCarbon($timezone)->addMinutes($this->durationInMinutes())->startOfDay();
+                $dateStr = Carbon::parse($date)->format('Y-m-d');
 
-                return Carbon::parse($date)->startOfDay()->between($startDate, $endDate);
+                // Calendar-date comparison, for the same reason as the recurring branch above.
+                return $dateStr >= $startDate->format('Y-m-d') && $dateStr <= $endDate->format('Y-m-d');
             }
 
             return $startDate->isSameDay($date);
@@ -1168,13 +1272,16 @@ class Event extends Model
         // validity is governed by pass expiry, so don't block their sale on date.
         $hasPassTicket = $this->tickets->contains(fn ($t) => $t->is_pass);
 
-        // For recurring events, check if the specific occurrence is in the past
+        // For recurring events, check if the specific occurrence is in the past. Resolve the
+        // occurrence in the venue's timezone: whether a ticket may be sold is a property of the
+        // event, not of who is asking, and getStartDateTime() would otherwise use the viewer's.
         if ($this->days_of_week && $date) {
+            $tz = $this->scheduleTimezone();
             if ($this->sell_after_start) {
-                if ($this->getEndDateTime($date, true)->isPast()) {
+                if ($this->getEndDateTime($date, true, $tz)->isPast()) {
                     return false;
                 }
-            } elseif ($this->getStartDateTime($date, true)->isPast()) {
+            } elseif ($this->getStartDateTime($date, true, $tz)->isPast()) {
                 return false;
             }
         }
@@ -1259,7 +1366,10 @@ class Event extends Model
 
         // Check if event is past
         if ($this->recurring_frequency) {
-            if ($date && Carbon::parse($date)->endOfDay()->isPast()) {
+            // End of the occurrence's day AT THE VENUE. Carbon::parse($date) would use the app
+            // timezone, closing RSVP at UTC midnight - an hour before doors for a 9pm New York
+            // show, and nine hours into the next venue day for Tokyo.
+            if ($date && Carbon::parse($date, $this->scheduleTimezone())->endOfDay()->isPast()) {
                 return false;
             }
         } else {
@@ -1498,7 +1608,11 @@ class Event extends Model
         }
 
         if ($date === null && $this->starts_at) {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC')->format('Y-m-d');
+            // The venue's calendar date, not the UTC one: this becomes the date segment of a
+            // recurring event's guest URL, and the UTC date of an evening show west of UTC is
+            // the following day - a weekday the recurrence does not fall on. (It also handles a
+            // date-only starts_at, which the raw createFromFormat('Y-m-d H:i:s', ...) would throw on.)
+            $date = $this->saleEventDateFromStartsAt();
         }
 
         $data = [
@@ -1560,7 +1674,9 @@ class Event extends Model
         $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
-        $startAt = $this->getStartDateTime($date);
+        // Stamped as UTC: a dated occurrence must be rebuilt from the venue's time-of-day, or the
+        // link lands a day early for an evening event west of UTC. (Matches FeedController's iCal.)
+        $startAt = $date ? $this->occurrenceStartUtc($date) : $this->getStartDateTime();
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->addMinutes(self::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
 
@@ -1590,7 +1706,9 @@ class Event extends Model
         $description = $this->description_html ? strip_tags($this->description_html) : ($this->role() ? strip_tags($this->role()->description_html) : '');
         $location = $this->venue ? $this->venue->bestAddress() : '';
         $duration = $this->duration > 0 ? $this->duration : 2;
-        $startAt = $this->getStartDateTime($date);
+        // See getGoogleCalendarUrl(): the stamp is UTC, so a dated occurrence needs the venue's
+        // time-of-day rather than the UTC one.
+        $startAt = $date ? $this->occurrenceStartUtc($date) : $this->getStartDateTime();
         $startDate = $startAt->format('Y-m-d\TH:i:s\Z');
         $endDate = $startAt->addMinutes(self::durationHoursToMinutes($duration))->format('Y-m-d\TH:i:s\Z');
 
@@ -1624,13 +1742,16 @@ class Event extends Model
             $startAt = Carbon::createFromFormat('Y-m-d H:i:s', $this->starts_at, 'UTC');
         }
 
+        // Convert before applying the occurrence date. $date is a calendar date in the
+        // schedule's zone (that is how sales.event_date is stored), so setting it on the UTC
+        // datetime and converting afterwards slides an evening event back a day.
+        if ($locale) {
+            $startAt->setTimezone($timezone);
+        }
+
         if ($date && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
             $customDate = Carbon::parse($date);
             $startAt->setDate($customDate->year, $customDate->month, $customDate->day);
-        }
-
-        if ($locale) {
-            $startAt->setTimezone($timezone);
         }
 
         return $startAt;
@@ -1724,9 +1845,14 @@ class Event extends Model
         return static::durationHoursToMinutes($this->duration);
     }
 
+    /**
+     * The occurrence's clock time at the venue. An event's time is a property of where it happens,
+     * not of who is looking - and these strings go out in emails, which render inside whichever
+     * request dispatched them (EmailService sends synchronously from the admin portal).
+     */
     public function getStartEndTime($date = null, $use24 = false)
     {
-        $date = $this->getStartDateTime($date, true);
+        $date = $this->getStartDateTime($date, true, $this->scheduleTimezone());
 
         if ($this->is_multi_day) {
             return $date->format($use24 ? 'H:i' : 'g:i A');
@@ -1743,7 +1869,8 @@ class Event extends Model
 
     public function getDateRangeDisplay($date = null)
     {
-        $start = $this->getStartDateTime($date, true);
+        // Venue-local, for the same reason as getStartEndTime().
+        $start = $this->getStartDateTime($date, true, $this->scheduleTimezone());
         $end = $start->copy()->addMinutes($this->durationInMinutes());
 
         if ($start->year !== $end->year) {
@@ -2132,17 +2259,53 @@ class Event extends Model
 
     protected function computePassReservedSeats(string $date): int
     {
-        $schedule = $this->creatorRole ?: $this->roles->first();
-        if (! $schedule || ! $schedule->hasPass()) {
+        // A pass is sold on its own home event, which may live on a DIFFERENT schedule than
+        // this one - a curator's pass covering a venue event cross-listed on the curator's
+        // schedule. Ticket::covers() resolves coverage within the pass's home schedule, and
+        // that schedule must therefore list this event, so every schedule listing this event
+        // bounds the search exactly. Scoping to creatorRole alone hides those reservations
+        // and lets occurrenceSeatsRemaining() resell a seat that is already held.
+        $schedules = $this->roles;
+        if ($this->creatorRole && ! $schedules->contains('id', $this->creatorRole->id)) {
+            $schedules = $schedules->concat([$this->creatorRole]);
+        }
+
+        $scheduleIds = $schedules->pluck('id')->filter()->unique();
+        if ($scheduleIds->isEmpty()) {
             return 0;
         }
 
-        $scheduleEventIds = $schedule->events()->pluck('events.id');
+        // An event belongs to a schedule either through the event_role pivot or through
+        // creator_role_id, and a pass's home event may be linked by only one of them. Cover both.
+        //
+        // Do NOT filter the schedules by Role::hasPass() first - that helper only looks through
+        // the pivot, so it drops a schedule whose pass lives on an event linked to it solely by
+        // creator_role_id, and the reservation goes uncounted.
+        //
+        // Kept as a subquery rather than a plucked id list: a large curator schedule can list
+        // tens of thousands of events, and binding one placeholder each would be slow and can
+        // exceed MySQL's prepared-statement placeholder limit. A fresh builder per call, since
+        // whereIn() consumes it.
+        $scheduleEventIds = fn () => static::query()
+            ->select('id')
+            ->where(fn ($query) => $query
+                ->whereIn('creator_role_id', $scheduleIds)
+                ->orWhereHas('roles', fn ($q) => $q->whereIn('roles.id', $scheduleIds)));
+
+        // Cheap short-circuit for the overwhelming majority of schedules, which sell no passes.
+        $hasPass = Ticket::query()
+            ->where('is_pass', true)
+            ->whereIn('event_id', $scheduleEventIds())
+            ->exists();
+
+        if (! $hasPass) {
+            return 0;
+        }
 
         $saleTickets = SaleTicket::query()
             ->whereNotNull('pass_usages')
             ->whereHas('ticket', fn ($q) => $q->where('is_pass', true))
-            ->whereHas('sale', fn ($q) => $q->where('status', 'paid')->whereIn('event_id', $scheduleEventIds))
+            ->whereHas('sale', fn ($q) => $q->where('status', 'paid')->whereIn('event_id', $scheduleEventIds()))
             ->get(['id', 'pass_usages']);
 
         $count = 0;
@@ -2623,11 +2786,14 @@ class Event extends Model
     }
 
     /**
-     * Get ISO 8601 formatted date string for schema
+     * Get ISO 8601 formatted date string for schema.
+     *
+     * Structured data must be absolute: pinned to the venue so a crawler and a signed-in owner
+     * emit the same instant, not just the same wall-clock with a different offset.
      */
     public function getSchemaStartDate($date = null)
     {
-        $startAt = $this->getStartDateTime($date, true);
+        $startAt = $this->getStartDateTime($date, true, $this->scheduleTimezone());
 
         return $startAt->toIso8601String();
     }
@@ -2637,7 +2803,7 @@ class Event extends Model
      */
     public function getSchemaEndDate($date = null)
     {
-        $endAt = $this->getEndDateTime($date, true);
+        $endAt = $this->getEndDateTime($date, true, $this->scheduleTimezone());
 
         return $endAt->toIso8601String();
     }

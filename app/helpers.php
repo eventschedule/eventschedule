@@ -264,6 +264,39 @@ if (! function_exists('app_url')) {
     }
 }
 
+if (! function_exists('canonical_url')) {
+    /**
+     * Build an absolute URL whose base path comes from APP_URL rather than from the
+     * incoming request.
+     *
+     * `route()` and `url()` resolve against $request->root(), which includes the base path
+     * the front controller happens to be served under. An install whose document root is the
+     * project folder answers on both `/` and `/public/`, so the same route can produce two
+     * different absolute URLs. That is harmless for a redirect but not for a value we bake
+     * into a QR code, which must be stable for the life of the ticket.
+     *
+     * The scheme and host still come from Laravel's own resolver so custom-domain branding
+     * survives. Do NOT read them off the request: AppServiceProvider forces the https scheme
+     * outside local, and a proxy that terminates TLS leaves the request looking like plain
+     * http, which would bake http:// into a printed ticket. Under a queue worker there is no
+     * real request; SetRequestForConsole synthesizes one from APP_URL.
+     *
+     * Pass the relative form, e.g. canonical_url(route('ticket.view', [...], false)).
+     */
+    function canonical_url(string $path): string
+    {
+        $root = \Illuminate\Support\Facades\URL::formatRoot(\Illuminate\Support\Facades\URL::formatScheme());
+        $origin = preg_replace('#^(https?://[^/]+).*$#', '$1', $root);
+
+        // A schemeless APP_URL ("host/public") makes parse_url() report the whole string as the
+        // path; concatenating that would corrupt the host. Only an absolute path is a base path.
+        $base = parse_url(config('app.url'), PHP_URL_PATH) ?: '';
+        $base = str_starts_with($base, '/') ? rtrim($base, '/') : '';
+
+        return $origin.$base.'/'.ltrim($path, '/');
+    }
+}
+
 if (! function_exists('redirect_with_pending_action')) {
     /**
      * Store pending action data in session and redirect.

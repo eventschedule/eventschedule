@@ -4,8 +4,7 @@ namespace App\Services\designs;
 
 use App\Models\Event;
 use App\Services\AbstractEventDesign;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
+use App\Utils\QrCodeUtils;
 
 class GridDesign extends AbstractEventDesign
 {
@@ -266,15 +265,9 @@ class GridDesign extends AbstractEventDesign
                 }
             }
 
-            // Create QR code without a fixed size; the library will determine the optimal size.
-            // We will resize it to a consistent dimension during the placement step.
-            $qrCode = QrCode::create($eventUrl)
-                ->setMargin(self::QR_CODE_MARGIN); // Keep margin for a quiet zone
-
-            // Create PNG writer and generate QR code image data
-            $writer = new PngWriter;
-            $result = $writer->write($qrCode);
-            $qrCodeImageData = $result->getString();
+            // Rendered at the library's default size; it is resized to a consistent
+            // dimension during the placement step below.
+            $qrCodeImageData = QrCodeUtils::png($eventUrl, 300, self::QR_CODE_MARGIN);
 
             // Create an image resource from the generated QR code data
             $qrCodeImage = imagecreatefromstring($qrCodeImageData);

@@ -416,13 +416,15 @@ class ApiSaleController extends Controller
             $eventDate = $event->saleEventDateFromStartsAt();
         }
 
-        // Check if recurring event occurrence is in the past
+        // Check if recurring event occurrence is in the past. Resolve it in the venue's
+        // timezone, not the authenticated API user's.
         if ($event->days_of_week) {
+            $eventTz = $event->scheduleTimezone();
             if ($event->sell_after_start) {
-                if ($event->getEndDateTime($eventDate, true)->isPast()) {
+                if ($event->getEndDateTime($eventDate, true, $eventTz)->isPast()) {
                     return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
                 }
-            } elseif ($event->getStartDateTime($eventDate, true)->isPast()) {
+            } elseif ($event->getStartDateTime($eventDate, true, $eventTz)->isPast()) {
                 return response()->json(['error' => 'Cannot sell tickets for events in the past'], 422);
             }
         }

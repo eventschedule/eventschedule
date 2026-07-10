@@ -59,9 +59,18 @@ class PassRedemptionService
             return $data;
         }
 
-        // Coverage resolves within the pass's own schedule (cross-tenant safe).
-        $schedule = $sale->event?->creatorRole;
-        $tz = $schedule?->timezone ?? config('app.timezone');
+        // Coverage resolves within the pass's own schedule (cross-tenant safe). creator_role_id is
+        // nullable, so fall back to the first schedule listing the home event - Ticket::covers()
+        // denies everything when handed no schedule.
+        $schedule = $sale->event?->creatorRole ?? $sale->event?->roles->first();
+
+        // Dates resolve at the venue the operator is standing in, which is the event being
+        // scanned - not the pass's home schedule. `covers()` allows a cross-schedule pass (a
+        // curator's pass over an imported venue event), and every other surface keys pass dates
+        // by the event's own venue: PassBookingService, Event::passReservedSeats(), and the
+        // check-in dashboard. Using the home schedule here would hide the holder's advance
+        // booking and re-consume it as a walk-up. Identical for the default `this_event` scope.
+        $tz = $scanningEvent->scheduleTimezone();
 
         $todayCarbon = $now->copy()->setTimezone($tz)->startOfDay();
         $today = $todayCarbon->format('Y-m-d');
@@ -95,17 +104,21 @@ class PassRedemptionService
             return $data;
         }
 
-        // Is the scanning event actually happening today?
-        if (! $scanningEvent->starts_at || ! $scanningEvent->matchesDate($todayCarbon->copy())) {
-            $next = $this->nextOccurrenceDate($scanningEvent, $today);
+        // Is the scanning event actually happening today? Resolve the occurrence in the
+        // schedule's timezone - $today already is, and matchesDate() would otherwise use the
+        // scanning operator's, which flips the day for a late-evening one-time event.
+        if (! $scanningEvent->starts_at || ! $scanningEvent->matchesDate($todayCarbon->copy(), $tz)) {
+            $next = $this->nextOccurrenceDate($scanningEvent, $today, $tz);
             $data->pass_status = 'no_event_today';
-            $data->date = $next ? $scanningEvent->localStartsAt(true, $next) : null;
+            // Show the venue's local time - the operator is standing at the door, and their
+            // own profile timezone is irrelevant to when the doors open.
+            $data->date = $next ? $scanningEvent->localStartsAt(true, $next, false, $tz) : null;
             $data->next_event = $data->date;
 
             return $data;
         }
 
-        $data->date = $scanningEvent->localStartsAt(true, $today);
+        $data->date = $scanningEvent->localStartsAt(true, $today, false, $tz);
 
         // Build today's occurrence window for the scanning event.
         [$startUtc, $endUtc, $earliest] = $this->occurrenceWindow($scanningEvent, $today, $tz);
@@ -232,11 +245,7 @@ class PassRedemptionService
      */
     protected function occurrenceWindow(Event $event, string $date, string $tz): array
     {
-        $startsAt = strlen($event->starts_at) === 10
-            ? Carbon::createFromFormat('Y-m-d', $event->starts_at, 'UTC')->startOfDay()
-            : Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
-        $timeOfDay = $startsAt->copy()->setTimezone($tz)->format('H:i:s');
-        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' '.$timeOfDay, $tz)->setTimezone('UTC');
+        $startUtc = $event->occurrenceStartUtc($date, $tz);
         $duration = $event->duration > 0 ? $event->duration : 2;
         $endUtc = $startUtc->copy()->addMinutes(Event::durationHoursToMinutes($duration));
         $earliest = $startUtc->copy()->subHours(24);
@@ -246,9 +255,9 @@ class PassRedemptionService
 
     /**
      * Next occurrence date (Y-m-d) on/after $fromDate for $event, scanning
-     * forward up to a year. Null if none.
+     * forward up to a year. Null if none. Dates resolve in $timezone (the schedule's).
      */
-    protected function nextOccurrenceDate(Event $event, string $fromDate): ?string
+    protected function nextOccurrenceDate(Event $event, string $fromDate, ?string $timezone = null): ?string
     {
         if (! $event->starts_at) {
             return null;
@@ -256,7 +265,7 @@ class PassRedemptionService
 
         $date = Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay();
         for ($i = 0; $i < 366; $i++) {
-            if ($event->matchesDate($date->copy())) {
+            if ($event->matchesDate($date->copy(), $timezone)) {
                 return $date->format('Y-m-d');
             }
             $date->addDay();

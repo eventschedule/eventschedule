@@ -52,12 +52,7 @@
                     $appName = config('app.name', 'Event Schedule');
                     $qrCodeUrl = $google2fa->getQRCodeUrl($appName, $user->email, $user->two_factor_secret);
 
-                    $qrCode = new \Endroid\QrCode\QrCode($qrCodeUrl);
-                    $qrCode->setSize(200);
-                    $qrCode->setMargin(10);
-                    $writer = new \Endroid\QrCode\Writer\PngWriter;
-                    $result = $writer->write($qrCode);
-                    $dataUri = $result->getDataUri();
+                    $dataUri = \App\Utils\QrCodeUtils::dataUri($qrCodeUrl);
                 @endphp
                 <img src="{{ $dataUri }}" alt="QR Code" class="rounded-lg">
             </div>

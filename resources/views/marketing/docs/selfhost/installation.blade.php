@@ -447,6 +447,17 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
                                 <div class="doc-callout-title">Manual fallback</div>
                                 <p>If the wizard still does not appear, open <code class="doc-inline-code">.env</code>, clear the <code class="doc-inline-code">APP_URL</code> value so it is blank, and reload. The wizard will run again and rewrite <code class="doc-inline-code">APP_URL</code> once setup succeeds.</p>
                             </div>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Ticket QR codes don't scan, or the site answers on <code class="doc-inline-code">/public</code></h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Your web server's document root must point at the <code class="doc-inline-code">public</code> directory inside the project, not at the project folder itself. When the root is set one level too high, the app answers on both <code class="doc-inline-code">https://your-domain.com/</code> and <code class="doc-inline-code">https://your-domain.com/public/</code>, and links generated from a page you reached through <code class="doc-inline-code">/public/</code> carry that segment too.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">The give-away is that the same ticket shows one QR code when opened from a confirmation email and a different one when opened from the Sales page. Fix the document root, then confirm that <code class="doc-inline-code">APP_URL</code> in <code class="doc-inline-code">.env</code> exactly matches the address people use to reach the site. <code class="doc-inline-code">APP_URL</code> is what the app trusts when it builds the URL inside a ticket's QR code, so it must include a sub-path if you genuinely serve the app from one.</p>
+
+                            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 my-4">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <span>QR codes already printed or emailed before you correct <code class="doc-inline-code">APP_URL</code> keep pointing at the old address. Re-send the ticket email to reissue them.</span>
+                                </p>
+                            </div>
                         </section>
 
                         <!-- Custom translations -->

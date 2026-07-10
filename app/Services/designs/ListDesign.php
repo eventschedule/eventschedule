@@ -4,9 +4,8 @@ namespace App\Services\designs;
 
 use App\Models\Event;
 use App\Services\AbstractEventDesign;
+use App\Utils\QrCodeUtils;
 use Carbon\Carbon;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 
 class ListDesign extends AbstractEventDesign
 {
@@ -717,13 +716,7 @@ class ListDesign extends AbstractEventDesign
             }
 
             // Create QR code
-            $qrCode = QrCode::create($eventUrl)
-                ->setMargin(self::QR_CODE_MARGIN);
-
-            // Create PNG writer and generate QR code image data
-            $writer = new PngWriter;
-            $result = $writer->write($qrCode);
-            $qrCodeImageData = $result->getString();
+            $qrCodeImageData = QrCodeUtils::png($eventUrl, 300, self::QR_CODE_MARGIN);
 
             // Create an image resource from the generated QR code data
             $qrCodeImage = imagecreatefromstring($qrCodeImageData);

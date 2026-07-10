@@ -3689,7 +3689,9 @@ class EventController extends Controller
         $description = $event->description_html ? strip_tags($event->description_html) : ($event->role() ? strip_tags($event->role()->description_html) : '');
         $location = $event->venue ? $event->venue->bestAddress() : '';
         $duration = $event->duration > 0 ? $event->duration : 2;
-        $startAt = $event->getStartDateTime($date);
+        // UTC stamp: rebuild a dated occurrence from the venue's time-of-day so this .ics agrees
+        // with the subscription feed it shares a UID with (FeedController::buildVevent).
+        $startAt = $date ? $event->occurrenceStartUtc($date) : $event->getStartDateTime();
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->addMinutes(Event::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
 

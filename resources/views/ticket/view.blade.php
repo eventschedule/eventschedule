@@ -250,7 +250,7 @@
                 </div>
                 <div>
                   <p class="text-[10px] text-white/50 print-text-gray uppercase tracking-wide font-medium">{{ __('messages.time') }}</p>
-                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $event->getStartEndTime($sale->event_date) }}</p>
+                  <p class="text-[13px] text-white print-text-dark font-semibold">{{ $event->getStartEndTime($sale->event_date, $event->use24HourTime()) }}</p>
                 </div>
               </div>
 

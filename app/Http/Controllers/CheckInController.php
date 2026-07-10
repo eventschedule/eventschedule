@@ -13,23 +13,26 @@ class CheckInController extends Controller
     {
         $user = auth()->user();
 
-        $events = Event::where('user_id', $user->id)
+        $events = Event::with('creatorRole')
+            ->where('user_id', $user->id)
             ->where(fn ($q) => $q->whereHas('tickets')->orWhere('rsvp_enabled', true))
             ->orderBy('starts_at', 'desc')
             ->get();
 
-        $today = now()->format('Y-m-d');
-
-        // Pre-select event with sales for today, else most recent
-        $eventIdsWithTodaySales = Sale::whereIn('event_id', $events->pluck('id'))
-            ->where('event_date', $today)
+        // Pre-select event with sales for today, else most recent. sales.event_date holds the
+        // venue's calendar date, so compare against that rather than the app timezone's date;
+        // listed events may sit in different timezones, hence the exact per-venue date set.
+        $salesDatesByEvent = Sale::whereIn('event_id', $events->pluck('id'))
+            ->whereIn('event_date', Event::scheduleTodayDates($events))
             ->where('status', 'paid')
             ->where('is_deleted', false)
-            ->pluck('event_id')
-            ->unique();
+            ->get(['event_id', 'event_date'])
+            ->groupBy('event_id')
+            ->map(fn ($rows) => $rows->pluck('event_date')->all());
 
-        $selectedEventId = $events->first(fn ($e) => $eventIdsWithTodaySales->contains($e->id))?->id
-            ?? $events->first()?->id;
+        $selectedEventId = $events->first(
+            fn (Event $e) => in_array($e->scheduleToday(), $salesDatesByEvent[$e->id] ?? [], true)
+        )?->id ?? $events->first()?->id;
 
         $eventsData = $events->map(function ($event) {
             return [
@@ -49,7 +52,7 @@ class CheckInController extends Controller
     public function stats($eventId)
     {
         $user = auth()->user();
-        $event = Event::with(['tickets', 'roles'])->find(UrlUtils::decodeId($eventId));
+        $event = Event::with(['tickets', 'roles', 'creatorRole'])->find(UrlUtils::decodeId($eventId));
 
         if (! $event) {
             return response()->json(['error' => 'Event not found'], 404);
@@ -59,11 +62,15 @@ class CheckInController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $requestedDate = request()->query('date', now()->format('Y-m-d'));
+        // Default to the venue's calendar date, which is what sales.event_date and the
+        // pass_usages entries are keyed by. Using the app timezone's date instead reports
+        // zero check-ins and zero reserved seats all evening for any venue west of UTC.
+        $today = $event->scheduleToday();
+        $requestedDate = request()->query('date', $today);
         try {
             $requestedDate = \Carbon\Carbon::createFromFormat('Y-m-d', $requestedDate)->format('Y-m-d');
         } catch (\Exception $e) {
-            $requestedDate = now()->format('Y-m-d');
+            $requestedDate = $today;
         }
 
         // Get available dates for this event

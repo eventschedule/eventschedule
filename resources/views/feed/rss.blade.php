@@ -7,7 +7,15 @@
         <description>{{ htmlspecialchars($role->name . ' - Event Schedule', ENT_XML1, 'UTF-8') }}</description>
         <language>{{ app()->getLocale() }}</language>
         @if($items->first())
-        <lastBuildDate>{{ $items->first()['event']->getStartDateTime($items->first()['date'])->toRssString() }}</lastBuildDate>
+        @php
+            // A dated occurrence must be rebuilt from the venue's time-of-day, exactly as the
+            // iCal feed does; getStartDateTime($date) would stamp the UTC time-of-day and put
+            // a recurring evening event a day early.
+            $firstEvent = $items->first()['event'];
+            $firstDate = $items->first()['date'];
+            $firstStart = $firstDate ? $firstEvent->occurrenceStartUtc($firstDate) : $firstEvent->getStartDateTime();
+        @endphp
+        <lastBuildDate>{{ $firstStart->toRssString() }}</lastBuildDate>
         @endif
         <atom:link href="{{ custom_domain_url(route('feed.rss', ['subdomain' => $role->subdomain])) }}" rel="self" type="application/rss+xml" />
         @foreach($items as $item)
@@ -25,7 +33,7 @@
             <description>{{ htmlspecialchars($description, ENT_XML1, 'UTF-8') }}</description>
             @endif
             @if($event->starts_at)
-            <pubDate>{{ $event->getStartDateTime($date)->toRssString() }}</pubDate>
+            <pubDate>{{ ($date ? $event->occurrenceStartUtc($date) : $event->getStartDateTime())->toRssString() }}</pubDate>
             @endif
         </item>
         @endforeach

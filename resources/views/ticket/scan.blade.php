@@ -161,6 +161,7 @@
                     lastScanUrl: null,
                     events: @json($events ?? []),
                     selectedEventId: @json($selectedEventId ?? ''),
+                    scanUrlTemplate: @json($scanUrlTemplate ?? ''),
                     dropdownOpen: false,
                 }
             },
@@ -285,12 +286,19 @@
                         this.errorMessage = @json(__('messages.invalid_ticket_qr_code'));
                         return;
                     }
-                    if (!/^\/ticket\/view\/[^/]+\/[^/]+/.test(url.pathname)) {
+
+                    // Take only the event id + secret from the QR. The path may carry a base
+                    // path (an install served under /public/), and the origin may be a custom
+                    // domain, so neither is safe to reuse as the POST target.
+                    const match = url.pathname.match(/\/ticket\/view\/([^/]+)\/([^/]+)\/?$/);
+                    if (!match) {
                         this.errorMessage = @json(__('messages.invalid_ticket_qr_code'));
                         return;
                     }
 
-                    const scanUrl = window.location.origin + url.pathname;
+                    const scanUrl = this.scanUrlTemplate
+                        .replace('__EVENT_ID__', encodeURIComponent(match[1]))
+                        .replace('__SECRET__', encodeURIComponent(match[2]));
                     this.lastScanUrl = scanUrl;
                     this.postScan(scanUrl);
                 },

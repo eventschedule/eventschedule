@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Event;
+use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleTicket;
 use App\Models\Ticket;
@@ -35,6 +36,18 @@ class PassBookingService
     }
 
     /**
+     * The schedule a pass's coverage resolves within: its home event's.
+     *
+     * `events.creator_role_id` is nullable (CheckData backfills it), so fall back to the first
+     * schedule listing the home event. Without this, Ticket::covers() sees no schedule and denies
+     * every `specific_events` pass sold on a legacy event.
+     */
+    public function homeSchedule(Sale $sale): ?Role
+    {
+        return $sale->event?->creatorRole ?? $sale->event?->roles->first();
+    }
+
+    /**
      * Whether this sale is a paid, booking-enabled pass.
      */
     public function isBookable(Sale $sale): bool
@@ -55,7 +68,7 @@ class PassBookingService
      */
     protected function coveredEvents(Sale $sale, Ticket $passTicket): \Illuminate\Support\Collection
     {
-        $schedule = $sale->event?->creatorRole;
+        $schedule = $this->homeSchedule($sale);
         $ids = $passTicket->coveredEventIds($schedule);
 
         if (empty($ids)) {
@@ -90,13 +103,16 @@ class PassBookingService
         // A date is bookable only if its occurrence start is on or before the pass
         // expiry instant, so every offered date is still redeemable at the event
         // (matches redeem()'s instant check, not a date-midnight comparison).
-        $withinExpiry = fn (string $d) => ! $expiresAt || $event->getStartDateTime($d)->lte($expiresAt);
+        $withinExpiry = fn (string $d) => ! $expiresAt || $event->occurrenceStartUtc($d)->lte($expiresAt);
+        $tz = $event->scheduleTimezone();
 
         if ($event->days_of_week) {
-            $cursor = $now->copy()->startOfDay();
+            // Walk venue-local calendar days: `$now` is in the app timezone, and starting the
+            // cursor there skips tonight's occurrence for any venue west of UTC.
+            $cursor = $now->copy()->setTimezone($tz)->startOfDay();
             while ($cursor->lte($end) && count($dates) < self::MAX_DATES_PER_EVENT) {
                 $d = $cursor->format('Y-m-d');
-                if ($event->matchesDate($cursor) && $event->canSellTickets($d) && $withinExpiry($d)) {
+                if ($event->matchesDate($cursor, $tz) && $event->canSellTickets($d) && $withinExpiry($d)) {
                     $dates[] = $d;
                 }
                 $cursor->addDay();
@@ -109,7 +125,7 @@ class PassBookingService
             // the recurring branch and book().
             $date = $event->saleEventDateFromStartsAt();
             if ($date
-                && $now->copy()->startOfDay()->lte(Carbon::parse($date)->endOfDay())
+                && $event->scheduleToday($now) <= $date
                 && $event->canSellTickets($date)
                 && $withinExpiry($date)) {
                 $dates[] = $date;
@@ -244,7 +260,7 @@ class PassBookingService
 
         $saleTicket = $this->passSaleTicket($sale);
         $passTicket = $saleTicket->ticket;
-        $schedule = $sale->event?->creatorRole;
+        $schedule = $this->homeSchedule($sale);
 
         $event = Event::with(['tickets', 'creatorRole'])->find($eventId);
         if (! $event || ! $passTicket->covers($event, $schedule)) {
@@ -253,9 +269,12 @@ class PassBookingService
             return $result;
         }
 
-        // Must be a real, sellable, future-or-today occurrence of this event.
+        // Must be a real, sellable, future-or-today occurrence of this event. Resolve the
+        // occurrence in the schedule's timezone so book() agrees with the dates
+        // upcomingDates() offered, and with what redeem() will accept at the door.
         $dateCarbon = Carbon::parse($date)->startOfDay();
-        if ($dateCarbon->lt($now->copy()->startOfDay()) || ! $event->matchesDate($dateCarbon) || ! $event->canSellTickets($date)) {
+        $isPast = $date < $event->scheduleToday($now);
+        if ($isPast || ! $event->matchesDate($dateCarbon, $event->scheduleTimezone()) || ! $event->canSellTickets($date)) {
             $result->status = 'invalid_date';
 
             return $result;
@@ -264,7 +283,7 @@ class PassBookingService
         // Expiry is a precise instant; reject a date only if its occurrence start is
         // after expiry, so every bookable date is still redeemable at the event
         // (book() and redeem() then agree on the boundary).
-        if ($saleTicket->pass_expires_at && $event->getStartDateTime($date)->gt($saleTicket->pass_expires_at)) {
+        if ($saleTicket->pass_expires_at && $event->occurrenceStartUtc($date)->gt($saleTicket->pass_expires_at)) {
             $result->status = 'expired';
 
             return $result;

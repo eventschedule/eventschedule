@@ -115,8 +115,14 @@ class Ticket extends Model
                     ->pluck('events.id')->map(fn ($id) => (int) $id)->all();
             case 'specific_events':
                 $ids = array_map('intval', $this->pass_event_ids ?? []);
+
+                // Without a home schedule there is nothing to intersect against, so the stored
+                // ids cannot be trusted - deny, as `all_events` and `sub_schedule` already do.
+                // Returning them raw would cover any event id in the system, and would let a
+                // reservation be written for an event outside the pass's schedules, where
+                // Event::computePassReservedSeats() cannot see it.
                 if (! $schedule || empty($ids)) {
-                    return $ids;
+                    return [];
                 }
 
                 // Intersect with the home schedule's events so a stale or forged id
@@ -155,10 +161,11 @@ class Ticket extends Model
 
                 // Even when the id is in the stored list, require the event to
                 // belong to the pass's home schedule (defends against a stale or
-                // forged cross-tenant id).
+                // forged cross-tenant id). With no schedule to check against, deny -
+                // matching all_events / sub_schedule above.
                 return $schedule
                     ? $schedule->events()->where('events.id', $event->id)->exists()
-                    : true;
+                    : false;
             case 'this_event':
             default:
                 return (int) $event->id === (int) $this->event_id;

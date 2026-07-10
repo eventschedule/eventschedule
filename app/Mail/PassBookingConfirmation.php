@@ -5,9 +5,8 @@ namespace App\Mail;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Utils\QrCodeUtils;
 use App\Utils\UrlUtils;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -56,13 +55,12 @@ class PassBookingConfirmation extends Mailable
     {
         // The pass link lives on the sale's home event (where the secret resolves),
         // which may differ from the booked event for a multi-event pass.
-        $manageUrl = route('ticket.view', [
+        $manageUrl = canonical_url(route('ticket.view', [
             'event_id' => UrlUtils::encodeId($this->sale->event_id),
             'secret' => $this->sale->secret,
-        ]);
+        ], false));
 
-        $qrCode = QrCode::create($manageUrl)->setSize(200)->setMargin(10);
-        $qrCodeData = (new PngWriter)->write($qrCode)->getString();
+        $qrCodeData = QrCodeUtils::png($manageUrl);
 
         return new Content(
             view: 'emails.pass_booking_confirmation',

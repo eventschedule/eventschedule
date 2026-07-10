@@ -3,10 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SendQueuedEmail;
-use App\Services\OneSignalService;
 use App\Mail\CarpoolNotification;
 use App\Models\CarpoolOffer;
 use App\Models\CarpoolRequest;
+use App\Services\OneSignalService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -49,8 +49,8 @@ class SendCarpoolReminders extends Command
 
             $eventDate = $offer->event_date?->format('Y-m-d');
             $relevantDateTime = $offer->direction === 'from_event'
-                ? $event->getEndDateTime($eventDate)
-                : $event->getStartDateTime($eventDate);
+                ? $event->getEndDateTime($eventDate, true, $event->scheduleTimezone())
+                : $event->getStartDateTime($eventDate, true, $event->scheduleTimezone());
 
             if (! $relevantDateTime) {
                 continue;

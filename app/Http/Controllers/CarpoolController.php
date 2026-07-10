@@ -54,7 +54,7 @@ class CarpoolController extends Controller
             abort(404);
         }
 
-        if ($isRecurring && ! $event->matchesDate(\Carbon\Carbon::parse($date))) {
+        if ($isRecurring && ! $event->matchesDate(\Carbon\Carbon::parse($date), $event->scheduleTimezone())) {
             abort(404);
         }
 
@@ -82,7 +82,7 @@ class CarpoolController extends Controller
         }
 
         $eventEnded = false;
-        $endDateTime = $event->getEndDateTime($date);
+        $endDateTime = $event->getEndDateTime($date, true, $event->scheduleTimezone());
         if ($endDateTime && $endDateTime->isPast()) {
             $eventEnded = true;
         }
@@ -165,15 +165,15 @@ class CarpoolController extends Controller
             return redirect()->back()->with('error', __('messages.carpool_date_required'));
         }
 
-        if ($isRecurring && $eventDate && ! $event->matchesDate(\Carbon\Carbon::parse($eventDate))) {
+        if ($isRecurring && $eventDate && ! $event->matchesDate(\Carbon\Carbon::parse($eventDate), $event->scheduleTimezone())) {
             return redirect()->back()->with('error', __('messages.carpool_invalid_date'));
         }
 
         $direction = $request->input('direction');
 
         // Check timing
-        $startDateTime = $event->getStartDateTime($eventDate);
-        $endDateTime = $event->getEndDateTime($eventDate);
+        $startDateTime = $event->getStartDateTime($eventDate, true, $event->scheduleTimezone());
+        $endDateTime = $event->getEndDateTime($eventDate, true, $event->scheduleTimezone());
 
         if (in_array($direction, ['to_event', 'round_trip']) && $startDateTime && $startDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_started'));
@@ -251,7 +251,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -333,7 +333,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -408,12 +408,12 @@ class CarpoolController extends Controller
         $direction = $offer->direction;
 
         if (in_array($direction, ['to_event', 'round_trip'])) {
-            $startDateTime = $event->getStartDateTime($offer->event_date?->format('Y-m-d'));
+            $startDateTime = $event->getStartDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
             if ($startDateTime && $startDateTime->isPast()) {
                 return redirect()->back()->with('error', __('messages.carpool_event_started'));
             }
         } else {
-            $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
+            $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
             if ($endDateTime && $endDateTime->isPast()) {
                 return redirect()->back()->with('error', __('messages.carpool_event_ended'));
             }
@@ -513,7 +513,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($carpoolRequest->offer->event_date?->format('Y-m-d'));
+        $endDateTime = $event->getEndDateTime($carpoolRequest->offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -569,7 +569,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -651,7 +651,7 @@ class CarpoolController extends Controller
             abort(403);
         }
 
-        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
         if ($endDateTime && $endDateTime->isPast()) {
             return redirect()->back()->with('error', __('messages.carpool_event_ended'));
         }
@@ -706,7 +706,7 @@ class CarpoolController extends Controller
         }
 
         // Check event has ended
-        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'));
+        $endDateTime = $event->getEndDateTime($offer->event_date?->format('Y-m-d'), true, $event->scheduleTimezone());
         if (! $endDateTime || $endDateTime->isFuture()) {
             return redirect()->back()->with('error', __('messages.carpool_review_not_yet'));
         }

@@ -5,9 +5,8 @@ namespace App\Mail;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Utils\QrCodeUtils;
 use App\Utils\UrlUtils;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -70,19 +69,12 @@ class TicketPurchase extends Mailable
      */
     public function content(): Content
     {
-        $ticketUrl = route('ticket.view', [
+        $ticketUrl = canonical_url(route('ticket.view', [
             'event_id' => UrlUtils::encodeId($this->event->id),
             'secret' => $this->sale->secret,
-        ]);
+        ], false));
 
-        // Generate QR code
-        $qrCode = QrCode::create($ticketUrl)
-            ->setSize(200)
-            ->setMargin(10);
-
-        $writer = new PngWriter;
-        $result = $writer->write($qrCode);
-        $qrCodeData = $result->getString();
+        $qrCodeData = QrCodeUtils::png($ticketUrl);
 
         return new Content(
             view: 'emails.ticket_purchase',

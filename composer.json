@@ -8,7 +8,7 @@
         "php": "^8.2",
         "ext-gd": "*",
         "codedge/laravel-selfupdater": "^3.9",
-        "endroid/qr-code": "^5.0",
+        "endroid/qr-code": "~6.0.0",
         "ezyang/htmlpurifier": "^4.17",
         "geoip2/geoip2": "^3.3",
         "google/apiclient": "^2.18",

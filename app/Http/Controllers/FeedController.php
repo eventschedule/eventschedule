@@ -159,7 +159,11 @@ class FeedController extends Controller
         $description = $event->description_html ? strip_tags($event->description_html) : '';
         $location = $event->venue ? $event->venue->bestAddress() : '';
         $duration = $event->duration > 0 ? $event->duration : 2;
-        $startAt = $event->getStartDateTime($date);
+        // DTSTART/DTEND are stamped as UTC. For a recurring occurrence $date is the venue's
+        // calendar date, so the instant must be rebuilt from the venue's time-of-day -
+        // getStartDateTime($date) would stamp the UTC time-of-day and export the series a day
+        // early. Undated (non-recurring) events already carry the true instant in starts_at.
+        $startAt = $date ? $event->occurrenceStartUtc($date) : $event->getStartDateTime();
         $startDate = $startAt->format('Ymd\THis\Z');
         $endDate = $startAt->copy()->addMinutes(Event::durationHoursToMinutes($duration))->format('Ymd\THis\Z');
         $url = custom_domain_url($event->getGuestUrl($role->subdomain, $date));
