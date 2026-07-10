@@ -2,7 +2,9 @@
 
 Tracks which app features have automated **integration-test** coverage and which are gaps to fill.
 
-_Last updated: 2026-06-16_
+_Last updated: 2026-07-10_
+
+> **Refactor-campaign characterization suites** (2026-07-10, `tests/Feature/Characterization/`): `EventSave*CharacterizationTest` (saveEvent matrix, 43 tests), `RoleGuestSurfaceCharacterizationTest`, `CheckoutBranchCharacterizationTest`, `EventCurationModerationCharacterizationTest`, `ViewGuestDeepCharacterizationTest`, `RoleUpdateCharacterizationTest`, `ModelBootClosureCharacterizationTest`, `NewsletterValidationCharacterizationTest`, `MarketingDataCharacterizationTest`, `EventGraphicStructuralTest`, `EncodedIdRoutingCharacterizationTest`, `NoFakeEmailCharacterizationTest`. These pin CURRENT behavior (bug-for-bug, see `BUGS_FOUND.md`) ahead of REFACTOR_PLAN.md; several also add first-time feature coverage (rows flipped below).
 
 ## How to keep this current
 
@@ -26,28 +28,28 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 
 ## Summary
 
-**110 of 154 features covered (~71%).** (Up from 53 / ~37% at the start of this session.)
+**113 of 154 features covered (~73%).** (Up from 53 / ~37% at the start of this session.)
 
 | Area | Covered |
 |------|---------|
 | Authentication & Account | 8 / 11 |
 | User Profile & Settings | 7 / 7 |
-| Schedules (Roles) | 13 / 18 |
+| Schedules (Roles) | 14 / 18 |
 | Sub-schedules (Groups) | 4 / 4 |
 | Events | 14 / 14 |
-| Ticketing & Payments | 16 / 23 |
+| Ticketing & Payments | 17 / 23 |
 | Community & Engagement | 7 / 9 |
 | Newsletters | 10 / 11 |
 | Integrations | 0 / 8 |
 | AI Features | 0 / 8 |
-| Graphics, Analytics & Promotion | 1 / 4 |
+| Graphics, Analytics & Promotion | 2 / 4 |
 | Customization & Branding | 7 / 8 |
 | Backup & Data | 2 / 2 |
 | Developer / API | 7 / 9 |
 | Billing & Plans | 1 / 3 |
 | Guest Portal | 7 / 8 |
 | Platform Admin | 6 / 7 |
-| **Total** | **110 / 154** |
+| **Total** | **113 / 154** |
 
 ## Coverage by feature
 
@@ -91,7 +93,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Multiple team members (Ent) | ✓ | `MiscFeaturesTest` (add/update/remove) |
 | Guest portal banner (Pro) | ✓ | `MiscFeaturesTest` |
 | Unlimited events & schedules | ✗ | — (non-functional) |
-| Custom schedule URLs (subdomain slug) | ✗ | — |
+| Custom schedule URLs (subdomain slug) | ✓ | `RoleUpdateCharacterizationTest` (subdomain change round trip) |
 | Mobile-optimized / responsive design | ✗ | — (non-functional) |
 | Venue location maps (Google Maps) | ✗ | — |
 | Sponsor / partner logos (Pro) | ✗ | — |
@@ -145,7 +147,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Ticket reservations / release time | ✗ | — |
 | Sell online via Stripe | ✗ | — (needs Stripe) |
 | Invoice Ninja integration | ✗ | — (needs Invoice Ninja) |
-| Payment links | ✗ | — |
+| Payment links | ✓ | `CheckoutBranchCharacterizationTest` (payment_url branch redirect + pending sale) |
 | Sale notification emails (Pro) | ✗ | skipped — env-guarded mail path (see Notes) |
 | Bulk attendee import (Pro) | ✗ | skipped — timezone-sensitive fixture (see Notes) |
 | Embed ticket widget (Pro) | ✗ | — |
@@ -207,7 +209,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 ### Graphics, Analytics & Promotion
 | Feature | Tested | Test |
 |---|---|---|
-| Event graphics generator (Pro) | ✗ | — |
+| Event graphics generator (Pro) | ✓ | `EventGraphicStructuralTest` (all 3 layouts generate valid PNGs) |
 | Scheduled graphic emails (Ent) | ✗ | — |
 | Built-in analytics dashboard | ✓ | `AdminFeaturesTest` (view recording + dashboard) |
 | Event boosting / Meta Ads (Pro) | ✗ | — (needs Meta Ads) |
