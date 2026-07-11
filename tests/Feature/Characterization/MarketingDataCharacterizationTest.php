@@ -18,6 +18,19 @@ use Tests\TestCase;
  */
 class MarketingDataCharacterizationTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // getReplacementData() embeds GitHubUtils::getStars(), which would
+        // otherwise make a LIVE GitHub API call (array cache is empty per
+        // process) and leak a varying star count into the golden fixture.
+        // Seed the cached-failure marker so getStars() deterministically
+        // returns null, and block any accidental outbound HTTP.
+        cache()->put('github_stars', false, 300);
+        \Illuminate\Support\Facades\Http::fake();
+    }
+
     private const COMPARISON_KEYS = [
         'eventbrite', 'luma', 'ticket-tailor', 'google-calendar', 'meetup',
         'dice', 'brown-paper-tickets', 'splash', 'sched', 'whova',
