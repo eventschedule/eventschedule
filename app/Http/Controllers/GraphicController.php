@@ -46,17 +46,6 @@ class GraphicController extends Controller
             }
         }
 
-        $aiGraphicModels = collect(config('services.ai.graphic_models', []))->filter(function ($model) {
-            if ($model['provider'] === 'gemini') {
-                return (bool) config('services.google.gemini_key');
-            }
-            if ($model['provider'] === 'openai') {
-                return (bool) config('services.openai.api_key');
-            }
-
-            return false;
-        })->all();
-
         // Warn if any event that will appear in the graphic is anchored to a different timezone
         // than this schedule: it would publish at the wrong time in the generated flyer/text/email.
         $timezoneMismatchCount = 0;
@@ -73,7 +62,7 @@ class GraphicController extends Controller
                 ->count();
         }
 
-        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl', 'aiGraphicModels', 'timezoneMismatchCount'));
+        return view('graphic.show', compact('role', 'layout', 'isPro', 'isEnterprise', 'graphicSettings', 'hasRecurringEvents', 'headerImagePreviewUrl', 'timezoneMismatchCount'));
     }
 
     public function getSettings($subdomain)

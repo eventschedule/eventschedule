@@ -40,8 +40,6 @@ return [
         'image_provider' => env('AI_IMAGE_PROVIDER', 'openai'),
         'graphic_models' => [
             'gemini-2.5-flash' => ['name' => 'Gemini 2.5 Flash', 'provider' => 'gemini', 'badge' => 'balanced'],
-            'gemini-2.0-flash' => ['name' => 'Gemini 2.0 Flash', 'provider' => 'gemini', 'badge' => 'fastest'],
-            'gemini-2.5-pro' => ['name' => 'Gemini 2.5 Pro', 'provider' => 'gemini', 'badge' => 'smartest'],
         ],
     ],
 
@@ -51,7 +49,7 @@ return [
         'analytics' => env('ANALYTICS_ID'),
         'gemini_key' => env('GEMINI_API_KEY'),
         'gemini_translation_model' => env('GEMINI_TRANSLATION_MODEL', 'gemini-2.5-flash'),
-        'gemini_content_model' => env('GEMINI_CONTENT_MODEL', 'gemini-2.5-pro'),
+        'gemini_content_model' => env('GEMINI_CONTENT_MODEL', 'gemini-2.5-flash'),
         'gemini_image_model' => env('GEMINI_IMAGE_MODEL', 'imagen-4.0-ultra-generate-001'),
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

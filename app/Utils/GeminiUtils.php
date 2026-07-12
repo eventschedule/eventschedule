@@ -445,7 +445,7 @@ class GeminiUtils
             $config['footer']
         );
 
-        // Use gemini-1.5-flash for both text and image inputs
+        // Model is resolved from config (services.google.gemini_content_model)
         $data = self::sendRequest($prompt, $imageData);
 
         // Handle quota exceeded or other errors gracefully

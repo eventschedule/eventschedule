@@ -40,14 +40,22 @@ class EventTextGenerator
             $text .= $message."\n".$url."\n";
         }
 
-        // Prepend a direction marker to every line so the message
-        // displays in the schedule's intended direction when pasted
-        // into apps like WhatsApp, which applies bidi per line.
-        // Based on the schedule's language_code, not Role::isRtl()
-        // (which is viewer-dependent). Forced-English text is LTR.
-        $isRtlLanguage = ! $forceEnglish && ($role->language_code == 'he' || $role->language_code == 'ar');
-        $marker = $isRtlLanguage ? "\u{200F}" : "\u{200E}";
-        $text = $marker.str_replace("\n", "\n".$marker, $text);
+        // Prepend a Right-to-Left Mark (U+200F) to each line that contains
+        // Hebrew/Arabic text so it displays right-to-left when pasted into apps
+        // like WhatsApp (which applies bidi per line). Based on the schedule's
+        // language_code, not Role::isRtl() (which is viewer-dependent); forced-
+        // English text is LTR.
+        //
+        // Lines WITHOUT Hebrew/Arabic - URLs, numbers, Latin - are left unmarked
+        // so they render LTR. A URL forced right-to-left by a leading RLM breaks
+        // desktop WhatsApp's link auto-detection so the link won't open (the
+        // v1.0.103 regression). LTR-language schedules need no marker at all.
+        if (! $forceEnglish && ($role->language_code == 'he' || $role->language_code == 'ar')) {
+            $lines = array_map(function ($line) {
+                return preg_match('/\p{Hebrew}|\p{Arabic}/u', $line) === 1 ? "\u{200F}".$line : $line;
+            }, explode("\n", $text));
+            $text = implode("\n", $lines);
+        }
 
         return $text;
     }
