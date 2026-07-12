@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Art Galleries | Share Your Exhibitions</x-slot>
+    <x-slot name="title">Free Event Schedule for Art Galleries | Exhibitions</x-slot>
     <x-slot name="description">Fill your gallery with collectors. Announce exhibitions, sell tickets to opening nights, and email your collectors directly. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Art Galleries</x-slot>
 
@@ -846,7 +846,7 @@
         <div class="mx-auto max-w-6xl">
             <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(78, 129, 250, 0.32), rgba(78, 129, 250, 0) 60%); opacity: 0.7;"></div>
+                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.30), rgba(217, 119, 6, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                     <div class="es-artlight absolute -top-10 left-1/2 h-[380px] w-[260px] -translate-x-1/2" style="background: linear-gradient(to bottom, rgba(217, 119, 6, 0.22), rgba(217, 119, 6, 0) 75%); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0% 100%); filter: blur(8px);"></div>
                 </div>

@@ -424,7 +424,12 @@ class EventRepo
                         $venue->phone = $authUser->phone;
                         $venue->phone_verified_at = $authUser->phone_verified_at;
                     }
-                    $venue->save();
+                    // Save quietly: the auth user's contact was copied verbatim (already
+                    // lowercased/normalized on the User), so bypass the Role::updating hook
+                    // that would otherwise null the just-copied email_verified_at /
+                    // phone_verified_at and send a redundant verification email because the
+                    // email/phone became dirty - defeating the claim.
+                    $venue->saveQuietly();
 
                     $authUser->roles()->attach($venue->id, ['level' => 'owner', 'created_at' => now()]);
 

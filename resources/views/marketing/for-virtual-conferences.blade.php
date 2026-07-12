@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Virtual Conferences | Hosting Software</x-slot>
+    <x-slot name="title">Free Event Schedule for Virtual Conferences</x-slot>
     <x-slot name="description">Schedule and sell virtual conferences with multi-day agendas, tiered ticketing, and attendee email notifications. Works with any platform. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Virtual Conferences</x-slot>
 

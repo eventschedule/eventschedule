@@ -36,13 +36,7 @@
         }
     }
     </script>
-    <x-seo.faq-schema :items="[
-        ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is fully open source under the Attribution Assurance License (AAL). You can inspect the code, contribute improvements, or fork it for your own needs at no cost.'],
-        ['q' => 'How do I install Event Schedule on my server?', 'a' => 'You can install Event Schedule with a one-click Softaculous installer on most shared hosts, or deploy it with Docker Compose on a VPS, cloud server, or locally. Both paths are documented in the install guide.'],
-        ['q' => 'How do updates work for selfhosted installations?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds with minimal disruption. No terminal access is required.'],
-        ['q' => 'Does the selfhosted version support ticket sales and AI features?', 'a' => 'Yes. Selfhosted installations include ticketing, QR check-ins, AI-powered event auto-import, and AI blog generation for SEO. You connect your own Stripe and Gemini API keys.'],
-        ['q' => 'Can I run Event Schedule as a white-label SaaS for my customers?', 'a' => 'Yes. The selfhosted version supports white-label multi-tenant use, so you can run it as a branded SaaS product for your own customers.'],
-    ]" />
+    {{-- FAQ JSON-LD is emitted alongside the visible FAQ section near the end of the page, driven by one $selfhostFaqs array so the markup always matches the rendered content. --}}
     </x-slot>
 
     <style {!! nonce_attr() !!}>
@@ -622,7 +616,46 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Finale                                                   -->
+    <!-- 8. FAQ                                                       -->
+    <!-- ============================================================ -->
+    @php
+        $selfhostFaqs = [
+            ['q' => 'Is Event Schedule really free to selfhost?', 'a' => 'Yes. Event Schedule is fully open source under the Attribution Assurance License (AAL). You can inspect the code, contribute improvements, or fork it for your own needs at no cost.'],
+            ['q' => 'How do I install Event Schedule on my server?', 'a' => 'You can install Event Schedule with a one-click Softaculous installer on most shared hosts, or deploy it with Docker Compose on a VPS, cloud server, or locally. Both paths are documented in the install guide.'],
+            ['q' => 'How do updates work for selfhosted installations?', 'a' => 'When a new version is released, a notice appears in your admin panel. One click applies the update in seconds with minimal disruption. No terminal access is required.'],
+            ['q' => 'Does the selfhosted version support ticket sales and AI features?', 'a' => 'Yes. Selfhosted installations include ticketing, QR check-ins, AI-powered event auto-import, and AI blog generation for SEO. You connect your own Stripe and Gemini API keys.'],
+            ['q' => 'Can I run Event Schedule as a white-label SaaS for my customers?', 'a' => 'Yes. The selfhosted version supports white-label multi-tenant use, so you can run it as a branded SaaS product for your own customers.'],
+        ];
+    @endphp
+    <x-seo.faq-schema :items="$selfhostFaqs" />
+    <section class="bg-gray-50 py-24 dark:bg-[#0f0f14]">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient es-gradient-anim">questions</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Common questions about selfhosting Event Schedule.
+                </p>
+            </div>
+            <div class="space-y-4" data-reveal-group="80">
+                @foreach ($selfhostFaqs as $faq)
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-emerald-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-emerald-400/40">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. Finale                                                   -->
     <!-- ============================================================ -->
     <section class="relative bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">

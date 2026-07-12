@@ -872,7 +872,7 @@ SVG;
     <!-- ============================================================ -->
     <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key <span class="text-gradient-guide">features</span></h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
                     <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
@@ -908,7 +908,7 @@ SVG;
     <!-- ============================================================ -->
     <section class="bg-white py-20 dark:bg-[#0a0a0f]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related <span class="text-gradient-guide">pages</span></h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
                 @foreach ([['/for-talent', 'Talent'], ['/for-venues', 'Venues'], ['/for-community-centers', 'Community Centers'], ['/for-watch-parties', 'Watch Parties']] as [$relHref, $relName])
                     <a href="{{ marketing_url($relHref) }}" data-reveal class="group guide-rel flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">

@@ -581,11 +581,11 @@
     <!-- ============================================================ -->
     @php
         $journey = [
-            ['Discovery', 'Guest finds you online or walks in', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />'],
-            ['Follow', 'Signs up for your updates via QR or calendar', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />'],
-            ['Return', 'Gets email about new menu, comes back', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />'],
-            ['Regular', "Books chef's table, buys wine dinner tickets", '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />'],
-            ['Advocate', 'Shares your events with friends', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />'],
+            ['Discovery', 'Guest finds you online or walks in', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />', 'Aperitif'],
+            ['Follow', 'Signs up for your updates via QR or calendar', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />', 'Appetizer'],
+            ['Return', 'Gets email about new menu, comes back', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />', 'Entree'],
+            ['Regular', "Books chef's table, buys wine dinner tickets", '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />', 'Dessert'],
+            ['Advocate', 'Shares your events with friends', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />', 'Digestif'],
         ];
     @endphp
     <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
@@ -615,11 +615,12 @@
                 <div class="relative">
                     <div class="absolute left-0 right-0 top-8 hidden h-0.5 bg-gradient-to-r from-rose-500/50 via-amber-500/50 to-emerald-500/50 lg:block" aria-hidden="true"></div>
                     <div class="relative grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-5" data-reveal-group="90">
-                        @foreach ($journey as [$title, $desc, $icon])
+                        @foreach ($journey as [$title, $desc, $icon, $course])
                             <div data-reveal class="text-center">
                                 <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm">
                                     <svg aria-hidden="true" class="h-7 w-7 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
                                 </div>
+                                <div class="es-menu-eyebrow mb-1 text-[11px] tracking-widest text-amber-300/80">{{ $course }}</div>
                                 <h4 class="es-menu-eyebrow mb-2 font-semibold text-white">{{ $title }}</h4>
                                 <p class="text-sm text-gray-400">{{ $desc }}</p>
                             </div>

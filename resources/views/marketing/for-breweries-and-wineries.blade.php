@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Breweries & Wineries | Fill Your Taproom</x-slot>
+    <x-slot name="title">Free Event Schedule for Breweries & Wineries</x-slot>
     <x-slot name="description">Fill your tasting room with fans. Announce releases, host tastings, and sell tickets to brewery events. Email your fans directly. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Breweries & Wineries</x-slot>
 
@@ -857,10 +857,10 @@
                     ['How do customers discover our events?', 'Customers can follow your schedule and receive email notifications when you add new events. Embed your calendar on your website, share the link on social media, or send newsletters to followers with your upcoming calendar.'],
                     ['Does it sync with Google Calendar?', 'Yes. Two-way Google Calendar sync keeps your events updated across platforms. Add an event in either place and it appears in both. Your staff and customers always see the latest schedule.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-[#fed7aa] dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-amber-600/40">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-all duration-300 group-open/faq:rotate-180 group-open/faq:text-[#b45309] dark:text-gray-400 dark:group-open/faq:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>

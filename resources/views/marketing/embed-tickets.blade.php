@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Embed Tickets | Sell Tickets from Any Website - Event Schedule</x-slot>
+    <x-slot name="title">Embed Tickets on Any Website - Event Schedule</x-slot>
     <x-slot name="description">Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 11 languages.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>
 

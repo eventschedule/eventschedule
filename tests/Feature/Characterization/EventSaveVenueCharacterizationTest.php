@@ -209,6 +209,10 @@ class EventSaveVenueCharacterizationTest extends TestCase
 
     public function test_claim_venue_ownership_sets_owner_and_default_role(): void
     {
+        // BUG-001 only manifested on hosted (the Role::updating hook is app.hosted-gated);
+        // pin hosted so this guards the fix regardless of the ambient IS_HOSTED env.
+        config(['app.hosted' => true]);
+
         \Illuminate\Support\Facades\Notification::fake();
 
         $owner = $this->createOwner();
@@ -226,13 +230,13 @@ class EventSaveVenueCharacterizationTest extends TestCase
         $this->assertSame($owner->id, $venue->user_id);
         $this->assertSame($owner->email, $venue->email);
 
-        // BUG-001 (see BUGS_FOUND.md): intentionally asserting current buggy behavior.
-        // The claim block copies email_verified_at so isClaimed() returns true, but
-        // setting the email marks it dirty, and the Role::updating hook (hosted)
-        // immediately nulls email_verified_at and sends a verification email -
-        // defeating the block's stated intent.
-        $this->assertNull($venue->email_verified_at);
-        \Illuminate\Support\Facades\Notification::assertSentTo(
+        // BUG-001 fixed: the claim block saves quietly, so the copied verification
+        // survives (isClaimed() true) and no redundant verify-email is sent - even on
+        // hosted, where the Role::updating hook would otherwise null email_verified_at
+        // on the now-dirty email.
+        $this->assertNotNull($venue->email_verified_at);
+        $this->assertTrue($venue->isClaimed());
+        \Illuminate\Support\Facades\Notification::assertNotSentTo(
             $venue,
             \App\Notifications\VerifyEmail::class
         );

@@ -7,7 +7,7 @@
         <priority>1.0</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/')])
     </url>
-    @if(config('app.hosted') && $showMarketingLinks)
+    @if(config('app.is_nexus') && $showMarketingLinks)
     <url>
         <loc>{{ url('/features') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
@@ -35,12 +35,6 @@
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/examples')])
-    </url>
-    <url>
-        <loc>{{ url('/search') }}</loc>
-        <lastmod>{{ $lastmod }}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
     </url>
     <url>
         <loc>{{ url('/browse') }}</loc>

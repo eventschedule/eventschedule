@@ -445,7 +445,7 @@
                         <p class="mb-6 text-gray-500 dark:text-gray-400">When promoters add you to their lineup, it auto-appears on your schedule. No double-entry.</p>
 
                         <div class="relative mt-auto flex items-center justify-center gap-8 py-2" aria-hidden="true">
-                            <div class="w-20 rounded-lg border border-cyan-400/30 bg-cyan-500/15 p-2">
+                            <div class="es-cyan-box w-20 rounded-lg p-2">
                                 <div class="mb-1 text-center text-[10px] font-medium text-cyan-700 dark:text-cyan-300">Club</div>
                                 <div class="mb-1 h-1.5 rounded bg-gray-300/60 dark:bg-white/20"></div>
                                 <div class="h-1.5 w-3/4 rounded bg-cyan-400/40"></div>

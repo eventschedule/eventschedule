@@ -107,7 +107,7 @@
 
     <style {!! nonce_attr() !!}>
         /* For-libraries "The Catalog" styles. The shared es-* motion system
-           lives in marketing.css; this holds the sky gradient, the library-card
+           lives in marketing.css; this holds the lamplight amber gradient, the library-card
            badge, the card-catalog cards, the drifting programs card, and the
            dust-mote-in-lamplight motif. */
         .text-gradient-lamp {
@@ -164,6 +164,7 @@
             background-image: linear-gradient(to bottom right, #f59e0b, #d97706);
             box-shadow: 0 10px 15px -3px rgba(217, 119, 6, 0.30);
         }
+        .dark .lamp-step { background-image: linear-gradient(to bottom right, #fbbf24, #f59e0b); }
 
         /* Amber text links + related-card hovers */
         .lamp-textlink { color: #b45309; }
@@ -202,6 +203,7 @@
         .lamp-chip { border-color: #fcd34d; background-color: rgba(254, 243, 199, 0.80); color: #92400e; }
         .dark .lamp-chip { border-color: rgba(255, 255, 255, 0.10); background-color: rgba(255, 255, 255, 0.06); color: #d1d5db; }
         .lamp-dot { background-image: linear-gradient(to right, #fbbf24, #f59e0b); }
+        .dark .lamp-dot { background-image: linear-gradient(to right, #fcd34d, #fbbf24); }
 
         /* Date-due stamp for the catalog band corner (decorative red) */
         .lamp-duestamp {

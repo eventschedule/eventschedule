@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Subscriptions & Passes - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Subscriptions & Passes</x-slot>
-    <x-slot name="description">Sell one pass that a guest pays for once and reuses across many events. Set up visit passes, memberships, festival passes, and season passes, then redeem and track them.</x-slot>
+    <x-slot name="description">Sell one pass a guest buys once and reuses across many events. Set up visit passes, memberships, festival passes, and season passes, then redeem and track them.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

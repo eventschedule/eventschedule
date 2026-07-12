@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Replace Google Forms, Mailchimp, Canva & More for Events | Event Schedule</x-slot>
+    <x-slot name="title">Replace Google Forms, Canva & More | Event Schedule</x-slot>
     <x-slot name="description">Replace Google Forms, Mailchimp, Canva, Notion, and Trello with Event Schedule: purpose-built event management with ticketing, event pages, and AI.</x-slot>
     <x-slot name="breadcrumbTitle">Replace</x-slot>
 

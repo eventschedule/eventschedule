@@ -48,8 +48,8 @@ Numbered so work orders can cite them.
 
 **R4 - Found-a-bug protocol.** Characterization WILL surface latent bugs. When it does:
 1. Do NOT fix it. Do NOT clean it up "in passing".
-2. Write the characterization test to assert the CURRENT buggy behavior, annotated: `// BUG-NNN (see BUGS_FOUND.md): intentionally asserting current buggy behavior`.
-3. Append an entry to `BUGS_FOUND.md` (repo root, committed - template in Appendix B).
+2. Write the characterization test to assert the CURRENT buggy behavior, annotated: `// BUG-NNN: intentionally asserting current buggy behavior`.
+3. Report the bug privately to the owner with a repro (no committed bug ledger - retired 2026-07-12; the owner schedules the fix per item 5).
 4. Complete the refactor preserving the bug bit-for-bit.
 5. Bug fixes happen only outside refactor phases, as owner-approved standalone commits that flip the pinned test to the correct expectation in the same commit as the fix.
 
@@ -206,7 +206,7 @@ Ordered. Stop at the first failure.
 | 9 | Mount smoke | `bash storage/refactor/js_smoke.sh` (restart Herd/FPM first) | JS or affected views touched | all markers present, no raw mustaches |
 | 10 | Non-JS form posts | the phase's raw-field-set Feature tests | JS phases | green (subset of gate 3 - verify explicitly) |
 | 11 | Tree review | `git status --porcelain` + `git diff --stat` (+ `git diff --stat routes/web.php` on split phases) | always | only in-scope files; baselines untracked |
-| 12 | Ledger | `BUGS_FOUND.md` updated for anything found | always | entries and pinned tests cross-reference |
+| 12 | Bugs | any bug found is pinned in-test + reported to the owner | always | pinned test annotated; owner notified |
 | 13 | Manual QA | present the phase's Appendix C checklist to the owner | always | owner sign-off |
 | 14 | CI | push the branch; feature-tests + dusk jobs green | always | phase not done until CI passes |
 
@@ -415,7 +415,7 @@ Standing decisions - do not revisit them mid-phase:
 
 **Goal:** build every tool the postflight checklist references, capture first baselines, install the static-analysis net.
 
-**Targets (all new):** `storage/refactor/` per Section 3.1; `phpstan.neon` + `phpstan-baseline.neon`; `BUGS_FOUND.md` stub; `tests/Support/NormalizesHtml.php`.
+**Targets (all new):** `storage/refactor/` per Section 3.1; `phpstan.neon` + `phpstan-baseline.neon`; `BUGS_FOUND.md` stub (retired 2026-07-12); `tests/Support/NormalizesHtml.php`.
 
 **Steps:**
 
@@ -437,7 +437,7 @@ Standing decisions - do not revisit them mid-phase:
            - database/seeders
    ```
    Then `vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline` and commit both files. No `excludePaths` without a justifying comment.
-8. Create `BUGS_FOUND.md` with the Appendix B template at top and no entries.
+8. Create `BUGS_FOUND.md` with the Appendix B template at top and no entries. (Retired 2026-07-12: the ledger was removed once its sole entry, BUG-001, was fixed; see Appendix B.)
 9. Create `tests/Support/NormalizesHtml.php` (same two normalizations as the snapshot script) for use inside Feature tests.
 
 **Verification:** every script runs green on the untouched tree; self-diff empty; `phpstan analyse` exits 0; `php artisan test` green. **Risk:** low - the named risk is snapshot scripts that pass by accident (empty output diffs empty); assert each script produced a nonzero file count.
@@ -852,18 +852,12 @@ Postflight: 1[ ] 2[ ] 3[ ] 4[ ] 5[ ] 6[ ] 7[ ] 8[ ] 9[ ] 10[ ] 11[ ] 12[ ] 13[ ]
 Bugs found: BUG-___ ...
 ```
 
-### Appendix B - BUGS_FOUND.md entry template
+### Appendix B - Bug ledger (retired)
 
-```markdown
-## BUG-007 - saveEvent creates duplicate venue when address differs only by case
-- Found: 2026-07-12, Phase P11 (saveEvent characterization)
-- Location: app/Repos/EventRepo.php ~840
-- Repro: POST event.store with venue address "Main st" when the schedule already has "Main St"
-- Current behavior: a second venue row is created
-- Expected behavior: case-insensitive dedup reuses the existing venue
-- Pinned by: EventSaveCharacterizationTest::test_venue_dedup_is_case_sensitive_bug007
-- Severity: low | Status: preserved, not fixed
-```
+Retired 2026-07-12: the standalone `BUGS_FOUND.md` ledger was removed once its sole
+entry, BUG-001, was fixed. Bugs surfaced during characterization are now pinned in-test
+(R4 step 2) and reported privately to the owner (R4 step 3); the owner schedules the fix
+as a standalone commit that flips the pinned test (R4 step 5).
 
 ### Appendix C - Manual-QA menus
 

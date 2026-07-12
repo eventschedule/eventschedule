@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Selfhost Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Selfhost</x-slot>
-    <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn how to install, configure email, set up Stripe payments, enable Google Calendar sync, and connect AI features.</x-slot>
+    <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn to install, configure email, set up Stripe payments, enable Google Calendar sync, and add AI.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

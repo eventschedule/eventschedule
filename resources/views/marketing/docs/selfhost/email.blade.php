@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Email Setup Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Email Setup</x-slot>
-    <x-slot name="description">Configure email sending for your selfhosted Event Schedule instance. Set up SMTP, Mailgun, Amazon SES, or other mail drivers for ticket confirmations, newsletters, and notifications.</x-slot>
+    <x-slot name="description">Configure email sending for selfhosted Event Schedule. Set up SMTP, Mailgun, Amazon SES, or other mail drivers for ticket confirmations and newsletters.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

@@ -1,6 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">{{ $post->meta_title }} | Event Schedule</x-slot>
     <x-slot name="description">{{ $post->meta_description }}</x-slot>
+    <x-slot name="canonical">{{ url()->current() }}</x-slot>
     @if($post->tags)
     @endif
     <x-slot name="breadcrumbTitle">{{ $post->title }}</x-slot>

@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">AI Setup Documentation - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">AI Setup</x-slot>
-    <x-slot name="description">Configure Google Gemini and OpenAI for your selfhosted Event Schedule instance. Enable AI-powered event importing, agenda scanning, automatic translations, AI-generated text on event graphics, and image generation.</x-slot>
+    <x-slot name="description">Configure Google Gemini or OpenAI for your selfhosted Event Schedule to enable AI event importing, agenda scanning, translations, and image generation.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {

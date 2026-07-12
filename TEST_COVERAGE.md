@@ -4,7 +4,7 @@ Tracks which app features have automated **integration-test** coverage and which
 
 _Last updated: 2026-07-10_
 
-> **Refactor-campaign characterization suites** (2026-07-10, `tests/Feature/Characterization/`): `EventSave*CharacterizationTest` (saveEvent matrix, 43 tests), `RoleGuestSurfaceCharacterizationTest`, `CheckoutBranchCharacterizationTest`, `EventCurationModerationCharacterizationTest`, `ViewGuestDeepCharacterizationTest`, `RoleUpdateCharacterizationTest`, `ModelBootClosureCharacterizationTest`, `NewsletterValidationCharacterizationTest`, `MarketingDataCharacterizationTest`, `EventGraphicStructuralTest`, `EncodedIdRoutingCharacterizationTest`, `NoFakeEmailCharacterizationTest`. These pin CURRENT behavior (bug-for-bug, see `BUGS_FOUND.md`) ahead of REFACTOR_PLAN.md; several also add first-time feature coverage (rows flipped below).
+> **Refactor-campaign characterization suites** (2026-07-10, `tests/Feature/Characterization/`): `EventSave*CharacterizationTest` (saveEvent matrix, 43 tests), `RoleGuestSurfaceCharacterizationTest`, `CheckoutBranchCharacterizationTest`, `EventCurationModerationCharacterizationTest`, `ViewGuestDeepCharacterizationTest`, `RoleUpdateCharacterizationTest`, `ModelBootClosureCharacterizationTest`, `NewsletterValidationCharacterizationTest`, `MarketingDataCharacterizationTest`, `EventGraphicStructuralTest`, `EncodedIdRoutingCharacterizationTest`, `NoFakeEmailCharacterizationTest`. These pin CURRENT behavior (bug-for-bug) ahead of REFACTOR_PLAN.md; several also add first-time feature coverage (rows flipped below).
 
 ## How to keep this current
 

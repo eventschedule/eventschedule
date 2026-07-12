@@ -46,14 +46,14 @@
         $path = request()->path();
         $basePath = $path === '/' ? config('app.url') : config('app.url') . '/' . ltrim(rtrim($path, '/'), '/');
     @endphp
-    <link rel="canonical" href="{{ $basePath }}">
+    <link rel="canonical" href="{{ $canonical ?? $basePath }}">
     <meta name="description" content="{{ $description ?? 'The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.' }}">
     <meta name="robots" content="{{ $robots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
     <meta name="author" content="Event Schedule">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{{ $ogType ?? 'website' }}">
-    <meta property="og:url" content="{{ $basePath }}">
+    <meta property="og:url" content="{{ $canonical ?? $basePath }}">
     <meta property="og:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta property="og:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     @php
@@ -62,9 +62,15 @@
         } else {
             $pathSlug = trim(request()->path(), '/') ?: 'home';
             $pathSlug = str_replace('/', '-', $pathSlug);
-            $ogImage = file_exists(public_path("images/social/{$pathSlug}.png"))
-                ? config('app.url') . "/images/social/{$pathSlug}.png"
-                : config('app.url') . '/images/social/home.png';
+            // Fall back from an exact page image to a section image (e.g. docs-getting-started -> docs), then home.
+            $section = explode('-', $pathSlug)[0];
+            if (file_exists(public_path("images/social/{$pathSlug}.png"))) {
+                $ogImage = config('app.url') . "/images/social/{$pathSlug}.png";
+            } elseif ($section !== $pathSlug && file_exists(public_path("images/social/{$section}.png"))) {
+                $ogImage = config('app.url') . "/images/social/{$section}.png";
+            } else {
+                $ogImage = config('app.url') . '/images/social/home.png';
+            }
         }
     @endphp
     <meta property="og:image" content="{{ $ogImage }}">
@@ -84,7 +90,7 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="{{ $basePath }}">
+    <meta name="twitter:url" content="{{ $canonical ?? $basePath }}">
     <meta name="twitter:title" content="{{ $title ?? 'Event Schedule' }}">
     <meta name="twitter:description" content="{{ $description ?? 'The simple and free way to share your event schedule' }}">
     <meta name="twitter:image" content="{{ $ogImage }}">
@@ -163,28 +169,15 @@
     @php
         $breadcrumbs = [['name' => 'Home', 'url' => config('app.url')]];
         $path = request()->path();
-        if (str_starts_with($path, 'docs/selfhost/')) {
-            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
-            $breadcrumbs[] = ['name' => 'Selfhost', 'url' => url('/docs/selfhost')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        $skipBreadcrumb = false;
+        if ($path === 'docs') {
+            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url()->current()];
         } elseif ($path === 'docs/selfhost') {
             $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
             $breadcrumbs[] = ['name' => 'Selfhost', 'url' => url()->current()];
-        } elseif (str_starts_with($path, 'docs/saas/')) {
-            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
-            $breadcrumbs[] = ['name' => 'SaaS', 'url' => url('/docs/saas')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
-        } elseif ($path === 'docs/saas') {
-            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
-            $breadcrumbs[] = ['name' => 'SaaS', 'url' => url()->current()];
-        } elseif (str_starts_with($path, 'docs/developer/')) {
-            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
-        } elseif (str_starts_with($path, 'docs/') || $path === 'docs') {
-            if ($path !== 'docs') {
-                $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
-            }
-            $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
+        } elseif (str_starts_with($path, 'docs/')) {
+            // Leaf docs pages render their own visible BreadcrumbList via <x-docs-breadcrumb>; skip the layout's here to avoid a duplicate.
+            $skipBreadcrumb = true;
         } elseif (str_starts_with($path, 'features/')) {
             $breadcrumbs[] = ['name' => 'Features', 'url' => url('/features')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
@@ -198,7 +191,7 @@
             $breadcrumbs[] = ['name' => 'Replace', 'url' => url('/replace')];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } elseif (str_starts_with($path, 'blog/')) {
-            $breadcrumbs[] = ['name' => 'Blog', 'url' => url('/blog')];
+            $breadcrumbs[] = ['name' => 'Blog', 'url' => blog_url()];
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         } elseif ($path === 'blog') {
             $breadcrumbs[] = ['name' => 'Blog', 'url' => url()->current()];
@@ -217,6 +210,7 @@
             $breadcrumbs[] = ['name' => $breadcrumbTitle ?? $title ?? 'Page', 'url' => url()->current()];
         }
     @endphp
+    @if (! $skipBreadcrumb)
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
@@ -234,6 +228,7 @@
         ]
     }
     </script>
+    @endif
     @endif
 
     @include('partials.google-analytics')

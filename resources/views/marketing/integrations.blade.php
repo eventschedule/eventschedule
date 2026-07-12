@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Integrations | Google Calendar, Stripe & More - Event Schedule</x-slot>
+    <x-slot name="title">Integrations | Google Calendar & Stripe - Event Schedule</x-slot>
     <x-slot name="description">Connect Event Schedule with Google Calendar, CalDAV, Stripe, and Invoice Ninja so your calendar, payments, and invoices stay in sync automatically.</x-slot>
     <x-slot name="breadcrumbTitle">Integrations</x-slot>
 

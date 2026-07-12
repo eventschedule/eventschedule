@@ -536,12 +536,21 @@ class HomeController extends Controller
 
                 $hasQueryFilter = request()->has('events') || request()->has('roles');
 
+                // Static marketing/docs pages change on deploy, not per crawl. Derive
+                // <lastmod> from the newest marketing view mtime so it reflects real
+                // content changes instead of "now" (which trains crawlers to ignore it).
+                $staticMtime = collect(glob(resource_path('views/marketing/*.blade.php')) ?: [])
+                    ->push(resource_path('views/sitemap.blade.php'))
+                    ->map(fn ($f) => @filemtime($f) ?: 0)
+                    ->max();
+                $staticLastmod = now()->setTimestamp($staticMtime ?: now()->getTimestamp())->toIso8601String();
+
                 return view('sitemap', [
                     'roles' => ! request()->has('events') ? $roles : [],
                     'events' => ! request()->has('roles') ? $events : [],
                     'blogPosts' => $hasQueryFilter ? [] : $blogPosts,
                     'showMarketingLinks' => ! $hasQueryFilter,
-                    'lastmod' => now()->toIso8601String(),
+                    'lastmod' => $staticLastmod,
                 ])->render();
             });
 

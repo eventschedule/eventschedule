@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Bars & Pubs | Fill Your Event Calendar</x-slot>
+    <x-slot name="title">Free Event Schedule for Bars & Pubs | Fill Your Calendar</x-slot>
     <x-slot name="description">Fill your bar's calendar with great events. Email your regulars directly - no algorithm. Sell tickets, accept booking requests. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Bars</x-slot>
 
@@ -762,10 +762,10 @@
                     ['Do I need to pay to list my bar\'s events?', 'No. Event Schedule is free forever for creating and sharing your bar\'s event calendar. You can upgrade to Pro or Enterprise for ticketing and newsletters, with no platform fees on ticket sales - you only pay Stripe\'s standard processing fees.'],
                     ['Can bands and musicians request to play at my bar?', 'Yes. Turn on the booking inbox and performers can submit requests directly. You review each one and approve or decline. Approved acts are added to your calendar automatically - no back-and-forth emails needed.'],
                 ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-amber-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-amber-400/40">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-all duration-300 group-open/faq:rotate-180 group-open/faq:text-amber-600 dark:text-gray-400 dark:group-open/faq:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>

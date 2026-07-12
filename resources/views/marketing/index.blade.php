@@ -297,15 +297,20 @@
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
+        "@id": "{{ config('app.url') }}/#software",
         "name": "Event Schedule",
+        "url": "{{ config('app.url') }}",
         "description": "The simple and free way to share your event schedule. Perfect for musicians, venues, event organizers, and vendors.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "screenshot": "{{ config('app.url') }}/images/social/home.png",
+        "publisher": { "@id": "{{ config('app.url') }}/#organization" },
         "offers": {
             "@type": "Offer",
             "price": "0",
-            "priceCurrency": "USD"
+            "priceCurrency": "USD",
+            "url": "{{ config('app.url') }}/pricing",
+            "availability": "https://schema.org/InStock"
         }
     }
     </script>
@@ -318,13 +323,7 @@
             ['name' => 'Grow your audience', 'text' => 'Fans follow your schedule. Send them newsletters and notify them when you add new events.'],
         ]"
     />
-    <x-seo.faq-schema :items="[
-        ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules. Pro and Enterprise plans add features like ticketing, event boosting, custom branding, and AI tools.'],
-        ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, you can sell tickets with zero platform fees using Stripe or Invoice Ninja. Tickets include QR codes for check-in, and you can create multiple ticket types with promo codes.'],
-        ['q' => 'Does Event Schedule sync with Google Calendar?', 'a' => 'Yes, Event Schedule offers two-way Google Calendar sync with real-time webhook updates. You can also sync with any CalDAV-compatible calendar server.'],
-        ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com.'],
-        ['q' => 'Who is Event Schedule for?', 'a' => 'Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience.'],
-    ]" />
+    {{-- FAQ JSON-LD is emitted alongside the visible FAQ section near the end of the page, driven by one $homeFaqs array so the markup always matches the rendered content. --}}
     {{-- Structured data: list the publicly visible events in the rail --}}
     @php
         $eventListItems = [];
@@ -1466,7 +1465,46 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 11. Finale: claim your stage                                 -->
+    <!-- 11. FAQ                                                      -->
+    <!-- ============================================================ -->
+    @php
+        $homeFaqs = [
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes, Event Schedule is free to use with unlimited events and schedules. Pro and Enterprise plans add features like ticketing, event boosting, custom branding, and AI tools.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes, you can sell tickets with zero platform fees using Stripe or Invoice Ninja. Tickets include QR codes for check-in, and you can create multiple ticket types with promo codes.'],
+            ['q' => 'Does Event Schedule sync with Google Calendar?', 'a' => 'Yes, Event Schedule offers two-way Google Calendar sync with real-time webhook updates. You can also sync with any CalDAV-compatible calendar server.'],
+            ['q' => 'Can I selfhost Event Schedule?', 'a' => 'Yes, Event Schedule is 100% open source. You can selfhost it on your own server for full control over your data, or use the hosted platform at eventschedule.com.'],
+            ['q' => 'Who is Event Schedule for?', 'a' => 'Event Schedule is built for musicians, DJs, comedians, venues, bars, theaters, event curators, and anyone who needs to share an event schedule with their audience.'],
+        ];
+    @endphp
+    <x-seo.faq-schema :items="$homeFaqs" />
+    <section class="relative scroll-mt-24 bg-gray-50 py-24 dark:bg-[#0f0f14] lg:py-32">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                    Frequently asked <span class="text-gradient es-gradient-anim">questions</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything you need to know about sharing your events with Event Schedule.
+                </p>
+            </div>
+            <div class="space-y-4" data-reveal-group="80">
+                @foreach ($homeFaqs as $faq)
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-400/40">
+                        <summary class="flex cursor-pointer items-center justify-between p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
+                    </details>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 12. Finale: claim your stage                                 -->
     <!-- ============================================================ -->
     <section id="claim" class="relative scroll-mt-24 bg-gray-50 py-24 dark:bg-[#0f0f14] lg:py-32">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">

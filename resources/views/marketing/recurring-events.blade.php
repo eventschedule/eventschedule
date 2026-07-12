@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Recurring Events | Flexible Repeat Scheduling - Event Schedule</x-slot>
+    <x-slot name="title">Recurring Events | Flexible Scheduling - Event Schedule</x-slot>
     <x-slot name="description">Set events to repeat daily, weekly, biweekly, monthly, or yearly with flexible end conditions, per-occurrence tickets, and automatic Google Calendar sync.</x-slot>
     <x-slot name="breadcrumbTitle">Recurring Events</x-slot>
 

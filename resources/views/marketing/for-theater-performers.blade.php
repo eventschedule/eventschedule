@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Theater Performers | Share Your Shows</x-slot>
-    <x-slot name="description">Share your theater productions with audiences everywhere. Email your fans directly - no social media algorithms. Sell tickets to your shows with zero platform fees.</x-slot>
+    <x-slot name="title">Free Event Schedule for Theater Performers</x-slot>
+    <x-slot name="description">Share your theater productions with audiences everywhere. Email fans directly, skip social media algorithms. Sell tickets to your shows with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Theater Performers</x-slot>
 
     <x-slot name="structuredData">

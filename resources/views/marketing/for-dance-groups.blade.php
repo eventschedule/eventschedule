@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Dance Groups | Share Your Performances</x-slot>
+    <x-slot name="title">Free Event Schedule for Dance Groups | Share Your Shows</x-slot>
     <x-slot name="description">Share your dance performances with fans worldwide. Email your fans directly and sell tickets to recitals and workshops with zero fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 

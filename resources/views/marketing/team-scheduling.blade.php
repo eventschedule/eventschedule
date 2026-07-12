@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Team Event Scheduling | Permissions & Collaboration - Event Schedule</x-slot>
+    <x-slot name="title">Team Event Scheduling & Permissions | Event Schedule</x-slot>
     <x-slot name="description">Invite team members, manage permissions, and coordinate schedules together. Collaborate on events with your team using flexible role-based access.</x-slot>
     <x-slot name="breadcrumbTitle">Team Scheduling</x-slot>
 

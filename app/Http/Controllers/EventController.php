@@ -2240,6 +2240,19 @@ class EventController extends Controller
             $request->validate($rules);
         }
 
+        // A required sub-schedule must resolve to a real group for this curator, not merely be
+        // present: the rule above is presence-only, and the attach step below silently drops an
+        // unresolvable curator_group_id, so a crafted non-empty value would otherwise slip the
+        // requirement and file the event uncategorized. Same skip condition as the rule (:2231).
+        if (($role->import_config['required_fields']['group_id'] ?? false) && $role->groups()->exists()) {
+            $groupId = UrlUtils::decodeId($request->curator_group_id);
+            if (! $groupId || ! Group::where('id', $groupId)->where('role_id', $role->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'curator_group_id' => [__('messages.select_sub_schedule')],
+                ]);
+            }
+        }
+
         $user = auth()->user();
 
         if (! $user) {

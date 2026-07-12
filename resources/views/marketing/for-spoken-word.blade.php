@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Spoken Word | Share Your Performances</x-slot>
+    <x-slot name="title">Free Event Schedule for Spoken Word | Share Your Readings</x-slot>
     <x-slot name="description">Share your poetry readings, open mics, and workshops. Sell tickets directly and reach fans with newsletters. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 

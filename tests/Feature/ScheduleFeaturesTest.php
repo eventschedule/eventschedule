@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Services\AuditService;
+use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -211,5 +212,37 @@ class ScheduleFeaturesTest extends TestCase
         $event = Event::where('name', 'Guest Submitted Event')->first();
         $this->assertNotNull($event);
         $this->assertTrue($role->events()->where('events.id', $event->id)->exists());
+    }
+
+    public function test_guest_submit_requires_valid_sub_schedule_when_configured_required(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, [
+            'accept_requests' => true,
+            'require_account' => true,
+            'import_config' => ['required_fields' => ['group_id' => true]],
+        ]);
+        $group = $this->createGroup($curator);
+
+        $payload = [
+            'name' => 'Sneaky Event',
+            'description' => 'From a guest',
+            'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+            'duration' => 2,
+        ];
+        $route = route('event.guest_import.store', ['subdomain' => $curator->subdomain]);
+
+        // A crafted, non-empty but unresolvable id satisfies the presence-only 'required' rule,
+        // yet must be rejected so the event can't be filed uncategorized past the requirement.
+        $this->postJson($route, $payload + ['curator_group_id' => 'zzzz'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('curator_group_id');
+
+        $this->assertNull(Event::where('name', 'Sneaky Event')->first());
+
+        // A real sub-schedule id clears the sub-schedule gate (any remaining 422 is for the
+        // account fields this no-account request omits, not for curator_group_id).
+        $this->postJson($route, $payload + ['curator_group_id' => UrlUtils::encodeId($group->id)])
+            ->assertJsonMissingValidationErrors('curator_group_id');
     }
 }

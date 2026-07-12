@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Scheduling Software for Every Industry | Event Schedule</x-slot>
-    <x-slot name="description">Event scheduling software for musicians, venues, restaurants, theaters, and more. Share events, sell tickets, send newsletters. Free forever with zero platform fees.</x-slot>
+    <x-slot name="title">Event Scheduling for Every Industry | Event Schedule</x-slot>
+    <x-slot name="description">Event scheduling software for musicians, venues, restaurants, and theaters. Share events, sell tickets, send newsletters. Free forever with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
     <x-slot name="structuredData">

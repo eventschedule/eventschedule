@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Compare Event Schedule | vs Eventbrite, Luma, Meetup & 13 More</x-slot>
+    <x-slot name="title">Compare Event Schedule vs Eventbrite, Luma & More</x-slot>
     <x-slot name="description">Compare Event Schedule with Eventbrite, Luma, Meetup, and 13 more platforms. Feature-by-feature breakdowns, a fee calculator, and zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Compare</x-slot>
 

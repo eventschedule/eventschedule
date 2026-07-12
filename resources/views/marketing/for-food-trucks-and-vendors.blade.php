@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Food Trucks & Vendors | Share Your Route</x-slot>
+    <x-slot name="title">Free Event Schedule for Food Trucks & Vendors</x-slot>
     <x-slot name="description">Tell hungry customers where to find you. Share daily locations, build a following, and take catering bookings. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Food Trucks & Vendors</x-slot>
 
@@ -791,6 +791,22 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.32), rgba(249, 115, 22, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <!-- Route motif echoed into the finale (the third full-bleed layer) -->
+                    <div class="es-route absolute inset-0 text-orange-400" style="-webkit-mask-image: radial-gradient(ellipse 90% 82% at 50% 50%, black 18%, transparent 80%); mask-image: radial-gradient(ellipse 90% 82% at 50% 50%, black 18%, transparent 80%);">
+                        <svg class="h-full w-full" viewBox="0 0 1200 400" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M-60 260 C 200 120, 380 360, 620 220 S 980 100, 1260 240" stroke="currentColor" stroke-width="20" stroke-linecap="round" opacity="0.10"/>
+                            <path class="es-route-path" d="M-60 260 C 200 120, 380 360, 620 220 S 980 100, 1260 240" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="es-pin-bob absolute hidden sm:block" style="left: 8%; top: 2.75rem;">
+                        <span class="es-ping relative flex h-9 w-9 items-center justify-center">
+                            <span style="--ping-dur: 3s; --ping-delay: 0s;"></span>
+                            <span style="--ping-dur: 3s; --ping-delay: 1.5s;"></span>
+                            <svg class="relative h-8 w-8 text-orange-500 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
+                            </svg>
+                        </span>
+                    </div>
                 </div>
 
                 <div class="relative z-10">

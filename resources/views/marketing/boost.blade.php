@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Boost Events with Ad Campaigns - Event Schedule</x-slot>
-    <x-slot name="description">Turn your event details into live Facebook and Instagram ads. Automated targeting, budget control, and real-time analytics with no ad manager experience required.</x-slot>
+    <x-slot name="description">Turn your event details into live Facebook and Instagram ads. Automated targeting, budget control, and real-time analytics, no ad manager experience needed.</x-slot>
     <x-slot name="breadcrumbTitle">Boost</x-slot>
 
     <x-slot name="structuredData">

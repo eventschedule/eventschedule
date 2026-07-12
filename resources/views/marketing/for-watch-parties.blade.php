@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Watch Parties | Hosting Software</x-slot>
+    <x-slot name="title">Free Event Schedule for Watch Parties | Movie Nights</x-slot>
     <x-slot name="description">Free, open-source watch party scheduling software with registration, ticketing, and email notifications. Works with any streaming platform. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Watch Parties</x-slot>
 

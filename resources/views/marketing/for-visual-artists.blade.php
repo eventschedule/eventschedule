@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Visual Artists | Share Your Exhibitions</x-slot>
+    <x-slot name="title">Free Event Schedule for Visual Artists | Exhibitions</x-slot>
     <x-slot name="description">Build your collector base directly. Announce exhibitions, sell tickets to openings, and email collectors. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Visual Artists</x-slot>
 

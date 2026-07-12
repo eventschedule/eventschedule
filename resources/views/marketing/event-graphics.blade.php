@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Event Graphics | Auto-Generated Shareable Images - Event Schedule</x-slot>
+    <x-slot name="title">Event Graphics | Auto-Generated Images - Event Schedule</x-slot>
     <x-slot name="description">Auto-generate shareable event images and formatted text for Instagram, WhatsApp, email, and more. Custom header images and multiple output formats.</x-slot>
     <x-slot name="breadcrumbTitle">Event Graphics</x-slot>
 

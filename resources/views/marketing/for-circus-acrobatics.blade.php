@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Circus & Acrobatics | Share Your Performances</x-slot>
+    <x-slot name="title">Free Event Schedule for Circus & Acrobatics</x-slot>
     <x-slot name="description">Share your circus performances, sell tickets directly, and reach your audience with newsletters. No social media algorithms. Zero platform fees. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Circus & Acrobatics</x-slot>
 

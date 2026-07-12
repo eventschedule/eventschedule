@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Nightclubs | Fill Your Event Calendar</x-slot>
+    <x-slot name="title">Free Event Schedule for Nightclubs | Fill Your Calendar</x-slot>
     <x-slot name="description">Fill your club with DJ lineups and themed nights. Email your crowd directly - no algorithm. Sell tickets, accept DJ bookings. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 

@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Comedians | Share Your Show Dates</x-slot>
-    <x-slot name="description">One link for every set. Track your mics, guest spots, and headlines. Email fans directly - algorithms can't bury it. Zero fees when you sell tickets. Free forever.</x-slot>
+    <x-slot name="description">One link for every set. Track your mics, guest spots, and headlines. Email fans directly, no algorithm buries it. Zero fees when you sell tickets. Free forever.</x-slot>
     <x-slot name="breadcrumbTitle">For Comedians</x-slot>
 
     <x-slot name="structuredData">

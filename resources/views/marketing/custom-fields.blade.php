@@ -1,5 +1,5 @@
 <x-marketing-layout>
-    <x-slot name="title">Custom Fields | Event Metadata &amp; Attendee Forms - Event Schedule</x-slot>
+    <x-slot name="title">Custom Fields | Event Metadata & Forms - Event Schedule</x-slot>
     <x-slot name="description">Collect exactly the info you need from ticket buyers. Add custom text, dropdown, date, and yes/no fields to your events and tickets.</x-slot>
     <x-slot name="breadcrumbTitle">Custom Fields</x-slot>
 

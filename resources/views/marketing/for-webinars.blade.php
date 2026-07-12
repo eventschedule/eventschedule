@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Webinars | Hosting Software</x-slot>
-    <x-slot name="description">Host webinars with built-in registration, ticketing, email notifications, and streaming link integration. Works with Zoom, Google Meet, and any platform. Zero platform fees.</x-slot>
+    <x-slot name="title">Free Event Schedule for Webinars | Registration & Streaming</x-slot>
+    <x-slot name="description">Host webinars with built-in registration, ticketing, email reminders, and streaming links. Works with Zoom, Google Meet, or any platform. Zero fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Webinars</x-slot>
 
     <x-slot name="structuredData">

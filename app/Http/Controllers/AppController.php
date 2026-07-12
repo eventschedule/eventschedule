@@ -377,7 +377,7 @@ class AppController extends Controller
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
         $content = $isAppSubdomain
             ? $disallowRules
-            : $disallowRules."\nSitemap: ".config('app.url')."/sitemap.xml\n";
+            : $disallowRules."\nSitemap: ".config('app.url')."/sitemap.xml\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
     }

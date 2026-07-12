@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Contact Event Schedule | Get in Touch</x-slot>
-    <x-slot name="description">Get in touch with Event Schedule. Contact us via email for support, report issues on GitHub, or connect on social media. We're here to help with setup, features, and more.</x-slot>
+    <x-slot name="description">Contact Event Schedule by email for support, report issues on GitHub, or connect with us on social media. We're here to help with setup, features, and more.</x-slot>
     <x-slot name="breadcrumbTitle">Contact</x-slot>
 
     <x-slot name="structuredData">

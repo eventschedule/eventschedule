@@ -402,7 +402,7 @@
     "canva": {
         "name": "Canva",
         "tagline": "Event graphics that create themselves.",
-        "description": "Replace Canva for event flyers and graphics with Event Schedule. AI-generated event graphics and shareable flyers are created automatically from your event details.",
+        "description": "Replace Canva for event flyers and graphics with Event Schedule. AI-generated graphics and shareable flyers are created automatically from your event details.",
         "keywords": "Canva alternative for events, Canva replacement, event flyer maker, event graphic generator",
         "audience_hint": "For organizers spending hours designing event flyers manually",
         "about": "Canva is a popular graphic design platform that event organizers use to create flyers, social media posts, and promotional graphics. While Canva offers great design flexibility, creating event graphics manually takes time and requires updating multiple designs whenever event details change.",
@@ -1402,7 +1402,7 @@
     "doodle": {
         "name": "Doodle",
         "tagline": "Go from polling dates to publishing events.",
-        "description": "Replace Doodle for event scheduling with Event Schedule. Move beyond date polling to a full event platform with public pages, ticketing, and a shareable calendar.",
+        "description": "Replace Doodle for event scheduling with Event Schedule. Move beyond date polls to a full event platform with public pages, ticketing, and a shareable calendar.",
         "keywords": "Doodle alternative for events, Doodle replacement, event scheduling poll, event date scheduling",
         "audience_hint": "For organizers using date polling to coordinate events",
         "about": "Doodle is a scheduling poll tool that helps groups find a common time to meet. Event organizers sometimes use it to pick event dates, but Doodle stops at the poll - it does not help you create, promote, or manage the actual event once a date is chosen.",
@@ -1803,7 +1803,7 @@
     "squarespace": {
         "name": "Squarespace",
         "tagline": "An event platform, not a website builder.",
-        "description": "Replace Squarespace for event websites with Event Schedule. Get purpose-built event pages, integrated ticketing, and a shareable schedule without building a full website.",
+        "description": "Replace Squarespace for event websites with Event Schedule. Get purpose-built event pages, integrated ticketing, and a shareable schedule, no full site needed.",
         "keywords": "Squarespace alternative for events, Squarespace replacement, event website builder, event landing page",
         "audience_hint": "For organizers building event pages on a general website builder",
         "about": "Squarespace is a general website builder that some event organizers use to create event pages and sell tickets through third-party integrations. While it produces beautiful websites, building event functionality on top of a website builder means extra complexity, plugins, and ongoing maintenance for features that should be built in.",
@@ -2003,7 +2003,7 @@
     "notion": {
         "name": "Notion",
         "tagline": "Event management that faces your audience, not just your team.",
-        "description": "Replace Notion for event planning with Event Schedule. Get public event pages, built-in ticketing, and Google Calendar sync instead of internal workspace databases.",
+        "description": "Replace Notion for event planning with Event Schedule. Get public event pages, built-in ticketing, and Google Calendar sync instead of workspace databases.",
         "keywords": "Notion alternative for events, Notion replacement, Notion event planning, event management workspace",
         "audience_hint": "For organizers planning events in workspace tools like Notion",
         "about": "Notion is a workspace and productivity tool that some event organizers use to plan events with databases, calendars, and shared pages. While Notion is excellent for internal project management, it has no public-facing event pages, no ticketing or RSVP functionality, and a steep learning curve for setting up event workflows.",

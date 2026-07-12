@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Free Event Schedule for Live Concerts | Promote Your Shows</x-slot>
-    <x-slot name="description">Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your streaming schedule. Zero platform fees.</x-slot>
+    <x-slot name="description">Stream live concerts to fans worldwide. Sell virtual tickets alongside venue tickets, email fans directly, and manage your schedule. Zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Live Concerts</x-slot>
 
     <x-slot name="structuredData">

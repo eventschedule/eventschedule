@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Event Polls & Voting - Event Schedule</x-slot>
-    <x-slot name="description">Add interactive polls to your events. Guests vote on multiple choice questions with real-time results. Pro feature with one vote per user. No credit card required.</x-slot>
+    <x-slot name="description">Add interactive polls to your events. Guests vote on multiple choice questions with real-time results. A Pro feature with one vote per user, no credit card.</x-slot>
     <x-slot name="breadcrumbTitle">Event Polls</x-slot>
 
     <x-slot name="structuredData">

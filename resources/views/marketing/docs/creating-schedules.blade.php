@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Creating Schedules - Event Schedule</x-slot>
     <x-slot name="breadcrumbTitle">Creating Schedules</x-slot>
-    <x-slot name="description">Learn how to create and configure your schedule in Event Schedule. Set up details, address, contact info, settings, sub-schedules, auto import, calendar integrations, and more.</x-slot>
+    <x-slot name="description">Learn how to create and configure your schedule in Event Schedule. Set up details, address, contact info, sub-schedules, auto import, and calendar sync.</x-slot>
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
