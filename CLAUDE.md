@@ -192,7 +192,7 @@ v1.0.112
 
 ## Feature Tiers (Free / Pro / Enterprise)
 
-See `FEATURES.md` for the complete reference of which features belong to each plan tier. **Always consult `FEATURES.md`** when:
+See `docs/FEATURES.md` for the complete reference of which features belong to each plan tier. **Always consult `docs/FEATURES.md`** when:
 - Updating the pricing page, comparison/alternative pages, or feature marketing pages
 - Updating the user guide or documentation
 - Adding or modifying gate checks (`$role->isPro()`, `$role->isEnterprise()`) in the AP
