@@ -39,7 +39,7 @@ return [
         'text_provider' => env('AI_TEXT_PROVIDER', 'gemini'),
         'image_provider' => env('AI_IMAGE_PROVIDER', 'openai'),
         'graphic_models' => [
-            'gemini-2.5-flash' => ['name' => 'Gemini 2.5 Flash', 'provider' => 'gemini', 'badge' => 'balanced'],
+            'gemini-3-flash' => ['name' => 'Gemini 3 Flash', 'provider' => 'gemini', 'badge' => 'balanced'],
         ],
     ],
 

@@ -184,7 +184,7 @@ class GraphicEmailService
             // Determine model and provider from config
             $models = config('services.ai.graphic_models', []);
             $modelConfig = $models[$aiModel] ?? null;
-            $model = $modelConfig ? $aiModel : 'gemini-2.5-flash';
+            $model = $modelConfig ? $aiModel : 'gemini-3-flash';
             $provider = $modelConfig ? $modelConfig['provider'] : 'gemini';
 
             if ($provider === 'openai') {
