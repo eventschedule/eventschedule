@@ -409,7 +409,7 @@
                         textSpinner.classList.add('hidden');
                         textContent.classList.remove('hidden');
                         textContent.value = data.text;
-                        textContent.dir = formSettings.force_english ? 'ltr' : '{{ $role->isRtl() ? "rtl" : "ltr" }}';
+                        textContent.dir = formSettings.force_english ? 'ltr' : '{{ content_dir($role) }}';
                         graphicData = graphicData || {};
                         graphicData.text = data.text;
                         graphicData.download_url = data.download_url;
@@ -2401,7 +2401,7 @@
                                 id="eventText"
                                 readonly
                                 class="hidden w-full h-full p-3 border border-gray-200 dark:border-gray-700 rounded-md resize-none font-mono text-sm leading-relaxed whitespace-pre-wrap overflow-y-auto bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none min-h-[50vh] lg:min-h-[200px]"
-                                dir="{{ $role->isRtl() ? 'rtl' : 'ltr' }}"
+                                dir="{{ content_dir($role) }}"
                             ></textarea>
                             <div id="aiProcessingIndicator" class="hidden flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2 px-1">
                                 <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

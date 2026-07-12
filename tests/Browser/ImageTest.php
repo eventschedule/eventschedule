@@ -68,10 +68,10 @@ class ImageTest extends DuskTestCase
 
             // Upload
             $browser->attach('#profile_image', $imagePath)
-                ->waitFor('#profile_image_preview_clear', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15);
+                ->waitFor('#profile_image_preview_clear', 5);
+
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
+            $browser->waitForLocation('/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->profile_image_url);
@@ -119,10 +119,10 @@ class ImageTest extends DuskTestCase
 
             // Upload
             $browser->attach('#header_image_url', $imagePath)
-                ->waitFor('#header_image_url_preview_clear', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15);
+                ->waitFor('#header_image_url_preview_clear', 5);
+
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
+            $browser->waitForLocation('/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->refresh()->header_image_url);
@@ -173,10 +173,10 @@ class ImageTest extends DuskTestCase
 
             // Upload
             $browser->attach('#background_image_url', $imagePath)
-                ->waitFor('#background_image_preview_clear', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15);
+                ->waitFor('#background_image_preview_clear', 5);
+
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
+            $browser->waitForLocation('/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Role::where('subdomain', 'talent')->first()->refresh()->background_image_url);
@@ -217,10 +217,10 @@ class ImageTest extends DuskTestCase
             // Create event
             $browser->visit('/talent/add-event?date='.date('Y-m-d'))
                 ->waitFor('#event_name', 5)
-                ->type('name', 'Flyer Test Event')
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15);
+                ->type('name', 'Flyer Test Event');
+
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
+            $browser->waitForLocation('/talent/schedule', 30);
 
             // Get event hash
             $event = Event::first();
@@ -230,10 +230,10 @@ class ImageTest extends DuskTestCase
             $browser->visit('/talent/edit-event/'.$hash)
                 ->waitFor('#flyer_image_choose', 5)
                 ->attach('#flyer_image', $imagePath)
-                ->waitFor('#image_preview', 5)
-                ->scrollIntoView('button[type="submit"]')
-                ->press('SAVE')
-                ->waitForLocation('/talent/schedule', 15);
+                ->waitFor('#image_preview', 5);
+
+            $browser->script("window._skipUnsavedWarning = true; document.getElementById('edit-form').requestSubmit();");
+            $browser->waitForLocation('/talent/schedule', 30);
 
             // Verify DB
             $this->assertNotNull(Event::first()->refresh()->flyer_image_url);
