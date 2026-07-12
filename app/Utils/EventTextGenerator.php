@@ -17,11 +17,17 @@ class EventTextGenerator
             $template = self::getDefaultTemplate();
         }
 
+        // RTL-language schedules get bidi treatment so the text displays
+        // right-to-left when pasted into apps like WhatsApp. Based on the
+        // schedule's language_code, not Role::isRtl() (which is viewer-
+        // dependent); forced-English text stays LTR.
+        $isRtlLang = ! $forceEnglish && ($role->language_code == 'he' || $role->language_code == 'ar');
+
         // Normalize to 0-based sequential keys so {number} reflects position regardless of how the caller built the collection.
         $events = collect($events)->values();
 
         foreach ($events as $i => $event) {
-            $text .= self::parseTemplate($template, $event, $role, $directRegistration, $urlSettings, $i + 1, $forceEnglish);
+            $text .= self::parseTemplate($template, $event, $role, $directRegistration, $urlSettings, $i + 1, $forceEnglish, $isRtlLang);
             $text .= "\n\n";
         }
 
@@ -37,22 +43,30 @@ class EventTextGenerator
             }
             $url = preg_replace('#^https?://#', '', $url);
 
+            // Isolate the URL as LTR so it renders correctly inside the RTL line below.
+            if ($isRtlLang) {
+                $url = "\u{2066}".$url."\u{2069}";
+            }
+
             $text .= $message."\n".$url."\n";
         }
 
-        // Prepend a Right-to-Left Mark (U+200F) to each line that contains
-        // Hebrew/Arabic text so it displays right-to-left when pasted into apps
-        // like WhatsApp (which applies bidi per line). Based on the schedule's
-        // language_code, not Role::isRtl() (which is viewer-dependent); forced-
-        // English text is LTR.
+        // For RTL languages, prepend a Right-to-Left Mark (U+200F) to every
+        // non-empty line. This forces each line - and, because the very first
+        // character of the message is now an RLM, the whole message bubble - to
+        // display right-to-left when pasted into apps like WhatsApp (which
+        // resolves direction from the first strong directional character).
         //
-        // Lines WITHOUT Hebrew/Arabic - URLs, numbers, Latin - are left unmarked
-        // so they render LTR. A URL forced right-to-left by a leading RLM breaks
-        // desktop WhatsApp's link auto-detection so the link won't open (the
-        // v1.0.103 regression). LTR-language schedules need no marker at all.
-        if (! $forceEnglish && ($role->language_code == 'he' || $role->language_code == 'ar')) {
+        // URLs are kept clickable by wrapping them in a Left-to-Right Isolate
+        // (U+2066 ... U+2069) at their source (parseTemplate's {url} token and
+        // the request URL above) rather than leaving the line unmarked. A bare
+        // leading RLM directly before a URL breaks desktop WhatsApp's link
+        // auto-detection (the v1.0.103 regression); the isolate keeps the URL a
+        // clean LTR run while the surrounding line stays RTL. LTR-language and
+        // forced-English text get no marks at all.
+        if ($isRtlLang) {
             $lines = array_map(function ($line) {
-                return preg_match('/\p{Hebrew}|\p{Arabic}/u', $line) === 1 ? "\u{200F}".$line : $line;
+                return $line === '' ? $line : "\u{200F}".$line;
             }, explode("\n", $text));
             $text = implode("\n", $lines);
         }
@@ -71,9 +85,16 @@ class EventTextGenerator
     /**
      * Parse a template string with event data
      */
-    public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [], $eventNumber = null, $forceEnglish = false)
+    public static function parseTemplate($template, $event, $role, $directRegistration, $urlSettings = [], $eventNumber = null, $forceEnglish = false, $isolateUrl = false)
     {
         $replacements = self::buildReplacements($event, $role, $directRegistration, $urlSettings, $eventNumber, $forceEnglish);
+
+        // Wrap the event URL in a Left-to-Right Isolate (U+2066 ... U+2069) so it
+        // renders as a clean LTR run - and stays link-detectable - inside the RTL
+        // lines that generate() produces for Hebrew/Arabic schedules.
+        if ($isolateUrl && ($replacements['{url}'] ?? '') !== '') {
+            $replacements['{url}'] = "\u{2066}".$replacements['{url}']."\u{2069}";
+        }
 
         $result = str_replace(array_keys($replacements), array_values($replacements), $template);
 
