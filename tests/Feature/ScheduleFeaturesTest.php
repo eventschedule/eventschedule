@@ -245,4 +245,76 @@ class ScheduleFeaturesTest extends TestCase
         $this->postJson($route, $payload + ['curator_group_id' => UrlUtils::encodeId($group->id)])
             ->assertJsonMissingValidationErrors('curator_group_id');
     }
+
+    public function test_fix_events_timezone_relabels_events_and_keeps_wall_clock(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['timezone' => 'Asia/Jerusalem']);
+
+        $startsAt = now()->addDays(30)->setTime(20, 0)->format('Y-m-d H:i:s');
+        $event = $this->createEvent($curator, [
+            'timezone' => 'America/New_York',
+            'starts_at' => $startsAt,
+            'is_private' => false,
+            'description' => 'Body copy',
+        ]);
+
+        // Precondition: the event is off-timezone for the schedule, and its markdown was rendered.
+        $this->assertTrue($event->isOffTimezoneFor($curator));
+        $descriptionHtml = $event->description_html;
+        $this->assertNotEmpty($descriptionHtml);
+
+        $this->actingAs($owner)
+            ->post(route('role.timezone_warning_fix_events', ['subdomain' => $curator->subdomain]), [
+                'timezone' => 'Asia/Jerusalem',
+            ])
+            ->assertRedirect();
+
+        $event->refresh();
+
+        // Relabeled to the schedule timezone, with the wall-clock start time left intact.
+        $this->assertEquals('Asia/Jerusalem', $event->timezone);
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'starts_at' => $startsAt]);
+        $this->assertFalse($event->isOffTimezoneFor($curator->fresh()));
+        // The full row was re-fetched before saving, so the saving hook did not wipe *_html.
+        $this->assertEquals($descriptionHtml, $event->description_html);
+    }
+
+    public function test_fix_events_timezone_requires_editor(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['timezone' => 'Asia/Jerusalem']);
+        $event = $this->createEvent($curator, [
+            'timezone' => 'America/New_York',
+            'starts_at' => now()->addDays(30)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        $outsider = $this->createOwner(); // authenticated, but not a member of the curator
+
+        $this->actingAs($outsider)
+            ->post(route('role.timezone_warning_fix_events', ['subdomain' => $curator->subdomain]), [
+                'timezone' => 'Asia/Jerusalem',
+            ]);
+
+        // Non-editor: the event's timezone must be left untouched.
+        $this->assertEquals('America/New_York', $event->fresh()->timezone);
+    }
+
+    public function test_fix_events_timezone_ignores_stale_posted_timezone(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['timezone' => 'Asia/Jerusalem']);
+        $event = $this->createEvent($curator, [
+            'timezone' => 'America/New_York',
+            'starts_at' => now()->addDays(30)->setTime(20, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        // Posted timezone no longer matches the schedule's own timezone -> reject, change nothing.
+        $this->actingAs($owner)
+            ->post(route('role.timezone_warning_fix_events', ['subdomain' => $curator->subdomain]), [
+                'timezone' => 'Europe/London',
+            ]);
+
+        $this->assertEquals('America/New_York', $event->fresh()->timezone);
+    }
 }

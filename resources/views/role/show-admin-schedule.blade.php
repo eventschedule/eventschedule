@@ -39,16 +39,14 @@
                         @csrf
                         <button type="submit" class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline">{{ __('messages.dismiss') }}</button>
                     </form>
-                    @if($timezoneMismatchAdoptTz)
-                    <form method="POST" action="{{ route('role.timezone_warning_adopt', ['subdomain' => $role->subdomain]) }}"
-                          data-confirm="{{ str_replace(':timezone', $timezoneMismatchAdoptTz, __('messages.timezone_adopt_confirm')) }}">
+                    <form method="POST" action="{{ route('role.timezone_warning_fix_events', ['subdomain' => $role->subdomain]) }}"
+                          data-confirm="{{ str_replace(':timezone', $role->timezone, __('messages.timezone_fix_events_confirm')) }}">
                         @csrf
                         {{-- Echo back the timezone the confirmation dialog named, so the action can
-                             refuse if the events changed and the candidate is no longer that one. --}}
-                        <input type="hidden" name="timezone" value="{{ $timezoneMismatchAdoptTz }}">
-                        <button type="submit" class="text-xs font-medium text-amber-700 dark:text-amber-300 underline hover:no-underline">{{ str_replace(':timezone', $timezoneMismatchAdoptTz, __('messages.timezone_adopt_button')) }}</button>
+                             refuse if the schedule timezone changed since the banner rendered. --}}
+                        <input type="hidden" name="timezone" value="{{ $role->timezone }}">
+                        <button type="submit" class="text-xs font-medium text-amber-700 dark:text-amber-300 underline hover:no-underline">{{ str_replace(':timezone', $role->timezone, __('messages.timezone_fix_events_button')) }}</button>
                     </form>
-                    @endif
                 </div>
             </div>
         </div>

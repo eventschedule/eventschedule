@@ -873,25 +873,7 @@ class RoleController extends Controller
         return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']);
     }
 
-    /**
-     * The timezone a schedule could adopt to resolve its off-timezone events: the one timezone every
-     * mismatched event agrees on. Null when they disagree, since there is then no single right
-     * answer and the curator must open each event instead.
-     */
-    private function offTimezoneAdoptCandidate(\Illuminate\Support\Collection $events): ?string
-    {
-        $timezones = $events->map->getEffectiveTimezone()->unique();
-
-        if ($timezones->count() !== 1) {
-            return null;
-        }
-
-        $timezone = $timezones->first();
-
-        return in_array($timezone, \DateTimeZone::listIdentifiers(), true) ? $timezone : null;
-    }
-
-    public function adoptTimezoneFromEvents(Request $request, $subdomain)
+    public function fixEventsTimezone(Request $request, $subdomain)
     {
         if (is_demo_mode()) {
             return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
@@ -913,21 +895,32 @@ class RoleController extends Controller
             return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']);
         }
 
-        // Recompute server-side rather than trusting the posted timezone, since the value is written
-        // straight to the schedule. The posted one is still required to match: the events may have
-        // changed since the banner rendered, and adopting a timezone the curator never saw in the
-        // confirmation dialog would silently re-time every event on the schedule.
-        $timezone = $this->offTimezoneAdoptCandidate($events);
-
-        if (! $timezone || $request->input('timezone') !== $timezone) {
-            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
-                ->with('error', __('messages.timezone_adopt_unavailable'));
+        // The button always fixes the events onto the schedule's own timezone. Require the posted
+        // value to still match it, so a schedule-timezone change since the banner rendered can't
+        // relabel every event to a zone the curator never saw in the confirmation dialog.
+        if (! $role->timezone || $request->input('timezone') !== $role->timezone) {
+            return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']);
         }
 
-        $role->timezone = $timezone;
-        $role->save();
+        // Re-fetch full rows: offTimezoneEvents() selects only a few columns, and saving a partially
+        // loaded event would let the saving hook re-derive the *_html columns from unloaded (null)
+        // source columns and wipe them.
+        $events = Event::whereIn('id', $events->pluck('id'))->get();
 
-        AuditService::log(AuditService::SCHEDULE_UPDATE, auth()->id(), 'Role', $role->id, null, null, $role->name);
+        foreach ($events as $event) {
+            // Relabel only: keep the wall-clock starts_at and change the timezone it was captured in,
+            // so 20:00 America/New_York becomes 20:00 Asia/Jerusalem (the event was really in the
+            // schedule's timezone; only its label was wrong).
+            $event->timezone = $role->timezone;
+            $event->save();
+
+            // The relabel moves the event's absolute instant, so push it to any external calendars the
+            // event's roles sync to (both no-op when nothing is synced).
+            $event->syncToGoogleCalendar('update');
+            $event->syncToCalDAV('update');
+
+            AuditService::log(AuditService::EVENT_UPDATE, auth()->id(), 'Event', $event->id, null, null, $event->name);
+        }
 
         return redirect()->route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule'])
             ->with('message', __('messages.timezone_updated'));
@@ -2336,11 +2329,9 @@ class RoleController extends Controller
 
         $venueDuplicateGroupCount = 0;
         $timezoneMismatchEvents = collect();
-        $timezoneMismatchAdoptTz = null;
         if ($tab === 'schedule' && $role->isCurator() && auth()->user()->isEditor($subdomain)) {
             $venueDuplicateGroupCount = count($this->venueDuplicateGroups($role, auth()->user()->id));
             $timezoneMismatchEvents = $this->offTimezoneEvents($role, auth()->user()->id);
-            $timezoneMismatchAdoptTz = $this->offTimezoneAdoptCandidate($timezoneMismatchEvents);
         }
 
         return view('role/show-admin', compact(
@@ -2362,7 +2353,6 @@ class RoleController extends Controller
             'sortDir',
             'venueDuplicateGroupCount',
             'timezoneMismatchEvents',
-            'timezoneMismatchAdoptTz',
         ));
     }
 
