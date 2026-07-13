@@ -1407,7 +1407,7 @@
                                 {{ __('messages.tickets') }}
                             </a>
                             @endif
-                            @if ($user->isEditor($subdomain))
+                            @if ($user->isEditor($subdomain) && $role->isPro())
                             <a href="#section-event-settings" class="section-nav-link" data-section="section-event-settings">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
@@ -1433,7 +1433,7 @@
                                 <span v-if="isSaving">{{ __('messages.saving') }}</span>
                                 <span v-else>{{ __('messages.save') }}</span>
                             </x-primary-button>
-                            @if ($event->exists && $event->is_draft)
+                            @if ($event->exists && $event->is_draft && ! $event->is_internal)
                             <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
                                 class="w-full justify-center mt-3 inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                 {{ __('messages.publish') }}
@@ -1446,7 +1446,7 @@
                                 </svg>
                                 {{ __('messages.note_all_events_are_publicly_listed') }}
                             </p>
-                            <p v-show="event.is_draft" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
+                            <p v-show="event.is_draft && !event.is_internal" class="text-sm text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                                 </svg>
@@ -1539,6 +1539,80 @@
                             </x-secondary-button>
                             @endif
                             @endif
+                        </div>
+
+                        {{-- Visibility selector (unifies Public / Draft / Internal / Unlisted) --}}
+                        @php
+                            $visibilityOptions = [
+                                ['value' => 'public',   'label' => __('messages.public'),   'desc' => __('messages.visibility_public_desc'),   'enterprise' => false],
+                                ['value' => 'draft',    'label' => __('messages.draft'),    'desc' => __('messages.visibility_draft_desc'),    'enterprise' => false],
+                                ['value' => 'internal', 'label' => __('messages.internal'), 'desc' => __('messages.visibility_internal_desc'), 'enterprise' => true],
+                                ['value' => 'unlisted', 'label' => __('messages.unlisted'), 'desc' => __('messages.visibility_unlisted_desc'), 'enterprise' => true],
+                            ];
+                        @endphp
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.visibility')" />
+                            <input type="hidden" name="is_draft" :value="event.is_draft ? 1 : 0">
+                            <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
+                            <input type="hidden" name="is_internal" :value="event.is_internal ? 1 : 0">
+                            <div class="space-y-2 mt-1">
+                                @foreach ($visibilityOptions as $opt)
+                                    @if (! $opt['enterprise'] || $role->isEnterprise())
+                                        <label class="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors"
+                                            :class="visibility === '{{ $opt['value'] }}' ? 'border-[var(--brand-blue)] bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'"
+                                            @click="visibility = '{{ $opt['value'] }}'">
+                                            <div class="w-4 h-4 mt-0.5 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                                                :class="visibility === '{{ $opt['value'] }}' ? 'border-[var(--brand-blue)]' : 'border-gray-400'">
+                                                <div v-show="visibility === '{{ $opt['value'] }}'" class="w-2 h-2 rounded-full bg-[var(--brand-blue)]"></div>
+                                            </div>
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $opt['label'] }}</span>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $opt['desc'] }}</p>
+                                            </div>
+                                        </label>
+                                    @else
+                                        <div class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mt-0.5 text-gray-400 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                            </svg>
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-500 dark:text-gray-400 inline-flex items-center gap-1.5">
+                                                    {{ $opt['label'] }}
+                                                    <span class="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">{{ __('messages.enterprise') }}</span>
+                                                </span>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $opt['desc'] }}</p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+
+                            @if (! $role->isEnterprise())
+                                <div class="mt-3">
+                                    <x-upgrade-prompt tier="enterprise" :learnMoreUrl="marketing_url('/features/private-events')" :subdomain="$subdomain">
+                                        {{ __('messages.upgrade_enterprise_privacy') }}
+                                    </x-upgrade-prompt>
+                                </div>
+                            @endif
+
+                            @if ($role->isEnterprise())
+                            {{-- Password applies only to Unlisted events --}}
+                            <div class="mt-4" v-show="visibility === 'unlisted'">
+                                <x-input-label for="event_password" :value="__('messages.event_password')" />
+                                <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
+                                    v-model="event.event_password" maxlength="255" />
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
+                            </div>
+                            @endif
+
+                            {{-- Warn before an already-hidden event is made public --}}
+                            <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2"
+                                v-show="initiallyHidden && visibility === 'public'">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <span class="text-sm text-amber-800 dark:text-amber-300">{{ __('messages.visibility_publish_warning') }}</span>
+                            </div>
                         </div>
 
                         @if($effectiveRole->groups && count($effectiveRole->groups))
@@ -3946,7 +4020,7 @@
                     </div>
                 @endif
 
-                @if ($user->isEditor($subdomain))
+                @if ($user->isEditor($subdomain) && $role->isPro())
                     <button type="button" class="mobile-section-header" data-section="section-event-settings">
                         <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -3968,24 +4042,6 @@
                                 </svg>
                                 {{ __('messages.settings') }}
                             </h2>
-
-                            <!-- Settings Tabs -->
-                            <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-                                <nav class="-mb-px flex space-x-2 sm:space-x-6 overflow-x-auto scrollbar-hide">
-                                    @if ($role->isPro())
-                                    <button type="button" @click="activeSettingsTab = 'sponsors'"
-                                        :class="activeSettingsTab === 'sponsors' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="sponsors">
-                                        {{ __('messages.sponsors') }}
-                                    </button>
-                                    @endif
-                                    <button type="button" @click="activeSettingsTab = 'privacy'"
-                                        :class="activeSettingsTab === 'privacy' ? 'border-[var(--brand-blue)] text-[var(--brand-blue)]' : 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-300'"
-                                        class="settings-tab text-center whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium" data-tab="privacy">
-                                        {{ __('messages.privacy') }}
-                                    </button>
-                                </nav>
-                            </div>
 
                             <!-- Sponsors Tab -->
                             @if ($role->isPro())
@@ -4128,53 +4184,6 @@
                             </div>
                             @endif
 
-                            <!-- Privacy Tab -->
-                            <div v-show="activeSettingsTab === 'privacy'">
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input type="hidden" name="is_draft" :value="event.is_draft ? 1 : 0">
-                                            <input id="is_draft" name="is_draft" type="checkbox" v-model="event.is_draft" :value="1"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="is_draft" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.draft_event') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.draft_event_help') }}</p>
-                                </div>
-
-                            @if ($role->isEnterprise())
-                                <div class="mb-6">
-                                    <div class="flex items-center gap-3">
-                                        <label class="relative w-11 h-6 cursor-pointer flex-shrink-0">
-                                            <input type="hidden" name="is_private" :value="event.is_private ? 1 : 0">
-                                            <input id="is_private" name="is_private" type="checkbox" v-model="event.is_private" :value="1"
-                                                class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-300 dark:bg-gray-600 rounded-full peer-checked:bg-[var(--brand-button-bg)] transition-colors"></div>
-                                            <div class="absolute top-0.5 ltr:left-0.5 rtl:right-0.5 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-200 peer-checked:ltr:translate-x-5 peer-checked:rtl:-translate-x-5"></div>
-                                        </label>
-                                        <label for="is_private" class="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-                                            {{ __('messages.private_event') }}
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 ms-14">{{ __('messages.private_event_help') }}</p>
-                                </div>
-
-                                <div class="mb-6" v-show="event.is_private">
-                                    <x-input-label for="event_password" :value="__('messages.event_password')" />
-                                    <x-text-input id="event_password" name="event_password" type="text" class="mt-1 block w-full"
-                                        v-model="event.event_password" maxlength="255" />
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.event_password_help') }}</p>
-                                </div>
-                            @else
-                                <x-upgrade-prompt tier="enterprise" :learnMoreUrl="marketing_url('/features/private-events')" :subdomain="$subdomain">
-                                    {{ __('messages.upgrade_enterprise_privacy') }}
-                                </x-upgrade-prompt>
-                            @endif
-                            </div>
                         </div>
                     </div>
                 @endif
@@ -4669,7 +4678,7 @@
                 </svg>
                 {{ __('messages.note_all_events_are_publicly_listed') }}
             </p>
-            <p v-show="event.is_draft" class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
+            <p v-show="event.is_draft && !event.is_internal" class="text-sm text-gray-500 dark:text-gray-400 mb-3 flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 shrink-0">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                 </svg>
@@ -4681,7 +4690,7 @@
                     <span v-if="isSaving">{{ __('messages.saving') }}</span>
                     <span v-else>{{ __('messages.save') }}</span>
                 </x-primary-button>
-                @if ($event->exists && $event->is_draft)
+                @if ($event->exists && $event->is_draft && ! $event->is_internal)
                 <button type="button" @click="publishEvent()" v-bind:disabled="isSaving"
                     class="flex-1 justify-center inline-flex items-center px-4 py-3 bg-green-600 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                     {{ __('messages.publish') }}
@@ -4859,6 +4868,7 @@
           show_unavailable_tickets: {{ $event->show_unavailable_tickets ? 'true' : 'false' }},
           sponsor_mode: @json($event->sponsor_mode ?? 'default'),
         },
+        initiallyHidden: @json($event->exists && ($event->is_draft || $event->is_private)),
         isPro: @json($role->isPro()),
         ticketMode: @json($event->tickets_enabled ? 'tickets' : ($event->rsvp_enabled ? 'rsvp' : 'external')),
         venues: @json($venues),
@@ -4943,7 +4953,7 @@
         showSalesDates: @json(($event->tickets ?? collect())->contains(fn($t) => $t->sales_start_at || $t->sales_end_at)),
         isInvoiceNinjaPaymentLink: @json($user->invoiceninja_api_key && $user->invoiceninja_mode === 'payment_link'),
         activeTicketTab: @json($event->rsvp_enabled ? 'options' : 'tickets'),
-        activeSettingsTab: @json($role->isPro() ? 'sponsors' : 'privacy'),
+        activeSettingsTab: @json('sponsors'),
         activeEngagementTab: (function() {
           // Deep-link support: the dashboard "Needs attention" list links here with
           // ?engagement=<tab> (plus #section-engagement, which the section nav already
@@ -5900,6 +5910,9 @@
       },
       publishEvent() {
         this.event.is_draft = false;
+        this.event.is_internal = false;
+        this.event.is_private = false;
+        this.event.event_password = '';
         this.$nextTick(() => {
           window._skipUnsavedWarning = true;
           document.getElementById('edit-form').requestSubmit();
@@ -6880,6 +6893,20 @@
       },
     },
     computed: {
+      visibility: {
+        get() {
+          if (this.event.is_internal) return 'internal';
+          if (this.event.is_draft) return 'draft';
+          if (this.event.is_private) return 'unlisted';
+          return 'public';
+        },
+        set(v) {
+          this.event.is_internal = (v === 'internal');
+          this.event.is_private = (v === 'unlisted');
+          this.event.is_draft = (v === 'draft' || v === 'internal');
+          if (v !== 'unlisted') this.event.event_password = '';
+        },
+      },
       boostCanEnable() {
         return this.eventName && this.startsAt && new Date(this.startsAt) > new Date();
       },

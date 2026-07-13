@@ -131,6 +131,7 @@ trait CalendarDataTrait
             'fan_videos_enabled' => $event->isFanVideosEnabled(),
             'is_password_protected' => $event->isPasswordProtected(),
             'is_draft' => (bool) $event->is_draft,
+            'is_internal' => (bool) $event->is_internal,
             'is_cancelled' => (bool) $event->is_cancelled,
         ];
 

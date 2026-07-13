@@ -68,6 +68,14 @@
       </div>
     </div>
   </div>
+  @elseif ($event->is_internal)
+  <div class="fixed top-0 left-0 w-full bg-amber-50 dark:bg-amber-950 border-b border-amber-200 dark:border-amber-800 py-6 z-[60]">
+    <div class="container mx-auto px-5">
+      <div class="flex items-center justify-center text-amber-800 dark:text-amber-200">
+        <span class="text-xl font-medium">{{ __('messages.event_is_internal') }}</span>
+      </div>
+    </div>
+  </div>
   @elseif ($event->is_draft)
   <div class="fixed top-0 left-0 w-full bg-blue-50 dark:bg-blue-950 border-b border-blue-200 dark:border-blue-800 py-6 z-[60]">
     <div class="container mx-auto px-5">
@@ -102,7 +110,7 @@
   </div>
   @endif
   {{-- Spacer for fixed banner --}}
-  @if ($event->is_cancelled || $event->is_draft || $eventIsAccepted === null || ! $eventIsAccepted)
+  @if ($event->is_cancelled || $event->is_draft || $event->is_internal || $eventIsAccepted === null || ! $eventIsAccepted)
   <div class="h-[68px]"></div>
   @endif
 

@@ -765,7 +765,7 @@ class EventRepo
             'ask_phone', 'require_phone', 'country_code_phone',
             'individual_tickets', 'individual_ticket_fields',
             'sell_after_start', 'show_unavailable_tickets',
-            'is_draft', 'is_private',
+            'is_draft', 'is_private', 'is_internal',
         ] as $boolField) {
             if ($request->has($boolField)) {
                 $event->$boolField = $request->boolean($boolField);
@@ -779,8 +779,27 @@ class EventRepo
             }
         }
 
+        // Internal reuses the draft gate to hide from every public surface, and is mutually
+        // exclusive with the unlisted/private state. Run this BEFORE the Enterprise gate below so a
+        // non-Enterprise request for internal is first normalized to a hidden Draft (is_draft=true);
+        // the gate then strips the Enterprise-only is_internal, leaving the event safely hidden
+        // rather than flipping it public.
+        if ($event->is_internal) {
+            $event->is_draft = true;
+            $event->is_private = false;
+            $event->event_password = null;
+        }
+
         if ($currentRole && ! $currentRole->isEnterprise()) {
             $event->is_private = false;
+            $event->is_internal = false;
+            $event->event_password = null;
+        }
+
+        // A password only applies to an Unlisted (is_private) event. Never leave a stale password on
+        // a public/draft/internal event - isPasswordProtected() gates the guest page independently of
+        // is_private, so a leftover password would keep a "published" event password-locked.
+        if (! $event->is_private) {
             $event->event_password = null;
         }
 

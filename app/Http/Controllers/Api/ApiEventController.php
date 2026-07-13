@@ -211,6 +211,7 @@ class ApiEventController extends Controller
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
                 'is_draft' => 'nullable|boolean',
+                'is_internal' => 'nullable|boolean',
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:2048',
@@ -260,7 +261,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'is_private', 'is_draft', 'rsvp_enabled', 'rsvp_limit',
+            'event_url', 'event_password', 'is_private', 'is_draft', 'is_internal', 'rsvp_enabled', 'rsvp_limit',
             'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',
@@ -282,9 +283,22 @@ class ApiEventController extends Controller
         // Convert days_of_week string to individual checkbox params for saveEvent()
         $this->convertDaysOfWeek($request);
 
-        // Default is_draft to role's draft_events_default if not provided
-        if (! $request->has('is_draft')) {
-            $request->merge(['is_draft' => $role->draft_events_default]);
+        // Seed visibility from the schedule's default. If the caller sent NO visibility flag at all,
+        // apply the full default state. If they sent some flag but omitted is_draft, still seed
+        // is_draft from the default's hide-bit so a drafts-by-default schedule never silently
+        // publishes (a present-but-false is_private must not defeat the draft default).
+        $defaultVisibility = $role->defaultEventVisibility();
+        if (! $request->has('is_draft') && ! $request->has('is_private') && ! $request->has('is_internal')) {
+            $request->merge([
+                'is_draft' => in_array($defaultVisibility, ['draft', 'internal']),
+                'is_private' => $defaultVisibility === 'unlisted',
+                'is_internal' => $defaultVisibility === 'internal',
+            ]);
+        } elseif (! $request->has('is_draft') && ! $request->boolean('is_private') && ! $request->boolean('is_internal')) {
+            // Partial payload with no hidden-state choice (unlisted/internal are absent or false):
+            // apply the draft default so a drafts-by-default schedule never silently publishes.
+            // An explicit is_private/is_internal choice is left untouched (no incoherent draft+private).
+            $request->merge(['is_draft' => in_array($defaultVisibility, ['draft', 'internal'])]);
         }
 
         // Pre-processing: venue, members, group, category
@@ -337,6 +351,7 @@ class ApiEventController extends Controller
                 'event_password' => 'nullable|string|max:255',
                 'is_private' => 'nullable|boolean',
                 'is_draft' => 'nullable|boolean',
+                'is_internal' => 'nullable|boolean',
                 'rsvp_enabled' => 'nullable|boolean',
                 'rsvp_limit' => 'nullable|integer|min:1',
                 'registration_url' => 'nullable|url|max:2048',
@@ -386,7 +401,7 @@ class ApiEventController extends Controller
         // Strip request to only allowed fields to prevent mass assignment
         $request->replace($request->only([
             'name', 'starts_at', 'duration', 'description', 'short_description',
-            'event_url', 'event_password', 'is_private', 'is_draft', 'rsvp_enabled', 'rsvp_limit',
+            'event_url', 'event_password', 'is_private', 'is_draft', 'is_internal', 'rsvp_enabled', 'rsvp_limit',
             'registration_url',
             'category_id', 'category', 'tickets_enabled', 'ticket_currency_code',
             'payment_method', 'payment_instructions',

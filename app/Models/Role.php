@@ -110,6 +110,7 @@ class Role extends Model implements MustVerifyEmail
         'ai_content_instructions',
         'hide_past_events',
         'draft_events_default',
+        'default_event_visibility',
         'hide_videos',
         'show_accessibility_widget',
         'default_category_id',
@@ -1268,6 +1269,28 @@ class Role extends Model implements MustVerifyEmail
                         ->where('plan_expires', '>=', now()->format('Y-m-d'));
                 });
         });
+    }
+
+    /**
+     * The visibility state new events start with on this schedule.
+     * Internal and Unlisted are Enterprise-only, so for non-Enterprise schedules
+     * clamp them to the closest allowed state (internal -> draft to stay hidden,
+     * unlisted -> public) - matching EventRepo::saveEvent's plan gate.
+     */
+    public function defaultEventVisibility(): string
+    {
+        $state = $this->default_event_visibility ?: 'public';
+
+        if (! $this->isEnterprise()) {
+            if ($state === 'internal') {
+                return 'draft';
+            }
+            if ($state === 'unlisted') {
+                return 'public';
+            }
+        }
+
+        return $state;
     }
 
     public function isEnterprise()

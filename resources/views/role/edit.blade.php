@@ -3073,11 +3073,26 @@
                         <!-- Tab Content: Advanced -->
                         <div id="settings-tab-advanced" class="settings-tab-content hidden">
                             <div class="mb-6">
-                                <x-toggle name="draft_events_default"
-                                    label="{{ __('messages.draft_events_default') }}"
-                                    checked="{{ old('draft_events_default', $role->draft_events_default) }}"
-                                    help="{{ __('messages.draft_events_default_help') }}" />
-                                <x-input-error class="mt-2" :messages="$errors->get('draft_events_default')" />
+                                <x-input-label for="default_event_visibility" :value="__('messages.default_event_visibility')" />
+                                @php $currentDefaultVisibility = old('default_event_visibility', $role->default_event_visibility ?: 'public'); @endphp
+                                <select name="default_event_visibility" id="default_event_visibility"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="public" {{ $currentDefaultVisibility === 'public' ? 'selected' : '' }}>{{ __('messages.public') }}</option>
+                                    <option value="draft" {{ $currentDefaultVisibility === 'draft' ? 'selected' : '' }}>{{ __('messages.draft') }}</option>
+                                    {{-- Enterprise-only options; still rendered when already the stored value so a
+                                         downgraded schedule's default round-trips instead of silently flipping to public. --}}
+                                    @if ($role->isEnterprise() || $currentDefaultVisibility === 'internal')
+                                    <option value="internal" {{ $currentDefaultVisibility === 'internal' ? 'selected' : '' }}>{{ __('messages.internal') }}</option>
+                                    @endif
+                                    @if ($role->isEnterprise() || $currentDefaultVisibility === 'unlisted')
+                                    <option value="unlisted" {{ $currentDefaultVisibility === 'unlisted' ? 'selected' : '' }}>{{ __('messages.unlisted') }}</option>
+                                    @endif
+                                </select>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.default_event_visibility_help') }}</p>
+                                @if (! $role->isEnterprise())
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.upgrade_enterprise_privacy') }}</p>
+                                @endif
+                                <x-input-error class="mt-2" :messages="$errors->get('default_event_visibility')" />
                             </div>
 
                             <div class="mb-6">

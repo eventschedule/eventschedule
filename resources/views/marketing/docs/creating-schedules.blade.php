@@ -865,8 +865,8 @@
                             <h3 id="settings-advanced" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Advanced</h3>
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default to Draft</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, new events are created as drafts and stay hidden from the public schedule until you uncheck the Draft toggle on each event. See <a href="{{ route('marketing.docs.creating_events') }}#draft" class="text-cyan-400 hover:text-cyan-300">Draft events</a>.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default new-event visibility</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose the visibility that new events start with - Public, Draft, or (on Enterprise) Internal or Unlisted. New events default to Public; you can change the visibility on any individual event. See <a href="{{ route('marketing.docs.creating_events') }}#draft" class="text-cyan-400 hover:text-cyan-300">event visibility</a>.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Videos</h4>

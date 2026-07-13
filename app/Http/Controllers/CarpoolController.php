@@ -35,6 +35,20 @@ class CarpoolController extends Controller
             abort(404);
         }
 
+        // Draft and internal events are members-only (internal reuses the is_draft gate); unlisted
+        // events need membership or an unlocked password. Without this, the carpool page would expose
+        // a hidden event's name, date, and participants to anyone with the (enumerable) event hash.
+        $user = auth()->user();
+        $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            abort(404);
+        }
+        if ($event->is_private && ! $isMemberOrAdmin
+            && ! ($event->isPasswordProtected() && session()->has('event_password_'.$event->id))) {
+            abort(404);
+        }
+
         return [$role, $event];
     }
 

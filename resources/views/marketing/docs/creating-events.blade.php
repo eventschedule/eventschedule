@@ -104,7 +104,7 @@
                             <a href="#event-settings" class="doc-nav-group-header doc-nav-link">Event Settings <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
                             <div class="doc-nav-group-items">
                                 <a href="#custom-fields" class="doc-nav-link">Custom Fields</a>
-                                <a href="#privacy" class="doc-nav-link">Privacy</a>
+                                <a href="#privacy" class="doc-nav-link">Internal &amp; Unlisted</a>
                                 <a href="#sponsors" class="doc-nav-link">Sponsors</a>
                             </div>
                         </div>
@@ -221,16 +221,16 @@
                                             <td>For existing events, the event URL is displayed with a copy button. You can click <strong>Edit</strong> to customize the URL slug.</td>
                                         </tr>
                                         <tr>
-                                            <td id="draft"><span class="font-semibold text-gray-900 dark:text-white">Draft</span></td>
-                                            <td>Mark the event as a draft to keep it private while you finish editing. Draft events are hidden from the public schedule, event feeds, RSS, event graphics, newsletters, and Google Calendar/CalDAV sync. Admins see a banner indicating the event is still in draft. Uncheck to publish.</td>
+                                            <td id="draft"><span class="font-semibold text-gray-900 dark:text-white">Visibility</span></td>
+                                            <td>Choose who can see the event. <strong>Public</strong> lists it for everyone. <strong>Draft</strong> keeps it visible only to schedule members while you finish editing - publish when ready. <strong>Internal</strong> (Enterprise) keeps it members-only permanently. <strong>Unlisted</strong> (Enterprise) hides it from your schedule but lets anyone with the direct link view it, optionally behind a password. Draft, Internal, and Unlisted events are all hidden from the public schedule, event feeds, RSS, event graphics, newsletters, and Google Calendar/CalDAV sync.</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">
-                                <div class="doc-callout-title">Draft by default</div>
-                                <p>You can make all new events default to draft from <strong>Schedule Settings &rarr; Advanced</strong>. See <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-500">Advanced Settings</a>.</p>
+                                <div class="doc-callout-title">Default visibility</div>
+                                <p>You can set the visibility that all new events start with from <strong>Schedule Settings &rarr; Advanced</strong>. See <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-600 dark:text-cyan-400 hover:text-cyan-500">Advanced Settings</a>.</p>
                             </div>
                         </section>
 
@@ -575,32 +575,35 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                                 </svg>
-                                Privacy <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">Control event visibility with per-event privacy settings. Private events are hidden from your public schedule and require a password to view.</p>
+                                Internal &amp; Unlisted Events <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 ml-2">Enterprise</span></h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Every event has a <strong>Visibility</strong> setting in its Details section - Public or Draft on all plans. Enterprise schedules unlock two more options for keeping events out of public view.</p>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Making an Event Private</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Internal</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Set an event's visibility to <strong class="text-gray-900 dark:text-white">Internal</strong> to keep it visible only to schedule members. Unlike a Draft, an Internal event is never meant to be published - it stays out of your public schedule, feeds, graphics, and sync, and cannot be reached by a direct link.</p>
+
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Unlisted</h3>
                             <ol class="doc-list doc-list-numbered mb-6">
-                                <li>When creating or editing an event, toggle the <strong class="text-gray-900 dark:text-white">"Private"</strong> option</li>
-                                <li>Set a password for the event</li>
+                                <li>When creating or editing an event, set <strong class="text-gray-900 dark:text-white">Visibility</strong> to <strong class="text-gray-900 dark:text-white">Unlisted</strong></li>
+                                <li>Optionally set a password for the event</li>
                                 <li>Save the event</li>
                             </ol>
 
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Private events are hidden from your public schedule page and calendar views. Visitors can only access them via a direct link and must enter the correct password to view the event details.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Unlisted events are hidden from your public schedule page and calendar views. Visitors can only access them via a direct link, and if you set a password they must enter it to view the event details.</p>
 
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mix Public and Private</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Privacy is set per event, not per schedule. You can freely mix public and private events on the same schedule. Public events appear normally while private events remain hidden.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Mix visibility states</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Visibility is set per event, not per schedule. You can freely mix Public, Draft, Internal, and Unlisted events on the same schedule. Public events appear normally while the others stay hidden.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sharing Private Events</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Share the event's direct link and password with your intended audience via email, messaging, or any other channel. Only people with both the link and the correct password can view the event.</p>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sharing Unlisted Events</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Share the event's direct link, and its password if you set one, with your intended audience via email, messaging, or any other channel. Only people with the link (and password) can view the event.</p>
                                 </div>
                             </div>
 
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
-                                <p>For schedule-level settings, see <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Advanced Settings</a>.</p>
+                                <p>To choose the visibility all new events start with, see <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="text-cyan-400 hover:text-cyan-300">Advanced Settings</a>.</p>
                             </div>
                         </section>
 

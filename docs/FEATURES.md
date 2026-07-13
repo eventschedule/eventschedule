@@ -24,6 +24,7 @@ All users get these features with no subscription required.
 | Feature | Notes |
 |---------|-------|
 | Unlimited events and schedules | No caps on event or schedule count |
+| Event visibility (Public & Draft) | Publish events publicly or keep them members-only as a Draft; set a per-schedule default for new events |
 | Mobile-optimized, professional design | Responsive layout |
 | Custom schedule URLs | Subdomain-based URLs |
 | Team collaboration (single member) | One team member per schedule |
@@ -97,7 +98,7 @@ Gated by `$role->isEnterprise()`.
 | AI text processing on graphics | `GraphicController:298`, `$role->isEnterprise()` | AI prompt for graphic text via Gemini |
 | Email scheduling (graphic emails) | `GraphicController:142`, `$role->isEnterprise()` | Schedule automated graphic emails |
 | Custom domains | `RoleController`, `$role->isEnterprise()` | Use your own domain for schedule |
-| Private & password-protected events | `EventRepo`, `$role->isEnterprise()` | Restrict event visibility |
+| Internal & unlisted events | `EventRepo`, `$role->isEnterprise()` | Internal (members-only, never public) and Unlisted (hidden from the schedule but reachable by direct link, with an optional password) visibility options |
 | Multiple team members | `RoleController:1210,1229`, `$role->isEnterprise()` | Add/manage multiple team members |
 | Availability management | `RoleController:2413`, `$role->isEnterprise()` | Team member availability tracking |
 | 1,000 newsletter emails per month | `$role->newsletterLimit()` | Highest email sending limit (counts each recipient as one email) |

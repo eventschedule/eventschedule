@@ -433,7 +433,7 @@ class EventController extends Controller
 
         $event = new Event;
         $event->user_id = $user->id;
-        $event->is_draft = $role->draft_events_default;
+        $event->setVisibilityState($role->defaultEventVisibility());
         $selectedMembers = [];
         $clonedFlyerImage = null;
         $clonedFlyerImageUrl = null;
@@ -447,7 +447,9 @@ class EventController extends Controller
             }
             $event->user_id = $user->id;
             $event->creator_role_id = $role->id;
-            $event->is_draft = $role->draft_events_default;
+            // A clone starts at the schedule's default visibility (same as a fresh event),
+            // rather than inheriting the source event's visibility from the cloned payload.
+            $event->setVisibilityState($role->defaultEventVisibility());
 
             // Set cloned tickets
             $event->tickets = collect(array_map(function ($ticketData) {
@@ -1070,11 +1072,14 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
-        if (! $event->is_draft) {
+        // Internal events are intentionally never public, so the quick-publish route must not flip one
+        // (the UI never offers Publish for them; this also blocks crafted requests). Publishing means
+        // "make fully public", so normalize the whole visibility state via the shared helper.
+        if (! $event->is_draft || $event->is_internal) {
             return redirect()->back();
         }
 
-        $event->is_draft = false;
+        $event->setVisibilityState('public');
         $event->save();
 
         // Trigger calendar sync now that the event is published
@@ -2157,8 +2162,10 @@ class EventController extends Controller
         // Covers both the non-account save below and the require_account path.
         $request->validate(['name' => ['required', 'string', 'max:255']]);
 
-        // Prevent guests from injecting draft status
+        // Prevent guests from injecting any visibility state
         $request->request->remove('is_draft');
+        $request->request->remove('is_private');
+        $request->request->remove('is_internal');
 
         // Curators that require an account collect the account + schedule + event on this one
         // page and own the event on the submitter's own talent schedule (linked to the curator).
@@ -3563,6 +3570,12 @@ class EventController extends Controller
         // Privacy check
         $user = auth()->user();
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
+
+        // Draft and internal events (both is_draft=true) are members-only - a non-member must not
+        // reach the fan-photo gallery by direct link, matching the guest event page guard.
+        if ($event->is_draft && ! $isMemberOrAdmin) {
+            return redirect($role->getGuestUrl());
+        }
 
         if ($event->is_private && ! $event->isPasswordProtected() && ! $isMemberOrAdmin) {
             return redirect($role->getGuestUrl());

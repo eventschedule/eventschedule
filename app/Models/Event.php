@@ -57,6 +57,7 @@ class Event extends Model
         'event_password',
         'is_private',
         'is_draft',
+        'is_internal',
         'name',
         'name_en',
         'slug',
@@ -109,6 +110,7 @@ class Event extends Model
         'duration' => 'float',
         'is_private' => 'boolean',
         'is_draft' => 'boolean',
+        'is_internal' => 'boolean',
         // Cancellation state is set only via EventController::cancel()/restore() (intentionally NOT in
         // $fillable, so the edit form's fill() can never toggle it via mass-assignment).
         'is_cancelled' => 'boolean',
@@ -810,6 +812,48 @@ class Event extends Model
     public function isPrivate()
     {
         return (bool) $this->is_private;
+    }
+
+    public function isInternal()
+    {
+        return (bool) $this->is_internal;
+    }
+
+    /**
+     * Resolve the event's four-state visibility into a single label.
+     * Mirrors the Vue getter on the event form. Internal is checked before draft
+     * (internal implies draft), and draft before private, so a legacy row that has
+     * both is_draft and is_private set safely reads as the more-hidden "draft".
+     */
+    public function visibilityState(): string
+    {
+        if ($this->is_internal) {
+            return 'internal';
+        }
+        if ($this->is_draft) {
+            return 'draft';
+        }
+        if ($this->is_private) {
+            return 'unlisted';
+        }
+
+        return 'public';
+    }
+
+    /**
+     * Apply a four-state visibility label to the underlying boolean columns.
+     * Mirrors the Vue setter. The Enterprise gate + invariant in EventRepo::saveEvent
+     * still run on save, so this never leaves an incoherent stored state.
+     */
+    public function setVisibilityState(string $state): void
+    {
+        $this->is_internal = $state === 'internal';
+        $this->is_private = $state === 'unlisted';
+        $this->is_draft = in_array($state, ['draft', 'internal']);
+
+        if ($state !== 'unlisted') {
+            $this->event_password = null;
+        }
     }
 
     public function isPasswordProtected()
@@ -2024,6 +2068,7 @@ class Event extends Model
         $data->category_color = $this->resolveCategoryColor();
         $data->is_private = (bool) $this->is_private;
         $data->is_draft = (bool) $this->is_draft;
+        $data->is_internal = (bool) $this->is_internal;
         $data->is_password_protected = $this->isPasswordProtected();
         $data->event_url = $this->event_url;
         $data->registration_url = $this->registration_url;

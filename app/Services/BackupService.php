@@ -47,6 +47,7 @@ class BackupService
         'require_approval', 'event_layout', 'request_terms', 'request_terms_en', 'custom_css',
         'event_custom_fields', 'graphic_settings', 'agenda_ai_prompt', 'agenda_show_times',
         'agenda_show_description', 'agenda_save_image', 'slug_pattern', 'direct_registration',
+        'default_event_visibility',
         'feedback_enabled', 'feedback_delay_hours', 'fan_comments_enabled', 'fan_photos_enabled',
         'fan_videos_enabled', 'first_day_of_week', 'sponsor_logos', 'sponsor_section_title',
         'sponsor_section_title_en', 'custom_labels', 'ai_style_instructions', 'ai_content_instructions',
