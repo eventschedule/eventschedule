@@ -20,6 +20,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Align card actions to bottom** - In grids of cards/panels with varying content lengths, use `flex flex-col` on the card and `mt-auto` on the bottom element (e.g. links, buttons) so they align across cards
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
 - **Forward button at the end** - In button pairs (e.g. cancel/submit), place the forward action button at the end (right in LTR, left in RTL)
+- **Work directly on `main`** - Do not create feature branches; commit all changes directly to the `main` branch
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages
 - **Never use em-dashes** - Use hyphens, "to", or "or" instead of em-dashes (—) in all written content
 - **Use "schedule" not "role", "sub-schedule" not "group"** - In the code, `Role` = schedule and `Group` = sub-schedule. Always use "schedule" and "sub-schedule" in UI text and conversations, never "role" or "group"
