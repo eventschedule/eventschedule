@@ -62,9 +62,9 @@ class ImageTest extends DuskTestCase
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
-            $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="branding"]')
-                ->pause(500);
+            $browser->waitFor('#section-style', 10);
+            $browser->script("document.getElementById('style-tab-branding').click();");
+            $browser->pause(500);
 
             // Upload
             $browser->attach('#profile_image', $imagePath)
@@ -81,9 +81,9 @@ class ImageTest extends DuskTestCase
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
-            $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="branding"]')
-                ->pause(500)
+            $browser->waitFor('#section-style', 10);
+            $browser->script("document.getElementById('style-tab-branding').click();");
+            $browser->pause(500)
                 ->waitFor('#profile_image_existing', 5);
 
             // Delete via AJAX (override confirm dialog)
@@ -104,9 +104,9 @@ class ImageTest extends DuskTestCase
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
-            $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="advanced"]')
-                ->pause(500);
+            $browser->waitFor('#section-style', 10);
+            $browser->script("document.getElementById('style-tab-advanced').click();");
+            $browser->pause(500);
 
             // Header image controls only show for the "banner" header style; select it to reveal them
             $browser->script("document.getElementById('header_style_banner').checked = true; document.getElementById('header_style_banner').dispatchEvent(new Event('change', { bubbles: true }));");
@@ -132,9 +132,9 @@ class ImageTest extends DuskTestCase
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
-            $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="advanced"]')
-                ->pause(500);
+            $browser->waitFor('#section-style', 10);
+            $browser->script("document.getElementById('style-tab-advanced').click();");
+            $browser->pause(500);
             // Ensure banner style so the header image block (and its delete button) is visible
             $browser->script("document.getElementById('header_style_banner').checked = true; document.getElementById('header_style_banner').dispatchEvent(new Event('change', { bubbles: true }));");
             $browser->pause(300)
@@ -157,9 +157,9 @@ class ImageTest extends DuskTestCase
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
-            $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="background"]')
-                ->pause(500);
+            $browser->waitFor('#section-style', 10);
+            $browser->script("document.getElementById('style-tab-background').click();");
+            $browser->pause(500);
 
             // Select "image" radio
             $browser->radio('background', 'image')
@@ -186,9 +186,9 @@ class ImageTest extends DuskTestCase
                 ->waitFor('a[data-section="section-style"]', 5)
                 ->pause(1000);
             $browser->script("document.querySelector('a[data-section=\"section-style\"]').click()");
-            $browser->waitFor('#section-style', 10)
-                ->click('button[data-style-tab="background"]')
-                ->pause(500)
+            $browser->waitFor('#section-style', 10);
+            $browser->script("document.getElementById('style-tab-background').click();");
+            $browser->pause(500)
                 ->radio('background', 'image')
                 ->pause(500)
                 ->waitFor('#style_background_image', 5);
