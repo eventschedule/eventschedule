@@ -85,6 +85,7 @@ class Role extends Model implements MustVerifyEmail
         'graphic_settings',
         'caldav_settings',
         'caldav_sync_direction',
+        'microsoft_sync_direction',
         'calendar_description_template',
         'agenda_ai_prompt',
         'agenda_show_times',
@@ -126,6 +127,9 @@ class Role extends Model implements MustVerifyEmail
         'google_webhook_expires_at' => 'datetime',
         'trial_ends_at' => 'datetime',
         'caldav_last_sync_at' => 'datetime',
+        'microsoft_webhook_expires_at' => 'datetime',
+        'microsoft_last_sync_at' => 'datetime',
+        'microsoft_create_teams_meetings' => 'boolean',
         'event_custom_fields' => 'array',
         'approved_subdomains' => 'array',
         'last_translated_at' => 'datetime',
@@ -2152,6 +2156,58 @@ class Role extends Model implements MustVerifyEmail
         return $this->google_webhook_id &&
                $this->google_webhook_expires_at &&
                $this->google_webhook_expires_at->isFuture();
+    }
+
+    /**
+     * Get the Outlook / Microsoft calendar ID for this role.
+     * Returns the owner's selected calendar, or null for the default calendar.
+     * Unlike Google there is no 'primary' alias in Graph - null routes to /me/events.
+     */
+    public function getMicrosoftCalendarId(): ?string
+    {
+        $pivot = RoleUser::where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->first();
+
+        return $pivot?->microsoft_calendar_id ?: null;
+    }
+
+    /**
+     * Check if this role has Outlook / Microsoft calendar integration enabled
+     */
+    public function hasMicrosoftCalendarIntegration()
+    {
+        $pivot = RoleUser::where('role_id', $this->id)
+            ->where('user_id', $this->user_id)
+            ->first();
+
+        return ! is_null($pivot?->microsoft_calendar_id);
+    }
+
+    /**
+     * Check if this role syncs to Outlook / Microsoft calendar
+     */
+    public function syncsToMicrosoft()
+    {
+        return in_array($this->microsoft_sync_direction, ['to', 'both']);
+    }
+
+    /**
+     * Check if this role syncs from Outlook / Microsoft calendar
+     */
+    public function syncsFromMicrosoft()
+    {
+        return in_array($this->microsoft_sync_direction, ['from', 'both']);
+    }
+
+    /**
+     * Check if the Microsoft Graph subscription is active and not expired
+     */
+    public function hasActiveMicrosoftWebhook()
+    {
+        return $this->microsoft_webhook_id &&
+               $this->microsoft_webhook_expires_at &&
+               $this->microsoft_webhook_expires_at->isFuture();
     }
 
     /**

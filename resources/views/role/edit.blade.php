@@ -3773,6 +3773,9 @@
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 {{ config('app.hosted') ? 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600' : 'border-[var(--brand-blue)] text-[var(--brand-blue)]' }}" data-tab="google">
                                     Google Calendar
                                 </button>
+                                <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="microsoft">
+                                    {{ __('messages.microsoft_calendar') }}
+                                </button>
                                 <button type="button" class="integration-tab text-center px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="caldav">
                                     {{ __('messages.caldav_calendar') }}
                                 </button>
@@ -4097,6 +4100,90 @@
                                 </x-link>
                                 @endif
                             </div>
+                            @endif
+                        </div>
+
+                        <!-- Tab Content: Outlook / Microsoft Calendar -->
+                        <div id="integration-tab-microsoft" class="integration-tab-content hidden {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                {{ __('messages.microsoft_sync_events_between_schedules') }}
+                            </p>
+
+                            @if (auth()->id() === $role->user_id && auth()->user()->microsoft_token)
+                            {{-- Marker so an absent Teams checkbox (tab not rendered) can't clobber the stored value --}}
+                            <input type="hidden" name="microsoft_integration_submitted" value="1">
+                            <div class="space-y-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                                <!-- Calendar Selection -->
+                                <div>
+                                    <x-input-label for="microsoft-calendar-select" :value="__('messages.select_microsoft_calendar')" />
+                                    <select id="microsoft-calendar-select" name="microsoft_calendar_id" data-searchable class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                        <option value="">{{ __('messages.loading_calendars') }}</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sync Direction Selection -->
+                                <div>
+                                    <x-input-label :value="__('messages.sync_direction')" />
+                                    <div class="mt-2 space-y-2">
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="microsoft_sync_direction"
+                                                   value="to"
+                                                   {{ $role->microsoft_sync_direction === 'to' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.to_microsoft_calendar') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.to_microsoft_calendar_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="microsoft_sync_direction"
+                                                   value="from"
+                                                   {{ $role->microsoft_sync_direction === 'from' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.from_microsoft_calendar') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.from_microsoft_calendar_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="microsoft_sync_direction"
+                                                   value="both"
+                                                   {{ $role->microsoft_sync_direction === 'both' ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.bidirectional_sync') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.bidirectional_sync_description') }}</div>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center">
+                                            <input type="radio"
+                                                   name="microsoft_sync_direction"
+                                                   value=""
+                                                   {{ !$role->microsoft_sync_direction ? 'checked' : '' }}
+                                                   class="border-gray-300 dark:border-gray-700 focus:ring-[var(--brand-blue)] h-4 w-4">
+                                            <div class="ms-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <div class="font-medium">{{ __('messages.no_sync') }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.no_microsoft_sync_description') }}</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Teams Meetings -->
+                                <div>
+                                    <x-toggle name="microsoft_create_teams_meetings"
+                                        label="{{ __('messages.microsoft_teams_meetings') }}"
+                                        checked="{{ old('microsoft_create_teams_meetings', $role->microsoft_create_teams_meetings) }}"
+                                        help="{{ __('messages.microsoft_teams_meetings_help') }}" />
+                                </div>
+                            </div>
+                            @else
+                            <x-link href="{{ route('profile.edit') }}#section-microsoft-calendar" target="_blank">
+                                {{ __('messages.connect_microsoft_calendar') }}
+                            </x-link>
                             @endif
                         </div>
 
@@ -4867,6 +4954,12 @@ document.addEventListener('DOMContentLoaded', function() {
         loadGoogleCalendars();
     }
 
+    // Only load Outlook calendars if the Outlook Calendar section is present
+    const microsoftCalendarSelect = document.getElementById('microsoft-calendar-select');
+    if (microsoftCalendarSelect) {
+        loadMicrosoftCalendars();
+    }
+
     var forceGoogleResyncBtn = document.getElementById('force-google-resync-btn');
     if (forceGoogleResyncBtn) {
         var savedCalendarId = @json($userCalendarId ?? '');
@@ -5011,6 +5104,50 @@ function loadGoogleCalendars() {
                 errorMessage = @json(__('messages.access_denied_calendar'), JSON_UNESCAPED_UNICODE);
             }
             
+            select.innerHTML = '<option value="">' + errorMessage + '</option>';
+        });
+}
+
+function loadMicrosoftCalendars() {
+    const select = document.getElementById('microsoft-calendar-select');
+    if (!select) {
+        return;
+    }
+
+    fetch('{{ url('/microsoft-calendar/calendars') }}')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            select.innerHTML = '<option value="">' + @json(__('messages.select_a_calendar'), JSON_UNESCAPED_UNICODE) + '</option>';
+
+            if (data.calendars && Array.isArray(data.calendars)) {
+                data.calendars.forEach(calendar => {
+                    const option = document.createElement('option');
+                    option.value = calendar.id;
+                    option.textContent = calendar.summary + (calendar.primary ? ' (Primary)' : '');
+                    if (calendar.id === @json($userMicrosoftCalendarId ?? '')) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            } else {
+                select.innerHTML = '<option value="">' + @json(__('messages.no_calendars_available'), JSON_UNESCAPED_UNICODE) + '</option>';
+            }
+            window.dispatchEvent(new CustomEvent('microsoft-calendars-loaded'));
+        })
+        .catch(error => {
+            let errorMessage = @json(__('messages.error_loading_calendars'), JSON_UNESCAPED_UNICODE);
+
+            if (error.message.includes('401')) {
+                errorMessage = @json(__('messages.microsoft_calendar_not_connected'), JSON_UNESCAPED_UNICODE);
+            } else if (error.message.includes('403')) {
+                errorMessage = @json(__('messages.access_denied_microsoft_calendar'), JSON_UNESCAPED_UNICODE);
+            }
+
             select.innerHTML = '<option value="">' + errorMessage + '</option>';
         });
 }

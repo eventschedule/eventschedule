@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ApiEventController;
 use App\Http\Controllers\Api\ApiGroupController;
 use App\Http\Controllers\Api\ApiSaleController;
 use App\Http\Controllers\Api\ApiScheduleController;
+use App\Http\Controllers\Api\ApiTranslationSuggestionController;
 use App\Http\Middleware\ApiAuthentication;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register/send-code', [ApiAuthController::class, 'sendCode']);
 Route::post('/register', [ApiAuthController::class, 'register']);
 Route::post('/login', [ApiAuthController::class, 'login']);
+
+// Nexus only: receives translation suggestions shared by other installs.
+// The api group carries no default throttle, so the route sets its own.
+if (config('app.is_nexus')) {
+    Route::post('/translations/suggestions', [ApiTranslationSuggestionController::class, 'store'])
+        ->middleware('throttle:30,1');
+}
 
 // Authenticated routes
 Route::middleware([ApiAuthentication::class])->group(function () {

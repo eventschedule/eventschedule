@@ -92,6 +92,7 @@ class RouteLoadTest extends DuskTestCase
 
                 // Integration pages
                 '/google-calendar',
+                '/outlook-calendar',
                 '/caldav',
                 '/stripe',
                 '/invoiceninja',
@@ -191,6 +192,7 @@ class RouteLoadTest extends DuskTestCase
                 '/docs/selfhost/installation',
                 '/docs/selfhost/stripe',
                 '/docs/selfhost/google-calendar',
+                '/docs/selfhost/microsoft-calendar',
                 '/docs/selfhost/boost',
                 '/docs/selfhost/admin',
                 '/docs/selfhost/email',

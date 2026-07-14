@@ -19,7 +19,7 @@ class RouteLoadTest extends TestCase
         $role->subdomain = $subdomain;
         $role->user_id = $user->id;
         $role->type = $type;
-        $role->name = 'Test ' . ucfirst($type);
+        $role->name = 'Test '.ucfirst($type);
         $role->email = 'test@example.com';
         $role->save();
 
@@ -35,7 +35,7 @@ class RouteLoadTest extends TestCase
         $user->save();
 
         $role = new Role;
-        $role->subdomain = 'admin' . strtolower(\Str::random(8));
+        $role->subdomain = 'admin'.strtolower(\Str::random(8));
         $role->user_id = $user->id;
         $role->type = 'venue';
         $role->name = 'Admin Schedule';
@@ -125,6 +125,7 @@ class RouteLoadTest extends TestCase
 
             // Integration pages
             '/google-calendar',
+            '/outlook-calendar',
             '/caldav',
             '/stripe',
             '/invoiceninja',
@@ -220,6 +221,7 @@ class RouteLoadTest extends TestCase
             '/docs/selfhost/installation',
             '/docs/selfhost/stripe',
             '/docs/selfhost/google-calendar',
+            '/docs/selfhost/microsoft-calendar',
             '/docs/selfhost/boost',
             '/docs/selfhost/admin',
             '/docs/selfhost/email',
@@ -338,16 +340,16 @@ class RouteLoadTest extends TestCase
         try {
             [$user, $role] = $this->createUserWithSchedule('talent', 'testtalent');
 
-            $baseUrl = 'http://testtalent.' . parse_url(config('app.url'), PHP_URL_HOST);
+            $baseUrl = 'http://testtalent.'.parse_url(config('app.url'), PHP_URL_HOST);
 
             $urls = [
-                $baseUrl . '/',
-                $baseUrl . '/request',
-                $baseUrl . '/follow',
-                $baseUrl . '/guest-add',
-                $baseUrl . '/booking-request',
-                $baseUrl . '/feed/ical',
-                $baseUrl . '/feed/rss',
+                $baseUrl.'/',
+                $baseUrl.'/request',
+                $baseUrl.'/follow',
+                $baseUrl.'/guest-add',
+                $baseUrl.'/booking-request',
+                $baseUrl.'/feed/ical',
+                $baseUrl.'/feed/rss',
             ];
 
             foreach ($urls as $url) {

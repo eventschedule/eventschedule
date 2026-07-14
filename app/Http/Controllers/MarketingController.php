@@ -133,6 +133,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Outlook / Microsoft Calendar page
+     */
+    public function outlookCalendar()
+    {
+        return view('marketing.outlook-calendar');
+    }
+
+    /**
      * CalDAV page
      */
     public function caldav()
@@ -1180,6 +1188,14 @@ class MarketingController extends Controller
     public function docsSelfhostGoogleCalendar()
     {
         return view('marketing.docs.selfhost.google-calendar');
+    }
+
+    /**
+     * Outlook / Microsoft Calendar documentation page
+     */
+    public function docsSelfhostMicrosoftCalendar()
+    {
+        return view('marketing.docs.selfhost.microsoft-calendar');
     }
 
     /**
@@ -5003,6 +5019,7 @@ class MarketingController extends Controller
             'selfhost_installation' => route('marketing.docs.selfhost.installation'),
             'selfhost_stripe' => route('marketing.docs.selfhost.stripe'),
             'selfhost_google_calendar' => route('marketing.docs.selfhost.google_calendar'),
+            'selfhost_microsoft_calendar' => route('marketing.docs.selfhost.microsoft_calendar'),
             'selfhost_email' => route('marketing.docs.selfhost.email'),
             'selfhost_ai' => route('marketing.docs.selfhost.ai'),
             'selfhost_admin' => route('marketing.docs.selfhost.admin'),
@@ -5258,6 +5275,15 @@ class MarketingController extends Controller
             ['page' => 'Google Calendar', 'section' => 'Troubleshooting', 'description' => 'Debug Google Calendar sync issues.', 'url' => $r['selfhost_google_calendar'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix debug sync'],
             ['page' => 'Google Calendar', 'section' => 'Security', 'description' => 'Token storage and security considerations.', 'url' => $r['selfhost_google_calendar'].'#security', 'category' => 'Selfhost', 'keywords' => 'security tokens oauth'],
 
+            // Outlook / Microsoft Calendar (Selfhost)
+            ['page' => 'Outlook Calendar', 'section' => 'Prerequisites', 'description' => 'Azure app registration requirements for Outlook calendar sync.', 'url' => $r['selfhost_microsoft_calendar'].'#prerequisites', 'category' => 'Selfhost', 'keywords' => 'microsoft azure app registration prerequisites outlook 365'],
+            ['page' => 'Outlook Calendar', 'section' => 'Setup Instructions', 'description' => 'Step-by-step Microsoft Graph OAuth setup for Outlook Calendar.', 'url' => $r['selfhost_microsoft_calendar'].'#setup', 'category' => 'Selfhost', 'keywords' => 'setup oauth graph credentials microsoft outlook'],
+            ['page' => 'Outlook Calendar', 'section' => 'Features', 'description' => 'Outlook Calendar sync capabilities including Teams meetings.', 'url' => $r['selfhost_microsoft_calendar'].'#features', 'category' => 'Selfhost', 'keywords' => 'features sync bidirectional teams meetings outlook'],
+            ['page' => 'Outlook Calendar', 'section' => 'Usage', 'description' => 'How to use the Outlook Calendar integration.', 'url' => $r['selfhost_microsoft_calendar'].'#usage', 'category' => 'Selfhost', 'keywords' => 'usage connect calendar outlook microsoft'],
+            ['page' => 'Outlook Calendar', 'section' => 'API Endpoints', 'description' => 'Outlook Calendar API endpoints reference.', 'url' => $r['selfhost_microsoft_calendar'].'#api-endpoints', 'category' => 'Selfhost', 'keywords' => 'api endpoints routes microsoft outlook webhook'],
+            ['page' => 'Outlook Calendar', 'section' => 'Troubleshooting', 'description' => 'Debug Outlook Calendar sync issues.', 'url' => $r['selfhost_microsoft_calendar'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix debug sync outlook microsoft'],
+            ['page' => 'Outlook Calendar', 'section' => 'Security', 'description' => 'Token storage and security considerations for Outlook sync.', 'url' => $r['selfhost_microsoft_calendar'].'#security', 'category' => 'Selfhost', 'keywords' => 'security tokens oauth microsoft outlook'],
+
             // Email (Selfhost)
             ['page' => 'Email Setup', 'section' => 'Overview', 'description' => 'Configure email for your selfhosted instance.', 'url' => $r['selfhost_email'].'#overview', 'category' => 'Selfhost', 'keywords' => 'email mail setup'],
             ['page' => 'Email Setup', 'section' => 'SMTP Setup', 'description' => 'Configure SMTP for sending emails.', 'url' => $r['selfhost_email'].'#smtp', 'category' => 'Selfhost', 'keywords' => 'smtp mail server'],
@@ -5301,6 +5327,8 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Queue', 'description' => 'Monitor background job queue.', 'url' => $r['selfhost_admin'].'#system-queue', 'category' => 'Selfhost', 'keywords' => 'queue jobs background worker'],
             ['page' => 'Admin Panel', 'section' => 'Logs', 'description' => 'View application error logs.', 'url' => $r['selfhost_admin'].'#system-logs', 'category' => 'Selfhost', 'keywords' => 'logs errors debug'],
             ['page' => 'Admin Panel', 'section' => 'Settings', 'description' => 'Add custom header and footer code (Google Tag Manager, analytics) injected into all public guest pages.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'settings header footer code google tag manager gtm analytics tracking script head body'],
+            ['page' => 'Admin Panel', 'section' => 'Translations', 'description' => 'Review and customize the app\'s text in any language, and share improvements with the community.', 'url' => $r['selfhost_admin'].'#system-translations', 'category' => 'Selfhost', 'keywords' => 'translations translate language customize text terminology rename wording localization locale strings'],
+            ['page' => 'Admin Panel', 'section' => 'Sharing translations', 'description' => 'Share your translation improvements with the EventSchedule community for review.', 'url' => $r['selfhost_admin'].'#system-translations', 'category' => 'Selfhost', 'keywords' => 'share translations community contribute suggestions auto-share'],
 
             // Boost Setup (Selfhost)
             ['page' => 'Boost Setup', 'section' => 'Overview', 'description' => 'Set up Meta/Facebook boost for selfhosted instances.', 'url' => $r['selfhost_boost'].'#overview', 'category' => 'Selfhost', 'keywords' => 'boost meta facebook setup'],

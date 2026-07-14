@@ -917,6 +917,7 @@ class RoleController extends Controller
             // The relabel moves the event's absolute instant, so push it to any external calendars the
             // event's roles sync to (both no-op when nothing is synced).
             $event->syncToGoogleCalendar('update');
+            $event->syncToMicrosoftCalendar('update');
             $event->syncToCalDAV('update');
 
             AuditService::log(AuditService::EVENT_UPDATE, auth()->id(), 'Event', $event->id, null, null, $event->name);
@@ -2857,6 +2858,7 @@ class RoleController extends Controller
             'created_at' => now(),
             'level' => 'owner',
             'google_calendar_id' => $request->input('google_calendar_id'),
+            'microsoft_calendar_id' => $request->input('microsoft_calendar_id'),
         ]);
 
         AuditService::log(AuditService::SCHEDULE_CREATE, $user->id, 'Role', $role->id, null, null, $role->name);
@@ -2866,6 +2868,13 @@ class RoleController extends Controller
         $calendarId = $request->input('google_calendar_id');
         if ($syncDirection || $calendarId) {
             $this->handleSyncAndCalendarChanges($role, $syncDirection, null, $calendarId, null);
+        }
+
+        // Handle Outlook / Microsoft sync direction and calendar setup for new role
+        $microsoftSyncDirection = $request->input('microsoft_sync_direction');
+        $microsoftCalendarId = $request->input('microsoft_calendar_id');
+        if ($microsoftSyncDirection || $microsoftCalendarId) {
+            $this->handleMicrosoftSyncAndCalendarChanges($role, $microsoftSyncDirection, null, $microsoftCalendarId, null);
         }
 
         // Save groups
@@ -3147,6 +3156,7 @@ class RoleController extends Controller
             'availableCurators' => $availableCurators,
             'notificationSettings' => $notificationSettings,
             'userCalendarId' => $pivot?->google_calendar_id,
+            'userMicrosoftCalendarId' => $pivot?->microsoft_calendar_id,
             'event_category_counts' => $eventCategoryCounts,
             'mergeCandidates' => $mergeCandidates,
             'mergeSuggestion' => $mergeSuggestion,
@@ -3243,6 +3253,12 @@ class RoleController extends Controller
         $oldCalendarId = $ownerPivot?->google_calendar_id;
         $newCalendarId = $request->input('google_calendar_id');
 
+        // Outlook / Microsoft sync direction + calendar changes
+        $oldMicrosoftSyncDirection = $role->microsoft_sync_direction;
+        $newMicrosoftSyncDirection = $request->input('microsoft_sync_direction');
+        $oldMicrosoftCalendarId = $ownerPivot?->microsoft_calendar_id;
+        $newMicrosoftCalendarId = $request->input('microsoft_calendar_id');
+
         // Capture old category state for rename detection.
         $oldEventCategories = $role->event_categories;
         $eventCategoriesSubmitted = $request->boolean('event_categories_submitted');
@@ -3268,6 +3284,29 @@ class RoleController extends Controller
         if (($newSyncDirection && $oldSyncDirection !== $newSyncDirection) ||
             ($oldCalendarId !== $newCalendarId)) {
             $this->handleSyncAndCalendarChanges($role, $newSyncDirection, $oldSyncDirection, $newCalendarId, $oldCalendarId);
+        }
+
+        // The whole Outlook tab (Teams toggle, calendar select, direction radios) only renders
+        // for the connected owner. Gate every Outlook write on the hidden marker so a save that
+        // did NOT render the tab (a non-owner editor, or the owner while disconnected) cannot
+        // clobber the owner's calendar selection or tear down their Graph subscription with the
+        // wrong account's token. NOTE: microsoft_sync_direction is fillable, so when the tab is
+        // absent fill() simply leaves it unchanged.
+        if ($request->has('microsoft_integration_submitted')) {
+            $role->microsoft_create_teams_meetings = $request->boolean('microsoft_create_teams_meetings');
+
+            // Save Outlook calendar ID to owner's pivot
+            if ($oldMicrosoftCalendarId !== $newMicrosoftCalendarId) {
+                $ownerPivot?->update(['microsoft_calendar_id' => $newMicrosoftCalendarId ?: null]);
+            }
+
+            // Handle subscription management whenever the direction (incl. to "no sync") or the
+            // calendar changed. The direction condition must NOT require a truthy new value, or
+            // switching to "no sync" would leave the subscription live until it auto-expires.
+            if (($oldMicrosoftSyncDirection !== $newMicrosoftSyncDirection) ||
+                ($oldMicrosoftCalendarId !== $newMicrosoftCalendarId)) {
+                $this->handleMicrosoftSyncAndCalendarChanges($role, $newMicrosoftSyncDirection, $oldMicrosoftSyncDirection, $newMicrosoftCalendarId, $oldMicrosoftCalendarId);
+            }
         }
 
         $newSubdomain = Role::cleanSubdomain($request->new_subdomain);
@@ -5745,6 +5784,78 @@ class RoleController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Failed to handle sync and calendar changes', [
+                'user_id' => $user->id,
+                'role_id' => $role->id,
+                'old_sync_direction' => $oldSyncDirection,
+                'new_sync_direction' => $newSyncDirection,
+                'old_calendar_id' => $oldCalendarId,
+                'new_calendar_id' => $newCalendarId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Handle Outlook / Microsoft sync direction and calendar changes and Graph subscription management
+     */
+    private function handleMicrosoftSyncAndCalendarChanges($role, $newSyncDirection, $oldSyncDirection, $newCalendarId = null, $oldCalendarId = null)
+    {
+        $user = auth()->user();
+
+        if (! $user->microsoft_token) {
+            return; // No Outlook Calendar connected, skip subscription management
+        }
+
+        try {
+            $microsoftCalendarService = app(\App\Services\MicrosoftCalendarService::class);
+
+            // A deltaLink is scoped to a calendar, so a calendar switch invalidates the stored token.
+            // forceFill: system-managed columns kept out of $fillable.
+            if ($oldCalendarId !== $newCalendarId) {
+                $role->forceFill(['microsoft_sync_token' => null, 'microsoft_last_sync_at' => null])->save();
+            }
+
+            $shouldRemoveOldSubscription = ($oldCalendarId !== $newCalendarId) ||
+                                    ($oldSyncDirection !== $newSyncDirection &&
+                                     ($oldSyncDirection === 'from' || $oldSyncDirection === 'both'));
+
+            if ($shouldRemoveOldSubscription && $role->microsoft_webhook_id) {
+                if ($microsoftCalendarService->ensureValidToken($user)) {
+                    $microsoftCalendarService->deleteSubscription($user, $role->microsoft_webhook_id);
+                }
+
+                $role->forceFill([
+                    'microsoft_webhook_id' => null,
+                    'microsoft_webhook_expires_at' => null,
+                ])->save();
+            }
+
+            if ($newSyncDirection === 'from' || $newSyncDirection === 'both') {
+                if (! $role->hasActiveMicrosoftWebhook()) {
+                    if (! $microsoftCalendarService->ensureValidToken($user)) {
+                        \Log::warning('Outlook Calendar token invalid and refresh failed during sync direction change', [
+                            'user_id' => $user->id,
+                            'role_id' => $role->id,
+                        ]);
+
+                        return;
+                    }
+
+                    $webhook = $microsoftCalendarService->createSubscription(
+                        $user,
+                        $role->getMicrosoftCalendarId(),
+                        route('microsoft.calendar.webhook.handle')
+                    );
+
+                    $role->forceFill([
+                        'microsoft_webhook_id' => $webhook['id'],
+                        'microsoft_webhook_expires_at' => $webhook['expiration'] ? \Carbon\Carbon::parse($webhook['expiration']) : null,
+                    ])->save();
+                }
+            }
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to handle Outlook sync and calendar changes', [
                 'user_id' => $user->id,
                 'role_id' => $role->id,
                 'old_sync_direction' => $oldSyncDirection,

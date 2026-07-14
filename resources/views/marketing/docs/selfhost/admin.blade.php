@@ -130,6 +130,7 @@
                         <a href="#system-queue" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Queue</a>
                         <a href="#system-logs" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Logs</a>
                         <a href="#system-settings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Settings</a>
+                        <a href="#system-translations" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Translations</a>
                     </nav>
                 </aside>
 
@@ -449,6 +450,37 @@
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Privacy &amp; consent</div>
                                 <p>Injected analytics are not automatically gated by the cookie-consent banner. You are responsible for configuring consent (for example, Google consent mode) to comply with the privacy regulations in your region.</p>
+                            </div>
+                        </section>
+
+                        <!-- System: Translations -->
+                        <section id="system-translations" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+                                </svg>
+                                Translations (System)
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">The Translations page lets you review and customize every piece of text the app shows, in any of the supported languages. Fix an awkward translation, adapt wording to your industry (for example rename "ticket" to "registration" or "booking"), or fill in missing translations - all without editing any files.</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Pick a language and file</strong> - <code class="doc-inline-code">messages</code> holds the app's UI strings; <code class="doc-inline-code">accessibility</code> and <code class="doc-inline-code">marketing</code> are smaller companion files. English is editable too, which is handy for renaming built-in terms.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Search and filter</strong> - find strings by key or text, and filter to only your customized keys or to translations that are missing in the selected language.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Edit and save</strong> - type your text next to the original and save. Changes apply immediately, are stored in the database, and survive app updates. A per-row revert restores the shipped translation at any time.</li>
+                                <li><strong class="text-gray-900 dark:text-white">Copy as PHP</strong> - copies your customizations as ready-to-paste language-file lines, useful for moving them into another install or contributing a pull request.</li>
+                            </ul>
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Placeholders and plurals</div>
+                                <p>Some strings contain placeholders such as <code class="doc-inline-code">:name</code> or plural forms separated by <code class="doc-inline-code">|</code>. Keep them in your version so dynamic values keep working - the editor warns you if one goes missing, but never blocks the save.</p>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Sharing improvements with the community</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">Many translation fixes are useful to every EventSchedule install. You can share yours with the community for review, and approved suggestions ship with future releases. Nothing is ever sent automatically: use the <strong class="text-gray-900 dark:text-white">Share</strong> button to pick exactly which changes to send, or enable the <strong class="text-gray-900 dark:text-white">auto-share</strong> toggle if you want saved changes submitted on their own. Keep auto-share off if your wording is specific to your business.</p>
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">What sharing sends</div>
+                                <p>Sharing sends the language, the translation key and your suggested text, plus your app version and a random anonymous install identifier, to eventschedule.com. No URLs, email addresses, or other personal data are included.</p>
+                            </div>
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Behind the scenes</div>
+                                <p>Customizations are stored in the database and published as override files under <code class="doc-inline-code">storage/app/lang</code>. Hand-made override files (the pre-existing <a href="{{ route('marketing.docs.selfhost.installation') }}#translations" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline">custom translations</a> approach) are adopted into the editor automatically. After restoring a database backup or cloning to a new server, run <code class="doc-inline-code">php artisan translations:publish</code> to rebuild the files.</p>
                             </div>
                         </section>
 

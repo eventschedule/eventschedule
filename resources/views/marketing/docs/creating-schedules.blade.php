@@ -138,6 +138,7 @@
                             <div class="doc-nav-group-items">
                                 <a href="#integrations-email" class="doc-nav-link">Email</a>
                                 <a href="#integrations-google" class="doc-nav-link">Google Calendar</a>
+                                <a href="#integrations-microsoft" class="doc-nav-link">Outlook Calendar</a>
                                 <a href="#integrations-caldav" class="doc-nav-link">CalDAV</a>
                                 <a href="#integrations-advanced" class="doc-nav-link">Advanced</a>
                             </div>
@@ -1173,6 +1174,24 @@
                             <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Selfhost Note</div>
                                 <p>Google Calendar integration requires API credentials configuration. See the <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">selfhost Google Calendar docs</a> for setup instructions.</p>
+                            </div>
+
+                            <!-- Outlook / Microsoft Calendar -->
+                            <h3 id="integrations-microsoft" class="doc-heading text-lg font-semibold text-gray-900 dark:text-white mb-4">Outlook Calendar</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Connect your Outlook / Microsoft 365 calendar for two-way sync via the Microsoft Graph API. Events created in either place stay synchronized, with near-real-time updates plus a polling fallback.</p>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">First, make sure you've connected your Outlook account in <a href="{{ route('marketing.docs.account_settings') }}#microsoft" class="text-cyan-400 hover:text-cyan-300">Account Settings</a>. Then:</p>
+                            <ol class="doc-list doc-list-numbered mb-6">
+                                <li>Go to <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Schedule &rarr; Edit</strong></li>
+                                <li>Open <strong class="text-gray-900 dark:text-white">Integrations &rarr; Outlook Calendar</strong></li>
+                                <li>Select which <strong class="text-gray-900 dark:text-white">calendar</strong> to sync with</li>
+                                <li>Choose your <strong class="text-gray-900 dark:text-white">sync direction</strong>: to Outlook, from Outlook, or bidirectional</li>
+                                <li>Optionally enable <strong class="text-gray-900 dark:text-white">Teams meetings</strong> so online events (no venue) are created as Microsoft Teams meetings with the join link saved to the event</li>
+                            </ol>
+
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Selfhost Note</div>
+                                <p>Outlook Calendar integration requires an Azure app registration. See the <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="text-cyan-400 hover:text-cyan-300">selfhost Outlook Calendar docs</a> for setup instructions.</p>
                             </div>
 
                             <!-- CalDAV -->

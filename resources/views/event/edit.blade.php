@@ -1399,6 +1399,14 @@
                                 {{ __('messages.google_calendar_sync') }}
                             </a>
                             @endif
+                            @if ($event->exists && $event->canBeSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
+                            <a href="#section-microsoft-calendar" class="section-nav-link" data-section="section-microsoft-calendar">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                {{ __('messages.microsoft_calendar_sync') }}
+                            </a>
+                            @endif
                             @if ($event->user_id == $user->id)
                             <a href="#section-tickets" class="section-nav-link" data-section="section-tickets">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -2962,6 +2970,67 @@
                     </div>
 
                     <div id="sync-status-{{ $event->id }}" class="hidden mt-3">
+                        <div class="flex items-center text-blue-600 dark:text-blue-400">
+                            <svg class="animate-spin -ms-1 me-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span class="text-sm">{{ __('messages.syncing') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            @if ($event->exists && $event->canBeSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
+            <button type="button" class="mobile-section-header" data-section="section-microsoft-calendar">
+                <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    {{ __('messages.microsoft_calendar_sync') }}
+                </span>
+                <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div id="section-microsoft-calendar" class="section-content lg:mt-0">
+                <div class="max-w-xl">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                        </svg>
+                        {{ __('messages.microsoft_calendar_sync') }}
+                    </h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                        {{ __('messages.sync_this_event_microsoft_description') }}
+                    </p>
+
+                    <div class="flex items-center space-x-4">
+                        @if ($event->isSyncedToMicrosoftCalendarForSubdomain(request()->subdomain))
+                            <div class="flex items-center text-green-600 dark:text-green-400">
+                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-sm">{{ __('messages.synced_to_microsoft_calendar') }}</span>
+                            </div>
+                            <x-secondary-button type="button" id="microsoft-unsync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
+                                {{ __('messages.remove_from_microsoft_calendar') }}
+                            </x-secondary-button>
+                        @else
+                            <div class="flex items-center text-gray-500 dark:text-gray-400">
+                                <svg class="w-4 h-4 me-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 0a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1h-4a1 1 0 01-1-1v-2z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-sm">{{ __('messages.not_synced_to_microsoft_calendar') }}</span>
+                            </div>
+                            <x-primary-button type="button" id="microsoft-sync-event-btn" data-subdomain="{{ $subdomain }}" data-event-id="{{ $event->id }}">
+                                {{ __('messages.sync_to_microsoft_calendar') }}
+                            </x-primary-button>
+                        @endif
+                    </div>
+
+                    <div id="microsoft-sync-status-{{ $event->id }}" class="hidden mt-3">
                         <div class="flex items-center text-blue-600 dark:text-blue-400">
                             <svg class="animate-spin -ms-1 me-3 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -7375,6 +7444,89 @@
   if (syncBtn) {
     syncBtn.addEventListener('click', function() {
       syncEvent(this.dataset.subdomain, parseInt(this.dataset.eventId));
+    });
+  }
+
+  // Unsync from Outlook Calendar button
+  var microsoftUnsyncBtn = document.getElementById('microsoft-unsync-event-btn');
+  if (microsoftUnsyncBtn) {
+    microsoftUnsyncBtn.addEventListener('click', function() {
+      microsoftUnsyncEvent(this.dataset.subdomain, parseInt(this.dataset.eventId));
+    });
+  }
+
+  // Sync to Outlook Calendar button
+  var microsoftSyncBtn = document.getElementById('microsoft-sync-event-btn');
+  if (microsoftSyncBtn) {
+    microsoftSyncBtn.addEventListener('click', function() {
+      microsoftSyncEvent(this.dataset.subdomain, parseInt(this.dataset.eventId));
+    });
+  }
+
+  // Outlook Calendar sync functions
+  function microsoftSyncEvent(subdomain, eventId) {
+    const statusDiv = document.getElementById(`microsoft-sync-status-${eventId}`);
+    statusDiv.classList.remove('hidden');
+
+    fetch(`{{ url('/microsoft-calendar/sync-event') }}/${subdomain}/${eventId}`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      statusDiv.classList.add('hidden');
+      if (data.error) {
+        alert(@json(__('messages.error')) + ': ' + data.error);
+      } else {
+        location.reload();
+      }
+    })
+    .catch(error => {
+      statusDiv.classList.add('hidden');
+      alert(@json(__('messages.error')) + ': ' + error.message);
+    });
+  }
+
+  function microsoftUnsyncEvent(subdomain, eventId) {
+    if (!confirm(@json(__('messages.confirm_remove_microsoft_calendar')))) {
+      return;
+    }
+
+    const statusDiv = document.getElementById(`microsoft-sync-status-${eventId}`);
+    statusDiv.classList.remove('hidden');
+
+    fetch(`{{ url('/microsoft-calendar/unsync-event') }}/${subdomain}/${eventId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      statusDiv.classList.add('hidden');
+      if (data.error) {
+        alert(@json(__('messages.error')) + ': ' + data.error);
+      } else {
+        location.reload();
+      }
+    })
+    .catch(error => {
+      statusDiv.classList.add('hidden');
+      alert(@json(__('messages.error')) + ': ' + error.message);
     });
   }
 

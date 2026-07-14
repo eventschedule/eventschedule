@@ -56,6 +56,17 @@ class UsageTrackingService
 
     const GCAL_WEBHOOK = 'gcal_webhook';
 
+    // Outlook / Microsoft Calendar operations
+    const MSCAL_CREATE = 'mscal_create';
+
+    const MSCAL_UPDATE = 'mscal_update';
+
+    const MSCAL_DELETE = 'mscal_delete';
+
+    const MSCAL_SYNC = 'mscal_sync';
+
+    const MSCAL_WEBHOOK = 'mscal_webhook';
+
     // Stripe operations
     const STRIPE_ACCOUNT = 'stripe_account';
 

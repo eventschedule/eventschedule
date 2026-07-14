@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminNewsletterController;
+use App\Http\Controllers\AdminTranslationController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\AppController;
@@ -24,6 +25,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceNinjaController;
 use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MetaAdsWebhookController;
+use App\Http\Controllers\MicrosoftCalendarController;
+use App\Http\Controllers\MicrosoftCalendarWebhookController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
@@ -162,6 +165,10 @@ Route::post('/invoiceninja/event-purchase-webhook/{event}', [InvoiceNinjaControl
 // Google Calendar webhook routes (no auth required)
 Route::get('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'verify'])->name('google.calendar.webhook.verify')->middleware('throttle:10,1');
 Route::post('/google-calendar/webhook', [GoogleCalendarWebhookController::class, 'handle'])->name('google.calendar.webhook.handle')->middleware('throttle:60,1');
+
+// Microsoft (Outlook) Calendar webhook routes (no auth required)
+Route::get('/microsoft-calendar/webhook', [MicrosoftCalendarWebhookController::class, 'verify'])->name('microsoft.calendar.webhook.verify')->middleware('throttle:10,1');
+Route::post('/microsoft-calendar/webhook', [MicrosoftCalendarWebhookController::class, 'handle'])->name('microsoft.calendar.webhook.handle')->middleware('throttle:60,1');
 
 // Meta Ads webhook routes (no auth required)
 Route::get('/webhooks/meta', [MetaAdsWebhookController::class, 'verify'])->name('meta.webhook.verify')->middleware('throttle:10,1');
@@ -309,6 +316,16 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/google-calendar/member-sync/{subdomain}', [GoogleCalendarController::class, 'memberSync'])->name('google.calendar.member_sync');
     Route::post('/google-calendar/sync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'syncEvent'])->name('google.calendar.sync_event');
     Route::delete('/google-calendar/unsync-event/{subdomain}/{eventId}', [GoogleCalendarController::class, 'unsyncEvent'])->name('google.calendar.unsync_event');
+
+    // Microsoft (Outlook) Calendar routes
+    Route::get('/microsoft-calendar/redirect', [MicrosoftCalendarController::class, 'redirect'])->name('microsoft.calendar.redirect');
+    Route::get('/microsoft-calendar/callback', [MicrosoftCalendarController::class, 'callback'])->name('microsoft.calendar.callback');
+    Route::get('/microsoft-calendar/reauthorize', [MicrosoftCalendarController::class, 'reauthorize'])->name('microsoft.calendar.reauthorize');
+    Route::get('/microsoft-calendar/disconnect', [MicrosoftCalendarController::class, 'disconnect'])->name('microsoft.calendar.disconnect');
+    Route::get('/microsoft-calendar/calendars', [MicrosoftCalendarController::class, 'getCalendars'])->name('microsoft.calendar.calendars');
+    Route::post('/microsoft-calendar/sync/{subdomain}', [MicrosoftCalendarController::class, 'sync'])->name('microsoft.calendar.sync');
+    Route::post('/microsoft-calendar/sync-event/{subdomain}/{eventId}', [MicrosoftCalendarController::class, 'syncEvent'])->name('microsoft.calendar.sync_event');
+    Route::delete('/microsoft-calendar/unsync-event/{subdomain}/{eventId}', [MicrosoftCalendarController::class, 'unsyncEvent'])->name('microsoft.calendar.unsync_event');
 
     // CalDAV routes
     Route::post('/caldav/test-connection', [CalDAVController::class, 'testConnection'])->name('caldav.test_connection')->middleware('throttle:10,1');
@@ -558,6 +575,24 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/newsletters/{hash}/save-as-template', [AdminNewsletterController::class, 'saveAsTemplate'])->name('admin.newsletters.save_as_template');
         Route::post('/admin/newsletters/upload-image', [AdminNewsletterController::class, 'uploadImage'])->name('admin.newsletters.upload_image');
 
+        // Admin translation manager. Registered on every install: the sharing
+        // endpoints runtime-404 on nexus and the suggestion-review endpoints
+        // runtime-404 off nexus (registration-time gates would be untestable
+        // because phpunit forces IS_NEXUS=true).
+        Route::get('/admin/translations', [AdminTranslationController::class, 'index'])->name('admin.translations');
+        Route::get('/admin/translations/data', [AdminTranslationController::class, 'data'])->name('admin.translations.data');
+        Route::post('/admin/translations', [AdminTranslationController::class, 'save'])->name('admin.translations.save');
+        Route::post('/admin/translations/revert', [AdminTranslationController::class, 'revert'])->name('admin.translations.revert');
+        Route::get('/admin/translations/unshared', [AdminTranslationController::class, 'unshared'])->name('admin.translations.unshared');
+        Route::post('/admin/translations/share', [AdminTranslationController::class, 'share'])->name('admin.translations.share');
+        Route::post('/admin/translations/auto-share', [AdminTranslationController::class, 'autoShare'])->name('admin.translations.auto_share');
+        Route::get('/admin/translations/suggestions', [AdminTranslationController::class, 'suggestions'])->name('admin.translations.suggestions');
+        Route::get('/admin/translations/suggestions/data', [AdminTranslationController::class, 'suggestionsData'])->name('admin.translations.suggestions.data');
+        Route::get('/admin/translations/suggestions/export', [AdminTranslationController::class, 'exportApproved'])->name('admin.translations.suggestions.export');
+        Route::post('/admin/translations/suggestions/bulk', [AdminTranslationController::class, 'bulkSuggestions'])->name('admin.translations.suggestions.bulk');
+        Route::post('/admin/translations/suggestions/{hash}/approve', [AdminTranslationController::class, 'approveSuggestion'])->name('admin.translations.suggestions.approve');
+        Route::post('/admin/translations/suggestions/{hash}/reject', [AdminTranslationController::class, 'rejectSuggestion'])->name('admin.translations.suggestions.reject');
+
         // Admin support chat routes (hosted only)
         if (config('app.hosted')) {
             Route::get('/admin/support', [SupportChatController::class, 'adminIndex'])->name('admin.support');
@@ -602,6 +637,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
         Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
         Route::get('/google-calendar', [MarketingController::class, 'googleCalendar'])->name('marketing.google_calendar');
+        Route::get('/outlook-calendar', [MarketingController::class, 'outlookCalendar'])->name('marketing.outlook_calendar');
         Route::get('/caldav', [MarketingController::class, 'caldav'])->name('marketing.caldav');
         Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
         Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
@@ -761,6 +797,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
         Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
         Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
+        Route::get('/docs/selfhost/microsoft-calendar', [MarketingController::class, 'docsSelfhostMicrosoftCalendar'])->name('marketing.docs.selfhost.microsoft_calendar');
         Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
         Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
         Route::get('/docs/selfhost/email', [MarketingController::class, 'docsSelfhostEmail'])->name('marketing.docs.selfhost.email');
@@ -800,6 +837,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/ai', [MarketingController::class, 'ai'])->name('marketing.ai');
             Route::get('/features/calendar-sync', [MarketingController::class, 'calendarSync'])->name('marketing.calendar_sync');
             Route::get('/google-calendar', [MarketingController::class, 'googleCalendar'])->name('marketing.google_calendar');
+            Route::get('/outlook-calendar', [MarketingController::class, 'outlookCalendar'])->name('marketing.outlook_calendar');
             Route::get('/caldav', [MarketingController::class, 'caldav'])->name('marketing.caldav');
             Route::get('/stripe', [MarketingController::class, 'stripe'])->name('marketing.stripe');
             Route::get('/invoiceninja', [MarketingController::class, 'invoiceninja'])->name('marketing.invoiceninja');
@@ -961,6 +999,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/installation', [MarketingController::class, 'docsSelfhostInstallation'])->name('marketing.docs.selfhost.installation');
             Route::get('/docs/selfhost/stripe', [MarketingController::class, 'docsSelfhostStripe'])->name('marketing.docs.selfhost.stripe');
             Route::get('/docs/selfhost/google-calendar', [MarketingController::class, 'docsSelfhostGoogleCalendar'])->name('marketing.docs.selfhost.google_calendar');
+            Route::get('/docs/selfhost/microsoft-calendar', [MarketingController::class, 'docsSelfhostMicrosoftCalendar'])->name('marketing.docs.selfhost.microsoft_calendar');
             Route::get('/docs/selfhost/boost', [MarketingController::class, 'docsSelfhostBoost'])->name('marketing.docs.selfhost.boost');
             Route::get('/docs/selfhost/admin', [MarketingController::class, 'docsSelfhostAdmin'])->name('marketing.docs.selfhost.admin');
             Route::get('/docs/selfhost/email', [MarketingController::class, 'docsSelfhostEmail'])->name('marketing.docs.selfhost.email');
@@ -998,6 +1037,7 @@ if (config('app.is_nexus')) {
             Route::get('/ai', fn () => redirect('https://'._base_domain().'/features/ai', 301));
             Route::get('/calendar-sync', fn () => redirect('https://'._base_domain().'/features/calendar-sync', 301));
             Route::get('/google-calendar', fn () => redirect('https://'._base_domain().'/google-calendar', 301));
+            Route::get('/outlook-calendar', fn () => redirect('https://'._base_domain().'/outlook-calendar', 301));
             Route::get('/caldav', fn () => redirect('https://'._base_domain().'/caldav', 301));
             Route::get('/stripe', fn () => redirect('https://'._base_domain().'/stripe', 301));
             Route::get('/invoiceninja', fn () => redirect('https://'._base_domain().'/invoiceninja', 301));
@@ -1145,6 +1185,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/selfhost/saas', fn () => redirect('https://'._base_domain().'/docs/saas', 301));
             Route::get('/docs/selfhost/stripe', fn () => redirect('https://'._base_domain().'/docs/selfhost/stripe', 301));
             Route::get('/docs/selfhost/google-calendar', fn () => redirect('https://'._base_domain().'/docs/selfhost/google-calendar', 301));
+            Route::get('/docs/selfhost/microsoft-calendar', fn () => redirect('https://'._base_domain().'/docs/selfhost/microsoft-calendar', 301));
             Route::get('/docs/selfhost/boost', fn () => redirect('https://'._base_domain().'/docs/selfhost/boost', 301));
             Route::get('/docs/selfhost/admin', fn () => redirect('https://'._base_domain().'/docs/selfhost/admin', 301));
             Route::get('/docs/selfhost/email', fn () => redirect('https://'._base_domain().'/docs/selfhost/email', 301));
@@ -1181,6 +1222,7 @@ if (config('app.is_nexus')) {
     Route::get('/features/ai', fn () => redirect()->route('home'));
     Route::get('/features/calendar-sync', fn () => redirect()->route('home'));
     Route::get('/google-calendar', fn () => redirect()->route('home'));
+    Route::get('/outlook-calendar', fn () => redirect()->route('home'));
     Route::get('/caldav', fn () => redirect()->route('home'));
     Route::get('/stripe', fn () => redirect()->route('home'));
     Route::get('/invoiceninja', fn () => redirect()->route('home'));
@@ -1280,6 +1322,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/selfhost/saas', fn () => redirect()->route('home'));
     Route::get('/docs/selfhost/stripe', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.stripe');
     Route::get('/docs/selfhost/google-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.google_calendar');
+    Route::get('/docs/selfhost/microsoft-calendar', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.microsoft_calendar');
     Route::get('/docs/selfhost/boost', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.boost');
     Route::get('/docs/selfhost/admin', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.admin');
     Route::get('/docs/selfhost/email', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.email');

@@ -399,6 +399,7 @@
                             <ul class="doc-list">
                                 <li>Configure <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="text-cyan-400 hover:text-cyan-300">Stripe payments</a> for ticket sales</li>
                                 <li>Set up <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Google Calendar integration</a></li>
+                                <li>Set up <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="text-cyan-400 hover:text-cyan-300">Outlook Calendar integration</a></li>
                                 <li>Set up <a href="https://www.twilio.com" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:text-cyan-300">Twilio SMS</a> for phone verification (set <code class="doc-inline-code">TWILIO_SID</code>, <code class="doc-inline-code">TWILIO_AUTH_TOKEN</code>, and <code class="doc-inline-code">TWILIO_FROM_NUMBER</code> in your <code class="doc-inline-code">.env</code>)</li>
                                 <li>Enable <a href="#push-notifications" class="text-cyan-400 hover:text-cyan-300">push notifications</a> with OneSignal (optional)</li>
                                 <li>Configure email settings for notifications</li>
@@ -469,6 +470,11 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
                                 Custom translations
                             </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Rename built-in UI terms (for example "Talent" to "Artist", or "Curator" to "Event Planner") without your changes being wiped out by <code class="doc-inline-code">php artisan app:update</code>.</p>
+
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Prefer the admin panel</div>
+                                <p>The easiest way to customize translations is the <a href="{{ route('marketing.docs.selfhost.admin') }}#system-translations" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 underline">Translations page</a> in the admin panel (System &gt; Translations): search every string, edit any language, and optionally share improvements with the community. Hand-made files described below keep working and are adopted into the editor automatically.</p>
+                            </div>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Drop a PHP file in:</p>
                             <pre class="rounded-xl bg-gray-100 dark:bg-[#1A1A1A] p-4 text-sm overflow-x-auto"><code>storage/app/lang/{locale}/{file}.php</code></pre>

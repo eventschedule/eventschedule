@@ -175,7 +175,7 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Sync with Google Calendar or any CalDAV server. Let attendees add events to their favorite calendar app.
+                Sync with Google Calendar, Outlook, or any CalDAV server. Let attendees add events to their favorite calendar app.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -201,10 +201,10 @@
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>Choose your <span class="text-gradient-cal">integration</span></h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Two powerful options for syncing your events.</p>
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Three powerful ways to keep your events in sync.</p>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2" data-reveal-group="90">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="90">
                 <!-- Google Calendar -->
                 <a href="{{ marketing_url('/google-calendar') }}" data-reveal class="es-bento group relative block" data-tilt="4">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
@@ -224,6 +224,33 @@
                             <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">Instant sync</span>
                         </div>
                         <div class="mt-auto flex items-center gap-2 font-medium text-blue-500 transition-all group-hover:gap-3 dark:text-blue-400">
+                            Learn more
+                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </a>
+
+                <!-- Outlook Calendar -->
+                <a href="{{ marketing_url('/outlook-calendar') }}" data-reveal class="es-bento group relative block" data-tilt="4">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
+                        <div class="mb-6 flex items-center gap-3">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm dark:bg-gray-800">
+                                <svg aria-hidden="true" class="h-6 w-6" viewBox="0 0 23 23"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-300">Outlook Calendar</h3>
+                                <p class="text-sm text-gray-500 dark:text-white/60">Microsoft 365 via Graph</p>
+                            </div>
+                        </div>
+                        <p class="mb-6 text-gray-600 dark:text-white/80">Connect your Outlook or Microsoft 365 account with OAuth for two-way sync. Optionally create Microsoft Teams meetings for online events.</p>
+                        <div class="mb-6 flex flex-wrap gap-2">
+                            <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">Microsoft Graph</span>
+                            <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">Teams meetings</span>
+                            <span class="inline-flex items-center rounded-full bg-indigo-100 px-3 py-1 text-sm text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">Two-way sync</span>
+                        </div>
+                        <div class="mt-auto flex items-center gap-2 font-medium text-indigo-500 transition-all group-hover:gap-3 dark:text-indigo-400">
                             Learn more
                             <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </div>
@@ -406,7 +433,7 @@
     <!-- ============================================================ -->
     @php
         $steps = [
-            ['1', 'Connect your calendar', 'Choose Google Calendar (OAuth) or any CalDAV server (username/password).'],
+            ['1', 'Connect your calendar', 'Choose Google Calendar or Outlook (OAuth) or any CalDAV server (username/password).'],
             ['2', 'Choose direction', 'Push events out, pull events in, or sync both ways. You decide.'],
             ['3', 'Select calendar', 'Pick which calendar to use. Different schedules can use different calendars.'],
             ['4', 'Auto-sync', 'Events sync automatically when created, updated, or deleted. No manual work.'],
@@ -452,7 +479,7 @@
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>Which should I <span class="text-gradient-cal">choose?</span></h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">Both options offer two-way sync. Here's how they differ.</p>
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">All three options offer two-way sync. Here's how they differ.</p>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-gray-200 dark:border-white/10" data-reveal>
@@ -467,6 +494,12 @@
                                 </div>
                             </th>
                             <th class="px-4 py-4 text-center">
+                                <div class="flex items-center justify-center gap-2 font-semibold text-indigo-700 dark:text-indigo-300">
+                                    <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 23 23"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>
+                                    Outlook
+                                </div>
+                            </th>
+                            <th class="px-4 py-4 text-center">
                                 <div class="flex items-center justify-center gap-2 font-semibold text-teal-700 dark:text-teal-300">
                                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                     CalDAV
@@ -478,31 +511,37 @@
                         <tr class="border-b border-gray-100 dark:border-white/5">
                             <td class="px-4 py-4 text-gray-600 dark:text-gray-300">Authentication</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">OAuth 2.0 (one-click)</td>
+                            <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">OAuth 2.0 (one-click)</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Username/password</td>
                         </tr>
                         <tr class="border-b border-gray-100 dark:border-white/5">
                             <td class="px-4 py-4 text-gray-600 dark:text-gray-300">Sync speed</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Real-time (webhooks)</td>
+                            <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Near real-time + polling</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Every 15 minutes</td>
                         </tr>
                         <tr class="border-b border-gray-100 dark:border-white/5">
                             <td class="px-4 py-4 text-gray-600 dark:text-gray-300">Server options</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Google only</td>
+                            <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Microsoft 365 / Outlook</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Any CalDAV server</td>
                         </tr>
                         <tr class="border-b border-gray-100 dark:border-white/5">
                             <td class="px-4 py-4 text-gray-600 dark:text-gray-300">Selfhosted friendly</td>
                             <td class="px-4 py-4 text-center"><span class="text-gray-500 dark:text-gray-400">Requires Google API setup</span></td>
+                            <td class="px-4 py-4 text-center"><span class="text-gray-500 dark:text-gray-400">Requires Azure app setup</span></td>
                             <td class="px-4 py-4 text-center"><svg aria-hidden="true" class="mx-auto h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></td>
                         </tr>
                         <tr class="border-b border-gray-100 dark:border-white/5">
                             <td class="px-4 py-4 text-gray-600 dark:text-gray-300">Two-way sync</td>
                             <td class="px-4 py-4 text-center"><svg aria-hidden="true" class="mx-auto h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></td>
+                            <td class="px-4 py-4 text-center"><svg aria-hidden="true" class="mx-auto h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></td>
                             <td class="px-4 py-4 text-center"><svg aria-hidden="true" class="mx-auto h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></td>
                         </tr>
                         <tr>
                             <td class="px-4 py-4 text-gray-600 dark:text-gray-300">Best for</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Google users who want instant sync</td>
+                            <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Microsoft 365 and Teams users</td>
                             <td class="px-4 py-4 text-center text-gray-500 dark:text-gray-400">Selfhosted or privacy-focused users</td>
                         </tr>
                     </tbody>

@@ -32,5 +32,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="APP_TESTING" value="true"/>
         <env name="IS_NEXUS" value="true"/>
+        <env name="LANG_OVERRIDES_PATH" value="storage/framework/testing/lang"/>
     </php>
 </phpunit>

@@ -88,6 +88,7 @@
                         <a href="#api" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">API Settings</a>
                         <a href="#webhooks" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Webhooks</a>
                         <a href="#google" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Google Settings</a>
+                        <a href="#microsoft" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Outlook Settings</a>
                         <a href="#backup" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Backup & Restore</a>
                         <a href="#app-update" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">App Update</a>
                         <a href="#password" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Update Password</a>
@@ -329,6 +330,31 @@
                             <div class="doc-callout doc-callout-tip">
                                 <div class="doc-callout-title">Tip</div>
                                 <p>Google Calendar sync is configured per schedule in the schedule settings. Connect your Google account here first, then enable sync on each schedule you want to keep in sync. Team members on a shared schedule each control their own connection.</p>
+                            </div>
+                        </section>
+
+                        <!-- Outlook Settings -->
+                        <section id="microsoft" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                </svg>
+                                Outlook Settings
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Connect your Outlook / Microsoft 365 account to enable two-way calendar sync via the Microsoft Graph API:
+                            </p>
+
+                            <div class="space-y-4 mb-6">
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Outlook Calendar</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Connect Outlook to enable two-way sync between Event Schedule and your Outlook / Microsoft 365 calendar. Events created in either platform are automatically synced to the other, with near-real-time updates plus a 15-minute polling fallback. Once connected, configure sync per schedule in <a href="{{ route('marketing.docs.creating_schedules') }}#integrations-microsoft" class="text-cyan-400 hover:text-cyan-300">Integrations</a>.</p>
+                                </div>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Tip</div>
+                                <p>Outlook Calendar sync is configured per schedule in the schedule settings. Connect your Outlook account here first, then enable sync on each schedule you want to keep in sync. Enable the Teams meetings option on a schedule to create Microsoft Teams meetings for online events automatically.</p>
                             </div>
                         </section>
 

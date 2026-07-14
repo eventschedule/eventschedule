@@ -185,6 +185,13 @@ class AppController extends Controller
                     report($e);
                 }
 
+                try {
+                    \Artisan::call('microsoft:sync');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command microsoft:sync failed: '.$e->getMessage());
+                    report($e);
+                }
+
                 if (\App\Services\MetaAdsService::isBoostConfigured()) {
                     try {
                         \Artisan::call('boost:sync');
@@ -270,6 +277,12 @@ class AppController extends Controller
                     \Artisan::call('google:refresh-webhooks');
                 } catch (\Exception $e) {
                     \Log::error('Scheduled command google:refresh-webhooks failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('microsoft:refresh-webhooks');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command microsoft:refresh-webhooks failed: '.$e->getMessage());
                     report($e);
                 }
                 try {

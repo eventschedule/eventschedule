@@ -47,6 +47,10 @@ Schedule::call(function () {
 })->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('microsoft:refresh-webhooks');
+})->daily()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     if (! config('app.hosted')) {
         Artisan::call('app:import-curator-events');
     }
@@ -62,6 +66,10 @@ Schedule::call(function () {
 
 Schedule::call(function () {
     Artisan::call('caldav:sync');
+})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('microsoft:sync');
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {

@@ -161,6 +161,25 @@
                     </div>
                 </a>
 
+                <!-- Outlook Calendar -->
+                <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-indigo-100 dark:bg-indigo-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Outlook Calendar</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enable two-way sync between Event Schedule and Outlook / Microsoft 365 via Microsoft Graph.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                            Read Guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
                 <!-- Boost Setup -->
                 <a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-card block">
                     <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900">

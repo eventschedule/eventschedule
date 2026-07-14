@@ -316,6 +316,13 @@
 @include('partials.sitemap-hreflang', ['url' => url('/google-calendar')])
     </url>
     <url>
+        <loc>{{ url('/outlook-calendar') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/outlook-calendar')])
+    </url>
+    <url>
         <loc>{{ url('/caldav') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
@@ -888,6 +895,13 @@
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/google-calendar')])
+    </url>
+    <url>
+        <loc>{{ url('/docs/selfhost/microsoft-calendar') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/microsoft-calendar')])
     </url>
     <url>
         <loc>{{ url('/docs/saas') }}</loc>

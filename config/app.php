@@ -36,6 +36,16 @@ return [
     'is_testing' => (bool) env('APP_TESTING', false),
 
     'is_nexus' => (bool) env('IS_NEXUS', false),
+    // The upstream nexus app that receives shared translation suggestions.
+    // Separate from marketing_url, which operators may point at their own site.
+    'nexus_url' => env('NEXUS_URL', 'https://eventschedule.com'),
+    // Where published translation-override files live. Env-overridable so tests
+    // never write into storage/app/lang of the working checkout. A relative env
+    // value resolves under the app base path; an absolute value is used as-is
+    // (e.g. a shared volume on a multi-server deploy).
+    'lang_overrides_path' => env('LANG_OVERRIDES_PATH')
+        ? (str_starts_with(env('LANG_OVERRIDES_PATH'), DIRECTORY_SEPARATOR) ? env('LANG_OVERRIDES_PATH') : base_path(env('LANG_OVERRIDES_PATH')))
+        : storage_path('app/lang'),
     'logo_dark' => env('APP_LOGO_DARK', '/images/dark_logo.png'),
     'logo_light' => env('APP_LOGO_LIGHT', '/images/light_logo.png'),
     'marketing_url' => env('APP_MARKETING_URL', 'https://eventschedule.com'),

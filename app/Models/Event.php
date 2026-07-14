@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Jobs\SyncEventToCalDAV;
 use App\Jobs\SyncEventToGoogleCalendar;
+use App\Jobs\SyncEventToMicrosoftCalendar;
 use App\Services\TicketVolumeDiscount;
 use App\Utils\EventTextGenerator;
 use App\Utils\MarkdownUtils;
@@ -334,6 +335,13 @@ class Event extends Model
                     SyncEventToGoogleCalendar::dispatchSync(
                         $this, $role, $action, $member, $member->pivot->google_calendar_id
                     );
+                }
+            }
+
+            if ($role->syncsToMicrosoft()) {
+                $user = $role->user;
+                if ($user && $user->microsoft_token) {
+                    SyncEventToMicrosoftCalendar::dispatchSync($this, $role, $action);
                 }
             }
 
@@ -2508,6 +2516,106 @@ class Event extends Model
         }
 
         return 'not_synced';
+    }
+
+    /**
+     * Get Outlook / Microsoft event ID for a specific role (uses owner's sync record)
+     */
+    public function getMicrosoftEventIdForRole($roleId)
+    {
+        $role = $this->roles->first(function ($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
+
+        if (! $role) {
+            return null;
+        }
+
+        return MicrosoftCalendarSync::where('user_id', $role->user_id)
+            ->where('event_id', $this->id)
+            ->where('role_id', $roleId)
+            ->first()?->microsoft_event_id;
+    }
+
+    /**
+     * Set Outlook / Microsoft event ID for a specific role (uses owner's sync record)
+     */
+    public function setMicrosoftEventIdForRole($roleId, $microsoftEventId)
+    {
+        $role = $this->roles->first(function ($role) use ($roleId) {
+            return $role->id == $roleId;
+        });
+
+        if (! $role) {
+            return;
+        }
+
+        if ($microsoftEventId) {
+            MicrosoftCalendarSync::updateOrCreate(
+                ['user_id' => $role->user_id, 'event_id' => $this->id, 'role_id' => $roleId],
+                ['microsoft_event_id' => $microsoftEventId]
+            );
+        } else {
+            MicrosoftCalendarSync::where('user_id', $role->user_id)
+                ->where('event_id', $this->id)
+                ->where('role_id', $roleId)
+                ->delete();
+        }
+    }
+
+    /**
+     * Get Outlook / Microsoft event ID for the role defined by subdomain
+     */
+    public function getMicrosoftEventIdForSubdomain($subdomain)
+    {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        return $role ? $this->getMicrosoftEventIdForRole($role->id) : null;
+    }
+
+    /**
+     * Sync this event to Outlook / Microsoft calendar for the schedule owner
+     */
+    public function syncToMicrosoftCalendar($action = 'create')
+    {
+        foreach ($this->roles as $role) {
+            if ($role->syncsToMicrosoft()) {
+                $user = $role->user;
+                if ($user && $user->microsoft_token) {
+                    SyncEventToMicrosoftCalendar::dispatchSync($this, $role, $action);
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if this event is synced to Outlook / Microsoft calendar for a specific role
+     */
+    public function isSyncedToMicrosoftCalendarForRole($roleId)
+    {
+        return ! is_null($this->getMicrosoftEventIdForRole($roleId));
+    }
+
+    /**
+     * Check if this event is synced to Outlook / Microsoft calendar for the role defined by subdomain
+     */
+    public function isSyncedToMicrosoftCalendarForSubdomain($subdomain)
+    {
+        return ! is_null($this->getMicrosoftEventIdForSubdomain($subdomain));
+    }
+
+    /**
+     * Check if this event can be synced to Outlook / Microsoft calendar for the role defined by subdomain
+     */
+    public function canBeSyncedToMicrosoftCalendarForSubdomain($subdomain)
+    {
+        $role = $this->roles->first(function ($role) use ($subdomain) {
+            return $role->subdomain == $subdomain;
+        });
+
+        return $role && $role->hasMicrosoftCalendarIntegration() && $role->syncsToMicrosoft();
     }
 
     /**

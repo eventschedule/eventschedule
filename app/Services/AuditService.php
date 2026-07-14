@@ -103,6 +103,18 @@ class AuditService
 
     const ADMIN_SETTINGS_UPDATE = 'admin.settings_update';
 
+    const ADMIN_TRANSLATIONS_UPDATE = 'admin.translations_update';
+
+    const ADMIN_TRANSLATIONS_REVERT = 'admin.translations_revert';
+
+    const ADMIN_TRANSLATIONS_SHARE = 'admin.translations_share';
+
+    const ADMIN_TRANSLATIONS_AUTO_SHARE = 'admin.translations_auto_share';
+
+    const ADMIN_TRANSLATION_SUGGESTION_APPROVE = 'admin.translation_suggestion_approve';
+
+    const ADMIN_TRANSLATION_SUGGESTION_REJECT = 'admin.translation_suggestion_reject';
+
     // Subscription actions
     const SUBSCRIPTION_CREATE = 'subscription.create';
 
@@ -140,6 +152,13 @@ class AuditService
     const GOOGLE_CALENDAR_SYNC = 'google_calendar.sync';
 
     const GOOGLE_CALENDAR_MEMBER_SYNC = 'google_calendar.member_sync';
+
+    // Outlook / Microsoft Calendar actions
+    const MICROSOFT_CALENDAR_CONNECT = 'microsoft_calendar.connect';
+
+    const MICROSOFT_CALENDAR_DISCONNECT = 'microsoft_calendar.disconnect';
+
+    const MICROSOFT_CALENDAR_SYNC = 'microsoft_calendar.sync';
 
     // Payment actions
     const STRIPE_LINK = 'stripe.link';

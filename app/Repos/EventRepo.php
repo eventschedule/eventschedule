@@ -1800,6 +1800,15 @@ class EventRepo
                 }
             }
 
+            // Sync to Outlook / Microsoft calendar for the current role
+            if ($currentRole && $currentRole->syncsToMicrosoft()) {
+                if ($isNewOrJustPublished) {
+                    $event->syncToMicrosoftCalendar('create');
+                } else {
+                    $event->syncToMicrosoftCalendar('update');
+                }
+            }
+
             // Sync to CalDAV for the current role
             if ($currentRole && $currentRole->syncsToCalDAV()) {
                 if ($isNewOrJustPublished) {
@@ -1827,6 +1836,9 @@ class EventRepo
                         );
                     }
                 }
+            }
+            if ($currentRole && $currentRole->syncsToMicrosoft()) {
+                $event->syncToMicrosoftCalendar('delete');
             }
             if ($currentRole && $currentRole->syncsToCalDAV()) {
                 $event->syncToCalDAV('delete');

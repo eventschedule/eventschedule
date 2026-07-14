@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\GeoIpService::class);
 
         $this->callAfterResolving('translator', function ($translator) {
-            $translator->getLoader()->addPath(storage_path('app/lang'));
+            $translator->getLoader()->addPath(config('app.lang_overrides_path'));
         });
     }
 

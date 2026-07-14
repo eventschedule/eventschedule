@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->validateCsrfTokens(except: [
             'google-calendar/webhook',
+            'microsoft-calendar/webhook',
             'stripe/webhook',
             'stripe/subscription-webhook',
             'invoiceninja/webhook/*',

@@ -57,6 +57,14 @@ return [
         'webhook_secret' => env('GOOGLE_WEBHOOK_SECRET'),
     ],
 
+    'microsoft' => [
+        'client_id' => env('MICROSOFT_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
+        'redirect' => env('MICROSOFT_REDIRECT_URI'),
+        'tenant' => env('MICROSOFT_TENANT', 'common'),
+        'webhook_secret' => env('MICROSOFT_WEBHOOK_SECRET'),
+    ],
+
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),

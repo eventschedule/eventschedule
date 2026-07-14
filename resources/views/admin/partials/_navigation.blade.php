@@ -8,7 +8,7 @@
         $manageKeys = array_merge($manageKeys, ['schedules', 'domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
-    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'support', 'settings']);
+    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'support', 'settings', 'translations']);
 
     $tabActive = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
     $tabInactive = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -142,6 +142,9 @@
                         </a>
                         <a href="{{ route('admin.settings') }}" class="{{ $active === 'settings' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.settings')
+                        </a>
+                        <a href="{{ route('admin.translations') }}" class="{{ $active === 'translations' ? $dropdownItemActive : $dropdownItem }}">
+                            @lang('messages.translations')
                         </a>
                         @if (config('app.hosted'))
                         <a href="{{ route('admin.support') }}" class="{{ $active === 'support' ? $dropdownItemActive : $dropdownItem }}">

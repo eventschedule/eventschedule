@@ -1087,6 +1087,9 @@ class EventController extends Controller
         if ($role->syncsToGoogle()) {
             $event->syncToGoogleCalendar('create');
         }
+        if ($role->syncsToMicrosoft()) {
+            $event->syncToMicrosoftCalendar('create');
+        }
         if ($role->syncsToCalDAV()) {
             $event->syncToCalDAV('create');
         }

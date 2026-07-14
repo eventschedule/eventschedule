@@ -30,6 +30,7 @@ All users get these features with no subscription required.
 | Team collaboration (single member) | One team member per schedule |
 | Venue location maps | Google Maps integration |
 | Google Calendar sync | Bidirectional sync |
+| Outlook Calendar sync | Microsoft 365 / Graph two-way sync, optional Teams meeting links |
 | CalDAV sync | Standard calendar protocol |
 | Fan videos, photos & comments on events | User-generated content on events (25 photo limit on free tier) |
 | Built-in analytics | Schedule analytics dashboard |
