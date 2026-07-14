@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Setting;
 use App\Models\TranslationOverride;
 use App\Utils\UrlUtils;
+use HTMLPurifier;
+use HTMLPurifier_Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -25,6 +27,9 @@ class TranslationOverrideService
     public const SHARE_CHUNK_SIZE = 200;
 
     public const SHARE_MAX_ITEMS = 1000;
+
+    /** Lazily-built HTML sanitizer for override values (see sanitizeValue). */
+    protected ?HTMLPurifier $purifier = null;
 
     /**
      * The shipped translations from resources/lang, bypassing any overrides.
@@ -128,6 +133,14 @@ class TranslationOverrideService
         foreach ($values as $key => $value) {
             if (! is_string($key) || ! array_key_exists($key, $enCatalog)) {
                 continue;
+            }
+
+            // Sanitize before the value can become a live override. messages.*
+            // is rendered raw ({!! __() !!}) on public pages, and this value may
+            // be an approved community suggestion from an untrusted install, so
+            // strip scripts/handlers/iframes while keeping safe inline markup.
+            if (is_string($value)) {
+                $value = $this->sanitizeValue($value);
             }
 
             $shippedValue = $shipped[$key] ?? null;
@@ -338,6 +351,49 @@ class TranslationOverrideService
     }
 
     /**
+     * Sanitize an override value so it can be safely rendered raw. Several
+     * messages.* strings are output via {!! __() !!} on public pages; a
+     * translation is UI text, never a script surface. Keeps the safe inline
+     * markup the shipped strings use (bold/italic/links/line breaks) and strips
+     * everything else (script/iframe/svg/img/event handlers/javascript: URIs).
+     * Plain text and :placeholder tokens pass through untouched.
+     */
+    public function sanitizeValue(string $value): string
+    {
+        // Only purify values that actually carry a dangerous construct. Many
+        // legitimate strings contain literal angle brackets or placeholder
+        // links (help text referring to "<head>"/"<email>", a link with a
+        // :smtp_link href) that the purifier would strip or re-encode - purifying
+        // those would corrupt benign content for no security gain.
+        if (! $this->containsDangerousHtml($value)) {
+            return $value;
+        }
+
+        if ($this->purifier === null) {
+            $config = HTMLPurifier_Config::createDefault();
+            $config->set('HTML.Allowed', 'b,strong,i,em,u,a[href|title|target|rel],br');
+            $config->set('HTML.TargetBlank', true);
+            $config->set('HTML.Nofollow', true);
+            $this->purifier = new HTMLPurifier($config);
+        }
+
+        return $this->purifier->purify($value);
+    }
+
+    /**
+     * Whether a value carries a construct that is unsafe to render raw
+     * (scripts, framing/embedding tags, event handlers, javascript:/data: URIs).
+     * The single source of truth shared by the sanitizer and the review warning.
+     */
+    public function containsDangerousHtml(string $value): bool
+    {
+        return (bool) preg_match(
+            '/<\s*(script|iframe|object|embed|svg|img|style|link|meta|base)\b|\bon\w+\s*=|javascript:|data:\s*text\/html/i',
+            $value
+        );
+    }
+
+    /**
      * The anonymous identifier sent with shared suggestions, created on first use.
      */
     public function instanceId(): string
@@ -367,6 +423,17 @@ class TranslationOverrideService
         }
 
         $overrides = $query->limit($maxItems)->get();
+
+        // A blank-after-trim value (e.g. a hand-made ' ' label adopted from a
+        // file) carries nothing to share and would be rejected by the intake's
+        // `required` rule - the framework trims it to null - which would abort
+        // the whole batch and permanently wedge sharing. Mark such overrides
+        // handled (a later real edit resets shared_at) and never send them.
+        [$blank, $sendable] = $overrides->partition(fn ($o) => trim($o->value) === '');
+        if ($blank->isNotEmpty()) {
+            TranslationOverride::whereIn('id', $blank->pluck('id'))->update(['shared_at' => now()]);
+        }
+        $overrides = $sendable->values();
 
         $url = rtrim(config('app.nexus_url'), '/').'/api/translations/suggestions';
         $instanceId = $this->instanceId();

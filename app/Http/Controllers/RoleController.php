@@ -219,6 +219,23 @@ class RoleController extends Controller
             }
         }
 
+        // Clean up the Outlook / Microsoft Graph subscription before deleting role
+        if ($role->microsoft_webhook_id) {
+            try {
+                $microsoftUser = $role->user;
+                if ($microsoftUser && $microsoftUser->microsoft_token) {
+                    app(\App\Services\MicrosoftCalendarService::class)
+                        ->deleteSubscription($microsoftUser, $role->microsoft_webhook_id);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to clean up Outlook subscription during role deletion', [
+                    'role_id' => $role->id,
+                    'subscription_id' => $role->microsoft_webhook_id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         // Prevent orphaned events
         if ($role->isTalent()) {
             $events = $role->events()->get();
@@ -3253,9 +3270,10 @@ class RoleController extends Controller
         $oldCalendarId = $ownerPivot?->google_calendar_id;
         $newCalendarId = $request->input('google_calendar_id');
 
-        // Outlook / Microsoft sync direction + calendar changes
+        // Outlook / Microsoft sync direction + calendar changes. The new direction is read from
+        // the model AFTER fill() (below), not the raw request, so a hand-crafted POST that sets
+        // the marker but omits the direction radio can't spuriously null it and tear the sub down.
         $oldMicrosoftSyncDirection = $role->microsoft_sync_direction;
-        $newMicrosoftSyncDirection = $request->input('microsoft_sync_direction');
         $oldMicrosoftCalendarId = $ownerPivot?->microsoft_calendar_id;
         $newMicrosoftCalendarId = $request->input('microsoft_calendar_id');
 
@@ -3294,6 +3312,9 @@ class RoleController extends Controller
         // absent fill() simply leaves it unchanged.
         if ($request->has('microsoft_integration_submitted')) {
             $role->microsoft_create_teams_meetings = $request->boolean('microsoft_create_teams_meetings');
+
+            // Read the new direction from the model post-fill (fillable), not the raw request.
+            $newMicrosoftSyncDirection = $role->microsoft_sync_direction;
 
             // Save Outlook calendar ID to owner's pivot
             if ($oldMicrosoftCalendarId !== $newMicrosoftCalendarId) {

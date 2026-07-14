@@ -3619,6 +3619,7 @@ return [
     'copy_approved_as_php' => 'העתק את המאושרות כ-PHP',
     'copy_approved_hint' => 'בחר שפה ואת הסינון "אושר" כדי להעתיק הצעות מאושרות.',
     'all_languages' => 'כל השפות',
+    'all_files' => 'כל הקבצים',
     'no_suggestions_found' => 'לא נמצאו הצעות',
     'no_suggestions_hint' => 'הצעות שנשלחו מהתקנות EventSchedule יופיעו כאן.',
     'html_warning' => 'מוסיף תגי HTML או סקריפט שאינם קיימים בטקסט המקורי',

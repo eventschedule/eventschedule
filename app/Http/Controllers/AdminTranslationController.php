@@ -310,6 +310,7 @@ class AdminTranslationController extends Controller
         $validated = $request->validate([
             'status' => ['nullable', Rule::in(['pending', 'approved', 'rejected', 'all'])],
             'locale' => ['nullable', Rule::in(array_keys(config('app.supported_languages')))],
+            'group' => ['nullable', Rule::in(TranslationOverrideService::GROUPS)],
         ]);
 
         $status = $validated['status'] ?? 'pending';
@@ -320,6 +321,9 @@ class AdminTranslationController extends Controller
         }
         if (! empty($validated['locale'])) {
             $query->where('locale', $validated['locale']);
+        }
+        if (! empty($validated['group'])) {
+            $query->where('group', $validated['group']);
         }
 
         $shipped = [];
@@ -535,18 +539,22 @@ class AdminTranslationController extends Controller
     }
 
     /**
-     * Whether an edited value introduces HTML/script markers absent from the
-     * reference text. Surfaced as a review warning, never blocking.
+     * Whether a suggested value carries risky HTML. Surfaced as a review warning
+     * (never blocking; approval also sanitizes via TranslationOverrideService).
+     * Dangerous constructs are flagged unconditionally - the shipped reference is
+     * trusted and never contains them, so comparing against it would miss a
+     * <script> injected into a key that already ships with benign markup (e.g. a
+     * footer with <b>). New markup absent from the reference is also flagged.
      */
     protected function introducesHtml(string $reference, string $value): bool
     {
-        foreach (['/</', '/javascript:/i', '/\bon\w+\s*=/i'] as $pattern) {
-            if (preg_match($pattern, $value) && ! preg_match($pattern, $reference)) {
-                return true;
-            }
+        // Same detector the sanitizer uses, so the warning and the stripping agree.
+        if ($this->service->containsDangerousHtml($value)) {
+            return true;
         }
 
-        return false;
+        // Any newly-introduced tag markup (even if otherwise safe) is worth a hint.
+        return str_contains($value, '<') && ! str_contains($reference, '<');
     }
 
     protected function validateScope(Request $request): array

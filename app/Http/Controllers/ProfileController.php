@@ -218,6 +218,21 @@ class ProfileController extends Controller
                 }
             }
 
+            // Clean up the Outlook / Microsoft Graph subscription before deleting role
+            if ($role->microsoft_webhook_id && $user->microsoft_token) {
+                try {
+                    app(\App\Services\MicrosoftCalendarService::class)
+                        ->deleteSubscription($user, $role->microsoft_webhook_id);
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to clean up Outlook subscription during user deletion', [
+                        'user_id' => $user->id,
+                        'role_id' => $role->id,
+                        'subscription_id' => $role->microsoft_webhook_id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
             if ($role->profile_image_url) {
                 $path = $role->getAttributes()['profile_image_url'];
                 if (config('filesystems.default') == 'local') {

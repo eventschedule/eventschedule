@@ -71,13 +71,25 @@ class MicrosoftCalendarWebhookController extends Controller
                 // Debounce: Graph sends one notification per changed event. The deltaLink
                 // returns every pending change, so a single sync per role per minute is
                 // enough; the rest are caught by the next notification or the 15-min poll.
-                if (! Cache::add("microsoft-webhook-sync-{$role->id}", true, 60)) {
+                // Cache::add is atomic (set-if-absent) so only the first concurrent
+                // notification proceeds.
+                $debounceKey = "microsoft-webhook-sync-{$role->id}";
+                if (! Cache::add($debounceKey, true, 60)) {
                     continue;
                 }
 
                 // Sync off the request thread - Graph expects a fast 2xx and deprovisions
                 // subscriptions after slow responses. Token refresh happens inside the job.
-                SyncMicrosoftCalendarInbound::dispatch($role);
+                try {
+                    SyncMicrosoftCalendarInbound::dispatch($role);
+                } catch (\Throwable $e) {
+                    // Release the debounce key so this role isn't blocked for 60s on a queue blip.
+                    Cache::forget($debounceKey);
+                    Log::error('Failed to dispatch Outlook inbound sync job', [
+                        'role_id' => $role->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
             if ($validated === 0 && ! empty($notifications)) {

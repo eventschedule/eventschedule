@@ -150,7 +150,7 @@ class ApiScheduleController extends Controller
 
         $user->roles()->attach($role->id, ['created_at' => now(), 'level' => 'owner']);
 
-        if (!$user->default_role_id) {
+        if (! $user->default_role_id) {
             $user->default_role_id = $role->id;
             $user->save();
         }
@@ -257,6 +257,22 @@ class ApiScheduleController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::warning('Failed to clean up webhook during API role deletion', [
+                    'role_id' => $role->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Clean up the Outlook / Microsoft Graph subscription
+        if ($role->microsoft_webhook_id) {
+            try {
+                $microsoftUser = $role->user;
+                if ($microsoftUser && $microsoftUser->microsoft_token) {
+                    app(\App\Services\MicrosoftCalendarService::class)
+                        ->deleteSubscription($microsoftUser, $role->microsoft_webhook_id);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Failed to clean up Outlook subscription during API role deletion', [
                     'role_id' => $role->id,
                     'error' => $e->getMessage(),
                 ]);

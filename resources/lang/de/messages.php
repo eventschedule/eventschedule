@@ -3627,6 +3627,7 @@ return [
     'copy_approved_as_php' => 'Genehmigte Vorschläge als PHP kopieren',
     'copy_approved_hint' => 'Wählen Sie eine Sprache und den Filter "Genehmigt", um genehmigte Vorschläge zu kopieren.',
     'all_languages' => 'Alle Sprachen',
+    'all_files' => 'Alle Dateien',
     'no_suggestions_found' => 'Keine Vorschläge gefunden',
     'no_suggestions_hint' => 'Hier erscheinen Vorschläge, die von EventSchedule-Installationen eingereicht wurden.',
     'html_warning' => 'Fügt HTML- oder Skript-Markierungen hinzu, die im Originaltext nicht vorhanden sind',

@@ -3643,6 +3643,7 @@ return [
     'copy_approved_as_php' => 'Kopeeri kinnitatud ettepanekud PHP-na',
     'copy_approved_hint' => 'Kinnitatud ettepanekute kopeerimiseks valige keel ja filter "Kinnitatud".',
     'all_languages' => 'Kõik keeled',
+    'all_files' => 'Kõik failid',
     'no_suggestions_found' => 'Ettepanekuid ei leitud',
     'no_suggestions_hint' => 'Siia ilmuvad EventSchedule\'i paigalduste esitatud ettepanekud.',
     'html_warning' => 'Lisab HTML- või skriptimärgiseid, mida algtekstis ei ole',

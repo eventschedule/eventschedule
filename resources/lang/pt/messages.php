@@ -3623,6 +3623,7 @@ return [
     'copy_approved_as_php' => 'Copiar aprovadas como PHP',
     'copy_approved_hint' => 'Selecione um idioma e filtre por aprovadas para copiar as sugestões aprovadas.',
     'all_languages' => 'Todos os idiomas',
+    'all_files' => 'Todos os arquivos',
     'no_suggestions_found' => 'Nenhuma sugestão encontrada',
     'no_suggestions_hint' => 'As sugestões enviadas pelas instalações do EventSchedule aparecerão aqui.',
     'html_warning' => 'Adiciona HTML ou marcações de script que não existem no texto original',

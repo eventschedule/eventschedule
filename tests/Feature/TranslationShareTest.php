@@ -128,6 +128,28 @@ class TranslationShareTest extends TestCase
         $this->assertSame(1, TranslationOverride::unshared()->count());
     }
 
+    public function test_a_blank_override_does_not_wedge_the_share_batch(): void
+    {
+        Http::fake([self::NEXUS_ENDPOINT => Http::response(['accepted' => 1, 'skipped' => 0])]);
+        config(['app.is_nexus' => false]);
+
+        // A hand-made ' ' override (adopted from a file, never trimmed) would 422
+        // the intake and stall sharing; it must be marked handled and skipped.
+        $blank = TranslationOverride::create(['locale' => 'fr', 'group' => 'messages', 'key' => 'back', 'value' => '   ']);
+        $real = $this->createOverride('home', 'Maison');
+
+        $result = app(TranslationOverrideService::class)->shareToNexus();
+
+        $this->assertSame(1, $result['shared']);
+        $this->assertFalse($result['failed']);
+        $this->assertSame(0, $result['remaining']);
+        $this->assertNotNull($real->fresh()->shared_at);
+        $this->assertNotNull($blank->fresh()->shared_at);
+
+        // Only the real override was actually sent to nexus.
+        Http::assertSent(fn ($request) => count($request['items']) === 1 && $request['items'][0]['key'] === 'home');
+    }
+
     public function test_sharing_works_on_self_hosted_saas_but_review_is_hidden(): void
     {
         // Self-hosted SaaS = hosted && !nexus: sharing must work, review must 404.

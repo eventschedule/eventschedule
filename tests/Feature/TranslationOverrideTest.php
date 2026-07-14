@@ -172,6 +172,48 @@ class TranslationOverrideTest extends TestCase
         $this->assertFileExists($this->overrideFilePath('es'));
     }
 
+    public function test_saving_sanitizes_dangerous_html_but_keeps_safe_markup(): void
+    {
+        // messages.talent_footer ships with <b><i> and renders raw on public
+        // pages, so an injected <script> must be stripped while the safe
+        // formatting survives.
+        $this->service()->saveOverrides('fr', 'messages', [
+            'talent_footer' => '<b>Vos evenements</b><script>alert(1)</script>',
+        ], null);
+
+        $stored = \App\Models\TranslationOverride::where('key', 'talent_footer')->value('value');
+        $this->assertStringContainsString('<b>Vos evenements</b>', $stored);
+        $this->assertStringNotContainsString('<script', $stored);
+
+        // The published file and the translator serve the sanitized value.
+        $published = require $this->overrideFilePath('fr');
+        $this->assertStringNotContainsString('<script', $published['talent_footer']);
+
+        app()->setLocale('fr');
+        $this->assertStringNotContainsString('<script', __('messages.talent_footer'));
+        app()->setLocale('en');
+    }
+
+    public function test_sanitizing_preserves_legitimate_literal_markup_and_placeholders(): void
+    {
+        // Help-text translations legitimately contain literal angle brackets and
+        // placeholder links; the sanitizer must not strip or re-encode those.
+        $service = $this->service();
+
+        $this->assertSame('Nom <email> par ligne', $service->sanitizeValue('Nom <email> par ligne'));
+        $this->assertSame('Injecte dans le <head> de la page', $service->sanitizeValue('Injecte dans le <head> de la page'));
+        $this->assertSame('<a href=":smtp_link">config</a>', $service->sanitizeValue('<a href=":smtp_link">config</a>'));
+
+        // Every shipped messages key with literal markup round-trips unchanged.
+        $withMarkup = array_filter(
+            $service->readShipped('en', 'messages'),
+            fn ($v) => is_string($v) && (str_contains($v, '<') || str_contains($v, '>'))
+        );
+        foreach ($withMarkup as $key => $value) {
+            $this->assertSame($value, $service->sanitizeValue($value), "Sanitizer mangled shipped key: {$key}");
+        }
+    }
+
     public function test_editor_page_renders_off_nexus(): void
     {
         // Default suite config is IS_NEXUS=true; the sharing UI (share modal +

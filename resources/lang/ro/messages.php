@@ -3663,6 +3663,7 @@ return [
     'copy_approved_as_php' => 'Copiază cele aprobate ca PHP',
     'copy_approved_hint' => 'Selectează o limbă și filtrul "Aprobat" pentru a copia sugestiile aprobate.',
     'all_languages' => 'Toate limbile',
+    'all_files' => 'Toate fișierele',
     'no_suggestions_found' => 'Nu s-au găsit sugestii',
     'no_suggestions_hint' => 'Sugestiile trimise de instalările EventSchedule vor apărea aici.',
     'html_warning' => 'Adaugă marcaje HTML sau de script care nu există în textul original',

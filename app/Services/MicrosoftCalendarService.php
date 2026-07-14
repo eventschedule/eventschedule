@@ -182,7 +182,9 @@ class MicrosoftCalendarService
         $lock = Cache::lock('microsoft-token-refresh-'.$user->id, 15);
 
         try {
-            $lock->block(5);
+            // Wait longer than the 8s refresh HTTP timeout so a waiter outlasts a legitimate
+            // in-flight refresh (and still under the 15s lock TTL).
+            $lock->block(10);
         } catch (LockTimeoutException $e) {
             // Another process refreshed while we waited - re-read and trust its result.
             $user->refresh();
@@ -579,6 +581,17 @@ class MicrosoftCalendarService
     public function syncFromMicrosoftCalendar(User $user, Role $role, ?string $calendarId): array
     {
         $results = ['created' => 0, 'updated' => 0, 'errors' => 0];
+
+        // Serialize inbound sync per role: the webhook job and the 15-min poll (or two
+        // overlapping runs) could otherwise both import the same remote event as two local
+        // events (the sync-row lookup + name/time fallback are not constraint-backed).
+        $lock = Cache::lock('microsoft-role-sync-'.$role->id, 120);
+        if (! $lock->get()) {
+            // Another inbound sync for this role is running; its deltaLink advance covers
+            // these changes, so skipping is safe (not a lost update).
+            return $results;
+        }
+
         $restarted = false;
 
         try {
@@ -676,6 +689,8 @@ class MicrosoftCalendarService
                 'error' => $e->getMessage(),
             ]);
             $results['errors']++;
+        } finally {
+            $lock->release();
         }
 
         return $results;

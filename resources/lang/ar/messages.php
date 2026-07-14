@@ -3624,6 +3624,7 @@ return [
     'copy_approved_as_php' => 'نسخ الموافق عليها بصيغة PHP',
     'copy_approved_hint' => 'اختر لغة ثم عامل التصفية "موافق عليه" لنسخ الاقتراحات الموافق عليها.',
     'all_languages' => 'كل اللغات',
+    'all_files' => 'كل الملفات',
     'no_suggestions_found' => 'لم يتم العثور على اقتراحات',
     'no_suggestions_hint' => 'ستظهر هنا الاقتراحات المرسلة من تثبيتات EventSchedule.',
     'html_warning' => 'يضيف وسوم HTML أو علامات سكريبت غير موجودة في النص الأصلي',

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\TranslationOverride;
 use App\Models\TranslationSuggestion;
 use App\Models\User;
 use App\Utils\UrlUtils;
@@ -111,6 +112,44 @@ class TranslationSuggestionReviewTest extends TestCase
 
         $this->assertSame('approved', $suggestion->fresh()->status);
         $this->assertDatabaseHas('translation_overrides', ['key' => 'home', 'value' => 'Page d\'accueil']);
+    }
+
+    public function test_approving_a_suggestion_sanitizes_dangerous_html(): void
+    {
+        $admin = $this->createOwner(true);
+        // talent_footer ships with <b><i> and renders raw on public pages.
+        $suggestion = $this->createSuggestion([
+            'key' => 'talent_footer',
+            'suggested_value' => '<b>Vos evenements</b><img src=x onerror=alert(1)>',
+            'shipped_value' => '<b><i>Your events</i></b> at various venues',
+        ]);
+
+        $this->adminActing($admin)
+            ->postJson(route('admin.translations.suggestions.approve', ['hash' => UrlUtils::encodeId($suggestion->id)]))
+            ->assertOk();
+
+        $stored = TranslationOverride::where('key', 'talent_footer')->value('value');
+        $this->assertStringContainsString('<b>Vos evenements</b>', $stored);
+        $this->assertStringNotContainsString('onerror', $stored);
+        $this->assertStringNotContainsString('<img', $stored);
+    }
+
+    public function test_queue_flags_dangerous_html_even_when_shipped_value_has_markup(): void
+    {
+        $admin = $this->createOwner(true);
+        // Shipped value already contains <b>; a <script> injection must still be
+        // flagged (the old check missed this because '<' was already present).
+        $this->createSuggestion([
+            'key' => 'talent_footer',
+            'suggested_value' => '<b>ok</b><script>alert(1)</script>',
+            'shipped_value' => '<b><i>Your events</i></b> at various venues',
+        ]);
+
+        $row = $this->adminActing($admin)
+            ->getJson(route('admin.translations.suggestions.data'))
+            ->json('rows.0');
+
+        $this->assertTrue($row['warnings']['html']);
     }
 
     public function test_rejecting_marks_the_group_without_touching_translations(): void

@@ -3623,6 +3623,7 @@ return [
     'copy_approved_as_php' => 'Goedgekeurde suggesties kopiëren als PHP',
     'copy_approved_hint' => 'Selecteer een taal en het filter Goedgekeurd om goedgekeurde suggesties te kopiëren.',
     'all_languages' => 'Alle talen',
+    'all_files' => 'Alle bestanden',
     'no_suggestions_found' => 'Geen suggesties gevonden',
     'no_suggestions_hint' => 'Suggesties die door EventSchedule-installaties zijn ingediend, verschijnen hier.',
     'html_warning' => 'Voegt HTML- of scriptmarkeringen toe die niet in de originele tekst voorkomen',

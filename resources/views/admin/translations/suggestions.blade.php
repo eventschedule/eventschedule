@@ -57,6 +57,14 @@
                             <option v-for="l in locales" :key="l.code" :value="l.code">@{{ l.label }}</option>
                         </select>
                     </div>
+                    <div class="w-full lg:w-44">
+                        <label for="sg-group" class="sr-only">@{{ msg.file }}</label>
+                        <select id="sg-group" v-model="groupFilter" @change="loadData"
+                            class="block w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)]">
+                            <option value="">@{{ msg.allFiles }}</option>
+                            <option v-for="g in groups" :key="g" :value="g">@{{ g }}</option>
+                        </select>
+                    </div>
                     <div class="flex-1">
                         <label for="sg-search" class="sr-only">@{{ msg.search }}</label>
                         <input id="sg-search" v-model.trim="searchQuery" type="search" autocomplete="off"
@@ -251,6 +259,8 @@
             'copyApprovedAsPhp' => __('messages.copy_approved_as_php'),
             'copyApprovedHint' => __('messages.copy_approved_hint'),
             'copied' => __('messages.copied'),
+            'file' => __('messages.translation_file'),
+            'allFiles' => __('messages.all_files'),
             'suggestedByNInstalls' => __('messages.suggested_by_n_installs'),
             'appVersions' => __('messages.app_versions'),
             'loading' => __('messages.loading'),
@@ -277,11 +287,13 @@
         document.addEventListener('DOMContentLoaded', function () {
             var MSG = @json($trSuggestionMsg);
             var LOCALES = @json($trSuggestionLocales);
+            var GROUPS = @json(\App\Services\TranslationOverrideService::GROUPS);
             var URLS = {
                 data: @json(route('admin.translations.suggestions.data')),
                 bulk: @json(route('admin.translations.suggestions.bulk')),
                 approve: @json(route('admin.translations.suggestions.approve', ['hash' => '__HASH__'])),
                 reject: @json(route('admin.translations.suggestions.reject', ['hash' => '__HASH__'])),
+                export: @json(route('admin.translations.suggestions.export')),
             };
             var CSRF = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -301,8 +313,10 @@
                     return {
                         msg: MSG,
                         locales: LOCALES,
+                        groups: GROUPS,
                         statusFilter: 'pending',
                         localeFilter: '',
+                        groupFilter: '',
                         searchQuery: '',
                         activeQuery: '',
                         searchTimer: null,
@@ -351,7 +365,9 @@
                             && this.selectablePending.every(function (r) { return selected[r.hash]; });
                     },
                     canCopyApproved() {
-                        return this.statusFilter === 'approved' && this.localeFilter !== '' && this.filteredGroups.length > 0;
+                        // A lang file is per (locale, file), so both must be chosen
+                        // to produce paste-ready lines for a single file.
+                        return this.statusFilter === 'approved' && this.localeFilter !== '' && this.groupFilter !== '' && this.filteredGroups.length > 0;
                     },
                 },
                 watch: {
@@ -386,6 +402,7 @@
                         var params = new URLSearchParams();
                         if (this.statusFilter) params.set('status', this.statusFilter);
                         if (this.localeFilter) params.set('locale', this.localeFilter);
+                        if (this.groupFilter) params.set('group', this.groupFilter);
                         fetch(URLS.data + '?' + params.toString(), { headers: { 'Accept': 'application/json' } })
                             .then(function (r) { if (!r.ok) throw r; return r.json(); })
                             .then(function (data) {
@@ -543,21 +560,27 @@
                             }
                         });
                     },
-                    phpEscape(value) {
-                        return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-                    },
                     copyApprovedAsPhp() {
                         var self = this;
                         if (!this.canCopyApproved || !navigator.clipboard) return;
-                        var lines = this.filteredGroups
-                            .slice()
-                            .sort(function (a, b) { return a.key < b.key ? -1 : 1; })
-                            .map(function (r) {
-                                // The nexus override holds the live (possibly edited) value.
-                                var value = r.nexus_override !== null ? r.nexus_override : r.suggested;
-                                return "    '" + self.phpEscape(r.key) + "' => '" + self.phpEscape(value) + "',";
-                            });
-                        navigator.clipboard.writeText(lines.join('\n')).then(function () {
+                        // Use the server endpoint: it scopes to the selected file,
+                        // exports the live override value, and omits reverted keys -
+                        // avoiding the group-mixing and stale-value pitfalls of
+                        // rebuilding the lines client-side.
+                        var url = URLS.export + '?locale=' + encodeURIComponent(this.localeFilter) + '&group=' + encodeURIComponent(this.groupFilter);
+                        var fetched = fetch(url, { headers: { 'Accept': 'text/plain' } })
+                            .then(function (r) { if (!r.ok) throw r; return r.blob(); });
+                        // Pass the fetch promise INTO the clipboard write (ClipboardItem
+                        // deferred promise) so the write stays tied to the click gesture -
+                        // a plain writeText after an awaited fetch is rejected on Safari.
+                        var write;
+                        if (window.ClipboardItem) {
+                            write = navigator.clipboard.write([new ClipboardItem({ 'text/plain': fetched })]);
+                        } else {
+                            write = fetched.then(function (b) { return b.text(); })
+                                .then(function (text) { return navigator.clipboard.writeText(text); });
+                        }
+                        write.then(function () {
                             self.copiedPhp = true;
                             setTimeout(function () { self.copiedPhp = false; }, 1500);
                         }).catch(function () {});

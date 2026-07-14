@@ -3630,6 +3630,7 @@ return [
     'copy_approved_as_php' => 'Copier les suggestions approuvées en PHP',
     'copy_approved_hint' => 'Sélectionnez une langue et le filtre « Approuvée » pour copier les suggestions approuvées.',
     'all_languages' => 'Toutes les langues',
+    'all_files' => 'Tous les fichiers',
     'no_suggestions_found' => 'Aucune suggestion trouvée',
     'no_suggestions_hint' => 'Les suggestions envoyées par les installations EventSchedule apparaîtront ici.',
     'html_warning' => 'Ajoute des balises HTML ou des marqueurs de script absents du texte d\'origine',

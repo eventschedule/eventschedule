@@ -3700,6 +3700,7 @@ return [
     'copy_approved_as_php' => 'Copy approved as PHP',
     'copy_approved_hint' => 'Select a language and the Approved filter to copy approved suggestions.',
     'all_languages' => 'All languages',
+    'all_files' => 'All files',
     'no_suggestions_found' => 'No suggestions found',
     'no_suggestions_hint' => 'Suggestions submitted by EventSchedule installs will appear here.',
     'html_warning' => 'Adds HTML or script markers not present in the original text',

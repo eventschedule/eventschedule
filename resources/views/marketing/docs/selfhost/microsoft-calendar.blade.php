@@ -121,6 +121,11 @@
                                 <div class="doc-callout-title">No public URL?</div>
                                 <p>Installs without a public HTTPS URL still work. Instead of near-real-time webhooks, inbound changes are picked up by the 15-minute <code class="doc-inline-code">microsoft:sync</code> polling fallback.</p>
                             </div>
+
+                            <div class="doc-callout doc-callout-warning mt-6">
+                                <div class="doc-callout-title">Queue worker required for webhooks</div>
+                                <p>For near-real-time webhooks, run an asynchronous queue (set <code class="doc-inline-code">QUEUE_CONNECTION=database</code> and keep <code class="doc-inline-code">php artisan queue:work</code> running). Inbound sync is dispatched to the queue so Microsoft Graph gets a fast response. On the default <code class="doc-inline-code">sync</code> connection the sync runs inside the webhook request, which can be slow enough that Graph deprovisions the subscription. Without a worker, inbound changes still arrive via the 15-minute poll.</p>
+                            </div>
                         </section>
 
                         <!-- Setup Instructions -->
@@ -206,7 +211,7 @@
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">MICROSOFT_WEBHOOK_SECRET</code></td>
-                                            <td>Required. Any long random string. It is the <code class="doc-inline-code">clientState</code> that authenticates inbound Microsoft Graph notifications</td>
+                                            <td>Required for near-real-time webhooks (public HTTPS URL); not needed for polling-only installs. Any long random string. It is the <code class="doc-inline-code">clientState</code> that authenticates inbound Microsoft Graph notifications</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -235,7 +240,7 @@
                                 <li><strong class="text-gray-900 dark:text-white">Teams Meeting Links:</strong> Optionally add a Microsoft Teams join link to online events through a per-schedule toggle</li>
                                 <li><strong class="text-gray-900 dark:text-white">Near-Real-Time Inbound:</strong> Microsoft Graph subscriptions push Outlook changes back to Event Schedule</li>
                                 <li><strong class="text-gray-900 dark:text-white">Polling Fallback:</strong> A 15-minute <code class="doc-inline-code">microsoft:sync</code> command catches anything webhooks miss</li>
-                                <li><strong class="text-gray-900 dark:text-white">Subscription Renewal:</strong> A daily <code class="doc-inline-code">microsoft:refresh-webhooks</code> command renews Graph subscriptions, which expire about every 3 days</li>
+                                <li><strong class="text-gray-900 dark:text-white">Subscription Renewal:</strong> A daily <code class="doc-inline-code">microsoft:refresh-webhooks</code> command renews Graph subscriptions, which expire about every 2.5 days</li>
                             </ol>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Information Synced</h3>
@@ -244,7 +249,6 @@
                                 <li>Event description (with venue and URL information)</li>
                                 <li>Start and end times</li>
                                 <li>Location (venue address)</li>
-                                <li>Event URL</li>
                                 <li>Microsoft Teams join link (for online events when enabled)</li>
                             </ul>
 
@@ -282,7 +286,7 @@
                             <ul class="doc-list">
                                 <li>Microsoft Graph subscriptions deliver change notifications to the webhook endpoint for near-real-time inbound sync</li>
                                 <li>The 15-minute <code class="doc-inline-code">microsoft:sync</code> command polls for changes as a fallback, and is the primary path when no public URL is available</li>
-                                <li>The daily <code class="doc-inline-code">microsoft:refresh-webhooks</code> command renews subscriptions before they expire (about every 3 days)</li>
+                                <li>The daily <code class="doc-inline-code">microsoft:refresh-webhooks</code> command renews subscriptions before they expire (about every 2.5 days)</li>
                             </ul>
                         </section>
 
@@ -376,6 +380,10 @@
                                             <td>OAuth callback</td>
                                         </tr>
                                         <tr>
+                                            <td><code class="doc-inline-code">GET /microsoft-calendar/reauthorize</code></td>
+                                            <td>Re-run consent to obtain a refresh token</td>
+                                        </tr>
+                                        <tr>
                                             <td><code class="doc-inline-code">GET /microsoft-calendar/disconnect</code></td>
                                             <td>Disconnect Outlook Calendar</td>
                                         </tr>
@@ -394,6 +402,10 @@
                                         <tr>
                                             <td><code class="doc-inline-code">DELETE /microsoft-calendar/unsync-event/{subdomain}/{eventId}</code></td>
                                             <td>Remove event from Outlook</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code class="doc-inline-code">GET /microsoft-calendar/webhook</code></td>
+                                            <td>Microsoft Graph subscription validation handshake</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">POST /microsoft-calendar/webhook</code></td>
