@@ -24,6 +24,7 @@ use App\Models\Sale;
 use App\Models\SaleTicket;
 use App\Models\Ticket;
 use App\Models\TicketWaitlist;
+use App\Utils\CountryUtils;
 use App\Utils\CssUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
@@ -1103,6 +1104,11 @@ class BackupService
         $role->description_html_en = MarkdownUtils::convertToHtml($role->description_en);
         $role->banner_message_html = MarkdownUtils::convertToHtml($role->banner_message);
         $role->banner_message_html_en = MarkdownUtils::convertToHtml($role->banner_message_en);
+
+        // saveQuietly() below skips the Role saving hook, so re-apply its country_code
+        // normalization here. An old or self-hosted backup can carry an alpha-3 value
+        // ("ISR") that would otherwise persist un-normalized and crash the country picker.
+        $role->country_code = CountryUtils::normalizeCountryCode($role->country_code);
 
         if ($role->custom_css) {
             $role->custom_css = CssUtils::sanitizeCss($role->custom_css);

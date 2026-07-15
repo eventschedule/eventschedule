@@ -2685,7 +2685,7 @@ class Event extends Model
                 $address['postalCode'] = $this->venue->postal_code;
             }
             if ($this->venue->country_code) {
-                $address['addressCountry'] = $this->venue->country_code;
+                $address['addressCountry'] = strtoupper($this->venue->country_code);
             }
 
             // Always include address field (required by Google)
@@ -2749,7 +2749,7 @@ class Event extends Model
                 $address['postalCode'] = $organizerRole->postal_code;
             }
             if ($organizerRole->country_code) {
-                $address['addressCountry'] = $organizerRole->country_code;
+                $address['addressCountry'] = strtoupper($organizerRole->country_code);
             }
         }
 

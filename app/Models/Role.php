@@ -207,6 +207,11 @@ class Role extends Model implements MustVerifyEmail
             if ($model->phone) {
                 $model->phone = \App\Utils\PhoneUtils::normalize($model->phone);
             }
+            if ($model->country_code) {
+                // Normalize to lowercase ISO 3166-1 alpha-2 (e.g. "ISR" -> "il"). The country
+                // picker (intl-tel-input) only accepts alpha-2, so alpha-3 values throw.
+                $model->country_code = \App\Utils\CountryUtils::normalizeCountryCode($model->country_code);
+            }
 
             // Recompute the *_normalized columns used by the venue dedup lookup
             // whenever the source field changes (or on initial create).

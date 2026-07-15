@@ -18,6 +18,24 @@ if (!document.getElementById('iti-country-styles')) {
 window._countryInputs = window._countryInputs || {};
 window._countryInputPending = window._countryInputPending || {};
 
+// Validate a code against intl-tel-input's own alpha-2 (iso2) list before handing it to the
+// library. intlTelInput({initialCountry}) and iti.setCountry() throw "No country data for '<code>'"
+// on any unknown code - e.g. an ISO alpha-3 value like "isr" stored on a venue. Guarding here keeps
+// a bad stored value from breaking the picker (and the surrounding Vue watcher chain).
+window._itiValidCountry = function(code) {
+    if (!code || typeof code !== 'string') return false;
+    var lc = code.trim().toLowerCase();
+    try {
+        var data = (window.intlTelInput && typeof window.intlTelInput.getCountryData === 'function')
+            ? window.intlTelInput.getCountryData() : null;
+        if (data && data.length) {
+            return data.some(function(c) { return c.iso2 === lc; });
+        }
+    } catch (e) {}
+    // Fallback if the country list isn't available: only a 2-letter code is plausibly valid.
+    return /^[a-z]{2}$/.test(lc);
+};
+
 window.destroyCountryInput = function(inputId) {
     var entry = window._countryInputs[inputId];
     if (entry && entry.iti) {
@@ -78,7 +96,7 @@ window.initCountryInput = function(inputId, initialValue) {
     }
 
     var iti = intlTelInput(telInput, {
-        initialCountry: initialValue || 'us',
+        initialCountry: window._itiValidCountry(initialValue) ? initialValue.trim().toLowerCase() : 'us',
         countrySearch: true,
         containerClass: 'iti--country-only',
         showFlags: true,
@@ -121,10 +139,15 @@ window.initCountryInput = function(inputId, initialValue) {
     window._countryInputs[inputId] = {
         iti: iti,
         setCountry: function(code) {
-            if (code) {
-                iti.setCountry(code);
+            if (!window._itiValidCountry(code)) {
+                return;
+            }
+            try {
+                iti.setCountry(code.trim().toLowerCase());
                 updateLabel();
                 syncHidden();
+            } catch (e) {
+                // Defensive: never let an unexpected code break the surrounding Vue watcher chain.
             }
         },
         getSelectedCountryData: function() {

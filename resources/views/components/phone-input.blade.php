@@ -20,6 +20,24 @@
 .iti:not(.iti--country-only) > .iti__country-container { padding: 0 0 0 4px !important; }
 </style>
 <script src="{{ asset('vendor/intl-tel-input/js/intlTelInput.min.js') }}" {!! nonce_attr() !!}></script>
+<script {!! nonce_attr() !!}>
+// Shared with country-input.blade.php: validate a code against intl-tel-input's own iso2 list so a
+// bad stored value (e.g. an ISO alpha-3 "isr") never throws "No country data for '<code>'".
+if (!window._itiValidCountry) {
+    window._itiValidCountry = function(code) {
+        if (!code || typeof code !== 'string') return false;
+        var lc = code.trim().toLowerCase();
+        try {
+            var data = (window.intlTelInput && typeof window.intlTelInput.getCountryData === 'function')
+                ? window.intlTelInput.getCountryData() : null;
+            if (data && data.length) {
+                return data.some(function(c) { return c.iso2 === lc; });
+            }
+        } catch (e) {}
+        return /^[a-z]{2}$/.test(lc);
+    };
+}
+</script>
 @endonce
 
 <input type="hidden" name="{{ $name }}" id="{{ $inputId }}_hidden" value="{{ $value }}">
@@ -37,7 +55,7 @@
 
     var iti = window.intlTelInput(input, {
         utilsScript: '{{ asset('vendor/intl-tel-input/js/utils.js') }}',
-        initialCountry: '{{ strtolower($country) }}',
+        initialCountry: window._itiValidCountry('{{ strtolower($country) }}') ? '{{ strtolower($country) }}' : 'us',
         separateDialCode: true,
         strictMode: true,
         nationalMode: false,

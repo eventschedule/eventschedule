@@ -375,7 +375,7 @@ class GeminiUtils
             'event_state' => '',
             'event_state_en' => 'English translation, only if the event state is not English',
             'event_postal_code' => '',
-            'event_country_code' => '',
+            'event_country_code' => '2-letter ISO 3166-1 alpha-2 country code, lowercase (e.g. "il", "us")',
             'registration_url' => '',
             'ticket_price' => 'Price of admission (numeric value only, no currency symbol)',
             'ticket_currency' => 'Currency code (e.g., USD, EUR, ILS) if price is mentioned',
@@ -761,9 +761,11 @@ class GeminiUtils
                 $normCity = self::normalizeForMatch($item['event_city'] ?? null);
                 $normAddress = self::normalizeForMatch($item['event_address'] ?? null);
                 $normAddressEn = self::normalizeForMatch($item['event_address_en'] ?? null);
+                // Normalize to lowercase ISO alpha-2 ("ISR" -> "il") so venue matching compares
+                // against the alpha-2 values stored on existing venues and doesn't create duplicates.
                 $countryCode = ! empty($item['event_country_code'])
-                    ? strtolower($item['event_country_code'])
-                    : ($role->country_code ? strtolower($role->country_code) : null);
+                    ? CountryUtils::normalizeCountryCode($item['event_country_code'])
+                    : ($role->country_code ? CountryUtils::normalizeCountryCode($role->country_code) : null);
 
                 // First: if the importing user owns a venue with this name, that's the match.
                 // No city/country needed - owner identity is the strongest signal.
@@ -869,6 +871,12 @@ class GeminiUtils
             }
             if (empty($data[$key]['event_country_code']) && ! empty($role->country_code)) {
                 $data[$key]['event_country_code'] = $role->country_code;
+            }
+
+            // Emit a normalized alpha-2 code so the import preview and any downstream picker
+            // never receive an alpha-3 value (e.g. "ISR") that intl-tel-input would reject.
+            if (! empty($data[$key]['event_country_code'])) {
+                $data[$key]['event_country_code'] = CountryUtils::normalizeCountryCode($data[$key]['event_country_code']);
             }
 
             if ($role->isTalent()) {
