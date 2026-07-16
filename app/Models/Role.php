@@ -86,6 +86,7 @@ class Role extends Model implements MustVerifyEmail
         'caldav_settings',
         'caldav_sync_direction',
         'microsoft_sync_direction',
+        'calendar_delete_action',
         'calendar_description_template',
         'agenda_ai_prompt',
         'agenda_show_times',
@@ -2203,6 +2204,18 @@ class Role extends Model implements MustVerifyEmail
     public function syncsFromMicrosoft()
     {
         return in_array($this->microsoft_sync_direction, ['from', 'both']);
+    }
+
+    /**
+     * How an event deleted in a connected calendar (Google / Microsoft) should be handled here:
+     * 'ignore' (keep it), 'cancel' (hide via is_cancelled), or 'delete' (remove). Shared across
+     * providers; defaults to 'ignore' when unset.
+     */
+    public function calendarDeleteAction(): string
+    {
+        return in_array($this->calendar_delete_action, ['cancel', 'delete'], true)
+            ? $this->calendar_delete_action
+            : 'ignore';
     }
 
     /**

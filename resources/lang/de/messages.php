@@ -3657,4 +3657,13 @@ return [
     'no_suggestions_hint' => 'Hier erscheinen Vorschläge, die von EventSchedule-Installationen eingereicht wurden.',
     'html_warning' => 'Fügt HTML- oder Skript-Markierungen hinzu, die im Originaltext nicht vorhanden sind',
     'may_be_outdated' => 'Die Installation, von der dieser Vorschlag stammt, verwendete einen anderen Text als den, der mit dieser Website ausgeliefert wird.',
+    'calendar_delete_action' => 'Wenn eine Veranstaltung im verbundenen Kalender gelöscht wird',
+    'calendar_delete_action_help' => 'Was im Veranstaltungskalender passiert, wenn eine Veranstaltung im verbundenen Kalender gelöscht wird.',
+    'calendar_delete_keep' => 'Hier behalten',
+    'calendar_delete_keep_desc' => 'Die Veranstaltung bleibt im Veranstaltungskalender.',
+    'calendar_delete_hide' => 'Als abgesagt markieren',
+    'calendar_delete_hide_desc' => 'Die Veranstaltung wird im Veranstaltungskalender ausgeblendet (umkehrbar). Empfohlen, wenn Tickets verkauft werden.',
+    'calendar_delete_remove' => 'Hier löschen',
+    'calendar_delete_remove_desc' => 'Die Veranstaltung wird aus dem Veranstaltungskalender entfernt. Veranstaltungen mit Ticketverkäufen werden stattdessen ausgeblendet.',
+    'calendar_delete_warning' => 'Das Löschen ist endgültig. Veranstaltungen mit Ticketverkäufen oder einer aktiven Werbeanzeige werden ausgeblendet statt gelöscht.',
 ];

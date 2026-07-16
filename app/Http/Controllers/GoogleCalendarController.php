@@ -155,8 +155,9 @@ class GoogleCalendarController extends Controller
                     ]);
                 }
             }
-            // Clear sync direction on owned roles only
-            $user->owner()->update(['sync_direction' => null]);
+            // Clear sync direction and the incremental sync cursor on owned roles only.
+            // (Bulk query-builder update writes google_sync_token even though it is not fillable.)
+            $user->owner()->update(['sync_direction' => null, 'google_sync_token' => null]);
 
             // Clear all calendar sync records for this user
             \App\Models\CalendarSync::where('user_id', $user->id)->delete();
@@ -378,6 +379,12 @@ class GoogleCalendarController extends Controller
             // Update the role's sync_direction if provided
             if ($request->has('sync_direction')) {
                 $this->updateRoleSyncDirection($user, $syncDirection, $role);
+            }
+
+            // Persist the deletion policy if provided (shared across providers; also saved via the
+            // main schedule form). Validated to the allowed set before writing.
+            if ($request->has('delete_action') && in_array($request->input('delete_action'), ['ignore', 'cancel', 'delete'], true)) {
+                $role->update(['calendar_delete_action' => $request->input('delete_action')]);
             }
 
             // Ensure user has valid token before syncing

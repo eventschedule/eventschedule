@@ -192,6 +192,13 @@ class AppController extends Controller
                     report($e);
                 }
 
+                try {
+                    \Artisan::call('google:sync');
+                } catch (\Exception $e) {
+                    \Log::error('Scheduled command google:sync failed: '.$e->getMessage());
+                    report($e);
+                }
+
                 if (\App\Services\MetaAdsService::isBoostConfigured()) {
                     try {
                         \Artisan::call('boost:sync');

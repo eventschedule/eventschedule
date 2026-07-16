@@ -3693,4 +3693,13 @@ return [
     'no_suggestions_hint' => 'Sugestiile trimise de instalările EventSchedule vor apărea aici.',
     'html_warning' => 'Adaugă marcaje HTML sau de script care nu există în textul original',
     'may_be_outdated' => 'Instalarea care a sugerat acest text folosea un alt text decât cel livrat cu acest site.',
+    'calendar_delete_action' => 'Când un eveniment este șters în calendarul conectat',
+    'calendar_delete_action_help' => 'Ce se întâmplă în Event Schedule când un eveniment este șters în calendarul conectat.',
+    'calendar_delete_keep' => 'Păstrează-l aici',
+    'calendar_delete_keep_desc' => 'Evenimentul rămâne în Event Schedule.',
+    'calendar_delete_hide' => 'Marchează ca anulat',
+    'calendar_delete_hide_desc' => 'Evenimentul este ascuns în Event Schedule (reversibil). Recomandat în cazul vânzării de bilete.',
+    'calendar_delete_remove' => 'Șterge-l aici',
+    'calendar_delete_remove_desc' => 'Evenimentul este eliminat din Event Schedule. Evenimentele cu vânzări de bilete sunt ascunse în schimb.',
+    'calendar_delete_warning' => 'Ștergerea este permanentă. Evenimentele cu vânzări de bilete sau o campanie publicitară activă sunt ascunse în loc să fie șterse.',
 ];

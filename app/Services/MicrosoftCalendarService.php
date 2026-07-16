@@ -716,10 +716,26 @@ class MicrosoftCalendarService
      */
     protected function processDeltaItem(array $item, Role $role, ?string $calendarId): string
     {
-        // Removed events: drop the mapping only, never the local Event (Google does the
-        // same - remote deletions are not propagated).
+        // Removed events: apply the schedule's calendar delete policy (ignore / cancel / delete) to
+        // the local event, then drop the now-stale mapping row.
         if (array_key_exists('@removed', $item)) {
             if (! empty($item['id'])) {
+                $sync = MicrosoftCalendarSync::where('role_id', $role->id)
+                    ->where('microsoft_event_id', $item['id'])
+                    ->first();
+
+                if ($sync && ($event = Event::find($sync->event_id))) {
+                    $eventId = $event->id;
+                    $eventName = $event->name;
+                    $outcome = $event->applyInboundDeletion($role->calendarDeleteAction());
+
+                    if ($outcome === 'deleted') {
+                        AuditService::log(AuditService::EVENT_DELETE, $role->user_id, 'Event', $eventId, null, null, $eventName);
+                    } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled'], true)) {
+                        AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
+                    }
+                }
+
                 MicrosoftCalendarSync::where('role_id', $role->id)
                     ->where('microsoft_event_id', $item['id'])
                     ->delete();

@@ -3660,4 +3660,13 @@ return [
     'no_suggestions_hint' => 'Les suggestions envoyées par les installations EventSchedule apparaîtront ici.',
     'html_warning' => 'Ajoute des balises HTML ou des marqueurs de script absents du texte d\'origine',
     'may_be_outdated' => 'L\'installation qui a proposé cette suggestion utilisait un texte différent de celui fourni par ce site.',
+    'calendar_delete_action' => 'Lorsqu\'un événement est supprimé dans le calendrier connecté',
+    'calendar_delete_action_help' => 'Ce qui se passe dans le Planning d\'Événements lorsqu\'un événement est supprimé dans le calendrier connecté.',
+    'calendar_delete_keep' => 'Le conserver ici',
+    'calendar_delete_keep_desc' => 'L\'événement reste dans le Planning d\'Événements.',
+    'calendar_delete_hide' => 'Marquer comme annulé',
+    'calendar_delete_hide_desc' => 'L\'événement est masqué dans le Planning d\'Événements (réversible). Recommandé en cas de vente de billets.',
+    'calendar_delete_remove' => 'Le supprimer ici',
+    'calendar_delete_remove_desc' => 'L\'événement est retiré du Planning d\'Événements. Les événements avec des ventes de billets sont masqués à la place.',
+    'calendar_delete_warning' => 'La suppression est définitive. Les événements avec des ventes de billets ou une campagne publicitaire active sont masqués au lieu d\'être supprimés.',
 ];

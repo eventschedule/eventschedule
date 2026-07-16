@@ -15,11 +15,16 @@ use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event as GoogleEvent;
 use Google\Service\Calendar\EventDateTime;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class GoogleCalendarService
 {
     use ConvertsLocationToVenue;
+
+    // Safety cap on incremental-sync pagination so a huge calendar can't spin unbounded during the
+    // synchronous, save-triggered sync (mirrors MicrosoftCalendarService::MAX_DELTA_PAGES).
+    const MAX_SYNC_PAGES = 50;
 
     protected $client;
 
@@ -509,55 +514,24 @@ class GoogleCalendarService
     }
 
     /**
-     * Get events from Google Calendar for a specific time range
+     * Map a Google Calendar event object into the associative array the inbound sync works with.
+     * Includes 'status' ('confirmed' | 'tentative' | 'cancelled') so incremental syncs can detect
+     * deletions, which arrive as 'cancelled' tombstones.
      */
-    public function getEvents(string $calendarId, ?\DateTime $timeMin = null, ?\DateTime $timeMax = null): array
+    protected function mapGoogleEvent(GoogleEvent $event): array
     {
-        try {
-            if (! $this->calendarService) {
-                throw new \Exception('Calendar service not initialized');
-            }
-
-            $optParams = [
-                'orderBy' => 'startTime',
-                'singleEvents' => true,
-            ];
-
-            if ($timeMin) {
-                $optParams['timeMin'] = $timeMin->format('c');
-            }
-
-            if ($timeMax) {
-                $optParams['timeMax'] = $timeMax->format('c');
-            }
-
-            $events = $this->calendarService->events->listEvents($calendarId, $optParams);
-
-            $result = [];
-            foreach ($events->getItems() as $event) {
-                $result[] = [
-                    'id' => $event->getId(),
-                    'summary' => $event->getSummary(),
-                    'description' => $event->getDescription(),
-                    'start' => $event->getStart(),
-                    'end' => $event->getEnd(),
-                    'location' => $event->getLocation(),
-                    'htmlLink' => $event->getHtmlLink(),
-                    'created' => $event->getCreated(),
-                    'updated' => $event->getUpdated(),
-                ];
-            }
-
-            return $result;
-
-        } catch (\Exception $e) {
-            Log::error('Failed to get Google Calendar events', [
-                'calendar_id' => $calendarId,
-                'error' => $e->getMessage(),
-            ]);
-
-            return [];
-        }
+        return [
+            'id' => $event->getId(),
+            'status' => $event->getStatus(),
+            'summary' => $event->getSummary(),
+            'description' => $event->getDescription(),
+            'start' => $event->getStart(),
+            'end' => $event->getEnd(),
+            'location' => $event->getLocation(),
+            'htmlLink' => $event->getHtmlLink(),
+            'created' => $event->getCreated(),
+            'updated' => $event->getUpdated(),
+        ];
     }
 
     /**
@@ -596,15 +570,23 @@ class GoogleCalendarService
     }
 
     /**
-     * Sync events from Google Calendar to EventSchedule
+     * Sync events from Google Calendar to EventSchedule.
+     *
+     * Uses Google's incremental sync tokens: the stored nextSyncToken means each run fetches only
+     * changes since the last one - including 'cancelled' tombstones for deleted events, which drive
+     * inbound delete-sync. With no token yet, a bounded initial full sync establishes the first
+     * token. Mirrors MicrosoftCalendarService::syncFromMicrosoftCalendar().
      */
     public function syncFromGoogleCalendar(User $user, Role $role, string $calendarId): array
     {
-        $results = [
-            'created' => 0,
-            'updated' => 0,
-            'errors' => 0,
-        ];
+        $results = ['created' => 0, 'updated' => 0, 'deleted' => 0, 'errors' => 0];
+
+        // Serialize inbound sync per role: the webhook and the 15-min poll (or two overlapping runs)
+        // could otherwise import the same event twice and race on the sync-token advance.
+        $lock = Cache::lock('google-role-sync-'.$role->id, 120);
+        if (! $lock->get()) {
+            return $results;
+        }
 
         try {
             if (! $this->refreshTokenIfNeeded($user)) {
@@ -613,72 +595,94 @@ class GoogleCalendarService
                 return $results;
             }
 
-            // Get events from the last 30 days to the next 365 days
-            $timeMin = now()->subDays(30);
-            $timeMax = now()->addDays(365);
+            $syncToken = $role->google_sync_token ?: null;
 
-            $googleEvents = $this->getEvents($calendarId, $timeMin, $timeMax);
+            // Compute the initial-sync window ONCE - it must stay identical across paginated
+            // requests (Google rejects a page request whose params differ from the first).
+            $timeMin = now()->subDays(30)->format('c');
+            $timeMax = now()->addDays(365)->format('c');
 
-            foreach ($googleEvents as $googleEvent) {
+            $pageToken = null;
+            $restarted = false;
+            $pages = 0;
+            $nextSyncToken = null;
+
+            while (true) {
+                if (++$pages > self::MAX_SYNC_PAGES) {
+                    Log::warning('Google sync pagination cap hit', ['role_id' => $role->id]);
+                    break;
+                }
+
+                // maxResults=2500 (API max) minimizes pages so a large calendar can still finish the
+                // initial sync and establish an incremental token within MAX_SYNC_PAGES.
+                $optParams = ['singleEvents' => true, 'maxResults' => 2500];
+                if ($syncToken) {
+                    // Incremental: showDeleted returns 'cancelled' tombstones. timeMin/timeMax/orderBy
+                    // are not allowed alongside syncToken.
+                    $optParams['syncToken'] = $syncToken;
+                    $optParams['showDeleted'] = true;
+                } else {
+                    $optParams['timeMin'] = $timeMin;
+                    $optParams['timeMax'] = $timeMax;
+                    $optParams['orderBy'] = 'startTime';
+                }
+                if ($pageToken) {
+                    $optParams['pageToken'] = $pageToken;
+                }
+
                 try {
-                    // Check if this event already exists by looking for the google_event_id in calendar_syncs table
-                    $existingSync = \App\Models\CalendarSync::where('role_id', $role->id)
-                        ->where('google_event_id', $googleEvent['id'])
-                        ->first();
-                    $existingEvent = $existingSync ? Event::find($existingSync->event_id) : null;
+                    $events = $this->calendarService->events->listEvents($calendarId, $optParams);
+                } catch (\Google\Service\Exception $e) {
+                    // A stored sync token can be rejected as expired (410 Gone) or invalid - e.g.
+                    // after the selected calendar changed (400/410). Clear it and restart a full
+                    // sync once; other errors (auth, rate limit, 5xx) abort and retry later.
+                    if ($syncToken && ! $restarted && in_array($e->getCode(), [400, 410], true)) {
+                        $restarted = true;
+                        $this->clearGoogleSyncToken($role);
+                        $syncToken = null;
+                        $pageToken = null;
+                        $pages = 0;
 
-                    // Also check for events with the same name and start time to prevent duplicates
-                    if (! $existingEvent && isset($googleEvent['start'])) {
-                        $startTime = null;
-                        if ($googleEvent['start']->getDateTime()) {
-                            $startTime = \Carbon\Carbon::parse($googleEvent['start']->getDateTime())->utc();
-                        } elseif ($googleEvent['start']->getDate()) {
-                            $startTime = \Carbon\Carbon::parse($googleEvent['start']->getDate())->utc();
-                        }
-
-                        if ($startTime) {
-                            $existingEvent = Event::where('name', $googleEvent['summary'] ?: __('messages.untitled_event'))
-                                ->where('starts_at', $startTime->format('Y-m-d H:i:s'))
-                                ->whereHas('roles', function ($query) use ($role) {
-                                    $query->where('role_id', $role->id);
-                                })
-                                ->first();
-                        }
+                        continue;
                     }
 
-                    if ($existingEvent) {
-                        $changed = $this->updateEventFromGoogle($existingEvent, $googleEvent, $role);
-
-                        // Backfill the sync mapping when the match came from the name+time
-                        // fallback (no CalendarSync row yet) so future syncs match reliably
-                        // by google_event_id even if the title or time later change.
-                        if (! $existingSync) {
-                            \App\Models\CalendarSync::firstOrCreate(
-                                ['user_id' => $role->user_id, 'event_id' => $existingEvent->id, 'role_id' => $role->id],
-                                ['google_event_id' => $googleEvent['id'], 'google_calendar_id' => $calendarId]
-                            );
-                        }
-
-                        if ($changed) {
-                            $results['updated']++;
-                            UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
-                        }
-                    } else {
-                        // Create new event
-                        $this->createEventFromGoogle($googleEvent, $role, $calendarId);
-                        $results['created']++;
-                        UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
-                    }
-                } catch (\Exception $e) {
-                    Log::error('Failed to sync individual Google Calendar event', [
-                        'google_event_id' => $googleEvent['id'],
+                    Log::error('Failed to list Google Calendar events', [
                         'role_id' => $role->id,
+                        'calendar_id' => $calendarId,
+                        'code' => $e->getCode(),
                         'error' => $e->getMessage(),
                     ]);
                     $results['errors']++;
+
+                    // Abort WITHOUT persisting a token so the next run retries from the same point.
+                    return $results;
+                }
+
+                foreach ($events->getItems() as $googleEvent) {
+                    try {
+                        $this->processInboundGoogleEvent($googleEvent, $role, $calendarId, $results);
+                    } catch (\Throwable $e) {
+                        Log::error('Failed to sync individual Google Calendar event', [
+                            'google_event_id' => $googleEvent->getId(),
+                            'role_id' => $role->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        $results['errors']++;
+                    }
+                }
+
+                $pageToken = $events->getNextPageToken();
+                if (! $pageToken) {
+                    // Google returns the next sync token only on the final page.
+                    $nextSyncToken = $events->getNextSyncToken();
+                    break;
                 }
             }
 
+            // Persist the fresh token only after a clean, fully-paginated run.
+            if ($nextSyncToken) {
+                $this->storeGoogleSyncToken($role, $nextSyncToken);
+            }
         } catch (\Exception $e) {
             Log::error('Failed to sync from Google Calendar', [
                 'user_id' => $user->id,
@@ -687,9 +691,129 @@ class GoogleCalendarService
                 'error' => $e->getMessage(),
             ]);
             $results['errors']++;
+        } finally {
+            $lock->release();
         }
 
         return $results;
+    }
+
+    /**
+     * Reconcile one Google event from an inbound sync: create/update, or (for a cancelled tombstone)
+     * apply the schedule's delete policy.
+     */
+    protected function processInboundGoogleEvent(GoogleEvent $googleEvent, Role $role, string $calendarId, array &$results): void
+    {
+        // Deleted events arrive as 'cancelled' tombstones on incremental (syncToken) responses.
+        if ($googleEvent->getStatus() === 'cancelled') {
+            $this->handleGoogleInboundDeletion($googleEvent->getId(), $role, $results);
+
+            return;
+        }
+
+        $data = $this->mapGoogleEvent($googleEvent);
+
+        // Match by google_event_id in calendar_syncs.
+        $existingSync = \App\Models\CalendarSync::where('role_id', $role->id)
+            ->where('google_event_id', $data['id'])
+            ->first();
+        $existingEvent = $existingSync ? Event::find($existingSync->event_id) : null;
+
+        // Fallback: match by name + start time to prevent duplicates.
+        if (! $existingEvent && isset($data['start'])) {
+            $startTime = null;
+            if ($data['start']->getDateTime()) {
+                $startTime = \Carbon\Carbon::parse($data['start']->getDateTime())->utc();
+            } elseif ($data['start']->getDate()) {
+                $startTime = \Carbon\Carbon::parse($data['start']->getDate())->utc();
+            }
+
+            if ($startTime) {
+                $existingEvent = Event::where('name', $data['summary'] ?: __('messages.untitled_event'))
+                    ->where('starts_at', $startTime->format('Y-m-d H:i:s'))
+                    ->whereHas('roles', function ($query) use ($role) {
+                        $query->where('role_id', $role->id);
+                    })
+                    ->first();
+            }
+        }
+
+        if ($existingEvent) {
+            $changed = $this->updateEventFromGoogle($existingEvent, $data, $role);
+
+            // Backfill the sync mapping when the match came from the name+time fallback (no
+            // CalendarSync row yet) so future syncs match reliably by google_event_id even if the
+            // title or time later change.
+            if (! $existingSync) {
+                \App\Models\CalendarSync::firstOrCreate(
+                    ['user_id' => $role->user_id, 'event_id' => $existingEvent->id, 'role_id' => $role->id],
+                    ['google_event_id' => $data['id'], 'google_calendar_id' => $calendarId]
+                );
+            }
+
+            if ($changed) {
+                $results['updated']++;
+                UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
+            }
+        } else {
+            $this->createEventFromGoogle($data, $role, $calendarId);
+            $results['created']++;
+            UsageTrackingService::track(UsageTrackingService::GCAL_SYNC, $role->id);
+        }
+    }
+
+    /**
+     * Apply a Google-side deletion (cancelled tombstone) to the locally-synced event, honoring the
+     * schedule's calendar_delete_action, then drop the now-stale sync-mapping row.
+     */
+    protected function handleGoogleInboundDeletion(string $googleEventId, Role $role, array &$results): void
+    {
+        $sync = \App\Models\CalendarSync::where('role_id', $role->id)
+            ->where('google_event_id', $googleEventId)
+            ->first();
+
+        if (! $sync) {
+            return;
+        }
+
+        $event = Event::find($sync->event_id);
+
+        if ($event) {
+            $eventId = $event->id;
+            $eventName = $event->name;
+
+            $outcome = $event->applyInboundDeletion($role->calendarDeleteAction());
+
+            if ($outcome === 'deleted') {
+                $results['deleted']++;
+                AuditService::log(AuditService::EVENT_DELETE, $role->user_id, 'Event', $eventId, null, null, $eventName);
+            } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled'], true)) {
+                $results['deleted']++;
+                AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
+            }
+        }
+
+        // Drop the stale mapping row - the remote event no longer exists. On a hard delete the FK
+        // cascade already removed it, so this is a harmless no-op there.
+        \App\Models\CalendarSync::where('role_id', $role->id)
+            ->where('google_event_id', $googleEventId)
+            ->delete();
+    }
+
+    /**
+     * Persist Google's incremental sync cursor. Direct assignment + save() (not update()) because
+     * google_sync_token is not mass-assignable; mirrors how microsoft_sync_token is stored.
+     */
+    protected function storeGoogleSyncToken(Role $role, string $token): void
+    {
+        $role->google_sync_token = $token;
+        $role->save();
+    }
+
+    protected function clearGoogleSyncToken(Role $role): void
+    {
+        $role->google_sync_token = null;
+        $role->save();
     }
 
     /**

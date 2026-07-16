@@ -3653,4 +3653,13 @@ return [
     'no_suggestions_hint' => 'As sugestões enviadas pelas instalações do EventSchedule aparecerão aqui.',
     'html_warning' => 'Adiciona HTML ou marcações de script que não existem no texto original',
     'may_be_outdated' => 'A instalação que enviou esta sugestão usava um texto diferente do incluído neste site.',
+    'calendar_delete_action' => 'Quando um evento é excluído no calendário conectado',
+    'calendar_delete_action_help' => 'O que acontece no Cronograma de Eventos quando um evento é excluído no calendário conectado.',
+    'calendar_delete_keep' => 'Mantê-lo aqui',
+    'calendar_delete_keep_desc' => 'O evento permanece no Cronograma de Eventos.',
+    'calendar_delete_hide' => 'Marcar como cancelado',
+    'calendar_delete_hide_desc' => 'O evento fica oculto no Cronograma de Eventos (reversível). Recomendado em caso de venda de ingressos.',
+    'calendar_delete_remove' => 'Excluí-lo aqui',
+    'calendar_delete_remove_desc' => 'O evento é removido do Cronograma de Eventos. Eventos com venda de ingressos são ocultados em vez disso.',
+    'calendar_delete_warning' => 'A exclusão é permanente. Eventos com venda de ingressos ou um anúncio ativo são ocultados em vez de excluídos.',
 ];

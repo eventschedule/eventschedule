@@ -73,6 +73,10 @@ Schedule::call(function () {
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('google:sync');
+})->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:setup-demo');
     }

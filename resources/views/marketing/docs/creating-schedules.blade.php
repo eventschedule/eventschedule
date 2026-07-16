@@ -1074,6 +1074,10 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Sync Direction Options</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Choose one-way sync (import only or export only) or two-way sync to keep both calendars in perfect harmony.</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">When an Event Is Deleted in Your Calendar</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">For schedules that import from a calendar, choose what happens when you delete an event there: <strong class="text-gray-900 dark:text-white">Keep it</strong> in Event Schedule (the default), <strong class="text-gray-900 dark:text-white">Mark it as cancelled</strong> (hidden but reversible), or <strong class="text-gray-900 dark:text-white">Delete it</strong>. Events that have ticket sales or an active ad boost are hidden instead of deleted to protect your data.</p>
+                                </div>
                             </div>
 
                             <!-- Email -->

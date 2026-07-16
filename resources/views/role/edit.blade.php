@@ -3960,6 +3960,8 @@
                                     </div>
                                 </div>
 
+                                @include('role.partials.calendar-delete-action', ['provider' => 'google'])
+
                                 @if (auth()->id() === $role->user_id)
                                 <div class="space-y-4">
                                     <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -4171,6 +4173,13 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                {{-- Render only when Google is NOT connected: the control is shared across
+                                     providers and uses one radio name, so two visible copies would collide.
+                                     Google-connected users configure it on the Google tab instead. --}}
+                                @if (! auth()->user()->google_token)
+                                    @include('role.partials.calendar-delete-action', ['provider' => 'microsoft'])
+                                @endif
 
                                 <!-- Teams Meetings -->
                                 <div>
@@ -5172,10 +5181,14 @@ function syncEvents() {
     showSyncStatus();
     
     // Use the unified sync endpoint
+    const selectedDeleteAction = document.querySelector('input[name="calendar_delete_action"]:checked');
     const requestBody = {
         sync_direction: selectedDirection.value
     };
-    
+    if (selectedDeleteAction) {
+        requestBody.delete_action = selectedDeleteAction.value;
+    }
+
     fetch('{{ url('/google-calendar/sync/' . $role->subdomain) }}', {
         method: 'POST',
         headers: {
@@ -5264,6 +5277,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (syncEventsButton && selectedDirection) {
         syncEventsButton.disabled = !selectedDirection.value || selectedDirection.value === '';
     }
+});
+
+// Calendar deletion policy: keep the Google + Outlook copies in sync, toggle the warning, and show
+// each group only when that provider syncs inbound (direction 'from' or 'both').
+document.addEventListener('DOMContentLoaded', function() {
+    function applyDeleteAction(value) {
+        document.querySelectorAll('input[name="calendar_delete_action"]').forEach(function(r) {
+            r.checked = (r.value === value);
+        });
+        document.querySelectorAll('[data-delete-action-warning]').forEach(function(w) {
+            w.classList.toggle('hidden', value !== 'delete');
+        });
+    }
+
+    document.querySelectorAll('input[name="calendar_delete_action"]').forEach(function(r) {
+        r.addEventListener('change', function() { applyDeleteAction(this.value); });
+    });
+
+    function toggleDeleteGroup(groupId, directionName) {
+        var group = document.getElementById(groupId);
+        if (!group) return;
+        var checked = document.querySelector('input[name="' + directionName + '"]:checked');
+        var dir = checked ? checked.value : '';
+        group.classList.toggle('hidden', !(dir === 'from' || dir === 'both'));
+    }
+
+    document.querySelectorAll('input[name="sync_direction"]').forEach(function(r) {
+        r.addEventListener('change', function() { toggleDeleteGroup('google-delete-action-group', 'sync_direction'); });
+    });
+    document.querySelectorAll('input[name="microsoft_sync_direction"]').forEach(function(r) {
+        r.addEventListener('change', function() { toggleDeleteGroup('microsoft-delete-action-group', 'microsoft_sync_direction'); });
+    });
+
+    toggleDeleteGroup('google-delete-action-group', 'sync_direction');
+    toggleDeleteGroup('microsoft-delete-action-group', 'microsoft_sync_direction');
 });
 
 // Test email functionality

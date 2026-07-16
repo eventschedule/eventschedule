@@ -47,6 +47,14 @@ class Event extends Model
         'lorem ipsum', 'na', 'n/a',
     ];
 
+    /**
+     * When true, the `deleting` hook skips dispatchCalendarSync('delete'). Set by
+     * applyInboundDeletion() so a delete triggered by an inbound calendar sync does not echo a
+     * redundant delete back out to the calendars. (Events with an active boost are separately kept
+     * safe: applyInboundDeletion routes them to the cancel path, so the refund logic never runs.)
+     */
+    public bool $skipOutboundCalendarSync = false;
+
     protected $fillable = [
         'starts_at',
         'duration',
@@ -310,9 +318,47 @@ class Event extends Model
                 }
             }
 
-            // Sync deletion to Google Calendar and CalDAV for all roles that have sync enabled
-            $event->dispatchCalendarSync('delete');
+            // Sync deletion to Google Calendar and CalDAV for all roles that have sync enabled.
+            // Skipped when the delete was itself triggered by an inbound calendar sync (the remote
+            // event is already gone) to avoid an echo-delete loop.
+            if (! $event->skipOutboundCalendarSync) {
+                $event->dispatchCalendarSync('delete');
+            }
         });
+    }
+
+    /**
+     * Apply a remote calendar deletion to this event, honoring the schedule's calendar_delete_action.
+     * Returns the outcome ('ignored', 'deleted', 'cancelled', or 'guarded_cancelled') so the caller
+     * can audit-log it. Loop-safe: never dispatches an outbound calendar sync.
+     *
+     *  - 'ignore'  -> leaves the event untouched (caller drops the stale sync mapping).
+     *  - 'delete'  -> hard delete, EXCEPT events with ticket sales or live ad spend, which are
+     *                 hidden instead to protect revenue/refund data.
+     *  - 'cancel'  -> hides the event via is_cancelled (reversible).
+     */
+    public function applyInboundDeletion(string $action): string
+    {
+        if ($action === 'ignore') {
+            return 'ignored';
+        }
+
+        $guarded = $this->sales()->exists()
+            || $this->boostCampaigns()->whereIn('status', ['active', 'paused', 'pending_payment'])->exists();
+
+        if ($action === 'delete' && ! $guarded) {
+            $this->skipOutboundCalendarSync = true;
+            $this->delete();
+
+            return 'deleted';
+        }
+
+        // 'cancel', or a guarded 'delete': hide the event without pushing the change back out.
+        if (! $this->is_cancelled) {
+            $this->forceFill(['is_cancelled' => true, 'cancelled_at' => now()])->save();
+        }
+
+        return $action === 'delete' ? 'guarded_cancelled' : 'cancelled';
     }
 
     /**

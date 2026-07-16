@@ -3653,4 +3653,13 @@ return [
     'no_suggestions_hint' => 'Suggesties die door EventSchedule-installaties zijn ingediend, verschijnen hier.',
     'html_warning' => 'Voegt HTML- of scriptmarkeringen toe die niet in de originele tekst voorkomen',
     'may_be_outdated' => 'De installatie die dit voorstelde, gebruikte een andere tekst dan deze site meelevert.',
+    'calendar_delete_action' => 'Wanneer een evenement in de gekoppelde agenda wordt verwijderd',
+    'calendar_delete_action_help' => 'Wat er in het Evenementenrooster gebeurt wanneer een evenement in de gekoppelde agenda wordt verwijderd.',
+    'calendar_delete_keep' => 'Hier behouden',
+    'calendar_delete_keep_desc' => 'Het evenement blijft in het Evenementenrooster.',
+    'calendar_delete_hide' => 'Markeren als geannuleerd',
+    'calendar_delete_hide_desc' => 'Het evenement wordt verborgen in het Evenementenrooster (omkeerbaar). Aanbevolen bij verkoop van tickets.',
+    'calendar_delete_remove' => 'Hier verwijderen',
+    'calendar_delete_remove_desc' => 'Het evenement wordt uit het Evenementenrooster verwijderd. Evenementen met ticketverkoop worden in plaats daarvan verborgen.',
+    'calendar_delete_warning' => 'Verwijderen is permanent. Evenementen met ticketverkoop of een actieve advertentiecampagne worden verborgen in plaats van verwijderd.',
 ];

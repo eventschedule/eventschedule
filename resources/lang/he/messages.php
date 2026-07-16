@@ -3649,4 +3649,13 @@ return [
     'no_suggestions_hint' => 'הצעות שנשלחו מהתקנות EventSchedule יופיעו כאן.',
     'html_warning' => 'מוסיף תגי HTML או סקריפט שאינם קיימים בטקסט המקורי',
     'may_be_outdated' => 'ההתקנה שהציעה זאת השתמשה בטקסט שונה מהטקסט המובנה באתר זה.',
+    'calendar_delete_action' => 'כאשר אירוע נמחק ביומן המחובר',
+    'calendar_delete_action_help' => 'מה קורה בלוח הזמנים כאשר אירוע נמחק ביומן המחובר.',
+    'calendar_delete_keep' => 'להשאיר אותו כאן',
+    'calendar_delete_keep_desc' => 'האירוע נשאר בלוח הזמנים.',
+    'calendar_delete_hide' => 'לסמן כמבוטל',
+    'calendar_delete_hide_desc' => 'האירוע מוסתר בלוח הזמנים (הפיך). מומלץ כאשר מוכרים כרטיסים.',
+    'calendar_delete_remove' => 'למחוק אותו כאן',
+    'calendar_delete_remove_desc' => 'האירוע מוסר מלוח הזמנים. אירועים עם מכירת כרטיסים מוסתרים במקום זאת.',
+    'calendar_delete_warning' => 'המחיקה היא לצמיתות. אירועים עם מכירת כרטיסים או קמפיין פרסום פעיל מוסתרים במקום להימחק.',
 ];

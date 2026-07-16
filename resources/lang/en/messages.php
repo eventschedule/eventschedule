@@ -3730,4 +3730,13 @@ return [
     'no_suggestions_hint' => 'Suggestions submitted by EventSchedule installs will appear here.',
     'html_warning' => 'Adds HTML or script markers not present in the original text',
     'may_be_outdated' => 'The install that suggested this was running a different text than this site ships.',
+    'calendar_delete_action' => 'When an event is deleted in the connected calendar',
+    'calendar_delete_action_help' => 'What happens in Event Schedule when an event is deleted in the connected calendar.',
+    'calendar_delete_keep' => 'Keep it here',
+    'calendar_delete_keep_desc' => 'The event stays in Event Schedule.',
+    'calendar_delete_hide' => 'Mark as cancelled',
+    'calendar_delete_hide_desc' => 'The event is hidden in Event Schedule (reversible). Recommended when tickets are sold.',
+    'calendar_delete_remove' => 'Delete it here',
+    'calendar_delete_remove_desc' => 'The event is removed from Event Schedule. Events with ticket sales are hidden instead.',
+    'calendar_delete_warning' => 'Deleting is permanent. Events with ticket sales or an active ad boost are hidden instead of deleted.',
 ];

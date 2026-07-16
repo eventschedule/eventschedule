@@ -3673,4 +3673,13 @@ return [
     'no_suggestions_hint' => 'Siia ilmuvad EventSchedule\'i paigalduste esitatud ettepanekud.',
     'html_warning' => 'Lisab HTML- või skriptimärgiseid, mida algtekstis ei ole',
     'may_be_outdated' => 'Selle ettepaneku esitanud paigaldus kasutas teistsugust teksti kui see, mis on selle saidiga kaasas.',
+    'calendar_delete_action' => 'Kui sündmus kustutatakse ühendatud kalendris',
+    'calendar_delete_action_help' => 'Mis juhtub sündmuste ajakavas, kui sündmus kustutatakse ühendatud kalendris.',
+    'calendar_delete_keep' => 'Säilita see siin',
+    'calendar_delete_keep_desc' => 'Sündmus jääb sündmuste ajakavasse alles.',
+    'calendar_delete_hide' => 'Märgi tühistatuks',
+    'calendar_delete_hide_desc' => 'Sündmus peidetakse sündmuste ajakavas (tagasipööratav). Soovitatav piletite müügi korral.',
+    'calendar_delete_remove' => 'Kustuta see siin',
+    'calendar_delete_remove_desc' => 'Sündmus eemaldatakse sündmuste ajakavast. Piletimüügiga sündmused peidetakse selle asemel.',
+    'calendar_delete_warning' => 'Kustutamine on lõplik. Piletimüügiga või aktiivse reklaamikampaaniaga sündmused peidetakse, mitte ei kustutata.',
 ];
