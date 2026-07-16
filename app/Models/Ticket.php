@@ -40,6 +40,8 @@ class Ticket extends Model
         'pass_event_ids',
         'pass_allow_booking',
         'pass_seats_per_occurrence',
+        'pass_cancel_cutoff_hours',
+        'pass_late_cancel_policy',
         'pass_admits_per_event',
         'image_url',
         'url',
@@ -58,6 +60,7 @@ class Ticket extends Model
         'pass_event_ids' => 'array',
         'pass_allow_booking' => 'boolean',
         'pass_seats_per_occurrence' => 'integer',
+        'pass_cancel_cutoff_hours' => 'integer',
         'pass_admits_per_event' => 'integer',
     ];
 
@@ -70,6 +73,69 @@ class Ticket extends Model
     public function admitsPerEvent(): int
     {
         return max(1, (int) ($this->pass_admits_per_event ?: 1));
+    }
+
+    /**
+     * The instant until which an advance booking for $date on $event may be
+     * cancelled with the visit credited back. Null = no deadline configured
+     * (a cancellation is always credited). After this instant the ticket's
+     * pass_late_cancel_policy applies: 'forfeit' or 'block'.
+     */
+    public function passCancelDeadlineUtc(Event $event, string $date): ?\Carbon\Carbon
+    {
+        // A time-less event (days_of_week with no starts_at) or an all-day
+        // event (date-only starts_at) has no reliable occurrence instant to
+        // measure against - a date-only start would anchor the deadline to
+        // midnight UTC, often the previous evening in the schedule's timezone.
+        // Treat both as having no deadline.
+        if ($this->pass_cancel_cutoff_hours === null
+            || ! $event->starts_at
+            || strlen((string) $event->starts_at) === 10) {
+            return null;
+        }
+
+        return $event->occurrenceStartUtc($date)->subHours((int) $this->pass_cancel_cutoff_hours);
+    }
+
+    /**
+     * The late-cancellation policy, normalized to a known value.
+     */
+    public function passLateCancelPolicy(): string
+    {
+        return $this->pass_late_cancel_policy === 'block' ? 'block' : 'forfeit';
+    }
+
+    /**
+     * The id-less field payload used to seed a new event's ticket from this one
+     * (event clone and default templates). Single source of truth: a ticket
+     * column missing here silently drops on clone/template. sold and id are
+     * intentionally not carried. Coverage ids are encoded for the edit form's
+     * pass_coverage fallback, which id-less tickets rely on.
+     */
+    public function toClonePayload(): array
+    {
+        return [
+            'type' => $this->type,
+            'quantity' => $this->quantity,
+            'price' => $this->price,
+            'description' => $this->description,
+            'custom_fields' => $this->custom_fields,
+            'volume_discount' => $this->volume_discount,
+            'is_pass' => $this->is_pass,
+            'pass_usage_type' => $this->pass_usage_type,
+            'pass_max_uses' => $this->pass_max_uses,
+            'pass_valid_days' => $this->pass_valid_days,
+            'pass_scope' => $this->pass_scope,
+            'pass_allow_booking' => $this->pass_allow_booking,
+            'pass_seats_per_occurrence' => $this->pass_seats_per_occurrence,
+            'pass_cancel_cutoff_hours' => $this->pass_cancel_cutoff_hours,
+            'pass_late_cancel_policy' => $this->pass_late_cancel_policy,
+            'pass_admits_per_event' => $this->pass_admits_per_event,
+            'pass_coverage' => [
+                'group' => $this->pass_scope_group_id ? UrlUtils::encodeId($this->pass_scope_group_id) : '',
+                'events' => collect($this->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
+            ],
+        ];
     }
 
     public function isSalesNotStarted()
@@ -266,6 +332,8 @@ class Ticket extends Model
             $data['pass_valid_days'] = $this->pass_valid_days ?: null;
             $data['pass_scope'] = $this->pass_scope;
             $data['pass_allow_booking'] = (bool) $this->pass_allow_booking;
+            $data['pass_cancel_cutoff_hours'] = $this->pass_cancel_cutoff_hours;
+            $data['pass_late_cancel_policy'] = $this->pass_cancel_cutoff_hours !== null ? $this->passLateCancelPolicy() : null;
             $data['pass_admits_per_event'] = $this->admitsPerEvent();
             $data['pass_covered_count'] = $this->pass_scope === 'specific_events'
                 ? count($this->pass_event_ids ?? [])

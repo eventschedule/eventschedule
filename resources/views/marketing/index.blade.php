@@ -602,15 +602,15 @@
                         </div>
                     <!-- Click-to-play video facade -->
                     <div class="relative aspect-video bg-black">
-                        <a href="https://www.youtube-nocookie.com/embed/IL8Fj0p6Lz8"
+                        <a href="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ"
                            target="_blank"
                            rel="noopener"
                            data-video-facade
-                           data-video-src="https://www.youtube-nocookie.com/embed/IL8Fj0p6Lz8"
+                           data-video-src="https://www.youtube-nocookie.com/embed/w1JLIvGmIjQ"
                            data-video-title="Event Schedule Overview"
                            class="group absolute inset-0 block"
                            aria-label="Play the Event Schedule overview video">
-                            <img src="https://img.youtube.com/vi/IL8Fj0p6Lz8/maxresdefault.jpg" alt="Event Schedule overview video" class="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100" loading="lazy" decoding="async" width="1280" height="720">
+                            <img src="https://img.youtube.com/vi/w1JLIvGmIjQ/maxresdefault.jpg" alt="Event Schedule overview video" class="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100" loading="lazy" decoding="async" width="1280" height="720">
                             <span class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" aria-hidden="true"></span>
                             <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" aria-hidden="true">
                                 <span class="es-play-ring absolute inset-0 rounded-full bg-white/40"></span>

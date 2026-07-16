@@ -269,6 +269,8 @@ class BackupService
                 'pass_event_ids' => $ticket->pass_event_ids,
                 'pass_allow_booking' => $ticket->pass_allow_booking,
                 'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
+                'pass_cancel_cutoff_hours' => $ticket->pass_cancel_cutoff_hours,
+                'pass_late_cancel_policy' => $ticket->pass_late_cancel_policy,
                 'pass_admits_per_event' => $ticket->pass_admits_per_event,
             ];
         })->toArray();
@@ -1279,6 +1281,8 @@ class BackupService
         $ticket->pass_event_ids = $data['pass_event_ids'] ?? null;
         $ticket->pass_allow_booking = $data['pass_allow_booking'] ?? false;
         $ticket->pass_seats_per_occurrence = $data['pass_seats_per_occurrence'] ?? null;
+        $ticket->pass_cancel_cutoff_hours = $data['pass_cancel_cutoff_hours'] ?? null;
+        $ticket->pass_late_cancel_policy = $data['pass_late_cancel_policy'] ?? 'forfeit';
         $ticket->pass_admits_per_event = $data['pass_admits_per_event'] ?? null;
         $ticket->description_html = MarkdownUtils::convertToHtml($data['description'] ?? null);
         $ticket->saveQuietly();

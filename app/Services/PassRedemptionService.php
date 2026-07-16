@@ -149,8 +149,12 @@ class PassRedemptionService
             // 'booking'); scanning in then upgrades that entry to a redemption rather
             // than consuming a second use. An entry already redeemed today is a
             // genuine repeat scan. Legacy entries (no kind) are treated as redemptions.
+            // A 'forfeited' entry is a dead late-cancellation whose seat may have been
+            // resold - it never revives; showing up anyway is a brand-new walk-up
+            // visit that consumes another use (subject to the limits below).
             $existingIndex = collect($usages)->search(fn ($u) => (int) ($u['event_id'] ?? 0) === (int) $scanningEvent->id
-                && ($u['date'] ?? null) === $today);
+                && ($u['date'] ?? null) === $today
+                && SaleTicket::usageKind($u) !== 'forfeited');
 
             if ($existingIndex !== false && ($usages[$existingIndex]['kind'] ?? 'redemption') === 'redemption') {
                 // Already redeemed today. A multi-admit pass (e.g. holder + guest)

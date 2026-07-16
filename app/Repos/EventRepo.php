@@ -89,32 +89,10 @@ class EventRepo
         $rawFlyer = $event->getAttributes()['flyer_image_url'] ?? null;
         $clonedFlyer = ($rawFlyer && ! str_starts_with($rawFlyer, 'demo_')) ? $rawFlyer : null;
 
-        // Clone tickets (reset sold quantities)
+        // Clone tickets (reset sold quantities; field list lives in Ticket::toClonePayload)
         $clonedTickets = [];
         foreach ($event->tickets as $ticket) {
-            $clonedTickets[] = [
-                'type' => $ticket->type,
-                'quantity' => $ticket->quantity,
-                'price' => $ticket->price,
-                'description' => $ticket->description,
-                'custom_fields' => $ticket->custom_fields,
-                'volume_discount' => $ticket->volume_discount,
-                // Pass / subscription config (coverage ids encoded; consumed by the
-                // edit form's pass_coverage fallback since cloned tickets have no id).
-                'is_pass' => $ticket->is_pass,
-                'pass_usage_type' => $ticket->pass_usage_type,
-                'pass_max_uses' => $ticket->pass_max_uses,
-                'pass_valid_days' => $ticket->pass_valid_days,
-                'pass_scope' => $ticket->pass_scope,
-                'pass_allow_booking' => $ticket->pass_allow_booking,
-                'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
-                'pass_admits_per_event' => $ticket->pass_admits_per_event,
-                'pass_coverage' => [
-                    'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
-                    'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
-                ],
-                // sold is not cloned
-            ];
+            $clonedTickets[] = $ticket->toClonePayload();
         }
         if (empty($clonedTickets)) {
             // Represent "no tickets" as a single empty-fields array (rehydrated into a
@@ -304,6 +282,17 @@ class EventRepo
 
             if ($usageType === 'total' && empty($data['pass_max_uses'])) {
                 throw ValidationException::withMessages(["tickets.{$index}.pass_max_uses" => __('messages.pass_max_uses_required')]);
+            }
+
+            // '' = no deadline; 0 is a valid cutoff (credited until the event starts).
+            if (isset($data['pass_cancel_cutoff_hours']) && $data['pass_cancel_cutoff_hours'] !== ''
+                && (! is_numeric($data['pass_cancel_cutoff_hours']) || (int) $data['pass_cancel_cutoff_hours'] < 0)) {
+                throw ValidationException::withMessages(["tickets.{$index}.pass_cancel_cutoff_hours" => __('messages.error')]);
+            }
+
+            if (isset($data['pass_late_cancel_policy'])
+                && ! in_array($data['pass_late_cancel_policy'], ['forfeit', 'block'], true)) {
+                throw ValidationException::withMessages(["tickets.{$index}.pass_late_cancel_policy" => __('messages.error')]);
             }
 
             if ($scope === 'sub_schedule' && empty($data['pass_scope_group_id'])) {
@@ -1489,6 +1478,20 @@ class EventRepo
                     ? max(1, (int) $data['pass_seats_per_occurrence'])
                     : null;
 
+                // Cancellation deadline for advance bookings. Not empty(): 0 is a
+                // valid cutoff ("credited until the event starts"), '' means none.
+                // Gated on $isPass, NOT $passAllowBooking: toggling advance
+                // booking off must not erase the configured policy (it stays
+                // stored, inert, and still governs leftover bookings).
+                $passCancelCutoffHours = ($isPass
+                    && isset($data['pass_cancel_cutoff_hours'])
+                    && $data['pass_cancel_cutoff_hours'] !== '')
+                    ? max(0, (int) $data['pass_cancel_cutoff_hours'])
+                    : null;
+                $passLateCancelPolicy = in_array($data['pass_late_cancel_policy'] ?? null, ['forfeit', 'block'], true)
+                    ? $data['pass_late_cancel_policy']
+                    : 'forfeit';
+
                 // People admitted per event (holder plus any guests), always at
                 // least 1. Lets the holder bring guests without consuming extra
                 // visits; the QR is scanned once per admitted person.
@@ -1509,6 +1512,8 @@ class EventRepo
                     'pass_event_ids' => $passEventIds,
                     'pass_allow_booking' => $passAllowBooking,
                     'pass_seats_per_occurrence' => $passSeatsPerOccurrence,
+                    'pass_cancel_cutoff_hours' => $passCancelCutoffHours,
+                    'pass_late_cancel_policy' => $passLateCancelPolicy,
                     'pass_admits_per_event' => $passAdmitsPerEvent,
                 ];
 

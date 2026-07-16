@@ -19,6 +19,19 @@
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $bookedEvent->name }}</h2>
             <p style="margin: 10px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $dateLabel }}</p>
             <p style="margin: 10px 0;"><strong>{{ __('messages.attendee') }}:</strong> {{ $sale->name }}</p>
+            @if (! empty($cancelDeadlineLabel))
+            <p style="margin: 10px 0; color: #b45309;">
+                @if (! empty($cancelDeadlinePassed))
+                    {{ $lateCancelPolicy === 'block'
+                        ? __('messages.pass_cancel_email_closed', ['minutes' => \App\Services\PassBookingService::CANCEL_GRACE_MINUTES])
+                        : __('messages.pass_cancel_email_no_credit', ['minutes' => \App\Services\PassBookingService::CANCEL_GRACE_MINUTES]) }}
+                @else
+                    {{ $lateCancelPolicy === 'block'
+                        ? __('messages.pass_cancel_email_deadline_block', ['deadline' => $cancelDeadlineLabel])
+                        : __('messages.pass_cancel_email_deadline_forfeit', ['deadline' => $cancelDeadlineLabel]) }}
+                @endif
+            </p>
+            @endif
         </div>
 
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">

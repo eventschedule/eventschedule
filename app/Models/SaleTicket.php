@@ -70,6 +70,16 @@ class SaleTicket extends Model
     }
 
     /**
+     * The kind of a pass_usages entry: 'booking' (advance reservation),
+     * 'redemption' (scanned in), or 'forfeited' (late cancellation - visit
+     * consumed, seat released). Legacy entries without a kind are redemptions.
+     */
+    public static function usageKind(array $usage): string
+    {
+        return $usage['kind'] ?? 'redemption';
+    }
+
+    /**
      * Number of recorded pass / subscription redemptions (one per event-day).
      */
     public function passUsageCount(): int

@@ -1056,6 +1056,37 @@ class Event extends Model
     }
 
     /**
+     * A UTC instant rendered the way localStartsAt() renders occurrence dates:
+     * the authenticated viewer's timezone and 12/24-hour preference when set
+     * (so it never disagrees with the date_label beside it), otherwise the
+     * schedule's; language from the schedule. Used for instants that are not
+     * occurrence starts (e.g. a booking's cancellation deadline). Queued mail
+     * has no auth user, so emails render in the schedule's timezone.
+     */
+    public function localizedInstantLabel(Carbon $utcInstant): string
+    {
+        $tz = $this->scheduleTimezone();
+        $role = $this->creatorRole;
+        $enable24 = (bool) ($role?->use_24_hour_time);
+
+        if ($user = auth()->user()) {
+            $tz = $user->timezone ?? 'UTC';
+            if ($user->use_24_hour_time !== null) {
+                $enable24 = $user->use_24_hour_time;
+            }
+        }
+
+        $local = $utcInstant->copy()->setTimezone($tz);
+
+        if ($role && $role->language_code) {
+            return $local->locale($role->language_code)
+                ->translatedFormat($enable24 ? 'j F Y • H:i' : 'j F Y • g:i A');
+        }
+
+        return $local->format($enable24 ? 'M j, Y H:i' : 'M j, Y g:i A');
+    }
+
+    /**
      * The UTC instant at which this event's occurrence on $date starts.
      *
      * $date is a venue-local calendar date; the time of day comes from `starts_at`. Setting
@@ -2365,7 +2396,10 @@ class Event extends Model
         foreach ($saleTickets as $saleTicket) {
             foreach (($saleTicket->pass_usages ?? []) as $usage) {
                 if ((int) ($usage['event_id'] ?? 0) === (int) $this->id
-                    && ($usage['date'] ?? null) === $date) {
+                    && ($usage['date'] ?? null) === $date
+                    // A forfeited booking keeps the visit consumed but returns
+                    // its seat(s) to the pool.
+                    && SaleTicket::usageKind($usage) !== 'forfeited') {
                     // A single visit may admit more than one person (holder plus
                     // guests), so each occupies a seat in the shared pool.
                     $count += max(1, (int) ($usage['admits'] ?? 1));

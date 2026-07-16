@@ -137,6 +137,59 @@ class EventSaveTicketsCharacterizationTest extends TestCase
         $this->assertDatabaseHas('events', ['id' => $event->id, 'individual_tickets' => 0]);
     }
 
+    public function test_pass_cancel_cutoff_zero_round_trips(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        // 0 means "credited until the event starts" and must survive the save
+        // (a naive empty() check would null it); '' means no deadline.
+        $this->postCreateEvent($owner, $role, [
+            'tickets_enabled' => '1',
+            'tickets' => [
+                [
+                    'type' => 'Strict Pass', 'quantity' => '10', 'price' => '50', 'is_pass' => '1',
+                    'pass_allow_booking' => '1',
+                    'pass_cancel_cutoff_hours' => '0', 'pass_late_cancel_policy' => 'block',
+                ],
+                [
+                    'type' => 'Lax Pass', 'quantity' => '10', 'price' => '50', 'is_pass' => '1',
+                    'pass_allow_booking' => '1',
+                    'pass_cancel_cutoff_hours' => '', 'pass_late_cancel_policy' => 'forfeit',
+                ],
+            ],
+        ])->assertRedirect();
+
+        $event = $this->latestEvent();
+        $this->assertDatabaseHas('tickets', [
+            'event_id' => $event->id, 'type' => 'Strict Pass',
+            'pass_cancel_cutoff_hours' => 0, 'pass_late_cancel_policy' => 'block',
+        ]);
+        $this->assertDatabaseHas('tickets', [
+            'event_id' => $event->id, 'type' => 'Lax Pass',
+            'pass_cancel_cutoff_hours' => null, 'pass_late_cancel_policy' => 'forfeit',
+        ]);
+
+        // Toggling advance booking OFF must not erase the configured policy -
+        // it stays stored (inert) and reappears intact when booking is re-enabled.
+        $this->putUpdateEvent($owner, $role, $event, [
+            'tickets_enabled' => '1',
+            'tickets' => [
+                [
+                    'id' => Ticket::where('type', 'Strict Pass')->value('id'),
+                    'type' => 'Strict Pass', 'quantity' => '10', 'price' => '50', 'is_pass' => '1',
+                    'pass_allow_booking' => '0',
+                    'pass_cancel_cutoff_hours' => '24', 'pass_late_cancel_policy' => 'block',
+                ],
+            ],
+        ])->assertRedirect();
+        $this->assertDatabaseHas('tickets', [
+            'event_id' => $event->id, 'type' => 'Strict Pass',
+            'pass_allow_booking' => 0,
+            'pass_cancel_cutoff_hours' => 24, 'pass_late_cancel_policy' => 'block',
+        ]);
+    }
+
     public function test_addons_are_upserted_and_soft_deleted_as_addon_tickets(): void
     {
         $owner = $this->createOwner();

@@ -63,6 +63,8 @@
                                         <td class="py-1.5 whitespace-nowrap">
                                             @if (($usage['kind'] ?? 'attended') === 'booked')
                                                 <span class="inline-block rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-xs font-medium text-[var(--brand-blue)]">{{ __('messages.booked') }}</span>
+                                            @elseif (($usage['kind'] ?? 'attended') === 'forfeited')
+                                                <span class="inline-block rounded-full bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400">{{ __('messages.forfeited') }}</span>
                                             @else
                                                 <span class="inline-block rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400">{{ __('messages.attended') }}</span>
                                             @endif

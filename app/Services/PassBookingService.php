@@ -164,35 +164,66 @@ class PassBookingService
      * Reservations the holder currently holds (booking-kind entries), upcoming
      * first. Each: event, date, label, plus encoded ids for the view.
      */
-    public function bookedOccurrences(Sale $sale): array
+    public function bookedOccurrences(Sale $sale, ?Carbon $now = null): array
     {
+        $now = $now ?: now();
         $saleTicket = $this->passSaleTicket($sale);
         if (! $saleTicket) {
             return [];
         }
 
         $bookings = collect($saleTicket->pass_usages ?? [])
-            ->filter(fn ($u) => ($u['kind'] ?? 'redemption') === 'booking');
+            ->filter(fn ($u) => SaleTicket::usageKind($u) === 'booking');
 
         if ($bookings->isEmpty()) {
             return [];
         }
 
-        $events = Event::whereIn('id', $bookings->pluck('event_id')->unique()->all())
+        $ticket = $saleTicket->ticket;
+        $events = Event::with('creatorRole')
+            ->whereIn('id', $bookings->pluck('event_id')->unique()->all())
             ->get()->keyBy('id');
 
         return $bookings
-            ->map(function ($u) use ($events) {
+            ->map(function ($u) use ($events, $ticket, $now) {
                 $event = $events->get((int) ($u['event_id'] ?? 0));
                 if (! $event) {
                     return null;
                 }
 
+                $date = $u['date'] ?? null;
+                $deadline = ($ticket && $date) ? $ticket->passCancelDeadlineUtc($event, $date) : null;
+
+                // Mirror cancel()'s undo grace so the UI never warns about a
+                // forfeit that the server would still credit.
+                $bookedAt = isset($u['at']) ? Carbon::createFromTimestamp((int) $u['at'], 'UTC') : null;
+                $inGrace = $bookedAt && $now->lte($bookedAt->copy()->addMinutes(self::CANCEL_GRACE_MINUTES));
+
+                // With a cancellation policy in force, a booking whose occurrence
+                // has ended is dead weight (visit consumed, seat worthless) - drop
+                // it from the list instead of pinning "cancellation closed" rows
+                // forever. Never while the undo grace still runs (a last-minute
+                // mis-booking must keep its credited-cancel button), and without
+                // a policy legacy behavior stands: the row stays and may still be
+                // cancelled with credit.
+                if ($deadline && $event->starts_at && ! $inGrace) {
+                    $duration = $event->duration > 0 ? $event->duration : 2;
+                    $endUtc = $event->occurrenceStartUtc($date)
+                        ->addMinutes(Event::durationHoursToMinutes($duration));
+                    if ($now->gt($endUtc)) {
+                        return null;
+                    }
+                }
+
                 return [
                     'event_id' => UrlUtils::encodeId($event->id),
                     'event_name' => $event->name,
-                    'date' => $u['date'] ?? null,
-                    'date_label' => $event->localStartsAt(true, $u['date'] ?? null),
+                    'date' => $date,
+                    'date_label' => $event->localStartsAt(true, $date),
+                    'cancel_deadline_label' => $deadline ? $event->localizedInstantLabel($deadline) : null,
+                    'past_cutoff' => $deadline ? ($now->gt($deadline) && ! $inGrace) : false,
+                    'deadline_past' => $deadline ? $now->gt($deadline) : false,
+                    'late_policy' => $deadline ? $ticket->passLateCancelPolicy() : null,
                 ];
             })
             ->filter()
@@ -216,12 +247,26 @@ class PassBookingService
         }
 
         $bookedKeys = collect($saleTicket->pass_usages ?? [])
-            ->filter(fn ($u) => ($u['kind'] ?? 'redemption') === 'booking')
+            ->filter(fn ($u) => SaleTicket::usageKind($u) === 'booking')
             ->map(fn ($u) => ((int) ($u['event_id'] ?? 0)).'|'.($u['date'] ?? ''))
             ->all();
 
+        // A per-event pass grants one visit per event, and EVERY usage entry
+        // spends it - a booking on any date, a redemption, or a forfeited late
+        // cancellation. Don't offer dates of events the visit limit would
+        // reject anyway (book() would return limit_reached).
+        $spentEventIds = $passTicket->pass_usage_type === 'per_event'
+            ? collect($saleTicket->pass_usages ?? [])
+                ->map(fn ($u) => (int) ($u['event_id'] ?? 0))
+                ->unique()
+                ->all()
+            : [];
+
         $occurrences = [];
         foreach ($this->coveredEvents($sale, $passTicket) as $event) {
+            if (in_array($event->id, $spentEventIds, true)) {
+                continue;
+            }
             foreach ($this->upcomingDates($event, $now, $saleTicket->pass_expires_at) as $date) {
                 $seatsLeft = $this->seatsLeft($event, $date, $passTicket);
                 $occurrences[] = [
@@ -304,9 +349,12 @@ class PassBookingService
             $fresh = SaleTicket::lockForUpdate()->find($saleTicket->id);
             $usages = $fresh->pass_usages ?? [];
 
-            // Already holding this occurrence?
+            // Already holding this occurrence? Forfeited entries don't count -
+            // that visit is spent, but the holder may book the date again as a
+            // new visit (subject to the limits below, which count every entry).
             $already = collect($usages)->contains(fn ($u) => (int) ($u['event_id'] ?? 0) === $eventId
-                && ($u['date'] ?? null) === $date);
+                && ($u['date'] ?? null) === $date
+                && SaleTicket::usageKind($u) !== 'forfeited');
             if ($already) {
                 $result->status = 'already_booked';
 
@@ -354,12 +402,28 @@ class PassBookingService
         });
     }
 
+    /** Minutes after making a booking during which it may always be undone with credit. */
+    public const CANCEL_GRACE_MINUTES = 15;
+
     /**
      * Release a reservation for $eventId on $date (booking entries only; an
      * already-redeemed visit can't be cancelled). Atomic. Returns {ok, status}.
+     *
+     * When the pass ticket sets pass_cancel_cutoff_hours, cancelling past that
+     * deadline either forfeits the visit (entry kept as kind 'forfeited': the
+     * seat returns to the pool but the visit stays consumed) or is refused
+     * entirely, per pass_late_cancel_policy. Two escape hatches:
+     * - a booking may always be cancelled with credit within CANCEL_GRACE_MINUTES
+     *   of being made, so a booking made inside the cutoff window (born past its
+     *   own deadline) is never an irreversible mis-click;
+     * - the forfeit path only runs when $allowForfeit is set (the guest's form
+     *   acknowledged the warning); otherwise it returns 'confirm_forfeit' with
+     *   no mutation, so a cancel submitted from a page rendered before the
+     *   deadline can't silently burn the visit.
      */
-    public function cancel(Sale $sale, int $eventId, string $date): \stdClass
+    public function cancel(Sale $sale, int $eventId, string $date, ?Carbon $now = null, bool $allowForfeit = false): \stdClass
     {
+        $now = $now ?: now();
         $result = new \stdClass;
         $result->ok = false;
 
@@ -372,7 +436,7 @@ class PassBookingService
 
         $event = Event::with('tickets')->find($eventId);
 
-        return DB::transaction(function () use ($event, $saleTicket, $eventId, $date, $result) {
+        return DB::transaction(function () use ($event, $saleTicket, $eventId, $date, $now, $allowForfeit, $result) {
             if ($event) {
                 $event->tickets()->lockForUpdate()->get();
             }
@@ -381,10 +445,44 @@ class PassBookingService
 
             $index = collect($usages)->search(fn ($u) => (int) ($u['event_id'] ?? 0) === $eventId
                 && ($u['date'] ?? null) === $date
-                && ($u['kind'] ?? 'redemption') === 'booking');
+                && SaleTicket::usageKind($u) === 'booking');
 
             if ($index === false) {
                 $result->status = 'not_found';
+
+                return $result;
+            }
+
+            // A deleted booked event leaves no occurrence start to measure the
+            // deadline against, so the holder keeps the credited cancel.
+            $deadline = $event ? $fresh->ticket?->passCancelDeadlineUtc($event, $date) : null;
+
+            // Undo grace: within a few minutes of booking, credit-cancel is
+            // always allowed even past the configured deadline.
+            $bookedAt = isset($usages[$index]['at'])
+                ? Carbon::createFromTimestamp((int) $usages[$index]['at'], 'UTC')
+                : null;
+            $inGrace = $bookedAt && $now->lte($bookedAt->copy()->addMinutes(self::CANCEL_GRACE_MINUTES));
+
+            if ($deadline && $now->gt($deadline) && ! $inGrace) {
+                if ($fresh->ticket->passLateCancelPolicy() === 'block') {
+                    $result->status = 'too_late';
+
+                    return $result;
+                }
+
+                if (! $allowForfeit) {
+                    $result->status = 'confirm_forfeit';
+
+                    return $result;
+                }
+
+                $usages[$index]['kind'] = 'forfeited';
+                $fresh->pass_usages = array_values($usages);
+                $fresh->save();
+
+                $result->ok = true;
+                $result->status = 'forfeited';
 
                 return $result;
             }

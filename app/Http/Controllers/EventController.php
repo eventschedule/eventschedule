@@ -872,30 +872,7 @@ class EventController extends Controller
                 'sell_after_start' => $event->sell_after_start,
                 'show_unavailable_tickets' => $event->show_unavailable_tickets,
                 'custom_fields' => $event->custom_fields,
-                'tickets' => $event->tickets->map(function ($ticket) {
-                    return [
-                        'type' => $ticket->type,
-                        'quantity' => $ticket->quantity,
-                        'price' => $ticket->price,
-                        'description' => $ticket->description,
-                        'custom_fields' => $ticket->custom_fields,
-                        'volume_discount' => $ticket->volume_discount,
-                        // Pass / subscription config (coverage ids encoded; consumed by
-                        // the edit form's pass_coverage fallback for id-less tickets).
-                        'is_pass' => $ticket->is_pass,
-                        'pass_usage_type' => $ticket->pass_usage_type,
-                        'pass_max_uses' => $ticket->pass_max_uses,
-                        'pass_valid_days' => $ticket->pass_valid_days,
-                        'pass_scope' => $ticket->pass_scope,
-                        'pass_allow_booking' => $ticket->pass_allow_booking,
-                        'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
-                        'pass_admits_per_event' => $ticket->pass_admits_per_event,
-                        'pass_coverage' => [
-                            'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
-                            'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
-                        ],
-                    ];
-                })->toArray(),
+                'tickets' => $event->tickets->map(fn ($ticket) => $ticket->toClonePayload())->toArray(),
                 'addons' => $event->addons->map(function ($addon) {
                     return [
                         'type' => $addon->type,
@@ -1225,30 +1202,7 @@ class EventController extends Controller
                 'sell_after_start' => $event->sell_after_start,
                 'show_unavailable_tickets' => $event->show_unavailable_tickets,
                 'custom_fields' => $event->custom_fields,
-                'tickets' => $event->tickets->map(function ($ticket) {
-                    return [
-                        'type' => $ticket->type,
-                        'quantity' => $ticket->quantity,
-                        'price' => $ticket->price,
-                        'description' => $ticket->description,
-                        'custom_fields' => $ticket->custom_fields,
-                        'volume_discount' => $ticket->volume_discount,
-                        // Pass / subscription config (coverage ids encoded; consumed by
-                        // the edit form's pass_coverage fallback for id-less tickets).
-                        'is_pass' => $ticket->is_pass,
-                        'pass_usage_type' => $ticket->pass_usage_type,
-                        'pass_max_uses' => $ticket->pass_max_uses,
-                        'pass_valid_days' => $ticket->pass_valid_days,
-                        'pass_scope' => $ticket->pass_scope,
-                        'pass_allow_booking' => $ticket->pass_allow_booking,
-                        'pass_seats_per_occurrence' => $ticket->pass_seats_per_occurrence,
-                        'pass_admits_per_event' => $ticket->pass_admits_per_event,
-                        'pass_coverage' => [
-                            'group' => $ticket->pass_scope_group_id ? UrlUtils::encodeId($ticket->pass_scope_group_id) : '',
-                            'events' => collect($ticket->pass_event_ids ?? [])->map(fn ($id) => UrlUtils::encodeId($id))->values()->all(),
-                        ],
-                    ];
-                })->toArray(),
+                'tickets' => $event->tickets->map(fn ($ticket) => $ticket->toClonePayload())->toArray(),
                 'addons' => $event->addons->map(function ($addon) {
                     return [
                         'type' => $addon->type,

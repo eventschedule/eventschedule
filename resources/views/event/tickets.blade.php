@@ -256,6 +256,18 @@
                     var hint = @json(__('messages.volume_discount_hint'));
                     return hint.replace(':min', String(r.min_quantity));
                 },
+                passCancelPolicyHintText(ticket) {
+                    if (ticket.pass_cancel_cutoff_hours === null || ticket.pass_cancel_cutoff_hours === undefined) {
+                        return '';
+                    }
+                    var window = ticket.pass_cancel_cutoff_hours === 0
+                        ? @json(__('messages.pass_cancel_window_until_start'))
+                        : @json(__('messages.pass_cancel_window_hours')).replace(':hours', String(ticket.pass_cancel_cutoff_hours));
+                    var note = ticket.pass_late_cancel_policy === 'block'
+                        ? @json(__('messages.pass_late_cancel_note_block'))
+                        : @json(__('messages.pass_late_cancel_note_forfeit'));
+                    return window + ' ' + note;
+                },
                 volumeDiscountForTicketLine(ticket) {
                     var rule = ticket.volume_discount;
                     var qty = ticket.selectedQty || 0;
@@ -1015,6 +1027,7 @@
                         <template v-else>{{ __('messages.subscription') }}</template>
                     </span>
                     <p v-if="ticket.is_pass && ticket.pass_allow_booking" class="text-xs text-[var(--brand-blue)] mt-1">{{ __('messages.pass_book_after_purchase') }}</p>
+                    <p v-if="ticket.is_pass && ticket.pass_allow_booking && passCancelPolicyHintText(ticket)" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ passCancelPolicyHintText(ticket) }}</p>
                     <p v-if="ticket.description" class="text-sm text-gray-600 dark:text-gray-400" v-html="ticket.description"></p>
                     <p :class="{'text-lg': tickets.length === 1, 'text-sm': tickets.length > 1}" class="font-medium text-gray-900 dark:text-gray-100"><template v-if="!ticket.price">{{ __('messages.free') }}</template><template v-else>@{{ formatPrice(ticket.price) }}</template></p>
                     <p v-if="ticket.price && ticket.volume_discount && ticket.volume_discount.min_quantity" class="text-xs text-gray-600 dark:text-gray-400 mt-1">@{{ volumeDiscountHintText(ticket) }}</p>

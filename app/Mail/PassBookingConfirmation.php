@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Event;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Services\PassBookingService;
 use App\Utils\QrCodeUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Bus\Queueable;
@@ -62,6 +63,13 @@ class PassBookingConfirmation extends Mailable
 
         $qrCodeData = QrCodeUtils::png($manageUrl);
 
+        // Cancellation deadline for this booking, when the pass sets one. A
+        // deadline already in the past (the booking was made inside the cutoff
+        // window) is not worth printing as a date - the blade shows the
+        // policy's consequence instead.
+        $passTicket = app(PassBookingService::class)->passSaleTicket($this->sale)?->ticket;
+        $cancelDeadline = $passTicket?->passCancelDeadlineUtc($this->bookedEvent, $this->date);
+
         return new Content(
             view: 'emails.pass_booking_confirmation',
             text: 'emails.pass_booking_confirmation_text',
@@ -73,6 +81,11 @@ class PassBookingConfirmation extends Mailable
                 'dateLabel' => $this->bookedEvent->localStartsAt(true, $this->date),
                 'manageUrl' => $manageUrl,
                 'qrCodeData' => $qrCodeData,
+                'cancelDeadlineLabel' => $cancelDeadline
+                    ? $this->bookedEvent->localizedInstantLabel($cancelDeadline)
+                    : null,
+                'cancelDeadlinePassed' => $cancelDeadline ? $cancelDeadline->isPast() : false,
+                'lateCancelPolicy' => $cancelDeadline ? $passTicket->passLateCancelPolicy() : null,
             ]
         );
     }

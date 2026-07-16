@@ -445,6 +445,14 @@
             <div class="glass p-[20px] sm:p-[24px] print:hidden" id="pass-booking">
                 <h2 class="text-[11px] uppercase tracking-wider text-white/50 font-semibold mb-[12px]">{{ __('messages.book_your_dates') }}</h2>
 
+                @php $passCancelCutoff = ($passPolicyTicket ?? null)?->pass_cancel_cutoff_hours; @endphp
+                @if (! is_null($passCancelCutoff))
+                <p class="text-[12px] text-white/50 mb-[12px]">
+                    {{ $passCancelCutoff == 0 ? __('messages.pass_cancel_window_until_start') : __('messages.pass_cancel_window_hours', ['hours' => $passCancelCutoff]) }}
+                    {{ $passPolicyTicket->passLateCancelPolicy() === 'block' ? __('messages.pass_late_cancel_note_block') : __('messages.pass_late_cancel_note_forfeit') }}
+                </p>
+                @endif
+
                 @if (session('message'))
                 <div class="mb-[12px] rounded-[10px] bg-emerald-500/15 border border-emerald-400/30 px-[12px] py-[8px] text-[13px] text-emerald-200">{{ session('message') }}</div>
                 @endif
@@ -457,14 +465,36 @@
                     <div class="text-white/70 text-[13px] mb-[6px]">{{ __('messages.your_booked_dates') }}</div>
                     <ul class="space-y-[6px]">
                         @foreach ($bookedOccurrences as $b)
+                        @php
+                            $pastCutoff = ! empty($b['past_cutoff']);
+                            $latePolicy = $b['late_policy'] ?? null;
+                        @endphp
                         <li class="flex items-center justify-between gap-[8px] rounded-[10px] bg-white/[0.04] px-[12px] py-[8px]">
-                            <span class="text-[13px] text-white">{{ $b['date_label'] ?: $b['date'] }}@if ($b['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $b['event_name'] }}</span>@endif</span>
-                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ __('messages.are_you_sure') }}">
+                            <span class="text-[13px] text-white">{{ $b['date_label'] ?: $b['date'] }}@if ($b['event_name'] !== $event->name) <span class="text-white/50">&middot; {{ $b['event_name'] }}</span>@endif
+                                {{-- Not while the deadline itself has passed (undo grace): a past
+                                     instant must not be presented as a live cutoff. --}}
+                                @if (! empty($b['cancel_deadline_label']) && ! $pastCutoff && empty($b['deadline_past']))
+                                <span class="block text-[11px] text-white/40">{{ __('messages.pass_cancel_deadline_note', ['deadline' => $b['cancel_deadline_label']]) }}</span>
+                                @endif
+                            </span>
+                            @if ($pastCutoff && $latePolicy === 'block')
+                            <span class="text-[12px] text-white/40">{{ __('messages.pass_cancel_closed') }}</span>
+                            @else
+                            <form action="{{ route('pass.cancel_booking', ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret]) }}" method="POST" data-confirm="{{ $pastCutoff && $latePolicy === 'forfeit' ? __('messages.pass_forfeit_warning') : __('messages.are_you_sure') }}">
                                 @csrf
                                 <input type="hidden" name="book_event_id" value="{{ $b['event_id'] }}">
                                 <input type="hidden" name="date" value="{{ $b['date'] }}">
+                                @if ($pastCutoff && $latePolicy === 'forfeit')
+                                {{-- The ack tells the server the forfeit warning was actually shown;
+                                     without it a stale pre-deadline page gets a confirm bounce instead
+                                     of a silent forfeit. --}}
+                                <input type="hidden" name="forfeit_ack" value="1">
+                                <button type="submit" class="text-[12px] text-amber-400 hover:text-amber-300 transition-colors font-medium">{{ __('messages.pass_cancel_no_credit') }}</button>
+                                @else
                                 <button type="submit" class="text-[12px] text-red-400 hover:text-red-300 transition-colors font-medium">{{ __('messages.cancel') }}</button>
+                                @endif
                             </form>
+                            @endif
                         </li>
                         @endforeach
                     </ul>

@@ -3658,6 +3658,29 @@
                                                             <x-text-input type="number" min="1" step="1" v-model.number="ticket.pass_seats_per_occurrence" class="mt-1 block w-full sm:w-48" />
                                                             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_seats_per_occurrence_help') }}</p>
                                                         </div>
+                                                        <div>
+                                                            <x-input-label :value="__('messages.pass_cancel_cutoff_label')" />
+                                                            <select v-model="ticket.pass_cancel_cutoff_hours" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                                <option value="">{{ __('messages.pass_cancel_anytime') }}</option>
+                                                                <option :value="0">{{ __('messages.pass_cancel_until_start') }}</option>
+                                                                @foreach ([12, 24, 48, 72, 168] as $cutoffHours)
+                                                                <option :value="{{ $cutoffHours }}">{{ __('messages.pass_cancel_hours_before', ['hours' => $cutoffHours]) }}</option>
+                                                                @endforeach
+                                                                <!-- A stored value outside the presets (e.g. restored from a backup)
+                                                                     must stay visible and selected, not render a blank select. -->
+                                                                <option v-if="![0, 12, 24, 48, 72, 168].includes(ticket.pass_cancel_cutoff_hours) && ticket.pass_cancel_cutoff_hours !== '' && ticket.pass_cancel_cutoff_hours !== null"
+                                                                    :value="ticket.pass_cancel_cutoff_hours">@{{ passCancelHoursLabel(ticket.pass_cancel_cutoff_hours) }}</option>
+                                                            </select>
+                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_cancel_cutoff_help') }}</p>
+                                                        </div>
+                                                        <div v-if="ticket.pass_cancel_cutoff_hours !== '' && ticket.pass_cancel_cutoff_hours !== null">
+                                                            <x-input-label :value="__('messages.pass_late_cancel_policy_label')" />
+                                                            <select v-model="ticket.pass_late_cancel_policy" class="mt-1 block w-full sm:w-72 text-sm border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                                                <option value="forfeit">{{ __('messages.pass_late_cancel_forfeit') }}</option>
+                                                                <option value="block">{{ __('messages.pass_late_cancel_block') }}</option>
+                                                            </select>
+                                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.pass_late_cancel_policy_help') }}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -3672,6 +3695,8 @@
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_event_ids]`" :value="JSON.stringify(ticket.pass_event_ids || [])">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_allow_booking]`" :value="ticket.pass_allow_booking ? 1 : 0">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_seats_per_occurrence]`" :value="ticket.pass_seats_per_occurrence || ''">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_cancel_cutoff_hours]`" :value="ticket.pass_cancel_cutoff_hours === '' || ticket.pass_cancel_cutoff_hours === null ? '' : ticket.pass_cancel_cutoff_hours">
+                                                <input type="hidden" v-bind:name="`tickets[${index}][pass_late_cancel_policy]`" :value="ticket.pass_late_cancel_policy || 'forfeit'">
                                                 <input type="hidden" v-bind:name="`tickets[${index}][pass_admits_per_event]`" :value="ticket.pass_admits_per_event || ''">
                                             </template>
                                             <input v-else type="hidden" v-bind:name="`tickets[${index}][is_pass]`" :value="0">
@@ -4995,6 +5020,8 @@
           pass_scope: ticket.pass_scope || 'this_event',
           pass_allow_booking: !!ticket.pass_allow_booking,
           pass_seats_per_occurrence: ticket.pass_seats_per_occurrence ?? null,
+          pass_cancel_cutoff_hours: ticket.pass_cancel_cutoff_hours ?? '',
+          pass_late_cancel_policy: ticket.pass_late_cancel_policy || 'forfeit',
           pass_admits_per_event: ticket.pass_admits_per_event ?? 1,
           pass_scope_group_id: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).group || '',
           pass_event_ids: (@json($ticketPassCoverage)[ticket.id] || ticket.pass_coverage || {}).events || [],
@@ -6200,6 +6227,9 @@
         };
         return map[type] || '';
       },
+      passCancelHoursLabel(hours) {
+        return @json(__('messages.pass_cancel_hours_before')).replace(':hours', String(hours));
+      },
       getFilteredPassEvents(index) {
         const q = (this.passEventSearch[index] || '').toLowerCase().trim();
         if (!q) return this.passEvents;
@@ -6224,6 +6254,8 @@
             pass_scope: 'this_event',
             pass_allow_booking: false,
             pass_seats_per_occurrence: null,
+            pass_cancel_cutoff_hours: '',
+            pass_late_cancel_policy: 'forfeit',
             pass_admits_per_event: 1,
             pass_scope_group_id: '',
             pass_event_ids: [],

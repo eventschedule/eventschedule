@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImportAttendeesRequest;
 use App\Http\Requests\TicketCheckoutRequest;
+use App\Jobs\NotifyWaitlist;
 use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
@@ -246,7 +247,11 @@ class TicketController extends Controller
                     'event' => $eventNames[(int) ($u['event_id'] ?? 0)] ?? '—',
                     'date' => $u['date'] ?? '',
                     'time' => isset($u['at']) ? Carbon::createFromTimestamp((int) $u['at'])->format('M j, g:i A') : '',
-                    'kind' => ($u['kind'] ?? 'redemption') === 'booking' ? 'booked' : 'attended',
+                    'kind' => match ($u['kind'] ?? 'redemption') {
+                        'booking' => 'booked',
+                        'forfeited' => 'forfeited',
+                        default => 'attended',
+                    },
                 ])->values(),
             ];
         })->sortBy('name')->values();
@@ -2544,8 +2549,9 @@ class TicketController extends Controller
         $passBookable = $bookingService->isBookable($sale);
         $bookedOccurrences = $passBookable ? $bookingService->bookedOccurrences($sale) : [];
         $bookableOccurrences = $passBookable ? $bookingService->bookableOccurrences($sale, now()) : [];
+        $passPolicyTicket = $passBookable ? $bookingService->passSaleTicket($sale)?->ticket : null;
 
-        return view('ticket.view', compact('event', 'sale', 'role', 'passBookable', 'bookedOccurrences', 'bookableOccurrences'));
+        return view('ticket.view', compact('event', 'sale', 'role', 'passBookable', 'bookedOccurrences', 'bookableOccurrences', 'passPolicyTicket'));
     }
 
     public function handleAction(Request $request, $sale_id)
@@ -2835,7 +2841,12 @@ class TicketController extends Controller
         }
 
         try {
-            $result = app(PassBookingService::class)->cancel($sale, (int) $bookEventId, $date);
+            $result = app(PassBookingService::class)->cancel(
+                $sale,
+                (int) $bookEventId,
+                $date,
+                allowForfeit: $request->boolean('forfeit_ack'),
+            );
         } catch (\Illuminate\Database\QueryException $e) {
             report($e);
 
@@ -2846,12 +2857,28 @@ class TicketController extends Controller
             WebhookService::dispatch('ticket.booking_cancelled', $sale, null, [
                 'booked_event_id' => UrlUtils::encodeId((int) $bookEventId),
                 'booked_event_date' => $date,
+                'forfeited' => $result->status === 'forfeited',
             ]);
 
-            return $back->with('message', __('messages.pass_booking_cancelled'));
+            // The seat returned to the pool; offer it to the waitlist - but only
+            // for an occurrence that hasn't started (a forfeit can land after
+            // start, and a "spot opened" email for a running event is noise that
+            // burns the guest's one-shot notification). A time-less event has no
+            // start instant, so fall back to comparing calendar dates.
+            $bookedEvent = Event::find((int) $bookEventId);
+            $occurrenceUpcoming = $bookedEvent && ($bookedEvent->starts_at
+                ? $bookedEvent->occurrenceStartUtc($date)->isFuture()
+                : $date >= $bookedEvent->scheduleToday(now()));
+            if ($occurrenceUpcoming) {
+                NotifyWaitlist::dispatch((int) $bookEventId, $date);
+            }
+
+            return $back->with('message', $result->status === 'forfeited'
+                ? __('messages.pass_booking_forfeited')
+                : __('messages.pass_booking_cancelled'));
         }
 
-        return $back->with('error', __('messages.error'));
+        return $back->with('error', $this->passBookingStatusMessage($result->status));
     }
 
     /**
@@ -2907,6 +2934,8 @@ class TicketController extends Controller
             'not_covered' => __('messages.pass_not_covered'),
             'already_booked' => __('messages.pass_already_booked'),
             'invalid_date' => __('messages.pass_invalid_date'),
+            'too_late' => __('messages.pass_cancel_too_late'),
+            'confirm_forfeit' => __('messages.pass_forfeit_confirm_notice'),
             default => __('messages.error'),
         };
     }

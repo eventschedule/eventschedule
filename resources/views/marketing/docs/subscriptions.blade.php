@@ -100,6 +100,12 @@
                             </div>
                         </div>
                         <a href="#buying" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Step 2 - Buyers purchase</a>
+                        <div class="doc-nav-group">
+                            <a href="#advance-booking" class="doc-nav-group-header doc-nav-link">Advance booking <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
+                            <div class="doc-nav-group-items">
+                                <a href="#cancellation-policy" class="doc-nav-link">Cancellation policy</a>
+                            </div>
+                        </div>
                         <a href="#admissions-per-event" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Admissions per event</a>
                         <div class="doc-nav-group">
                             <a href="#redeeming" class="doc-nav-group-header doc-nav-link">Step 3 - Scan at the door <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></a>
@@ -304,6 +310,18 @@
                                 <li><strong class="text-gray-900 dark:text-white">Holders book from their pass page</strong> - the private link in their confirmation email lists upcoming dates with seats left; they book or cancel a date themselves, and each booking counts as one visit until they hit their limit.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Booked or attended</strong> - the Subscriptions tab shows which dates a holder has reserved versus actually attended, and the check-in screen shows how many seats are reserved for the date.</li>
                             </ul>
+
+                            <h3 id="cancellation-policy" class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cancellation policy</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Out of the box, holders can cancel a booked date at any time - even after the event - and the visit is credited back to their pass. With limited seats that invites no-shows: a late cancellation means the seat can't be resold and the waiting list never gets its chance. Two settings on the pass let you tighten this:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Cancellation deadline</strong> - how long before the event starts a booking can still be cancelled with the visit credited back: any time (the default), until the event starts, or 12 to 168 hours before.</li>
+                                <li><strong class="text-gray-900 dark:text-white">After the deadline</strong> - what a late cancellation does. <strong class="text-gray-900 dark:text-white">Forfeit</strong> (recommended) still releases the seat to other guests and the waiting list, but the visit stays spent - so a no-show doesn't get a free credit. <strong class="text-gray-900 dark:text-white">Block</strong> closes cancellation entirely and the booking stands.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Holders always see the rules up front: the deadline appears on the ticket page before purchase, on their pass page next to each booked date, and in the booking confirmation email. A late "Cancel (no credit)" click asks for explicit confirmation before forfeiting the visit, and a mis-click is never fatal: any booking can be undone with full credit within 15 minutes of being made, even past the deadline. When a seat is freed before the event starts - credited or forfeited - anyone on the <a href="{{ route('marketing.docs.tickets') }}#waitlist" class="text-cyan-400 hover:text-cyan-300">waiting list</a> is notified automatically.</p>
+                            <div class="doc-callout doc-callout-info mb-6">
+                                <div class="doc-callout-title">Forfeited but they turn up anyway?</div>
+                                <p>A forfeited booking never revives. If the holder shows up and scans in after forfeiting, that's a brand-new visit, subject to the pass's visit limits (on a festival pass, the one visit for that event is already spent). Changing the policy on the pass applies to existing bookings too.</p>
+                            </div>
                         </section>
 
                         <!-- Admissions per event -->
