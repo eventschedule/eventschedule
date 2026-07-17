@@ -43,7 +43,10 @@ class EventTextGenerator
             }
             $url = preg_replace('#^https?://#', '', $url);
 
-            // Isolate the URL as LTR so it renders correctly inside the RTL line below.
+            // Mark the URL with a Left-to-Right Isolate (U+2066 ... U+2069) so the
+            // per-line pass below can recognize this as a URL line. On its own line
+            // the isolate is stripped back off (leaving a bare, link-detectable URL);
+            // it only survives when a URL sits inline with other text.
             if ($isRtlLang) {
                 $url = "\u{2066}".$url."\u{2069}";
             }
@@ -52,21 +55,37 @@ class EventTextGenerator
         }
 
         // For RTL languages, prepend a Right-to-Left Mark (U+200F) to every
-        // non-empty line. This forces each line - and, because the very first
-        // character of the message is now an RLM, the whole message bubble - to
-        // display right-to-left when pasted into apps like WhatsApp (which
-        // resolves direction from the first strong directional character).
+        // non-empty text line. This forces each line - and, because the very first
+        // character of the message is then an RLM, the whole message bubble - to
+        // display right-to-left when pasted into apps like WhatsApp (which resolves
+        // direction from the first strong directional character).
         //
-        // URLs are kept clickable by wrapping them in a Left-to-Right Isolate
-        // (U+2066 ... U+2069) at their source (parseTemplate's {url} token and
-        // the request URL above) rather than leaving the line unmarked. A bare
-        // leading RLM directly before a URL breaks desktop WhatsApp's link
-        // auto-detection (the v1.0.103 regression); the isolate keeps the URL a
-        // clean LTR run while the surrounding line stays RTL. LTR-language and
-        // forced-English text get no marks at all.
+        // A line that is nothing but a URL is the exception: it must be left
+        // completely free of invisible bidi characters. WhatsApp's link
+        // auto-detection is unreliable when any invisible char sits next to a URL -
+        // a leading mark can stop the match from starting at the URL, and a trailing
+        // one can be swallowed into the tapped href and corrupt it. So the isolate
+        // added around the {url} token (parseTemplate) and the request URL above is
+        // treated as a transient marker here: on a URL-only line it is stripped back
+        // off and NO RLM is added, leaving a bare URL that resolves LTR and renders
+        // left-aligned inside the RTL bubble (expected for a link). The isolate only
+        // survives when a URL sits inline with other text (rare custom templates).
+        // LTR-language and forced-English text get no marks at all.
         if ($isRtlLang) {
             $lines = array_map(function ($line) {
-                return $line === '' ? $line : "\u{200F}".$line;
+                if ($line === '') {
+                    return $line;
+                }
+
+                // URL-only line: one isolate run alone on the line. Strip the
+                // isolate and add no RLM so the URL stays clickable in WhatsApp.
+                if (preg_match('/^\x{2066}[^\x{2066}\x{2069}]*\x{2069}$/u', trim($line)) === 1) {
+                    return trim(str_replace(["\u{2066}", "\u{2069}"], '', $line));
+                }
+
+                // Text line (may contain an inline URL): keep the RLM so it stays
+                // right-aligned; any inline isolate is preserved for display.
+                return "\u{200F}".$line;
             }, explode("\n", $text));
             $text = implode("\n", $lines);
         }
@@ -89,9 +108,10 @@ class EventTextGenerator
     {
         $replacements = self::buildReplacements($event, $role, $directRegistration, $urlSettings, $eventNumber, $forceEnglish);
 
-        // Wrap the event URL in a Left-to-Right Isolate (U+2066 ... U+2069) so it
-        // renders as a clean LTR run - and stays link-detectable - inside the RTL
-        // lines that generate() produces for Hebrew/Arabic schedules.
+        // Mark the event URL with a Left-to-Right Isolate (U+2066 ... U+2069). For a
+        // URL on its own line, generate() strips this back off to leave a bare,
+        // link-detectable URL; when the URL sits inline with other text the isolate
+        // survives and keeps it a clean LTR run inside the RTL line.
         if ($isolateUrl && ($replacements['{url}'] ?? '') !== '') {
             $replacements['{url}'] = "\u{2066}".$replacements['{url}']."\u{2069}";
         }
