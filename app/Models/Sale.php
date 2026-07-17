@@ -38,6 +38,8 @@ class Sale extends Model
         'newsletter_id',
         'promo_code_id',
         'discount_amount',
+        'gift_card_id',
+        'gift_card_amount',
         'volume_discount_amount',
         'feedback_sent_at',
         'group_id',
@@ -108,6 +110,24 @@ class Sale extends Model
                         ->decrement('times_used');
                 }
 
+                // Restore the redeemed amount to the gift card. Guarded so a
+                // cancelled→refunded transition doesn't credit twice, and only
+                // active cards are credited (never cancelled/refunded ones).
+                // The face-value cap protects against any residual double-fire.
+                if ($sale->gift_card_id && $sale->gift_card_amount > 0
+                    && ! in_array($sale->getOriginal('status'), ['cancelled', 'refunded', 'expired'])) {
+                    $giftCard = GiftCard::where('id', $sale->gift_card_id)->lockForUpdate()->first();
+                    if ($giftCard && $giftCard->status === 'active') {
+                        $restore = min(
+                            (float) $sale->gift_card_amount,
+                            (float) $giftCard->amount - (float) $giftCard->remaining_amount
+                        );
+                        if ($restore > 0) {
+                            $giftCard->increment('remaining_amount', $restore);
+                        }
+                    }
+                }
+
                 // Only dispatch waitlist notification from primary or ungrouped sales
                 if (! $sale->group_id || $sale->isPrimarySale()) {
                     NotifyWaitlist::dispatch($sale->event_id, $sale->event_date);
@@ -162,6 +182,11 @@ class Sale extends Model
     public function promoCode()
     {
         return $this->belongsTo(PromoCode::class);
+    }
+
+    public function giftCard()
+    {
+        return $this->belongsTo(GiftCard::class);
     }
 
     public function feedback()
@@ -221,6 +246,17 @@ class Sale extends Model
             ->sum('discount_amount');
     }
 
+    public function groupTotalGiftCard()
+    {
+        if (! $this->group_id) {
+            return (float) ($this->gift_card_amount ?? 0);
+        }
+
+        return (float) Sale::where('group_id', $this->group_id)
+            ->where('is_deleted', false)
+            ->sum('gift_card_amount');
+    }
+
     public function isRsvp()
     {
         return $this->payment_method === 'rsvp';
@@ -275,14 +311,18 @@ class Sale extends Model
             $data->volume_discount_amount = $groupVolume > 0 ? $groupVolume : null;
             $groupDiscount = $this->groupTotalDiscount();
             $data->discount_amount = $groupDiscount > 0 ? $groupDiscount : null;
+            $groupGiftCard = $this->groupTotalGiftCard();
+            $data->gift_card_amount = $groupGiftCard > 0 ? $groupGiftCard : null;
         } elseif ($this->group_id) {
             $data->payment_amount = 0.0;
             $data->volume_discount_amount = null;
             $data->discount_amount = null;
+            $data->gift_card_amount = null;
         } else {
             $data->payment_amount = (float) $this->payment_amount;
             $data->volume_discount_amount = $this->volume_discount_amount !== null ? (float) $this->volume_discount_amount : null;
             $data->discount_amount = $this->discount_amount !== null ? (float) $this->discount_amount : null;
+            $data->gift_card_amount = $this->gift_card_amount !== null ? (float) $this->gift_card_amount : null;
         }
         $data->transaction_reference = $this->transaction_reference;
 

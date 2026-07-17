@@ -813,6 +813,13 @@
 @include('partials.sitemap-hreflang', ['url' => url('/docs/subscriptions')])
     </url>
     <url>
+        <loc>{{ url('/docs/gift-cards') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/gift-cards')])
+    </url>
+    <url>
         <loc>{{ url('/docs/event-graphics') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

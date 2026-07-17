@@ -37,6 +37,7 @@ class HelpUtils
                 'engagement-tab-requests' => '/docs/creating-schedules#engagement-requests',
                 'engagement-tab-carpool' => '/docs/creating-schedules#engagement-carpool',
                 'engagement-tab-sponsors' => '/docs/creating-schedules#engagement-sponsors',
+                'section-gift-cards' => '/docs/gift-cards',
                 'section-auto-import' => '/docs/creating-schedules#auto-import',
                 'section-integrations' => '/docs/creating-schedules#integrations',
                 'integration-tab-email' => '/docs/creating-schedules#integrations-email',

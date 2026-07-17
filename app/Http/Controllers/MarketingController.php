@@ -1029,6 +1029,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Gift cards documentation page
+     */
+    public function docsGiftCards()
+    {
+        return view('marketing.docs.gift-cards', $this->getDocNavigation('marketing.docs.gift_cards'));
+    }
+
+    /**
      * Newsletters documentation page
      */
     public function docsNewsletters()
@@ -4563,6 +4571,7 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
             ['route' => 'marketing.docs.subscriptions', 'title' => 'Subscriptions & Passes'],
+            ['route' => 'marketing.docs.gift_cards', 'title' => 'Gift Cards'],
             ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
@@ -5011,6 +5020,7 @@ class MarketingController extends Controller
             'newsletters' => route('marketing.docs.newsletters'),
             'tickets' => route('marketing.docs.tickets'),
             'subscriptions' => route('marketing.docs.subscriptions'),
+            'gift_cards' => route('marketing.docs.gift_cards'),
             'event_graphics' => route('marketing.docs.event_graphics'),
             'analytics' => route('marketing.docs.analytics'),
             'account_settings' => route('marketing.docs.account_settings'),
@@ -5192,6 +5202,13 @@ class MarketingController extends Controller
             ['page' => 'Subscriptions & Passes', 'section' => 'Admissions Per Event', 'description' => 'Let one pass admit more than one person per event - for example the holder plus a guest - without using extra visits.', 'url' => $r['subscriptions'].'#admissions-per-event', 'category' => 'User Guide', 'keywords' => 'admissions per event admit guest bring a guest plus one party size scan twice couple family membership holder companion'],
             ['page' => 'Subscriptions & Passes', 'section' => 'Redeeming Passes', 'description' => 'Scan a pass at the door and read the result.', 'url' => $r['subscriptions'].'#redeeming', 'category' => 'User Guide', 'keywords' => 'redeem scan check-in door event selector visit already expired not covered'],
             ['page' => 'Subscriptions & Passes', 'section' => 'Tracking Subscriptions', 'description' => 'See who used a pass, how many visits, and at which events.', 'url' => $r['subscriptions'].'#monitoring', 'category' => 'User Guide', 'keywords' => 'track usage visits subscriptions tab subscribers report monitor'],
+
+            // Gift Cards
+            ['page' => 'Gift Cards', 'section' => 'Overview', 'description' => 'Sell gift cards that customers buy for someone else and redeem toward tickets for any event on your schedule.', 'url' => $r['gift_cards'].'#overview', 'category' => 'User Guide', 'keywords' => 'gift card voucher present buy for someone denomination balance redeem credit'],
+            ['page' => 'Gift Cards', 'section' => 'Enabling Gift Cards', 'description' => 'Turn on gift cards, set the denominations, currency, validity period, and how buyers pay.', 'url' => $r['gift_cards'].'#setup', 'category' => 'User Guide', 'keywords' => 'enable setup denominations amounts currency validity expiry payment method pro'],
+            ['page' => 'Gift Cards', 'section' => 'Buying a Gift Card', 'description' => 'Buyers pick an amount, enter the recipient details and a message, and pay; the recipient is emailed the code.', 'url' => $r['gift_cards'].'#buying', 'category' => 'User Guide', 'keywords' => 'buy purchase recipient message send to self email delivery receipt'],
+            ['page' => 'Gift Cards', 'section' => 'Redeeming at Checkout', 'description' => 'Customers enter the gift card code at ticket checkout to deduct the balance; any remainder stays on the card.', 'url' => $r['gift_cards'].'#redeeming', 'category' => 'User Guide', 'keywords' => 'redeem checkout code balance partial remainder deduct apply pay difference'],
+            ['page' => 'Gift Cards', 'section' => 'Managing Gift Cards', 'description' => 'Track sold gift cards, balances, and redemptions on the Sales page, and mark, cancel, or refund them.', 'url' => $r['gift_cards'].'#managing', 'category' => 'User Guide', 'keywords' => 'manage track sales tab balance outstanding mark paid cancel refund resend'],
 
             // Event Graphics
             ['page' => 'Event Graphics', 'section' => 'Overview', 'description' => 'Generate shareable images for social media.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'graphics images social media flyer'],

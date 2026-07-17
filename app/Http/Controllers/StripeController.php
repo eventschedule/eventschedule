@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEventsDaily;
+use App\Models\GiftCard;
 use App\Models\Sale;
 use App\Services\AuditService;
 use App\Services\EmailService;
@@ -215,6 +216,18 @@ class StripeController extends Controller
                     if ($didTransitionToPaid) {
                         (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
                     }
+                } elseif (isset($paymentIntent->metadata->gift_card_id)) {
+                    $giftCard = GiftCard::find(UrlUtils::decodeId($paymentIntent->metadata->gift_card_id));
+                    if ($giftCard) {
+                        $this->handleGiftCardPayment(
+                            $giftCard,
+                            $paymentIntent->amount,
+                            $paymentIntent->currency ?? null,
+                            $paymentIntent->id,
+                            $verifiedViaConnect,
+                            $event->account ?? null
+                        );
+                    }
                 }
                 break;
 
@@ -308,6 +321,18 @@ class StripeController extends Controller
                             (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
                         }
                     }
+                } elseif ($session->payment_status === 'paid' && isset($session->metadata->gift_card_id)) {
+                    $giftCard = GiftCard::find(UrlUtils::decodeId($session->metadata->gift_card_id));
+                    if ($giftCard) {
+                        $this->handleGiftCardPayment(
+                            $giftCard,
+                            $session->amount_total,
+                            $session->currency ?? null,
+                            $session->payment_intent,
+                            $verifiedViaConnect,
+                            $event->account ?? null
+                        );
+                    }
                 }
                 break;
 
@@ -316,6 +341,83 @@ class StripeController extends Controller
         }
 
         return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Activate a gift card once its Stripe payment settles. Locked and idempotent.
+     *
+     * Verifying WHICH connected account paid is load-bearing: the Connect webhook
+     * secret only proves the event came from SOME connected account, so without the
+     * account match a malicious user could pay themselves on their own Connect
+     * account with a victim's gift_card_id in metadata and mint balance the victim
+     * would owe. The payload currency is verified for the same reason.
+     */
+    private function handleGiftCardPayment(GiftCard $giftCard, $rawAmount, ?string $payloadCurrency, ?string $reference, bool $verifiedViaConnect, ?string $eventAccount): void
+    {
+        $merchantAccount = $giftCard->role?->user?->stripe_account_id;
+
+        if ($merchantAccount && ! $verifiedViaConnect) {
+            \Log::warning('Stripe webhook key mismatch: platform key used for Connect gift card', [
+                'gift_card_id' => $giftCard->id,
+                'reference' => $reference,
+            ]);
+
+            return;
+        }
+
+        if ($verifiedViaConnect && (! $merchantAccount || $eventAccount !== $merchantAccount)) {
+            \Log::error('Stripe gift card webhook: connected account mismatch - card NOT activated', [
+                'gift_card_id' => $giftCard->id,
+                'event_account' => $eventAccount,
+                'reference' => $reference,
+            ]);
+
+            return;
+        }
+
+        $didActivate = false;
+
+        \DB::transaction(function () use ($giftCard, $rawAmount, $payloadCurrency, $reference, &$didActivate) {
+            $giftCard = GiftCard::lockForUpdate()->find($giftCard->id);
+            if ($giftCard->status !== 'unpaid') {
+                return;
+            }
+
+            $webhookAmount = $rawAmount / MoneyUtils::getSmallestUnitMultiplier($giftCard->currency_code);
+            $currencyMatches = ! $payloadCurrency || strcasecmp($payloadCurrency, $giftCard->currency_code) === 0;
+
+            if (! $currencyMatches || abs($webhookAmount - (float) $giftCard->amount) > 0.01) {
+                \Log::error('Payment mismatch in Stripe gift card webhook - card NOT activated', [
+                    'gift_card_id' => $giftCard->id,
+                    'expected_amount' => (float) $giftCard->amount,
+                    'webhook_amount' => $webhookAmount,
+                    'expected_currency' => $giftCard->currency_code,
+                    'webhook_currency' => $payloadCurrency,
+                    'reference' => $reference,
+                ]);
+
+                $giftCard->status = 'amount_mismatch';
+                $giftCard->transaction_reference = $reference;
+                $giftCard->save();
+
+                AuditService::log(AuditService::GIFT_CARD_PAID, null, 'GiftCard', $giftCard->id,
+                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'stripe_amount_mismatch:role_id:'.$giftCard->role_id);
+
+                return;
+            }
+
+            $giftCard->activate($reference);
+            $didActivate = true;
+
+            AuditService::log(AuditService::GIFT_CARD_PAID, null, 'GiftCard', $giftCard->id,
+                ['status' => 'unpaid'], ['status' => 'active'], 'stripe:role_id:'.$giftCard->role_id);
+
+            UsageTrackingService::track(UsageTrackingService::STRIPE_PAYMENT);
+        });
+
+        if ($didActivate) {
+            (new EmailService)->sendGiftCardEmails($giftCard->refresh());
+        }
     }
 
     private function sendMetaConversion(Sale $sale, float $amount): void

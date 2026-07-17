@@ -373,13 +373,22 @@
           </div>
           @php
             $ticketDiscountTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+            $ticketGiftCardTotal = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
           @endphp
-          @if ($ticketDiscountTotal > 0)
-            <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200">
+          @if ($ticketDiscountTotal > 0 || $ticketGiftCardTotal > 0)
+            <div class="mt-[12px] pt-[12px] border-t border-white/10 print:border-slate-200 space-y-[6px]">
+              @if ($ticketDiscountTotal > 0)
               <div class="flex items-center justify-between">
                 <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">{{ __('messages.discount') }}@if ($sale->promoCode) ({{ $sale->promoCode->code }})@endif</span>
                 <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($ticketDiscountTotal, 2) }} {{ $event->ticket_currency_code }}</span>
               </div>
+              @endif
+              @if ($ticketGiftCardTotal > 0)
+              <div class="flex items-center justify-between">
+                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">{{ __('messages.gift_card') }}</span>
+                <span class="text-[13px] text-emerald-400 print:text-emerald-600 font-medium">-{{ number_format($ticketGiftCardTotal, 2) }} {{ $event->ticket_currency_code }}</span>
+              </div>
+              @endif
             </div>
           @endif
         </div>
@@ -610,8 +619,9 @@
           </div>
         @endif
 
-        {{-- Cancel Registration / Free Ticket --}}
-        @if ($sale->status === 'paid' && ($sale->isRsvp() || $sale->payment_amount == 0) && (!$sale->group_id || $sale->isPrimarySale()))
+        {{-- Cancel Registration / Free Ticket. Gift-card-paid orders are purchases, not free
+             reservations - self-cancel would be an instant refund-to-card, so it's owner-only. --}}
+        @if ($sale->status === 'paid' && ($sale->isRsvp() || ($sale->payment_amount == 0 && $sale->groupTotalGiftCard() == 0)) && (!$sale->group_id || $sale->isPrimarySale()))
         <div class="glass p-[20px] sm:p-[24px] print:bg-slate-50 print:hidden flex items-center justify-between">
           <a href="{{ $event->getGuestUrl() }}" target="_blank" class="text-[13px] text-violet-400 hover:text-violet-300 transition-colors font-medium">
             {{ __('messages.view_event') }}

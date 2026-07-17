@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
+use App\Models\GiftCard;
 use App\Models\Sale;
 use App\Models\User;
 use App\Services\AuditService;
@@ -95,6 +96,18 @@ class InvoiceNinjaController extends Controller
             ->first();
 
         if (! $sale) {
+            // Not a ticket sale - the invoice may belong to a gift card purchase
+            $giftCard = GiftCard::where('payment_method', 'invoiceninja')
+                ->where('transaction_reference', $invoiceId)
+                ->whereHas('role', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->first();
+
+            if ($giftCard) {
+                return $this->handleGiftCardPayment($giftCard, $payload, $invoiceId);
+            }
+
             return response()->json(['status' => 'error', 'message' => 'Sale not found'], 400);
         }
 
@@ -160,6 +173,54 @@ class InvoiceNinjaController extends Controller
 
         if ($didTransitionToPaid) {
             (new EmailService)->sendSaleConfirmationEmails($sale->refresh());
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
+    /**
+     * Activate a gift card once its Invoice Ninja invoice is paid.
+     * Locked, idempotent, and amount-verified (mirrors the sale path above).
+     */
+    private function handleGiftCardPayment(GiftCard $giftCard, array $payload, $invoiceId)
+    {
+        $didActivate = false;
+
+        \DB::transaction(function () use ($giftCard, $payload, $invoiceId, &$didActivate) {
+            $giftCard = GiftCard::lockForUpdate()->find($giftCard->id);
+            if ($giftCard->status !== 'unpaid') {
+                return;
+            }
+
+            $webhookAmount = $payload['paymentables'][0]['amount'];
+            $amountDifference = abs($webhookAmount - (float) $giftCard->amount);
+
+            if ($amountDifference > 0.01) {
+                \Log::warning('Payment amount mismatch in Invoice Ninja gift card webhook', [
+                    'gift_card_id' => $giftCard->id,
+                    'expected_amount' => (float) $giftCard->amount,
+                    'webhook_amount' => $webhookAmount,
+                    'invoice_id' => $invoiceId,
+                ]);
+
+                $giftCard->status = 'amount_mismatch';
+                $giftCard->save();
+
+                AuditService::log(AuditService::GIFT_CARD_PAID, null, 'GiftCard', $giftCard->id,
+                    ['status' => 'unpaid'], ['status' => 'amount_mismatch'], 'invoiceninja_amount_mismatch:role_id:'.$giftCard->role_id);
+
+                return;
+            }
+
+            $giftCard->activate();
+            $didActivate = true;
+
+            AuditService::log(AuditService::GIFT_CARD_PAID, null, 'GiftCard', $giftCard->id,
+                ['status' => 'unpaid'], ['status' => 'active'], 'invoiceninja:role_id:'.$giftCard->role_id);
+        });
+
+        if ($didActivate) {
+            (new EmailService)->sendGiftCardEmails($giftCard->refresh());
         }
 
         return response()->json(['status' => 'success']);

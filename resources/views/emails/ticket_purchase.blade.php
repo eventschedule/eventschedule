@@ -3,17 +3,21 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($sale->payment_amount == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation')) }}</title>
+    @php
+        // A gift-card-covered order is a purchase, not a free reservation
+        $isFreeReservation = $sale->payment_amount == 0 && ($giftCardAmount ?? 0) == 0;
+    @endphp
+    <title>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation')) }}</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #4E81FA; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-        <h1 style="margin: 0; font-size: 24px;">{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($sale->payment_amount == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation')) }}</h1>
+        <h1 style="margin: 0; font-size: 24px;">{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation')) }}</h1>
     </div>
 
     <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
         <p style="font-size: 16px; margin-top: 0;">{{ __('messages.hello') }} {{ $sale->name }},</p>
 
-        <p>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($sale->payment_amount == 0 ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets')) }}</p>
+        <p>{{ $sale->isRsvp() ? __('messages.registration_confirmation') : ($isFreeReservation ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets')) }}</p>
 
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
             <h2 style="margin-top: 0; color: #4E81FA;">{{ $event->name }}</h2>
@@ -67,6 +71,16 @@
             <p style="margin-top: 15px; font-size: 14px; color: #666;">{{ __('messages.scan_qr_code_to_view_ticket') ?: 'Scan this QR code to view your ticket' }}</p>
         </div>
         -->
+
+        @if (($giftCardAmount ?? 0) > 0 && $giftCard)
+        {{-- The ticket buyer may not be the card recipient, so do NOT link the secret-authed card
+             view page here (it exposes the purchaser's name/message). Show amounts only. --}}
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4E81FA;">
+            <h3 style="margin-top: 0; color: #4E81FA;">{{ __('messages.gift_card') }}</h3>
+            <p style="margin: 10px 0;">{{ __('messages.gift_card_applied_summary') }}: <strong>-{{ \App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code) }}</strong></p>
+            <p style="margin: 10px 0;">{{ __('messages.gift_card_remaining_balance') }}: <strong>{{ \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code) }}</strong></p>
+        </div>
+        @endif
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ $ticketUrl }}"

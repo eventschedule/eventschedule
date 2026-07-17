@@ -335,7 +335,16 @@
                             <div class="py-2" role="none">
                                 <div class="border-t border-gray-100 dark:border-gray-700"></div>
                             </div>
-                            <form method="POST" action="{{ route('role.delete', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ __('messages.are_you_sure') }}" class="form-confirm block">
+                            @php
+                                $outstandingGiftCards = $role->giftCards()
+                                    ->where('status', 'active')
+                                    ->where('remaining_amount', '>', 0)
+                                    ->exists();
+                                $deleteConfirmMessage = $outstandingGiftCards
+                                    ? __('messages.delete_schedule_gift_cards_warning')
+                                    : __('messages.are_you_sure');
+                            @endphp
+                            <form method="POST" action="{{ route('role.delete', ['subdomain' => $role->subdomain]) }}" data-confirm="{{ $deleteConfirmMessage }}" class="form-confirm block">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="w-full group flex items-center px-5 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 focus:bg-red-50 dark:focus:bg-red-900/20 focus:text-red-700 dark:focus:text-red-300 focus:outline-none transition-colors" role="menuitem" tabindex="0">

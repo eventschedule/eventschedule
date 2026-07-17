@@ -118,7 +118,7 @@ class InvoiceNinja
         ]);
     }
 
-    public function createInvoice($clientId, $lineItems, $qrCodeUrl, $sendEmail = false)
+    public function createInvoice($clientId, $lineItems, $qrCodeUrl, $sendEmail = false, $publicNotes = null)
     {
         $url = 'invoices';
 
@@ -128,9 +128,13 @@ class InvoiceNinja
             $url .= '?mark_sent=true';
         }
 
+        if ($publicNotes === null) {
+            $publicNotes = __('messages.qr_code_is_your_ticket').'<br><br><img src="'.$qrCodeUrl.'" />';
+        }
+
         $invoice = $this->sendRequest($url, 'POST', [
             'client_id' => $clientId,
-            'public_notes' => __('messages.qr_code_is_your_ticket').'<br><br><img src="'.$qrCodeUrl.'" />',
+            'public_notes' => $publicNotes,
             'line_items' => $lineItems,
         ]);
 

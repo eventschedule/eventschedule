@@ -54,6 +54,8 @@ class TicketCheckoutRequest extends FormRequest
         $rules['addons'] = ['nullable', 'array'];
         $rules['addons.*'] = ['integer', 'min:0'];
 
+        $rules['gift_card_code'] = ['nullable', 'string', 'max:20'];
+
         if (! auth()->user() && $this->create_account && config('app.hosted')) {
             $rules['email'] = ['required', 'string', 'email', 'max:255', 'unique:'.User::class, new NoFakeEmail];
             $rules['password'] = ['required', 'string', 'min:8'];

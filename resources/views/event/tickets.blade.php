@@ -60,6 +60,13 @@
                     promoCodeMessage: '',
                     discountAmount: 0,
                     isValidatingPromo: false,
+                    giftCardCode: '',
+                    giftCardValid: false,
+                    giftCardMessage: '',
+                    giftCardBalance: 0,
+                    isValidatingGiftCard: false,
+                    isStripePayment: @json($event->payment_method === 'stripe'),
+                    giftCardMinCharge: @json(50 / \App\Utils\MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code)),
                     isPaymentLinkMode: @json($event->payment_method === 'invoiceninja' && $event->user->invoiceninja_mode === 'payment_link'),
                     isSubmitting: false,
                     allSoldOut: @json($event->allTicketsSoldOut($date ?? request()->date)),
@@ -202,8 +209,27 @@
                     }
                     return sum;
                 },
+                giftCardApplied() {
+                    if (!this.giftCardValid || this.giftCardBalance <= 0) {
+                        return 0;
+                    }
+                    const orderTotal = Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount);
+                    let applied = Math.min(this.giftCardBalance, orderTotal);
+                    // Mirror the server: Stripe refuses charges below ~50 smallest currency
+                    // units, so leave either nothing to pay or at least the minimum.
+                    if (this.isStripePayment) {
+                        const remainder = orderTotal - applied;
+                        if (remainder > 0 && remainder < this.giftCardMinCharge) {
+                            applied = Math.max(0, orderTotal - this.giftCardMinCharge);
+                        }
+                    }
+                    return applied;
+                },
+                giftCardRemainderAfter() {
+                    return Math.max(0, this.giftCardBalance - this.giftCardApplied);
+                },
                 totalAmount() {
-                    return Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount);
+                    return Math.max(0, this.subtotalAmount - this.volumeDiscountTotal - this.discountAmount - this.giftCardApplied);
                 },
                 showGuestForms() {
                     return this.individualTickets && this.totalSelectedTickets > 1;
@@ -624,6 +650,46 @@
                     this.promoCodeValid = false;
                     this.promoCodeMessage = '';
                     this.discountAmount = 0;
+                },
+                applyGiftCard() {
+                    if (!this.giftCardCode.trim() || this.isValidatingGiftCard) return;
+
+                    this.isValidatingGiftCard = true;
+                    this.giftCardMessage = '';
+
+                    fetch(@json(route('gift_card.validate', ['subdomain' => $subdomain])), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
+                            code: this.giftCardCode.trim(),
+                        }),
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Request failed');
+                        return response.json();
+                    })
+                    .then(data => {
+                        this.isValidatingGiftCard = false;
+                        this.giftCardValid = data.valid;
+                        this.giftCardMessage = data.message;
+                        this.giftCardBalance = data.valid ? parseFloat(data.balance) : 0;
+                    })
+                    .catch(() => {
+                        this.isValidatingGiftCard = false;
+                        this.giftCardMessage = @json(__('messages.error'));
+                        this.giftCardValid = false;
+                        this.giftCardBalance = 0;
+                    });
+                },
+                removeGiftCard() {
+                    this.giftCardValid = false;
+                    this.giftCardMessage = '';
+                    this.giftCardBalance = 0;
                 },
                 hideForm() {
                     window.dispatchEvent(new CustomEvent('hide-event-form'));
@@ -1150,37 +1216,85 @@
             </div>
         </div>
 
-        <!-- Promo Code -->
-        @if($event->hasActivePromoCodes())
+        <!-- Promo Code / Gift Card -->
+        @php
+            $showPromoField = $event->hasActivePromoCodes();
+            $showGiftCardField = $event->acceptsGiftCards();
+        @endphp
+        @if($showPromoField || $showGiftCardField)
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6">
-            <div class="bg-white dark:bg-gray-700/50 rounded-lg p-4">
-                <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.promo_code') }}</label>
-                <div class="flex gap-2 mt-1">
-                    <input type="text" v-model="promoCode" :disabled="promoCodeValid"
-                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"
-                        :class="{'opacity-50': promoCodeValid}"
-                        placeholder="{{ __('messages.enter_promo_code') }}" />
-                    <button type="button" v-if="!promoCodeValid" @click="applyPromoCode" :disabled="isValidatingPromo || !promoCode.trim()"
-                        class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                        <span v-if="isValidatingPromo">...</span>
-                        <span v-else>{{ __('messages.apply') }}</span>
-                    </button>
-                    <button type="button" v-else @click="removePromoCode"
-                        class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
-                        &times;
-                    </button>
+            <div class="bg-white dark:bg-gray-700/50 rounded-lg p-4 space-y-4">
+                @if($showPromoField && $showGiftCardField)
+                <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('messages.have_a_code') }}</div>
+                @endif
+                @if($showPromoField)
+                <div>
+                    <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.promo_code') }}</label>
+                    <div class="flex gap-2 mt-1">
+                        <input type="text" v-model="promoCode" :disabled="promoCodeValid"
+                            class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm"
+                            :class="{'opacity-50': promoCodeValid}"
+                            placeholder="{{ __('messages.enter_promo_code') }}" />
+                        <button type="button" v-if="!promoCodeValid" @click="applyPromoCode" :disabled="isValidatingPromo || !promoCode.trim()"
+                            class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <span v-if="isValidatingPromo">...</span>
+                            <span v-else>{{ __('messages.apply') }}</span>
+                        </button>
+                        <button type="button" v-else @click="removePromoCode"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                            &times;
+                        </button>
+                    </div>
+                    <p v-if="promoCodeMessage" class="mt-2 text-sm" :class="promoCodeValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                        @{{ promoCodeMessage }}
+                    </p>
                 </div>
-                <p v-if="promoCodeMessage" class="mt-2 text-sm" :class="promoCodeValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-                    @{{ promoCodeMessage }}
-                </p>
+                @endif
+                @if($showGiftCardField)
+                <div>
+                    <label class="text-sm text-gray-600 dark:text-gray-400">{{ __('messages.gift_card') }}</label>
+                    <div class="flex gap-2 mt-1">
+                        <input type="text" v-model="giftCardCode" :disabled="giftCardValid" dir="ltr" autocapitalize="characters" spellcheck="false"
+                            class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm uppercase"
+                            :class="{'opacity-50': giftCardValid}"
+                            placeholder="{{ __('messages.enter_gift_card_code') }}" />
+                        <button type="button" v-if="!giftCardValid" @click="applyGiftCard" :disabled="isValidatingGiftCard || !giftCardCode.trim()"
+                            class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-medium rounded-lg hover:bg-[var(--brand-button-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            <span v-if="isValidatingGiftCard">...</span>
+                            <span v-else>{{ __('messages.apply') }}</span>
+                        </button>
+                        <button type="button" v-else @click="removeGiftCard"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">
+                            &times;
+                        </button>
+                    </div>
+                    <p v-if="giftCardMessage" class="mt-2 text-sm" :class="giftCardValid ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+                        @{{ giftCardMessage }}
+                    </p>
+                    <p v-if="giftCardValid && giftCardApplied > 0" class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {{ __('messages.gift_card_applied_summary') }}: -@{{ formatPrice(giftCardApplied) }} &middot; @{{ formatPrice(giftCardRemainderAfter) }} {{ __('messages.gift_card_remains_after') }}
+                    </p>
+                </div>
+                @endif
             </div>
+            @if($showPromoField)
             <input type="hidden" name="promo_code" :value="promoCodeValid ? promoCode.trim() : ''">
+            @endif
+            @if($showGiftCardField)
+            <input type="hidden" name="gift_card_code" :value="giftCardValid ? giftCardCode.trim() : ''">
+            @endif
         </div>
+        @endif
+
+        @if ($role->canSellGiftCards())
+        <p v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+            🎁 <a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" target="_blank" rel="noopener" class="hover:underline" style="color: {{ $accentColor }}">{{ __('messages.gift_cards_available_buy') }}</a>
+        </p>
         @endif
 
         <!-- Total -->
         <div v-if="!isPaymentLinkMode && !isAllSoldOut" class="mb-6 bg-white dark:bg-gray-700/50 rounded-lg p-4">
-            <template v-if="volumeDiscountTotal > 0 || discountAmount > 0">
+            <template v-if="volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-600 dark:text-gray-400 text-sm">@lang('messages.subtotal')</span>
                     <span class="text-sm text-gray-900 dark:text-gray-100">@{{ formatPrice(subtotalAmount) }}</span>
@@ -1193,8 +1307,12 @@
                     <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.promo_discount')</span>
                     <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(discountAmount) }}</span>
                 </div>
+                <div v-if="giftCardApplied > 0" class="flex justify-between items-center mb-1">
+                    <span class="text-green-600 dark:text-green-400 text-sm">@lang('messages.gift_card')</span>
+                    <span class="text-sm text-green-600 dark:text-green-400">-@{{ formatPrice(giftCardApplied) }}</span>
+                </div>
             </template>
-            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 }">
+            <div class="flex justify-between items-center" :class="{ 'pt-2 mt-1 border-t border-gray-200 dark:border-gray-600': volumeDiscountTotal > 0 || discountAmount > 0 || giftCardApplied > 0 }">
                 <span class="text-gray-600 dark:text-gray-400">@lang('messages.total')</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-gray-100">@{{ formatPrice(totalAmount) }}</span>
             </div>

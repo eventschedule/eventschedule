@@ -17,6 +17,15 @@
     </button>
 </a>
 @endif
+@if ($role->canSellGiftCards())
+<a href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
+    <button type="button"
+        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
+        class="{{ $primaryBtnClass }} {{ $onDark ? 'bg-transparent' : 'bg-white dark:bg-transparent' }}">
+        {{ __('messages.gift_cards') }}
+    </button>
+</a>
+@endif
 @if (config('app.hosted') || config('app.is_testing'))
     @if (! is_demo_mode() && (
         ($hasSubmitButton && auth()->user() && ! auth()->user()->isFollowing($role->subdomain) && ! auth()->user()->isConnected($role->subdomain)) ||

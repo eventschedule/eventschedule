@@ -18,6 +18,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventTemplateController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
+use App\Http\Controllers\GiftCardController;
 use App\Http\Controllers\GoogleCalendarController;
 use App\Http\Controllers\GoogleCalendarWebhookController;
 use App\Http\Controllers\GraphicController;
@@ -88,6 +89,13 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/checkout/cancel/{sale_id}/{date}', [TicketController::class, 'cancel'])->name('checkout.cancel');
         Route::get('/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
         Route::get('/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
+        Route::get('/gift-cards', [GiftCardController::class, 'showPurchase'])->name('gift_card.purchase');
+        Route::post('/gift-cards', [GiftCardController::class, 'purchase'])->name('gift_card.purchase.store')->middleware('throttle:10,1');
+        Route::get('/gift-cards/success/{gift_card_id}', [GiftCardController::class, 'success'])->name('gift_card.success')->middleware('throttle:100,1');
+        Route::get('/gift-cards/cancel/{gift_card_id}', [GiftCardController::class, 'cancel'])->name('gift_card.cancel')->middleware('throttle:100,1');
+        Route::get('/gift-cards/payment/success/{gift_card_id}', [GiftCardController::class, 'paymentUrlSuccess'])->name('gift_card.payment_url.success')->middleware('throttle:100,1');
+        Route::get('/gift-cards/payment/cancel/{gift_card_id}', [GiftCardController::class, 'paymentUrlCancel'])->name('gift_card.payment_url.cancel')->middleware('throttle:100,1');
+        Route::post('/gift-card/validate', [GiftCardController::class, 'validateCode'])->name('gift_card.validate')->middleware('throttle:20,1');
         // iCal download for Apple Calendar
         Route::get('/{slug}/{id}/ical', [EventController::class, 'downloadIcal'])->where(['id' => '[A-Za-z0-9+=]+']);
         Route::get('/{slug}/{id}/{date}/ical', [EventController::class, 'downloadIcal'])->where(['date' => '\d{4}-\d{2}-\d{2}', 'id' => '[A-Za-z0-9+=]+']);
@@ -187,6 +195,8 @@ Route::post('/ticket/book/{event_id}/{secret}', [TicketController::class, 'passB
 Route::post('/ticket/cancel-booking/{event_id}/{secret}', [TicketController::class, 'passCancelBooking'])->name('pass.cancel_booking')->middleware('throttle:30,1');
 Route::post('/pass/resend-link', [TicketController::class, 'resendPassLink'])->name('pass.resend_link')->middleware('throttle:5,1');
 
+Route::get('/gift-card/view/{gift_card_id}/{secret}', [GiftCardController::class, 'view'])->name('gift_card.view')->middleware('throttle:100,1');
+
 Route::get('/feedback/{event_id}/{secret}', [FeedbackController::class, 'show'])->name('feedback.show')->middleware('throttle:60,1');
 Route::post('/feedback/{event_id}/{secret}', [FeedbackController::class, 'store'])->name('feedback.store')->middleware('throttle:10,1');
 
@@ -216,6 +226,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/sales/cancel-feedback', [TicketController::class, 'cancelFeedback'])->name('sales.cancel_feedback');
     Route::post('/sales/action/{sale_id}', [TicketController::class, 'handleAction'])->name('sales.action');
     Route::post('/sales/resend-email/{sale_id}', [TicketController::class, 'resendEmail'])->name('sales.resend_email');
+    Route::post('/gift-cards/action/{gift_card_id}', [GiftCardController::class, 'handleAction'])->name('gift_card.action');
+    Route::post('/gift-cards/resend-email/{gift_card_id}', [GiftCardController::class, 'resendEmail'])->name('gift_card.resend_email');
     Route::post('/sales/resend-feedback/{sale_id}', [TicketController::class, 'resendFeedbackEmail'])->name('sales.resend_feedback')->middleware('throttle:30,1');
     Route::get('/waitlist', [WaitlistController::class, 'index'])->name('waitlist.index');
     Route::post('/waitlist/remove/{id}', [WaitlistController::class, 'remove'])->name('waitlist.remove');
@@ -781,6 +793,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
         Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
+        Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
         Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
@@ -983,6 +996,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/sharing', [MarketingController::class, 'docsSharing'])->name('marketing.docs.sharing');
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
             Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
+            Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
             Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
@@ -1169,6 +1183,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/sharing', fn () => redirect('https://'._base_domain().'/docs/sharing', 301));
             Route::get('/docs/tickets', fn () => redirect('https://'._base_domain().'/docs/tickets', 301));
             Route::get('/docs/subscriptions', fn () => redirect('https://'._base_domain().'/docs/subscriptions', 301));
+            Route::get('/docs/gift-cards', fn () => redirect('https://'._base_domain().'/docs/gift-cards', 301));
             Route::get('/docs/event-graphics', fn () => redirect('https://'._base_domain().'/docs/event-graphics', 301));
             Route::get('/docs/newsletters', fn () => redirect('https://'._base_domain().'/docs/newsletters', 301));
             Route::get('/docs/analytics', fn () => redirect('https://'._base_domain().'/docs/analytics', 301));
@@ -1307,6 +1322,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/sharing', fn () => redirect()->route('home'))->name('marketing.docs.sharing');
     Route::get('/docs/tickets', fn () => redirect()->route('home'))->name('marketing.docs.tickets');
     Route::get('/docs/subscriptions', fn () => redirect()->route('home'))->name('marketing.docs.subscriptions');
+    Route::get('/docs/gift-cards', fn () => redirect()->route('home'))->name('marketing.docs.gift_cards');
     Route::get('/docs/event-graphics', fn () => redirect()->route('home'))->name('marketing.docs.event_graphics');
     Route::get('/docs/newsletters', fn () => redirect()->route('home'))->name('marketing.docs.newsletters');
     Route::get('/docs/analytics', fn () => redirect()->route('home'))->name('marketing.docs.analytics');
@@ -1383,6 +1399,13 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/checkout/cancel/{sale_id}', [TicketController::class, 'cancel'])->name('checkout.cancel');
     Route::get('/{subdomain}/payment/success/{sale_id}', [TicketController::class, 'paymentUrlSuccess'])->name('payment_url.success');
     Route::get('/{subdomain}/payment/cancel/{sale_id}', [TicketController::class, 'paymentUrlCancel'])->name('payment_url.cancel');
+    Route::get('/{subdomain}/gift-cards', [GiftCardController::class, 'showPurchase'])->name('gift_card.purchase');
+    Route::post('/{subdomain}/gift-cards', [GiftCardController::class, 'purchase'])->name('gift_card.purchase.store')->middleware('throttle:10,1');
+    Route::get('/{subdomain}/gift-cards/success/{gift_card_id}', [GiftCardController::class, 'success'])->name('gift_card.success')->middleware('throttle:100,1');
+    Route::get('/{subdomain}/gift-cards/cancel/{gift_card_id}', [GiftCardController::class, 'cancel'])->name('gift_card.cancel')->middleware('throttle:100,1');
+    Route::get('/{subdomain}/gift-cards/payment/success/{gift_card_id}', [GiftCardController::class, 'paymentUrlSuccess'])->name('gift_card.payment_url.success')->middleware('throttle:100,1');
+    Route::get('/{subdomain}/gift-cards/payment/cancel/{gift_card_id}', [GiftCardController::class, 'paymentUrlCancel'])->name('gift_card.payment_url.cancel')->middleware('throttle:100,1');
+    Route::post('/{subdomain}/gift-card/validate', [GiftCardController::class, 'validateCode'])->name('gift_card.validate')->middleware('throttle:20,1');
     Route::get('/{subdomain}', [RoleController::class, 'viewGuest'])->name('role.view_guest');
 
     // iCal download for Apple Calendar

@@ -98,6 +98,7 @@
                                     @php
                                         $rowAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
                                         $rowDiscount = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                                        $rowGiftCard = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
                                     @endphp
                                     @if ($sale->isRsvp())
                                     <span class="font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</span>
@@ -109,6 +110,12 @@
                                         <span class="ms-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                                             {{ $sale->promoCode->code }}
                                             <span class="ms-1 text-green-600 dark:text-green-400">-{{ number_format($rowDiscount, 2, '.', ',') }}</span>
+                                        </span>
+                                    @endif
+                                    @if ($rowGiftCard > 0)
+                                        <span class="ms-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                                            {{ __('messages.gift_card') }}
+                                            <span class="ms-1 text-green-600 dark:text-green-400">-{{ number_format($rowGiftCard, 2, '.', ',') }}</span>
                                         </span>
                                     @endif
                                 </td>
@@ -450,6 +457,7 @@
                         @php
                             $mobileRowAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
                             $mobileRowDiscount = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                            $mobileRowGiftCard = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
                         @endphp
                         @if ($sale->isRsvp())
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100">{{ __('messages.registered') }}</div>
@@ -460,6 +468,11 @@
                         @if ($sale->promo_code_id && $sale->promoCode)
                             <span class="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                                 {{ $sale->promoCode->code }} -{{ number_format($mobileRowDiscount, 2, '.', ',') }}
+                            </span>
+                        @endif
+                        @if ($mobileRowGiftCard > 0)
+                            <span class="mt-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                                {{ __('messages.gift_card') }} -{{ number_format($mobileRowGiftCard, 2, '.', ',') }}
                             </span>
                         @endif
                     </div>

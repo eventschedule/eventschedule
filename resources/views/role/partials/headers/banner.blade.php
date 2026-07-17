@@ -134,7 +134,7 @@
                 @php
                 $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
                 @endphp
-                @if ($hasSubmitButton || config('app.hosted') || config('app.is_testing'))
+                @if ($hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
                   @if ($hasSubmitButton)
                   <a
@@ -147,6 +147,20 @@
                       class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
+                    </button>
+                  </a>
+                  @endif
+                  @if ($role->canSellGiftCards())
+                  <a
+                    href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
+                    class="inline-flex items-center justify-center"
+                  >
+                    <button
+                      type="button"
+                      style="border-color: {{ $accentColor }}; background-color: transparent; color: {{ $accentColor }}"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
+                      {{ __('messages.gift_cards') }}
                     </button>
                   </a>
                   @endif
@@ -294,7 +308,7 @@
                 </div>
 
                 {{-- Action buttons --}}
-                @if ($hasSubmitButton || config('app.hosted') || config('app.is_testing'))
+                @if ($hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center flex-shrink-0">
                   @if ($hasSubmitButton)
                   <a
@@ -307,6 +321,20 @@
                       class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
+                    </button>
+                  </a>
+                  @endif
+                  @if ($role->canSellGiftCards())
+                  <a
+                    href="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
+                    class="inline-flex items-center justify-center flex-shrink-0"
+                  >
+                    <button
+                      type="button"
+                      style="border-color: {{ $accentColor }}; background-color: transparent; color: {{ $accentColor }}"
+                      class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
+                      {{ __('messages.gift_cards') }}
                     </button>
                   </a>
                   @endif

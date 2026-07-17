@@ -3,10 +3,14 @@
 namespace App\Services;
 
 use App\Jobs\SendQueuedEmail;
+use App\Mail\GiftCardReceipt;
+use App\Mail\GiftCardRecipient;
+use App\Mail\GiftCardSaleNotification;
 use App\Mail\NewSaleNotification;
 use App\Mail\PassBookingConfirmation;
 use App\Mail\TicketPurchase;
 use App\Models\Event;
+use App\Models\GiftCard;
 use App\Models\Role;
 use App\Models\Sale;
 use Illuminate\Support\Facades\Config;
@@ -135,6 +139,81 @@ class EmailService
             ]);
 
             return self::ERROR_SEND_FAILED;
+        }
+    }
+
+    /**
+     * Send gift card emails after activation: the card to the recipient, a receipt
+     * to the purchaser, and a sale notification to opted-in editors. Only fires for
+     * active cards. Call outside DB transactions so a rollback does not leave queued
+     * emails behind.
+     */
+    public function sendGiftCardEmails(GiftCard $giftCard, bool $recipientOnly = false): void
+    {
+        if ($giftCard->status !== 'active') {
+            Log::warning('Skipping gift card emails: card not active', [
+                'gift_card_id' => $giftCard->id,
+                'status' => $giftCard->status,
+            ]);
+
+            return;
+        }
+
+        $role = $giftCard->role;
+
+        if (is_demo_role($role)) {
+            return;
+        }
+
+        // Check the mail transport (mirrors sendTicketEmail)
+        if (config('app.hosted')) {
+            if (! $role || ! $role->hasEmailSettings()) {
+                return;
+            }
+        } else {
+            $mailer = config('mail.default');
+            if (in_array($mailer, ['log', 'array'])) {
+                return;
+            }
+        }
+
+        try {
+            if (! $this->isTestEmail($giftCard->recipient_email)) {
+                SendQueuedEmail::dispatch(
+                    new GiftCardRecipient($giftCard, $role),
+                    $giftCard->recipient_email,
+                    $role->id,
+                    app()->getLocale()
+                );
+            }
+
+            if ($recipientOnly) {
+                return;
+            }
+
+            // Skip the separate receipt when the buyer sent the card to themselves
+            if (strcasecmp($giftCard->purchaser_email, $giftCard->recipient_email) !== 0
+                && ! $this->isTestEmail($giftCard->purchaser_email)) {
+                SendQueuedEmail::dispatch(
+                    new GiftCardReceipt($giftCard, $role),
+                    $giftCard->purchaser_email,
+                    $role->id,
+                    app()->getLocale()
+                );
+            }
+
+            foreach ($role->getEditorsWantingNotification('new_sale') as $editor) {
+                SendQueuedEmail::dispatch(
+                    new GiftCardSaleNotification($giftCard, $role, $editor),
+                    $editor->email,
+                    $role->id,
+                    $editor->language_code ?? app()->getLocale()
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send gift card emails: '.$e->getMessage(), [
+                'gift_card_id' => $giftCard->id,
+            ]);
         }
     }
 

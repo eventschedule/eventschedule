@@ -9,6 +9,7 @@ use App\Mail\FeedbackRequest;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\Event;
 use App\Models\EventFeedback;
+use App\Models\GiftCard;
 use App\Models\PromoCode;
 use App\Models\Role;
 use App\Models\Sale;
@@ -186,8 +187,57 @@ class TicketController extends Controller
             $subscriptions = $this->getSubscriptionsData();
             $subscriptionsCount = $subscriptions->count();
 
-            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount'));
+            $giftCards = $this->getGiftCardsData();
+            $giftCardsCount = $giftCards->count();
+
+            return view('ticket.sales', compact('sales', 'count', 'waitlistCount', 'waitlistEntries', 'hasPro', 'groupCounts', 'sortBy', 'sortDir', 'subscriptions', 'subscriptionsCount', 'giftCards', 'giftCardsCount'));
         }
+    }
+
+    /**
+     * Build the rows for the Gift cards tab: every card sold on schedules the
+     * user owns, its balance, and where it has been redeemed.
+     */
+    private function getGiftCardsData()
+    {
+        $user = auth()->user();
+
+        return GiftCard::whereHas('role', fn ($q) => $q->where('user_id', $user->id))
+            ->with(['role:id,name,subdomain', 'sales' => function ($q) {
+                $q->where('is_deleted', false)->whereNotNull('gift_card_amount')->with('event:id,name');
+            }])
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($giftCard) {
+                return [
+                    'id' => UrlUtils::encodeId($giftCard->id),
+                    'code' => $giftCard->formattedCode(),
+                    'schedule' => $giftCard->role->name,
+                    'purchaser_name' => $giftCard->purchaser_name,
+                    'purchaser_email' => $giftCard->purchaser_email,
+                    'recipient_name' => $giftCard->recipient_name,
+                    'recipient_email' => $giftCard->recipient_email,
+                    'message' => $giftCard->message,
+                    'amount' => $giftCard->amount,
+                    'remaining_amount' => $giftCard->remaining_amount,
+                    'currency_code' => $giftCard->currency_code,
+                    'status' => $giftCard->displayStatus(),
+                    'payment_method' => $giftCard->payment_method,
+                    'expires_at' => $giftCard->expires_at ? $giftCard->expires_at->format('M j, Y') : null,
+                    'created_at' => $giftCard->created_at->format('M j, Y'),
+                    'view_url' => $giftCard->getViewUrl(),
+                    'can_mark_paid' => in_array($giftCard->status, ['unpaid', 'amount_mismatch']),
+                    'can_cancel' => in_array($giftCard->status, ['unpaid', 'active', 'amount_mismatch']),
+                    'can_refund' => $giftCard->status === 'active',
+                    'can_resend' => $giftCard->status === 'active',
+                    'redemptions' => $giftCard->sales->sortByDesc('id')->values()->map(fn ($sale) => [
+                        'event' => $sale->event?->name ?? '-',
+                        'date' => $sale->created_at->format('M j, Y'),
+                        'amount' => (float) $sale->gift_card_amount,
+                        'status' => $sale->status,
+                    ]),
+                ];
+            });
     }
 
     /**
@@ -725,7 +775,7 @@ class TicketController extends Controller
             fwrite($handle, "\xEF\xBB\xBF");
 
             // Header row
-            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires'];
+            $headers = ['Name', 'Email', 'Phone', 'Event', 'Event Date', 'Tickets', 'Add-ons', 'Quantity', 'Amount', 'Currency', 'Promo Code', 'Discount', 'Gift Card', 'Gift Card Amount', 'Transaction Reference', 'Payment Method', 'Status', 'Date', 'Group ID', 'Check-in Status', 'Check-in Time', 'Pass Type', 'Pass Visits Used', 'Pass Expires'];
             $headers = array_merge($headers, $customFieldNames);
             fputcsv($handle, $headers);
 
@@ -756,6 +806,8 @@ class TicketController extends Controller
                     $sale->event->ticket_currency_code,
                     CsvUtils::sanitizeCell($sale->promoCode ? $sale->promoCode->code : ''),
                     $sale->discount_amount ? number_format($sale->discount_amount, 2, '.', '') : '',
+                    CsvUtils::sanitizeCell($sale->giftCard ? $sale->giftCard->formattedCode() : ''),
+                    $sale->gift_card_amount ? number_format($sale->gift_card_amount, 2, '.', '') : '',
                     CsvUtils::sanitizeCell($sale->transaction_reference),
                     CsvUtils::sanitizeCell($sale->payment_method),
                     $sale->status,
@@ -1273,6 +1325,43 @@ class TicketController extends Controller
                         }
                     }
 
+                    // Apply a gift card if provided (deducted after volume + promo). Unlike promo
+                    // codes, an unusable code aborts the checkout - a gift card is a payment
+                    // instrument, and silently charging full price would surprise the buyer.
+                    $giftCardId = null;
+                    $giftCardApplied = 0.0;
+                    if ($request->gift_card_code) {
+                        $giftCard = GiftCard::whereIn('role_id', $event->roles()->pluck('roles.id'))
+                            ->where('code', GiftCard::normalizeCode($request->gift_card_code))
+                            ->lockForUpdate()
+                            ->first();
+
+                        // Cards are sold through the schedule owner's payment account but redemption
+                        // reduces the event owner's payout, so both must be the same user.
+                        if (! $giftCard || $event->user_id !== $giftCard->role->user_id
+                            || ! $giftCard->isRedeemable($event->ticket_currency_code)) {
+                            throw new \App\Exceptions\BusinessException(__('messages.gift_card_invalid'));
+                        }
+
+                        $orderTotal = max(0, $subtotalAfterVolume - $discountTotal);
+                        $giftCardApplied = min((float) $giftCard->remaining_amount, $orderTotal);
+
+                        // Stripe refuses charges below ~50 smallest currency units; leave either
+                        // nothing to pay or at least the minimum (the sliver stays on the card).
+                        if ($event->payment_method === 'stripe') {
+                            $minCharge = 50 / MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code);
+                            $remainder = $orderTotal - $giftCardApplied;
+                            if ($remainder > 0 && $remainder < $minCharge) {
+                                $giftCardApplied = max(0, $orderTotal - $minCharge);
+                            }
+                        }
+
+                        if ($giftCardApplied > 0) {
+                            $giftCard->decrement('remaining_amount', $giftCardApplied);
+                            $giftCardId = $giftCard->id;
+                        }
+                    }
+
                     // Per-seat allocation for individual tickets, group total for standard flow
                     if ($isIndividualTickets) {
                         $seatCount = count($ticketAssignments);
@@ -1294,13 +1383,32 @@ class TicketController extends Controller
                             $seatPromoShares[$seatCount - 1] = round($discountTotal - $promoAccum, 2);
                         }
 
-                        // Primary holds seat[0] + all add-ons
+                        // Gift card allocation: greedy waterfall over per-seat nets (primary first).
+                        // Proportional shares could push a seat negative when a ticket-restricted
+                        // promo skews the nets; greedy sums exactly with no rounding residue.
                         $primaryNet = $seatPrices[0] - $seatVolumeShares[0] - $seatPromoShares[0] + $addonTotal;
-                        $sale->payment_amount = max(0, $primaryNet);
+                        $seatGiftShares = array_fill(0, $seatCount, 0.0);
+                        if ($giftCardApplied > 0) {
+                            $remainingGift = $giftCardApplied;
+                            $seatGiftShares[0] = round(min(max(0, $primaryNet), $remainingGift), 3);
+                            $remainingGift = round($remainingGift - $seatGiftShares[0], 3);
+                            for ($i = 1; $i < $seatCount && $remainingGift > 0; $i++) {
+                                $net = max(0, $seatPrices[$i] - $seatVolumeShares[$i] - $seatPromoShares[$i]);
+                                $seatGiftShares[$i] = round(min($net, $remainingGift), 3);
+                                $remainingGift = round($remainingGift - $seatGiftShares[$i], 3);
+                            }
+                        }
+
+                        // Primary holds seat[0] + all add-ons
+                        $sale->payment_amount = max(0, $primaryNet - $seatGiftShares[0]);
                         $sale->volume_discount_amount = $seatVolumeShares[0] > 0 ? $seatVolumeShares[0] : null;
                         $sale->discount_amount = $seatPromoShares[0] > 0 ? $seatPromoShares[0] : null;
                         if ($promoCodeId) {
                             $sale->promo_code_id = $promoCodeId;
+                        }
+                        if ($giftCardId && $seatGiftShares[0] > 0) {
+                            $sale->gift_card_id = $giftCardId;
+                            $sale->gift_card_amount = $seatGiftShares[0];
                         }
                     } else {
                         $sale->volume_discount_amount = $volumeTotal > 0 ? $volumeTotal : null;
@@ -1308,7 +1416,11 @@ class TicketController extends Controller
                             $sale->promo_code_id = $promoCodeId;
                             $sale->discount_amount = $discountTotal;
                         }
-                        $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal);
+                        if ($giftCardId) {
+                            $sale->gift_card_id = $giftCardId;
+                            $sale->gift_card_amount = $giftCardApplied;
+                        }
+                        $sale->payment_amount = max(0, $subtotalAfterVolume - $discountTotal - $giftCardApplied);
                     }
 
                     // Create guest sales for individual tickets
@@ -1325,7 +1437,7 @@ class TicketController extends Controller
                             $guestSale->user_id = null;
                             $guestSale->secret = strtolower(Str::random(32));
                             $guestSale->payment_method = $sale->payment_method;
-                            $guestSale->payment_amount = max(0, $seatPrices[$g] - $seatVolumeShares[$g] - $seatPromoShares[$g]);
+                            $guestSale->payment_amount = max(0, $seatPrices[$g] - $seatVolumeShares[$g] - $seatPromoShares[$g] - $seatGiftShares[$g]);
                             $guestSale->status = $sale->status ?? 'unpaid';
                             $guestSale->group_id = $sale->id;
                             if ($promoCodeId) {
@@ -1336,6 +1448,10 @@ class TicketController extends Controller
                             }
                             if ($seatVolumeShares[$g] > 0) {
                                 $guestSale->volume_discount_amount = $seatVolumeShares[$g];
+                            }
+                            if ($giftCardId && $seatGiftShares[$g] > 0) {
+                                $guestSale->gift_card_id = $giftCardId;
+                                $guestSale->gift_card_amount = $seatGiftShares[$g];
                             }
 
                             // Copy event-level custom values from primary sale
@@ -1397,7 +1513,10 @@ class TicketController extends Controller
             return back()->withInput()->with('error', __('messages.error'));
         }
 
-        $total = $sale->payment_amount;
+        // The free-order check below must consider the whole group: a gift card can zero out the
+        // primary seat while guest seats still owe, and marking the primary paid would cascade
+        // paid status to the unpaid guests.
+        $total = ($sale->group_id && $sale->isPrimarySale()) ? $sale->groupTotalPayment() : $sale->payment_amount;
 
         AuditService::log(AuditService::SALE_CHECKOUT, $sale->user_id, 'Sale', $sale->id, null, null, 'event_id:'.$event->id);
 
@@ -1721,10 +1840,153 @@ class TicketController extends Controller
         return redirect($ticketViewUrl);
     }
 
+    /**
+     * Build the Stripe Checkout line items for an order. Applies the promo discount ratio to
+     * eligible ticket lines, scales every line by the gift-card tender ratio (a gift card pays
+     * for the whole order, add-ons included), then reconciles the rounding so the line-item sum
+     * equals $expectedTotal (in the currency's smallest unit) exactly - absorbing the cents-level
+     * diff into the largest line so no unit_amount ever goes negative (Stripe rejects negatives).
+     * Extracted from stripeCheckout() so the money math is unit-testable in isolation.
+     *
+     * @param  iterable  $stripeSaleTickets  SaleTickets (group-aggregated for grouped primaries),
+     *                                       each with its ticket relation and event set.
+     * @return array<int, array> Stripe line_items
+     */
+    private function buildStripeLineItems($stripeSaleTickets, $event, $promoCode, float $discount, float $giftTotal, float $expectedTotal): array
+    {
+        // Calculate discount ratio for eligible tickets (exclude add-ons); base is post-volume line totals
+        $eligibleSubtotal = 0;
+        if ($promoCode && $discount > 0) {
+            foreach ($stripeSaleTickets as $saleTicket) {
+                if ($saleTicket->ticket->is_addon) {
+                    continue;
+                }
+                if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                    $eligibleSubtotal += $saleTicket->ticket->lineSubtotalAfterVolumeDiscount((int) $saleTicket->quantity);
+                }
+            }
+        }
+        $discountRatio = ($eligibleSubtotal > 0 && $discount > 0)
+            ? ($eligibleSubtotal - $discount) / $eligibleSubtotal
+            : 1;
+
+        // A gift card is tender for the whole order (add-ons included), so scale every
+        // line proportionally. Absorbing the deduction into one line could push its
+        // unit_amount negative; the ratio keeps all lines valid, and the rounding
+        // reconciliation below pins the session total to payment_amount exactly.
+        $preGiftTotal = 0.0;
+        if ($giftTotal > 0) {
+            foreach ($stripeSaleTickets as $saleTicket) {
+                $qty = (int) $saleTicket->quantity;
+                if ($saleTicket->ticket->is_addon) {
+                    $preGiftTotal += $saleTicket->ticket->price * $qty;
+                } else {
+                    $lineAmount = $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
+                    if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                        $lineAmount *= $discountRatio;
+                    }
+                    $preGiftTotal += $lineAmount;
+                }
+            }
+        }
+        $giftRatio = ($giftTotal > 0 && $preGiftTotal > 0)
+            ? max(0, ($preGiftTotal - $giftTotal) / $preGiftTotal)
+            : 1;
+
+        $lineItems = [];
+        $totalCents = 0;
+
+        foreach ($stripeSaleTickets as $index => $saleTicket) {
+            $qty = (int) $saleTicket->quantity;
+            if ($saleTicket->ticket->is_addon) {
+                $unitPrice = $saleTicket->ticket->price;
+            } else {
+                $linePostVolume = $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
+                $unitPrice = $qty > 0 ? $linePostVolume / $qty : 0;
+                if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
+                    $unitPrice = $unitPrice * $discountRatio;
+                }
+            }
+            if ($giftRatio < 1) {
+                $unitPrice = $unitPrice * $giftRatio;
+            }
+            $unitAmountCents = (int) round($unitPrice * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
+            $totalCents += $unitAmountCents * $saleTicket->quantity;
+
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => $event->ticket_currency_code,
+                    'product_data' => [
+                        'name' => $saleTicket->ticket->type ?: ($saleTicket->ticket->is_addon ? __('messages.add_on') : __('messages.tickets')),
+                        ...$saleTicket->ticket->description ? ['description' => $saleTicket->ticket->description] : [],
+                    ],
+                    'unit_amount' => $unitAmountCents,
+                ],
+                'quantity' => $saleTicket->quantity,
+            ];
+        }
+
+        // Fix rounding difference to match payment_amount exactly (group total when primary, else own per-seat amount).
+        // This runs whenever the summed line items drift from the expected total, whatever the cause:
+        // gift-card / promo scaling OR plain per-unit rounding on a multi-quantity line (e.g. a fixed
+        // volume discount that yields a fractional-cent unit price). The reconciliation considers every line.
+        $expectedCents = (int) round($expectedTotal * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
+        if ($totalCents !== $expectedCents) {
+            // Spread the (cents-level) rounding diff ONE cent at a time across individual units so
+            // the line-item sum equals $expectedCents exactly with no unit_amount going below zero.
+            // A single-line adjustment cannot absorb a diff larger than that line's unit_amount
+            // (e.g. many cheap units heavily gift-scaled), so distribute across units instead.
+            // Adjusted units are split off into their own quantity-1 line items. Taking from the
+            // priciest units first guarantees a -1 step never drives a unit negative; the diff is
+            // always absorbable because it comes from per-unit rounding on multi-quantity lines,
+            // so |diff| <= the count of >=1-cent units available to adjust.
+            $step = ($expectedCents - $totalCents) > 0 ? 1 : -1;
+            $need = abs($expectedCents - $totalCents);
+
+            $order = array_keys($lineItems);
+            usort($order, fn ($a, $b) => $lineItems[$b]['price_data']['unit_amount'] <=> $lineItems[$a]['price_data']['unit_amount']);
+
+            foreach ($order as $idx) {
+                if ($need <= 0) {
+                    break;
+                }
+                $unit = $lineItems[$idx]['price_data']['unit_amount'];
+                if ($step < 0 && $unit <= 0) {
+                    continue; // cannot reduce a zero-cost unit below zero
+                }
+                $qty = $lineItems[$idx]['quantity'];
+                $take = min($need, $qty);
+                $adjustedUnit = $unit + $step; // magnitude 1; stays >= 0 by the guard above
+
+                if ($take === $qty) {
+                    $lineItems[$idx]['price_data']['unit_amount'] = $adjustedUnit;
+                } else {
+                    $lineItems[$idx]['quantity'] = $qty - $take;
+                    $lineItems[] = [
+                        'price_data' => [
+                            'currency' => $lineItems[$idx]['price_data']['currency'],
+                            'product_data' => $lineItems[$idx]['price_data']['product_data'],
+                            'unit_amount' => $adjustedUnit,
+                        ],
+                        'quantity' => $take,
+                    ];
+                }
+                $need -= $take;
+            }
+        }
+
+        return $lineItems;
+    }
+
     private function stripeCheckout($subdomain, $sale, $event, $isEmbed = false)
     {
         $promoCode = $sale->promo_code_id ? $sale->promoCode : null;
-        $discount = $sale->discount_amount ?? 0;
+        // For a grouped (individual-tickets) primary the line items are aggregated across the
+        // whole group, so the discount must be the group total too - using the primary's own
+        // per-seat share here skews discountRatio and, combined with gift-card line scaling,
+        // can drive a reconciled unit_amount negative (Stripe rejects it). Mirrors how
+        // $expectedTotal below uses groupTotalPayment() for grouped primaries.
+        $discount = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
 
         // For grouped sales, aggregate SaleTickets across all sales in the group
         if ($sale->group_id && $sale->isPrimarySale()) {
@@ -1760,79 +2022,10 @@ class TicketController extends Controller
             }
         }
 
-        // Calculate discount ratio for eligible tickets (exclude add-ons); base is post-volume line totals
-        $eligibleSubtotal = 0;
-        if ($promoCode && $discount > 0) {
-            foreach ($stripeSaleTickets as $saleTicket) {
-                if ($saleTicket->ticket->is_addon) {
-                    continue;
-                }
-                if ($promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                    $eligibleSubtotal += $saleTicket->ticket->lineSubtotalAfterVolumeDiscount((int) $saleTicket->quantity);
-                }
-            }
-        }
-        $discountRatio = ($eligibleSubtotal > 0 && $discount > 0)
-            ? ($eligibleSubtotal - $discount) / $eligibleSubtotal
-            : 1;
-
-        $lineItems = [];
-        $totalCents = 0;
-        $lastEligibleIndex = null;
-
-        foreach ($stripeSaleTickets as $index => $saleTicket) {
-            $qty = (int) $saleTicket->quantity;
-            if ($saleTicket->ticket->is_addon) {
-                $unitPrice = $saleTicket->ticket->price;
-            } else {
-                $linePostVolume = $saleTicket->ticket->lineSubtotalAfterVolumeDiscount($qty);
-                $unitPrice = $qty > 0 ? $linePostVolume / $qty : 0;
-                if ($promoCode && $discount > 0 && $promoCode->appliesToTicket($saleTicket->ticket_id)) {
-                    $unitPrice = $unitPrice * $discountRatio;
-                    $lastEligibleIndex = count($lineItems);
-                }
-            }
-            $unitAmountCents = (int) round($unitPrice * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
-            $totalCents += $unitAmountCents * $saleTicket->quantity;
-
-            $lineItems[] = [
-                'price_data' => [
-                    'currency' => $event->ticket_currency_code,
-                    'product_data' => [
-                        'name' => $saleTicket->ticket->type ?: ($saleTicket->ticket->is_addon ? __('messages.add_on') : __('messages.tickets')),
-                        ...$saleTicket->ticket->description ? ['description' => $saleTicket->ticket->description] : [],
-                    ],
-                    'unit_amount' => $unitAmountCents,
-                ],
-                'quantity' => $saleTicket->quantity,
-            ];
-        }
-
-        // Fix rounding difference to match payment_amount exactly (group total when primary, else own per-seat amount)
+        $giftTotal = $sale->isPrimarySale() ? $sale->groupTotalGiftCard() : (float) ($sale->gift_card_amount ?? 0);
         $expectedTotal = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-        $expectedCents = (int) round($expectedTotal * MoneyUtils::getSmallestUnitMultiplier($event->ticket_currency_code));
-        if ($totalCents !== $expectedCents && $lastEligibleIndex !== null) {
-            $diff = $expectedCents - $totalCents;
-            $lastItem = &$lineItems[$lastEligibleIndex];
-            if ($lastItem['quantity'] > 1) {
-                // Split: (quantity-1) at original price + 1 at adjusted price
-                $originalUnit = $lastItem['price_data']['unit_amount'];
-                $lastItem['quantity'] -= 1;
-                $totalCents -= $originalUnit; // remove one unit from total
-                $adjustedUnit = $originalUnit + $diff;
-                $lineItems[] = [
-                    'price_data' => [
-                        'currency' => $lastItem['price_data']['currency'],
-                        'product_data' => $lastItem['price_data']['product_data'],
-                        'unit_amount' => $adjustedUnit,
-                    ],
-                    'quantity' => 1,
-                ];
-            } else {
-                $lastItem['price_data']['unit_amount'] += $diff;
-            }
-            unset($lastItem);
-        }
+
+        $lineItems = $this->buildStripeLineItems($stripeSaleTickets, $event, $promoCode, (float) $discount, $giftTotal, $expectedTotal);
 
         $data = [
             'sale_id' => UrlUtils::encodeId($sale->id),
@@ -2000,6 +2193,21 @@ class TicketController extends Controller
                     'notes' => $sale->promoCode->code,
                     'quantity' => 1,
                     'cost' => -$promoDiscount,
+                ];
+            }
+
+            $giftTotal = $isGroupedPrimary
+                ? $sale->groupTotalGiftCard()
+                : (float) ($sale->gift_card_amount ?? 0);
+            if ($giftTotal > 0) {
+                // The primary can carry no share while a guest does; resolve the card from any group row
+                $giftCardRef = $sale->giftCard
+                    ?: ($isGroupedPrimary ? Sale::where('group_id', $sale->group_id)->whereNotNull('gift_card_id')->first()?->giftCard : null);
+                $lineItems[] = [
+                    'product_key' => __('messages.gift_card'),
+                    'notes' => $giftCardRef?->formattedCode() ?: __('messages.gift_card'),
+                    'quantity' => 1,
+                    'cost' => -$giftTotal,
                 ];
             }
 
@@ -2571,112 +2779,155 @@ class TicketController extends Controller
             }
         }
 
+        // Each status-changing action re-fetches the sale under lockForUpdate and re-asserts its
+        // precondition INSIDE the transaction. Without this, a concurrent transition (a webhook
+        // marking the sale paid, or the ReleaseTickets cron expiring it) between this request's
+        // read and its save would let a stale-status overwrite fire the Sale::booted restore hook
+        // a second time - double-crediting a redeemed gift card (and misreporting analytics).
+        // $previousStatus captures the locked pre-transition status for the audit log.
         $previousStatus = $sale->status;
         $actionPerformed = false;
 
         switch ($request->action) {
             case 'mark_paid':
-                if ($sale->status === 'unpaid') {
-                    DB::transaction(function () use ($sale) {
-                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                $prev = DB::transaction(function () use ($sale) {
+                    $locked = Sale::lockForUpdate()->find($sale->id);
+                    if (! $locked || $locked->status !== 'unpaid') {
+                        return null;
+                    }
+                    $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
+                    $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
 
-                        $sale->status = 'paid';
-                        $sale->transaction_reference = __('messages.manual_payment');
-                        $sale->save();
+                    $locked->status = 'paid';
+                    $locked->transaction_reference = __('messages.manual_payment');
+                    $locked->save();
 
-                        AnalyticsEventsDaily::incrementSale($sale->event_id, $analyticsAmount);
-                        if ($promoTotal > 0) {
-                            AnalyticsEventsDaily::incrementPromoSale($sale->event_id, $promoTotal);
-                        }
-                    });
+                    AnalyticsEventsDaily::incrementSale($locked->event_id, $analyticsAmount);
+                    if ($promoTotal > 0) {
+                        AnalyticsEventsDaily::incrementPromoSale($locked->event_id, $promoTotal);
+                    }
+
+                    return 'unpaid';
+                });
+                if ($prev !== null) {
+                    $previousStatus = $prev;
                     $actionPerformed = true;
                 }
                 break;
 
             case 'refund':
-                if ($sale->status === 'paid') {
-                    DB::transaction(function () use ($sale) {
-                        $analyticsDate = $sale->created_at->toDateString();
-                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                $prev = DB::transaction(function () use ($sale) {
+                    $locked = Sale::lockForUpdate()->find($sale->id);
+                    if (! $locked || $locked->status !== 'paid') {
+                        return null;
+                    }
+                    $analyticsDate = $locked->created_at->toDateString();
+                    $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
+                    $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
 
-                        $sale->status = 'refunded';
-                        $sale->save();
+                    $locked->status = 'refunded';
+                    $locked->save();
 
-                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                        if ($sale->payment_method !== 'rsvp') {
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $analyticsAmount, $analyticsDate);
+                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                    if ($locked->payment_method !== 'rsvp') {
+                        AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
 
-                            if ($promoTotal > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $promoTotal, $analyticsDate);
-                            }
+                        if ($promoTotal > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
                         }
-                    });
+                    }
+
+                    return 'paid';
+                });
+                if ($prev !== null) {
+                    $previousStatus = $prev;
                     $actionPerformed = true;
                 }
                 break;
 
             case 'cancel':
-                if (in_array($sale->status, ['unpaid', 'paid'])) {
-                    $wasPaid = $sale->status === 'paid';
+                $prev = DB::transaction(function () use ($sale) {
+                    $locked = Sale::lockForUpdate()->find($sale->id);
+                    if (! $locked || ! in_array($locked->status, ['unpaid', 'paid'])) {
+                        return null;
+                    }
+                    $wasPaid = $locked->status === 'paid';
+                    $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
+                    $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
+                    $pre = $locked->status;
 
-                    DB::transaction(function () use ($sale, $wasPaid) {
-                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                    $locked->status = 'cancelled';
+                    $locked->save();
 
-                        $sale->status = 'cancelled';
-                        $sale->save();
+                    // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
+                    if ($wasPaid && $locked->payment_method !== 'rsvp') {
+                        $analyticsDate = $locked->created_at->toDateString();
+                        AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
 
-                        // Skip analytics decrement for RSVP sales - handled by Sale::booted hook
-                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                            $analyticsDate = $sale->created_at->toDateString();
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $analyticsAmount, $analyticsDate);
-
-                            if ($promoTotal > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $promoTotal, $analyticsDate);
-                            }
+                        if ($promoTotal > 0) {
+                            AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
                         }
-                    });
+                    }
+
+                    return $pre;
+                });
+                if ($prev !== null) {
+                    $previousStatus = $prev;
                     $actionPerformed = true;
                 }
                 break;
 
             case 'delete':
-                DB::transaction(function () use ($sale) {
-                    // Cancel first to release ticket inventory (triggers Sale::booted hook)
-                    if (in_array($sale->status, ['unpaid', 'paid'])) {
-                        $wasPaid = $sale->status === 'paid';
-                        $analyticsAmount = $sale->isPrimarySale() ? $sale->groupTotalPayment() : (float) $sale->payment_amount;
-                        $promoTotal = $sale->isPrimarySale() ? $sale->groupTotalDiscount() : (float) ($sale->discount_amount ?? 0);
+                $prev = DB::transaction(function () use ($sale) {
+                    $locked = Sale::lockForUpdate()->find($sale->id);
+                    if (! $locked) {
+                        return null;
+                    }
+                    $pre = $locked->status;
 
-                        $sale->status = 'cancelled';
-                        $sale->save();
+                    // Cancel first to release ticket inventory (triggers Sale::booted hook)
+                    if (in_array($locked->status, ['unpaid', 'paid'])) {
+                        $wasPaid = $locked->status === 'paid';
+                        $analyticsAmount = $locked->isPrimarySale() ? $locked->groupTotalPayment() : (float) $locked->payment_amount;
+                        $promoTotal = $locked->isPrimarySale() ? $locked->groupTotalDiscount() : (float) ($locked->discount_amount ?? 0);
+
+                        $locked->status = 'cancelled';
+                        $locked->save();
 
                         // Decrement analytics only for previously paid sales
                         // Skip RSVP sales - handled by Sale::booted hook
-                        if ($wasPaid && $sale->payment_method !== 'rsvp') {
-                            $analyticsDate = $sale->created_at->toDateString();
-                            AnalyticsEventsDaily::decrementSale($sale->event_id, $analyticsAmount, $analyticsDate);
+                        if ($wasPaid && $locked->payment_method !== 'rsvp') {
+                            $analyticsDate = $locked->created_at->toDateString();
+                            AnalyticsEventsDaily::decrementSale($locked->event_id, $analyticsAmount, $analyticsDate);
 
                             if ($promoTotal > 0) {
-                                AnalyticsEventsDaily::decrementPromoSale($sale->event_id, $promoTotal, $analyticsDate);
+                                AnalyticsEventsDaily::decrementPromoSale($locked->event_id, $promoTotal, $analyticsDate);
                             }
                         }
                     }
 
-                    $sale->is_deleted = true;
-                    $sale->save();
+                    $locked->is_deleted = true;
+                    $locked->save();
 
                     // Cascade is_deleted to grouped guest sales
-                    if ($sale->group_id && $sale->isPrimarySale()) {
-                        Sale::where('group_id', $sale->group_id)
-                            ->where('id', '!=', $sale->id)
+                    if ($locked->group_id && $locked->isPrimarySale()) {
+                        Sale::where('group_id', $locked->group_id)
+                            ->where('id', '!=', $locked->id)
                             ->update(['is_deleted' => true]);
                     }
+
+                    return $pre;
                 });
-                $actionPerformed = true;
+                if ($prev !== null) {
+                    $previousStatus = $prev;
+                    $actionPerformed = true;
+                }
                 break;
+        }
+
+        // Reflect the committed status change on the outer instance for the audit/webhook/email below.
+        if ($actionPerformed) {
+            $sale->refresh();
         }
 
         if ($actionPerformed) {
@@ -2742,6 +2993,12 @@ class TicketController extends Controller
         }
 
         if ($sale->payment_method !== 'rsvp' && $sale->payment_amount != 0) {
+            abort(403);
+        }
+
+        // Gift-card-paid orders are purchases, not free reservations - self-cancel
+        // would be an instant refund-to-card. Cancellation is owner-only for these.
+        if ($sale->payment_method !== 'rsvp' && $sale->groupTotalGiftCard() > 0) {
             abort(403);
         }
 

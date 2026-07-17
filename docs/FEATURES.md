@@ -76,6 +76,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Carpool matching | `CarpoolController`, `$role->isPro()` | Let attendees offer and request rides to events with driver approval, contact sharing, and reviews |
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
+| Gift cards | `GiftCardController`, `$role->giftCardsEnabled()` (`$role->isPro()`) | Sell balance-tracked gift cards buyers send to a recipient by email; redeemed toward tickets for any event on the schedule. Redemption of already-sold cards works even if selling is disabled |
 | Eventbrite import | EventbriteController, $role->isPro() | Import events from Eventbrite |
 | Bulk attendee import | `TicketController::importAttendees`, `$event->isPro()` | Import attendees in bulk from CSV or form entry (up to 5,000 rows per import) |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |

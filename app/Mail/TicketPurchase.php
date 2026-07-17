@@ -54,7 +54,8 @@ class TicketPurchase extends Mailable
             }
         }
 
-        $subjectKey = $this->sale->payment_amount == 0
+        // A gift-card-covered order is a purchase, not a free reservation
+        $subjectKey = $this->sale->payment_amount == 0 && $this->sale->groupTotalGiftCard() == 0
             ? 'messages.ticket_reservation_confirmation'
             : 'messages.ticket_purchase_confirmation';
 
@@ -76,6 +77,17 @@ class TicketPurchase extends Mailable
 
         $qrCodeData = QrCodeUtils::png($ticketUrl);
 
+        // Gift card feedback for the buyer: their deduction plus the balance left on the
+        // card at send time (the live balance stays on the card page).
+        $giftCardAmount = $this->sale->isPrimarySale()
+            ? $this->sale->groupTotalGiftCard()
+            : (float) ($this->sale->gift_card_amount ?? 0);
+        $giftCard = $this->sale->giftCard;
+        if (! $giftCard && $giftCardAmount > 0 && $this->sale->group_id) {
+            $giftCard = Sale::where('group_id', $this->sale->group_id)
+                ->whereNotNull('gift_card_id')->first()?->giftCard;
+        }
+
         return new Content(
             view: 'emails.ticket_purchase',
             text: 'emails.ticket_purchase_text',
@@ -85,6 +97,8 @@ class TicketPurchase extends Mailable
                 'role' => $this->role,
                 'ticketUrl' => $ticketUrl,
                 'qrCodeData' => $qrCodeData,
+                'giftCardAmount' => $giftCardAmount,
+                'giftCard' => $giftCard,
             ]
         );
     }

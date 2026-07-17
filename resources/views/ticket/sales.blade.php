@@ -1,6 +1,6 @@
 <x-app-admin-layout>
 
-    @if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0)
+    @if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0)
     <div class="ap-tab-container mb-6 border-b border-gray-200 dark:border-gray-700">
         <nav class="-mb-px flex gap-6">
             <button type="button" id="tab-sales"
@@ -23,6 +23,12 @@
             <button type="button" id="tab-subscriptions"
                 class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
                 {{ __('messages.subscriptions') }}@if (($subscriptionsCount ?? 0) > 0) ({{ $subscriptionsCount }})@endif
+            </button>
+            @endif
+            @if ($hasPro || ($giftCardsCount ?? 0) > 0)
+            <button type="button" id="tab-gift-cards"
+                class="sales-tab whitespace-nowrap border-b-2 pb-3 px-1 text-sm font-medium border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300">
+                {{ __('messages.gift_cards') }}@if (($giftCardsCount ?? 0) > 0) ({{ $giftCardsCount }})@endif
             </button>
             @endif
         </nav>
@@ -106,6 +112,12 @@
     </div>
     @endif
 
+    @if ($hasPro || ($giftCardsCount ?? 0) > 0)
+    <div id="gift-cards-panel" style="display: none;">
+        @include('ticket.gift_cards_table', ['giftCards' => $giftCards ?? collect()])
+    </div>
+    @endif
+
 </x-app-admin-layout>
 
 <script {!! nonce_attr() !!}>
@@ -116,7 +128,7 @@ var waitlistSortDir = 'desc';
 var feedbackSortBy = '';
 var feedbackSortDir = 'desc';
 
-@if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0)
+@if ($waitlistCount > 0 || $hasPro || ($subscriptionsCount ?? 0) > 0 || ($giftCardsCount ?? 0) > 0)
 // Tab switching
 const activeClass = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
 const inactiveClass = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -141,6 +153,10 @@ function setActiveTab(activeId) {
     if (subscriptionsPanel) {
         subscriptionsPanel.style.display = activeId === 'tab-subscriptions' ? '' : 'none';
     }
+    var giftCardsPanel = document.getElementById('gift-cards-panel');
+    if (giftCardsPanel) {
+        giftCardsPanel.style.display = activeId === 'tab-gift-cards' ? '' : 'none';
+    }
 }
 
 document.getElementById('tab-sales').addEventListener('click', function() {
@@ -150,6 +166,58 @@ document.getElementById('tab-sales').addEventListener('click', function() {
 @if ($hasPro || ($subscriptionsCount ?? 0) > 0)
 document.getElementById('tab-subscriptions').addEventListener('click', function() {
     setActiveTab('tab-subscriptions');
+});
+@endif
+
+@if ($hasPro || ($giftCardsCount ?? 0) > 0)
+document.getElementById('tab-gift-cards').addEventListener('click', function() {
+    setActiveTab('tab-gift-cards');
+});
+
+// Gift card owner actions (mark paid / cancel / refund / resend email)
+document.addEventListener('click', function(e) {
+    var actionButton = e.target.closest('[data-gift-card-action], [data-gift-card-resend]');
+    if (!actionButton) return;
+
+    var confirmMessage = actionButton.getAttribute('data-confirm-message');
+    if (confirmMessage && !window.confirm(confirmMessage)) {
+        return;
+    }
+
+    var giftCardId = actionButton.getAttribute('data-gift-card-id');
+    var isResend = actionButton.hasAttribute('data-gift-card-resend');
+    var url = isResend
+        ? '{{ route('gift_card.resend_email', ['gift_card_id' => ':id']) }}'.replace(':id', giftCardId)
+        : '{{ route('gift_card.action', ['gift_card_id' => ':id']) }}'.replace(':id', giftCardId);
+
+    actionButton.disabled = true;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify(isResend ? {} : { action: actionButton.getAttribute('data-gift-card-action') }),
+    })
+    .then(function(response) { return response.json().then(function(data) { return { ok: response.ok, data: data }; }); })
+    .then(function(result) {
+        if (!result.ok) {
+            alert(result.data.error || '{{ __('messages.error') }}');
+            actionButton.disabled = false;
+            return;
+        }
+        if (isResend) {
+            actionButton.textContent = '{{ __('messages.sent') }}';
+        } else {
+            window.location.href = '{{ route('sales', ['tab' => 'gift-cards']) }}';
+        }
+    })
+    .catch(function() {
+        alert('{{ __('messages.error') }}');
+        actionButton.disabled = false;
+    });
 });
 @endif
 
@@ -339,6 +407,8 @@ if (tab === 'feedback' && document.getElementById('tab-feedback')) {
     document.getElementById('tab-waitlist').click();
 } else if (tab === 'subscriptions' && document.getElementById('tab-subscriptions')) {
     document.getElementById('tab-subscriptions').click();
+} else if (tab === 'gift-cards' && document.getElementById('tab-gift-cards')) {
+    document.getElementById('tab-gift-cards').click();
 }
 @endif
 

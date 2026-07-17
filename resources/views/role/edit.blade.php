@@ -992,6 +992,14 @@
                                 </svg>
                                 {{ __('messages.engagement') }}
                             </a>
+                            @if ($role->exists)
+                            <a href="#section-gift-cards" class="section-nav-link" data-section="section-gift-cards">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                </svg>
+                                {{ __('messages.gift_cards') }}
+                            </a>
+                            @endif
                             @if (! config('app.hosted'))
                             <a href="#section-auto-import" class="section-nav-link" data-section="section-auto-import">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -3637,6 +3645,234 @@
                         <!-- End Tab Content: Sponsors -->
                     </div>
                 </div>
+
+                @if ($role->exists)
+                <button type="button" class="mobile-section-header" data-section="section-gift-cards">
+                    <span class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                        </svg>
+                        {{ __('messages.gift_cards') }}
+                    </span>
+                    <svg class="w-5 h-5 text-gray-400 transition-transform duration-200 accordion-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="section-gift-cards" class="section-content lg:mt-0">
+                    <div class="max-w-2xl">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                            </svg>
+                            {{ __('messages.gift_cards') }}
+                        </h2>
+
+                        @if ($role->isPro())
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ __('messages.gift_cards_settings_help') }}</p>
+
+                        @php $giftCardOwner = $role->user; @endphp
+
+                        @if (config('app.hosted') && ! $role->hasEmailSettings())
+                        <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                </svg>
+                                <div class="text-sm text-amber-800 dark:text-amber-400">
+                                    {{ __('messages.gift_cards_email_required') }}
+                                    <a href="#section-settings" class="section-jump-link underline font-medium" data-section="section-settings">{{ __('messages.email_settings') }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="mb-6">
+                            <x-toggle name="gift_cards_enabled"
+                                label="{{ __('messages.enable_gift_cards') }}"
+                                checked="{{ old('gift_cards_enabled', $role->gift_cards_enabled) }}"
+                                help="{{ __('messages.enable_gift_cards_help') }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_cards_enabled')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.gift_card_amounts')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_amounts_help') }}</p>
+                            <div id="gift-card-amounts-items" class="space-y-2">
+                                @foreach (old('gift_card_amounts', $role->gift_card_amounts ?? []) as $amount)
+                                <div class="flex items-center gap-2" data-gift-card-amount-row>
+                                    <input type="number" name="gift_card_amounts[]" value="{{ $amount }}" min="0.01" step="0.01"
+                                        class="block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <button type="button" data-remove-gift-card-amount
+                                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
+                                </div>
+                                @endforeach
+                            </div>
+                            <button type="button" id="add-gift-card-amount" class="mt-2 text-sm text-[var(--brand-blue)] hover:text-[var(--brand-blue-dark)]">
+                                + {{ __('messages.add_amount') }}
+                            </button>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_amounts')" />
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_amounts.*')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="gift_card_currency_code" :value="__('messages.currency')" />
+                            @php
+                                $giftCardCurrencies = json_decode(file_get_contents(base_path('storage/currencies.json')));
+                                $giftCardCurrencyDefault = old('gift_card_currency_code', $role->gift_card_currency_code
+                                    ?: ($role->events()->whereNotNull('ticket_currency_code')->orderByDesc('events.id')->value('ticket_currency_code') ?: 'USD'));
+                            @endphp
+                            <select id="gift_card_currency_code" name="gift_card_currency_code"
+                                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                @foreach ($giftCardCurrencies as $currency)
+                                @if ($loop->index == 2)
+                                <option disabled>──────────</option>
+                                @endif
+                                <option value="{{ $currency->value }}" {{ $giftCardCurrencyDefault == $currency->value ? 'selected' : '' }}>
+                                    {{ $currency->value }} - {{ $currency->label }}
+                                </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_currency_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_currency_code')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="gift_card_valid_days" :value="__('messages.gift_card_valid_days')" />
+                            <input type="number" id="gift_card_valid_days" name="gift_card_valid_days" min="1" max="3650"
+                                value="{{ old('gift_card_valid_days', $role->gift_card_valid_days) }}" placeholder="365"
+                                class="mt-1 block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_valid_days_help') }}</p>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_valid_days')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.payment_method')" />
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">{{ __('messages.gift_card_payment_method_help') }}</p>
+                            @php $giftCardMethod = old('gift_card_payment_method', $role->gift_card_payment_method ?: 'cash'); @endphp
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="cash" {{ $giftCardMethod === 'cash' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.cash') }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.gift_card_cash_help') }}</div>
+                                    </div>
+                                </label>
+                                @if ($giftCardOwner && $giftCardOwner->canAcceptStripePayments())
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="stripe" {{ $giftCardMethod === 'stripe' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Stripe{{ $giftCardOwner->stripe_completed_at && $giftCardOwner->stripe_company_name ? ' - '.$giftCardOwner->stripe_company_name : '' }}</div>
+                                    </div>
+                                </label>
+                                @endif
+                                @if ($giftCardOwner && $giftCardOwner->invoiceninja_api_key)
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="invoiceninja" {{ $giftCardMethod === 'invoiceninja' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">Invoice Ninja{{ $giftCardOwner->invoiceninja_company_name ? ' - '.$giftCardOwner->invoiceninja_company_name : '' }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.gift_card_invoiceninja_help') }}</div>
+                                    </div>
+                                </label>
+                                @endif
+                                @if ($giftCardOwner && $giftCardOwner->payment_url)
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                                    <input type="radio" name="gift_card_payment_method" value="payment_url" {{ $giftCardMethod === 'payment_url' ? 'checked' : '' }}
+                                        class="mt-0.5 h-4 w-4 border-gray-300" style="accent-color: var(--brand-blue)">
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ __('messages.payment_url') }} - {{ $giftCardOwner->paymentUrlHost() }}</div>
+                                    </div>
+                                </label>
+                                @endif
+                            </div>
+                            <div class="text-xs pt-1">
+                                <x-link href="{{ route('profile.edit') }}#section-payment-methods" target="_blank">
+                                    {{ __('messages.manage_payment_methods') }}
+                                </x-link>
+                            </div>
+                            <x-input-error class="mt-2" :messages="$errors->get('gift_card_payment_method')" />
+                        </div>
+
+                        @if ($role->canSellGiftCards())
+                        <div class="mb-6">
+                            <x-input-label :value="__('messages.gift_card_share_link')" />
+                            <div class="mt-1 flex items-center gap-2">
+                                <input type="text" readonly id="gift-card-purchase-url"
+                                    value="{{ route('gift_card.purchase', ['subdomain' => $role->subdomain]) }}"
+                                    class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-lg shadow-sm text-sm bg-gray-50 dark:bg-gray-800">
+                                <button type="button" id="copy-gift-card-url"
+                                    class="shrink-0 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2d2d30] transition-all duration-200">
+                                    {{ __('messages.copy') }}
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.gift_card_share_link_help') }}</p>
+                        </div>
+                        @endif
+
+                        @else
+                        <x-upgrade-prompt tier="pro" :learnMoreUrl="marketing_url('/docs/gift-cards')" :subdomain="$role->subdomain">
+                            <x-slot:icon>
+                                <svg class="h-7 w-7 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                </svg>
+                            </x-slot:icon>
+                            {{ __('messages.upgrade_gift_cards') }}
+                        </x-upgrade-prompt>
+                        @endif
+                    </div>
+                </div>
+                <script {!! nonce_attr() !!}>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var addButton = document.getElementById('add-gift-card-amount');
+                        var container = document.getElementById('gift-card-amounts-items');
+                        if (addButton && container) {
+                            addButton.addEventListener('click', function () {
+                                var row = document.createElement('div');
+                                row.className = 'flex items-center gap-2';
+                                row.setAttribute('data-gift-card-amount-row', '');
+                                row.innerHTML = '<input type="number" name="gift_card_amounts[]" min="0.01" step="0.01" class="block w-40 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">'
+                                    + '<button type="button" data-remove-gift-card-amount class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>';
+                                container.appendChild(row);
+                                row.querySelector('input').focus();
+                            });
+                            container.addEventListener('click', function (e) {
+                                var removeButton = e.target.closest('[data-remove-gift-card-amount]');
+                                if (removeButton) {
+                                    removeButton.closest('[data-gift-card-amount-row]').remove();
+                                }
+                            });
+                        }
+
+                        var copyButton = document.getElementById('copy-gift-card-url');
+                        var urlInput = document.getElementById('gift-card-purchase-url');
+                        if (copyButton && urlInput) {
+                            copyButton.addEventListener('click', function () {
+                                var done = function () {
+                                    var original = copyButton.textContent;
+                                    copyButton.textContent = @json(__('messages.copied'));
+                                    setTimeout(function () { copyButton.textContent = original; }, 2000);
+                                };
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(urlInput.value).then(done).catch(function () {});
+                                } else {
+                                    urlInput.select();
+                                    try { document.execCommand('copy'); done(); } catch (err) {}
+                                }
+                            });
+                        }
+
+                        document.querySelectorAll('.section-jump-link').forEach(function (link) {
+                            link.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                var target = document.querySelector('.section-nav-link[data-section="' + link.dataset.section + '"]');
+                                if (target) target.click();
+                            });
+                        });
+                    });
+                </script>
+                @endif
 
                 @if (! config('app.hosted'))
                 <button type="button" class="mobile-section-header" data-section="section-auto-import">

@@ -1,8 +1,12 @@
-{{ $sale->payment_amount == 0 ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation') }}
+@php
+    // A gift-card-covered order is a purchase, not a free reservation
+    $isFreeReservation = $sale->payment_amount == 0 && ($giftCardAmount ?? 0) == 0;
+@endphp
+{{ $isFreeReservation ? __('messages.ticket_reservation_confirmation') : __('messages.ticket_purchase_confirmation') }}
 
 {{ __('messages.hello') }} {{ $sale->name }},
 
-{{ $sale->payment_amount == 0 ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets') }}
+{{ $isFreeReservation ? __('messages.thank_you_for_reserving_tickets') : __('messages.thank_you_for_purchasing_tickets') }}
 
 {{ $event->name }}
 
@@ -30,6 +34,11 @@ $addonTickets = $sale->saleTickets->filter(fn($st) => $st->ticket && $st->ticket
 @endforeach
 @endif
 
+@if (($giftCardAmount ?? 0) > 0 && $giftCard)
+{{ __('messages.gift_card_applied_summary') }}: -{{ \App\Utils\MoneyUtils::format($giftCardAmount, $giftCard->currency_code) }}
+{{ __('messages.gift_card_remaining_balance') }}: {{ \App\Utils\MoneyUtils::format($giftCard->remaining_amount, $giftCard->currency_code) }}
+
+@endif
 {{ __('messages.view_your_tickets') }}: {{ $ticketUrl }}
 
 @php $ticketNotes = $event->parsedTicketNotesText($sale->event_date, $role); @endphp

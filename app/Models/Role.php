@@ -117,6 +117,11 @@ class Role extends Model implements MustVerifyEmail
         'show_accessibility_widget',
         'default_category_id',
         'event_categories',
+        'gift_cards_enabled',
+        'gift_card_amounts',
+        'gift_card_currency_code',
+        'gift_card_valid_days',
+        'gift_card_payment_method',
     ];
 
     /**
@@ -143,6 +148,8 @@ class Role extends Model implements MustVerifyEmail
         'fan_photos_enabled' => 'boolean',
         'fan_videos_enabled' => 'boolean',
         'carpool_enabled' => 'boolean',
+        'gift_cards_enabled' => 'boolean',
+        'gift_card_amounts' => 'array',
         'boost_credit' => 'decimal:2',
         'boost_max_budget' => 'decimal:2',
         'phone_verified_at' => 'datetime',
@@ -421,6 +428,80 @@ class Role extends Model implements MustVerifyEmail
         }
 
         return $this->hasPassCache;
+    }
+
+    public function giftCards()
+    {
+        return $this->hasMany(GiftCard::class);
+    }
+
+    /**
+     * Whether this schedule currently SELLS gift cards (settings on + Pro).
+     */
+    public function giftCardsEnabled(): bool
+    {
+        return $this->gift_cards_enabled
+            && ! empty($this->gift_card_amounts)
+            && $this->isPro();
+    }
+
+    /**
+     * Whether the configured gift card payment method is usable by the owner.
+     */
+    public function giftCardPaymentMethodAvailable(): bool
+    {
+        $user = $this->user;
+        if (! $user) {
+            return false;
+        }
+
+        return match ($this->gift_card_payment_method) {
+            'stripe' => $user->canAcceptStripePayments(),
+            'invoiceninja' => (bool) $user->invoiceninja_api_key,
+            'payment_url' => (bool) ($user->payment_url && $user->payment_secret),
+            default => true, // cash
+        };
+    }
+
+    /**
+     * Full selling gate for the public purchase page and entry buttons:
+     * settings + Pro, a working delivery channel (hosted needs role SMTP -
+     * the recipient email IS the delivery mechanism), and a usable payment method.
+     */
+    public function canSellGiftCards(): bool
+    {
+        if (! $this->giftCardsEnabled()) {
+            return false;
+        }
+
+        if (config('app.hosted') && ! $this->hasEmailSettings()) {
+            return false;
+        }
+
+        return $this->giftCardPaymentMethodAvailable();
+    }
+
+    /** Per-request cache for whether this schedule has any redeemable gift card. */
+    protected $hasRedeemableGiftCardsCache = null;
+
+    /**
+     * Whether any sold gift card can still be redeemed. Redemption must keep
+     * working even when selling is disabled or the Pro plan lapses - sold cards
+     * are outstanding liabilities.
+     */
+    public function hasRedeemableGiftCards(): bool
+    {
+        if ($this->hasRedeemableGiftCardsCache === null) {
+            $this->hasRedeemableGiftCardsCache = $this->giftCards()
+                ->where('status', 'active')
+                ->where('remaining_amount', '>', 0)
+                ->where(function ($query) {
+                    $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                })
+                ->exists();
+        }
+
+        return $this->hasRedeemableGiftCardsCache;
     }
 
     public function users()

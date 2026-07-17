@@ -82,6 +82,15 @@ class AuditService
 
     const SALE_EXPIRED = 'sale.expired';
 
+    // Gift card actions
+    const GIFT_CARD_CREATED = 'gift_card.created';
+
+    const GIFT_CARD_PAID = 'gift_card.paid';
+
+    const GIFT_CARD_CANCELLED = 'gift_card.cancelled';
+
+    const GIFT_CARD_REFUNDED = 'gift_card.refunded';
+
     // Admin actions
     const ADMIN_PLAN_UPDATE = 'admin.plan_update';
 

@@ -11,6 +11,7 @@ use App\Models\EventPhoto;
 use App\Models\EventPoll;
 use App\Models\EventPollVote;
 use App\Models\EventVideo;
+use App\Models\GiftCard;
 use App\Models\Group;
 use App\Models\Newsletter;
 use App\Models\NewsletterAbTest;
@@ -54,6 +55,8 @@ class BackupService
         'sponsor_section_title_en', 'custom_labels', 'ai_style_instructions', 'ai_content_instructions',
         'social_links', 'payment_links', 'youtube_links', 'background_image', 'header_image',
         'profile_image_url', 'header_image_url', 'background_image_url',
+        'gift_cards_enabled', 'gift_card_amounts', 'gift_card_currency_code',
+        'gift_card_valid_days', 'gift_card_payment_method',
     ];
 
     private const EVENT_EXPORT_EXCLUDE = [
@@ -200,7 +203,34 @@ class BackupService
             'newsletter_segments' => $segmentsData,
             'newsletter_ab_tests' => $abTestsData,
             'newsletter_unsubscribes' => $unsubscribesData,
+            'gift_cards' => $this->exportGiftCards($role),
         ];
+    }
+
+    private function exportGiftCards(Role $role): array
+    {
+        return GiftCard::where('role_id', $role->id)->get()->map(function ($card) {
+            return [
+                '_ref_id' => $card->id,
+                'code' => $card->code,
+                'secret' => $card->secret,
+                'amount' => $card->amount,
+                'remaining_amount' => $card->remaining_amount,
+                'currency_code' => $card->currency_code,
+                'status' => $card->status,
+                'payment_method' => $card->payment_method,
+                'transaction_reference' => $card->transaction_reference,
+                'purchaser_name' => $card->purchaser_name,
+                'purchaser_email' => $card->purchaser_email,
+                'recipient_name' => $card->recipient_name,
+                'recipient_email' => $card->recipient_email,
+                'message' => $card->message,
+                'valid_days' => $card->valid_days,
+                'activated_at' => $card->activated_at?->toDateTimeString(),
+                'expires_at' => $card->expires_at?->toDateTimeString(),
+                'created_at' => $card->created_at?->toDateTimeString(),
+            ];
+        })->toArray();
     }
 
     private function exportEvent(Event $event, Role $role, bool $includeImages, array &$imageFiles): array
@@ -299,6 +329,7 @@ class BackupService
             $saleData = [
                 '_ref_id' => $sale->id,
                 '_promo_code_ref_id' => $sale->promo_code_id,
+                '_gift_card_ref_id' => $sale->gift_card_id,
                 '_group_ref_id' => $sale->group_id,
                 '_newsletter_ref_id' => $sale->newsletter_id,
                 'name' => $sale->name,
@@ -310,6 +341,7 @@ class BackupService
                 'payment_amount' => $sale->payment_amount,
                 'transaction_reference' => $sale->transaction_reference,
                 'discount_amount' => $sale->discount_amount,
+                'gift_card_amount' => $sale->gift_card_amount,
                 'utm_source' => $sale->utm_source,
                 'utm_medium' => $sale->utm_medium,
                 'utm_campaign' => $sale->utm_campaign,
@@ -695,6 +727,7 @@ class BackupService
             'events' => [],
             'tickets' => [],
             'promo_codes' => [],
+            'gift_cards' => [],
             'sales' => [],
             'parts' => [],
             'newsletters' => [],
@@ -720,6 +753,18 @@ class BackupService
                     report($e);
                     $report['sub_schedules']['failed']++;
                     $report['sub_schedules']['failures'][] = ($groupData['name'] ?? 'Unknown').': Import failed';
+                }
+            }
+
+            // Import gift cards before events - sales reference them by gift_card_id
+            foreach ($scheduleData['gift_cards'] ?? [] as $giftCardData) {
+                try {
+                    $giftCard = $this->importGiftCard($giftCardData, $role);
+                    if (isset($giftCardData['_ref_id'])) {
+                        $idMap['gift_cards'][$giftCardData['_ref_id']] = $giftCard->id;
+                    }
+                } catch (\Exception $e) {
+                    report($e);
                 }
             }
 
@@ -1328,6 +1373,47 @@ class BackupService
         return $promo;
     }
 
+    private function importGiftCard(array $data, Role $role): GiftCard
+    {
+        $validator = Validator::make($data, [
+            'code' => 'required|string|max:12',
+            'amount' => 'required|numeric|min:0',
+            'currency_code' => 'required|string|size:3',
+            'status' => 'required|in:unpaid,active,cancelled,refunded,amount_mismatch',
+        ]);
+
+        if ($validator->fails()) {
+            throw new \InvalidArgumentException('Invalid gift card data: '.$validator->errors()->first());
+        }
+
+        $giftCard = new GiftCard;
+        $giftCard->role_id = $role->id;
+        $giftCard->code = $data['code'];
+        // Preserve the secret so existing view links keep working; regenerate if absent
+        $giftCard->secret = $data['secret'] ?? strtolower(Str::random(32));
+        $giftCard->amount = $data['amount'];
+        $giftCard->remaining_amount = $data['remaining_amount'] ?? $data['amount'];
+        $giftCard->currency_code = $data['currency_code'];
+        $giftCard->status = $data['status'];
+        $giftCard->payment_method = $data['payment_method'] ?? 'cash';
+        $giftCard->transaction_reference = $data['transaction_reference'] ?? null;
+        $giftCard->purchaser_name = $data['purchaser_name'] ?? '';
+        $giftCard->purchaser_email = $data['purchaser_email'] ?? '';
+        $giftCard->recipient_name = $data['recipient_name'] ?? '';
+        $giftCard->recipient_email = $data['recipient_email'] ?? '';
+        $giftCard->message = $data['message'] ?? null;
+        $giftCard->valid_days = $data['valid_days'] ?? null;
+        $giftCard->activated_at = $data['activated_at'] ?? null;
+        $giftCard->expires_at = $data['expires_at'] ?? null;
+        $giftCard->saveQuietly();
+
+        if (! empty($data['created_at'])) {
+            GiftCard::where('id', $giftCard->id)->update(['created_at' => $data['created_at']]);
+        }
+
+        return $giftCard;
+    }
+
     private function importSale(array $data, Event $event, Role $role, int $userId, array &$idMap): Sale
     {
         $validator = Validator::make($data, [
@@ -1363,6 +1449,13 @@ class BackupService
         $promoRefId = $data['_promo_code_ref_id'] ?? null;
         if ($promoRefId && isset($idMap['promo_codes'][$promoRefId])) {
             $sale->promo_code_id = $idMap['promo_codes'][$promoRefId];
+        }
+
+        // Remap gift_card_id
+        $giftCardRefId = $data['_gift_card_ref_id'] ?? null;
+        if ($giftCardRefId && isset($idMap['gift_cards'][$giftCardRefId])) {
+            $sale->gift_card_id = $idMap['gift_cards'][$giftCardRefId];
+            $sale->gift_card_amount = $data['gift_card_amount'] ?? null;
         }
 
         // newsletter_id is remapped in the second pass after newsletters are imported

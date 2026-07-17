@@ -751,7 +751,7 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
 
         $createdVenues = [];
 
-        foreach ($venues as $venueData) {
+        foreach ($venues as $venueIndex => $venueData) {
             // Skip if already exists
             $existing = Role::where('subdomain', $venueData['subdomain'])->first();
             if ($existing) {
@@ -775,6 +775,15 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
             $role->background_colors = $venueData['background_colors'];
             $role->accent_color = $venueData['accent_color'];
             $role->accept_requests = false;
+
+            // Enable gift cards on the first demo venue for docs screenshots
+            if ($venueIndex === 0) {
+                $role->gift_cards_enabled = true;
+                $role->gift_card_amounts = [25, 50, 100];
+                $role->gift_card_currency_code = 'USD';
+                $role->gift_card_valid_days = 365;
+                $role->gift_card_payment_method = 'cash';
+            }
             $role->social_links = self::getRandomDemoSocialLinks();
             $role->description = $venueData['description'];
             if (! empty($venueData['header_image'])) {
@@ -790,6 +799,28 @@ Hosting town halls, talent shows, AA meetings, and everything in between since t
 
             // Attach user to role as owner
             $role->users()->attach($user->id, ['level' => 'owner']);
+
+            // Seed one sold gift card on the gift-card-enabled venue for docs screenshots
+            if ($venueIndex === 0) {
+                $giftCard = new \App\Models\GiftCard;
+                $giftCard->role_id = $role->id;
+                $giftCard->code = \App\Models\GiftCard::generateCode();
+                $giftCard->secret = strtolower(Str::random(32));
+                $giftCard->amount = 50;
+                $giftCard->remaining_amount = 50;
+                $giftCard->currency_code = 'USD';
+                $giftCard->status = 'active';
+                $giftCard->payment_method = 'cash';
+                $giftCard->valid_days = 365;
+                $giftCard->purchaser_name = 'Marge Simpson';
+                $giftCard->purchaser_email = 'marge@'.parse_url(config('app.url'), PHP_URL_HOST);
+                $giftCard->recipient_name = 'Homer Simpson';
+                $giftCard->recipient_email = 'homer@'.parse_url(config('app.url'), PHP_URL_HOST);
+                $giftCard->message = 'Happy anniversary! Enjoy a night out.';
+                $giftCard->activated_at = now();
+                $giftCard->expires_at = now()->addDays(365);
+                $giftCard->save();
+            }
 
             $createdVenues[$venueData['subdomain']] = $role;
         }

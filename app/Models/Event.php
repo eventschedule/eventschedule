@@ -412,6 +412,19 @@ class Event extends Model
         return $this->hasMany(PromoCode::class);
     }
 
+    /**
+     * Whether a gift card could be redeemed at this event's checkout. Matches the
+     * redemption guard: the card's schedule must belong to the event's owner
+     * (cards are sold on the schedule owner's payment rails but redemption
+     * reduces the event owner's payout).
+     */
+    public function acceptsGiftCards(): bool
+    {
+        return $this->roles->contains(
+            fn ($role) => $role->user_id === $this->user_id && $role->hasRedeemableGiftCards()
+        );
+    }
+
     public function hasActivePromoCodes(): bool
     {
         return $this->promoCodes()->where('is_active', true)

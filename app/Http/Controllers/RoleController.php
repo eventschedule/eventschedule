@@ -3237,6 +3237,30 @@ class RoleController extends Controller
             $request->merge(['carpool_enabled' => $role->carpool_enabled]);
         }
 
+        // Normalize gift card denominations (unique, positive, sorted)
+        if ($request->has('gift_card_amounts')) {
+            $request->merge([
+                'gift_card_amounts' => collect($request->input('gift_card_amounts', []))
+                    ->map(fn ($amount) => round((float) $amount, 2))
+                    ->filter(fn ($amount) => $amount > 0)
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all(),
+            ]);
+        }
+
+        // Guard gift card settings behind Pro plan
+        if (! $role->isPro()) {
+            $request->merge([
+                'gift_cards_enabled' => $role->gift_cards_enabled,
+                'gift_card_amounts' => $role->gift_card_amounts,
+                'gift_card_currency_code' => $role->gift_card_currency_code,
+                'gift_card_valid_days' => $role->gift_card_valid_days,
+                'gift_card_payment_method' => $role->gift_card_payment_method,
+            ]);
+        }
+
         // Guard banner behind Pro plan
         if (! $role->isPro()) {
             $request->merge([
