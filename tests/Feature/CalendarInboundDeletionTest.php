@@ -119,6 +119,62 @@ class CalendarInboundDeletionTest extends TestCase
         $this->assertNull(Event::find($event->id));
     }
 
+    public function test_delete_triggered_by_a_non_owner_role_detaches_instead_of_deleting(): void
+    {
+        // A shared event owned by user A, also attached to a venue owned by DIFFERENT user B. When B's
+        // calendar copy is removed, only B is detached - A's event must survive.
+        $ownerRole = $this->syncingRole('delete');
+        $event = $this->createEvent($ownerRole, ['name' => 'Shared Show']);
+
+        $venue = $this->createRole($this->createOwner(), 'venue', ['name' => 'Other Venue']);
+        $event->roles()->attach($venue->id, ['is_accepted' => true]);
+
+        $outcome = $event->applyInboundDeletion('delete', $venue);
+
+        $this->assertSame('detached', $outcome);
+        $this->assertNotNull(Event::find($event->id));
+        $roleIds = $event->fresh()->roles->pluck('id');
+        $this->assertFalse($roleIds->contains($venue->id), 'triggering venue role should be detached');
+        $this->assertTrue($roleIds->contains($ownerRole->id), 'owner role must remain attached');
+    }
+
+    public function test_delete_is_guarded_when_event_has_a_completed_boost(): void
+    {
+        $role = $this->syncingRole('delete');
+        $event = $this->createEvent($role);
+
+        \App\Models\BoostCampaign::create([
+            'event_id' => $event->id,
+            'role_id' => $role->id,
+            'user_id' => $role->user_id,
+            'name' => 'Completed Boost',
+            'user_budget' => 50,
+            'status' => 'completed',
+            'billing_status' => 'charged',
+            'actual_spend' => 45,
+        ]);
+
+        $outcome = $event->applyInboundDeletion($role->calendarDeleteAction());
+
+        // A completed (already-charged) boost campaign has billing history that must not be cascaded away.
+        $this->assertSame('guarded_cancelled', $outcome);
+        $this->assertNotNull(Event::find($event->id));
+        $this->assertTrue((bool) $event->fresh()->is_cancelled);
+    }
+
+    public function test_delete_is_guarded_when_event_has_only_refunded_sales(): void
+    {
+        $role = $this->syncingRole('delete');
+        $event = $this->createEvent($role);
+        $this->createSale($event, $role, ['is_deleted' => true]);
+
+        $outcome = $event->applyInboundDeletion($role->calendarDeleteAction());
+
+        // Refunded (soft-deleted) sales are still records worth preserving; hide, don't cascade-delete.
+        $this->assertSame('guarded_cancelled', $outcome);
+        $this->assertNotNull(Event::find($event->id));
+    }
+
     public function test_role_edit_renders_the_delete_action_control(): void
     {
         $owner = $this->createOwner();

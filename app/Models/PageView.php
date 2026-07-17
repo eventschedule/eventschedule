@@ -228,6 +228,37 @@ class PageView
     }
 
     /**
+     * Seconds from now until the end of the current day - for a cache TTL that resets at midnight.
+     *
+     * Operand order matters: now()->endOfDay()->diffInSeconds(now()) is NEGATIVE under Carbon's
+     * signed diffs, and Cache::add/put reject a non-positive TTL (storing nothing, or leaving the
+     * key with no expiry so it never resets). max(1, ...) also guards the day's final second.
+     */
+    protected static function secondsUntilEndOfDay(): int
+    {
+        return max(1, (int) now()->diffInSeconds(now()->endOfDay()));
+    }
+
+    /**
+     * Whether this is the first time today a given IP+UA has been seen for $bucket.
+     *
+     * Uses the daily-salted getIpHash() so it is privacy-preserving, and - unlike a
+     * session cookie - it is robust against cookieless bots that would otherwise get a
+     * fresh session (and thus recount) on every request.
+     */
+    public static function isFirstDailyVisit(string $bucket, ?string $ip, ?string $userAgent): bool
+    {
+        if (! $ip) {
+            return false; // no resolvable IP: do not count (cannot dedup safely)
+        }
+
+        $key = 'visit:'.$bucket.':'.self::getIpHash($ip.'|'.($userAgent ?? ''));
+
+        // Cache::add is atomic and returns true only when the key was absent (first visit today).
+        return Cache::add($key, 1, self::secondsUntilEndOfDay());
+    }
+
+    /**
      * Check if IP has exceeded view limit for a role today
      */
     protected static function hasExceededViewLimit(int $roleId, string $ipHash): bool
@@ -236,9 +267,8 @@ class PageView
 
         $cacheKey = "analytics_view:{$roleId}:{$ipHash}";
 
-        // Atomically create key with TTL if it doesn't exist, then increment
-        $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
-        Cache::add($cacheKey, 0, $secondsUntilMidnight);
+        // Atomically create the key (expiring at midnight so the count resets daily), then increment.
+        Cache::add($cacheKey, 0, self::secondsUntilEndOfDay());
         $viewCount = Cache::increment($cacheKey);
 
         return $viewCount > $maxViewsPerIpPerRole;

@@ -199,6 +199,33 @@ class EventVisibilityTest extends TestCase
         $this->assertFalse($event->is_private);
     }
 
+    public function test_non_enterprise_unlisted_request_degrades_to_draft_not_public(): void
+    {
+        // Unlisted is Enterprise-only. When a schedule loses Enterprise, editing a formerly-Unlisted
+        // event must NOT flip it fully Public - it must stay hidden as a Draft (same gate as create).
+        config(['app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', [
+            'plan_type' => 'pro',
+            'plan_expires' => now()->addYear()->format('Y-m-d'),
+        ]);
+        $this->assertFalse($role->isEnterprise());
+
+        $this->withHeaders($this->apiHeaders($owner))
+            ->postJson("/api/events/{$role->subdomain}", [
+                'name' => 'API Unlisted Attempt',
+                'starts_at' => '2026-08-17 20:00:00',
+                'duration' => 2,
+                'is_private' => true,
+            ])->assertSuccessful();
+
+        $event = Event::where('name', 'API Unlisted Attempt')->firstOrFail();
+        $this->assertTrue($event->is_draft, 'unlisted request must stay hidden as a draft, not become public');
+        $this->assertFalse($event->is_private);
+        $this->assertFalse($event->is_internal);
+    }
+
     public function test_api_seeds_draft_default_even_when_a_false_visibility_flag_is_sent(): void
     {
         $owner = $this->createOwner();
@@ -312,6 +339,25 @@ class EventVisibilityTest extends TestCase
 
         // The owning member can.
         $this->actingAs($owner)->get($url)->assertOk();
+    }
+
+    public function test_unlisted_past_events_do_not_leak_into_public_graphic_view(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        // Past events only, so the current calendar month has NO events - this is the condition that
+        // used to skip the private-event filter and leak Unlisted past events into the graphic view.
+        $past = now()->subMonths(2)->setTime(12, 0)->format('Y-m-d H:i:s');
+        $this->createEvent($role, ['name' => 'Secret Investor Dinner', 'is_private' => 1, 'starts_at' => $past]);
+        $this->createEvent($role, ['name' => 'Public Past Show', 'starts_at' => $past]);
+
+        // An unauthenticated guest requesting graphic mode must not receive the Unlisted event's data.
+        $response = $this->get(route('role.view_guest', ['subdomain' => $role->subdomain]).'?graphic=1');
+        $response->assertOk();
+        $response->assertDontSee('Secret Investor Dinner');
+        // A public past event still appears (the filter must not over-remove).
+        $response->assertSee('Public Past Show');
     }
 
     /** Set an API key on the user and return the X-API-Key auth header. */

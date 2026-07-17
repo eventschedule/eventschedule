@@ -780,6 +780,12 @@ class EventRepo
         }
 
         if ($currentRole && ! $currentRole->isEnterprise()) {
+            // Losing Enterprise strips the Enterprise-only is_private/is_internal states. An event that
+            // was Unlisted must NOT silently become fully Public on the next edit - keep it hidden as a
+            // Draft instead (mirrors how Internal degrades to Draft in the block above).
+            if ($event->is_private) {
+                $event->is_draft = true;
+            }
             $event->is_private = false;
             $event->is_internal = false;
             $event->event_password = null;

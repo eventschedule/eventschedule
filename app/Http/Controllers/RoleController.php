@@ -1313,13 +1313,10 @@ class RoleController extends Controller
                 }
             }
 
-            if ($event) {
-                // Block direct URL access to private events for non-members.
-                // Password-protected private events fall through to the password gate below.
-                if ($event->is_private && ! $event->isPasswordProtected() && (! $user || (! $user->isMember($subdomain) && ! $user->isAdmin()))) {
-                    $event = null;
-                }
-            }
+            // Unlisted (is_private) events are reachable by direct link - "not listed, anyone with the
+            // link can view". They are excluded from every listing, feed and search, but the direct URL
+            // renders for anyone holding it. Password-protected private events still fall through to the
+            // password gate below; Draft/Internal (is_draft) remain members-only via their own guard.
 
             if ($event) {
                 // Handle direct registration redirect when URL has trailing slash
@@ -1523,10 +1520,16 @@ class RoleController extends Controller
             }
         }
 
-        // Filter draft and private events from calendar listings for non-members
-        if (! $isMemberOrAdmin && $events->first() instanceof Event) {
-            $events = $events->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
-            $pastEvents = $pastEvents->filter(fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds)));
+        // Filter draft and private events from calendar listings for non-members. Past events are
+        // filtered UNCONDITIONALLY: gating this on the current month having events meant an eventless
+        // month skipped the filter entirely, leaking Unlisted (is_private) past events into the public
+        // ?graphic=1 view (their full data is serialized into pastEventsForVue).
+        if (! $isMemberOrAdmin) {
+            $keep = fn ($e) => ! $e->is_draft && (! $e->is_private || in_array($e->id, $unlockedEventIds));
+            if ($events->first() instanceof Event) {
+                $events = $events->filter($keep);
+            }
+            $pastEvents = $pastEvents->filter($keep);
         }
 
         // Track view for analytics (non-member visits only, skip embeds)

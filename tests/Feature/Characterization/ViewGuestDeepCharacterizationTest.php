@@ -53,24 +53,25 @@ class ViewGuestDeepCharacterizationTest extends TestCase
             ->assertSee('Secret Show');
     }
 
-    public function test_private_event_without_password_is_hidden_from_guests(): void
+    public function test_unlisted_event_without_password_is_reachable_by_direct_link(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
         $event = $this->createEvent($role, [
-            'name' => 'Members Only',
+            'name' => 'Unlisted By Link',
             'is_private' => true,
         ]);
 
-        // For guests the event resolves to null -> redirect to schedule home.
+        // Unlisted = "not listed, anyone with the link can view": the direct URL renders for a guest.
         $this->get($this->guestEventUrl($role, $event))
-            ->assertRedirect($role->getGuestUrl());
+            ->assertOk()
+            ->assertSee('Unlisted By Link');
 
-        // Members still see it.
+        // Members see it directly too.
         $this->actingAs($owner)
             ->get($this->guestEventUrl($role, $event))
             ->assertOk()
-            ->assertSee('Members Only');
+            ->assertSee('Unlisted By Link');
     }
 
     public function test_ticket_embed_variant_renders_embed_view(): void

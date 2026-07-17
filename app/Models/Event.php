@@ -337,14 +337,27 @@ class Event extends Model
      *                 hidden instead to protect revenue/refund data.
      *  - 'cancel'  -> hides the event via is_cancelled (reversible).
      */
-    public function applyInboundDeletion(string $action): string
+    public function applyInboundDeletion(string $action, ?Role $triggeringRole = null): string
     {
         if ($action === 'ignore') {
             return 'ignored';
         }
 
-        $guarded = $this->sales()->exists()
-            || $this->boostCampaigns()->whereIn('status', ['active', 'paused', 'pending_payment'])->exists();
+        // A shared event (attached to several schedules) must not be destroyed or hidden for everyone
+        // just because ONE schedule's calendar copy was removed. When the deletion is triggered by a
+        // role that does not own the event, detach that role instead - the event stays intact for its
+        // owner and the other schedules. Only the owner/creator role may delete or cancel it outright.
+        if ($triggeringRole && ! $this->isOwnedByRole($triggeringRole) && $this->roles()->count() > 1) {
+            $this->roles()->detach($triggeringRole->id);
+
+            return 'detached';
+        }
+
+        // Guard events carrying revenue/spend history from a hard-delete cascade - hide them instead so
+        // the sale/refund and ad-spend records survive. Covers refunded (soft-deleted) sales too, and
+        // any boost that ever incurred spend (including completed/charged), not just cancelable ones.
+        $guarded = Sale::where('event_id', $this->id)->exists()
+            || $this->boostCampaigns()->whereIn('status', ['active', 'paused', 'pending_payment', 'completed'])->exists();
 
         if ($action === 'delete' && ! $guarded) {
             $this->skipOutboundCalendarSync = true;
@@ -359,6 +372,16 @@ class Event extends Model
         }
 
         return $action === 'delete' ? 'guarded_cancelled' : 'cancelled';
+    }
+
+    /**
+     * Whether the given role owns this event (its creator role, or a role belonging to the event's
+     * owning user). Used by inbound delete-sync to decide detach-vs-delete for shared events.
+     */
+    public function isOwnedByRole(Role $role): bool
+    {
+        return ($this->creator_role_id && (int) $this->creator_role_id === (int) $role->id)
+            || (int) $this->user_id === (int) $role->user_id;
     }
 
     /**

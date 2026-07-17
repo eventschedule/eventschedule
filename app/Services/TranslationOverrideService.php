@@ -171,7 +171,19 @@ class TranslationOverrideService
                 $override->created_by = $userId;
             }
 
-            $override->save();
+            try {
+                $override->save();
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Lost a race to create the same (locale, group, key): the unique index rejected the
+                // insert. Re-fetch the winning row and apply this value to it rather than 500ing.
+                $override = TranslationOverride::where('locale', $locale)
+                    ->where('group', $group)
+                    ->where('key', $key)
+                    ->firstOrFail();
+                $override->value = $value;
+                $override->shared_at = null;
+                $override->save();
+            }
 
             $saved++;
             $savedHashes[] = UrlUtils::encodeId($override->id);
@@ -294,6 +306,12 @@ class TranslationOverrideService
 
         foreach ($active as $pair) {
             [$locale, $group] = explode('/', $pair);
+            // Skip pairs whose locale is no longer supported (or an unknown group): publish() would
+            // throw via assertValidScope() and abort the whole rebuild AFTER the prune loop already
+            // deleted files. A stale override for a removed language must not break publishing.
+            if (! is_valid_language_code($locale) || ! in_array($group, self::GROUPS, true)) {
+                continue;
+            }
             $this->publish($locale, $group);
             $written++;
         }
@@ -387,10 +405,21 @@ class TranslationOverrideService
      */
     public function containsDangerousHtml(string $value): bool
     {
-        return (bool) preg_match(
-            '/<\s*(script|iframe|object|embed|svg|img|style|link|meta|base)\b|\bon\w+\s*=|javascript:|data:\s*text\/html/i',
-            $value
-        );
+        // Decode HTML entities first so an obfuscated scheme (&#106;avascript:, javascript&colon;,
+        // &#x6a;avascript:) can't slip past this substring check and skip the purifier in
+        // sanitizeValue(). Rendering is via {!! __() !!}, and the browser decodes these entities.
+        $decoded = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Dangerous tags and inline event handlers.
+        if (preg_match('/<\s*(script|iframe|object|embed|svg|img|style|link|meta|base)\b|\bon\w+\s*=/i', $decoded)) {
+            return true;
+        }
+
+        // Scheme-based vectors. Strip whitespace/control chars first so a split scheme
+        // (java&Tab;script:, vb\nscript:) still matches - browsers ignore those characters in a URI.
+        $stripped = preg_replace('/[\s\x00-\x1F\x7F]+/', '', $decoded);
+
+        return (bool) preg_match('#(?:javascript|vbscript):|data:(?:text/html|image/svg)#i', $stripped);
     }
 
     /**

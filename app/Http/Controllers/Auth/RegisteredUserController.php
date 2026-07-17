@@ -83,15 +83,16 @@ class RegisteredUserController extends Controller
             }
         }
 
-        // Onboarding funnel stage 2 ("viewed sign-up page"). Count once per session per
-        // UTC day, skipping bots. Counted on all deployments (the /sign_up page is served
-        // on the app subdomain, not the nexus, so this is not gated on is_nexus).
-        if (! PageView::isBot(request()->userAgent())) {
-            $dayKey = 'signup_view_'.now()->format('Ymd');
-            if (! session()->has($dayKey)) {
-                MarketingDailyStat::record('signup_views');
-                session()->put($dayKey, true);
-            }
+        // Onboarding funnel stage 2 ("viewed sign-up page"). Count each unique visitor once
+        // per UTC day, filtering bots the same way as the marketing counter (UA blocklist +
+        // suspicious headers) and deduping by IP+UA so cookieless bots cannot recount.
+        // Counted on all deployments (the /sign_up page is served on the app subdomain, not
+        // the nexus, so this is not gated on is_nexus).
+        $ip = request()->header('CF-Connecting-IP') ?? request()->ip();
+        if (! PageView::isBot(request()->userAgent())
+            && ! PageView::isSuspiciousRequest(request())
+            && PageView::isFirstDailyVisit('signup_view', $ip, request()->userAgent())) {
+            MarketingDailyStat::record('signup_views');
         }
 
         return view('auth.register', [

@@ -14,6 +14,7 @@
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
             "Event Ticketing with QR Check-in",
+            "Gift Cards",
             "AI Event Parsing",
             "Email Newsletters",
             "Google Calendar Sync",
@@ -1427,6 +1428,69 @@
                                         <div class="text-green-400">Done!</div>
                                         <div class="text-gray-400 dark:text-gray-400">$ php artisan serve</div>
                                         <div class="text-gray-500 dark:text-gray-400">Server running...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Banner 18: Gift Cards (Text Left, Visual Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 left-1/4 w-[400px] h-[400px] bg-sky-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 right-1/3 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/gift-cards') }}" data-reveal class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300 text-sm font-medium mb-4">
+                                <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                </svg>
+                                Gift Cards
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">Sell gift cards</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Let customers buy a gift card for someone else and redeem it toward tickets for any event on your schedule. Balance-tracked and delivered by email.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Your denominations</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Email delivery</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Balance carries over</span>
+                            </div>
+                            <span class="inline-flex items-center text-cyan-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float">
+                                <div class="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900 dark:to-cyan-900 rounded-2xl border border-cyan-200 dark:border-cyan-500/30 p-6 w-72 shadow-2xl shadow-cyan-500/10">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <svg aria-hidden="true" class="w-5 h-5 text-cyan-500 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                            </svg>
+                                            <span class="text-sm font-medium text-gray-900 dark:text-white">Gift Card</span>
+                                        </div>
+                                        <span class="text-xl font-bold text-gray-900 dark:text-white">$100</span>
+                                    </div>
+                                    <div class="rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 p-3 mb-3">
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Code</div>
+                                        <div class="font-mono text-sm text-cyan-600 dark:text-cyan-300">GIFT-8Q2K-2026</div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-gray-500 dark:text-gray-400">Balance</span>
+                                        <span class="text-emerald-500 dark:text-emerald-400 font-medium">$100 available</span>
                                     </div>
                                 </div>
                             </div>

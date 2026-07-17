@@ -288,7 +288,12 @@ class MicrosoftCalendarService
         if ($minutes <= 0) {
             // All-day / zero-duration event: Graph rejects end == start and requires whole-day
             // midnight boundaries (inbound all-day events arrive here with duration 0).
-            $startDay = $startLocal->copy()->startOfDay();
+            // For a DATE-ONLY starts_at, anchor to the naive calendar date in the schedule tz -
+            // getStartDateTime() parses date-only values as midnight UTC, so setTimezone() west of UTC
+            // would slide the all-day event back a calendar day.
+            $startDay = strlen((string) $event->starts_at) === 10
+                ? Carbon::parse($event->starts_at, $tz)->startOfDay()
+                : $startLocal->copy()->startOfDay();
             $payload['isAllDay'] = true;
             $payload['start'] = ['dateTime' => $startDay->format('Y-m-d\T00:00:00'), 'timeZone' => $tz];
             $payload['end'] = ['dateTime' => $startDay->copy()->addDay()->format('Y-m-d\T00:00:00'), 'timeZone' => $tz];
@@ -585,7 +590,7 @@ class MicrosoftCalendarService
         // Serialize inbound sync per role: the webhook job and the 15-min poll (or two
         // overlapping runs) could otherwise both import the same remote event as two local
         // events (the sync-row lookup + name/time fallback are not constraint-backed).
-        $lock = Cache::lock('microsoft-role-sync-'.$role->id, 120);
+        $lock = Cache::lock('microsoft-role-sync-'.$role->id, 300);
         if (! $lock->get()) {
             // Another inbound sync for this role is running; its deltaLink advance covers
             // these changes, so skipping is safe (not a lost update).
@@ -603,11 +608,16 @@ class MicrosoftCalendarService
 
             $nextUrl = $role->microsoft_sync_token ?: $this->initialDeltaUrl($calendarId);
             $deltaLink = null;
+            $checkpoint = null;
             $pages = 0;
 
             while ($nextUrl) {
                 if (++$pages > self::MAX_DELTA_PAGES) {
                     Log::warning('Microsoft delta pagination cap hit', ['role_id' => $role->id]);
+                    // Persist the next page URL as a resumable checkpoint so the following run CONTINUES
+                    // from here instead of restarting from the initial window forever - otherwise a
+                    // calendar larger than the page cap never syncs past it and never gets a delta token.
+                    $checkpoint = $nextUrl;
                     break;
                 }
 
@@ -681,6 +691,11 @@ class MicrosoftCalendarService
                 $role->microsoft_sync_token = $deltaLink;
                 $role->microsoft_last_sync_at = now();
                 $role->save();
+            } elseif ($checkpoint && $this->isGraphUrl($checkpoint)) {
+                // Page cap hit before the deltaLink: store the mid-cycle nextLink so we resume here.
+                $role->microsoft_sync_token = $checkpoint;
+                $role->microsoft_last_sync_at = now();
+                $role->save();
             }
         } catch (\Throwable $e) {
             Log::error('Failed to sync from Microsoft Calendar', [
@@ -719,6 +734,15 @@ class MicrosoftCalendarService
         // Removed events: apply the schedule's calendar delete policy (ignore / cancel / delete) to
         // the local event, then drop the now-stale mapping row.
         if (array_key_exists('@removed', $item)) {
+            // Graph's calendarView/delta reports @removed for events that leave the query window
+            // (reason 'changed'), not only for real deletions (reason 'deleted'). Acting on a
+            // window-exit would wrongly delete/hide an event that was merely rescheduled far out but
+            // still exists in Outlook, so only a genuine 'deleted' removal applies the delete policy.
+            $reason = is_array($item['@removed'] ?? null) ? ($item['@removed']['reason'] ?? null) : null;
+            if ($reason !== 'deleted') {
+                return 'skipped';
+            }
+
             if (! empty($item['id'])) {
                 $sync = MicrosoftCalendarSync::where('role_id', $role->id)
                     ->where('microsoft_event_id', $item['id'])
@@ -727,11 +751,11 @@ class MicrosoftCalendarService
                 if ($sync && ($event = Event::find($sync->event_id))) {
                     $eventId = $event->id;
                     $eventName = $event->name;
-                    $outcome = $event->applyInboundDeletion($role->calendarDeleteAction());
+                    $outcome = $event->applyInboundDeletion($role->calendarDeleteAction(), $role);
 
                     if ($outcome === 'deleted') {
                         AuditService::log(AuditService::EVENT_DELETE, $role->user_id, 'Event', $eventId, null, null, $eventName);
-                    } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled'], true)) {
+                    } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled', 'detached'], true)) {
                         AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
                     }
                 }

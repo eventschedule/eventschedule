@@ -327,6 +327,51 @@ class PassBookingTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_multi_admit_guest_is_not_admitted_into_a_full_room(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-07-15 18:00:00'));
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['timezone' => 'UTC']);
+        $event = $this->createEvent($role, [
+            'creator_role_id' => $role->id, 'tickets_enabled' => true,
+            'starts_at' => '2026-07-15 18:00:00', 'duration' => 4,
+        ]);
+        $date = '2026-07-15';
+
+        // Tiny house of 2 seats + a booking-enabled pass that admits up to 3 people per event.
+        $ga = $this->createTicket($event, ['type' => 'GA', 'quantity' => 2, 'price' => 10]);
+        $pass = $this->createTicket($event, [
+            'type' => 'Group Pass', 'quantity' => 100, 'price' => 20,
+            'is_pass' => true, 'pass_usage_type' => 'total', 'pass_max_uses' => 5,
+            'pass_valid_days' => 90, 'pass_scope' => 'this_event', 'pass_allow_booking' => true,
+            'pass_admits_per_event' => 3,
+        ]);
+        $holder = $this->createSale($event, $role, ['email' => 'h@gmail.com'], $pass);
+
+        // Holder books (reserves 1 seat); a GA buyer takes the other -> the house is now full.
+        $this->assertTrue($this->bookingService()->book($holder->fresh(), $event->id, $date)->ok);
+        $this->createSale($event, $role, ['email' => 'ga@gmail.com'], $ga, 1);
+        $this->assertSame(0, $event->fresh()->occurrenceSeatsRemaining($date));
+
+        $svc = app(\App\Services\PassRedemptionService::class);
+
+        // First scan admits the holder (upgrades the booking, still 1 reserved seat).
+        $first = $svc->redeem($holder->fresh(), $event->fresh(), Carbon::now());
+        $this->assertSame('valid', $first->pass_status);
+        $this->assertSame(1, $first->admits_used);
+
+        // A second scan would admit a guest, but the room is full: the admit is refused (not oversold).
+        $second = $svc->redeem($holder->fresh(), $event->fresh(), Carbon::now());
+        $this->assertSame('already_today', $second->pass_status);
+        $this->assertSame(1, $second->admits_used);
+        $this->assertTrue($second->seats_full);
+        // Reserved seats never exceeded what was booked - no retroactive oversell.
+        $this->assertSame(1, $event->fresh()->passReservedSeats($date));
+
+        Carbon::setTestNow();
+    }
+
     public function test_guest_event_page_renders_buy_cta_with_pass_reservations(): void
     {
         $owner = $this->createOwner();

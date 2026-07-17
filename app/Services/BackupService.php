@@ -1241,6 +1241,15 @@ class BackupService
             }
         }
 
+        // Re-assert the visibility invariant: is_internal implies is_draft (and excludes is_private).
+        // saveQuietly() fires no model hooks, so a hand-edited or legacy backup carrying
+        // is_internal=true without is_draft would otherwise restore an event that leaks through every
+        // is_draft-keyed read gate.
+        if ($event->is_internal) {
+            $event->is_draft = true;
+            $event->is_private = false;
+        }
+
         $event->creator_role_id = $role->id;
         $event->user_id = $userId;
 

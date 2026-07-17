@@ -141,6 +141,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Gift Cards page
+     */
+    public function giftCards()
+    {
+        return view('marketing.gift-cards');
+    }
+
+    /**
      * CalDAV page
      */
     public function caldav()
@@ -5082,6 +5090,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Carpool', 'description' => 'Enable carpool matching for event attendees.', 'url' => $r['creating_schedules'].'#engagement-carpool', 'category' => 'User Guide', 'keywords' => 'carpool ride sharing matching driver attendee'],
             ['page' => 'Creating Schedules', 'section' => 'Auto Import', 'description' => 'Automatically import events from external sources.', 'url' => $r['creating_schedules'].'#auto-import', 'category' => 'User Guide', 'keywords' => 'import automatic feed ical'],
             ['page' => 'Creating Schedules', 'section' => 'Integrations', 'description' => 'Connect with calendar and third-party services.', 'url' => $r['creating_schedules'].'#integrations', 'category' => 'User Guide', 'keywords' => 'connect sync third-party'],
+            ['page' => 'Creating Schedules', 'section' => 'Calendar Delete Sync', 'description' => 'Choose what happens when you delete an imported event in your external calendar: keep it, mark it cancelled, or delete it.', 'url' => $r['creating_schedules'].'#delete-sync', 'category' => 'User Guide', 'keywords' => 'delete cancel on delete calendar delete sync tombstone keep it mark cancelled removed google outlook inbound'],
             ['page' => 'Creating Schedules', 'section' => 'Email Settings', 'description' => 'Configure email delivery for your schedule.', 'url' => $r['creating_schedules'].'#integrations-email', 'category' => 'User Guide', 'keywords' => 'email smtp sender notifications permission denied authentication failed test email error unverified sender app password troubleshooting'],
             ['page' => 'Creating Schedules', 'section' => 'Google Calendar', 'description' => 'Set up Google Calendar sync for your schedule.', 'url' => $r['creating_schedules'].'#integrations-google', 'category' => 'User Guide', 'keywords' => 'google calendar sync'],
             ['page' => 'Creating Schedules', 'section' => 'Outlook Calendar', 'description' => 'Set up Outlook / Microsoft 365 calendar sync for your schedule.', 'url' => $r['creating_schedules'].'#integrations-microsoft', 'category' => 'User Guide', 'keywords' => 'outlook microsoft 365 office calendar sync teams'],

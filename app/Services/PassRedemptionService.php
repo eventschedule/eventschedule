@@ -163,7 +163,14 @@ class PassRedemptionService
                 // use. Only when every admission is spent is it a repeat scan.
                 $admitsUsed = max(1, (int) ($usages[$existingIndex]['admits'] ?? 1));
 
-                if ($admitsUsed < $admitsPerEvent) {
+                // Gate the extra admit on the occurrence still having a free seat. A booking reserves
+                // only ONE seat up front (computePassReservedSeats counts max(1, admits)), but admits
+                // can climb to admitsPerEvent at the door - so an unchecked bump lets a walk-in guest
+                // retroactively oversell a full room. null = unlimited house, so fail open there.
+                $seatsRemaining = $scanningEvent->occurrenceSeatsRemaining($today);
+                $roomForGuest = $seatsRemaining === null || $seatsRemaining > 0;
+
+                if ($admitsUsed < $admitsPerEvent && $roomForGuest) {
                     $usages[$existingIndex]['admits'] = $admitsUsed + 1;
                     $locked->pass_usages = $usages;
                     $locked->save();
@@ -180,6 +187,9 @@ class PassRedemptionService
 
                 $data->pass_status = 'already_today';
                 $data->admits_used = $admitsUsed;
+                // Distinguish "all admissions spent" from "room is full", so the operator knows why an
+                // extra guest was not admitted.
+                $data->seats_full = $admitsUsed < $admitsPerEvent && ! $roomForGuest;
                 $data->checked_in_at = Carbon::createFromTimestamp($usages[$existingIndex]['at'] ?? $nowUtc->timestamp, $tz)->format('g:i A');
 
                 return $data;

@@ -622,9 +622,12 @@ class GoogleCalendarService
                     $optParams['syncToken'] = $syncToken;
                     $optParams['showDeleted'] = true;
                 } else {
+                    // NOTE: do NOT set orderBy here - Google omits nextSyncToken from a list response
+                    // that uses orderBy, which would leave the initial sync unable to establish an
+                    // incremental token. Without the token the sync never enters the showDeleted
+                    // branch, so cancelled tombstones (inbound delete-sync) would never be fetched.
                     $optParams['timeMin'] = $timeMin;
                     $optParams['timeMax'] = $timeMax;
-                    $optParams['orderBy'] = 'startTime';
                 }
                 if ($pageToken) {
                     $optParams['pageToken'] = $pageToken;
@@ -782,12 +785,12 @@ class GoogleCalendarService
             $eventId = $event->id;
             $eventName = $event->name;
 
-            $outcome = $event->applyInboundDeletion($role->calendarDeleteAction());
+            $outcome = $event->applyInboundDeletion($role->calendarDeleteAction(), $role);
 
             if ($outcome === 'deleted') {
                 $results['deleted']++;
                 AuditService::log(AuditService::EVENT_DELETE, $role->user_id, 'Event', $eventId, null, null, $eventName);
-            } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled'], true)) {
+            } elseif (in_array($outcome, ['cancelled', 'guarded_cancelled', 'detached'], true)) {
                 $results['deleted']++;
                 AuditService::log(AuditService::EVENT_CANCEL, $role->user_id, 'Event', $eventId, null, null, $eventName);
             }

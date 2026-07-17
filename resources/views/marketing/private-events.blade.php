@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Private Events | Password-Protected Events - Event Schedule</x-slot>
-    <x-slot name="description">Password-protect events for VIP audiences or invite-only gatherings. Control who sees what with per-event privacy settings.</x-slot>
+    <x-slot name="title">Private Events | Internal and Unlisted Events - Event Schedule</x-slot>
+    <x-slot name="description">Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password. Control who sees what, per event.</x-slot>
     <x-slot name="breadcrumbTitle">Private Events</x-slot>
 
     <x-slot name="structuredData">
@@ -9,13 +9,14 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Event Schedule - Private Events",
-        "description": "Password-protect events for VIP audiences or invite-only gatherings. Control who sees what with per-event privacy settings.",
+        "description": "Keep events members-only with Internal visibility, or hide them from your public schedule as Unlisted with an optional password. Control who sees what, per event.",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": ["Web", "Android", "iOS"],
         "featureList": [
-            "Password-protected events",
-            "Hidden from public schedule",
-            "Per-event privacy control",
+            "Internal (members-only) events",
+            "Unlisted events with a direct link",
+            "Optional event password",
+            "Per-event visibility control",
             "Mix public and private events"
         ],
         "offers": {
@@ -36,7 +37,7 @@
                 "name": "How do I make an event private?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "When creating or editing an event, toggle the 'Private' option and set a password. Only visitors who enter the correct password can view the event details."
+                    "text": "When creating or editing an event, choose its visibility. Internal makes it members-only with no password. Unlisted hides it from your public schedule but lets anyone with the direct link, and an optional password, view it."
                 }
             },
             {
@@ -44,7 +45,7 @@
                 "name": "Can I have both public and private events on the same schedule?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Privacy is set per event, so you can mix public and private events on a single schedule. Public events appear normally, while private events require a password to view."
+                    "text": "Yes. Visibility is set per event, so you can mix Public, Draft, Internal, and Unlisted events on a single schedule. Public events appear normally, while Internal and Unlisted events stay off your public pages."
                 }
             },
             {
@@ -52,7 +53,7 @@
                 "name": "Are private events hidden from the public schedule?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Private events are hidden from your public schedule and calendar views. They can only be accessed via a direct link with the correct password."
+                    "text": "Yes. Internal and Unlisted events are both hidden from your public schedule, feeds, and calendar sync. Unlisted events can still be opened with a direct link and optional password, while Internal events are visible only to signed-in members."
                 }
             },
             {
@@ -60,7 +61,7 @@
                 "name": "Which plan includes private events?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Private events are available on the Enterprise plan. Free plans include unlimited public events."
+                    "text": "Internal and Unlisted visibility are available on the Enterprise plan. Public and Draft events are free on every plan."
                 }
             }
         ]
@@ -152,7 +153,7 @@
             </h1>
 
             <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Password-protect any event for VIP audiences or invite-only gatherings. Share the link and password only with the people who matter.
+                Choose exactly who sees each event. Keep it members-only as an Internal event, or share an Unlisted link, with an optional password, with just the people who matter.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -191,10 +192,10 @@
                                     <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                     </svg>
-                                    Password Protected
+                                    Unlisted
                                 </div>
-                                <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Lock it down</h3>
-                                <p class="mb-6 text-gray-500 dark:text-gray-400 lg:text-lg">Set a password on any event and only visitors who enter the correct password can view the details. Share the link and password with your audience however you choose.</p>
+                                <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Share a private link</h3>
+                                <p class="mb-6 text-gray-500 dark:text-gray-400 lg:text-lg">An unlisted event stays off your public schedule and feeds, but anyone with the direct link can open it. Add an optional password when you want an extra layer of protection.</p>
                                 <div class="flex flex-wrap gap-3">
                                     <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Per-event password</span>
                                     <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Instant access</span>
@@ -228,10 +229,10 @@
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                             </svg>
-                            Hidden
+                            Internal
                         </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Hidden from public</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Private events are hidden from your public schedule and calendar views. Only people with the direct link and password can find them.</p>
+                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Members only</h3>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">An internal event is visible only to signed-in members of your schedule. It never appears on your public schedule, feeds, or calendar sync, and needs no password.</p>
                         <div class="mt-auto space-y-2" aria-hidden="true">
                             <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 dark:bg-white/5" style="--i: 0;">
                                 <svg aria-hidden="true" class="h-4 w-4 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -241,7 +242,7 @@
                             <div class="es-ai-field flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 dark:border-amber-500/20 dark:bg-amber-500/10" style="--i: 1;">
                                 <svg aria-hidden="true" class="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                 <span class="text-sm text-gray-600 dark:text-gray-300">VIP Launch</span>
-                                <span class="ml-auto text-[10px] text-amber-600 dark:text-amber-400">Private</span>
+                                <span class="ml-auto text-[10px] text-amber-600 dark:text-amber-400">Internal</span>
                             </div>
                             <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 px-3 py-2 dark:bg-white/5" style="--i: 2;">
                                 <svg aria-hidden="true" class="h-4 w-4 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -264,7 +265,7 @@
                             Flexible
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Per-event control</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Privacy is set per event, not per schedule. Mix public and private events freely. Perfect for schedules that host both open and exclusive content.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Visibility is set per event, not per schedule. Mix Public, Draft, Internal, and Unlisted events freely on a single schedule.</p>
                         <div class="mt-auto rounded-xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
                             <div class="mb-3 flex items-center justify-between">
                                 <span class="text-sm text-gray-600 dark:text-gray-300">Private Event</span>
@@ -294,7 +295,7 @@
                                     Enterprise Feature
                                 </div>
                                 <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Included with Enterprise</h3>
-                                <p class="text-gray-500 dark:text-gray-400 lg:text-lg">Private events are part of the Enterprise plan, alongside custom domains, multiple team members, AI features, and more. Start free and upgrade when you need privacy controls.</p>
+                                <p class="text-gray-500 dark:text-gray-400 lg:text-lg">Internal and Unlisted visibility are part of the Enterprise plan, alongside custom domains, multiple team members, AI features, and more. Public and Draft events are always free.</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4" aria-hidden="true">
                                 @php
@@ -384,10 +385,10 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['How do I make an event private?', 'When creating or editing an event, toggle the "Private" option and set a password. Only visitors who enter the correct password can view the event details.'],
-                    ['Can I have both public and private events on the same schedule?', 'Yes. Privacy is set per event, so you can mix public and private events on a single schedule. Public events appear normally, while private events require a password to view.'],
-                    ['Are private events hidden from the public schedule?', 'Private events are hidden from your public schedule and calendar views. They can only be accessed via a direct link with the correct password.'],
-                    ['Which plan includes private events?', 'Private events are available on the Enterprise plan. Free plans include unlimited public events. You can upgrade at any time from your account settings.'],
+                    ['How do I make an event private?', 'When creating or editing an event, choose its visibility. Internal makes it members-only with no password. Unlisted hides it from your public schedule but lets anyone with the direct link, and an optional password, view it.'],
+                    ['Can I have both public and private events on the same schedule?', 'Yes. Visibility is set per event, so you can mix Public, Draft, Internal, and Unlisted events on a single schedule. Public events appear normally, while Internal and Unlisted events stay off your public pages.'],
+                    ['Are private events hidden from the public schedule?', 'Yes. Internal and Unlisted events are both hidden from your public schedule, feeds, and calendar sync. Unlisted events can still be opened with a direct link and optional password, while Internal events are visible only to signed-in members.'],
+                    ['Which plan includes private events?', 'Internal and Unlisted visibility are available on the Enterprise plan. Public and Draft events are free on every plan. You can upgrade at any time from your account settings.'],
                 ] as [$q, $a])
                     <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">

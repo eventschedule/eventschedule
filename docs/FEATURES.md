@@ -29,8 +29,8 @@ All users get these features with no subscription required.
 | Custom schedule URLs | Subdomain-based URLs |
 | Team collaboration (single member) | One team member per schedule |
 | Venue location maps | Google Maps integration |
-| Google Calendar sync | Bidirectional sync |
-| Outlook Calendar sync | Microsoft 365 / Graph two-way sync, optional Teams meeting links |
+| Google Calendar sync | Bidirectional sync; per-schedule delete-sync action (keep, mark cancelled, or delete a local event when it is deleted in the external calendar) |
+| Outlook Calendar sync | Microsoft 365 / Graph two-way sync, optional Teams meeting links; shares the per-schedule delete-sync action |
 | CalDAV sync | Standard calendar protocol |
 | Fan videos, photos & comments on events | User-generated content on events (25 photo limit on free tier) |
 | Built-in analytics | Schedule analytics dashboard |
@@ -56,7 +56,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 |---------|--------------|-------|
 | Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" |
 | Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
-| Passes & subscriptions | Tied to ticketing gate, `$ticket->is_pass` | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab |
+| Passes & subscriptions | Tied to ticketing gate, `$ticket->is_pass` | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab; per-pass cancellation deadline and late-cancel policy (forfeit or block) |
 | Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |
 | Sell online via Stripe | Tied to ticketing gate | Stripe Connect payments, no platform fees |
 | Generate event graphics | `GraphicController`, `$role->isPro()` | Auto-generated shareable images |

@@ -3534,9 +3534,8 @@ class EventController extends Controller
             return redirect($role->getGuestUrl());
         }
 
-        if ($event->is_private && ! $event->isPasswordProtected() && ! $isMemberOrAdmin) {
-            return redirect($role->getGuestUrl());
-        }
+        // Unlisted (is_private, no password) events are reachable by direct link, so their fan-photo
+        // gallery is too. Password-protected ones still hit the password gate below.
 
         // Password gate
         $bypassPassword = $isMemberOrAdmin || session()->has('event_password_'.$event->id);

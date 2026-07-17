@@ -27,19 +27,20 @@ class TrackMarketingVisit
             || ! $request->isMethod('GET')
             || auth()->check()
             || ! $request->routeIs('marketing.*')
-            || PageView::isBot($request->userAgent())) {
+            || PageView::isBot($request->userAgent())
+            || PageView::isSuspiciousRequest($request)) {
             return $response;
         }
 
-        // Raw page views: every qualifying view.
+        // Raw page views: every qualifying (bot-filtered) view.
         MarketingDailyStat::record('page_views');
 
-        // Unique visitors: once per session per UTC day. The flag and the DB row date
-        // use the same UTC day so a near-midnight request cannot split them.
-        $dayKey = 'mkt_visit_'.now()->format('Ymd');
-        if (! $request->session()->has($dayKey)) {
+        // Unique visitors: dedup by a daily-salted IP+UA hash rather than a session cookie,
+        // so cookieless bots (which get a fresh session per request) cannot each be counted
+        // as a new visitor. Prefer Cloudflare's real client IP, matching PageView::recordView().
+        $ip = $request->header('CF-Connecting-IP') ?? $request->ip();
+        if (PageView::isFirstDailyVisit('mkt_visit', $ip, $request->userAgent())) {
             MarketingDailyStat::record('visitors');
-            $request->session()->put($dayKey, true);
         }
 
         return $response;

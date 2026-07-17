@@ -302,6 +302,13 @@
 @include('partials.sitemap-hreflang', ['url' => url('/features/ai')])
     </url>
     <url>
+        <loc>{{ url('/features/gift-cards') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/gift-cards')])
+    </url>
+    <url>
         <loc>{{ url('/features/calendar-sync') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

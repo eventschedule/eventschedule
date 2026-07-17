@@ -297,6 +297,32 @@ class MicrosoftCalendarServiceTest extends TestCase
         $this->assertDatabaseHas('events', ['id' => $event->id, 'name' => 'Keep Me']);
     }
 
+    public function test_delta_removed_item_with_changed_reason_is_not_a_deletion(): void
+    {
+        // Graph reports @removed with reason 'changed' when an event merely leaves the query window
+        // (e.g. rescheduled beyond the sync horizon). That is NOT a deletion: even with the delete
+        // policy, the still-existing event and its mapping must be left intact.
+        $user = $this->connectedOwner();
+        $role = $this->createRole($user, 'venue', ['calendar_delete_action' => 'delete']);
+        $event = $this->createEvent($role, ['name' => 'Still Exists']);
+        MicrosoftCalendarSync::create([
+            'user_id' => $user->id,
+            'event_id' => $event->id,
+            'role_id' => $role->id,
+            'microsoft_event_id' => 'moved-out',
+        ]);
+
+        Http::fake(['graph.microsoft.com/*' => Http::response([
+            'value' => [['id' => 'moved-out', '@removed' => ['reason' => 'changed']]],
+            '@odata.deltaLink' => 'https://graph.microsoft.com/v1.0/me/calendarView/delta?$deltatoken=next',
+        ], 200)]);
+
+        $this->service()->syncFromMicrosoftCalendar($user, $role, null);
+
+        $this->assertDatabaseHas('events', ['id' => $event->id, 'name' => 'Still Exists']);
+        $this->assertDatabaseHas('microsoft_calendar_syncs', ['microsoft_event_id' => 'moved-out']);
+    }
+
     public function test_delta_410_clears_token_and_restarts(): void
     {
         $user = $this->connectedOwner();

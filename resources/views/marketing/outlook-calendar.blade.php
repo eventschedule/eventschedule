@@ -57,7 +57,7 @@
                 "name": "How quickly do changes sync?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Changes sync in near real time. Microsoft Graph change notifications push updates within seconds, and a 15-minute polling fallback keeps everything in sync if a notification is ever missed."
+                    "text": "Changes sync in near real time. When you create, update, or delete an event in either Event Schedule or Outlook, Microsoft Graph change notifications push the change within seconds, and a 15-minute polling fallback keeps everything in sync if a notification is ever missed."
                 }
             },
             {
@@ -238,7 +238,7 @@
                             Real-time
                         </div>
                         <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Near-real-time updates</h2>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Changes in Outlook appear within seconds. Microsoft Graph change notifications push updates, backed by a 15-minute polling fallback.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Create, update, or delete an event in Outlook and it appears in Event Schedule within seconds. Microsoft Graph change notifications push the change, backed by a 15-minute polling fallback.</p>
                         <div class="mt-auto rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
                             <div class="flex items-center gap-3">
                                 <div class="animate-sync flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
@@ -267,7 +267,7 @@
                             Two-way
                         </div>
                         <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sync in both directions</h2>
-                        <p class="mb-4 text-gray-500 dark:text-gray-400">Events you publish appear in Outlook, and events created in Outlook appear in Event Schedule.</p>
+                        <p class="mb-4 text-gray-500 dark:text-gray-400">Events you publish appear in Outlook, and events created in Outlook appear in Event Schedule. Create, update, or delete in either place and the change flows both ways.</p>
                         <div class="mt-auto space-y-2" aria-hidden="true">
                             <div class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-2 dark:border-white/10 dark:bg-white/5">
                                 <svg aria-hidden="true" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -505,7 +505,7 @@
                     $faqs = [
                         ['Does Outlook Calendar sync work with selfhosted Event Schedule?', 'Yes, selfhosted users can set up Outlook Calendar sync by registering their own Microsoft Entra application and configuring the OAuth credentials. Full setup instructions are available in the selfhosted documentation.'],
                         ['Is two-way sync available on the free plan?', 'Yes, Outlook Calendar sync is available on all plans, including the free plan. Events you publish appear in Outlook, and events created in Outlook appear in Event Schedule, at no cost.'],
-                        ['How quickly do changes sync?', 'Changes sync in near real time. Microsoft Graph change notifications push updates within seconds, and a 15-minute polling fallback keeps everything in sync if a notification is ever missed.'],
+                        ['How quickly do changes sync?', 'Changes sync in near real time. When you create, update, or delete an event in either Event Schedule or Outlook, Microsoft Graph change notifications push the change within seconds, and a 15-minute polling fallback keeps everything in sync if a notification is ever missed.'],
                         ['Does it work with personal Microsoft accounts and work accounts?', 'Yes. Outlook Calendar sync works with both personal Microsoft accounts, such as Outlook.com, Hotmail, and Live, and with Microsoft 365 work or school accounts.'],
                     ];
                 @endphp

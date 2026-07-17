@@ -214,6 +214,53 @@ class TranslationOverrideTest extends TestCase
         }
     }
 
+    public function test_sanitizing_strips_obfuscated_dangerous_uri_schemes(): void
+    {
+        // The denylist pre-filter used to match only the literal "javascript:", so an entity-encoded
+        // or vbscript: scheme inside an allowed <a href> skipped the purifier and was stored raw for
+        // {!! __() !!} to render. Every obfuscation must now trip the purifier and lose the scheme.
+        $service = $this->service();
+
+        $payloads = [
+            '<a href="&#106;avascript:alert(1)">x</a>',   // decimal entity
+            '<a href="&#x6a;avascript:alert(1)">x</a>',   // hex entity
+            '<a href="javascript&colon;alert(1)">x</a>',  // named-entity colon
+            '<a href="vbscript:msgbox(1)">x</a>',         // vbscript scheme
+            '<a href="jav&#x09;ascript:alert(1)">x</a>',  // tab-split scheme
+        ];
+
+        foreach ($payloads as $payload) {
+            // The gate must catch it (so the purifier runs)...
+            $this->assertTrue($service->containsDangerousHtml($payload), "gate missed: {$payload}");
+            // ...and the purified output must carry no executable scheme. Purify strips the href
+            // outright or escapes the ampersand, so the browser's single entity-decode pass can never
+            // reconstruct a literal "javascript:"/"vbscript:" (colon intact) from what remains.
+            $clean = strtolower($service->sanitizeValue($payload));
+            $this->assertStringNotContainsString('javascript:', $clean, "scheme survived: {$payload}");
+            $this->assertStringNotContainsString('vbscript:', $clean, "scheme survived: {$payload}");
+            // The neutralized output no longer trips the detector either.
+            $this->assertFalse($service->containsDangerousHtml($service->sanitizeValue($payload)), "still dangerous: {$payload}");
+        }
+    }
+
+    public function test_publish_all_skips_overrides_for_an_unsupported_locale(): void
+    {
+        // A valid override that must still publish...
+        $this->service()->saveOverrides('fr', 'messages', ['home' => 'Maison'], null);
+        // ...alongside a stale override whose locale is no longer in config('app.supported_languages')
+        // (e.g. a language the operator removed). publishAll() must not abort on it.
+        \App\Models\TranslationOverride::forceCreate([
+            'locale' => 'zz', 'group' => 'messages', 'key' => 'home', 'value' => 'Zzz',
+        ]);
+
+        $result = $this->service()->publishAll();
+
+        $this->assertGreaterThanOrEqual(1, $result['written']);
+        app()->setLocale('fr');
+        $this->assertSame('Maison', __('messages.home'));
+        app()->setLocale('en');
+    }
+
     public function test_editor_page_renders_off_nexus(): void
     {
         // Default suite config is IS_NEXUS=true; the sharing UI (share modal +
