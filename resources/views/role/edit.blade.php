@@ -1107,7 +1107,7 @@
 
                         @if ($role->name_en)
                         <div class="mb-6">
-                            <x-input-label for="name_en" :value="__('messages.name_en')" />
+                            <x-input-label for="name_en" :value="__('messages.name') . ' (' . $role->translationLanguageName() . ')'" />
                             <x-text-input id="name_en" name="name_en" type="text" class="mt-1 block w-full"
                                 :value="old('name_en', $role->name_en)" />
                             <x-input-error class="mt-2" :messages="$errors->get('name_en')" />
@@ -1123,7 +1123,7 @@
 
                         @if ($role->short_description_en)
                         <div class="mb-6">
-                            <x-input-label for="short_description_en" :value="__('messages.short_description') . ' (' . __('messages.english') . ')'" />
+                            <x-input-label for="short_description_en" :value="__('messages.short_description') . ' (' . $role->translationLanguageName() . ')'" />
                             <x-text-input id="short_description_en" name="short_description_en" type="text" class="mt-1 block w-full"
                                 :value="old('short_description_en', $role->short_description_en)" maxlength="200" />
                             <x-input-error class="mt-2" :messages="$errors->get('short_description_en')" />
@@ -1169,7 +1169,7 @@
 
                             @if ($role->banner_message_en)
                             <div class="mt-4">
-                                <x-input-label for="banner_message_en" :value="__('messages.banner_message') . ' (' . __('messages.english') . ')'" />
+                                <x-input-label for="banner_message_en" :value="__('messages.banner_message') . ' (' . $role->translationLanguageName() . ')'" />
                                 <textarea id="banner_message_en" name="banner_message_en"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                                     rows="3" dir="auto" maxlength="500">{{ old('banner_message_en', $role->banner_message_en) }}</textarea>
@@ -1202,8 +1202,80 @@
                                 </option>
                                 @endforeach
                             </select>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.language_help') }}</p>
                             <x-input-error class="mt-2" :messages="$errors->get('language_code')" />
                         </div>
+
+                        <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                            <x-toggle name="translation_enabled"
+                                label="{{ __('messages.offer_translation') }}"
+                                help="{{ __('messages.offer_translation_help') }}"
+                                checked="{{ old('translation_enabled', $role->translation_language_code && $role->translation_language_code !== $role->language_code) }}"
+                                :disabled="is_demo_mode()" />
+
+                            <div id="translation-language-wrapper" class="mt-4 {{ old('translation_enabled', $role->translation_language_code && $role->translation_language_code !== $role->language_code) ? '' : 'hidden' }}">
+                                <x-input-label for="translation_language_code" :value="__('messages.translate_into')" />
+                                <select name="translation_language_code" id="translation_language_code" {{ is_demo_mode() ? 'disabled' : '' }}
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    @foreach(config('app.supported_languages') as $key => $value)
+                                    <option value="{{ $key }}" {{ $role->translation_language_code == $key ? 'SELECTED' : '' }} {{ $key === $role->language_code ? 'hidden disabled' : '' }}>
+                                        {{ __('messages.' . $value) }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error class="mt-2" :messages="$errors->get('translation_language_code')" />
+
+                                <p class="mt-2 text-xs">
+                                    <x-link href="https://eventschedule.com/features/ai" target="_blank">{{ __('messages.learn_more') }}</x-link>
+                                </p>
+
+                                <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                    <p class="text-sm text-amber-800 dark:text-amber-200">{{ __('messages.translation_language_notice') }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script {!! nonce_attr() !!}>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            var toggle = document.getElementById('translation_enabled');
+                            var wrapper = document.getElementById('translation-language-wrapper');
+                            var authored = document.getElementById('language_code');
+                            var target = document.getElementById('translation_language_code');
+                            if (!toggle || !wrapper || !target) return;
+
+                            function firstAvailable() {
+                                return Array.from(target.options).find(function (o) { return !o.disabled; });
+                            }
+                            function ensureValidTarget() {
+                                var sel = target.options[target.selectedIndex];
+                                if (!sel || sel.disabled) {
+                                    var f = firstAvailable();
+                                    if (f) target.value = f.value;
+                                }
+                            }
+
+                            toggle.addEventListener('change', function () {
+                                wrapper.classList.toggle('hidden', !this.checked);
+                                if (this.checked) ensureValidTarget();
+                            });
+
+                            // The target picker must never offer the authored language (can't translate X->X).
+                            if (authored) {
+                                authored.addEventListener('change', function () {
+                                    var val = this.value;
+                                    Array.from(target.options).forEach(function (o) {
+                                        var isAuthored = (o.value === val);
+                                        o.hidden = isAuthored;
+                                        o.disabled = isAuthored;
+                                    });
+                                    ensureValidTarget();
+                                });
+                            }
+                        });
+                        </script>
 
                         <div class="mb-6 {{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
                             <x-input-label for="timezone" :value="__('messages.timezone')" />

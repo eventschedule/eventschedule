@@ -36,6 +36,8 @@ class RoleCreateRequest extends FormRequest
             // guest-facing pages, which the runtime compiler evaluates as JS (CSTI otherwise).
             'accent_color' => ['nullable', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'header_style' => ['nullable', 'string', 'in:banner,compact'],
+            'translation_enabled' => ['nullable', 'boolean'],
+            'translation_language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages')))],
         ];
     }
 }

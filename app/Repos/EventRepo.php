@@ -670,7 +670,8 @@ class EventRepo
                     try {
                         $translations = GeminiUtils::translateCustomFieldNames(
                             array_values($fieldsNeedingTranslation),
-                            $currentRole->language_code
+                            $currentRole->language_code,
+                            $currentRole->translation_language_code
                         );
 
                         foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
@@ -1367,7 +1368,8 @@ class EventRepo
                         try {
                             $translations = GeminiUtils::translateCustomFieldNames(
                                 array_values($fieldsNeedingTranslation),
-                                $currentRole->language_code
+                                $currentRole->language_code,
+                                $currentRole->translation_language_code
                             );
 
                             foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {

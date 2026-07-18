@@ -102,6 +102,26 @@ if (! function_exists('is_valid_language_code')) {
     }
 }
 
+if (! function_exists('showing_translation')) {
+    /**
+     * Whether the current request is displaying a schedule's TRANSLATED content (stored in the
+     * `_en` columns) rather than the authored language. The guest controllers set the `translate`
+     * session flag when a visitor switches to the schedule's target language - that flag is the
+     * authoritative signal for the guest flow. As a fallback for the same request, a passed model
+     * that exposes its own target (a Role, via `translation_language_code`) also matches an
+     * explicit `?lang=<target>`. Models without that column (Event/EventPart/Group) resolve to
+     * the default `'en'` here and rely on the session flag, which is always set for real renders.
+     */
+    function showing_translation($role = null): bool
+    {
+        if (session()->has('translate')) {
+            return true;
+        }
+
+        return $role && request()->lang == ($role->translation_language_code ?: 'en');
+    }
+}
+
 if (! function_exists('is_mobile')) {
     /**
      * Check if the current user is on a mobile device
@@ -151,21 +171,23 @@ if (! function_exists('rtl_class')) {
 
 if (! function_exists('content_dir')) {
     /**
-     * Base direction ('rtl'|'ltr') for schedule-authored content.
+     * Base direction ('rtl'|'ltr') for schedule content.
      *
-     * Uses the schedule's language (viewer-independent, via isContentRtl) so that
-     * mixed Latin/Hebrew text keeps the schedule's intended base direction, matching
-     * the WhatsApp export. Unlike is_rtl()/rtl_class(), it does not depend on the
-     * viewer's translate state. Pass $showingEnglish = true to force LTR when a real
-     * English value is the one actually being displayed.
+     * When showing authored content, uses the schedule's language (viewer-independent, via
+     * isContentRtl) so mixed Latin/Hebrew text keeps the schedule's intended base direction,
+     * matching the WhatsApp export. When showing the translated (`_en`) value, uses the
+     * schedule's TARGET language direction so an RTL translation renders correctly. Defaults
+     * to 'en' (=> 'ltr'), reproducing the original behavior.
      *
      * @param  object|null  $role  The schedule whose language governs the content
-     * @param  bool  $showingEnglish  True when a genuine English value is shown
+     * @param  bool  $showingTranslation  True when the translated (`_en`) value is shown
      */
-    function content_dir(?object $role, bool $showingEnglish = false): string
+    function content_dir(?object $role, bool $showingTranslation = false): string
     {
-        if ($showingEnglish) {
-            return 'ltr';
+        if ($showingTranslation) {
+            $target = ($role && ! empty($role->translation_language_code)) ? $role->translation_language_code : 'en';
+
+            return in_array($target, ['ar', 'he']) ? 'rtl' : 'ltr';
         }
 
         return ($role && method_exists($role, 'isContentRtl') && $role->isContentRtl()) ? 'rtl' : 'ltr';

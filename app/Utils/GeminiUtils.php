@@ -1098,16 +1098,28 @@ class GeminiUtils
     }
 
     /**
-     * Batch translate group names to English using Gemini API
+     * Map a language code to its human name for the batch-translation prompts (e.g. 'en' ->
+     * 'English', 'fr' -> 'French'). Keeps the prompt readable and, for the default 'en' target,
+     * preserves the original "... to English" wording. Unknown codes fall back to the code.
      */
-    public static function translateGroupNames($groupNames, $fromLanguage = 'auto')
+    private static function languageName(string $code): string
+    {
+        $languages = config('app.supported_languages', []);
+
+        return isset($languages[$code]) ? ucfirst($languages[$code]) : $code;
+    }
+
+    /**
+     * Batch translate group names into the target language using Gemini API
+     */
+    public static function translateGroupNames($groupNames, $fromLanguage = 'auto', $to = 'en')
     {
         if (empty($groupNames)) {
             return [];
         }
 
         // Create a single prompt for batch translation
-        $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($groupNames)], config('ai_prompts.translate_group_names.base'));
+        $prompt = str_replace([':from', ':to', ':names'], [$fromLanguage, self::languageName($to), json_encode($groupNames)], config('ai_prompts.translate_group_names.base'));
 
         try {
             $response = self::sendRequest($prompt, null, 'translation');
@@ -1136,16 +1148,16 @@ class GeminiUtils
     }
 
     /**
-     * Batch translate custom field names to English using Gemini API
+     * Batch translate custom field names into the target language using Gemini API
      */
-    public static function translateCustomFieldNames($fieldNames, $fromLanguage = 'auto')
+    public static function translateCustomFieldNames($fieldNames, $fromLanguage = 'auto', $to = 'en')
     {
         if (empty($fieldNames)) {
             return [];
         }
 
         // Create a single prompt for batch translation
-        $prompt = str_replace([':from', ':names'], [$fromLanguage, json_encode($fieldNames)], config('ai_prompts.translate_custom_field_names.base'));
+        $prompt = str_replace([':from', ':to', ':names'], [$fromLanguage, self::languageName($to), json_encode($fieldNames)], config('ai_prompts.translate_custom_field_names.base'));
 
         try {
             $response = self::sendRequest($prompt, null, 'translation');
@@ -1174,15 +1186,15 @@ class GeminiUtils
     }
 
     /**
-     * Batch translate custom field dropdown option values to English using Gemini API
+     * Batch translate custom field dropdown option values into the target language using Gemini API
      */
-    public static function translateCustomFieldOptions($optionValues, $fromLanguage = 'auto')
+    public static function translateCustomFieldOptions($optionValues, $fromLanguage = 'auto', $to = 'en')
     {
         if (empty($optionValues)) {
             return [];
         }
 
-        $prompt = str_replace([':from', ':values'], [$fromLanguage, json_encode($optionValues)], config('ai_prompts.translate_custom_field_options.base'));
+        $prompt = str_replace([':from', ':to', ':values'], [$fromLanguage, self::languageName($to), json_encode($optionValues)], config('ai_prompts.translate_custom_field_options.base'));
 
         try {
             $response = self::sendRequest($prompt, null, 'translation');

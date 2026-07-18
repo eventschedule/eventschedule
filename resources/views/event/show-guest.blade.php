@@ -82,7 +82,7 @@
       <div class="flex items-center justify-center gap-3 text-blue-800 dark:text-blue-200">
         <span class="text-xl font-medium">{{ __('messages.event_is_draft') }}</span>
         @if (auth()->user() && auth()->user()->isEditor($role->subdomain))
-        <form method="POST" action="{{ route('event.publish', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)]) }}">
+        <form method="POST" action="{{ app_url(route('event.publish', ['subdomain' => $role->subdomain, 'hash' => \App\Utils\UrlUtils::encodeId($event->id)], false)) }}">
           @csrf
           <button type="submit" class="px-4 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors">
             {{ __('messages.publish') }}
@@ -262,7 +262,7 @@
                           }
                         @endphp
                       @endif
-                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir($each, (session()->has('translate') || request()->lang == 'en') && (bool)$each->name_en) }}">
+                      <a href="{{ $talentUrl }}" class="group inline {{ $role->isRtl() ? 'rtl' : '' }}" dir="{{ content_dir($each, showing_translation($role) && (bool)$each->name_en) }}">
                         <span class="inline text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:underline" style="font-family: '{{ str_replace('_', ' ', $each->font_family) }}', sans-serif;">
                           {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
                           <svg class="inline-block w-5 h-5 {{ $role->isRtl() ? 'ms-1 scale-x-[-1]' : 'ms-1' }} align-text-bottom fill-gray-900 dark:fill-gray-100 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" aria-hidden="true">
@@ -271,7 +271,7 @@
                         </span>
                       </a>
                     @else
-                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir($each, (session()->has('translate') || request()->lang == 'en') && (bool)$each->name_en) }}">
+                      <p class="text-lg font-semibold text-gray-900 dark:text-gray-100" style="font-family: '{{ str_replace('_', ' ', $otherRole->font_family ?? 'sans-serif') }}', sans-serif;" dir="{{ content_dir($each, showing_translation($role) && (bool)$each->name_en) }}">
                         {!! str_replace(' , ', '<br>', e($each->translatedName())) !!}
                       </p>
                     @endif
@@ -640,7 +640,7 @@
         </nav>
 
         @php
-            $translateMode = session()->has('translate') || request()->lang == 'en';
+            $translateMode = showing_translation($role);
             // When a curator translation is shown, its own role's language governs
             // direction; otherwise the event's schedule does.
             $contentRole = ($translation && $translation->role) ? $translation->role : $role;

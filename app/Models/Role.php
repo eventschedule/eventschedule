@@ -48,6 +48,7 @@ class Role extends Model implements MustVerifyEmail
         'postal_code',
         'country_code',
         'language_code',
+        'translation_language_code',
         'description',
         'description_en',
         'banner_enabled',
@@ -187,6 +188,10 @@ class Role extends Model implements MustVerifyEmail
     protected $attributes = [
         'header_image' => 'none',
         'header_style' => 'banner',
+        // Match the DB column default so a new (unsaved) Role offers English translation by
+        // default, exactly like existing rows. Without this the create form renders a null
+        // target and the browser submits the first enabled <option> ('ar').
+        'translation_language_code' => 'en',
         'fan_comments_enabled' => true,
         'fan_photos_enabled' => true,
         'fan_videos_enabled' => true,
@@ -380,6 +385,15 @@ class Role extends Model implements MustVerifyEmail
             if ($model->isDirty('banner_message') && ! $model->isDirty('banner_message_en')) {
                 $model->banner_message_en = null;
                 $model->banner_message_html_en = null;
+            }
+        });
+
+        // When the translation TARGET changes, every stored `_en` value is now in the wrong
+        // language. Clear them (and reset attempts) so the cron regenerates in the new target;
+        // sub-schedule names are re-translated inline by the job since the cron skips groups.
+        static::updated(function ($model) {
+            if ($model->wasChanged('translation_language_code')) {
+                \App\Jobs\RegenerateRoleTranslations::dispatch($model);
             }
         });
 
@@ -1445,11 +1459,12 @@ class Role extends Model implements MustVerifyEmail
 
     public function isRtl()
     {
-        if (session()->has('translate') || request()->lang == 'en') {
-            return false;
+        if (showing_translation($this)) {
+            // When showing the translated content, the direction follows the TARGET language.
+            return in_array($this->translation_language_code, ['ar', 'he']);
         }
 
-        return $this->language_code == 'ar' || $this->language_code == 'he';
+        return in_array($this->language_code, ['ar', 'he']);
     }
 
     /**
@@ -1472,11 +1487,33 @@ class Role extends Model implements MustVerifyEmail
         return strtolower($this->language_code ?? 'en') === 'en';
     }
 
+    /**
+     * Whether this schedule actually offers a translation, i.e. its target language differs
+     * from the language its content is authored in. When they match there is nothing to
+     * translate and no visitor language toggle is shown.
+     */
+    public function offersTranslation(): bool
+    {
+        return $this->language_code !== ($this->translation_language_code ?: 'en');
+    }
+
+    /**
+     * Human-readable name of the schedule's translation TARGET language (e.g. "English",
+     * "French"), in the current UI locale. Defaults to English, matching the column default.
+     */
+    public function translationLanguageName(): string
+    {
+        $languages = config('app.supported_languages', ['en' => 'english']);
+        $code = $this->translation_language_code ?: 'en';
+
+        return isset($languages[$code]) ? __('messages.'.$languages[$code]) : strtoupper($code);
+    }
+
     public function translatedName()
     {
         $value = $this->name;
 
-        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->name_en && (showing_translation($this))) {
             $value = $this->name_en;
         }
 
@@ -1495,7 +1532,7 @@ class Role extends Model implements MustVerifyEmail
             return [];
         }
 
-        $useTranslation = session()->has('translate') || request()->lang == 'en';
+        $useTranslation = showing_translation($this);
 
         foreach ($sponsors as &$sponsor) {
             if (! empty($sponsor['logo'])) {
@@ -1568,7 +1605,7 @@ class Role extends Model implements MustVerifyEmail
         $labels = $this->custom_labels ?? [];
 
         if (isset($labels[$key])) {
-            if (! empty($labels[$key]['value_en']) && (session()->has('translate') || request()->lang == 'en')) {
+            if (! empty($labels[$key]['value_en']) && (showing_translation($this))) {
                 return $labels[$key]['value_en'];
             }
 
@@ -1589,7 +1626,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->short_description;
 
-        if ($this->short_description_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->short_description_en && (showing_translation($this))) {
             $value = $this->short_description_en;
         }
 
@@ -1600,7 +1637,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->description_html;
 
-        if ($this->description_html_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->description_html_en && (showing_translation($this))) {
             $value = $this->description_html_en;
         }
 
@@ -1611,7 +1648,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->address1;
 
-        if ($this->address1_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->address1_en && (showing_translation($this))) {
             $value = $this->address1_en;
         }
 
@@ -1622,7 +1659,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->address2;
 
-        if ($this->address2_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->address2_en && (showing_translation($this))) {
             $value = $this->address2_en;
         }
 
@@ -1633,7 +1670,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->city;
 
-        if ($this->city_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->city_en && (showing_translation($this))) {
             $value = $this->city_en;
         }
 
@@ -1644,7 +1681,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->state;
 
-        if ($this->state_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->state_en && (showing_translation($this))) {
             $value = $this->state_en;
         }
 
@@ -1675,7 +1712,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->request_terms;
 
-        if ($this->request_terms_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->request_terms_en && (showing_translation($this))) {
             $value = $this->request_terms_en;
         }
 
@@ -1686,7 +1723,7 @@ class Role extends Model implements MustVerifyEmail
     {
         $value = $this->banner_message_html;
 
-        if ($this->banner_message_html_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->banner_message_html_en && (showing_translation($this))) {
             $value = $this->banner_message_html_en;
         }
 
@@ -2025,6 +2062,9 @@ class Role extends Model implements MustVerifyEmail
     {
         $attrs = [];
         foreach ($this->getEventCustomFields() as $fieldKey => $field) {
+            // Match the field label shown in the AP event form (event/edit.blade.php), which keys
+            // off the admin's UI locale - not the guest translate toggle. This runs in the AP
+            // (EventCreate/UpdateRequest), where the guest `translate` session flag is never set.
             $name = (app()->getLocale() === 'en' && ! empty($field['name_en']))
                 ? $field['name_en']
                 : ($field['name'] ?? $fieldKey);

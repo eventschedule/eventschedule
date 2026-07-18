@@ -98,15 +98,15 @@ return [
     ],
 
     'translate_group_names' => [
-        'base' => "Translate these group names from :from to English. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original name and the value is the English translation:\n:names",
+        'base' => "Translate these group names from :from to :to. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original name and the value is the translation in :to:\n:names",
     ],
 
     'translate_custom_field_names' => [
-        'base' => "Translate these form field names from :from to English. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original name and the value is the English translation:\n:names",
+        'base' => "Translate these form field names from :from to :to. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original name and the value is the translation in :to:\n:names",
     ],
 
     'translate_custom_field_options' => [
-        'base' => "Translate these dropdown option values from :from to English. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original value and the value is the English translation:\n:values",
+        'base' => "Translate these dropdown option values from :from to :to. CRITICAL: Return ONLY a raw JSON object. Do not use markdown blocks. Your entire response must start exactly with { and end exactly with }. Each key is the original value and the value is the translation in :to:\n:values",
     ],
 
     'blog_post' => [

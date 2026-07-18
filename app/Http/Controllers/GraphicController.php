@@ -314,8 +314,11 @@ class GraphicController extends Controller
             ? $request->boolean('text_show_all')
             : ($graphicSettings['text_show_all'] ?? false);
 
-        // Generate output in English instead of the schedule language (no-op for English schedules)
+        // Generate output in English instead of the schedule language. Only valid when the
+        // schedule's translation target is English (the _en columns hold English); for any other
+        // target the "force English" export does not apply, so treat it as off.
         $forceEnglish = ! $role->isEnglish()
+            && ($role->translation_language_code ?: 'en') === 'en'
             && ($request->has('force_english')
                 ? $request->boolean('force_english')
                 : (bool) ($graphicSettings['force_english'] ?? false));
@@ -428,7 +431,7 @@ class GraphicController extends Controller
         $aiPrompt = trim($request->input('ai_prompt', ''));
         $aiModel = $request->input('ai_model', '');
         $numberEvents = $request->boolean('number_events', false);
-        $forceEnglish = ! $role->isEnglish() && $request->boolean('force_english', false);
+        $forceEnglish = ! $role->isEnglish() && ($role->translation_language_code ?: 'en') === 'en' && $request->boolean('force_english', false);
 
         if (empty($aiPrompt) || empty($text)) {
             return response()->json(['error' => 'Missing text or AI prompt']);

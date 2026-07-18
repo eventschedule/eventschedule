@@ -24,11 +24,12 @@
             <meta name="robots" content="index, follow">
         @endif
 
-        @if ($role->language_code != 'en')
+        @if ($role->language_code != ($role->translation_language_code ?: 'en'))
             @php
+                $targetCode = $role->translation_language_code ?: 'en';
                 $hreflangBase = ($event && $event->exists) ? $event->getGuestUrl(false, $date ?? null) : $role->getGuestUrl();
             @endphp
-            <link rel="alternate" hreflang="en" href="{{ $hreflangBase }}?lang=en">
+            <link rel="alternate" hreflang="{{ $targetCode }}" href="{{ $hreflangBase }}?lang={{ $targetCode }}">
             <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
             <link rel="alternate" hreflang="x-default" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
         @endif
@@ -85,8 +86,8 @@
                 <meta name="twitter:card" content="summary_large_image">
                 <meta name="twitter:site" content="@ScheduleEvent">
             @else
-            @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? 'en' : $role->language_code)) }}">
+            @if ($role->language_code != ($role->translation_language_code ?: 'en'))
+                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
             @else
                 <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
             @endif
@@ -109,8 +110,8 @@
             <meta name="twitter:site" content="@ScheduleEvent">
             @endif
         @elseif ($role->exists)
-            @if ($role->language_code != 'en')
-                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? 'en' : $role->language_code)) }}">
+            @if ($role->language_code != ($role->translation_language_code ?: 'en'))
+                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
             @else
                 <link rel="canonical" href="{{ $role->getGuestUrl() }}">
             @endif
@@ -532,21 +533,29 @@
             }
         @endphp
 
-        @if (! request()->embed && $role->language_code != 'en' && ! $hasInlineLangToggle)
+        @php
+            $switcherLanguages = config('app.supported_languages');
+            $switcherTarget = $role->translation_language_code ?: 'en';
+            $switcherTargetName = isset($switcherLanguages[$switcherTarget]) ? __('messages.' . $switcherLanguages[$switcherTarget]) : strtoupper($switcherTarget);
+            $switcherAuthoredName = isset($switcherLanguages[$role->language_code]) ? __('messages.' . $switcherLanguages[$role->language_code]) : strtoupper($role->language_code);
+        @endphp
+        @if (! request()->embed && $role->offersTranslation() && ! $hasInlineLangToggle)
             <div class="container mx-auto flex justify-end {{ $isRtl ? 'pl-5' : 'pr-5' }} pt-4">
                 <div class="gp-lang-switcher flex items-center rounded-full p-1 text-sm shadow-md z-50 {{ $isRtl ? 'flex-row-reverse' : '' }}" translate="no">
-                    @if(session()->has('translate') || request()->lang == 'en')
-                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium">EN</span>
+                    @if(session()->has('translate') || request()->lang == $switcherTarget)
+                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">{{ strtoupper($switcherTarget) }}</span>
                         <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $role->language_code }}"
-                           class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200">
+                           class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
+                           title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">
                             {{ strtoupper($role->language_code) }}
                         </a>
                     @else
-                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang=en"
-                           class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200">
-                            EN
+                        <a href="{{ str_replace('http://', 'https://', request()->url()) }}?lang={{ $switcherTarget }}"
+                           class="gp-lang-inactive px-3 py-1.5 rounded-full font-medium transition-all duration-200"
+                           title="{{ $switcherTargetName }}" aria-label="{{ $switcherTargetName }}">
+                            {{ strtoupper($switcherTarget) }}
                         </a>
-                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium">{{ strtoupper($role->language_code) }}</span>
+                        <span class="gp-lang-active px-3 py-1.5 rounded-full font-medium" title="{{ $switcherAuthoredName }}" aria-label="{{ $switcherAuthoredName }}">{{ strtoupper($role->language_code) }}</span>
                     @endif
                 </div>
             </div>

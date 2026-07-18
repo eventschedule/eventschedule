@@ -1471,7 +1471,7 @@ class EventController extends Controller
 
         // Store guest language for auth flow
         if (session()->has('translate')) {
-            session()->put('guest_language', 'en');
+            session()->put('guest_language', $role->translation_language_code);
         } elseif ($lang && is_valid_language_code($lang)) {
             session()->put('guest_language', $lang);
         } elseif (is_valid_language_code($role->language_code)) {
@@ -1483,7 +1483,7 @@ class EventController extends Controller
             if (is_valid_language_code($lang)) {
                 app()->setLocale($lang);
 
-                if ($lang == 'en') {
+                if ($lang == $role->translation_language_code && $lang != $role->language_code) {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -1493,7 +1493,7 @@ class EventController extends Controller
                 return redirect(request()->url());
             }
         } elseif (session()->has('translate')) {
-            app()->setLocale('en');
+            app()->setLocale($role->translation_language_code);
         } else {
             // Validate the language code from database before setting it
             if (is_valid_language_code($role->language_code)) {
@@ -1554,7 +1554,7 @@ class EventController extends Controller
 
         // Store guest language for auth flow
         if (session()->has('translate')) {
-            session()->put('guest_language', 'en');
+            session()->put('guest_language', $role->translation_language_code);
         } elseif ($lang && is_valid_language_code($lang)) {
             session()->put('guest_language', $lang);
         } elseif (is_valid_language_code($role->language_code)) {
@@ -1566,7 +1566,7 @@ class EventController extends Controller
             if (is_valid_language_code($lang)) {
                 app()->setLocale($lang);
 
-                if ($lang == 'en') {
+                if ($lang == $role->translation_language_code && $lang != $role->language_code) {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -1576,7 +1576,7 @@ class EventController extends Controller
                 return redirect(request()->url());
             }
         } elseif (session()->has('translate')) {
-            app()->setLocale('en');
+            app()->setLocale($role->translation_language_code);
         } else {
             // Validate the language code from database before setting it
             if (is_valid_language_code($role->language_code)) {
@@ -2597,7 +2597,7 @@ class EventController extends Controller
 
         // Store guest language for auth flow
         if (session()->has('translate')) {
-            session()->put('guest_language', 'en');
+            session()->put('guest_language', $role->translation_language_code);
         } elseif ($request->lang && is_valid_language_code($request->lang)) {
             session()->put('guest_language', $request->lang);
         } elseif (is_valid_language_code($role->language_code)) {
@@ -2608,7 +2608,7 @@ class EventController extends Controller
             if (is_valid_language_code($request->lang)) {
                 app()->setLocale($request->lang);
 
-                if ($request->lang == 'en') {
+                if ($request->lang == $role->translation_language_code && $request->lang != $role->language_code) {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -2617,7 +2617,7 @@ class EventController extends Controller
                 return redirect(request()->url());
             }
         } elseif (session()->has('translate')) {
-            app()->setLocale('en');
+            app()->setLocale($role->translation_language_code);
         } else {
             if (is_valid_language_code($role->language_code)) {
                 app()->setLocale($role->language_code);
@@ -3502,7 +3502,7 @@ class EventController extends Controller
             if (is_valid_language_code($request->lang)) {
                 app()->setLocale($request->lang);
 
-                if ($request->lang == 'en') {
+                if ($request->lang == $role->translation_language_code && $request->lang != $role->language_code) {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -3511,7 +3511,7 @@ class EventController extends Controller
                 return redirect(request()->url());
             }
         } elseif (session()->has('translate')) {
-            app()->setLocale('en');
+            app()->setLocale($role->translation_language_code);
         } elseif (is_valid_language_code($role->language_code)) {
             app()->setLocale($role->language_code);
         }

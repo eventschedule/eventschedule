@@ -28,7 +28,7 @@ class Group extends Model
     {
         $value = $this->name;
 
-        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->name_en && (showing_translation($this))) {
             $value = $this->name_en;
         }
 

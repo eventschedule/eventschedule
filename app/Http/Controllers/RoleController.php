@@ -331,7 +331,7 @@ class RoleController extends Controller
         $role = Role::subdomain($subdomain)->firstOrFail();
 
         if (! auth()->user()) {
-            $lang = session()->has('translate') ? 'en' : $role->language_code;
+            $lang = session()->has('translate') ? $role->translation_language_code : $role->language_code;
 
             return redirect_with_pending_action(
                 app_url(route('sign_up', ['lang' => $lang], false)),
@@ -1227,7 +1227,7 @@ class RoleController extends Controller
             if (is_valid_language_code($lang)) {
                 app()->setLocale($lang);
 
-                if ($lang == 'en') {
+                if ($lang == $role->translation_language_code && $lang != $role->language_code) {
                     session()->put('translate', true);
                 } else {
                     session()->forget('translate');
@@ -1239,7 +1239,7 @@ class RoleController extends Controller
                 return redirect(request()->url());
             }
         } elseif (session()->has('translate')) {
-            app()->setLocale('en');
+            app()->setLocale($role->translation_language_code);
         } else {
             // Validate the language code from database before setting it
             if (is_valid_language_code($role->language_code)) {
@@ -1877,7 +1877,7 @@ class RoleController extends Controller
             'category_name' => $event->resolveCategoryName(),
             'category_color' => $event->resolveCategoryColor(),
             'name' => $event->translatedName(),
-            'dir' => content_dir($role, (session()->has('translate') || request()->lang == 'en') && (bool) $event->name_en),
+            'dir' => content_dir($role, showing_translation($role) && (bool) $event->name_en),
             'venue_name' => $event->getVenueDisplayName(),
             'starts_at' => $event->starts_at,
             'days_of_week' => $event->days_of_week,
@@ -2833,6 +2833,15 @@ class RoleController extends Controller
 
         $role = new Role;
         $role->fill($request->all());
+
+        // The "offer a second language" toggle maps onto the target column: when it is off (or the
+        // submitted target is blank), the target equals the authored language = "no translation".
+        // Mirrors update(); without it the create form's <select> submits a bogus first option.
+        // Fall back to 'en' so a request that also omits language_code can't null this NOT NULL column.
+        if (! $request->boolean('translation_enabled') || ! $role->translation_language_code) {
+            $role->translation_language_code = $role->language_code ?: 'en';
+        }
+
         $role->subdomain = Role::generateSubdomain($request->name);
         $role->user_id = $user->id;
 
@@ -2911,9 +2920,9 @@ class RoleController extends Controller
 
             // Translate names if role is not in English
             $translations = [];
-            if (! empty($groupNames) && $role->language_code !== 'en') {
+            if (! empty($groupNames) && $role->language_code !== $role->translation_language_code) {
                 try {
-                    $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code);
+                    $translations = GeminiUtils::translateGroupNames($groupNames, $role->language_code, $role->translation_language_code);
                 } catch (\Exception $e) {
                     \Log::error('Failed to translate group names: '.$e->getMessage());
                     // Continue without translations if API fails
@@ -3198,6 +3207,7 @@ class RoleController extends Controller
             // Remove sensitive fields from the request
             $request->merge([
                 'language_code' => $role->language_code,
+                'translation_language_code' => $role->translation_language_code,
                 'timezone' => $role->timezone,
                 'new_subdomain' => $role->subdomain,
                 'custom_domain' => $role->custom_domain,
@@ -3309,6 +3319,14 @@ class RoleController extends Controller
         $eventCategoriesSubmitted = $request->boolean('event_categories_submitted');
 
         $role->fill($request->all());
+
+        // The "offer a second language" toggle maps onto the target column: when it is off (or the
+        // submitted target is blank), the target equals the authored language = "no translation".
+        // Skipped in demo mode, where the controls are disabled and frozen to current values above.
+        // Fall back to 'en' so a request that also omits language_code can't null this NOT NULL column.
+        if (! is_demo_mode() && (! $request->boolean('translation_enabled') || ! $role->translation_language_code)) {
+            $role->translation_language_code = $role->language_code ?: 'en';
+        }
 
         if ($request->has('youtube_links')) {
             $role->youtube_links = $this->sanitizeLinksJson($request->input('youtube_links'));
@@ -3494,7 +3512,8 @@ class RoleController extends Controller
                 try {
                     $translations = GeminiUtils::translateCustomFieldNames(
                         array_values($fieldsNeedingTranslation),
-                        $role->language_code
+                        $role->language_code,
+                        $role->translation_language_code
                     );
 
                     foreach ($fieldsNeedingTranslation as $fieldKey => $fieldName) {
@@ -3820,9 +3839,9 @@ class RoleController extends Controller
 
         // Translate new group names if role is not in English
         $translations = [];
-        if (! empty($newGroupNames) && $role->language_code !== 'en') {
+        if (! empty($newGroupNames) && $role->language_code !== $role->translation_language_code) {
             try {
-                $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code);
+                $translations = GeminiUtils::translateGroupNames($newGroupNames, $role->language_code, $role->translation_language_code);
             } catch (\Exception $e) {
                 \Log::error('Failed to translate group names: '.$e->getMessage());
                 // Continue without translations if API fails
@@ -4856,7 +4875,7 @@ class RoleController extends Controller
                     // branch below, which also forwards the requested language.
                     $lang = is_string($request->lang) && is_valid_language_code($request->lang)
                         ? $request->lang
-                        : (session()->has('translate') ? 'en' : $role->language_code);
+                        : (session()->has('translate') ? $role->translation_language_code : $role->language_code);
 
                     return redirect(route('event.guest_submit', [
                         'subdomain' => $role->subdomain,
@@ -4881,7 +4900,7 @@ class RoleController extends Controller
             }
 
             if (! $user) {
-                $lang = session()->has('translate') ? 'en' : $role->language_code;
+                $lang = session()->has('translate') ? $role->translation_language_code : $role->language_code;
 
                 return redirect_with_pending_action(
                     app_url(route('sign_up', ['lang' => $lang], false)),

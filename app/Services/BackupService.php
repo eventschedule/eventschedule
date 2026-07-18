@@ -41,7 +41,7 @@ class BackupService
         'type', 'is_unlisted', 'design', 'header_style', 'background', 'background_rotation', 'background_colors',
         'background_color', 'accent_color', 'font_color', 'font_family', 'name', 'name_en',
         'phone', 'email', 'website', 'address1', 'address1_en', 'address2', 'address2_en',
-        'city', 'city_en', 'state', 'state_en', 'postal_code', 'country_code', 'language_code',
+        'city', 'city_en', 'state', 'state_en', 'postal_code', 'country_code', 'language_code', 'translation_language_code',
         'description', 'description_en', 'short_description', 'short_description_en',
         'banner_enabled', 'banner_on_event_pages', 'banner_message', 'banner_message_en',
         'accept_requests', 'event_request_form', 'require_account', 'use_24_hour_time', 'timezone',
@@ -1091,6 +1091,7 @@ class BackupService
             'type' => 'required|in:talent,venue,curator',
             'timezone' => 'nullable|string|max:100',
             'language_code' => 'nullable|string|max:5',
+            'translation_language_code' => 'nullable|string|max:5',
         ]);
 
         if ($validator->fails()) {

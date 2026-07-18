@@ -90,7 +90,7 @@
                 'category_id' => $event->category_id,
                 'category_color' => $event->resolveCategoryColor(),
                 'name' => $curatorTranslation ? $curatorTranslation->name_translated : $event->translatedName(),
-                'dir' => content_dir($role ?? null, !$curatorTranslation && (session()->has('translate') || request()->lang == 'en') && (bool)$event->name_en),
+                'dir' => content_dir($role ?? null, !$curatorTranslation && showing_translation($role ?? null) && (bool)$event->name_en),
                 'short_description' => $curatorTranslation && $curatorTranslation->short_description_translated ? $curatorTranslation->short_description_translated : $event->translatedShortDescription(),
                 'venue_name' => $event->getVenueDisplayName(),
                 'venue_subdomain' => $event->venue?->subdomain ?: null,
@@ -226,7 +226,8 @@
             if (in_array($field['type'] ?? '', ['dropdown', 'multiselect']) && !empty($field['options'])) {
                 $originalOptions = array_values(array_filter(array_map('trim', explode(',', $field['options']))));
                 $optionsMap = new \stdClass();
-                if (app()->getLocale() === 'en' && !empty($field['options_en'])) {
+                $showFieldTranslation = ($isAdminRoute && auth()->check()) ? (app()->getLocale() === 'en') : showing_translation($role ?? null);
+                if ($showFieldTranslation && !empty($field['options_en'])) {
                     $translatedOptions = array_values(array_filter(array_map('trim', explode(',', $field['options_en']))));
                     if (count($originalOptions) === count($translatedOptions)) {
                         $optionsMap = (object) array_combine($originalOptions, $translatedOptions);
@@ -234,7 +235,7 @@
                 }
                 $dropdownCustomFields[] = [
                     'key' => (string) $key,
-                    'name' => (app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name'],
+                    'name' => ($showFieldTranslation && !empty($field['name_en'])) ? $field['name_en'] : $field['name'],
                     'options' => $originalOptions,
                     'optionsMap' => $optionsMap,
                 ];
@@ -273,7 +274,7 @@
             @if ($route === 'guest' && !request()->graphic)
             <time :datetime="monthYearDatetime" v-text="monthYearLabel"></time>
             @else
-            <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->locale($isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')))->translatedFormat('F Y') }}</time>
+            <time datetime="{{ sprintf('%04d-%02d', $year, $month) }}">{{ Carbon\Carbon::create($year, $month, 1)->locale($isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? (isset($role) && $role->translation_language_code ? $role->translation_language_code : 'en') : (isset($role) && $role->language_code ? $role->language_code : 'en')))->translatedFormat('F Y') }}</time>
             @endif
         </h1>
 
@@ -1947,7 +1948,7 @@ const calendarApp = createApp({
                 d: @json(__('messages.duration_day_short')),
                 m: @json(__('messages.duration_minute_short')),
             },
-            languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? 'en' : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
+            languageCode: '{{ $isAdminRoute && auth()->check() ? app()->getLocale() : (session()->has('translate') ? (isset($role) && $role->translation_language_code ? $role->translation_language_code : 'en') : (isset($role) && $role->language_code ? $role->language_code : 'en')) }}',
             userTimezone: '{{ auth()->check() && auth()->user()->timezone ? auth()->user()->timezone : null }}',
             popupTimeout: null,
             showFiltersDrawer: false,

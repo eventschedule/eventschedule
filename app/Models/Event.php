@@ -1613,6 +1613,29 @@ class Event extends Model
         return $lang;
     }
 
+    /**
+     * The TARGET language this event's content is translated INTO (stored in the `_en` columns),
+     * mirroring getLanguageCode()'s source resolution: the venue drives it when set, otherwise the
+     * first talent role. Defaults to 'en', which reproduces the original English-only behavior.
+     */
+    public function getTranslationLanguageCode()
+    {
+        if ($this->venue && $this->venue->translation_language_code) {
+            return $this->venue->translation_language_code;
+        }
+
+        $lang = 'en';
+
+        foreach ($this->roles as $role) {
+            if ($role->isTalent() && $role->translation_language_code) {
+                $lang = $role->translation_language_code;
+                break;
+            }
+        }
+
+        return $lang;
+    }
+
     public function getVenueDisplayName($translate = true)
     {
         if ($this->venue) {
@@ -1649,7 +1672,7 @@ class Event extends Model
             return [];
         }
 
-        $useTranslation = session()->has('translate') || request()->lang == 'en';
+        $useTranslation = showing_translation($this);
 
         foreach ($sponsors as &$sponsor) {
             if (! empty($sponsor['logo'])) {
@@ -2123,7 +2146,7 @@ class Event extends Model
     {
         $value = $this->name;
 
-        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->name_en && (showing_translation($this))) {
             $value = $this->name_en;
         }
 
@@ -2136,7 +2159,7 @@ class Event extends Model
     {
         $value = $this->description_html;
 
-        if ($this->description_html_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->description_html_en && (showing_translation($this))) {
             $value = $this->description_html_en;
         }
 
@@ -2147,7 +2170,7 @@ class Event extends Model
     {
         $value = $this->short_description;
 
-        if ($this->short_description_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->short_description_en && (showing_translation($this))) {
             $value = $this->short_description_en;
         }
 

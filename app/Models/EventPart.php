@@ -51,7 +51,7 @@ class EventPart extends Model
     {
         $value = $this->name;
 
-        if ($this->name_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->name_en && (showing_translation($this))) {
             $value = $this->name_en;
         }
 
@@ -64,7 +64,7 @@ class EventPart extends Model
     {
         $value = $this->description_html;
 
-        if ($this->description_html_en && (session()->has('translate') || request()->lang == 'en')) {
+        if ($this->description_html_en && (showing_translation($this))) {
             $value = $this->description_html_en;
         }
 

@@ -102,6 +102,11 @@ class RoleUpdateRequest extends FormRequest
             'slug_pattern' => ['nullable', 'string', 'max:500'],
             'event_layout' => ['nullable', 'string', 'in:calendar,list'],
             'header_style' => ['nullable', 'string', 'in:banner,compact'],
+            // Auto-translation target language. Nullable (not submitted in demo mode, where the
+            // selects are disabled); the controller maps the "offer translation" toggle to this
+            // value, so a valid non-null code is always what actually gets persisted.
+            'translation_enabled' => ['nullable', 'boolean'],
+            'translation_language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages')))],
             'direct_registration' => ['nullable', 'boolean'],
             'hide_past_events' => ['nullable', 'boolean'],
             'draft_events_default' => ['nullable', 'boolean'],

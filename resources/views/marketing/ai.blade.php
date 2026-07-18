@@ -530,7 +530,7 @@
                             Translation
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Instant translation</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Translate your entire schedule automatically. Support for 11 languages including English, Spanish, French, German, and more.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Translate your entire schedule automatically. Choose which language to translate into, and visitors can switch between your language and the translation. Support for 11 languages including English, Spanish, French, German, and more.</p>
                         <div class="mt-auto flex flex-wrap justify-center gap-2" aria-hidden="true">
                             @foreach (['EN', 'ES', 'FR', 'DE', 'IT', 'PT', 'NL', 'HE', 'AR'] as $li => $lang)
                                 <span class="es-ai-field inline-flex items-center rounded-lg bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900 dark:bg-white/10 dark:text-white" style="--i: {{ $li }};">{{ $lang }}</span>
