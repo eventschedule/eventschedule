@@ -68,6 +68,13 @@ return [
         ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate set-time flyers for your socials.'],
     ],
 
+    'for-comedians' => [
+        ['title' => 'For Comedy Clubs', 'path' => '/for-comedy-clubs', 'blurb' => 'Run the room where you get your reps.'],
+        ['title' => 'For Spoken Word', 'path' => '/for-spoken-word', 'blurb' => 'Open mics and features for poets and storytellers.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate show flyers for your socials.'],
+    ],
+
     'for-venues' => [
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run every show from one schedule.'],
         ['title' => 'For Bars & Pubs', 'path' => '/for-bars', 'blurb' => 'Fill the room with trivia, bands, and events.'],
