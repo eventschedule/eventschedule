@@ -374,7 +374,7 @@ class EventRepo
                 $venue->name_en = $request->venue_name_en ?? null;
                 $venue->email = $request->venue_email ?? null;
                 $venue->phone = $request->venue_phone ?: null;
-                $venue->subdomain = Role::generateSubdomain($request->venue_name);
+                $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en);
                 $venue->type = 'venue';
                 $venue->name = $request->venue_name ?? null;
                 $venue->address1 = $request->venue_address1;
@@ -638,7 +638,7 @@ class EventRepo
             }
 
             // Handle name_en for event-level custom fields
-            if (! empty($customFields) && $currentRole && $currentRole->language_code !== 'en') {
+            if (! empty($customFields) && $currentRole && $currentRole->offersTranslation()) {
                 $existingCustomFields = $event && $event->custom_fields ? $event->custom_fields : [];
                 $fieldsNeedingTranslation = [];
 
@@ -1341,7 +1341,7 @@ class EventRepo
                     }
                 }
 
-                if (! empty($ticketCustomFields) && $currentRole && $currentRole->language_code !== 'en') {
+                if (! empty($ticketCustomFields) && $currentRole && $currentRole->offersTranslation()) {
                     $existingTicket = ! empty($data['id']) ? Ticket::find($data['id']) : null;
                     $existingCustomFields = $existingTicket && $existingTicket->custom_fields ? $existingTicket->custom_fields : [];
                     $fieldsNeedingTranslation = [];

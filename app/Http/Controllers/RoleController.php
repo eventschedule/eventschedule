@@ -3490,7 +3490,7 @@ class RoleController extends Controller
                 if (! empty($fieldData['name_en'])) {
                     // User provided a manual English name
                     $eventCustomFields[$fieldKey]['name_en'] = $fieldData['name_en'];
-                } elseif ($role->language_code !== 'en') {
+                } elseif ($role->offersTranslation()) {
                     // Check if name changed or name_en is missing
                     $existingField = $existingCustomFields[$fieldKey] ?? null;
                     $existingName = $existingField['name'] ?? null;
@@ -3568,7 +3568,7 @@ class RoleController extends Controller
 
                 if (! empty($labelData['value_en'])) {
                     $customLabels[$key]['value_en'] = $labelData['value_en'];
-                } elseif ($role->language_code !== 'en') {
+                } elseif ($role->offersTranslation()) {
                     // Preserve existing translation if value unchanged, otherwise null out for re-translation
                     $existingLabel = $existingLabels[$key] ?? null;
                     if ($existingLabel && ($existingLabel['value'] ?? null) === $labelData['value'] && ! empty($existingLabel['value_en'])) {

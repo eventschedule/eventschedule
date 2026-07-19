@@ -797,9 +797,10 @@ class Role extends Model implements MustVerifyEmail
                 continue;
             }
 
-            // Prefer name_en for English viewers (matches sponsor_logos / event_custom_fields pattern).
+            // Prefer name_en (the translation target's text) when the requested locale is this
+            // schedule's target language (matches sponsor_logos / event_custom_fields pattern).
             $name = null;
-            if ($locale === 'en' && ! empty($entry['name_en'])) {
+            if ($locale === ($this->translation_language_code ?: 'en') && ! empty($entry['name_en'])) {
                 $name = $entry['name_en'];
             }
             if ($name === null) {
@@ -1028,27 +1029,59 @@ class Role extends Model implements MustVerifyEmail
         }
     }
 
-    public static function cleanSubdomain($name)
+    public static function cleanSubdomain($name, $fallbackEnglish = null)
     {
         $subdomain = Str::slug($name);
 
-        // Check if significant content was lost during slugification
-        // (indicates non-Latin characters that Str::slug can't transliterate)
-        $nameChars = mb_strlen(preg_replace('/[^\p{L}\p{N}]/u', '', $name));
-        $slugChars = strlen(preg_replace('/[^a-z0-9]/', '', $subdomain));
+        // Significant content lost during slugification => a non-Latin script (Hebrew/CJK/Thai...)
+        // that Str::slug can't transliterate. Resolve a readable slug in order: caller-supplied
+        // English -> Gemini translation (descriptive names) -> transliteration (proper names) ->
+        // random (via the <= 2 guard below).
+        if (self::isLossySlug($name, $subdomain)) {
+            $resolved = '';
 
-        if ($nameChars > 0 && $slugChars < $nameChars / 2) {
-            try {
-                $translated = GeminiUtils::translate($name, 'auto', 'en');
-
-                if ($translated && strlen($translated) > 2) {
-                    $subdomain = Str::slug($translated);
-                } else {
-                    \Log::warning('Subdomain translation returned empty for: '.$name);
+            // 1) Caller-supplied English name, no API round-trip. Mirrors
+            //    SlugPatternUtils::defaultSlug() preferring an existing *_en before translating.
+            if ($fallbackEnglish) {
+                $enSlug = Str::slug($fallbackEnglish);
+                if (strlen($enSlug) > 2 && ! self::isLossySlug($fallbackEnglish, $enSlug)) {
+                    $resolved = $enSlug;
                 }
-            } catch (\Exception $e) {
-                \Log::warning('Subdomain translation failed for: '.$name.' - '.$e->getMessage());
             }
+
+            // 2) Translate descriptive names ("private pool" -> private-pool). Accept only when the
+            //    translation is itself Latin; a proper noun comes back unchanged/non-Latin (still
+            //    lossy) and falls through to transliteration.
+            if (! $resolved) {
+                try {
+                    $translated = GeminiUtils::translate($name, 'auto', 'en');
+                    if ($translated) {
+                        $translatedSlug = Str::slug($translated);
+                        if (strlen($translatedSlug) > 2 && ! self::isLossySlug($translated, $translatedSlug)) {
+                            $resolved = $translatedSlug;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Subdomain translation failed for: '.$name.' - '.$e->getMessage());
+                }
+            }
+
+            // 3) Romanize the ORIGINAL name (רותם רם -> rwtm-rm, 東京 -> dong-jing).
+            if (! $resolved) {
+                try {
+                    $romanized = Str::slug(self::transliterateToAscii($name));
+                    if (strlen($romanized) > 2) {
+                        $resolved = $romanized;
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Subdomain transliteration failed for: '.$name.' - '.$e->getMessage());
+                }
+            }
+
+            if ($resolved) {
+                $subdomain = $resolved;
+            }
+            // else: $subdomain stays the (empty) lossy slug -> <= 2 guard below -> random.
         }
 
         $reserved = [
@@ -1110,13 +1143,46 @@ class Role extends Model implements MustVerifyEmail
         return $subdomain;
     }
 
-    public static function generateSubdomain($name = '')
+    /**
+     * True when Str::slug dropped more than half of the source's letters/digits - the signal that a
+     * non-Latin script survived slugification only as separators (or nothing at all).
+     */
+    private static function isLossySlug($source, $slug): bool
+    {
+        $sourceChars = mb_strlen(preg_replace('/[^\p{L}\p{N}]/u', '', (string) $source));
+        $slugChars = strlen(preg_replace('/[^a-z0-9]/', '', (string) $slug));
+
+        return $sourceChars > 0 && $slugChars < $sourceChars / 2;
+    }
+
+    /**
+     * ICU romanization of any script to lowercase ASCII (Hebrew רותם -> "rwtm", 東京 -> "dong jing").
+     * Returns '' when ext-intl is unavailable or ICU fails, so callers degrade to a random subdomain
+     * instead of fataling.
+     */
+    public static function transliterateToAscii(string $name): string
+    {
+        if (! class_exists(\Transliterator::class)) {
+            return '';
+        }
+
+        $transliterator = \Transliterator::create('Any-Latin; Latin-ASCII; Lower()');
+        if (! $transliterator) {
+            return '';
+        }
+
+        $result = $transliterator->transliterate($name);
+
+        return $result === false ? '' : $result;
+    }
+
+    public static function generateSubdomain($name = '', $fallbackEnglish = null)
     {
         if (! $name) {
             $name = strtolower(\Str::random(8));
         }
 
-        $subdomain = self::cleanSubdomain($name);
+        $subdomain = self::cleanSubdomain($name, $fallbackEnglish);
 
         // Check variations of the subdomain
         $parts = explode('-', $subdomain);

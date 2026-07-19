@@ -62,6 +62,11 @@ if (! function_exists('get_translated_categories')) {
     function get_translated_categories(?\App\Models\Role $role = null, ?string $locale = null): array
     {
         if ($role) {
+            // With no explicit locale, surface the target-language category names while the guest is
+            // viewing the translation (mirrors how name/description use showing_translation()).
+            if ($locale === null && showing_translation($role)) {
+                $locale = $role->translation_language_code ?: 'en';
+            }
             $out = [];
             foreach ($role->getEventCategories($locale) as $entry) {
                 $out[$entry['id']] = $entry['name'];
@@ -99,6 +104,47 @@ if (! function_exists('is_valid_language_code')) {
         $supportedLanguages = config('app.supported_languages', ['en' => 'english']);
 
         return array_key_exists($languageCode, $supportedLanguages);
+    }
+}
+
+if (! function_exists('detect_content_language')) {
+    /**
+     * Best-effort detection of the dominant NON-Latin script in event content, returned as a
+     * supported language code ('he', 'ar', 'ru') or null. Deliberately conservative: it only returns
+     * a code when a non-Latin script is at least as prevalent as Latin letters, so it can OVERRIDE an
+     * account/UI language without ever clobbering correct Latin-script content. It decides on the
+     * first argument that contains letters (pass the event name first, description second), so a long
+     * Latin description can't dilute a short non-Latin name. Ranges mirror AbstractEventDesign.
+     */
+    function detect_content_language(?string ...$parts): ?string
+    {
+        foreach ($parts as $text) {
+            $text = is_string($text) ? trim($text) : '';
+            if ($text === '') {
+                continue;
+            }
+
+            $candidates = [
+                'he' => preg_match_all('/[\x{0590}-\x{05FF}\x{FB1D}-\x{FB4F}]/u', $text),
+                'ar' => preg_match_all('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\x{FB50}-\x{FDFF}\x{FE70}-\x{FEFF}]/u', $text),
+                'ru' => preg_match_all('/[\x{0400}-\x{04FF}]/u', $text),
+            ];
+            $latin = preg_match_all('/[A-Za-z]/', $text);
+
+            arsort($candidates);
+            $code = array_key_first($candidates);
+            $count = $candidates[$code];
+
+            // A letter-less part (emoji / numbers only) tells us nothing - try the next one.
+            if ($count === 0 && $latin === 0) {
+                continue;
+            }
+
+            // Confident override only when a non-Latin script is at least as prevalent as Latin.
+            return ($count > 0 && $count >= $latin && is_valid_language_code($code)) ? $code : null;
+        }
+
+        return null;
     }
 }
 

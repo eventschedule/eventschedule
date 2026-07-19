@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.2",
         "ext-gd": "*",
+        "ext-intl": "*",
         "codedge/laravel-selfupdater": "^3.9",
         "endroid/qr-code": "~6.0.0",
         "ezyang/htmlpurifier": "^4.17",

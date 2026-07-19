@@ -43,7 +43,7 @@
                                     <h3 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate" 
                                         title="{{ $event->translatedName() }}"
                                         dir="auto">
-                                        {{ $event->translatedName() }}
+                                        <x-user-text>{{ $event->translatedName() }}</x-user-text>
                                     </h3>
                                 </div>
 
@@ -56,7 +56,7 @@
                                         </svg>
                                     </div>
                                     <p class="text-lg text-gray-700 dark:text-gray-300 font-medium">
-                                        {{ $event->getVenueDisplayName() }}
+                                        <x-user-text>{{ $event->getVenueDisplayName() }}</x-user-text>
                                     </p>
                                 </div>
                                 

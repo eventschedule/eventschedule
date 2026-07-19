@@ -177,6 +177,7 @@
                                 <li>BCMath</li>
                                 <li>Ctype</li>
                                 <li>Fileinfo</li>
+                                <li>Intl</li>
                                 <li>JSON</li>
                                 <li>Mbstring</li>
                                 <li>OpenSSL</li>

@@ -553,11 +553,13 @@
             return {
                 event: {
                     name: '',
+                    name_en: '',
                     event_date: '',
                     event_start_time: '',
                     event_end_time: '',
                     is_online: false,
                     venue_name: '',
+                    venue_name_en: '',
                     venue_country_code: @json($role->country_code),
                     venue_address1: '',
                     venue_city: '',
@@ -570,6 +572,7 @@
                     ticket_currency_code: @json($defaultCurrency),
                     registration_url: '',
                     short_description: '',
+                    short_description_en: '',
                     coupon_code: '',
                     category_id: '',
                     group_id: '',
@@ -1204,6 +1207,7 @@
                     const p = data.parsed && data.parsed[0];
                     if (p) {
                         if (p.event_name) this.event.name = p.event_name;
+                        if (p.event_name_en) this.event.name_en = p.event_name_en;
 
                         // The parser returns one combined 'YYYY-MM-DD HH:MM' stamp; split it
                         // like the AI-import page does (parsed in browser-local time).
@@ -1246,6 +1250,7 @@
                         }
 
                         if (p.venue_name) this.event.venue_name = p.venue_name;
+                        if (p.venue_name_en) this.event.venue_name_en = p.venue_name_en;
                         if (p.event_address) this.event.venue_address1 = p.event_address;
                         if (p.event_city) this.event.venue_city = p.event_city;
                         if (p.event_state) this.event.venue_state = p.event_state;
@@ -1262,6 +1267,7 @@
                         }
                         if (p.registration_url) this.event.registration_url = p.registration_url;
                         if (p.short_description) this.event.short_description = p.short_description;
+                        if (p.short_description_en) this.event.short_description_en = p.short_description_en;
                         if (p.category_id && this.categoryIds.includes(String(p.category_id))) {
                             this.event.category_id = String(p.category_id);
                         }
@@ -1333,6 +1339,8 @@
                     ticket_price: this.event.ticket_price,
                     ticket_currency_code: this.event.ticket_currency_code,
                     short_description: this.event.short_description,
+                    name_en: this.event.name_en || null,
+                    short_description_en: this.event.short_description_en || null,
                     coupon_code: this.event.coupon_code,
                     category_id: this.event.category_id || null,
                     curator_group_id: this.event.group_id || null,
@@ -1347,6 +1355,7 @@
                     body.event_url = this.event.event_url;
                 } else {
                     body.venue_name = this.event.venue_name;
+                    body.venue_name_en = this.event.venue_name_en || null;
                     body.venue_address1 = this.event.venue_address1;
                     body.venue_city = this.event.venue_city;
                     body.venue_state = this.event.venue_state;
@@ -1424,10 +1433,12 @@
                 this.autoFillImageUrl = null;
                 this.autoFillError = null;
                 this.event.name = '';
+                this.event.name_en = '';
                 this.event.event_date = '';
                 this.event.event_start_time = '';
                 this.event.event_end_time = '';
                 this.event.venue_name = '';
+                this.event.venue_name_en = '';
                 this.event.venue_address1 = '';
                 this.event.venue_city = '';
                 this.event.venue_state = '';
@@ -1439,6 +1450,7 @@
                 this.event.ticket_price = '';
                 this.event.registration_url = '';
                 this.event.short_description = '';
+                this.event.short_description_en = '';
                 this.event.coupon_code = '';
                 this.event.category_id = '';
                 this.event.group_id = '';

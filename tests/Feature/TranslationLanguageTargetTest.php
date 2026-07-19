@@ -238,4 +238,192 @@ class TranslationLanguageTargetTest extends TestCase
         $this->assertNotNull($role->translation_language_code);
         $this->assertSame($role->language_code ?: 'en', $role->translation_language_code);
     }
+
+    public function test_offers_translation_gates_custom_field_and_category_translation(): void
+    {
+        // The save-time custom-field / label / category translation gates in EventRepo and
+        // RoleController now use offersTranslation(). An English-authored schedule with a foreign
+        // target must translate (the gate previously hardcoded language_code !== 'en' and skipped it).
+        $user = $this->createOwner();
+
+        $englishToFrench = $this->createRole($user, 'venue', ['language_code' => 'en', 'translation_language_code' => 'fr']);
+        $this->assertTrue($englishToFrench->offersTranslation(), 'en->fr must translate custom fields/labels/categories');
+
+        $englishToEnglish = $this->createRole($user, 'venue', ['language_code' => 'en', 'translation_language_code' => 'en']);
+        $this->assertFalse($englishToEnglish->offersTranslation(), 'en->en has nothing to translate');
+    }
+
+    public function test_event_categories_show_target_translation_by_locale(): void
+    {
+        $user = $this->createOwner();
+
+        // Italian schedule translating to English: name_en holds the English text.
+        $italianToEnglish = $this->createRole($user, 'venue', ['language_code' => 'it', 'translation_language_code' => 'en']);
+        $italianToEnglish->event_categories = [
+            ['id' => 100, 'name' => 'Concierto', 'name_en' => 'Concert'],
+        ];
+        $italianToEnglish->saveQuietly();
+
+        $this->assertSame('Concert', $italianToEnglish->getEventCategories('en')[0]['name'], 'target locale shows name_en');
+        $this->assertSame('Concierto', $italianToEnglish->getEventCategories('it')[0]['name'], 'authored locale shows name');
+        $this->assertSame('Concierto', $italianToEnglish->getEventCategories(null)[0]['name'], 'no locale shows authored name');
+
+        // English schedule translating to French: name_en holds the French text, surfaced when the
+        // requested locale is the target 'fr' (the previously-hardcoded 'en' check would have missed it).
+        $englishToFrench = $this->createRole($user, 'venue', ['language_code' => 'en', 'translation_language_code' => 'fr']);
+        $englishToFrench->event_categories = [
+            ['id' => 100, 'name' => 'Party', 'name_en' => 'Fete'],
+        ];
+        $englishToFrench->saveQuietly();
+
+        $this->assertSame('Fete', $englishToFrench->getEventCategories('fr')[0]['name'], 'target locale (fr) shows name_en');
+        $this->assertSame('Party', $englishToFrench->getEventCategories('en')[0]['name'], 'non-target locale shows authored name');
+    }
+
+    public function test_get_translated_categories_follows_translation_session(): void
+    {
+        // The helper passes no explicit locale; it must surface the target-language category name
+        // while the guest is viewing the translation, and the authored name otherwise.
+        $user = $this->createOwner();
+        $role = $this->createRole($user, 'venue', ['language_code' => 'it', 'translation_language_code' => 'en']);
+        $role->event_categories = [
+            ['id' => 100, 'name' => 'Concierto', 'name_en' => 'Concert'],
+        ];
+        $role->saveQuietly();
+
+        $this->assertSame('Concierto', get_translated_categories($role)[100], 'not translating: authored name');
+
+        session()->put('translate', true);
+        $this->assertSame('Concert', get_translated_categories($role)[100], 'translating: target-language name');
+        session()->forget('translate');
+    }
+
+    public function test_detect_content_language_maps_dominant_non_latin_script(): void
+    {
+        $this->assertSame('he', detect_content_language('אירוע מוזיקה'));
+        $this->assertSame('ar', detect_content_language('مهرجان'));
+        $this->assertSame('ru', detect_content_language('Москва'));
+        $this->assertNull(detect_content_language('Summer Concert'));
+        $this->assertNull(detect_content_language('Concert אירוע'), 'Latin-majority keeps the account language');
+        $this->assertSame('he', detect_content_language('אירוע Live'), 'non-Latin majority overrides');
+        $this->assertNull(detect_content_language(''));
+        $this->assertNull(detect_content_language(null));
+        // Decides on the first part that has letters (the event name), not a long Latin description.
+        $this->assertSame('he', detect_content_language('אירוע', 'A much longer english description here'));
+    }
+
+    public function test_guest_submit_tags_new_talent_and_venue_with_content_language(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['accept_requests' => true, 'require_account' => true]);
+
+        // An English-account submitter posting Hebrew content: the auto-created talent/venue must be
+        // tagged 'he' (from the content), not 'en' (from the account), or the name never translates.
+        $submitter = $this->createOwner();
+        $submitter->language_code = 'en';
+        $submitter->save();
+
+        $this->actingAs($submitter)
+            ->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), [
+                'name' => 'קונצרט חורף',
+                'venue_name' => 'היכל התרבות',
+                'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+            ])
+            ->assertOk();
+
+        $talent = $submitter->talents()->first();
+        $this->assertNotNull($talent);
+        $this->assertSame('he', $talent->language_code);
+
+        $event = Event::where('name', 'קונצרט חורף')->first();
+        $this->assertNotNull($event);
+        $event->load('venue');
+        $this->assertSame('he', $event->venue->language_code);
+        $this->assertSame('he', $event->getLanguageCode());
+        $this->assertSame('en', $event->getTranslationLanguageCode(), 'source he != target en, so the cron translates');
+    }
+
+    public function test_guest_submit_english_content_keeps_account_language(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['accept_requests' => true, 'require_account' => true]);
+
+        $submitter = $this->createOwner();
+        $submitter->language_code = 'en';
+        $submitter->save();
+
+        $this->actingAs($submitter)
+            ->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), [
+                'name' => 'Summer Concert',
+                'venue_name' => 'City Hall',
+                'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+            ])
+            ->assertOk();
+
+        $talent = $submitter->talents()->first();
+        $this->assertSame('en', $talent->language_code, 'Latin content must not clobber the account language');
+
+        $event = Event::where('name', 'Summer Concert')->first();
+        $event->load('venue');
+        $this->assertSame('en', $event->venue->language_code);
+        $this->assertSame('en', $event->getLanguageCode());
+    }
+
+    public function test_guest_submit_forwards_ai_english_name_and_survives_saving_hook(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['accept_requests' => true, 'require_account' => true]);
+
+        $submitter = $this->createOwner();
+
+        // The AI-parse box already produced the English name; forwarding it gives an immediate
+        // translation instead of waiting for the hourly cron. The saving hook only nulls name_en on
+        // UPDATE ($model->exists), so a forwarded value must survive the initial insert.
+        $this->actingAs($submitter)
+            ->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), [
+                'name' => 'קונצרט',
+                'name_en' => 'Concert',
+                'short_description' => 'תיאור קצר',
+                'short_description_en' => 'A concert',
+                'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+            ])
+            ->assertOk();
+
+        $event = Event::where('name', 'קונצרט')->first();
+        $this->assertNotNull($event);
+        $this->assertSame('Concert', $event->name_en);
+        $this->assertSame('A concert', $event->short_description_en);
+    }
+
+    public function test_guest_submit_leaves_reused_talent_but_tags_new_venue(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createCurator($owner, ['accept_requests' => true, 'require_account' => true]);
+
+        // An existing English talent is reused (we never mutate a shared schedule's language), but the
+        // new venue is still tagged from the content, and the venue wins in getLanguageCode().
+        $submitter = $this->createOwner();
+        $existingTalent = $this->createRole($submitter, 'talent', ['language_code' => 'en', 'translation_language_code' => 'en']);
+
+        $this->actingAs($submitter)
+            ->postJson(route('event.guest_import.store', ['subdomain' => $curator->subdomain]), [
+                'name' => 'קונצרט חורף',
+                'venue_name' => 'היכל התרבות',
+                'starts_at' => now()->addDays(3)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+            ])
+            ->assertOk();
+
+        $existingTalent->refresh();
+        $this->assertSame('en', $existingTalent->language_code, 'reused talent is left untouched');
+
+        $event = Event::where('name', 'קונצרט חורף')->first();
+        $this->assertNotNull($event);
+        $event->load('venue');
+        $this->assertSame('he', $event->venue->language_code);
+        $this->assertSame('he', $event->getLanguageCode(), 'venue-first resolution rescues translation');
+    }
 }

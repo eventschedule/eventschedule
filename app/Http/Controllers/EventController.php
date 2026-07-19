@@ -2117,7 +2117,12 @@ class EventController extends Controller
         // creates the user account + talent schedule - so a null name can't reach the typed
         // SlugPatternUtils::generateSlug(string $eventName) inside saveEvent() (TypeError otherwise).
         // Covers both the non-account save below and the require_account path.
-        $request->validate(['name' => ['required', 'string', 'max:255']]);
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'name_en' => ['nullable', 'string', 'max:255'],
+            'venue_name_en' => ['nullable', 'string', 'max:255'],
+            'short_description_en' => ['nullable', 'string', 'max:255'],
+        ]);
 
         // Prevent guests from injecting any visibility state
         $request->request->remove('is_draft');
@@ -2264,6 +2269,13 @@ class EventController extends Controller
             }
         }
 
+        // Tag the auto-created talent/venue with the language the event is actually written in, not
+        // the submitter's UI/account language. Only a clearly non-Latin script overrides; Latin
+        // content keeps the account language. Without this, an English-account guest posting Hebrew
+        // gets getLanguageCode() == target so the name never translates. The user's own account
+        // language_code is intentionally left untouched.
+        $contentLang = detect_content_language($request->input('name'), $request->input('short_description'));
+
         // Resolve the submitter's talent schedule (reuse, or auto-create from the page name).
         if ($request->filled('selected_talent_id')) {
             $talent = $user->talents()->where('roles.id', UrlUtils::decodeId($request->selected_talent_id))->first();
@@ -2283,7 +2295,7 @@ class EventController extends Controller
             // talent's own guest page renders them in its own timezone (Event::getStartDateTime()
             // falls back to creatorRole->timezone for logged-out viewers). The form warns the guest
             // when their device timezone differs. The user *account* still keeps the browser value.
-            $talent = $this->createTalentSchedule($user, $name, $role->timezone, $user->language_code);
+            $talent = $this->createTalentSchedule($user, $name, $role->timezone, $contentLang ?: $user->language_code);
         }
 
         // Auto-follow the curator (the form discloses this). Demo users never follow.
@@ -2298,6 +2310,12 @@ class EventController extends Controller
         // Mirror the AP acceptance rule so require-approval curators get a pending item.
         $isAccepted = ($role->accept_requests && ! $role->require_approval)
             || ($role->approved_subdomains && in_array($talent->subdomain, $role->approved_subdomains));
+
+        // Tag the auto-created venue with the event's content language too (the venue wins in
+        // Event::getLanguageCode()), so translation also works when an existing talent is reused.
+        if ($contentLang && ! $request->filled('venue_language_code')) {
+            $request->merge(['venue_language_code' => $contentLang]);
+        }
 
         try {
             // The event saves onto the submitter's talent schedule, but the time they typed is the
@@ -2682,7 +2700,7 @@ class EventController extends Controller
         } elseif ($request->venue_name || $request->venue_address1 || $request->venue_city) {
             $venue = new Role;
             $venue->name = $request->venue_name ?? null;
-            $venue->subdomain = Role::generateSubdomain($request->venue_name);
+            $venue->subdomain = Role::generateSubdomain($request->venue_name, $request->venue_name_en);
             $venue->type = 'venue';
             $venue->address1 = $request->venue_address1;
             $venue->city = $request->venue_city;
