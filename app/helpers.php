@@ -493,6 +493,29 @@ if (! function_exists('is_demo_mode')) {
     }
 }
 
+if (! function_exists('can_self_update')) {
+    /**
+     * Whether the self-updater UI/route is available to the given user.
+     *
+     * Disabled on nexus (eventschedule.com deploys via git/CI) and in testing.
+     * On a multi-tenant self-hosted SaaS (hosted) it is operator-only (admin),
+     * so a tenant can't trigger a global update. On a plain selfhost it is
+     * available to any authenticated user.
+     */
+    function can_self_update(?\App\Models\User $user = null): bool
+    {
+        if (config('app.is_nexus') || config('app.is_testing')) {
+            return false;
+        }
+
+        if (! config('app.hosted')) {
+            return true; // plain selfhost - any authenticated user
+        }
+
+        return (bool) ($user ?? auth()->user())?->isAdmin(); // self-hosted SaaS - admin only
+    }
+}
+
 if (! function_exists('is_demo_role')) {
     /**
      * Check if a given role is the demo role

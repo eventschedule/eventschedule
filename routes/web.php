@@ -140,13 +140,18 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     Route::post('/test_database', [AppController::class, 'testDatabase'])->name('app.test_database');
 }
 
-// Self-update is available on any non-nexus install (selfhosted or a self-hosted SaaS),
-// not just plain selfhost. It is operator-only: the 'admin' middleware (EnsureUserIsAdmin)
-// gates it so individual tenants on a multi-tenant install cannot trigger a global update.
+// Self-update is available on any non-nexus install (selfhosted or a self-hosted SaaS).
+// On a multi-tenant self-hosted SaaS it is operator-only (the 'admin' middleware,
+// EnsureUserIsAdmin, so a tenant cannot trigger a global update); on a plain selfhost any
+// authenticated user may trigger it. Keep this in sync with the can_self_update() helper.
 if (! config('app.is_nexus') && ! config('app.is_testing')) {
+    $updateMiddleware = ['auth', 'verified'];
+    if (config('app.hosted')) {
+        $updateMiddleware[] = 'admin';
+    }
     Route::match(['get', 'post'], '/update', [AppController::class, 'update'])
         ->name('app.update')
-        ->middleware(['auth', 'verified', 'admin']);
+        ->middleware($updateMiddleware);
 }
 
 require __DIR__.'/auth.php';
