@@ -308,12 +308,12 @@ https://example.com/event/summer-concert</code></pre>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">{date_dmy}</code></td>
-                                            <td>Day/month format</td>
+                                            <td>Day/month format (year added for other years)</td>
                                             <td>15/3</td>
                                         </tr>
                                         <tr>
                                             <td><code class="doc-inline-code">{date_mdy}</code></td>
-                                            <td>Month/day format</td>
+                                            <td>Month/day format (year added for other years)</td>
                                             <td>3/15</td>
                                         </tr>
                                         <tr>

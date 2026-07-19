@@ -75,14 +75,14 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 > **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; no new dependencies or external assets.
 
-**Restyle progress:** 0 / 31 applied
+**Restyle progress:** 2 / 31 applied
 
 **Verified (Jul 2026 audit):** 31 / 31 audited faithful to their briefs; 8 pages received small brief-completion fixes (see the Verified column).
 
 | Reviewed | Updated | Verified | Page | URL | Notes |
 |:--------:|:-------:|:-------:|------|-----|-------|
-| ✅ |  | ✅ | For Musicians | `/for-musicians` | |
-| ✅ |  | ✅ rendered dead class | For DJs | `/for-djs` | |
+| ✅ | ✅ | ✅ | For Musicians | `/for-musicians` | "The Tour Poster" ground-up rebuild |
+| ✅ | ✅ | ✅ rendered dead class | For DJs | `/for-djs` | "The Neon Sign" ground-up rebuild |
 | ✅ |  | ✅ | For Comedians | `/for-comedians` | |
 | ✅ |  | ✅ | For Circus and Acrobatics | `/for-circus-acrobatics` | |
 | ✅ |  | ✅ | For Magicians | `/for-magicians` | |

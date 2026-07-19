@@ -2020,10 +2020,18 @@ abstract class AbstractEventDesign
             // Determine time format based on role's 24h setting
             $timeFormat = $this->role->use_24_hour_time ? 'H:i' : 'g:i A';
 
+            // Append a 2-digit year to the compact date tokens only when the event
+            // falls in a different year than "now" (schedule timezone), so a
+            // next-year event isn't mistaken for the current year. Matches the
+            // text-graphic path in EventTextGenerator::buildReplacements().
+            $showYear = $startDate->year !== Carbon::now($tz)->year;
+            $dmyFormat = $showYear ? 'j/n/y' : 'j/n';
+            $mdyFormat = $showYear ? 'n/j/y' : 'n/j';
+
             $replacements = [
                 // Date variables
-                '{date_mdy}' => $startDate->format('n/j'),
-                '{date_dmy}' => $startDate->format('j/n'),
+                '{date_mdy}' => $startDate->format($mdyFormat),
+                '{date_dmy}' => $startDate->format($dmyFormat),
                 '{date_full_mdy}' => $startDate->format('m/d/Y'),
                 '{date_full_dmy}' => $startDate->format('d/m/Y'),
                 '{day_name}' => $startDate->translatedFormat('l'),

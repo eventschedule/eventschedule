@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Utils\EventTextGenerator;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Tests\Feature\Concerns\CreatesScheduleData;
@@ -212,5 +213,47 @@ class EventTextGeneratorTest extends TestCase
             $this->assertStringStartsWith('eventschedule.test', $urlLine, "URL line not bare: {$urlLine}");
             $this->assertStringNotContainsString(self::RLM, $urlLine);
         }
+    }
+
+    public function test_current_year_event_date_has_no_year(): void
+    {
+        $this->forceDottedHost();
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['language_code' => 'en']);
+
+        // Mid-year in the current year, so the compact {date_dmy} stays year-less
+        // ("15/6") regardless of the schedule timezone.
+        $sameYear = Carbon::now()->setDate(Carbon::now()->year, 6, 15)->setTime(12, 0);
+        $event = $this->createEvent($role, [
+            'name' => 'This Year Event',
+            'starts_at' => $sameYear->format('Y-m-d H:i:s'),
+        ]);
+
+        $text = EventTextGenerator::generate($role, [$event]);
+
+        $this->assertStringContainsString('15/6', $text);
+        // No trailing "/yy" year segment on the date token.
+        $this->assertStringNotContainsString('15/6/', $text);
+    }
+
+    public function test_other_year_event_date_includes_year(): void
+    {
+        $this->forceDottedHost();
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['language_code' => 'en']);
+
+        // Same day/month but next year: without the year the list would look out of
+        // chronological order, so {date_dmy} appends a 2-digit year ("15/6/27").
+        $nextYear = Carbon::now()->addYear()->setDate(Carbon::now()->year + 1, 6, 15)->setTime(12, 0);
+        $event = $this->createEvent($role, [
+            'name' => 'Next Year Event',
+            'starts_at' => $nextYear->format('Y-m-d H:i:s'),
+        ]);
+
+        $text = EventTextGenerator::generate($role, [$event]);
+
+        $this->assertStringContainsString('15/6/'.$nextYear->format('y'), $text);
     }
 }

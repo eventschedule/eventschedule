@@ -942,7 +942,9 @@ class MarketingController extends Controller
      */
     public function saas()
     {
-        return view('marketing.saas');
+        return view('marketing.saas', [
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
+        ]);
     }
 
     /**

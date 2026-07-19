@@ -2,6 +2,9 @@
 
 return [
 
+    // Anti-abuse: daily event-creation cap (EventCreationLimitException)
+    'event_create_daily_limit_reached' => 'Je hebt de dagelijkse limiet voor het aanmaken van evenementen bereikt. Probeer het morgen opnieuw.',
+
     // Admin: site-wide custom header/footer code
     'header_footer_code' => 'Header- / footercode',
     'header_footer_code_intro' => 'Voeg aangepaste code toe, zoals Google Tag Manager of analyse, aan alle openbare pagina\'s.',

@@ -317,6 +317,14 @@ class EventRepo
         $user = $request->user();
         $venue = null;
 
+        // Anti-abuse: reject a brand-new event when the target schedule or the acting user has hit
+        // its daily creation cap. Hosted-only (canCreateEvent() returns true on selfhost). Checked
+        // up front, before any side effects (venue creation, etc.), so a blocked request writes
+        // nothing. Legitimate bulk flows (calendar sync, backup restore, demo) bypass saveEvent().
+        if ($event === null && $currentRole && ! $currentRole->canCreateEvent($user)) {
+            throw new \App\Exceptions\EventCreationLimitException;
+        }
+
         // The timezone the entered wall-clock is anchored to, and the timezone any schedule created
         // along the way inherits. Normally the schedule being saved onto, but guest submissions save
         // onto the submitter's own talent schedule while the time they typed is the curator's local
@@ -1053,6 +1061,12 @@ class EventRepo
         }
 
         $event->save();
+
+        // Anti-abuse: count this newly-created event toward the schedule's / user's daily cap.
+        // Hosted-only and silent-fail inside track(); mirrors the enforcement guard above.
+        if ($isNewEvent && $currentRole) {
+            \App\Services\UsageTrackingService::track(\App\Services\UsageTrackingService::EVENT_CREATE, $currentRole->id);
+        }
 
         if ($venue) {
             $roles[] = $venue;

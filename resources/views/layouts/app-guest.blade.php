@@ -585,8 +585,11 @@
 
     @if (! request()->embed && ! config('app.is_nexus') && $role->showBranding())
     <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
-        <a href="https://eventschedule.com" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}" class="block rounded-full bg-gray-400 p-[1px]">
-            <img src="{{ url('/images/logo.webp') }}" alt="Event Schedule" class="h-6 w-6 rounded-full">
+        {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
+        <a href="https://eventschedule.com" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
+           class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900">
+            <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
+            <span>Event Schedule</span>
         </a>
     </div>
     @endif

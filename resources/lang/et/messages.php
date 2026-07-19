@@ -2,6 +2,9 @@
 
 return [
 
+    // Anti-abuse: daily event-creation cap (EventCreationLimitException)
+    'event_create_daily_limit_reached' => 'Olete jõudnud sündmuste loomise päevase limiidini. Palun proovige homme uuesti.',
+
     // Admin: site-wide custom header/footer code
     'header_footer_code' => 'Päise / jaluse kood',
     'header_footer_code_intro' => 'Lisa kohandatud kood, näiteks Google Tag Manager või analüütika, kõigile avalikele külalislehtedele.',

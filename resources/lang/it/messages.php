@@ -2,6 +2,9 @@
 
 return [
 
+    // Anti-abuse: daily event-creation cap (EventCreationLimitException)
+    'event_create_daily_limit_reached' => 'Hai raggiunto il limite giornaliero per la creazione di eventi. Riprova domani.',
+
     // Admin: site-wide custom header/footer code
     'header_footer_code' => 'Codice header / footer',
     'header_footer_code_intro' => 'Aggiungi codice personalizzato, come Google Tag Manager o strumenti di analisi, a tutte le pagine pubbliche.',

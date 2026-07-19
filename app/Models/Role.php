@@ -1963,6 +1963,90 @@ class Role extends Model implements MustVerifyEmail
         return $count < $limit;
     }
 
+    public function eventCreateDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        if ($this->isOnTrial()) {
+            return config('usage.event_create_daily_limit_trial');
+        }
+
+        if ($this->isEnterprise()) {
+            return config('usage.event_create_daily_limit_enterprise');
+        }
+
+        return config('usage.event_create_daily_limit_pro');
+    }
+
+    public function eventCreateUserDailyLimit(): ?int
+    {
+        if (! config('app.hosted')) {
+            return null;
+        }
+
+        if ($this->isOnTrial()) {
+            return config('usage.event_create_user_daily_limit_trial');
+        }
+
+        if ($this->isEnterprise()) {
+            return config('usage.event_create_user_daily_limit_enterprise');
+        }
+
+        return config('usage.event_create_user_daily_limit_pro');
+    }
+
+    /**
+     * Anti-abuse guard: whether another event may be created against this schedule right now.
+     * Both limits are hosted-only (the limit helpers return null on selfhost = unlimited). Two
+     * independent daily caps must each pass:
+     *   - Per-schedule: events created today against THIS schedule.
+     *   - Per-user backstop: events created today across every schedule the acting user is an
+     *     editor (owner/admin) of - stops one account spreading volume across many schedules.
+     *     Skipped for anonymous guests, who are bounded by the per-schedule cap plus the per-IP
+     *     route throttle.
+     */
+    public function canCreateEvent(?User $actingUser = null): bool
+    {
+        $today = now()->toDateString();
+        $operation = \App\Services\UsageTrackingService::EVENT_CREATE;
+
+        $scheduleLimit = $this->eventCreateDailyLimit();
+
+        if (! is_null($scheduleLimit)) {
+            $scheduleCount = (int) \App\Models\UsageDaily::where('role_id', $this->id)
+                ->where('date', $today)
+                ->where('operation', $operation)
+                ->sum('count');
+
+            if ($scheduleCount >= $scheduleLimit) {
+                return false;
+            }
+        }
+
+        if ($actingUser) {
+            $userLimit = $this->eventCreateUserDailyLimit();
+
+            if (! is_null($userLimit)) {
+                $roleIds = $actingUser->editor()->pluck('roles.id');
+
+                if ($roleIds->isNotEmpty()) {
+                    $userCount = (int) \App\Models\UsageDaily::whereIn('role_id', $roleIds)
+                        ->where('date', $today)
+                        ->where('operation', $operation)
+                        ->sum('count');
+
+                    if ($userCount >= $userLimit) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     public function aiAgendaDailyLimit(): ?int
     {
         if (! config('app.hosted')) {

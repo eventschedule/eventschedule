@@ -15,4 +15,13 @@ return [
     'ai_parse_daily_limit_enterprise' => (int) env('AI_PARSE_DAILY_LIMIT_ENTERPRISE', 100),
     'ai_agenda_daily_limit_enterprise' => (int) env('AI_AGENDA_DAILY_LIMIT_ENTERPRISE', 10),
     'ai_content_daily_limit_enterprise' => (int) env('AI_CONTENT_DAILY_LIMIT_ENTERPRISE', 50),
+
+    // Anti-abuse caps on how many events a single schedule / user may create per day (hosted only).
+    // Generous enough that no legitimate organizer is affected, low enough that mass abuse is stopped.
+    'event_create_daily_limit_trial' => (int) env('EVENT_CREATE_DAILY_LIMIT_TRIAL', 100),
+    'event_create_daily_limit_pro' => (int) env('EVENT_CREATE_DAILY_LIMIT_PRO', 500),
+    'event_create_daily_limit_enterprise' => (int) env('EVENT_CREATE_DAILY_LIMIT_ENTERPRISE', 1000),
+    'event_create_user_daily_limit_trial' => (int) env('EVENT_CREATE_USER_DAILY_LIMIT_TRIAL', 300),
+    'event_create_user_daily_limit_pro' => (int) env('EVENT_CREATE_USER_DAILY_LIMIT_PRO', 1500),
+    'event_create_user_daily_limit_enterprise' => (int) env('EVENT_CREATE_USER_DAILY_LIMIT_ENTERPRISE', 3000),
 ];

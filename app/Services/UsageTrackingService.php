@@ -87,6 +87,9 @@ class UsageTrackingService
     // Push notifications
     const PUSH_NOTIFICATION = 'push_notification';
 
+    // Event operations
+    const EVENT_CREATE = 'event_create';
+
     /**
      * Track a usage operation. Silently fails so tracking never disrupts actual operations.
      */

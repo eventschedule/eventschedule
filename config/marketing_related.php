@@ -27,10 +27,17 @@ return [
     ],
 
     'selfhost' => [
+        ['title' => 'White-Label SaaS', 'path' => '/saas', 'blurb' => 'Turn your install into a ticketing business you own.'],
         ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature included in the selfhosted build.'],
         ['title' => 'AI Features', 'path' => '/features/ai', 'blurb' => 'Connect your own Gemini key for AI import and blog generation.'],
         ['title' => 'Developer Docs', 'path' => '/docs/developer', 'blurb' => 'REST API reference and contributor guide.'],
-        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'Compare hosted and selfhosted options.'],
+    ],
+
+    'saas' => [
+        ['title' => 'Selfhost', 'path' => '/selfhost', 'blurb' => 'Install Event Schedule on your own server with Docker or Softaculous.'],
+        ['title' => 'White Label', 'path' => '/features/white-label', 'blurb' => 'Remove branding and make the platform look like your product.'],
+        ['title' => 'Open Source', 'path' => '/open-source', 'blurb' => 'Read, fork, and contribute to the code you build your business on.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
     ],
 
     'features/ai' => [
@@ -52,6 +59,13 @@ return [
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Fill the calendar at the venues you play.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Keep more of every ticket you sell.'],
+    ],
+
+    'for-djs' => [
+        ['title' => 'For Musicians', 'path' => '/for-musicians', 'blurb' => 'Tour dates, gigs, and fans on one link.'],
+        ['title' => 'For Nightclubs', 'path' => '/for-nightclubs', 'blurb' => 'Run the room your sets light up.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell advance tickets with zero platform fees.'],
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate set-time flyers for your socials.'],
     ],
 
     'for-venues' => [

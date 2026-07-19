@@ -159,6 +159,15 @@ class EventTextGenerator
         // Determine time format based on role's 24h setting
         $timeFormat = $role->use_24_hour_time ? 'H:i' : 'g:i A';
 
+        // The compact date tokens omit the year to stay short, but an event in a
+        // different year than "now" then looks out of chronological order in the
+        // list (e.g. a Jul 2027 event renders as "11/7" and appears to precede a
+        // Jul 2026 "19/7"). Append a 2-digit year only when the event's year
+        // differs from the current year in the schedule timezone.
+        $showYear = $startDate->year !== \Carbon\Carbon::now($tz)->year;
+        $dmyFormat = $showYear ? 'j/n/y' : 'j/n';
+        $mdyFormat = $showYear ? 'n/j/y' : 'n/j';
+
         // Get URL formatting settings
         $urlIncludeHttps = $urlSettings['url_include_https'] ?? false;
         $urlIncludeId = $urlSettings['url_include_id'] ?? false;
@@ -185,8 +194,8 @@ class EventTextGenerator
             // Date/Time variables
             '{day_name}' => $startDate->translatedFormat('l'),
             '{day_short}' => $startDate->translatedFormat('D'),
-            '{date_dmy}' => $startDate->format('j/n'),
-            '{date_mdy}' => $startDate->format('n/j'),
+            '{date_dmy}' => $startDate->format($dmyFormat),
+            '{date_mdy}' => $startDate->format($mdyFormat),
             '{date_full_dmy}' => $startDate->format('d/m/Y'),
             '{date_full_mdy}' => $startDate->format('m/d/Y'),
             '{month}' => $startDate->format('n'),

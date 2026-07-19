@@ -2,6 +2,9 @@
 
 return [
 
+    // Anti-abuse: daily event-creation cap (EventCreationLimitException)
+    'event_create_daily_limit_reached' => 'Ai atins limita zilnică pentru crearea de evenimente. Te rugăm să încerci din nou mâine.',
+
     // Admin: site-wide custom header/footer code
     'header_footer_code' => 'Cod antet / subsol',
     'header_footer_code_intro' => 'Adăugați cod personalizat, precum Google Tag Manager sau instrumente de analiză, pe toate paginile publice.',

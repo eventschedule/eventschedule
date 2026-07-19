@@ -70,7 +70,7 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
         Route::post('/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
         Route::get('/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
-        Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store');
+        Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
         Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
@@ -383,7 +383,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/phone/send-code', [RoleController::class, 'phoneSendCode'])->name('role.phone.send_code')->middleware('throttle:5,1');
     Route::post('/{subdomain}/phone/verify-code', [RoleController::class, 'phoneVerifyCode'])->name('role.phone.verify_code')->middleware('throttle:10,1');
     Route::post('/{subdomain}/resend-invite/{hash}', [RoleController::class, 'resendInvite'])->name('role.resend_invite')->middleware('throttle:5,1');
-    Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store');
+    Route::post('/{subdomain}/store-event', [EventController::class, 'store'])->name('event.store')->middleware('throttle:60,1');
     Route::get('/{subdomain}/edit-event/{hash}', [EventController::class, 'edit'])->name('event.edit');
     Route::get('/{subdomain}/clone-event/{hash}', [EventController::class, 'clone'])->name('event.clone');
     Route::post('/{subdomain}/save-as-template/{hash}', [EventTemplateController::class, 'store'])->name('event_template.store');
@@ -420,12 +420,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::delete('/{subdomain}/uncurate-event/{hash}', [EventController::class, 'uncurate'])->name('event.uncurate');
     Route::get('/{subdomain}/import', [EventController::class, 'showImportHub'])->name('event.show_import');
     Route::get('/{subdomain}/import/ai', [EventController::class, 'showImport'])->name('event.show_import_ai');
-    Route::post('/{subdomain}/import/ai', [EventController::class, 'import'])->name('event.import');
+    Route::post('/{subdomain}/import/ai', [EventController::class, 'import'])->name('event.import')->middleware('throttle:60,1');
     Route::get('/{subdomain}/import/eventbrite', [EventbriteController::class, 'show'])->name('event.show_import_eventbrite');
     Route::post('/{subdomain}/import/eventbrite/connect', [EventbriteController::class, 'connect'])->name('event.eventbrite_connect')->middleware('throttle:10,1');
     Route::post('/{subdomain}/import/eventbrite/import', [EventbriteController::class, 'import'])->name('event.eventbrite_import')->middleware('throttle:60,1');
-    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse');
-    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts');
+    Route::post('/{subdomain}/parse', [EventController::class, 'parse'])->name('event.parse')->middleware('throttle:30,1');
+    Route::post('/{subdomain}/parse-event-parts', [EventController::class, 'parseEventParts'])->name('event.parse_parts')->middleware('throttle:30,1');
     Route::post('/{subdomain}/generate-flyer', [EventController::class, 'generateFlyer'])->name('event.generate_flyer');
     Route::get('/{subdomain}/generate-flyer/{requestId}', [EventController::class, 'pollFlyer'])->name('event.poll_flyer');
     Route::post('/{subdomain}/generate-style', [RoleController::class, 'generateStyle'])->name('role.generate_style');
@@ -1382,7 +1382,7 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::post('/{subdomain}/guest-add/check-email', [EventController::class, 'checkEmail'])->name('event.check_email')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
     Route::get('/{subdomain}/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
-    Route::post('/{subdomain}/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store');
+    Route::post('/{subdomain}/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');

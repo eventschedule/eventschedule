@@ -2653,6 +2653,12 @@ class EventController extends Controller
             abort(403, __('messages.not_authorized'));
         }
 
+        // Anti-abuse: this guest vector writes an event directly (bypassing EventRepo::saveEvent),
+        // so it enforces the daily creation cap itself. Guests key on the target schedule's cap.
+        if (! $role->canCreateEvent(auth()->user())) {
+            throw new \App\Exceptions\EventCreationLimitException;
+        }
+
         // Validate form input
         $rules = [
             'event_name' => ['nullable', 'string', 'max:255'],
@@ -2768,6 +2774,9 @@ class EventController extends Controller
         $eventName = $request->event_name ?: __('messages.booking_request');
         $event->slug = Str::slug($eventName).'-'.strtolower(Str::random(6));
         $event->save();
+
+        // Anti-abuse: count this booking-request event toward the schedule's daily cap.
+        \App\Services\UsageTrackingService::track(\App\Services\UsageTrackingService::EVENT_CREATE, $role->id);
 
         // Attach talent role
         $isAccepted = $role->require_approval ? null : true;

@@ -3,6 +3,9 @@
 
 return [
 
+    // Anti-abuse: daily event-creation cap (EventCreationLimitException)
+    'event_create_daily_limit_reached' => 'הגעת למגבלה היומית ליצירת אירועים. אנא נסה שוב מחר.',
+
     // Admin: site-wide custom header/footer code
     'header_footer_code' => 'קוד כותרת עליונה / תחתונה',
     'header_footer_code_intro' => 'הוסיפו קוד מותאם אישית, כגון Google Tag Manager או כלי ניתוח, לכל העמודים הציבוריים.',
