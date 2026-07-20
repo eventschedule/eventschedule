@@ -75,6 +75,20 @@ return [
         ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate show flyers for your socials.'],
     ],
 
+    'for-circus-acrobatics' => [
+        ['title' => 'For Magicians', 'path' => '/for-magicians', 'blurb' => 'Shows, residencies, and private bookings on one schedule.'],
+        ['title' => 'For Dance Groups', 'path' => '/for-dance-groups', 'blurb' => 'Rehearsals, recitals, and touring dates in one place.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate show posters for your socials.'],
+    ],
+
+    'for-magicians' => [
+        ['title' => 'For Comedians', 'path' => '/for-comedians', 'blurb' => 'Mics, guest sets, and headline dates on one link.'],
+        ['title' => 'For Circus & Acrobatics', 'path' => '/for-circus-acrobatics', 'blurb' => 'Shows, residencies, and private bookings in one place.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate show posters for your socials.'],
+    ],
+
     'for-venues' => [
         ['title' => 'For Music Venues', 'path' => '/for-music-venues', 'blurb' => 'Run every show from one schedule.'],
         ['title' => 'For Bars & Pubs', 'path' => '/for-bars', 'blurb' => 'Fill the room with trivia, bands, and events.'],
