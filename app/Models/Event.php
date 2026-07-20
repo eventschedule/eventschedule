@@ -1061,10 +1061,18 @@ class Event extends Model
         return $value;
     }
 
-    public function scopeInMonth($query, $gridStartUtc)
+    public function scopeInMonth($query, $gridStartUtc, $gridEndUtc = null)
     {
-        return $query->where(function ($q) use ($gridStartUtc) {
-            $q->where('starts_at', '>=', $gridStartUtc)
+        return $query->where(function ($q) use ($gridStartUtc, $gridEndUtc) {
+            $q->where(function ($q2) use ($gridStartUtc, $gridEndUtc) {
+                $q2->where('starts_at', '>=', $gridStartUtc);
+                if ($gridEndUtc) {
+                    // Upper-bound one-off events to the visible grid window so a schedule with
+                    // thousands of future events doesn't hydrate its entire event table at once.
+                    // Recurring and still-ongoing multi-day events keep their own clauses below.
+                    $q2->where('starts_at', '<=', $gridEndUtc);
+                }
+            })
                 ->orWhereNotNull('days_of_week')
                 ->orWhere(function ($q2) use ($gridStartUtc) {
                     $q2->where('duration', '>=', 24)

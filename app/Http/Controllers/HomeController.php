@@ -115,6 +115,9 @@ class HomeController extends Controller
 
         // Convert to UTC for database query
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        // Upper-bound the query to the visible grid window so a user with many future events
+        // doesn't hydrate their entire event table (matches buildCalendarResponse's default grid).
+        $endOfGridUtc = $startOfMonth->copy()->endOfMonth()->endOfWeek(6)->addDays(2)->setTimezone('UTC');
 
         $roleIds = $user->editor()->pluck('roles.id');
 
@@ -133,7 +136,7 @@ class HomeController extends Controller
                         $query->where('user_id', $user->id);
                     });
                 })
-                ->inMonth($startOfMonthUtc)
+                ->inMonth($startOfMonthUtc, $endOfGridUtc)
                 ->orderBy('starts_at')
                 ->get();
         } else {
@@ -464,6 +467,7 @@ class HomeController extends Controller
         $startOfMonth = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
 
         $startOfMonthUtc = $startOfMonth->copy()->setTimezone('UTC');
+        $endOfGridUtc = $startOfMonth->copy()->endOfMonth()->endOfWeek(6)->addDays(2)->setTimezone('UTC');
 
         $roleIds = $user->editor()->pluck('roles.id');
 
@@ -480,7 +484,7 @@ class HomeController extends Controller
                     $query->where('user_id', $user->id);
                 });
             })
-            ->inMonth($startOfMonthUtc)
+            ->inMonth($startOfMonthUtc, $endOfGridUtc)
             ->orderBy('starts_at')
             ->get();
 

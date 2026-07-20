@@ -82,7 +82,9 @@ html[data-es-view="list"] #calendar-panel-wrapper {
           // Filter events for upcoming events with videos (only on main role page, not event pages)
           $upcomingEventsWithVideos = collect();
           if (!$event) {
-            $upcomingEvents = $events->filter(function($event) {
+            // $carouselEvents is a dedicated bounded query (upcoming/ongoing events with talent
+            // videos) so this promo strip works across months without loading the full event set.
+            $upcomingEvents = ($carouselEvents ?? collect())->filter(function($event) {
               if (!$event->starts_at) return false;
               if (Carbon\Carbon::parse($event->starts_at)->isAfter(now())) return true;
               return $event->duration >= 24 && $event->getEndDateTime()->isAfter(now());

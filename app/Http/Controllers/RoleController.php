@@ -1419,6 +1419,15 @@ class RoleController extends Controller
         $startOfGrid = $startOfMonth->copy()->startOfWeek($firstDayOfWeek);
         $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
 
+        // Calendar grid end (including overflow days from the next month), used to upper-bound the
+        // event query so it only loads the visible window rather than every future event. The
+        // 2-day buffer absorbs timezone skew: matchesDate() places events by the EVENT's own
+        // timezone, so an event on the last grid day in a zone behind the schedule's could sit
+        // just past a tight bound. Extra loaded rows never render (buildEventsMap does exact
+        // per-day placement), so the query stays a safe superset of the visible window.
+        $lastDayOfWeek = ($firstDayOfWeek + 6) % 7;
+        $endOfGridUtc = $startOfMonth->copy()->endOfMonth()->endOfWeek($lastDayOfWeek)->addDays(2)->setTimezone('UTC');
+
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
@@ -1426,7 +1435,7 @@ class RoleController extends Controller
             // For event detail view (non-graphic), only check if calendar has events
             // The calendar partial loads data via Ajax, so we just need existence
             if ($role->isCurator()) {
-                $query = Event::inMonth($startOfGridUtc)
+                $query = Event::inMonth($startOfGridUtc, $endOfGridUtc)
                     ->whereIn('id', function ($query) use ($role) {
                         $query->select('event_id')
                             ->from('event_role')
@@ -1445,7 +1454,7 @@ class RoleController extends Controller
                 }
                 $hasCalendarEvents = $query->exists();
             } else {
-                $query = Event::inMonth($startOfGridUtc)
+                $query = Event::inMonth($startOfGridUtc, $endOfGridUtc)
                     ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true));
                 if (! $isMemberOrAdmin) {
                     $query->where('is_draft', false);
@@ -1462,7 +1471,7 @@ class RoleController extends Controller
             $events = $hasCalendarEvents ? collect([true]) : collect();
         } elseif ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc)
+                ->inMonth($startOfGridUtc, $endOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1474,7 +1483,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc)
+                ->inMonth($startOfGridUtc, $endOfGridUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -1530,6 +1539,25 @@ class RoleController extends Controller
                 $events = $events->filter($keep);
             }
             $pastEvents = $pastEvents->filter($keep);
+        }
+
+        // Dedicated bounded query for the homepage "upcoming events with videos" carousel. Kept
+        // separate from the calendar's month-windowed $events so it can promote the next videos
+        // across months without loading the entire event table (which OOMs large schedules). The
+        // blade re-filters this set with getFirstVideoUrl(), so the coarse youtube_links filter
+        // here just needs to be a superset.
+        $carouselEvents = collect();
+        if (! $event && ! $role->isTalent() && ! $role->hide_videos) {
+            $carouselEvents = Event::with('roles')
+                ->upcomingOrOngoing(Carbon::now('UTC'))
+                ->whereHas('roles', fn ($q) => $q->where('role_id', $role->id)->where('is_accepted', true))
+                ->whereHas('roles', fn ($q) => $q->where('type', 'talent')
+                    ->whereNotNull('youtube_links')
+                    ->where('youtube_links', '!=', '[]'))
+                ->when(! $isMemberOrAdmin, fn ($q) => $q->where('is_draft', false)->where('is_cancelled', false)->where('is_private', false))
+                ->orderBy('starts_at')
+                ->limit(20)
+                ->get();
         }
 
         // Track view for analytics (non-member visits only, skip embeds)
@@ -1647,6 +1675,7 @@ class RoleController extends Controller
             ->view($view, compact(
                 'subdomain',
                 'events',
+                'carouselEvents',
                 'role',
                 'otherRole',
                 'month',
@@ -1956,13 +1985,14 @@ class RoleController extends Controller
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
         $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
+        $endOfGridUtc = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->endOfMonth()->endOfWeek(($firstDayOfWeek + 6) % 7)->addDays(2)->setTimezone('UTC');
 
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc)
+                ->inMonth($startOfGridUtc, $endOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -1983,7 +2013,7 @@ class RoleController extends Controller
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc)
+                ->inMonth($startOfGridUtc, $endOfGridUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -2077,10 +2107,11 @@ class RoleController extends Controller
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
         $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
+        $endOfGridUtc = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->endOfMonth()->endOfWeek(($firstDayOfWeek + 6) % 7)->addDays(2)->setTimezone('UTC');
 
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets')
-                ->inMonth($startOfGridUtc)
+                ->inMonth($startOfGridUtc, $endOfGridUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -2097,7 +2128,7 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->inMonth($startOfGridUtc)
+                ->inMonth($startOfGridUtc, $endOfGridUtc)
                 ->orderBy('starts_at')
                 ->get();
         }
@@ -2258,11 +2289,12 @@ class RoleController extends Controller
             $firstDayOfWeek = $role->first_day_of_week ?? 0;
             $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
             $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
+            $endOfGridUtc = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->endOfMonth()->endOfWeek(($firstDayOfWeek + 6) % 7)->addDays(2)->setTimezone('UTC');
 
             if ($tab == 'schedule') {
                 if ($role->isCurator()) {
                     $events = Event::with('roles')
-                        ->inMonth($startOfGridUtc)
+                        ->inMonth($startOfGridUtc, $endOfGridUtc)
                         ->whereIn('id', function ($query) use ($role) {
                             $query->select('event_id')
                                 ->from('event_role')
@@ -2279,7 +2311,7 @@ class RoleController extends Controller
                                     ->where('is_accepted', true);
                             });
                         })
-                        ->inMonth($startOfGridUtc)
+                        ->inMonth($startOfGridUtc, $endOfGridUtc)
                         ->orderBy('starts_at')
                         ->get();
 
