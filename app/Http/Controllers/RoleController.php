@@ -65,6 +65,11 @@ class RoleController extends Controller
 {
     use Traits\CalendarDataTrait;
 
+    // Max events loaded for the guest list layout (event_layout = 'list'). The list only displays
+    // up to 100 upcoming events client-side, so the nearest 200 upcoming rows are a safe superset
+    // while keeping the query bounded (prevents hydrating the full event table on large schedules).
+    private const LIST_EVENT_CAP = 200;
+
     protected $eventRepo;
 
     public function __construct(EventRepo $eventRepo)
@@ -1990,9 +1995,16 @@ class RoleController extends Controller
         $isMemberOrAdmin = $user && ($user->isMember($subdomain) || $user->isAdmin());
         $unlockedEventIds = ! $isMemberOrAdmin ? $this->getUnlockedEventIds() : [];
 
+        // The list layout renders all upcoming events in one flat list, so it needs future events
+        // beyond the current month grid. Drop the upper-bound month window and cap the row count
+        // instead: bounded memory (this is what prevents the original OOM) and a safe superset of
+        // the events the list actually shows (it displays at most 100 upcoming events client-side).
+        $isListView = $request->boolean('list');
+        $queryEndUtc = $isListView ? null : $endOfGridUtc;
+
         if ($role->isCurator()) {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc, $endOfGridUtc)
+                ->inMonth($startOfGridUtc, $queryEndUtc)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -2010,10 +2022,11 @@ class RoleController extends Controller
                     });
                 })
                 ->orderBy('starts_at')
+                ->when($isListView, fn ($q) => $q->limit(self::LIST_EVENT_CAP))
                 ->get();
         } else {
             $events = Event::with(['roles', 'parts', 'tickets', 'approvedVideos', 'approvedPhotos', 'approvedComments.user', 'polls' => fn ($q) => $q->withCount('votes')])->withCount(['approvedVideos', 'approvedComments', 'approvedPhotos', 'polls'])
-                ->inMonth($startOfGridUtc, $endOfGridUtc)
+                ->inMonth($startOfGridUtc, $queryEndUtc)
                 ->where(function ($query) use ($role) {
                     $query->whereHas('roles', function ($query) use ($role) {
                         $query->where('role_id', $role->id)
@@ -2031,6 +2044,7 @@ class RoleController extends Controller
                     });
                 })
                 ->orderBy('starts_at')
+                ->when($isListView, fn ($q) => $q->limit(self::LIST_EVENT_CAP))
                 ->get();
         }
 

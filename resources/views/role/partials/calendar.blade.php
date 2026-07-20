@@ -2850,12 +2850,8 @@ const calendarApp = createApp({
                 }
             }
 
-            const now = new Date();
-            const currentMonth = now.getMonth() + 1;
-            const currentYear = now.getFullYear();
-            const isNavigatedAway = this.pageMonth !== currentMonth || this.pageYear !== currentYear;
-
-            if (view === 'list' && isNavigatedAway && !this.listDataLoaded) {
+            if (view === 'list' && !this.listDataLoaded) {
+                // The list needs the wide (row-capped) upcoming set, not just the current month grid.
                 this.isLoadingEvents = true;
                 this.fetchCalendarEvents({ skipMonthFilter: true });
             } else if (view === 'calendar' && this.listDataLoaded) {
@@ -3711,8 +3707,9 @@ const calendarApp = createApp({
                     url = '{{ isset($subdomain) ? route("role.calendar_events", ["subdomain" => $subdomain]) : "" }}';
                 }
                 const separator = url.includes('?') ? '&' : '?';
-                // Omit month/year so backend defaults to current month
-                url += separator + '_=1';
+                // List layout: omit month/year and request the unbounded (row-capped) upcoming set
+                // so future-month events load in one fetch instead of just the current month.
+                url += separator + 'list=1';
 
                 const response = await fetch(url);
                 const data = await response.json();
@@ -3792,8 +3789,13 @@ const calendarApp = createApp({
         document.documentElement.removeAttribute('data-es-view');
 
         if (this.isLoadingEvents) {
-            // Ajax mode: fetch events, then init popups after data loads
-            this.fetchCalendarEvents();
+            // Ajax mode: fetch events, then init popups after data loads. The list layout needs the
+            // wide (row-capped) upcoming set on first load, not just the current month grid.
+            if (this.currentView === 'list') {
+                this.fetchCalendarEvents({ skipMonthFilter: true });
+            } else {
+                this.fetchCalendarEvents();
+            }
         } else {
             // Graphic mode: data already server-rendered, init popups immediately
             this.initPopups();

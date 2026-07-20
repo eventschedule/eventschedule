@@ -91,6 +91,28 @@ class RoleGuestSurfaceCharacterizationTest extends TestCase
         $this->assertStringContainsString('Calendar Event', $response->getContent());
     }
 
+    public function test_calendar_events_list_mode_includes_future_month_events(): void
+    {
+        // The list layout loads all upcoming events in one flat fetch. A one-time event two months
+        // out must be excluded from the current-month calendar query but included when list=1 is set.
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue', ['event_layout' => 'list']);
+        $this->createEvent($role, [
+            'name' => 'Next Month Event',
+            'starts_at' => now()->addMonthsNoOverflow(2)->setTime(12, 0)->format('Y-m-d H:i:s'),
+        ]);
+
+        // Current-month calendar query (bounded window) should NOT contain the future-month event.
+        $bounded = $this->get('/'.$role->subdomain.'/api/calendar-events');
+        $bounded->assertOk();
+        $this->assertStringNotContainsString('Next Month Event', $bounded->getContent());
+
+        // List query (unbounded, row-capped) SHOULD contain it.
+        $list = $this->get('/'.$role->subdomain.'/api/calendar-events?list=1');
+        $list->assertOk();
+        $this->assertStringContainsString('Next Month Event', $list->getContent());
+    }
+
     public function test_calendar_events_for_unclaimed_schedule_returns_empty_shell(): void
     {
         $owner = $this->createOwner();
