@@ -81,17 +81,11 @@ class ResolveCustomDomain
                 $content = str_replace("http://{$role->subdomain}.{$baseDomain}", $customDomainUrl, $content);
                 $content = str_replace("//{$role->subdomain}.{$baseDomain}", "//{$host}", $content);
 
-                // Restore canonical, og:url, and hreflang to subdomain URL (SEO: canonical should always be the primary domain)
-                $content = str_replace(
-                    ['<link rel="canonical" href="'.$customDomainUrl, '<meta property="og:url" content="'.$customDomainUrl],
-                    ['<link rel="canonical" href="'.$subdomainUrl, '<meta property="og:url" content="'.$subdomainUrl],
-                    $content
-                );
-                $content = preg_replace(
-                    '/<link rel="alternate" hreflang="([^"]*)" href="'.preg_quote($customDomainUrl, '/').'/',
-                    '<link rel="alternate" hreflang="$1" href="'.$subdomainUrl,
-                    $content
-                );
+                // Canonical, og:url, and hreflang are left as the custom domain
+                // (the body rewrite above already points them at it): when a
+                // schedule has an active custom domain, that domain is the SEO
+                // primary for its guest portal, so self-referential URLs on the
+                // page served here should be the custom domain, not the subdomain.
 
                 $response->setContent($content);
             }
