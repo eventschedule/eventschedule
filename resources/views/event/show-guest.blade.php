@@ -1080,11 +1080,13 @@
             function hideCta() {
                 if (desktopCta) { desktopCta.style.display = 'none'; }
                 if (mobileCta) { mobileCta.style.display = 'none'; }
+                if (window.esUpdateA11yCtaClearance) { window.esUpdateA11yCtaClearance(); }
             }
 
             function showCta() {
                 if (desktopCta) { desktopCta.style.display = ''; }
                 if (mobileCta) { mobileCta.style.display = ''; }
+                if (window.esUpdateA11yCtaClearance) { window.esUpdateA11yCtaClearance(); }
             }
 
             function hidePanelsBelow() {
@@ -2154,6 +2156,34 @@
       @endif
     </div>
   </div>
+
+  {{-- Lift the accessibility widget above the sticky mobile CTA bar so it does not cover the button --}}
+  @if ($role->show_accessibility_widget)
+  <script {!! nonce_attr() !!}>
+  (function() {
+      var bar = document.getElementById('mobile-cta-bar');
+      if (!bar) return;
+      var root = document.documentElement;
+      function update() {
+          var h = bar.offsetHeight; // 0 when display:none (desktop `sm:hidden`, or form open)
+          if (h > 0) {
+              root.style.setProperty('--es-a11y-cta-clearance', h + 'px');
+              root.classList.add('es-a11y-cta-offset');
+          } else {
+              root.classList.remove('es-a11y-cta-offset');
+          }
+      }
+      window.esUpdateA11yCtaClearance = update;
+      update();
+      window.addEventListener('resize', update);
+      window.addEventListener('orientationchange', update);
+      window.addEventListener('load', update);
+      if (window.ResizeObserver) {
+          try { new ResizeObserver(update).observe(bar); } catch (e) {}
+      }
+  })();
+  </script>
+  @endif
 
   @if ($role->isPro() && $event->polls->count() > 0)
   <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!}></script>

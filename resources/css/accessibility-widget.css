@@ -29,3 +29,10 @@ html.es-a11y-reduce-motion *::after {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
 }
+
+/* Lift the widget above the mobile sticky CTA bar on the guest event page.
+   --es-a11y-cta-clearance is set (to the bar's px height) by show-guest.blade.php.
+   Compound selector wins over Tailwind's .bottom-6 (imported before @tailwind utilities). */
+html.es-a11y-cta-offset .es-a11y-root {
+    bottom: calc(var(--es-a11y-cta-clearance, 4.5rem) + 0.75rem);
+}
