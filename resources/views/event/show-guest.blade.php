@@ -891,8 +891,7 @@
               @endif
             >
                 <button type="button"
-                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                      style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                      class="min-w-[180px] inline-flex justify-center gap-x-1.5 rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg bg-green-600 hover:bg-green-700 text-white">
                   {{ __('messages.view_event') }}
                 </button>
             </a>
@@ -2136,8 +2135,7 @@
             @endif
           >
             <button type="button"
-                  class="w-full justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg"
-                  style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">
+                  class="w-full justify-center rounded-md px-6 py-3 text-lg font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg bg-green-600 hover:bg-green-700 text-white">
               {{ __('messages.view_event') }}
             </button>
           </a>
