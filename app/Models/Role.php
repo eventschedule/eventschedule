@@ -920,6 +920,17 @@ class Role extends Model implements MustVerifyEmail
         return ($this->email_verified_at != null || $this->phone_verified_at != null) && $this->user_id != null;
     }
 
+    // Query-level mirror of isClaimed(): has an owner + a verified contact channel.
+    // Keep in sync with isClaimed().
+    public function scopeClaimed($query)
+    {
+        return $query->whereNotNull('user_id')
+            ->where(function ($q) {
+                $q->whereNotNull('email_verified_at')
+                    ->orWhereNotNull('phone_verified_at');
+            });
+    }
+
     public function hasConfiguredBackground(): bool
     {
         return match ($this->background) {

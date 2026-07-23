@@ -3878,7 +3878,7 @@ function updateHeroFiltersButton() {
                 btn.style.color = contrast;
             } else {
                 btn.style.backgroundColor = 'transparent';
-                btn.style.color = accent;
+                btn.style.color = 'inherit';
             }
         }
         if (badge) {

@@ -5203,7 +5203,7 @@ function setupSubdomainAutocomplete(inputEl) {
             selectedSubdomains.forEach(function(s) {
                 excludeParams += '&exclude[]=' + encodeURIComponent(s);
             });
-            const url = '{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + excludeParams;
+            const url = '{{ route("role.search-subdomains") }}' + '?q=' + encodeURIComponent(q) + '&claimed=1' + excludeParams;
             fetch(url, {
                 headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
             })

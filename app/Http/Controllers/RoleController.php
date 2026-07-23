@@ -5281,6 +5281,7 @@ class RoleController extends Controller
                 ->orWhere('name', 'like', "%{$q}%");
         })
             ->when(! empty($exclude), fn ($query) => $query->whereNotIn('subdomain', $exclude))
+            ->when($request->boolean('claimed'), fn ($query) => $query->claimed())
             ->limit(10)
             ->get(['subdomain', 'name', 'city']);
 
