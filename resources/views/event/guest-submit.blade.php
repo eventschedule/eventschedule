@@ -1,7 +1,7 @@
 <x-app-guest-layout :role="$role" :showMobileBackground="true">
 
 @php
-  $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || $role->header_image_url;
+  $hasHeaderImage = ($role->header_image && ! in_array($role->header_image, ['none', 'logos'], true)) || $role->header_image_url;
   $accentColor = $role->accent_color ?? '#4E81FA';
   $contrastColor = accent_contrast_color($accentColor);
   $use24hr = get_use_24_hour_time($role);
@@ -30,7 +30,7 @@
         {{-- Header card --}}
         <div class="ap-card mb-4 {{ !$hasHeaderImage && $role->profile_image_url ? 'pt-16' : '' }} rounded-lg shadow-md">
           <div class="relative before:block before:absolute before:bg-[#00000033] before:-inset-0">
-            @if ($role->header_image && $role->header_image !== 'none')
+            @if ($role->header_image && ! in_array($role->header_image, ['none', 'logos'], true))
             <picture>
               <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
               <img class="block max-h-72 w-full object-cover rounded-t-2xl" src="{{ asset('images/headers') }}/{{ $role->header_image }}.png" />

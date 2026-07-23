@@ -3,10 +3,43 @@
           style="max-width: {{ ($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem' }}"
         >
           <div
-            class="relative overflow-hidden rounded-t-xl before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl"
+            class="relative rounded-t-xl {{ $role->header_image === 'logos' ? '' : 'overflow-hidden before:block before:absolute before:bg-[#00000033] before:-inset-0 before:rounded-t-xl' }}"
           >
 
-            @if ($role->header_image && $role->header_image !== 'none')
+            @if ($role->header_image === 'logos')
+            @if (($logoWallRoles ?? collect())->isNotEmpty())
+            {{-- Extra bottom padding when a profile image exists: it overlaps the
+                 header area by 100px (-mt-[100px] below) and must not cover the last row --}}
+            <div data-logo-wall role="group" aria-label="{{ $role->isVenue() ? __('messages.talents') : __('messages.venues') }}"
+                 class="px-4 pt-4 sm:px-6 sm:pt-6 {{ $role->profile_image_url ? 'pb-28' : 'pb-4 sm:pb-6' }} {{ $isRtl ? 'rtl' : '' }}">
+              <div class="mx-auto max-w-5xl flex flex-wrap justify-center gap-2 sm:gap-3">
+                @foreach ($logoWallRoles as $wallRole)
+                  @php $tileVisibility = $loop->index >= 16 ? 'hidden sm:flex' : 'flex'; @endphp
+                  @if ($wallRole->isClaimed())
+                  <a href="{{ route('role.view_guest', ['subdomain' => $wallRole->subdomain]) }}"
+                     class="social-tooltip {{ $tileVisibility }} h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-lg bg-white border border-gray-200 dark:border-gray-600 p-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                     data-tooltip="{{ $wallRole->translatedName() }}">
+                  @else
+                  <div class="social-tooltip {{ $tileVisibility }} h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 items-center justify-center rounded-lg bg-white border border-gray-200 dark:border-gray-600 p-2"
+                       data-tooltip="{{ $wallRole->translatedName() }}">
+                  @endif
+                    <img
+                      class="max-h-full max-w-full object-contain rounded"
+                      src="{{ $wallRole->profile_image_url }}"
+                      alt="{{ $wallRole->translatedName() }}"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  @if ($wallRole->isClaimed())
+                  </a>
+                  @else
+                  </div>
+                  @endif
+                @endforeach
+              </div>
+            </div>
+            @endif
+            @elseif ($role->header_image && $role->header_image !== 'none')
             <picture>
               <source srcset="{{ asset('images/headers') }}/{{ $role->header_image }}.webp" type="image/webp">
               <img

@@ -204,7 +204,7 @@
                                 </svg>
                                 Header Images
                             </h2>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add a header image to create a visual banner at the top of your schedule page. You have three options:</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Add a header image to create a visual banner at the top of your schedule page. You have four options:</p>
                             <div class="space-y-3 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Preset Headers</h4>
@@ -217,6 +217,10 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">No Header</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Opt for a cleaner look without a header image. Your profile image and name take center stage.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue Logo Wall</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Show a grid of logos of the venues from events approved on your schedule, each linking to that venue's schedule page. Drag the list on the edit page to control the order. Venue schedules show their talent's logos instead. Uses the Banner header style; the wall stays hidden until a connected schedule has a profile image.</p>
                                 </div>
                             </div>
                         </section>
@@ -427,7 +431,7 @@
             {
                 "@type": "HowToStep",
                 "name": "Upload Profile and Header Images",
-                "text": "Upload a square profile image and choose a header from 31 presets, upload a custom header, or opt for no header.",
+                "text": "Upload a square profile image and choose a header from 31 presets, upload a custom header, display a logo wall of your venues, or opt for no header.",
                 "url": "{{ url(route('marketing.docs.schedule_styling')) }}#profile-image"
             },
             {

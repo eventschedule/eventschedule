@@ -153,12 +153,12 @@
 
         @foreach ($talentMembers as $talentIndex => $each)
         @php
-          $hasTalentHeader = ($each->header_image && $each->header_image !== 'none') || $each->header_image_url;
+          $hasTalentHeader = ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true)) || $each->header_image_url;
         @endphp
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl overflow-hidden">
           @if ($hasTalentHeader)
             {{-- Header banner --}}
-            @if ($each->header_image && $each->header_image !== 'none')
+            @if ($each->header_image && ! in_array($each->header_image, ['none', 'logos'], true))
               <picture>
                 <source srcset="{{ asset('images/headers') }}/{{ $each->header_image }}.webp" type="image/webp">
                 <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $each->header_image }}.png" alt="{{ $each->translatedName() }}"/>
@@ -355,12 +355,12 @@
         {{-- Venue card --}}
         @if ($event->venue && ($event->venue->name || $event->venue->formatted_address))
         @php
-          $hasVenueHeader = ($event->venue->header_image && $event->venue->header_image !== 'none') || $event->venue->header_image_url;
+          $hasVenueHeader = ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true)) || $event->venue->header_image_url;
         @endphp
         <div class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl z-20 relative {{ $role->isRtl() ? 'rtl' : '' }}">
           @if ($hasVenueHeader)
             <div class="overflow-hidden rounded-t-2xl">
-              @if ($event->venue->header_image && $event->venue->header_image !== 'none')
+              @if ($event->venue->header_image && ! in_array($event->venue->header_image, ['none', 'logos'], true))
                 <picture>
                   <source srcset="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.webp" type="image/webp">
                   <img class="block max-h-40 w-full object-cover" src="{{ asset('images/headers') }}/{{ $event->venue->header_image }}.png" alt="{{ $event->venue->translatedName() }}" loading="lazy" decoding="async"/>

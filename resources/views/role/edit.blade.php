@@ -1,5 +1,11 @@
 <x-app-admin-layout>
 
+    @php
+        // Computed up top: the head-slot script below needs it (logo wall preview)
+        // and it renders again in the Style > Advanced section further down.
+        $logoWallRoles = $role->logoWallRoles();
+    @endphp
+
     @vite([
     'resources/js/color-picker.js',
     ])
@@ -263,7 +269,7 @@
 
             $('#header_image').on('input', function() {
                 var headerImageUrl = $(this).find(':selected').val();
-                if (headerImageUrl && headerImageUrl !== 'none') {
+                if (headerImageUrl && headerImageUrl !== 'none' && headerImageUrl !== 'logos') {
                     // Preset header selected
                     headerImageUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImageUrl + '.jpg';
                     $('#header_image_preview').attr('src', headerImageUrl).show();
@@ -482,6 +488,10 @@
             }
         }
 
+        // Real logo URLs for the logo-wall preview; reassigned by the order list's
+        // drag handler so the preview follows the drag order.
+        var logoWallPreviewUrls = @json($logoWallRoles->take(12)->pluck('profile_image_url'));
+
         function updatePreview() {
             var isDark = document.documentElement.classList.contains('dark');
             var background = $('input[name="background"]:checked').val();
@@ -514,7 +524,8 @@
 
             // Resolve header image URL
             var headerUrl = '';
-            if (headerImage && headerImage !== 'none' && headerImage !== '') {
+            var isLogoWall = (headerImage === 'logos');
+            if (headerImage && headerImage !== 'none' && headerImage !== '' && !isLogoWall) {
                 headerUrl = "{{ asset('images/headers/thumbs') }}" + '/' + headerImage + '.jpg';
             } else if (headerImage === '') {
                 var customSrc = $('#header_image_url_preview').attr('src');
@@ -528,7 +539,16 @@
                     '<div style="width: 100%; height: 100%; background-image: url(\'' + headerUrl + '\'); background-size: cover; background-position: center;"></div>' +
                     '<div style="position: absolute; inset: 0; background: rgba(0,0,0,0.2); border-radius: 12px 12px 0 0;"></div>' +
                 '</div>';
+            } else if (isLogoWall && logoWallPreviewUrls.length) {
+                // Real venue logos; an empty wall renders no header, matching the GP page
+                var wallTiles = logoWallPreviewUrls.map(function(u) {
+                    return '<div style="width: 22px; height: 22px; background: #ffffff; border: 1px solid rgba(127,127,127,0.35); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden;">' +
+                        '<img src="' + u + '" style="max-width: 100%; max-height: 100%; object-fit: contain;" /></div>';
+                }).join('');
+                headerHtml = '<div style="width: 100%; height: 90px; border-radius: 12px 12px 0 0; overflow: hidden; flex-shrink: 0; display: flex; align-items: center; justify-content: center;">' +
+                    '<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; padding: 8px; max-width: 85%;">' + wallTiles + '</div></div>';
             }
+            var hasHeaderArea = !!headerUrl || (isLogoWall && logoWallPreviewUrls.length > 0);
 
             // Resolve profile image
             var profileSrc = profileImagePreview && profileImagePreview !== '#' ? profileImagePreview : existingProfileImage;
@@ -538,7 +558,7 @@
             var profileBorderColor = isDark ? '#1e1e1e' : '#ffffff';
             var cardOverflow = 'hidden';
             var cardMarginTop = '';
-            if (profileSrc && headerUrl) {
+            if (profileSrc && hasHeaderArea) {
                 // Overlapping profile image (matches GP -mt-[100px] scaled down)
                 var profileAlign = isRtl ? 'margin-left: auto; margin-right: 0;' : 'margin-right: auto; margin-left: 0;';
                 profileHtml = '<div style="position: relative; z-index: 10; margin-top: -26px; margin-bottom: 4px; ' + profileAlign + '">' +
@@ -562,7 +582,7 @@
             var cardBg = isDark ? 'rgba(30,30,30,0.95)' : 'rgba(255,255,255,0.95)';
 
             // Build content HTML
-            var contentTopPadding = !profileSrc && !headerUrl ? 'padding-top: 10px;' : '';
+            var contentTopPadding = !profileSrc && !hasHeaderArea ? 'padding-top: 10px;' : '';
             var contentHtml =
                 '<div dir="' + (isRtl ? 'rtl' : 'ltr') + '" style="width: 100%; border-radius: 16px; background-color: ' + cardBg + '; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; flex-direction: column; overflow: ' + cardOverflow + '; ' + cardMarginTop + '">' +
                     headerHtml +
@@ -824,7 +844,7 @@
 
             // Show/hide built-in header preview thumbnail
             if (headerPreview) {
-                if (headerValue && headerValue !== 'none' && headerValue !== '') {
+                if (headerValue && headerValue !== 'none' && headerValue !== '' && headerValue !== 'logos') {
                     headerPreview.src = "{{ asset('images/headers/thumbs') }}" + '/' + headerValue + '.jpg';
                     headerPreview.style.display = '';
                 } else {
@@ -839,6 +859,12 @@
 
             const hasExistingCustomImage = deleteBtn && deleteBtn.style.display !== 'none';
             customInput.style.display = (isCustom && !hasExistingCustomImage) ? 'block' : 'none';
+
+            // Show/hide the logo wall settings (help text, empty warning, order list)
+            const logoSettings = document.getElementById('logo_wall_settings');
+            if (logoSettings) {
+                logoSettings.style.display = headerValue === 'logos' ? '' : 'none';
+            }
         }
 
         function updateFontNavButtons() {
@@ -1939,6 +1965,8 @@
                                         data-searchable data-action="header-image-input">
                                         <option value="none" {{ $effectiveHeaderImage == 'none' || (!$effectiveHeaderImage && !$role->header_image_url) ? 'SELECTED' : '' }}>
                                             {{ __('messages.none') }}</option>
+                                        <option value="logos" {{ $effectiveHeaderImage == 'logos' ? 'SELECTED' : '' }}>
+                                            {{ $role->isVenue() ? __('messages.header_image_logos_talent') : __('messages.header_image_logos_venue') }}</option>
                                         @foreach($headers as $header => $name)
                                         <option value="{{ $header }}"
                                             {{ $effectiveHeaderImage == $header ? 'SELECTED' : '' }}>
@@ -1963,6 +1991,42 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                         </svg>
                                     </button>
+                                </div>
+
+                                <div id="logo_wall_settings" style="display:none;">
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                        {{ $role->isVenue() ? __('messages.header_image_logos_help_venue') : __('messages.header_image_logos_help') }}
+                                    </p>
+                                    @if ($logoWallRoles->isEmpty())
+                                    <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        </svg>
+                                        <div class="text-sm text-gray-800 dark:text-gray-200">
+                                            {{ $role->isVenue() ? __('messages.logo_wall_empty_warning_venue') : __('messages.logo_wall_empty_warning') }}
+                                        </div>
+                                    </div>
+                                    @else
+                                    <div class="mt-3">
+                                        <x-input-label :value="__('messages.logo_wall_order')" />
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.logo_wall_order_help') }}</p>
+                                        <input type="hidden" name="logo_wall_order" id="logo_wall_order_input" value="" />
+                                        <ul id="logo-wall-list" class="mt-2 space-y-1">
+                                            @foreach ($logoWallRoles as $wallRole)
+                                            <li class="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-[#252526] border border-gray-200 dark:border-gray-700"
+                                                data-role-id="{{ \App\Utils\UrlUtils::encodeId($wallRole->id) }}">
+                                                <span class="drag-handle cursor-grab text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M7 2a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 2zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 8zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 7 14zm6-12a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 2zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 8zm0 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 13 14z"/>
+                                                    </svg>
+                                                </span>
+                                                <img src="{{ $wallRole->profile_image_url }}" alt="" class="w-8 h-8 rounded object-contain bg-white flex-shrink-0" />
+                                                <span class="text-sm text-gray-900 dark:text-gray-100 truncate">{{ $wallRole->translatedName() }}</span>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                    @endif
                                 </div>
 
                                 <div id="custom_header_input" style="display:none" class="mt-4">
@@ -1993,9 +2057,9 @@
                                 </div>
 
                                 <img id="header_image_preview"
-                                    src="{{ $role->header_image && $role->header_image !== 'none' ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
+                                    src="{{ $role->header_image && ! in_array($role->header_image, ['none', 'logos'], true) ? asset('images/headers/' . $role->header_image . '.png') : $role->header_image_url }}"
                                     alt="Header Image Preview"
-                                    style="max-height:120px; {{ $effectiveHeaderImage && $effectiveHeaderImage !== 'none' ? '' : 'display:none;' }}"
+                                    style="max-height:120px; {{ $effectiveHeaderImage && ! in_array($effectiveHeaderImage, ['none', 'logos'], true) ? '' : 'display:none;' }}"
                                     class="pt-3 cursor-pointer" data-lightbox-src />
 
                                 @if ($role->header_image_url)
@@ -7436,6 +7500,25 @@ document.addEventListener('DOMContentLoaded', function() {
             ghostClass: 'opacity-50',
             onEnd: function() {
                 updateSponsorHiddenInput();
+            }
+        });
+    }
+
+    // --- Initialize SortableJS for the logo wall order list ---
+    var logoWallList = document.getElementById('logo-wall-list');
+    if (logoWallList && typeof Sortable !== 'undefined') {
+        Sortable.create(logoWallList, {
+            handle: '.drag-handle',
+            animation: 150,
+            ghostClass: 'opacity-50',
+            onEnd: function() {
+                var ids = Array.from(logoWallList.querySelectorAll('[data-role-id]'))
+                    .map(function(el) { return el.dataset.roleId; });
+                document.getElementById('logo_wall_order_input').value = JSON.stringify(ids);
+                var imgs = Array.from(logoWallList.querySelectorAll('img')).map(function(i) { return i.src; });
+                logoWallPreviewUrls = imgs.slice(0, 12);
+                updatePreview();
+                if (window._markFormDirty) window._markFormDirty();
             }
         });
     }

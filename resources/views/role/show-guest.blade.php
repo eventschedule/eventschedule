@@ -9,8 +9,15 @@
   @endphp
 
   @php
-    $hasHeaderImage = ($role->header_image && $role->header_image !== 'none') || ($role->header_image_url && $role->header_image !== 'none');
     $headerStyle = $role->headerStyle();
+    // Fetched here (not in the banner partial) so an empty wall flips $hasHeaderImage
+    // false and the page degrades exactly like header_image = 'none'.
+    $logoWallRoles = ($headerStyle === 'banner' && $role->header_image === 'logos')
+        ? $role->logoWallRoles()
+        : collect();
+    $hasHeaderImage = $role->header_image === 'logos'
+        ? $logoWallRoles->isNotEmpty()
+        : (($role->header_image && $role->header_image !== 'none') || ($role->header_image_url && $role->header_image !== 'none'));
   @endphp
 
   @if ($role->profile_image_url && !$hasHeaderImage && $headerStyle === 'banner')

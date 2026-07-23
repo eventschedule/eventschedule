@@ -3581,6 +3581,15 @@ return [
     'header_style_compact' => 'Compact',
     'header_style_help' => 'Banner: large header with image and description. Compact: a slim full-width bar at the top.',
     'header_image_banner_only' => 'Applies to the Banner header style only.',
+    'talents' => 'Talents',
+    'header_image_logos_venue' => 'Venue logo wall',
+    'header_image_logos_talent' => 'Talent logo wall',
+    'header_image_logos_help' => 'Shows the logos of the venues hosting your approved events. Each logo links to the venue\'s schedule page.',
+    'header_image_logos_help_venue' => 'Shows the logos of the talents performing at your approved events. Each logo links to the talent\'s schedule page.',
+    'logo_wall_empty_warning' => 'No logos to show yet, so the header stays empty. Logos appear once approved events on your schedule have venues with profile images.',
+    'logo_wall_empty_warning_venue' => 'No logos to show yet, so the header stays empty. Logos appear once approved events on your schedule have talents with profile images.',
+    'logo_wall_order' => 'Logo order',
+    'logo_wall_order_help' => 'Drag to change the order the logos appear in.',
 
     // Single-page event submission (curators that require an account)
     'submit_your_event' => 'Submit your event',

@@ -1938,11 +1938,11 @@ class RoleController extends Controller
             'comment_count' => $event->approved_comments_count ?? 0,
             'photo_count' => $event->approved_photos_count ?? 0,
             'venue_profile_image' => $event->venue?->profile_image_url ?: null,
-            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && $event->venue->getAttributes()['header_image'] !== 'none') ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
+            'venue_header_image' => ($event->venue && $event->venue->getAttributes()['header_image'] && ! in_array($event->venue->getAttributes()['header_image'], ['none', 'logos'], true)) ? $event->venue->getHeaderImageUrlAttribute($event->venue->getAttributes()['header_image']) : null,
             'talent' => $event->roles->filter(fn ($r) => $r->type === 'talent' && $r->isClaimed())->map(fn ($r) => [
                 'name' => $r->name,
                 'profile_image' => $r->profile_image_url ?: null,
-                'header_image' => ($r->getAttributes()['header_image'] && $r->getAttributes()['header_image'] !== 'none') ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
+                'header_image' => ($r->getAttributes()['header_image'] && ! in_array($r->getAttributes()['header_image'], ['none', 'logos'], true)) ? $r->getHeaderImageUrlAttribute($r->getAttributes()['header_image']) : null,
                 'guest_url' => ($role && $r->subdomain === $role->subdomain) ? null : ($r->getGuestUrl() ?: null),
             ])->values()->toArray(),
             'videos' => $event->approvedVideos->take(3)->map(fn ($v) => [
@@ -3382,6 +3382,18 @@ class RoleController extends Controller
         }
         if ($request->has('payment_links')) {
             $role->payment_links = $this->sanitizeLinksJson($request->input('payment_links'));
+        }
+
+        // Logo wall order: hidden input holds encoded role IDs in drag order; it is
+        // only populated when the owner actually dragged, so an untouched save
+        // leaves the stored order alone.
+        if ($request->filled('logo_wall_order')) {
+            $orderedIds = collect(json_decode($request->input('logo_wall_order'), true) ?: [])
+                ->map(fn ($id) => UrlUtils::decodeId($id))
+                ->filter()
+                ->values();
+            $validIds = $role->logoWallRoles()->pluck('id');
+            $role->logo_wall_order = $orderedIds->intersect($validIds)->values()->toJson();
         }
 
         // Save calendar ID to owner's pivot

@@ -604,6 +604,54 @@ class Role extends Model implements MustVerifyEmail
             ->pluck('roles.id');
     }
 
+    /**
+     * Schedules shown in the guest-page logo wall banner (header_image = 'logos'):
+     * non-deleted venues (talents for a venue schedule) with a profile image that
+     * share at least one publicly listed event accepted on this schedule's side of
+     * the event_role pivot. Owner-defined order (logo_wall_order) first, the rest
+     * alphabetical; capped at 36 after ordering so manual picks survive the cap.
+     */
+    public function logoWallRoles(): \Illuminate\Database\Eloquent\Collection
+    {
+        $type = $this->isVenue() ? 'talent' : 'venue';
+
+        $roles = Role::query()
+            ->select([
+                'roles.id', 'roles.type', 'roles.subdomain',
+                'roles.name', 'roles.name_en', 'roles.translation_language_code',
+                'roles.profile_image_url',
+                'roles.user_id', 'roles.email_verified_at', 'roles.phone_verified_at',
+            ])
+            ->join('event_role as er2', 'er2.role_id', '=', 'roles.id')
+            ->join('event_role as er1', 'er1.event_id', '=', 'er2.event_id')
+            ->join('events', 'events.id', '=', 'er1.event_id')
+            ->where('er1.role_id', $this->id)
+            ->where('er1.is_accepted', true)
+            // Draft/internal and unlisted events must not leak booking
+            // relationships onto the public wall.
+            ->where('events.is_draft', false)
+            ->where('events.is_private', false)
+            ->where('events.is_cancelled', false)
+            ->where('roles.id', '!=', $this->id)
+            ->where('roles.type', $type)
+            ->where('roles.is_deleted', false)
+            ->whereNotNull('roles.profile_image_url')
+            ->where('roles.profile_image_url', '!=', '')
+            ->distinct()
+            ->orderBy('roles.name')
+            ->get();
+
+        // Guard against a malformed stored value (a JSON scalar would make array_flip
+        // throw and 500 this public page); only a JSON array yields a usable order.
+        $decoded = json_decode($this->logo_wall_order ?? '[]', true);
+        $order = array_flip(is_array($decoded) ? $decoded : []);
+
+        return $roles
+            ->sortBy(fn ($r) => $order[$r->id] ?? PHP_INT_MAX)
+            ->values()
+            ->take(36);
+    }
+
     public function scopeType($query, $type)
     {
         return $query->where('roles.type', $type);

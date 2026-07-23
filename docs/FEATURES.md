@@ -44,6 +44,7 @@ All users get these features with no subscription required.
 | iCal download | Download .ics files for individual events and recurring event dates |
 | Fan photos on events (25 per schedule) | User-submitted photos with approval workflow; upgrade prompt at limit |
 | Event cloning | Duplicate an existing event as a starting point for a new one |
+| Venue logo wall header | Banner header option showing logos of venues (talents for venue schedules) from approved public events; drag-reorderable on the edit page |
 | Backup & restore | Export and import schedule data with optional images |
 | 10 newsletter emails per month | Basic newsletter email sending limit (counts each recipient as one email) |
 | AI event parsing | `EventController::parse`, daily limit | Parse event details from text/images via Gemini (10/day free, 50/day pro, 100/day enterprise) |

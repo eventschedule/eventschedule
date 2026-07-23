@@ -143,6 +143,7 @@ class RoleUpdateRequest extends FormRequest
             'youtube_links' => ['nullable', 'json'],
             'social_links' => ['nullable', 'json'],
             'payment_links' => ['nullable', 'json'],
+            'logo_wall_order' => ['nullable', 'string', 'json', 'max:2000'],
         ];
     }
 
