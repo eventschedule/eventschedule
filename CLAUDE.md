@@ -19,6 +19,7 @@ Event Schedule is an open-source platform for sharing events, selling tickets, a
 - **Complete bento grids** - When using bento grids, ensure all cells are filled (especially the bottom right corner)
 - **Align card actions to bottom** - In grids of cards/panels with varying content lengths, use `flex flex-col` on the card and `mt-auto` on the bottom element (e.g. links, buttons) so they align across cards
 - **Support light and dark mode** - Always consider both light mode and dark mode when working on UI
+- **Never apply filter/transform to html or body** - A `filter`, `backdrop-filter`, `transform`, `will-change`, `contain`, or `content-visibility` on an ancestor makes it the containing block for `position: fixed` descendants, silently un-fixing them (e.g. the GP mobile CTA bar drops to the bottom of the document). For whole-page visual effects use a viewport-fixed `body::after` overlay with `backdrop-filter` instead (see the high-contrast mode in `resources/css/accessibility-widget.css`).
 - **Forward button at the end** - In button pairs (e.g. cancel/submit), place the forward action button at the end (right in LTR, left in RTL)
 - **Work directly on `main`** - Do not create feature branches; commit all changes directly to the `main` branch
 - **No co-author on commits** - Do not add "Co-Authored-By: Claude" to git commit messages

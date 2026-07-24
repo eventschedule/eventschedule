@@ -12,8 +12,22 @@ html.es-a11y-high-contrast {
     --es-a11y-link-weight: 600;
 }
 
-html.es-a11y-high-contrast body {
-    filter: contrast(1.08);
+/* High-contrast boost via a viewport-fixed backdrop-filter overlay.
+   NEVER put filter (or transform/backdrop-filter/will-change) on body or html:
+   a filtered ancestor becomes the containing block for position:fixed
+   descendants, un-fixing the mobile CTA bar and this widget (they drop to the
+   bottom of the document). Longhand offsets, not inset (iOS < 14.5). */
+html.es-a11y-high-contrast body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 2147483647;
+    -webkit-backdrop-filter: contrast(1.08);
+    backdrop-filter: contrast(1.08);
 }
 
 html.es-a11y-underline-links a:not(.es-a11y-ignore):not([class*='rounded-full']) {
