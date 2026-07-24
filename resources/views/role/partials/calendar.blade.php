@@ -21,6 +21,7 @@
     $role = $role ?? null;
     $label = fn($key) => $role ? $role->customLabel($key) : __('messages.' . $key);
     $isAdminRoute = $route == 'admin';
+    $alwaysShowFilters = in_array($route ?? '', ['guest', 'admin']);
     $stickyBleedClass = ($route === 'guest' && !(isset($embed) && $embed)) ? '-mx-5 px-5' : '-mx-4 px-4';
     $firstDay = $role?->first_day_of_week ?? 0;
     $lastDay = ($firstDay + 6) % 7;
@@ -337,7 +338,7 @@
             @if ($route != 'guest')
             <div class="md:hidden flex flex-row gap-2 w-full mb-3">
                 {{-- Mobile Filters Button (always shown when filters exist) --}}
-                <template v-if="dynamicFilterCount > 0">
+                <template v-if="{!! $alwaysShowFilters ? 'true' : 'dynamicFilterCount > 0' !!}">
                     <button @click="showFiltersDrawer = true"
                             :style="activeFilterCount > 0 ? 'background-color: var(--brand-button-bg); color: #fff; border-color: var(--brand-button-bg);' : ''"
                             class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5
@@ -380,7 +381,7 @@
 
             {{-- Desktop: Filters Button with label - AP only --}}
             @if ($route == 'admin')
-            <template v-if="dynamicFilterCount > 0">
+            <template v-if="{!! $alwaysShowFilters ? 'true' : 'dynamicFilterCount > 0' !!}">
                 <button @click="showDesktopFiltersModal = true"
                         :class="currentView === 'list' ? 'md:!inline-flex' : ''"
                         :style="activeFilterCount > 0 ? 'background-color: var(--brand-button-bg); color: #fff; border-color: var(--brand-button-bg);' : ''"
@@ -1633,7 +1634,7 @@
 
 {{-- Mobile Filters Bottom Sheet Drawer - Teleported to body to escape stacking context --}}
 <Teleport to="body">
-<div v-cloak v-if="dynamicFilterCount >= 1 && showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
+<div v-cloak v-if="showFiltersDrawer" class="md:hidden fixed inset-0 z-50">
     {{-- Backdrop --}}
     <div @click="showFiltersDrawer = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity"></div>
@@ -1744,6 +1745,13 @@
             </div>
         </div>
 
+        {{-- Empty state: no filters apply to the events in view --}}
+        <div v-if="dynamicFilterCount === 0 && activeFilterCount === 0"
+             class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <template v-if="currentView === 'calendar'">{{ $label('no_filters_this_month') }}</template>
+            <template v-else>{{ $label('no_filters_available') }}</template>
+        </div>
+
         {{-- Done button --}}
         <div class="px-6 py-4">
                 <x-brand-button @click="showFiltersDrawer = false" class="w-full">
@@ -1756,7 +1764,7 @@
 
 {{-- Desktop Filters Modal - Teleported to body to escape stacking context --}}
 <Teleport to="body">
-<div v-cloak v-if="dynamicFilterCount > 0 && showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-[100]">
+<div v-cloak v-if="showDesktopFiltersModal" class="hidden md:block fixed inset-0 z-[100]">
     {{-- Backdrop --}}
     <div @click="showDesktopFiltersModal = false"
          class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/75 transition-opacity z-[100]"></div>
@@ -1866,6 +1874,13 @@
                               :class="showOnlineOnly ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"></span>
                     </button>
                 </div>
+            </div>
+
+            {{-- Empty state: no filters apply to the events in view --}}
+            <div v-if="dynamicFilterCount === 0 && activeFilterCount === 0"
+                 class="px-6 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                <template v-if="currentView === 'calendar'">{{ $label('no_filters_this_month') }}</template>
+                <template v-else>{{ $label('no_filters_available') }}</template>
             </div>
 
             {{-- Done button --}}
@@ -3856,7 +3871,7 @@ function updateHeroFiltersButton() {
     const btnMobile = document.getElementById('hero-filters-btn-mobile');
     const badgeMobile = document.getElementById('hero-filters-badge-mobile');
     if (window.calendarVueApp) {
-        const showBtn = window.calendarVueApp.dynamicFilterCount > 0;
+        const showBtn = true;
         const count = window.calendarVueApp.activeFilterCount;
         const active = count > 0;
 
@@ -3936,7 +3951,6 @@ function updateHeroFiltersButton() {
 
 // Initial update and watch for changes
 updateHeroFiltersButton();
-calendarAppInstance.$watch('dynamicFilterCount', updateHeroFiltersButton);
 calendarAppInstance.$watch('activeFilterCount', updateHeroFiltersButton);
 }
 </script>

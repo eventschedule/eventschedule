@@ -758,6 +758,8 @@ return [
     'all_shows' => 'Alle',
     'filters' => 'Veranstaltungen filtern',
     'clear_filters' => 'Filter löschen',
+    'no_filters_available' => 'Keine Filter verfügbar',
+    'no_filters_this_month' => 'Keine Filter für diesen Monat',
 
     // Categories
     'parties_&_festivals' => 'Partys & Festivals',

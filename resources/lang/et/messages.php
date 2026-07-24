@@ -805,6 +805,8 @@ return [
     'all_shows' => 'Kõik',
     'filters' => 'Filtreeri sündmusi',
     'clear_filters' => 'Tühjenda filtrid',
+    'no_filters_available' => 'Filtreid pole saadaval',
+    'no_filters_this_month' => 'Selle kuu kohta pole filtreid',
     'schedule_url' => 'Ajasta URL',
     'back_to_schedule' => 'Tagasi ajakava juurde',
     'parties_&_festivals' => 'Peod ja festivalid',

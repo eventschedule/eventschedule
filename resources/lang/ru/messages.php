@@ -865,6 +865,8 @@ return [
     'all_shows' => 'Все',
     'filters' => 'Фильтровать события',
     'clear_filters' => 'Очистить фильтры',
+    'no_filters_available' => 'Нет доступных фильтров',
+    'no_filters_this_month' => 'Нет фильтров для этого месяца',
     'schedule_url' => 'URL расписания',
     'back_to_schedule' => 'Вернуться к расписанию',
     'parties_&_festivals' => 'Вечеринки и фестивали',

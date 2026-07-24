@@ -762,6 +762,8 @@ return [
     'all_shows' => 'Todos',
     'filters' => 'Filtrar eventos',
     'clear_filters' => 'Borrar Filtros',
+    'no_filters_available' => 'No hay filtros disponibles',
+    'no_filters_this_month' => 'No hay filtros para este mes',
 
     // Categories
     'parties_&_festivals' => 'Fiestas y Festivales',

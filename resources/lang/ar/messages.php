@@ -809,6 +809,8 @@ return [
     'all_shows' => 'الكل',
     'filters' => 'تصفية الأحداث',
     'clear_filters' => 'مسح الفلاتر',
+    'no_filters_available' => 'لا توجد فلاتر متاحة',
+    'no_filters_this_month' => 'لا توجد فلاتر لهذا الشهر',
 
     // Categories
     'parties_&_festivals' => 'الحفلات والمهرجانات',

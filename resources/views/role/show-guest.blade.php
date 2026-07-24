@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var heroFiltersBtn = document.getElementById('hero-filters-btn');
     if (heroFiltersBtn) {
         heroFiltersBtn.addEventListener('click', function() {
-            if (window.calendarVueApp && window.calendarVueApp.dynamicFilterCount > 0) {
+            if (window.calendarVueApp) {
                 window.calendarVueApp.showDesktopFiltersModal = true;
             }
         });
@@ -610,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var heroFiltersBtnMobile = document.getElementById('hero-filters-btn-mobile');
     if (heroFiltersBtnMobile) {
         heroFiltersBtnMobile.addEventListener('click', function() {
-            if (window.calendarVueApp && window.calendarVueApp.dynamicFilterCount > 0) {
+            if (window.calendarVueApp) {
                 window.calendarVueApp.showFiltersDrawer = true;
             }
         });

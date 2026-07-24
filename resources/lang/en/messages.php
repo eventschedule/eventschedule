@@ -868,6 +868,8 @@ return [
     'all_shows' => 'All',
     'filters' => 'Filter Events',
     'clear_filters' => 'Clear Filters',
+    'no_filters_available' => 'No filters available',
+    'no_filters_this_month' => 'No filters for this month',
     'schedule_url' => 'Schedule URL',
     'back_to_schedule' => 'Back to Schedule',
     'parties_&_festivals' => 'Parties & Festivals',

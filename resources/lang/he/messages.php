@@ -894,6 +894,8 @@ return [
     'all_shows' => 'הכל',
     'filters' => 'סינון אירועים',
     'clear_filters' => 'נקה מסננים',
+    'no_filters_available' => 'אין מסננים זמינים',
+    'no_filters_this_month' => 'אין מסננים לחודש זה',
     'parties_&_festivals' => 'מסיבות ופסטיבלים',
     'concerts' => 'קונצרטים',
     'art_&_culture' => 'אמנות ותרבות',

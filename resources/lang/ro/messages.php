@@ -811,6 +811,8 @@ return [
     'all_shows' => 'Toate',
     'filters' => 'Filtrează Evenimente',
     'clear_filters' => 'Șterge Filtrele',
+    'no_filters_available' => 'Niciun filtru disponibil',
+    'no_filters_this_month' => 'Niciun filtru pentru această lună',
     'schedule_url' => 'URL Program',
     'back_to_schedule' => 'Înapoi la Program',
     'parties_&_festivals' => 'Petreceri și Festivaluri',

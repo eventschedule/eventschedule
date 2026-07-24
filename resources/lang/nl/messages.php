@@ -547,6 +547,8 @@ return [
     'all_shows' => 'Alle',
     'filters' => 'Evenementen filteren',
     'clear_filters' => 'Filters wissen',
+    'no_filters_available' => 'Geen filters beschikbaar',
+    'no_filters_this_month' => 'Geen filters voor deze maand',
 
     // Categories
     'parties_&_festivals' => 'Feesten & Festivals',

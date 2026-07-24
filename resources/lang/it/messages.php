@@ -555,6 +555,8 @@ return [
     'all_shows' => 'Tutti',
     'filters' => 'Filtra eventi',
     'clear_filters' => 'Cancella filtri',
+    'no_filters_available' => 'Nessun filtro disponibile',
+    'no_filters_this_month' => 'Nessun filtro per questo mese',
 
     // Categories
     'parties_&_festivals' => 'Feste e Festival',

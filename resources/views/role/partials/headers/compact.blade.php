@@ -30,6 +30,7 @@
             {{-- Filters Button (visibility controlled by JS watcher in calendar.blade.php) --}}
             @if(!$event)
             <button id="hero-filters-btn"
+                    aria-label="{{ $role->customLabel('filters') }}" title="{{ $role->customLabel('filters') }}"
                     data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}"
                     class="hidden w-11 h-11 items-center justify-center rounded-lg border-2 transition-all duration-200 hover:scale-105 hover:shadow-md flex-shrink-0 relative"
                     style="border-color: {{ $accentColor }}; background-color: transparent; color: inherit; display: none;">
