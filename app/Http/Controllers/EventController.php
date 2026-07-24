@@ -648,23 +648,30 @@ class EventController extends Controller
 
     public function editAdmin(Request $request, $hash)
     {
-        $event_id = UrlUtils::decodeId($hash);
-        $event = Event::findOrFail($event_id);
-        $user = $request->user();
-        $subdomain = null;
-
-        foreach ($event->roles as $each) {
-            if ($user->isEditor($each->subdomain)) {
-                $subdomain = $each->subdomain;
-                break;
-            }
-        }
+        $event = Event::findOrFail(UrlUtils::decodeId($hash));
+        $subdomain = $this->resolveEditableSubdomain($request->user(), $event);
 
         if (! $subdomain) {
             abort(403);
         }
 
         return redirect(route('event.edit', ['subdomain' => $subdomain, 'hash' => $hash]));
+    }
+
+    /**
+     * Find a schedule attached to the event that the user may edit (owner/admin).
+     * Used to route the user to an editable schedule context when the requested
+     * subdomain is one they don't manage (e.g. from a venue/curator guest page).
+     */
+    private function resolveEditableSubdomain(User $user, Event $event): ?string
+    {
+        foreach ($event->roles as $each) {
+            if ($user->isEditor($each->subdomain)) {
+                return $each->subdomain;
+            }
+        }
+
+        return null;
     }
 
     public function clone(Request $request, $subdomain, $hash)
@@ -696,13 +703,24 @@ class EventController extends Controller
 
     public function edit(Request $request, $subdomain, $hash)
     {
-        if (! auth()->user()->isEditor($subdomain)) {
+        $user = $request->user();
+
+        if (! $user->isEditor($subdomain)) {
+            // The user may still be able to edit this event through a *different* schedule
+            // attached to it (e.g. they are viewing it on a venue or curator guest portal
+            // that they don't manage). Resolve a schedule they DO manage and redirect there,
+            // rather than rejecting a legitimately editable event.
+            $event = Event::findOrFail(UrlUtils::decodeId($hash));
+
+            if ($editableSubdomain = $this->resolveEditableSubdomain($user, $event)) {
+                return redirect(route('event.edit', ['subdomain' => $editableSubdomain, 'hash' => $hash]));
+            }
+
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
         $event_id = UrlUtils::decodeId($hash);
         $event = Event::with(['creatorRole', 'curators', 'parts', 'promoCodes', 'addons'])->findOrFail($event_id);
-        $user = $request->user();
 
         if ($user->cannot('update', $event)) {
             return redirect()->back();

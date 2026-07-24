@@ -1388,6 +1388,29 @@ class Role extends Model implements MustVerifyEmail
         return route('role.view_guest', ['subdomain' => $this->subdomain]);
     }
 
+    /**
+     * Whether the schedule is served directly on its custom domain (DigitalOcean direct mode,
+     * provisioned and active). This is the only mode where the custom domain renders the page
+     * itself, so it is the only mode whose URL should be used as the SEO canonical. Redirect
+     * mode 301s the custom domain to the subdomain, so the subdomain stays canonical there.
+     */
+    public function servesOnCustomDomain(): bool
+    {
+        return $this->custom_domain
+            && $this->custom_domain_mode === 'direct'
+            && $this->custom_domain_status === 'active';
+    }
+
+    /**
+     * The schedule's canonical guest URL: the custom domain when served directly on it, else the
+     * subdomain route. Passing the strict result as the flag means getGuestUrl's broad gate is
+     * only ever reached in the direct+active case, where both gates agree.
+     */
+    public function getCanonicalUrl()
+    {
+        return $this->getGuestUrl($this->servesOnCustomDomain());
+    }
+
     public function toData()
     {
         $url = $this->getGuestUrl();

@@ -1764,6 +1764,30 @@ class Event extends Model
         return $url ? $url.'/photos' : '';
     }
 
+    /**
+     * The event's canonical guest URL. Decided by the event's HOME schedule (the same role
+     * getGuestUrl resolves), so the canonical is identical no matter which schedule's page
+     * renders the event. Uses the custom domain only when that home schedule is served directly
+     * on it (direct + active); redirect mode keeps the subdomain canonical.
+     */
+    public function getCanonicalUrl($date = null)
+    {
+        $data = $this->getGuestUrlData(false, $date);
+
+        $homeRole = $this->roles->first(function ($role) use ($data) {
+            return $role->subdomain == $data['subdomain'];
+        });
+
+        return $this->getGuestUrl(false, $date, $homeRole && $homeRole->servesOnCustomDomain());
+    }
+
+    public function getCanonicalPhotoGalleryUrl($date = null)
+    {
+        $url = $this->getCanonicalUrl($date);
+
+        return $url ? $url.'/photos' : '';
+    }
+
     public function getGuestUrlData($subdomain = false, $date = null, $includeId = true)
     {
         $venueSubdomain = $this->venue && $this->venue->isClaimed() ? $this->venue->subdomain : null;

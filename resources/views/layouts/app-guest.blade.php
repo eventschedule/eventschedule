@@ -27,7 +27,7 @@
         @if ($role->language_code != ($role->translation_language_code ?: 'en'))
             @php
                 $targetCode = $role->translation_language_code ?: 'en';
-                $hreflangBase = ($event && $event->exists) ? $event->getGuestUrl(false, $date ?? null) : $role->getGuestUrl();
+                $hreflangBase = ($event && $event->exists) ? $event->getCanonicalUrl($date ?? null) : $role->getCanonicalUrl();
             @endphp
             <link rel="alternate" hreflang="{{ $targetCode }}" href="{{ $hreflangBase }}?lang={{ $targetCode }}">
             <link rel="alternate" hreflang="{{ $role->language_code }}" href="{{ $hreflangBase }}?lang={{ $role->language_code }}">
@@ -48,7 +48,7 @@
             <meta property="og:image" content="{{ config('app.url') . '/images/social/home.png' }}">
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">
-            <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
+            <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ __('messages.event_password_required') }}">
             <meta name="twitter:description" content="{{ __('messages.event_password_required') }}">
@@ -68,7 +68,7 @@
                     }
                     $galleryOgImage = $firstPhoto ? $firstPhoto->photo_url : ($event->getImageUrl() ?: (config('app.url') . '/images/social/home.png'));
                 @endphp
-                <link rel="canonical" href="{{ $event->getPhotoGalleryUrl(false, $date) }}">
+                <link rel="canonical" href="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
                 <meta name="description" content="{{ $galleryTitle }}">
                 <meta property="og:type" content="website">
                 <meta property="og:title" content="{{ $galleryTitle }}">
@@ -77,7 +77,7 @@
                 <meta property="og:image:width" content="1200">
                 <meta property="og:image:height" content="630">
                 <meta property="og:image:alt" content="{{ $galleryTitle }}">
-                <meta property="og:url" content="{{ $event->getPhotoGalleryUrl(false, $date) }}">
+                <meta property="og:url" content="{{ $event->getCanonicalPhotoGalleryUrl($date) }}">
                 <meta property="og:site_name" content="Event Schedule">
                 <meta name="twitter:title" content="{{ $galleryTitle }}">
                 <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
@@ -87,9 +87,9 @@
                 <meta name="twitter:site" content="@ScheduleEvent">
             @else
             @if ($role->language_code != ($role->translation_language_code ?: 'en'))
-                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
+                <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
             @else
-                <link rel="canonical" href="{{ $event->getGuestUrl(false, $date) }}">
+                <link rel="canonical" href="{{ $event->getCanonicalUrl($date) }}">
             @endif
             <meta name="description" content="{{ $event->getMetaDescription($date) }}">
             <meta property="og:type" content="event">
@@ -100,7 +100,7 @@
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">
             <meta property="og:image:alt" content="{{ $event->translatedName() }}">
-            <meta property="og:url" content="{{ $event->getGuestUrl(false, $date) }}">
+            <meta property="og:url" content="{{ $event->getCanonicalUrl($date) }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:title" content="{{ $event->translatedName() }}">
             <meta name="twitter:description" content="{{ $event->getMetaDescription($date) }}">
@@ -111,9 +111,9 @@
             @endif
         @elseif ($role->exists)
             @if ($role->language_code != ($role->translation_language_code ?: 'en'))
-                <link rel="canonical" href="{{ $role->getGuestUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
+                <link rel="canonical" href="{{ $role->getCanonicalUrl() }}?{{ 'lang=' . (is_valid_language_code(request()->lang) ? request()->lang : (session()->has('translate') ? ($role->translation_language_code ?: 'en') : $role->language_code)) }}">
             @else
-                <link rel="canonical" href="{{ $role->getGuestUrl() }}">
+                <link rel="canonical" href="{{ $role->getCanonicalUrl() }}">
             @endif
             @if ($description = Str::limit(trim(strip_tags($role->translatedDescription())), 155))
             <meta name="description" content="{{ $description }}">
@@ -151,7 +151,7 @@
             <meta property="og:image:width" content="1200">
             <meta property="og:image:height" content="630">
             <meta property="og:type" content="website">
-            <meta property="og:url" content="{{ $role->getGuestUrl() }}">
+            <meta property="og:url" content="{{ $role->getCanonicalUrl() }}">
             <meta property="og:site_name" content="Event Schedule">
             <meta name="twitter:card" content="summary_large_image">
             <meta name="twitter:site" content="@ScheduleEvent">
@@ -286,7 +286,7 @@
                 if (empty($eventDescription)) {
                     $eventDescription = $event->translatedName() . ' - ' . __('messages.event');
                 }
-                $eventUrl = $event->getGuestUrl(false, $date ?? null);
+                $eventUrl = $event->getCanonicalUrl($date ?? null);
                 $eventImage = $event->getImageUrl() ?: (config('app.url') . '/images/social/home.png');
                 $startDate = $event->getSchemaStartDate($date ?? null);
                 $endDate = $event->getSchemaEndDate($date ?? null);
@@ -328,7 +328,7 @@
             @php
                 $roleName = $role->translatedName();
                 $roleDescription = trim(strip_tags($role->translatedDescription()));
-                $roleUrl = $role->getGuestUrl();
+                $roleUrl = $role->getCanonicalUrl();
                 $roleImage = $role->profile_image_url;
                 
                 // Determine schema type based on role type
@@ -417,13 +417,13 @@
                         "@type": "ListItem",
                         "position": 2,
                         "name": @json($role->translatedName(), $jsonLdFlags),
-                        "item": "{{ $role->getGuestUrl() }}"
+                        "item": "{{ $role->getCanonicalUrl() }}"
                     },
                     {
                         "@type": "ListItem",
                         "position": 3,
                         "name": @json($event->translatedName(), $jsonLdFlags),
-                        "item": "{{ $event->getGuestUrl(false, $date ?? null) }}"
+                        "item": "{{ $event->getCanonicalUrl($date ?? null) }}"
                     }
                 ]
             }
@@ -444,7 +444,7 @@
                         "@type": "ListItem",
                         "position": 2,
                         "name": @json($role->translatedName(), $jsonLdFlags),
-                        "item": "{{ $role->getGuestUrl() }}"
+                        "item": "{{ $role->getCanonicalUrl() }}"
                     }
                 ]
             }
