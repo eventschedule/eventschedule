@@ -2328,7 +2328,7 @@
         "operationId": "list_fan_content",
         "tags": ["Feedback"],
         "summary": "List fan content",
-        "description": "Returns fan comments, photos and videos submitted on your events, newest first. Approved items only by default; pass is_approved=false to read the pending moderation queue. Submitter email addresses are never included.",
+        "description": "Returns fan comments, photos and videos submitted on your events, newest first. Approved items only by default; pass is_approved=false to read the pending moderation queue. Submitter email addresses are never included. Each kind of submission has its own id sequence, so an id is only unique within a type - key on the pair.",
         "parameters": [
           {
             "name": "type",
@@ -3226,7 +3226,7 @@
       "FanContent": {
         "type": "object",
         "properties": {
-          "id": { "type": "string", "description": "Encoded submission ID" },
+          "id": { "type": "string", "description": "Encoded submission ID, unique only within a given type" },
           "type": { "type": "string", "enum": ["comment", "photo", "video"] },
           "event_id": { "type": "string", "description": "Encoded event ID" },
           "event_name": { "type": "string" },

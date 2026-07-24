@@ -9,7 +9,9 @@
 @php $fanGuestRole = $role ?? null; @endphp
 @if ($fanGuestRole && ! auth()->check() && ! $fanGuestRole->fan_content_require_account && \App\Utils\TurnstileUtils::isEnabled())
 @once
-<div id="fan-content-turnstile" class="mt-2">
+{{-- w-full: on the event page this sits in a flex-wrap row of buttons, and without it the
+     widget is laid out as another button rather than on its own line. --}}
+<div id="fan-content-turnstile" class="mt-2 w-full">
     <x-turnstile />
 </div>
 <script {!! nonce_attr() !!}>

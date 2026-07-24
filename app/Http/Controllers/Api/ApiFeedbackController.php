@@ -158,9 +158,15 @@ class ApiFeedbackController extends Controller
             $models = [$request->type => $models[$request->type]];
         }
 
-        // Three tables with no shared parent, so each is queried and the results merged.
-        // Ordered newest first overall, then paginated in PHP.
+        $perPage = $this->perPage($request);
+        $page = max(1, (int) $request->input('page', 1));
+
+        // Three tables with no shared parent, so each is queried and the results merged, newest
+        // first. Merging a descending sort only ever needs the top page*per_page rows from each
+        // source - without that limit a schedule with a long history loads its entire backlog
+        // into memory on every request. Totals come from separate counts so `meta` stays exact.
         $rows = collect();
+        $total = 0;
 
         foreach ($models as $model) {
             $query = $model::with(['event'])
@@ -179,17 +185,18 @@ class ApiFeedbackController extends Controller
                 $query->where('event_date', $request->event_date);
             }
 
-            $rows = $rows->concat($query->orderBy('created_at', 'desc')->get());
+            $total += (clone $query)->toBase()->getCountForPagination();
+
+            $rows = $rows->concat(
+                $query->orderBy('created_at', 'desc')->limit($page * $perPage)->get()
+            );
         }
 
         $rows = $rows->sortByDesc('created_at')->values();
 
-        $perPage = $this->perPage($request);
-        $page = max(1, (int) $request->input('page', 1));
-
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
             $rows->forPage($page, $perPage)->values(),
-            $rows->count(),
+            $total,
             $perPage,
             $page,
             ['path' => $request->url()]

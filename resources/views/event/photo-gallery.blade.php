@@ -79,8 +79,11 @@
     <div x-data="{ showUpload: false, dragging: false, photoPreview: null }"
          @toggle-upload.window="showUpload = !showUpload"
          class="mb-6">
+      {{-- Outside the collapsible panel on purpose: Turnstile only auto-renders elements that are
+           in the DOM and visible at script load, so a widget inside x-show would stay unrendered
+           and every guest upload would fail with an empty token. --}}
+      @include('partials.fan-content-turnstile')
       <div x-show="showUpload" x-cloak x-transition class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
-        @include('partials.fan-content-turnstile')
         <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-3">
           @csrf
           <input type="hidden" name="return_to" value="gallery">

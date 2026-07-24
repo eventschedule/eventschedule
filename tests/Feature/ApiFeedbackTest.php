@@ -212,6 +212,68 @@ class ApiFeedbackTest extends TestCase
             ->assertJsonPath('data.0.is_approved', false);
     }
 
+    public function test_fan_content_endpoint_paginates_across_all_three_types(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        $event = $this->createEvent($role);
+
+        // 9 rows total, 3 per type, created oldest first so the ordering is deterministic.
+        $created = now()->subHours(20);
+        for ($i = 0; $i < 3; $i++) {
+            foreach (['comment', 'video', 'photo'] as $type) {
+                $created = $created->addHour();
+                $attrs = [
+                    'event_id' => $event->id,
+                    'guest_name' => "Guest {$type} {$i}",
+                    'is_approved' => true,
+                    'created_at' => $created->copy(),
+                    'updated_at' => $created->copy(),
+                ];
+
+                match ($type) {
+                    'comment' => EventComment::create($attrs + ['comment' => "Comment {$i}"]),
+                    'video' => EventVideo::create($attrs + ['youtube_url' => "https://www.youtube.com/watch?v=vid{$i}xxxxxxx"]),
+                    'photo' => EventPhoto::create($attrs + ['photo_url' => "photo{$i}.jpg"]),
+                };
+            }
+        }
+
+        $key = $this->apiKey($owner);
+
+        // Each source query is capped at page*per_page rows, so the merged page must still be
+        // correct and meta.total must report every matching row, not just the fetched ones.
+        $first = $this->getJson('/api/fan-content?per_page=4', ['X-API-Key' => $key])
+            ->assertOk()
+            ->assertJsonCount(4, 'data')
+            ->assertJsonPath('meta.total', 9)
+            ->assertJsonPath('meta.last_page', 3);
+
+        $second = $this->getJson('/api/fan-content?per_page=4&page=2', ['X-API-Key' => $key])
+            ->assertOk()
+            ->assertJsonCount(4, 'data')
+            ->assertJsonPath('meta.total', 9);
+
+        $third = $this->getJson('/api/fan-content?per_page=4&page=3', ['X-API-Key' => $key])
+            ->assertOk()
+            ->assertJsonCount(1, 'data');
+
+        // Rows are identified by type + id: each kind of fan content has its own table and its
+        // own autoincrement, so an id alone collides across types.
+        $keys = collect($first->json('data'))
+            ->concat($second->json('data'))
+            ->concat($third->json('data'))
+            ->map(fn ($row) => $row['type'].':'.$row['id']);
+
+        $this->assertCount(9, $keys->unique(), 'paging must not repeat or drop rows');
+
+        // Newest first across the whole merged feed.
+        $dates = collect($first->json('data'))->pluck('created_at')->all();
+        $sorted = $dates;
+        rsort($sorted);
+        $this->assertSame($sorted, $dates);
+    }
+
     public function test_fan_content_endpoint_hides_other_users_schedules(): void
     {
         $owner = $this->createOwner();

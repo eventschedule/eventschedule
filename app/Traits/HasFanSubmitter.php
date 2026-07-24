@@ -46,6 +46,10 @@ trait HasFanSubmitter
      * Deliberately carries no email: the submitter's address is for the schedule's own
      * moderation queue, not for anything an integration republishes. Each model supplies
      * its own type tag and payload fields.
+     *
+     * Note that `id` is only unique within a `type` - comments, photos and videos live in
+     * separate tables with separate autoincrements - so consumers of the merged feed must
+     * key on the pair.
      */
     public function toApiData()
     {

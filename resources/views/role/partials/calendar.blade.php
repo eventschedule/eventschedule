@@ -3081,8 +3081,24 @@ const calendarApp = createApp({
             return url;
         },
         openFanContentOnEventPage(event) {
-            if (!this.fanContentGuestRedirect || !event.guest_url) return false;
-            window.location.href = event.guest_url + '#event-media-section';
+            if (!this.fanContentGuestRedirect) return false;
+
+            // No event URL to send them to. Returning false would open the inline form, which
+            // carries no guest name/email fields and so could never pass validation - better to
+            // do nothing than to bounce them off a form that always fails.
+            if (!event.guest_url) return true;
+
+            const url = event.guest_url + '#event-media-section';
+
+            // This partial is also rendered inside the embed widget. Navigating there would
+            // replace the embed with a full event page inside someone else's site, so open a
+            // new tab when we are framed.
+            if (window.self !== window.top) {
+                window.open(url, '_blank', 'noopener');
+            } else {
+                window.location.href = url;
+            }
+
             return true;
         },
         toggleVideoForm(event, $event) {

@@ -1470,6 +1470,7 @@
                                             <code class="doc-inline-code">/api/fan-content</code>
                                         </div>
                                         <p class="text-gray-600 dark:text-gray-300 mb-6">Returns fan comments, photos and videos submitted on your events, newest first. Approved items only by default, which is what you want when displaying them on an external site. Submitter email addresses are never included.</p>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-6">Each kind of submission has its own <code class="doc-inline-code">id</code> sequence, so an <code class="doc-inline-code">id</code> is only unique within a <code class="doc-inline-code">type</code>. Key on the two together when storing rows from this feed.</p>
                                         <div class="overflow-x-auto mb-6">
                                             <table class="doc-table">
                                                 <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
