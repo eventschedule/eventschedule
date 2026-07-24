@@ -4,6 +4,13 @@
 
     <x-slot name="head">
         @include('partials.site-head-code')
+
+        {{-- Use the schedule's logo as the favicon (Pro/Enterprise); role() is talent-only and may be null --}}
+        @if ($role && $role->isPro() && $role->profile_image_url)
+            <link rel="icon" href="{{ $role->profile_image_url }}">
+            <link rel="apple-touch-icon" href="{{ $role->profile_image_url }}">
+        @endif
+
         <link href="/vendor/manrope/manrope.css" rel="stylesheet">
         <style {!! nonce_attr() !!}>
             /* Animations */

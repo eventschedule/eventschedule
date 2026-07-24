@@ -160,6 +160,12 @@
 
     <x-slot name="head">
 
+        {{-- Use the schedule's logo as the favicon on its guest pages (Pro/Enterprise) --}}
+        @if ($role->isPro() && $role->profile_image_url)
+            <link rel="icon" href="{{ $role->profile_image_url }}">
+            <link rel="apple-touch-icon" href="{{ $role->profile_image_url }}">
+        @endif
+
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         @foreach($fonts as $font)

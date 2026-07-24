@@ -85,6 +85,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Unlimited fan photos + bulk download | `EventController`, `$role->isPro()` | No per-schedule photo cap; download all event photos as zip |
 | Sponsor/partner logos | `RoleController`, `$role->isPro()` | Display sponsor logos with tiers on schedule page |
 | Guest portal banner | `RoleController`, `$role->isPro()` | Show a custom announcement banner at the top of the schedule's guest pages |
+| Custom guest favicon | `app-guest.blade.php` / `ticket/view.blade.php`, `$role->isPro()` | Schedule's logo becomes the browser-tab and iOS home-screen icon on its guest pages |
 
 ## Enterprise Features
 
