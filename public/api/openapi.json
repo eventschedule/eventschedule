@@ -2229,6 +2229,186 @@
           }
         }
       }
+    },
+    "/feedback": {
+      "get": {
+        "operationId": "list_feedback",
+        "tags": ["Feedback"],
+        "summary": "List post-event feedback",
+        "description": "Returns star ratings and comments left by attendees after events on schedules the authenticated user owns or administers. Requires a Pro plan.",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event (encoded event ID)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subdomain",
+            "in": "query",
+            "description": "Filter by schedule subdomain",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "event_date",
+            "in": "query",
+            "description": "Filter by event date (Y-m-d)",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "min_rating",
+            "in": "query",
+            "description": "Only return ratings of at least this value",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 5 }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "Only feedback submitted on or after this date (Y-m-d)",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "Only feedback submitted on or before this date (Y-m-d)",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page (default 100, max 500)",
+            "schema": { "type": "integer", "default": 100, "minimum": 1, "maximum": 500 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of feedback",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Feedback" }
+                    },
+                    "meta": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fan-content": {
+      "get": {
+        "operationId": "list_fan_content",
+        "tags": ["Feedback"],
+        "summary": "List fan content",
+        "description": "Returns fan comments, photos and videos submitted on your events, newest first. Approved items only by default; pass is_approved=false to read the pending moderation queue. Submitter email addresses are never included.",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Limit to one kind of submission",
+            "schema": { "type": "string", "enum": ["comment", "photo", "video"] }
+          },
+          {
+            "name": "event_id",
+            "in": "query",
+            "description": "Filter by event (encoded event ID)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "subdomain",
+            "in": "query",
+            "description": "Filter by schedule subdomain",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "event_date",
+            "in": "query",
+            "description": "Filter by event date (Y-m-d)",
+            "schema": { "type": "string", "format": "date" }
+          },
+          {
+            "name": "is_approved",
+            "in": "query",
+            "description": "Defaults to true. Pass false for the pending moderation queue",
+            "schema": { "type": "boolean", "default": true }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": { "type": "integer", "default": 1, "minimum": 1 }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of results per page (default 100, max 500)",
+            "schema": { "type": "integer", "default": 100, "minimum": 1, "maximum": 500 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of fan content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/FanContent" }
+                    },
+                    "meta": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid API key",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3029,6 +3209,39 @@
           }
         }
       },
+      "Feedback": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Encoded feedback ID" },
+          "event_id": { "type": "string", "description": "Encoded event ID" },
+          "event_name": { "type": "string" },
+          "event_date": { "type": "string", "format": "date", "nullable": true },
+          "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "comment": { "type": "string", "nullable": true },
+          "attendee_name": { "type": "string", "nullable": true },
+          "attendee_email": { "type": "string", "format": "email", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
+      "FanContent": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "description": "Encoded submission ID" },
+          "type": { "type": "string", "enum": ["comment", "photo", "video"] },
+          "event_id": { "type": "string", "description": "Encoded event ID" },
+          "event_name": { "type": "string" },
+          "event_part_id": { "type": "string", "nullable": true, "description": "Encoded agenda part ID, when the submission targets one" },
+          "event_date": { "type": "string", "format": "date", "nullable": true },
+          "submitted_by": { "type": "string", "description": "Display name of the submitter" },
+          "is_guest_submission": { "type": "boolean", "description": "True when submitted without an account" },
+          "is_approved": { "type": "boolean" },
+          "comment": { "type": "string", "description": "Comment text (type=comment)" },
+          "photo_url": { "type": "string", "description": "Image URL (type=photo)" },
+          "youtube_url": { "type": "string", "description": "Watch URL (type=video)" },
+          "embed_url": { "type": "string", "description": "Embeddable URL (type=video)" },
+          "created_at": { "type": "string", "format": "date-time" }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -3076,6 +3289,10 @@
     {
       "name": "Sales",
       "description": "Manage ticket sales for events. Supports creating, listing, viewing, updating status (mark as paid, refund, cancel), and deleting sales. Events must have tickets enabled and belong to a Pro schedule."
+    },
+    {
+      "name": "Feedback",
+      "description": "Read post-event ratings and fan submissions (comments, photos, videos) for your own schedules. Feedback requires a Pro plan; fan content is available on all plans."
     }
   ]
 }

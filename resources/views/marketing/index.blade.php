@@ -928,7 +928,139 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Everything else                                           -->
+    <!-- 5. Appointments: the booking window                          -->
+    <!-- ============================================================ -->
+    <section id="appointments" class="relative scroll-mt-24 bg-white py-24 dark:bg-[#0a0a0f] lg:py-32">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16" data-reveal-group="90">
+
+                <!-- Copy -->
+                <div>
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
+                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]" aria-hidden="true"></span>
+                        <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">New · Appointments</span>
+                    </div>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+                        Share a link, get <span class="text-gradient">booked</span>
+                    </h2>
+                    <p class="mb-8 text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal>
+                        Share one link. Guests pick an open time in their own timezone, and the booking lands on your schedule.
+                    </p>
+                    <ul class="mb-10 space-y-3" data-reveal>
+                        <li class="flex items-start gap-3">
+                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/20">
+                                <svg class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                            <span class="text-gray-700 dark:text-gray-300">Weekly hours with buffers and minimum notice</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-100 dark:bg-sky-500/20">
+                                <svg class="h-3.5 w-3.5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                            <span class="text-gray-700 dark:text-gray-300">Free or paid appointments with Stripe</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-cyan-100 dark:bg-cyan-500/20">
+                                <svg class="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                            <span class="text-gray-700 dark:text-gray-300">Never double-booked against your synced calendars</span>
+                        </li>
+                    </ul>
+                    <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center" data-reveal>
+                        <a href="{{ app_url('/sign_up') }}" class="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-blue-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#0a0a0f]">
+                            <span class="relative z-10 flex items-center gap-2">
+                                Start for free
+                                <svg class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </span>
+                            <span class="absolute inset-0 animate-shimmer" aria-hidden="true"></span>
+                        </a>
+                        <a href="{{ route('marketing.appointments') }}" aria-label="Learn more about appointments" class="group inline-flex items-center gap-1 text-lg font-medium text-blue-600 transition-all hover:gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA] focus-visible:ring-offset-2 dark:text-blue-400 dark:focus-visible:ring-offset-[#0a0a0f]">
+                            Learn more
+                            <svg class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Booking window mockup -->
+                <div class="relative" data-tilt="5" data-reveal="right">
+                    <div class="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-blue-500/10 via-transparent to-cyan-500/10 blur-2xl" aria-hidden="true"></div>
+                    <div class="relative rotate-[1.5deg]">
+                        <div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-white/10 dark:bg-[#101016]">
+                            <div class="flex items-center gap-3 border-b border-gray-200 bg-gray-50 px-4 py-3 dark:border-white/10 dark:bg-white/5" aria-hidden="true">
+                                <span class="flex gap-1.5">
+                                    <span class="h-3 w-3 rounded-full bg-[#FF5F57]"></span>
+                                    <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
+                                    <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
+                                </span>
+                                <span class="mx-auto rounded-lg bg-white px-4 py-1 text-xs font-medium text-gray-500 shadow-sm dark:bg-white/10 dark:text-gray-400">blue-note.eventschedule.com/book</span>
+                                <span class="w-14"></span>
+                            </div>
+                            <div class="grid gap-6 p-6 sm:grid-cols-[1.2fr,1fr]" aria-hidden="true">
+                                <!-- Mini month -->
+                                <div>
+                                    <div class="mb-3 flex items-center justify-between">
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white">July</span>
+                                        <span class="flex gap-1 text-gray-400">
+                                            <span class="flex h-6 w-6 items-center justify-center rounded-lg border border-gray-200 text-xs dark:border-white/10">&lsaquo;</span>
+                                            <span class="flex h-6 w-6 items-center justify-center rounded-lg border border-gray-200 text-xs dark:border-white/10">&rsaquo;</span>
+                                        </span>
+                                    </div>
+                                    <div class="mb-1 grid grid-cols-7 text-center text-[10px] font-semibold uppercase text-gray-400">
+                                        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="relative py-1.5">14<span class="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]"></span></span>
+                                        <span class="rounded-lg bg-gradient-to-br from-[#4E81FA] to-[#0EA5E9] py-1.5 font-bold text-white shadow-md shadow-blue-500/30">15</span>
+                                        <span class="py-1.5 text-gray-300 dark:text-gray-600">16</span>
+                                        <span class="relative py-1.5">17<span class="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]"></span></span>
+                                        <span class="py-1.5">18</span>
+                                        <span class="py-1.5 text-gray-300 dark:text-gray-600">19</span>
+                                        <span class="py-1.5 text-gray-300 dark:text-gray-600">20</span>
+                                        <span class="py-1.5">21</span>
+                                        <span class="relative py-1.5">22<span class="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]"></span></span>
+                                        <span class="py-1.5">23</span>
+                                        <span class="py-1.5">24</span>
+                                        <span class="relative py-1.5">25<span class="absolute bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#22D3EE]"></span></span>
+                                        <span class="py-1.5 text-gray-300 dark:text-gray-600">26</span>
+                                        <span class="py-1.5 text-gray-300 dark:text-gray-600">27</span>
+                                        <span class="py-1.5">28</span>
+                                        <span class="py-1.5">29</span>
+                                        <span class="py-1.5">30</span>
+                                        <span class="py-1.5">31</span>
+                                        <span class="py-1.5"></span><span class="py-1.5"></span><span class="py-1.5"></span>
+                                    </div>
+                                    <div class="mt-3 border-t border-gray-100 pt-2 text-[10px] font-medium text-gray-400 dark:border-white/5">Times shown in your timezone</div>
+                                </div>
+                                <!-- Slots -->
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-xs font-bold uppercase tracking-wide text-gray-400">Tue, Jul 15</span>
+                                    <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>9:00 AM</span>
+                                    <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>11:30 AM</span>
+                                    <span class="flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#4E81FA] to-[#0EA5E9] px-4 py-2 text-center text-xs font-bold text-white shadow-md shadow-blue-500/30" data-reveal>
+                                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                        3:00 PM
+                                    </span>
+                                    <span class="glass rounded-full px-4 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300" data-reveal>4:30 PM</span>
+                                    <span class="mt-auto rounded-xl bg-gradient-to-r from-[#4E81FA] via-[#0EA5E9] to-[#22D3EE] px-4 py-2.5 text-center text-sm font-bold text-white shadow-lg shadow-blue-500/25" data-reveal>Book</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Payoff toast (last reveal in the group, pops last) -->
+                        <div class="absolute -right-3 -top-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 shadow-lg dark:border-emerald-500/30 dark:bg-[#15151c]" data-reveal="zoom" aria-hidden="true">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/20">
+                                <svg class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </span>
+                            <span class="text-xs font-semibold text-gray-900 dark:text-white">Booked · Tue 3:00 PM</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Everything else                                           -->
     <!-- ============================================================ -->
     @php
         $moreFeatures = [
@@ -1042,7 +1174,7 @@
             ],
         ];
     @endphp
-    <section id="more-features" class="relative scroll-mt-24 bg-gray-50 pb-24 dark:bg-[#0f0f14] lg:pb-32">
+    <section id="more-features" class="relative scroll-mt-24 bg-gray-50 py-24 dark:bg-[#0f0f14] lg:py-32">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-12 max-w-3xl text-center">
                 <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
@@ -1070,7 +1202,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Discover: upcoming events rail (always-bright band)       -->
+    <!-- 7. Discover: upcoming events rail (always-bright band)       -->
     <!-- ============================================================ -->
     @php $discoverPinned = $discoverEvents->count() >= 4; @endphp
     <section id="discover" class="relative scroll-mt-24 bg-gray-50 px-2 py-6 dark:bg-[#0f0f14] sm:px-4">
@@ -1551,6 +1683,7 @@
             ['top', 'Top'],
             ['showcase', 'Demo'],
             ['features', 'Features'],
+            ['appointments', 'Appointments'],
             ['discover', 'Discover'],
             ['integrations', 'Integrations'],
             ['open-source', 'Free & open source'],

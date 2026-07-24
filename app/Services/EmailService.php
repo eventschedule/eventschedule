@@ -289,6 +289,22 @@ class EmailService
             return;
         }
 
+        // Appointment bookings confirm through the appointment service (idempotent): calendar sync
+        // create + the guest AppointmentConfirmed email. Catches the Stripe webhook, payment-URL
+        // success, and mark-paid, all of which route through here.
+        if ($sale->event?->appointment_type_id) {
+            $event = $sale->event;
+            $pivot = $event->roles()->where('roles.id', $event->creator_role_id)->first()?->pivot;
+            if ($pivot && is_null($pivot->is_accepted)) {
+                // Paid but awaiting approval: send "request received", not a confirmation.
+                $this->sendAppointmentPendingEmails($sale);
+            } else {
+                app(\App\Services\AppointmentService::class)->confirm($sale);
+            }
+
+            return;
+        }
+
         try {
             $event = $sale->event;
             if (! $event) {
@@ -328,6 +344,100 @@ class EmailService
                 'event_id' => $sale->event_id,
             ]);
         }
+    }
+
+    /**
+     * Confirmation emails for an appointment booking. Sends the guest an AppointmentConfirmed
+     * (transport-guarded like sendTicketEmail). The owner/editor notification is added in Phase 6.
+     */
+    /** Guest confirmation + owner "new booking" notification (called by AppointmentService::confirm). */
+    public function sendAppointmentConfirmationEmails(Sale $sale): void
+    {
+        $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentConfirmed::class);
+        $this->sendAppointmentOwnerNotification($sale, 'booked');
+    }
+
+    /** Guest "request received" + owner "new request" notification (approval-required bookings). */
+    public function sendAppointmentPendingEmails(Sale $sale): void
+    {
+        $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentPending::class);
+        $this->sendAppointmentOwnerNotification($sale, 'pending');
+    }
+
+    /** Guest decline notice. */
+    public function sendAppointmentDeclinedEmail(Sale $sale): void
+    {
+        $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentDeclined::class);
+    }
+
+    /** Guest cancellation notice (owner cancelled the booking). */
+    public function sendAppointmentGuestCancellation(Sale $sale): void
+    {
+        $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentCancelled::class);
+    }
+
+    /** Owner cancellation notice (guest cancelled the booking). */
+    public function sendAppointmentOwnerCancellation(Sale $sale): void
+    {
+        $this->sendAppointmentOwnerNotification($sale, 'cancelled');
+    }
+
+    protected function sendAppointmentGuestMail(Sale $sale, string $mailClass): void
+    {
+        try {
+            $event = $sale->event;
+            if (! $event) {
+                return;
+            }
+            $role = $event->getRoleWithEmailSettings() ?: $event->creatorRole;
+            if ($this->isTestEmail($sale->email) || is_demo_role($role) || ! $this->appointmentCanSend($role)) {
+                return;
+            }
+
+            SendQueuedEmail::dispatch(
+                new $mailClass($sale, $event, $role, $event->appointmentType),
+                $sale->email,
+                $role?->id,
+                app()->getLocale()
+            );
+        } catch (\Exception $e) {
+            Log::error('Failed to send appointment guest mail: '.$e->getMessage(), ['sale_id' => $sale->id]);
+        }
+    }
+
+    protected function sendAppointmentOwnerNotification(Sale $sale, string $kind): void
+    {
+        try {
+            $event = $sale->event;
+            if (! $event) {
+                return;
+            }
+            $role = $event->getRoleWithEmailSettings() ?: $event->creatorRole;
+            if (! $role || ! $this->appointmentCanSend($role)) {
+                return;
+            }
+
+            foreach ($role->getEditorsWantingNotification('new_sale') as $editor) {
+                if ($this->isTestEmail($editor->email)) {
+                    continue;
+                }
+                SendQueuedEmail::dispatch(
+                    new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind),
+                    $editor->email,
+                    $role->id,
+                    $editor->language_code ?? app()->getLocale()
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send appointment owner notification: '.$e->getMessage(), ['sale_id' => $sale->id]);
+        }
+    }
+
+    protected function appointmentCanSend(?Role $role): bool
+    {
+        return config('app.hosted')
+            ? ($role && $role->hasEmailSettings())
+            : ! in_array(config('mail.default'), ['log', 'array']);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ApiAuthController;
 use App\Http\Controllers\Api\ApiEventController;
+use App\Http\Controllers\Api\ApiFeedbackController;
 use App\Http\Controllers\Api\ApiGroupController;
 use App\Http\Controllers\Api\ApiSaleController;
 use App\Http\Controllers\Api\ApiScheduleController;
@@ -47,6 +48,10 @@ Route::middleware([ApiAuthentication::class])->group(function () {
     // Categories (global system defaults, and per-schedule effective list)
     Route::get('/categories', [ApiEventController::class, 'categories']);
     Route::get('/categories/{subdomain}', [ApiEventController::class, 'categories']);
+
+    // Feedback and fan content (read only)
+    Route::get('/feedback', [ApiFeedbackController::class, 'index']);
+    Route::get('/fan-content', [ApiFeedbackController::class, 'fanContent']);
 
     // Sales
     Route::get('/sales', [ApiSaleController::class, 'index']);

@@ -662,6 +662,22 @@ if (! function_exists('get_sub_audience_info')) {
     }
 }
 
+if (! function_exists('public_registration_enabled')) {
+    /**
+     * Whether anyone may create an account on this install.
+     *
+     * Hosted (and self-hosted SaaS) installs are always open. A plain selfhost is
+     * single-user by default - the first account is the instance admin - and only
+     * accepts further sign-ups when the operator sets ALLOW_REGISTRATION=true.
+     * Every account-creation path (sign-up form, API register, the guest-submit
+     * account step, Google OAuth) gates on this.
+     */
+    function public_registration_enabled(): bool
+    {
+        return (bool) config('app.hosted') || (bool) config('app.allow_registration');
+    }
+}
+
 if (! function_exists('selfhost_needs_setup')) {
     /**
      * Whether a selfhosted install still needs the first-run setup wizard.

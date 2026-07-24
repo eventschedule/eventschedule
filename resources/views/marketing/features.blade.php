@@ -160,6 +160,82 @@
     <!-- Feature Banners -->
     <div id="features" class="bg-white dark:bg-[#0a0a0f]">
 
+        <!-- Banner 1: Appointments (Visual Left, Text Right) -->
+        <section class="relative py-24 lg:py-32 overflow-hidden">
+            <!-- Parallax background blobs -->
+            <div class="absolute inset-0">
+                <div class="absolute top-10 right-1/4 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow parallax-blob" data-parallax-speed="0.4"></div>
+                <div class="absolute bottom-10 left-1/3 w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[100px] animate-pulse-slow parallax-blob" data-parallax-speed="0.3" style="animation-delay: 1s;"></div>
+            </div>
+
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <a href="{{ marketing_url('/features/appointments') }}" data-reveal class="feature-banner group block">
+                    <div class="flex flex-col lg:flex-row-reverse gap-8 lg:gap-16 items-center">
+                        <!-- Text side -->
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300 text-sm font-medium mb-4">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                </span>
+                                Appointments
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-sky-600 dark:group-hover:text-sky-300 transition-colors">Let guests book your time</h2>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Create bookable appointment types with weekly hours and share one link. Guests pick an open time in their own timezone, free or paid.</p>
+                            <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Weekly hours</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Free or paid</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">No double-booking</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Reminders</span>
+                            </div>
+                            <span class="inline-flex items-center text-sky-400 font-medium group-hover:gap-3 gap-2 transition-all">
+                                Learn more
+                                <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <!-- Visual side -->
+                        <div class="flex-shrink-0">
+                            <div class="animate-float">
+                                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900 dark:to-cyan-900 rounded-2xl border border-blue-200 dark:border-blue-500/30 p-6 w-72 shadow-2xl shadow-blue-500/10">
+                                    <div class="flex gap-2 mb-4">
+                                        <div class="flex-1 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 py-2 text-center">
+                                            <div class="text-[10px] font-bold uppercase text-gray-400">Mon</div>
+                                            <div class="text-lg font-black text-gray-900 dark:text-white leading-none">14</div>
+                                        </div>
+                                        <div class="flex-1 rounded-xl bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30 py-2 text-center">
+                                            <div class="text-[10px] font-bold uppercase text-blue-500 dark:text-blue-300">Tue</div>
+                                            <div class="text-lg font-black text-gray-900 dark:text-white leading-none">15</div>
+                                        </div>
+                                        <div class="flex-1 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10 py-2 text-center">
+                                            <div class="text-[10px] font-bold uppercase text-gray-400">Wed</div>
+                                            <div class="text-lg font-black text-gray-900 dark:text-white leading-none">16</div>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                                            <div class="text-gray-900 dark:text-white font-medium">9:00 AM</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-xs">Open</div>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-400/30">
+                                            <div class="text-gray-900 dark:text-white font-medium">3:00 PM</div>
+                                            <div class="text-blue-600 dark:text-blue-300 text-xs font-semibold">Selected</div>
+                                        </div>
+                                        <div class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-white/10 border border-gray-200 dark:border-white/10">
+                                            <div class="text-gray-900 dark:text-white font-medium">4:30 PM</div>
+                                            <div class="text-gray-500 dark:text-gray-400 text-xs">Open</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
         <!-- Banner 1: Ticketing (Text Left, Visual Right) -->
         <section class="relative py-24 lg:py-32 overflow-hidden">
             <!-- Parallax background blobs -->

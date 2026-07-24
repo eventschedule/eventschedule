@@ -2563,6 +2563,7 @@ class TicketController extends Controller
         $events = Event::with('creatorRole')
             ->where('user_id', $user->id)
             ->whereNotNull('starts_at')
+            ->whereNull('appointment_type_id') // appointment bookings are not scannable events
             ->orderBy('starts_at', 'desc')
             ->limit(100)
             ->get();
@@ -2749,6 +2750,12 @@ class TicketController extends Controller
     public function view($eventId, $secret)
     {
         $event = Event::findOrFail(UrlUtils::decodeId($eventId));
+
+        // Appointment bookings have their own manage page (not the QR ticket view).
+        if ($event->appointment_type_id) {
+            return redirect()->route('appointments.manage', ['event_id' => $eventId, 'secret' => $secret]);
+        }
+
         $sale = Sale::with(['promoCode', 'saleTickets.ticket'])->where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
         $role = $event->role();
 

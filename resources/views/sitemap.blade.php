@@ -498,6 +498,13 @@
 @include('partials.sitemap-hreflang', ['url' => url('/features/availability')])
     </url>
     <url>
+        <loc>{{ url('/features/appointments') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/features/appointments')])
+    </url>
+    <url>
         <loc>{{ url('/features/carpool') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
@@ -825,6 +832,13 @@
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/docs/gift-cards')])
+    </url>
+    <url>
+        <loc>{{ url('/docs/appointments') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/appointments')])
     </url>
     <url>
         <loc>{{ url('/docs/event-graphics') }}</loc>

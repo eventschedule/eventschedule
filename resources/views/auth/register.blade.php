@@ -548,7 +548,7 @@
             <x-input-error :messages="$errors->get('cf-turnstile-response')" class="mt-2" />
         @endif
 
-        @if (config('services.google.client_id') && config('app.hosted'))
+        @if (config('services.google.client_id') && public_registration_enabled())
         <div id="google-signup-section" class="w-full mt-6">
             <div class="relative mb-6">
                 <div class="absolute inset-0 flex items-center">

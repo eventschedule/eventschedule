@@ -788,7 +788,10 @@ class EventRepo
             $event->event_password = null;
         }
 
-        if ($currentRole && ! $currentRole->isEnterprise()) {
+        // Appointment bookings are always is_private (Pro-gated, not Enterprise). Skip the
+        // Enterprise strip so editing/saving one never demotes it to a Draft (which would stop
+        // calendar sync and break the accept flow).
+        if ($currentRole && ! $currentRole->isEnterprise() && ! $event->appointment_type_id) {
             // Losing Enterprise strips the Enterprise-only is_private/is_internal states. An event that
             // was Unlisted must NOT silently become fully Public on the next edit - keep it hidden as a
             // Draft instead (mirrors how Internal degrades to Draft in the block above).

@@ -101,6 +101,7 @@ class Role extends Model implements MustVerifyEmail
         'fan_comments_enabled',
         'fan_photos_enabled',
         'fan_videos_enabled',
+        'fan_content_require_account',
         'carpool_enabled',
         'first_day_of_week',
         'approved_subdomains',
@@ -148,6 +149,7 @@ class Role extends Model implements MustVerifyEmail
         'fan_comments_enabled' => 'boolean',
         'fan_photos_enabled' => 'boolean',
         'fan_videos_enabled' => 'boolean',
+        'fan_content_require_account' => 'boolean',
         'carpool_enabled' => 'boolean',
         'gift_cards_enabled' => 'boolean',
         'gift_card_amounts' => 'array',
@@ -195,6 +197,9 @@ class Role extends Model implements MustVerifyEmail
         'fan_comments_enabled' => true,
         'fan_photos_enabled' => true,
         'fan_videos_enabled' => true,
+        // Guests may submit fan content with just a name and email by default; the
+        // approval queue is what protects the schedule, not an account requirement.
+        'fan_content_require_account' => false,
     ];
 
     /**
@@ -447,6 +452,39 @@ class Role extends Model implements MustVerifyEmail
     public function giftCards()
     {
         return $this->hasMany(GiftCard::class);
+    }
+
+    public function appointmentTypes()
+    {
+        return $this->hasMany(AppointmentType::class);
+    }
+
+    /** Per-request memo for hasBookableAppointments(). */
+    protected $hasBookableAppointmentsCache = null;
+
+    /**
+     * Whether this schedule currently offers bookable appointments - drives the GP
+     * "Book a Time" button and the guest /book pages. Pro-gated on hosted (selfhost always
+     * qualifies); a type counts when active, not deleted, and free or with a working
+     * payment method.
+     */
+    public function hasBookableAppointments(): bool
+    {
+        if ($this->hasBookableAppointmentsCache !== null) {
+            return $this->hasBookableAppointmentsCache;
+        }
+
+        if (config('app.hosted') && ! $this->isPro()) {
+            return $this->hasBookableAppointmentsCache = false;
+        }
+
+        $bookable = $this->appointmentTypes()->active()->get()->contains(function ($type) {
+            $type->setRelation('role', $this);
+
+            return $type->isBookable();
+        });
+
+        return $this->hasBookableAppointmentsCache = $bookable;
     }
 
     /**
@@ -1719,6 +1757,7 @@ class Role extends Model implements MustVerifyEmail
             'add_video' => 'Add Video',
             'agenda' => 'Agenda',
             'back_to_schedule' => 'Back to schedule',
+            'book_a_time' => 'Book a Time',
             'buy_tickets' => 'Buy Tickets',
             'category' => 'Category',
             'clear_filters' => 'Clear Filters',

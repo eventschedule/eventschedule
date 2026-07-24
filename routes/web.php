@@ -6,6 +6,8 @@ use App\Http\Controllers\AdminTranslationController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\Api\ApiSettingsController;
 use App\Http\Controllers\AppController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\AppointmentTypeController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BlogController;
@@ -71,6 +73,11 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::post('/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
         Route::get('/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
         Route::post('/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
+        // Appointments (Calendly-style booking). Registered before the /{slug} catch-alls below.
+        Route::get('/book', [AppointmentController::class, 'showBook'])->name('appointments.book');
+        Route::get('/book/{typeSlug}', [AppointmentController::class, 'showBookType'])->name('appointments.book_type');
+        Route::get('/book/{typeSlug}/slots', [AppointmentController::class, 'slots'])->name('appointments.slots')->middleware('throttle:60,1');
+        Route::post('/book/{typeSlug}', [AppointmentController::class, 'book'])->name('appointments.book.store')->middleware('throttle:10,1');
         Route::post('/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
         Route::post('/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
         Route::get('/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');
@@ -196,6 +203,11 @@ Route::get('/translate_data', [AppController::class, 'translateData'])->name('tr
 Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrCode'])->name('ticket.qr_code')->middleware('throttle:100,1');
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
 Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->name('rsvp.cancel')->middleware('throttle:10,1');
+// Appointment manage/cancel via the sale secret ({event_id} is UrlUtils-encoded, like ticket.view).
+Route::get('/appointment/view/{event_id}/{secret}', [AppointmentController::class, 'manage'])->name('appointments.manage')->middleware('throttle:100,1');
+Route::post('/appointment/cancel/{event_id}/{secret}', [AppointmentController::class, 'cancelBooking'])->name('appointments.manage_cancel')->middleware('throttle:10,1');
+Route::post('/appointment/pay/{event_id}/{secret}', [AppointmentController::class, 'pay'])->name('appointments.pay')->middleware('throttle:10,1');
+Route::get('/appointment/checkout/success/{sale_id}', [AppointmentController::class, 'checkoutSuccess'])->name('appointments.checkout_success')->middleware('throttle:100,1');
 Route::post('/ticket/book/{event_id}/{secret}', [TicketController::class, 'passBook'])->name('pass.book')->middleware('throttle:30,1');
 Route::post('/ticket/cancel-booking/{event_id}/{secret}', [TicketController::class, 'passCancelBooking'])->name('pass.cancel_booking')->middleware('throttle:30,1');
 Route::post('/pass/resend-link', [TicketController::class, 'resendPassLink'])->name('pass.resend_link')->middleware('throttle:5,1');
@@ -415,6 +427,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/requests/accept-event/{hash}', [EventController::class, 'accept'])->name('event.accept');
     Route::post('/{subdomain}/requests/decline-event/{hash}', [EventController::class, 'decline'])->name('event.decline');
     Route::post('/{subdomain}/requests/accept-all', [EventController::class, 'acceptAll'])->name('event.accept_all');
+    // Appointments: owner-side type management (guest booking routes are in the public blocks).
+    Route::post('/{subdomain}/appointments', [AppointmentTypeController::class, 'store'])->name('appointments.store');
+    Route::put('/{subdomain}/appointments/{hash}', [AppointmentTypeController::class, 'update'])->name('appointments.update');
+    Route::delete('/{subdomain}/appointments/{hash}', [AppointmentTypeController::class, 'destroy'])->name('appointments.destroy');
+    Route::post('/{subdomain}/appointments/{hash}/toggle', [AppointmentTypeController::class, 'toggle'])->name('appointments.toggle');
+    Route::post('/{subdomain}/appointments/bookings/{saleHash}/cancel', [AppointmentTypeController::class, 'bookingCancel'])->name('appointments.booking_cancel');
     Route::post('/{subdomain}/publish-event/{hash}', [EventController::class, 'publish'])->name('event.publish');
     Route::post('/{subdomain}/preview-link', [RoleController::class, 'previewLink'])->name('role.preview_link');
     Route::get('/{subdomain}/followers/qr-code', [RoleController::class, 'qrCode'])->name('role.qr_code');
@@ -476,7 +494,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
 
     Route::get('/{subdomain}/audit-log', [RoleController::class, 'auditLog'])->name('role.audit_log')->where('subdomain', '(?!docs(?=/|$)|admin(?=/|$))[^/]+');
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 
@@ -681,6 +699,7 @@ if (config('app.is_nexus')) {
         Route::get('/features/custom-domain', [MarketingController::class, 'customDomain'])->name('marketing.custom_domain');
         Route::get('/features/feedback', [MarketingController::class, 'feedback'])->name('marketing.feedback');
         Route::get('/features/availability', [MarketingController::class, 'availability'])->name('marketing.availability');
+        Route::get('/features/appointments', [MarketingController::class, 'appointments'])->name('marketing.appointments');
         Route::get('/features/carpool', [MarketingController::class, 'carpool'])->name('marketing.carpool');
         // Redirects from old feature URLs
         Route::get('/wp/analytics', fn () => redirect()->route('marketing.analytics', [], 301));
@@ -800,6 +819,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
         Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
         Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
+        Route::get('/docs/appointments', [MarketingController::class, 'docsAppointments'])->name('marketing.docs.appointments');
         Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
         Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
         Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
@@ -883,6 +903,7 @@ if (config('app.is_nexus')) {
             Route::get('/features/custom-domain', [MarketingController::class, 'customDomain'])->name('marketing.custom_domain');
             Route::get('/features/feedback', [MarketingController::class, 'feedback'])->name('marketing.feedback');
             Route::get('/features/availability', [MarketingController::class, 'availability'])->name('marketing.availability');
+            Route::get('/features/appointments', [MarketingController::class, 'appointments'])->name('marketing.appointments');
             Route::get('/features/carpool', [MarketingController::class, 'carpool'])->name('marketing.carpool');
             // Redirects from old feature URLs
             Route::get('/ticketing', fn () => redirect()->route('marketing.ticketing', [], 301));
@@ -1004,6 +1025,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', [MarketingController::class, 'docsTickets'])->name('marketing.docs.tickets');
             Route::get('/docs/subscriptions', [MarketingController::class, 'docsSubscriptions'])->name('marketing.docs.subscriptions');
             Route::get('/docs/gift-cards', [MarketingController::class, 'docsGiftCards'])->name('marketing.docs.gift_cards');
+            Route::get('/docs/appointments', [MarketingController::class, 'docsAppointments'])->name('marketing.docs.appointments');
             Route::get('/docs/event-graphics', [MarketingController::class, 'docsEventGraphics'])->name('marketing.docs.event_graphics');
             Route::get('/docs/newsletters', [MarketingController::class, 'docsNewsletters'])->name('marketing.docs.newsletters');
             Route::get('/docs/analytics', [MarketingController::class, 'docsAnalytics'])->name('marketing.docs.analytics');
@@ -1191,6 +1213,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/tickets', fn () => redirect('https://'._base_domain().'/docs/tickets', 301));
             Route::get('/docs/subscriptions', fn () => redirect('https://'._base_domain().'/docs/subscriptions', 301));
             Route::get('/docs/gift-cards', fn () => redirect('https://'._base_domain().'/docs/gift-cards', 301));
+            Route::get('/docs/appointments', fn () => redirect('https://'._base_domain().'/docs/appointments', 301));
             Route::get('/docs/event-graphics', fn () => redirect('https://'._base_domain().'/docs/event-graphics', 301));
             Route::get('/docs/newsletters', fn () => redirect('https://'._base_domain().'/docs/newsletters', 301));
             Route::get('/docs/analytics', fn () => redirect('https://'._base_domain().'/docs/analytics', 301));
@@ -1330,6 +1353,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/tickets', fn () => redirect()->route('home'))->name('marketing.docs.tickets');
     Route::get('/docs/subscriptions', fn () => redirect()->route('home'))->name('marketing.docs.subscriptions');
     Route::get('/docs/gift-cards', fn () => redirect()->route('home'))->name('marketing.docs.gift_cards');
+    Route::get('/docs/appointments', fn () => redirect()->route('home'))->name('marketing.docs.appointments');
     Route::get('/docs/event-graphics', fn () => redirect()->route('home'))->name('marketing.docs.event_graphics');
     Route::get('/docs/newsletters', fn () => redirect()->route('home'))->name('marketing.docs.newsletters');
     Route::get('/docs/analytics', fn () => redirect()->route('home'))->name('marketing.docs.analytics');
@@ -1388,6 +1412,11 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::post('/{subdomain}/guest-add/send-code', [RegisteredUserController::class, 'sendVerificationCode'])->name('event.guest_send_code')->middleware('throttle:5,1');
     Route::get('/{subdomain}/booking-request', [EventController::class, 'showBookingRequest'])->name('event.booking_request');
     Route::post('/{subdomain}/booking-request', [EventController::class, 'bookingRequest'])->name('event.booking_request.store')->middleware('throttle:10,1');
+    // Appointments (Calendly-style booking). Registered before the /{subdomain}/{slug} catch-all below.
+    Route::get('/{subdomain}/book', [AppointmentController::class, 'showBook'])->name('appointments.book');
+    Route::get('/{subdomain}/book/{typeSlug}', [AppointmentController::class, 'showBookType'])->name('appointments.book_type');
+    Route::get('/{subdomain}/book/{typeSlug}/slots', [AppointmentController::class, 'slots'])->name('appointments.slots')->middleware('throttle:60,1');
+    Route::post('/{subdomain}/book/{typeSlug}', [AppointmentController::class, 'book'])->name('appointments.book.store')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-parse', [EventController::class, 'guestParse'])->name('event.guest_parse')->middleware('throttle:10,1');
     Route::post('/{subdomain}/guest-upload-image', [EventController::class, 'guestUploadImage'])->name('event.guest_upload_image')->middleware('throttle:20,1');
     Route::get('/{subdomain}/guest-search-youtube', [RoleController::class, 'guestSearchYouTube'])->name('role.guest_search_youtube');

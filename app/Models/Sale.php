@@ -43,10 +43,15 @@ class Sale extends Model
         'volume_discount_amount',
         'feedback_sent_at',
         'group_id',
+        'guest_timezone',
+        'reminder_sent_at',
+        'confirmed_at',
     ];
 
     protected $casts = [
         'feedback_sent_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
+        'confirmed_at' => 'datetime',
     ];
 
     protected static bool $cascadingGroup = false;
@@ -89,6 +94,13 @@ class Sale extends Model
             }
 
             if ($sale->isDirty('status') && in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
+                // Appointment bookings: releasing the sale frees the slot by soft-cancelling the
+                // backing event. The service is re-entrant safe (skips an already-cancelled event)
+                // and defers the calendar-sync delete + guest mail to DB::afterCommit.
+                if ($sale->event && $sale->event->appointment_type_id && ! $sale->event->is_cancelled) {
+                    app(\App\Services\AppointmentService::class)->cancelFromSale($sale);
+                }
+
                 if ($sale->payment_method === 'rsvp' && $sale->event) {
                     $sale->event->updateRsvpSold($sale->event_date, -1);
 

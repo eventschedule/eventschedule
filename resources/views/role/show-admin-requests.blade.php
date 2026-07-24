@@ -38,6 +38,26 @@
     @foreach($requests as $event)
     <li class="ap-card col-span-1 flex flex-col divide-y divide-gray-200 dark:divide-gray-700 rounded-lg text-center">
         <div class="flex flex-1 flex-col p-8 items-center">
+            @if ($event->appointment_type_id)
+                {{-- Appointment booking request --}}
+                @php $bookingSale = $event->sales->first(); @endphp
+                <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full mb-2">{{ $event->appointmentType?->name ?? __('messages.appointments') }}</span>
+                <div class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $bookingSale?->name }}</div>
+                @if ($bookingSale?->email)
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $bookingSale->email }}</div>
+                @endif
+                @if ($event->starts_at)
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $event->localStartsAt(true) }}</div>
+                @endif
+                @if ($bookingSale && $bookingSale->payment_amount > 0)
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $bookingSale->payment_amount, 2) }} &middot; {{ $bookingSale->status === 'paid' ? __('messages.paid') : __('messages.unpaid') }}</div>
+                @endif
+                <div class="flex gap-2 mt-4">
+                    <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?view=bookings&filter=pending" class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-semibold rounded hover:bg-[var(--brand-button-bg-hover)] transition">
+                        {{ __('messages.view') }}
+                    </a>
+                </div>
+            @else
             {{-- Profile Image --}}
             @if ($role->isVenue() || $role->isCurator())
                 @if ($event->role() && $event->role()->profile_image_url)
@@ -95,6 +115,7 @@
                 </a>
                 @endif
             </div>
+            @endif
         </div>
         @if (!$isViewer)
         <div>

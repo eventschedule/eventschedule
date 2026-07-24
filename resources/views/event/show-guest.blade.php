@@ -41,7 +41,7 @@
       foreach ($partPhotos as $photo) {
         $allPhotoData->push([
           'url' => $photo->photo_url,
-          'name' => $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user'),
+          'name' => $photo->submitterName(),
           'date' => $photo->created_at->format('M j, Y g:ia'),
         ]);
       }
@@ -53,7 +53,7 @@
     foreach ($eventPhotos as $photo) {
       $allPhotoData->push([
         'url' => $photo->photo_url,
-        'name' => $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user'),
+        'name' => $photo->submitterName(),
         'date' => $photo->created_at->format('M j, Y g:ia'),
       ]);
     }
@@ -1253,7 +1253,7 @@
                       <div class="rounded-lg overflow-hidden">
                         <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->user?->first_name ?? $video->user?->name ?? __('messages.user') }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
                     </div>
                     @endforeach
                   </div>
@@ -1265,7 +1265,7 @@
                       <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
                       </button>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
                     </div>
                     @endforeach
                   </div>
@@ -1274,7 +1274,7 @@
                   <div class="mt-2 space-y-1">
                     @foreach ($partComments as $comment)
                     <div class="text-sm text-gray-600 dark:text-gray-400">
-                      <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->first_name ?? $comment->user?->name ?? __('messages.user') }}</span>: {{ $comment->comment }}
+                      <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->submitterName() }}</span>: {{ $comment->comment }}
                     </div>
                     @endforeach
                   </div>
@@ -1313,7 +1313,7 @@
                   <div class="mt-2 space-y-1 opacity-60">
                     @foreach ($myPartPendingComments as $comment)
                     <div id="pending-comment-{{ $comment->id }}" class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
-                      <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->first_name ?? $comment->user?->name ?? __('messages.user') }}</span>: {{ $comment->comment }}</span>
+                      <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->submitterName() }}</span>: {{ $comment->comment }}</span>
                       <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1321,6 +1321,7 @@
                   @endif
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+                    @include('partials.fan-content-turnstile')
                     @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
@@ -1348,6 +1349,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                        @include('partials.fan-content-guest-fields')
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -1387,6 +1389,7 @@
                         <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
                                @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                         <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+                        @include('partials.fan-content-guest-fields')
                         <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
@@ -1400,6 +1403,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                        @include('partials.fan-content-guest-fields')
                         <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -1440,7 +1444,7 @@
                       <div class="rounded-lg overflow-hidden">
                         <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $part->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
                       </div>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->user?->first_name ?? $video->user?->name ?? __('messages.user') }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
                     </div>
                     @endforeach
                   </div>
@@ -1452,7 +1456,7 @@
                       <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                         <img src="{{ $photo->photo_url }}" alt="{{ $part->translatedName() }}" class="h-24 w-auto max-w-full rounded-lg object-cover" loading="lazy">
                       </button>
-                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
                     </div>
                     @endforeach
                   </div>
@@ -1461,7 +1465,7 @@
                   <div class="mt-2 space-y-1">
                     @foreach ($partComments as $comment)
                     <div class="text-sm text-gray-600 dark:text-gray-400">
-                      <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->first_name ?? $comment->user?->name ?? __('messages.user') }}</span>: {{ $comment->comment }}
+                      <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->submitterName() }}</span>: {{ $comment->comment }}
                     </div>
                     @endforeach
                   </div>
@@ -1500,7 +1504,7 @@
                   <div class="mt-2 space-y-1 opacity-60">
                     @foreach ($myPartPendingComments as $comment)
                     <div id="pending-comment-{{ $comment->id }}" class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
-                      <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->first_name ?? $comment->user?->name ?? __('messages.user') }}</span>: {{ $comment->comment }}</span>
+                      <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->submitterName() }}</span>: {{ $comment->comment }}</span>
                       <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
                     </div>
                     @endforeach
@@ -1508,6 +1512,7 @@
                   @endif
                   @if ($event->isFanContentEnabled())
                   <div class="mt-2 flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+                    @include('partials.fan-content-turnstile')
                     @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
                     <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
@@ -1535,6 +1540,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                        @include('partials.fan-content-guest-fields')
                         <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -1574,6 +1580,7 @@
                         <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
                                @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                         <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+                        @include('partials.fan-content-guest-fields')
                         <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
                       </form>
                     </div>
@@ -1587,6 +1594,7 @@
                         <input type="hidden" name="event_date" value="{{ $date }}">
                         @endif
                         <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                        @include('partials.fan-content-guest-fields')
                         <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
                       </form>
                     </div>
@@ -1782,7 +1790,7 @@
               <div class="rounded-lg overflow-hidden">
                 <iframe class="w-full" style="aspect-ratio:16/9" src="{{ \App\Utils\UrlUtils::getYouTubeEmbed($video->youtube_url) }}" title="{{ $event->translatedName() }} - YouTube video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
               </div>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->user?->first_name ?? $video->user?->name ?? __('messages.user') }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $video->submitterName() }}</p>
             </div>
             @endforeach
           </div>
@@ -1794,7 +1802,7 @@
               <button x-data @click="$dispatch('open-lightbox', { url: '{{ $photo->photo_url }}' })" class="block rounded-lg overflow-hidden max-w-full cursor-pointer hover:opacity-90 transition-opacity">
                 <img src="{{ $photo->photo_url }}" alt="{{ $event->translatedName() }}" class="h-32 sm:h-40 w-auto max-w-full rounded-lg object-cover" loading="lazy">
               </button>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->user?->first_name ?? $photo->user?->name ?? __('messages.user') }}</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $photo->submitterName() }}</p>
             </div>
             @endforeach
           </div>
@@ -1811,7 +1819,7 @@
           <div class="space-y-2 mb-4">
             @foreach ($eventLevelComments as $comment)
             <div class="text-sm text-gray-600 dark:text-gray-400">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->first_name ?? $comment->user?->name ?? __('messages.user') }}</span>: {{ $comment->comment }}
+              <span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->submitterName() }}</span>: {{ $comment->comment }}
             </div>
             @endforeach
           </div>
@@ -1840,7 +1848,7 @@
           <div class="space-y-2 mb-4 opacity-60">
             @foreach ($myEventLevelPendingComments as $comment)
             <div id="pending-comment-{{ $comment->id }}" class="text-sm text-gray-600 dark:text-gray-400 flex items-start gap-2">
-              <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->user?->first_name ?? $comment->user?->name ?? __('messages.user') }}</span>: {{ $comment->comment }}</span>
+              <span><span class="font-medium text-gray-700 dark:text-gray-300">{{ $comment->submitterName() }}</span>: {{ $comment->comment }}</span>
               <span class="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">{{ __('messages.pending_approval') }}</span>
             </div>
             @endforeach
@@ -1848,6 +1856,7 @@
           @endif
           @if ($event->parts->count() == 0 && $event->isFanContentEnabled())
           <div class="flex flex-wrap gap-3" x-data="{ showVideo: false, showComment: false, showPhoto: false, dragging: false, photoPreview: null }">
+            @include('partials.fan-content-turnstile')
             @if ($event->isFanPhotosEnabled() && ! $photoLimitReached)
             <button @click="showPhoto = !showPhoto; showVideo = false; showComment = false" class="accent-hover-btn inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white rounded-lg border transition-all duration-200 hover:scale-105 hover:shadow-md active:scale-95" style="border-color: {{ $accentColor }};" data-accent="{{ $accentColor }}" data-contrast="{{ $contrastColor }}">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" /></svg>
@@ -1874,6 +1883,7 @@
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
                 <input x-ref="videoInput" type="url" name="youtube_url" pattern="https?://(www\.)?((m\.)?youtube\.com|youtu\.be)/.+" title="{{ __('messages.invalid_youtube_url') }}" placeholder="{{ __('messages.paste_youtube_url') }}" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" required>
+                @include('partials.fan-content-guest-fields')
                 <button type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>
@@ -1912,6 +1922,7 @@
                 <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
                        @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
                 <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+                @include('partials.fan-content-guest-fields')
                 <button x-show="photoPreview" type="submit" class="self-start font-semibold text-sm px-4 py-2 rounded transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
               </form>
             </div>
@@ -1924,6 +1935,7 @@
                 <input type="hidden" name="event_date" value="{{ $date }}">
                 @endif
                 <textarea x-ref="commentInput" name="comment" placeholder="{{ __('messages.write_a_comment') }}" maxlength="1000" class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2" rows="2" required></textarea>
+                @include('partials.fan-content-guest-fields')
                 <button type="submit" class="font-semibold text-sm px-4 py-2 rounded self-start transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.submit') }}</button>
               </form>
             </div>

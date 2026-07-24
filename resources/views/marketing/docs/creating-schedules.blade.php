@@ -963,6 +963,10 @@
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Fan Videos</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Allow visitors to submit YouTube or Vimeo video links on your events.</p>
                                 </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Require an Account</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Off by default: attendees submit with just a name and email, so they never have to create an account. Turn it on to make them sign in first. Either way nothing appears publicly until you approve it, and the submitter's email is only ever visible to you.</p>
+                                </div>
                             </div>
 
                             <!-- Feedback Tab -->

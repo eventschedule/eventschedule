@@ -232,6 +232,13 @@
                                 <a href="#delete-sale" class="doc-nav-link" data-search="delete sale /api/sales"><span class="api-method-dot api-method-delete"></span>Delete Sale</a>
                             </div>
                         </div>
+                        <div class="doc-nav-group" data-group="feedback">
+                            <button class="doc-nav-group-header">Feedback <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+                            <div class="doc-nav-group-items">
+                                <a href="#list-feedback" class="doc-nav-link" data-search="list feedback ratings reviews get /api/feedback stars comments"><span class="api-method-dot api-method-get"></span>List Feedback</a>
+                                <a href="#list-fan-content" class="doc-nav-link" data-search="list fan content get /api/fan-content comments photos videos approved"><span class="api-method-dot api-method-get"></span>List Fan Content</a>
+                            </div>
+                        </div>
                         <div class="doc-nav-group" data-group="reference">
                             <button class="doc-nav-group-header">Reference <svg class="doc-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
                             <div class="doc-nav-group-items">
@@ -1383,6 +1390,123 @@
     <span class="code-string">"data"</span>: {
         <span class="code-string">"message"</span>: <span class="code-string">"Sale deleted successfully"</span>
     }
+}</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- List Feedback -->
+                            <section id="list-feedback" class="doc-section api-endpoint-section">
+                                <div class="api-endpoint-row">
+                                    <div class="api-endpoint-desc">
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                                            </svg>
+                                            List Feedback
+                                        </h2>
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
+                                            <code class="doc-inline-code">/api/feedback</code>
+                                        </div>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns a paginated list of post-event feedback (star ratings and comments) for events on schedules you own or administer. Requires a Pro plan. Supports filtering:</p>
+                                        <div class="overflow-x-auto mb-6">
+                                            <table class="doc-table">
+                                                <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                                                <tbody>
+                                                    <tr><td><code class="doc-inline-code">event_id</code></td><td>Filter by event (encoded event ID)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">subdomain</code></td><td>Filter by schedule subdomain</td></tr>
+                                                    <tr><td><code class="doc-inline-code">event_date</code></td><td>Filter by event date (Y-m-d)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">min_rating</code></td><td>Only return ratings of at least this value (1-5)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">from</code></td><td>Only feedback submitted on or after this date (Y-m-d)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">to</code></td><td>Only feedback submitted on or before this date (Y-m-d)</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="api-endpoint-code">
+                                        <div class="doc-code-block">
+                                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                                            <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/feedback?min_rating=4&subdomain=my-venue"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                                        </div>
+                                        <div class="doc-code-block">
+                                            <div class="doc-code-header"><span>Response (200)</span><button class="doc-copy-btn">Copy</button></div>
+                                            <pre><code>{
+    <span class="code-string">"data"</span>: [
+        {
+            <span class="code-string">"id"</span>: <span class="code-string">"fb123"</span>,
+            <span class="code-string">"event_id"</span>: <span class="code-string">"ev456"</span>,
+            <span class="code-string">"event_name"</span>: <span class="code-string">"Jazz Night"</span>,
+            <span class="code-string">"event_date"</span>: <span class="code-string">"2026-07-10"</span>,
+            <span class="code-string">"rating"</span>: <span class="code-value">5</span>,
+            <span class="code-string">"comment"</span>: <span class="code-string">"Best night out all year"</span>,
+            <span class="code-string">"attendee_name"</span>: <span class="code-string">"Alex Attendee"</span>,
+            <span class="code-string">"attendee_email"</span>: <span class="code-string">"alex@example.com"</span>,
+            <span class="code-string">"created_at"</span>: <span class="code-string">"2026-07-11T09:12:00+00:00"</span>
+        }
+    ],
+    <span class="code-string">"meta"</span>: { <span class="code-string">"current_page"</span>: <span class="code-value">1</span>, <span class="code-string">"total"</span>: <span class="code-value">8</span> }
+}</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- List Fan Content -->
+                            <section id="list-fan-content" class="doc-section api-endpoint-section">
+                                <div class="api-endpoint-row">
+                                    <div class="api-endpoint-desc">
+                                        <h2 class="doc-heading">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                                            </svg>
+                                            List Fan Content
+                                        </h2>
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="bg-blue-600 text-white px-2 py-1 rounded text-sm font-medium">GET</span>
+                                            <code class="doc-inline-code">/api/fan-content</code>
+                                        </div>
+                                        <p class="text-gray-600 dark:text-gray-300 mb-6">Returns fan comments, photos and videos submitted on your events, newest first. Approved items only by default, which is what you want when displaying them on an external site. Submitter email addresses are never included.</p>
+                                        <div class="overflow-x-auto mb-6">
+                                            <table class="doc-table">
+                                                <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                                                <tbody>
+                                                    <tr><td><code class="doc-inline-code">type</code></td><td>Limit to one kind: comment, photo, or video</td></tr>
+                                                    <tr><td><code class="doc-inline-code">event_id</code></td><td>Filter by event (encoded event ID)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">subdomain</code></td><td>Filter by schedule subdomain</td></tr>
+                                                    <tr><td><code class="doc-inline-code">event_date</code></td><td>Filter by event date (Y-m-d)</td></tr>
+                                                    <tr><td><code class="doc-inline-code">is_approved</code></td><td>Defaults to true. Pass 0 to read the pending moderation queue instead</td></tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="api-endpoint-code">
+                                        <div class="doc-code-block">
+                                            <div class="doc-code-header"><span>cURL</span><button class="doc-copy-btn">Copy</button></div>
+                                            <pre><code><span class="code-keyword">curl</span> -X GET <span class="code-string">"{{ config('app.url') }}/api/fan-content?type=photo&subdomain=my-venue"</span> \
+     -H <span class="code-string">"X-API-Key: your_api_key_here"</span></code></pre>
+                                        </div>
+                                        <div class="doc-code-block">
+                                            <div class="doc-code-header"><span>Response (200)</span><button class="doc-copy-btn">Copy</button></div>
+                                            <pre><code>{
+    <span class="code-string">"data"</span>: [
+        {
+            <span class="code-string">"id"</span>: <span class="code-string">"ph123"</span>,
+            <span class="code-string">"type"</span>: <span class="code-string">"photo"</span>,
+            <span class="code-string">"event_id"</span>: <span class="code-string">"ev456"</span>,
+            <span class="code-string">"event_name"</span>: <span class="code-string">"Jazz Night"</span>,
+            <span class="code-string">"event_date"</span>: <span class="code-string">"2026-07-10"</span>,
+            <span class="code-string">"submitted_by"</span>: <span class="code-string">"Dana Guest"</span>,
+            <span class="code-string">"is_guest_submission"</span>: <span class="code-value">true</span>,
+            <span class="code-string">"is_approved"</span>: <span class="code-value">true</span>,
+            <span class="code-string">"photo_url"</span>: <span class="code-string">"https://.../crowd.jpg"</span>,
+            <span class="code-string">"created_at"</span>: <span class="code-string">"2026-07-11T09:12:00+00:00"</span>
+        }
+    ],
+    <span class="code-string">"meta"</span>: { <span class="code-string">"current_page"</span>: <span class="code-value">1</span>, <span class="code-string">"total"</span>: <span class="code-value">24</span> }
 }</code></pre>
                                         </div>
                                     </div>

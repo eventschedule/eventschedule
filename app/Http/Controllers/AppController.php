@@ -255,6 +255,12 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-carpool-reminders failed: '.$e->getMessage());
                     report($e);
                 }
+                try {
+                    \Artisan::call('app:send-appointment-reminders');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command app:send-appointment-reminders failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
                     try {

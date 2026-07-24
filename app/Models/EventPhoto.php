@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use App\Traits\HasFanSubmitter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class EventPhoto extends Model
 {
+    use HasFanSubmitter;
+
     protected $fillable = [
         'event_id',
         'event_part_id',
         'event_date',
         'user_id',
+        'guest_name',
+        'guest_email',
         'photo_url',
         'is_approved',
     ];
@@ -61,5 +66,17 @@ class EventPhoto extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    protected function fanContentType(): string
+    {
+        return 'photo';
+    }
+
+    protected function fanContentApiFields(): array
+    {
+        return [
+            'photo_url' => $this->photo_url,
+        ];
     }
 }

@@ -4545,7 +4545,7 @@
                                             @if ($video->event_date)
                                             &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
                                             @endif
-                                            &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
+                                            &middot; {{ __('messages.submitted_by') }} <span v-pre>{{ $video->submitterName() }}</span>@if ($video->isGuestSubmission() && $video->submitterEmail()) <span v-pre class="text-gray-500 dark:text-gray-500">({{ $video->submitterEmail() }})</span>@endif
                                         </p>
                                     </div>
                                     <div class="flex gap-2 shrink-0">
@@ -4564,7 +4564,7 @@
                                             @if ($comment->event_date)
                                             &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
                                             @endif
-                                            &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
+                                            &middot; {{ __('messages.submitted_by') }} <span v-pre>{{ $comment->submitterName() }}</span>@if ($comment->isGuestSubmission() && $comment->submitterEmail()) <span v-pre class="text-gray-500 dark:text-gray-500">({{ $comment->submitterEmail() }})</span>@endif
                                         </p>
                                     </div>
                                     <div class="flex gap-2 shrink-0">
@@ -4583,7 +4583,7 @@
                                             @if ($photo->event_date)
                                             &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
                                             @endif
-                                            &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
+                                            &middot; {{ __('messages.submitted_by') }} <span v-pre>{{ $photo->submitterName() }}</span>@if ($photo->isGuestSubmission() && $photo->submitterEmail()) <span v-pre class="text-gray-500 dark:text-gray-500">({{ $photo->submitterEmail() }})</span>@endif
                                         </p>
                                     </div>
                                     <div class="flex gap-2 shrink-0">
@@ -4620,7 +4620,7 @@
                                             @if ($video->event_date)
                                             &middot; {{ \Carbon\Carbon::parse($video->event_date)->format('M j, Y') }}
                                             @endif
-                                            &middot; {{ __('messages.submitted_by') }} {{ $video->user?->name }}
+                                            &middot; {{ __('messages.submitted_by') }} <span v-pre>{{ $video->submitterName() }}</span>@if ($video->isGuestSubmission() && $video->submitterEmail()) <span v-pre class="text-gray-500 dark:text-gray-500">({{ $video->submitterEmail() }})</span>@endif
                                         </p>
                                     </div>
                                     <div class="shrink-0">
@@ -4638,7 +4638,7 @@
                                             @if ($comment->event_date)
                                             &middot; {{ \Carbon\Carbon::parse($comment->event_date)->format('M j, Y') }}
                                             @endif
-                                            &middot; {{ __('messages.submitted_by') }} {{ $comment->user?->name }}
+                                            &middot; {{ __('messages.submitted_by') }} <span v-pre>{{ $comment->submitterName() }}</span>@if ($comment->isGuestSubmission() && $comment->submitterEmail()) <span v-pre class="text-gray-500 dark:text-gray-500">({{ $comment->submitterEmail() }})</span>@endif
                                         </p>
                                     </div>
                                     <div class="shrink-0">
@@ -4656,7 +4656,7 @@
                                             @if ($photo->event_date)
                                             &middot; {{ \Carbon\Carbon::parse($photo->event_date)->format('M j, Y') }}
                                             @endif
-                                            &middot; {{ __('messages.submitted_by') }} {{ $photo->user?->name }}
+                                            &middot; {{ __('messages.submitted_by') }} <span v-pre>{{ $photo->submitterName() }}</span>@if ($photo->isGuestSubmission() && $photo->submitterEmail()) <span v-pre class="text-gray-500 dark:text-gray-500">({{ $photo->submitterEmail() }})</span>@endif
                                         </p>
                                     </div>
                                     <div class="shrink-0">

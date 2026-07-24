@@ -80,6 +80,7 @@
          @toggle-upload.window="showUpload = !showUpload"
          class="mb-6">
       <div x-show="showUpload" x-cloak x-transition class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+        @include('partials.fan-content-turnstile')
         <form method="POST" action="{{ route('event.submit_photo', ['subdomain' => $role->subdomain, 'event_hash' => $event->hashedId()]) }}" enctype="multipart/form-data" class="flex flex-col gap-3">
           @csrf
           <input type="hidden" name="return_to" value="gallery">
@@ -113,6 +114,7 @@
           <input x-ref="cameraInput" type="file" accept="image/*" capture="environment" class="hidden"
                  @change="if ($event.target.files[0]) { const f = $event.target.files[0]; const dt = new DataTransfer(); dt.items.add(f); $refs.photoInput.files = dt.files; const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL(f); }">
           <input x-ref="photoInput" type="file" name="photo" accept="image/*" class="hidden" @change="if ($event.target.files[0]) { const r = new FileReader(); r.onload = e => photoPreview = e.target.result; r.readAsDataURL($event.target.files[0]); }">
+          @include('partials.fan-content-guest-fields')
           <button x-show="photoPreview" type="submit" class="self-start font-semibold text-base px-4 py-3 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md" style="background-color: {{ $accentColor }}; color: {{ $contrastColor }};">{{ __('messages.upload_photo') }}</button>
         </form>
       </div>

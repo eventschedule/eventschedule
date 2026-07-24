@@ -602,6 +602,17 @@ class Event extends Model
         return $this->belongsTo(Role::class, 'creator_role_id');
     }
 
+    public function appointmentType()
+    {
+        return $this->belongsTo(AppointmentType::class);
+    }
+
+    /** Whether this event is a Calendly-style appointment booking (vs a regular event). */
+    public function isAppointment(): bool
+    {
+        return ! is_null($this->appointment_type_id);
+    }
+
     /**
      * Resolve the display name for this event's category.
      * Prefers the creator schedule's effective list (so renames are retroactive),

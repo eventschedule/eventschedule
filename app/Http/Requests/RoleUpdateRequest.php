@@ -125,6 +125,7 @@ class RoleUpdateRequest extends FormRequest
             'fan_comments_enabled' => ['nullable', 'boolean'],
             'fan_photos_enabled' => ['nullable', 'boolean'],
             'fan_videos_enabled' => ['nullable', 'boolean'],
+            'fan_content_require_account' => ['nullable', 'boolean'],
             'carpool_enabled' => ['nullable', 'boolean'],
             'feedback_delay_hours' => ['nullable', 'integer', 'in:1,2,6,12,24,48'],
             'gift_cards_enabled' => ['nullable', 'boolean'],

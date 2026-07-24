@@ -148,7 +148,7 @@
                     'embed_url' => \App\Utils\UrlUtils::getYouTubeEmbed($v->youtube_url),
                 ])->values()->toArray() : [],
                 'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn($c) => [
-                    'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
+                    'author' => $c->submitterName(),
                     'text' => Str::limit($c->comment, 80),
                 ])->values()->toArray() : [],
                 'photos' => $event->relationLoaded('approvedPhotos') ? $event->approvedPhotos->take(4)->map(fn($p) => [
@@ -1978,6 +1978,12 @@ const calendarApp = createApp({
             loadingPastEvents: false,
             showPastEvents: false,
             isAuthenticated: {{ auth()->check() ? 'true' : 'false' }},
+            // A signed-out visitor submitting fan content has to supply a name, an email and
+            // (on hosted) a Turnstile challenge. Those live on the event page, whose forms are
+            // in the DOM from the start; the ones here are v-if'd in on demand, which Turnstile
+            // cannot auto-render into. So send guests to the event page instead of opening a
+            // form that could never pass validation.
+            fanContentGuestRedirect: {{ (! auth()->check() && isset($role) && $role && ! $role->fan_content_require_account) ? 'true' : 'false' }},
             openVideoForm: {},
             playingVideo: null,
             openCommentForm: {},
@@ -3074,7 +3080,13 @@ const calendarApp = createApp({
 
             return url;
         },
+        openFanContentOnEventPage(event) {
+            if (!this.fanContentGuestRedirect || !event.guest_url) return false;
+            window.location.href = event.guest_url + '#event-media-section';
+            return true;
+        },
         toggleVideoForm(event, $event) {
+            if (this.openFanContentOnEventPage(event)) return;
             const key = event.uniqueKey;
             const btn = $event?.target?.closest('button');
             this.openVideoForm = { ...this.openVideoForm, [key]: !this.openVideoForm[key] };
@@ -3089,6 +3101,7 @@ const calendarApp = createApp({
             }
         },
         togglePhotoForm(event, $event) {
+            if (this.openFanContentOnEventPage(event)) return;
             const key = event.uniqueKey;
             this.openPhotoForm = { ...this.openPhotoForm, [key]: !this.openPhotoForm[key] };
             if (this.openPhotoForm[key]) {
@@ -3097,6 +3110,7 @@ const calendarApp = createApp({
             }
         },
         toggleCommentForm(event, $event) {
+            if (this.openFanContentOnEventPage(event)) return;
             const key = event.uniqueKey;
             const btn = $event?.target?.closest('button');
             this.openCommentForm = { ...this.openCommentForm, [key]: !this.openCommentForm[key] };

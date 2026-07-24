@@ -32,6 +32,9 @@ return [
     'custom_footer' => env('APP_CUSTOM_FOOTER', ''),
 
     'hosted' => (bool) env('IS_HOSTED', false),
+    // Selfhost only: lift the single-user restriction so visitors can create accounts.
+    // Hosted installs always allow registration. See public_registration_enabled().
+    'allow_registration' => (bool) env('ALLOW_REGISTRATION', false),
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
 

@@ -97,7 +97,16 @@ class SocialAuthController extends Controller
             return redirect()->intended(route('home', absolute: false));
         }
 
-        // New user - create account
+        // New user - create account.
+        // Google OAuth is an account-creation path like the sign-up form, so it obeys the same
+        // policy: a plain selfhost is single-user unless ALLOW_REGISTRATION is set. Both
+        // existing-user branches above have already returned, so this only blocks brand-new
+        // accounts - current users (and invited stubs being linked) keep signing in.
+        if (! public_registration_enabled() && ! config('app.is_testing') && User::exists()) {
+            return redirect()->route('login')
+                ->withErrors(['email' => __('messages.account_creation_disabled')]);
+        }
+
         $utmParams = session('utm_params', []);
 
         // Fall back to cookie if session has no UTM data

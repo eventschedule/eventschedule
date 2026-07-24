@@ -65,6 +65,10 @@ Schedule::call(function () {
 })->hourly()->name('send-feedback-requests')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('app:send-appointment-reminders');
+})->hourly()->name('send-appointment-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     Artisan::call('caldav:sync');
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
 

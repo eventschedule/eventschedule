@@ -367,6 +367,14 @@
                     </details>
                 @endforeach
             </div>
+
+            <p class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400" data-reveal>
+                Looking for bookable time slots instead?
+                <a href="{{ route('marketing.appointments') }}" class="inline-flex items-center gap-1 font-medium text-teal-600 transition-all hover:gap-1.5 dark:text-teal-400">
+                    Explore Appointments
+                    <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+            </p>
         </div>
     </section>
 

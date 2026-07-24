@@ -99,7 +99,7 @@ trait CalendarDataTrait
                 'embed_url' => UrlUtils::getYouTubeEmbed($v->youtube_url),
             ])->values()->toArray() : [],
             'recent_comments' => $event->relationLoaded('approvedComments') ? $event->approvedComments->take(2)->map(fn ($c) => [
-                'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
+                'author' => $c->submitterName(),
                 'text' => Str::limit($c->comment, 80),
             ])->values()->toArray() : [],
             'photos' => $event->relationLoaded('approvedPhotos') ? $event->approvedPhotos->take(4)->map(fn ($p) => [

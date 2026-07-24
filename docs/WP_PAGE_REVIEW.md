@@ -4,7 +4,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 **Legend:** a checkmark in the **Reviewed** column marks a page as reviewed; a blank cell means it has not been reviewed yet. On the audience "For" pages table, the **Updated** column marks pages whose restyle brief (the Notes cell) has been applied to the page. The **Verified** column records the July 2026 faithfulness audit: every page was read in full against its brief's Accent / Motif / Sections / Distinct targets; a plain ✅ means the brief was already fully realized, and a ✅ with a short note flags a small gap that this pass fixed.
 
-**Progress:** 142 / 142 reviewed
+**Progress:** 143 / 143 reviewed
 
 > Scope: static and functional marketing pages served under `marketing.*` routes (`routes/web.php`, `MarketingController`), cross-checked against `resources/views/sitemap.blade.php`. Excludes URL redirects, the shared partials/components, and individual blog posts. The comparison and replacement detail pages each render one shared template driven by per-slug data.
 
@@ -27,7 +27,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | Selfhost | `/selfhost` | |
 | ✅ | SaaS | `/saas` | White-label SaaS operator landing |
 
-## Feature pages (29)
+## Feature pages (30)
 
 | Reviewed | Page | URL | Notes |
 |:--------:|------|-----|-------|
@@ -55,6 +55,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | Custom Domain | `/features/custom-domain` | |
 | ✅ | Feedback | `/features/feedback` | |
 | ✅ | Availability | `/features/availability` | Local-dev only: `/features/availability` is shadowed by the `role.view_admin` `/{subdomain}/{tab}` route (tab `availability` is whitelisted) → 302 /login; production is unaffected (subdomain isolation). Verified via direct view render. |
+| ✅ | Appointments | `/features/appointments` | Redesigned July 2026 on the gift-cards skeleton (Calendly-style booking launch page). Local-dev only: shadowed by the `role.view_admin` `/{subdomain}/{tab}` route (tab `appointments` is whitelisted) → 302 /login; production unaffected. Verified via direct view render. |
 | ✅ | Carpool | `/features/carpool` | |
 | ✅ | Google Calendar | `/google-calendar` | Root-level integration page |
 | ✅ | CalDAV | `/caldav` | Root-level integration page |

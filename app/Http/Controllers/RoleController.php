@@ -1954,7 +1954,7 @@ class RoleController extends Controller
                 'embed_url' => UrlUtils::getYouTubeEmbed($v->youtube_url),
             ])->values()->toArray(),
             'recent_comments' => $event->approvedComments->take(2)->map(fn ($c) => [
-                'author' => $c->user ? ($c->user->first_name ?: 'User') : 'User',
+                'author' => $c->submitterName(),
                 'text' => Str::limit($c->comment, 80),
             ])->values()->toArray(),
             'occurrenceDate' => $event->starts_at ? $event->getStartDateTime(null, true)->format('Y-m-d') : null,

@@ -10,6 +10,7 @@ class HelpUtils
         'newsletters*' => '/docs/newsletters',
         'newsletter-segments*' => '/docs/newsletters#recipients',
         'newsletter-import*' => '/docs/newsletters',
+        'appointments*' => '/docs/appointments',
 
         // Pages with section-level anchor mapping
         '{subdomain}/edit' => [

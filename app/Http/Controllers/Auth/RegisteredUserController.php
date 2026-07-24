@@ -46,7 +46,7 @@ class RegisteredUserController extends Controller
             session(['signup_role_type' => $requestedType]);
         }
 
-        if (! config('app.hosted') && config('app.url') && ! config('app.is_testing') && ! selfhost_needs_setup() && User::exists()) {
+        if (! public_registration_enabled() && config('app.url') && ! config('app.is_testing') && ! selfhost_needs_setup() && User::exists()) {
             return redirect()->route('login');
         }
 
@@ -305,7 +305,7 @@ class RegisteredUserController extends Controller
             }
         }
 
-        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
+        if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
             return redirect()->route('login');
         }
 

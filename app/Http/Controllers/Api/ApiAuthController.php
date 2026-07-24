@@ -89,8 +89,8 @@ class ApiAuthController extends Controller
             return response()->json(['error' => 'Too many registration attempts. Please try again later.'], 429);
         }
 
-        // Block selfhosted registration if users already exist
-        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
+        // Block selfhosted registration if users already exist (unless ALLOW_REGISTRATION is set)
+        if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
             return response()->json(['error' => 'Registration is closed'], 403);
         }
 

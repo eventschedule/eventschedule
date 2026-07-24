@@ -15,6 +15,7 @@ class CheckInController extends Controller
 
         $events = Event::with('creatorRole')
             ->where('user_id', $user->id)
+            ->whereNull('appointment_type_id') // appointment bookings are not check-in events
             ->where(fn ($q) => $q->whereHas('tickets')->orWhere('rsvp_enabled', true))
             ->orderBy('starts_at', 'desc')
             ->get();

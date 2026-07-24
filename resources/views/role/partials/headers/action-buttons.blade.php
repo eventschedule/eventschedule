@@ -5,14 +5,29 @@
 @php
     $onDark = $onDark ?? false;
     $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
+    $bookable = $role->hasBookableAppointments();
     $primaryBtnClass = 'inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 '
         . ($onDark ? 'focus-visible:ring-white/70 focus-visible:ring-offset-[#16171b]' : 'focus-visible:ring-[var(--brand-blue)] focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900');
 @endphp
-@if ($hasSubmitButton)
-<a href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
+@if ($bookable)
+<a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
     <button type="button"
         style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
         class="{{ $primaryBtnClass }}">
+        {{ $role->customLabel('book_a_time') }}
+    </button>
+</a>
+@endif
+@if ($hasSubmitButton)
+<a href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
+    <button type="button"
+        @if ($bookable)
+        style="border-color: {{ $accentColor }}; color: {{ $accentColor }}"
+        class="{{ $primaryBtnClass }} {{ $onDark ? 'bg-transparent' : 'bg-white dark:bg-transparent' }}"
+        @else
+        style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}"
+        class="{{ $primaryBtnClass }}"
+        @endif>
         {{ $role->isTalent() ? $role->customLabel('request_to_book') : $role->customLabel('submit_event') }}
     </button>
 </a>

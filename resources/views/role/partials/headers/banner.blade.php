@@ -167,8 +167,13 @@
                 @php
                 $hasSubmitButton = ($role->isCurator() || $role->isVenue() || $role->isTalent()) && $role->accept_requests;
                 @endphp
-                @if ($hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
+                @if ($role->hasBookableAppointments() || $hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center justify-center">
+                  @if ($role->hasBookableAppointments())
+                  <a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center">
+                    <button type="button" style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}" class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{{ $role->customLabel('book_a_time') }}</button>
+                  </a>
+                  @endif
                   @if ($hasSubmitButton)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"
@@ -341,8 +346,13 @@
                 </div>
 
                 {{-- Action buttons --}}
-                @if ($hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
+                @if ($role->hasBookableAppointments() || $hasSubmitButton || $role->canSellGiftCards() || config('app.hosted') || config('app.is_testing'))
                 <div class="flex flex-row flex-wrap gap-3 items-center flex-shrink-0">
+                  @if ($role->hasBookableAppointments())
+                  <a href="{{ route('appointments.book', ['subdomain' => $role->subdomain]) }}" class="inline-flex items-center justify-center flex-shrink-0">
+                    <button type="button" style="border-color: {{ $accentColor }}; background-color: {{ $accentColor }}; color: {{ $contrastColor }}" class="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-semibold border-2 shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">{{ $role->customLabel('book_a_time') }}</button>
+                  </a>
+                  @endif
                   @if ($hasSubmitButton)
                   <a
                     href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}"

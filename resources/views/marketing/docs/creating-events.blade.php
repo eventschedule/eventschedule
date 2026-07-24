@@ -668,6 +668,9 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 All fan submissions go through an approval workflow. Nothing appears on your public event page until you approve it.
                             </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Attendees do not need an account. By default they submit with just a name and email, which appear in your moderation queue so you know who sent what; the email is never shown publicly. If you would rather have people sign in first, turn on <strong>Require an account</strong> in your schedule's Engagement settings.
+                            </p>
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Note</div>
                                 <p>Fan Content is available for schedules with the Curator type. You can change your schedule type in the schedule settings.</p>

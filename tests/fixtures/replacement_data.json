@@ -1001,8 +1001,8 @@
     },
     "calendly": {
         "name": "Calendly",
-        "tagline": "Event scheduling built for audiences, not one-on-ones.",
-        "description": "Replace Calendly for event scheduling with Event Schedule. Manage public events, sell tickets, and share a schedule page - not just appointment slots.",
+        "tagline": "Appointment booking, public events, and ticketing in one place.",
+        "description": "Switch from Calendly to Event Schedule. Take one-on-one appointment bookings and run public events with ticketing, newsletters, and a shareable schedule page.",
         "keywords": "Calendly alternative for events, Calendly replacement, event scheduling tool, public event scheduling",
         "audience_hint": "For organizers using appointment scheduling for public events",
         "about": "Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.",
@@ -1014,6 +1014,11 @@
                 "feature": "Public event pages",
                 "competitor": "Booking pages",
                 "es": "Full event pages"
+            },
+            {
+                "feature": "One-on-one appointment booking",
+                "competitor": true,
+                "es": "Built in (Pro)"
             },
             {
                 "feature": "Ticketing & payments",
@@ -1119,7 +1124,7 @@
             }
         ],
         "why_switch": {
-            "intro": "Calendly schedules meetings. Event Schedule manages public events with ticket sales, audience building, and promotional tools.",
+            "intro": "Calendly schedules meetings. Event Schedule does that too - with built-in appointment booking - plus public events, ticket sales, audience building, and promotional tools.",
             "points": [
                 "Public event pages with full details, images, and ticket purchasing",
                 "Ticketing with multiple types, promo codes, and zero platform fees",

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Concerns;
 
+use App\Models\AppointmentType;
 use App\Models\Event;
 use App\Models\Group;
 use App\Models\Role;
@@ -152,6 +153,42 @@ trait CreatesScheduleData
         }
 
         return $sale->fresh();
+    }
+
+    /**
+     * Appointment type. Defaults to a free 30-min "cash" type open Mon-Fri 09:00-17:00
+     * (weekly_windows keys are "0"=Sunday.."6"=Saturday, wall-clock in the role timezone).
+     */
+    protected function createAppointmentType(Role $role, array $attrs = []): AppointmentType
+    {
+        $type = new AppointmentType;
+        $type->role_id = $role->id;
+        $type->name = $attrs['name'] ?? '30 Minute Meeting';
+        $type->slug = $attrs['slug'] ?? 'meeting-'.strtolower(Str::random(6));
+        $type->duration_minutes = $attrs['duration_minutes'] ?? 30;
+        $type->weekly_windows = $attrs['weekly_windows'] ?? [
+            '0' => [],
+            '1' => [['start' => '09:00', 'end' => '17:00']],
+            '2' => [['start' => '09:00', 'end' => '17:00']],
+            '3' => [['start' => '09:00', 'end' => '17:00']],
+            '4' => [['start' => '09:00', 'end' => '17:00']],
+            '5' => [['start' => '09:00', 'end' => '17:00']],
+            '6' => [],
+        ];
+        $type->price = $attrs['price'] ?? 0;
+        $type->payment_method = $attrs['payment_method'] ?? 'cash';
+        $type->is_active = $attrs['is_active'] ?? true;
+
+        foreach ($attrs as $key => $value) {
+            if (in_array($key, ['name', 'slug', 'duration_minutes', 'weekly_windows', 'price', 'payment_method', 'is_active'])) {
+                continue;
+            }
+            $type->{$key} = $value;
+        }
+
+        $type->save();
+
+        return $type->fresh();
     }
 
     /** Sub-schedule (Group) attached to the given schedule. */

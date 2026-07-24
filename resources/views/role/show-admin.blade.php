@@ -400,6 +400,7 @@
                 @if ($role->isTalent())
                 <option value="availability" {{ $tab == 'availability' ? 'selected' : '' }}>{{ __('messages.availability') }}</option>
                 @endif
+                <option value="appointments" {{ $tab == 'appointments' ? 'selected' : '' }}>{{ __('messages.appointments') }}</option>
                 @if (count($requests))
                 <option value="requests" {{ $tab == 'requests' ? 'selected' : '' }}>
                     {{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</option>
@@ -434,6 +435,8 @@
                 <a href=" {{ route('role.view_admin', ((now()->year == $year && now()->month == $month) || $tab == 'availability') ? ['subdomain' => $role->subdomain, 'tab' => 'availability'] : ((now()->year == $year) ? ['subdomain' => $role->subdomain, 'tab' => 'availability', 'month' => $month] : ['subdomain' => $role->subdomain, 'tab' => 'availability', 'year' => $year, 'month' => $month])) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'availability' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.availability') }}</a>
                 @endif
+                <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}"
+                    class="whitespace-nowrap border-b-2 {{ $tab == 'appointments' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.appointments') }}</a>
                 @if (count($requests))
                 <a href=" {{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'requests']) }}"
                     class="whitespace-nowrap border-b-2 {{ $tab == 'requests' ? 'border-[var(--brand-blue)] px-3 pb-5 text-base font-medium text-[var(--brand-blue)]' : 'border-transparent px-3 pb-5 text-base font-medium text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300' }}">{{ __('messages.requests') }}{{ count($requests) ? ' (' . count($requests) . ')' : '' }}</a>
@@ -459,6 +462,8 @@
     @include('role.show-admin-templates')
     @elseif ($tab == 'availability')
     @include('role.show-admin-availability')
+    @elseif ($tab == 'appointments')
+    @include('role.show-admin-appointments')
     @elseif ($tab == 'requests')
     @include('role.show-admin-requests')
     @elseif ($tab == 'followers')

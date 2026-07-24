@@ -3539,6 +3539,12 @@
                                     label="{{ __('messages.fan_videos_enabled') }}"
                                     checked="{{ old('fan_videos_enabled', $role->fan_videos_enabled) }}" />
                             </div>
+                            <div class="mb-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <x-toggle name="fan_content_require_account"
+                                    label="{{ __('messages.fan_content_require_account') }}"
+                                    checked="{{ old('fan_content_require_account', $role->fan_content_require_account) }}"
+                                    help="{{ __('messages.fan_content_require_account_help') }}" />
+                            </div>
                         </div>
                         <!-- End Tab Content: Fan Content -->
 

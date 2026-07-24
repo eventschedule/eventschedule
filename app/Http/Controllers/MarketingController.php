@@ -290,6 +290,14 @@ class MarketingController extends Controller
     }
 
     /**
+     * Appointment booking page
+     */
+    public function appointments()
+    {
+        return view('marketing.appointments');
+    }
+
+    /**
      * Carpool page
      */
     public function carpool()
@@ -1044,6 +1052,11 @@ class MarketingController extends Controller
     public function docsGiftCards()
     {
         return view('marketing.docs.gift-cards', $this->getDocNavigation('marketing.docs.gift_cards'));
+    }
+
+    public function docsAppointments()
+    {
+        return view('marketing.docs.appointments', $this->getDocNavigation('marketing.docs.appointments'));
     }
 
     /**
@@ -4064,8 +4077,8 @@ class MarketingController extends Controller
             ],
             'calendly' => [
                 'name' => 'Calendly',
-                'tagline' => 'Event scheduling built for audiences, not one-on-ones.',
-                'description' => 'Replace Calendly for event scheduling with Event Schedule. Manage public events, sell tickets, and share a schedule page - not just appointment slots.',
+                'tagline' => 'Appointment booking, public events, and ticketing in one place.',
+                'description' => 'Switch from Calendly to Event Schedule. Take one-on-one appointment bookings and run public events with ticketing, newsletters, and a shareable schedule page.',
                 'keywords' => 'Calendly alternative for events, Calendly replacement, event scheduling tool, public event scheduling',
                 'audience_hint' => 'For organizers using appointment scheduling for public events',
                 'about' => 'Calendly is a scheduling tool designed for booking one-on-one meetings and appointments. Some event organizers use it to schedule events, but it lacks public event pages, ticketing, and the ability to share a calendar of events with an audience.',
@@ -4074,6 +4087,7 @@ class MarketingController extends Controller
                 'es_price' => 'From $0/mo (Pro $5/mo)',
                 'comparison_rows' => [
                     ['feature' => 'Public event pages', 'competitor' => 'Booking pages', 'es' => 'Full event pages'],
+                    ['feature' => 'One-on-one appointment booking', 'competitor' => true, 'es' => 'Built in (Pro)'],
                     ['feature' => 'Ticketing & payments', 'competitor' => false, 'es' => 'Zero platform fees'],
                     ['feature' => 'Google Calendar sync', 'competitor' => true, 'es' => 'Two-way sync'],
                     ['feature' => 'Event graphics', 'competitor' => false, 'es' => 'AI-generated'],
@@ -4102,7 +4116,7 @@ class MarketingController extends Controller
                     ['title' => 'Embeddable Calendar Widget', 'description' => 'Embed your event calendar on any website. Show your schedule wherever your audience is, not just on a scheduling page.', 'icon' => 'code', 'gradient' => 'from-sky-50 to-cyan-50 dark:from-sky-900/30 dark:to-cyan-900/30', 'border' => 'border-sky-200 dark:border-sky-500/20', 'icon_bg' => 'bg-sky-100 dark:bg-sky-500/20', 'icon_color' => 'text-sky-600 dark:text-sky-400'],
                 ],
                 'why_switch' => [
-                    'intro' => 'Calendly schedules meetings. Event Schedule manages public events with ticket sales, audience building, and promotional tools.',
+                    'intro' => 'Calendly schedules meetings. Event Schedule does that too - with built-in appointment booking - plus public events, ticket sales, audience building, and promotional tools.',
                     'points' => [
                         'Public event pages with full details, images, and ticket purchasing',
                         'Ticketing with multiple types, promo codes, and zero platform fees',
@@ -4582,6 +4596,7 @@ class MarketingController extends Controller
             ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
             ['route' => 'marketing.docs.subscriptions', 'title' => 'Subscriptions & Passes'],
             ['route' => 'marketing.docs.gift_cards', 'title' => 'Gift Cards'],
+            ['route' => 'marketing.docs.appointments', 'title' => 'Appointments'],
             ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
             ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
             ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
@@ -5031,6 +5046,7 @@ class MarketingController extends Controller
             'tickets' => route('marketing.docs.tickets'),
             'subscriptions' => route('marketing.docs.subscriptions'),
             'gift_cards' => route('marketing.docs.gift_cards'),
+            'appointments' => route('marketing.docs.appointments'),
             'event_graphics' => route('marketing.docs.event_graphics'),
             'analytics' => route('marketing.docs.analytics'),
             'account_settings' => route('marketing.docs.account_settings'),
@@ -5281,6 +5297,7 @@ class MarketingController extends Controller
             ['page' => 'Installation', 'section' => 'Download the Application', 'description' => 'Download and extract Event Schedule files.', 'url' => $r['selfhost_installation'].'#download', 'category' => 'Selfhost', 'keywords' => 'download extract files'],
             ['page' => 'Installation', 'section' => 'Set File Permissions', 'description' => 'Set proper directory permissions.', 'url' => $r['selfhost_installation'].'#permissions', 'category' => 'Selfhost', 'keywords' => 'permissions chmod directories'],
             ['page' => 'Installation', 'section' => 'Configure Environment', 'description' => 'Set up the .env configuration file.', 'url' => $r['selfhost_installation'].'#environment', 'category' => 'Selfhost', 'keywords' => 'env environment configuration'],
+            ['page' => 'Installation', 'section' => 'User Accounts and Registration', 'description' => 'Selfhost is single user by default; enable ALLOW_REGISTRATION to let others sign up.', 'url' => $r['selfhost_installation'].'#user-accounts', 'category' => 'Selfhost', 'keywords' => 'registration sign up register accounts users ALLOW_REGISTRATION single user attendees multi user public registration'],
             ['page' => 'Installation', 'section' => 'Running Behind a Reverse Proxy', 'description' => 'Set TRUSTED_PROXIES when running behind Nginx, Apache, or Cloudflare.', 'url' => $r['selfhost_installation'].'#reverse-proxy', 'category' => 'Selfhost', 'keywords' => 'proxy reverse proxy nginx apache cloudflare hestiacp https forwarded proto redirect loop TRUSTED_PROXIES'],
             ['page' => 'Installation', 'section' => 'Set Up the Cron Job', 'description' => 'Configure scheduled tasks for the application.', 'url' => $r['selfhost_installation'].'#cron', 'category' => 'Selfhost', 'keywords' => 'cron scheduler task'],
             ['page' => 'Installation', 'section' => 'Verification', 'description' => 'Test and verify the installation.', 'url' => $r['selfhost_installation'].'#verification', 'category' => 'Selfhost', 'keywords' => 'verify test check'],
@@ -5439,6 +5456,8 @@ class MarketingController extends Controller
             ['page' => 'API Reference', 'section' => 'Create Sale', 'description' => 'POST /api/sales - Create a new sale.', 'url' => $r['developer_api'].'#create-sale', 'category' => 'Developer', 'keywords' => 'create sale post new'],
             ['page' => 'API Reference', 'section' => 'Update Sale Status', 'description' => 'PUT /api/sales/{id} - Update a sale status.', 'url' => $r['developer_api'].'#update-sale', 'category' => 'Developer', 'keywords' => 'update sale put status'],
             ['page' => 'API Reference', 'section' => 'Delete Sale', 'description' => 'DELETE /api/sales/{id} - Delete a sale.', 'url' => $r['developer_api'].'#delete-sale', 'category' => 'Developer', 'keywords' => 'delete sale remove'],
+            ['page' => 'API Reference', 'section' => 'List Feedback', 'description' => 'GET /api/feedback - Post-event ratings and comments.', 'url' => $r['developer_api'].'#list-feedback', 'category' => 'Developer', 'keywords' => 'feedback ratings reviews stars comments get'],
+            ['page' => 'API Reference', 'section' => 'List Fan Content', 'description' => 'GET /api/fan-content - Approved fan comments, photos and videos.', 'url' => $r['developer_api'].'#list-fan-content', 'category' => 'Developer', 'keywords' => 'fan content comments photos videos approved get'],
             ['page' => 'API Reference', 'section' => 'Error Handling', 'description' => 'HTTP status codes and error responses.', 'url' => $r['developer_api'].'#error-handling', 'category' => 'Developer', 'keywords' => 'error status code http'],
 
             // Webhooks (Developer)

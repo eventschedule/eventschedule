@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AppointmentType;
 use App\Models\BackupJob;
 use App\Models\Event;
 use App\Models\EventComment;
@@ -50,8 +51,9 @@ class BackupService
         'event_custom_fields', 'graphic_settings', 'agenda_ai_prompt', 'agenda_show_times',
         'agenda_show_description', 'agenda_save_image', 'slug_pattern', 'direct_registration',
         'default_event_visibility',
-        'feedback_enabled', 'feedback_delay_hours', 'fan_comments_enabled', 'fan_photos_enabled',
-        'fan_videos_enabled', 'first_day_of_week', 'sponsor_logos', 'sponsor_section_title',
+        'feedback_enabled', 'feedback_delay_hours', 'feedback_public', 'fan_comments_enabled',
+        'fan_photos_enabled', 'fan_videos_enabled', 'fan_content_require_account',
+        'first_day_of_week', 'sponsor_logos', 'sponsor_section_title',
         'sponsor_section_title_en', 'custom_labels', 'ai_style_instructions', 'ai_content_instructions',
         'social_links', 'payment_links', 'youtube_links', 'background_image', 'header_image',
         'profile_image_url', 'header_image_url', 'background_image_url',
@@ -204,7 +206,43 @@ class BackupService
             'newsletter_ab_tests' => $abTestsData,
             'newsletter_unsubscribes' => $unsubscribesData,
             'gift_cards' => $this->exportGiftCards($role),
+            'appointment_types' => $this->exportAppointmentTypes($role),
         ];
+    }
+
+    private function exportAppointmentTypes(Role $role): array
+    {
+        return AppointmentType::where('role_id', $role->id)->get()->map(function ($type) {
+            return [
+                '_ref_id' => $type->id,
+                'name' => $type->name,
+                'slug' => $type->slug,
+                'description' => $type->description,
+                'duration_minutes' => $type->duration_minutes,
+                'slot_interval_minutes' => $type->slot_interval_minutes,
+                'buffer_before_minutes' => $type->buffer_before_minutes,
+                'buffer_after_minutes' => $type->buffer_after_minutes,
+                'min_notice_hours' => $type->min_notice_hours,
+                'max_advance_days' => $type->max_advance_days,
+                'weekly_windows' => $type->weekly_windows,
+                'date_overrides' => $type->date_overrides,
+                'location_type' => $type->location_type,
+                'location_address' => $type->location_address,
+                'location_url' => $type->location_url,
+                'location_phone' => $type->location_phone,
+                'price' => $type->price,
+                'currency_code' => $type->currency_code,
+                'payment_method' => $type->payment_method,
+                'requires_approval' => $type->requires_approval,
+                'capacity' => $type->capacity,
+                'custom_fields' => $type->custom_fields,
+                'ask_phone' => $type->ask_phone,
+                'require_phone' => $type->require_phone,
+                'is_active' => $type->is_active,
+                'is_deleted' => $type->is_deleted,
+                'created_at' => $type->created_at?->toDateTimeString(),
+            ];
+        })->toArray();
     }
 
     private function exportGiftCards(Role $role): array
@@ -251,6 +289,12 @@ class BackupService
         $eventData['_ref_id'] = $event->id;
         $eventData['_group_ref_id'] = $pivot?->group_id;
         $eventData['_is_accepted'] = (bool) ($pivot?->is_accepted ?? true);
+        // Preserve the pivot tri-state (null = pending approval) so appointment bookings restore
+        // in the right state; the bool above would flip pending to accepted.
+        $eventData['_is_accepted_raw'] = $pivot?->is_accepted;
+        // appointment_type_id is not fillable, so the fillable loop above drops it - export the
+        // ref explicitly and remap on import.
+        $eventData['_appointment_type_ref_id'] = $event->appointment_type_id;
         $eventData['days_of_week'] = $event->days_of_week;
         $eventData['recurring_include_dates'] = $event->recurring_include_dates;
         $eventData['recurring_exclude_dates'] = $event->recurring_exclude_dates;
@@ -346,6 +390,9 @@ class BackupService
                 'utm_medium' => $sale->utm_medium,
                 'utm_campaign' => $sale->utm_campaign,
                 'feedback_sent_at' => $sale->feedback_sent_at?->toDateTimeString(),
+                'reminder_sent_at' => $sale->reminder_sent_at?->toDateTimeString(),
+                'guest_timezone' => $sale->guest_timezone,
+                'confirmed_at' => $sale->confirmed_at?->toDateTimeString(),
                 'created_at' => $sale->created_at?->toDateTimeString(),
             ];
 
@@ -421,6 +468,9 @@ class BackupService
             return [
                 '_event_part_ref_id' => $comment->event_part_id,
                 'event_date' => $comment->event_date,
+                // Guest attribution round-trips; guest_email is deliberately dropped as PII,
+                // the same way user_id is not exported.
+                'guest_name' => $comment->guest_name,
                 'comment' => $comment->comment,
                 'is_approved' => $comment->is_approved,
             ];
@@ -433,6 +483,7 @@ class BackupService
             return [
                 '_event_part_ref_id' => $video->event_part_id,
                 'event_date' => $video->event_date,
+                'guest_name' => $video->guest_name,
                 'youtube_url' => $video->youtube_url,
                 'is_approved' => $video->is_approved,
             ];
@@ -580,6 +631,7 @@ class BackupService
                         '_photo_image' => $imageKey,
                         '_event_part_ref_id' => $photo->event_part_id,
                         'event_date' => $photo->event_date,
+                        'guest_name' => $photo->guest_name,
                         'is_approved' => $photo->is_approved,
                     ];
                 }
@@ -728,6 +780,7 @@ class BackupService
             'tickets' => [],
             'promo_codes' => [],
             'gift_cards' => [],
+            'appointment_types' => [],
             'sales' => [],
             'parts' => [],
             'newsletters' => [],
@@ -762,6 +815,18 @@ class BackupService
                     $giftCard = $this->importGiftCard($giftCardData, $role);
                     if (isset($giftCardData['_ref_id'])) {
                         $idMap['gift_cards'][$giftCardData['_ref_id']] = $giftCard->id;
+                    }
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            }
+
+            // Import appointment types before events - appointment events reference them.
+            foreach ($scheduleData['appointment_types'] ?? [] as $typeData) {
+                try {
+                    $type = $this->importAppointmentType($typeData, $role);
+                    if (isset($typeData['_ref_id'])) {
+                        $idMap['appointment_types'][$typeData['_ref_id']] = $type->id;
                     }
                 } catch (\Exception $e) {
                     report($e);
@@ -1268,6 +1333,12 @@ class BackupService
         $event->cancelled_at = $data['cancelled_at'] ?? null;
         $event->ical_sequence = (int) ($data['ical_sequence'] ?? 0);
 
+        // Remap the appointment type (not fillable). Drop the link if the type didn't import.
+        $apptRefId = $data['_appointment_type_ref_id'] ?? null;
+        if ($apptRefId && isset($idMap['appointment_types'][$apptRefId])) {
+            $event->appointment_type_id = $idMap['appointment_types'][$apptRefId];
+        }
+
         // Regenerate HTML fields
         $event->description_html = MarkdownUtils::convertToHtml($event->description);
         $event->description_html_en = MarkdownUtils::convertToHtml($event->description_en);
@@ -1293,8 +1364,9 @@ class BackupService
 
         $event->saveQuietly();
 
-        // Attach to role via pivot
-        $pivotData = ['is_accepted' => $data['_is_accepted'] ?? true];
+        // Attach to role via pivot. Prefer the raw tri-state (null = pending approval) when present
+        // so pending appointment bookings restore pending; fall back to the legacy bool.
+        $pivotData = ['is_accepted' => array_key_exists('_is_accepted_raw', $data) ? $data['_is_accepted_raw'] : ($data['_is_accepted'] ?? true)];
         $groupRefId = $data['_group_ref_id'] ?? null;
         if ($groupRefId && isset($idMap['groups'][$groupRefId])) {
             $pivotData['group_id'] = $idMap['groups'][$groupRefId];
@@ -1424,6 +1496,53 @@ class BackupService
         return $giftCard;
     }
 
+    private function importAppointmentType(array $data, Role $role): AppointmentType
+    {
+        $validator = Validator::make($data, [
+            'name' => 'required|string|max:255',
+            'duration_minutes' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            throw new \InvalidArgumentException('Invalid appointment type data: '.$validator->errors()->first());
+        }
+
+        $type = new AppointmentType;
+        $type->role_id = $role->id;
+        $type->name = $data['name'];
+        $type->slug = $data['slug'] ?? Str::slug($data['name']);
+        $type->description = $data['description'] ?? null;
+        $type->duration_minutes = $data['duration_minutes'];
+        $type->slot_interval_minutes = $data['slot_interval_minutes'] ?? null;
+        $type->buffer_before_minutes = $data['buffer_before_minutes'] ?? 0;
+        $type->buffer_after_minutes = $data['buffer_after_minutes'] ?? 0;
+        $type->min_notice_hours = $data['min_notice_hours'] ?? 0;
+        $type->max_advance_days = $data['max_advance_days'] ?? 60;
+        $type->weekly_windows = $data['weekly_windows'] ?? [];
+        $type->date_overrides = $data['date_overrides'] ?? null;
+        $type->location_type = $data['location_type'] ?? 'in_person';
+        $type->location_address = $data['location_address'] ?? null;
+        $type->location_url = $data['location_url'] ?? null;
+        $type->location_phone = $data['location_phone'] ?? null;
+        $type->price = $data['price'] ?? 0;
+        $type->currency_code = $data['currency_code'] ?? null;
+        $type->payment_method = $data['payment_method'] ?? null;
+        $type->requires_approval = $data['requires_approval'] ?? false;
+        $type->capacity = $data['capacity'] ?? 1;
+        $type->custom_fields = $data['custom_fields'] ?? null;
+        $type->ask_phone = $data['ask_phone'] ?? false;
+        $type->require_phone = $data['require_phone'] ?? false;
+        $type->is_active = $data['is_active'] ?? true;
+        $type->is_deleted = $data['is_deleted'] ?? false;
+        $type->saveQuietly();
+
+        if (! empty($data['created_at'])) {
+            AppointmentType::where('id', $type->id)->update(['created_at' => $data['created_at']]);
+        }
+
+        return $type;
+    }
+
     private function importSale(array $data, Event $event, Role $role, int $userId, array &$idMap): Sale
     {
         $validator = Validator::make($data, [
@@ -1454,6 +1573,9 @@ class BackupService
         $sale->utm_medium = $data['utm_medium'] ?? null;
         $sale->utm_campaign = $data['utm_campaign'] ?? null;
         $sale->feedback_sent_at = $data['feedback_sent_at'] ?? null;
+        $sale->reminder_sent_at = $data['reminder_sent_at'] ?? null;
+        $sale->guest_timezone = $data['guest_timezone'] ?? null;
+        $sale->confirmed_at = $data['confirmed_at'] ?? null;
 
         // Remap promo_code_id
         $promoRefId = $data['_promo_code_ref_id'] ?? null;
@@ -1577,6 +1699,7 @@ class BackupService
                 'event_part_id' => $partId,
                 'event_date' => $data['event_date'] ?? null,
                 'user_id' => null,
+                'guest_name' => $data['guest_name'] ?? null,
                 'comment' => $data['comment'] ?? '',
                 'is_approved' => $data['is_approved'] ?? true,
             ]);
@@ -1597,6 +1720,7 @@ class BackupService
                 'event_part_id' => $partId,
                 'event_date' => $data['event_date'] ?? null,
                 'user_id' => null,
+                'guest_name' => $data['guest_name'] ?? null,
                 'youtube_url' => $youtubeUrl,
                 'is_approved' => $data['is_approved'] ?? true,
             ]);
@@ -1933,6 +2057,7 @@ class BackupService
                     'event_part_id' => $partId,
                     'event_date' => $photoData['event_date'] ?? null,
                     'user_id' => null,
+                    'guest_name' => $photoData['guest_name'] ?? null,
                     'photo_url' => $filename,
                     'is_approved' => $photoData['is_approved'] ?? true,
                 ]);

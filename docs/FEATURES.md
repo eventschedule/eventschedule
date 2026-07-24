@@ -32,7 +32,7 @@ All users get these features with no subscription required.
 | Google Calendar sync | Bidirectional sync; per-schedule delete-sync action (keep, mark cancelled, or delete a local event when it is deleted in the external calendar) |
 | Outlook Calendar sync | Microsoft 365 / Graph two-way sync, optional Teams meeting links; shares the per-schedule delete-sync action |
 | CalDAV sync | Standard calendar protocol |
-| Fan videos, photos & comments on events | User-generated content on events (25 photo limit on free tier) |
+| Fan videos, photos & comments on events | User-generated content on events (25 photo limit on free tier). Attendees can submit with just a name and email; a per-schedule toggle can require an account instead. All submissions go through an approval queue |
 | Built-in analytics | Schedule analytics dashboard |
 | Configurable dashboard | Customize which panels appear on the dashboard |
 | Sub-schedules | Group events into sub-schedules |
@@ -61,7 +61,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |
 | Sell online via Stripe | Tied to ticketing gate | Stripe Connect payments, no platform fees |
 | Generate event graphics | `GraphicController`, `$role->isPro()` | Auto-generated shareable images |
-| REST API access | All `Api/*Controller.php`, `$role->isPro()` | Full CRUD API for events, schedules, sales, sub-schedules |
+| REST API access | All `Api/*Controller.php`, `$role->isPro()` | Full CRUD API for events, schedules, sales, sub-schedules; read endpoints for post-event feedback and fan content |
 | Webhooks | `WebhookService::dispatch()`, `$event->isPro()` | POST notifications for sales, events, check-ins |
 | Event boosting with ads | `BoostController:101,202`, `$role->isPro()` | Meta Ads integration |
 | Custom CSS styling | `RoleController:1748`, `$role->isPro()` | Custom CSS on schedule pages |
@@ -78,6 +78,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Embed ticket widget | `edit.blade.php`, `$role->isPro()` | Embed ticket purchase or RSVP form on external websites via iframe |
 | Promo/discount codes | `PromoCodeController`, tied to ticketing gate | Percentage or fixed discounts with usage limits and expiration dates |
 | Gift cards | `GiftCardController`, `$role->giftCardsEnabled()` (`$role->isPro()`) | Sell balance-tracked gift cards buyers send to a recipient by email; redeemed toward tickets for any event on the schedule. Redemption of already-sold cards works even if selling is disabled |
+| Appointment booking | `AppointmentTypeController` / `AppointmentController`, `$role->isPro()` | Calendly-style bookable appointment types (duration, weekly hours, buffers, optional payment via Stripe / payment URL / cash, optional approval); guests book a time on the public `/book` page. Distinct from the Enterprise "Availability management" tab, which tracks whole-day team member availability |
 | Eventbrite import | EventbriteController, $role->isPro() | Import events from Eventbrite |
 | Bulk attendee import | `TicketController::importAttendees`, `$event->isPro()` | Import attendees in bulk from CSV or form entry (up to 5,000 rows per import) |
 | Invoice Ninja integration | `InvoiceNinjaController` | Alternative payment processing via Invoice Ninja |

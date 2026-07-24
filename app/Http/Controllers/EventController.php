@@ -16,6 +16,7 @@ use App\Jobs\SendQueuedEmail;
 use App\Mail\EventAccepted;
 use App\Mail\EventChanged;
 use App\Mail\EventDeclined;
+use App\Models\AnalyticsEventsDaily;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventComment;
@@ -26,12 +27,14 @@ use App\Models\EventPollVote;
 use App\Models\EventVideo;
 use App\Models\Group;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Notifications\DeletedEventNotification;
 use App\Notifications\NewRequestsNotification;
 use App\Repos\EventRepo;
 use App\Rules\NoFakeEmail;
+use App\Rules\ValidTurnstile;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
@@ -145,6 +148,16 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        // Appointment bookings: hard-deleting would cascade-delete the Sale (refund trail). Cancel
+        // the booking instead - it frees the slot and (Phase 6) notifies the guest.
+        if ($event->appointment_type_id) {
+            AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
+            $this->cancelAppointmentBooking($event);
+
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'appointments']))
+                ->with('message', __('messages.appointments_cancelled_message'));
+        }
+
         AuditService::log(AuditService::EVENT_DELETE, $user->id, 'Event', $event->id, null, null, $event->name);
 
         // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
@@ -199,6 +212,15 @@ class EventController extends Controller
             return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
         }
 
+        // Appointment bookings: cancel the sale too so the slot frees, analytics decrement, and
+        // (Phase 6) the guest is emailed. The Sale hook sets is_cancelled on the event.
+        if ($event->appointment_type_id) {
+            AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
+            $this->cancelAppointmentBooking($event);
+
+            return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
+        }
+
         AuditService::log(AuditService::EVENT_CANCEL, $user->id, 'Event', $event->id, null, null, $event->name);
 
         // Cancel active boost campaigns (don't keep advertising a cancelled event)
@@ -229,6 +251,39 @@ class EventController extends Controller
         }
 
         return redirect()->back()->with('message', __('messages.event_cancelled_flash'));
+    }
+
+    /**
+     * Cancel an appointment booking from an owner action (event delete/cancel). Cancels the live
+     * sale - whose Sale::booted hook soft-cancels the event and frees the slot - and decrements
+     * analytics for a paid booking. Falls back to cancelling the event directly if no live sale.
+     */
+    protected function cancelAppointmentBooking(Event $event): void
+    {
+        $sale = Sale::where('event_id', $event->id)
+            ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
+            ->first();
+
+        if ($sale) {
+            $wasPaid = $sale->status === 'paid';
+            $sale->status = 'cancelled';
+            $sale->save();
+            if ($wasPaid) {
+                AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
+            }
+            // Owner cancelled - email the guest, and remind the owner to refund a paid booking.
+            app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
+            if ($wasPaid) {
+                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale);
+            }
+        } elseif (! $event->is_cancelled) {
+            $event->forceFill([
+                'is_cancelled' => true,
+                'cancelled_at' => now(),
+                'ical_sequence' => (int) $event->ical_sequence + 1,
+            ])->saveQuietly();
+            $event->dispatchCalendarSync('delete');
+        }
     }
 
     /**
@@ -726,6 +781,13 @@ class EventController extends Controller
             return redirect()->back();
         }
 
+        // Appointment bookings are managed from the Appointments tab, not the full event form
+        // (which would clobber the auto-created inventory and demote is_private).
+        if ($event->appointment_type_id) {
+            return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'appointments']))
+                ->with('message', __('messages.appointments_edit_redirect'));
+        }
+
         if ($event->tickets->count() == 0) {
             $event->tickets = collect([new Ticket]);
         }
@@ -976,6 +1038,16 @@ class EventController extends Controller
             $role->save();
         }
 
+        // Appointment bookings confirm on acceptance: calendar sync + guest AppointmentConfirmed.
+        if ($event->appointment_type_id) {
+            $sale = Sale::where('event_id', $event->id)
+                ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
+                ->first();
+            if ($sale) {
+                app(\App\Services\AppointmentService::class)->confirm($sale);
+            }
+        }
+
         // Send email to the user who submitted the event
         // Only send if they have an email and aren't a member of the accepting role
         // (Guest submissions without accounts have user_id set to venue's user)
@@ -1019,6 +1091,26 @@ class EventController extends Controller
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);
             $role->last_notified_request_count = 0;
             $role->save();
+        }
+
+        // Appointment bookings: declining cancels the sale (frees the slot) and emails the guest.
+        if ($event->appointment_type_id) {
+            $sale = Sale::where('event_id', $event->id)
+                ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
+                ->first();
+            if ($sale) {
+                $wasPaid = $sale->status === 'paid';
+                $sale->status = 'cancelled';
+                $sale->save();
+                if ($wasPaid) {
+                    AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
+                }
+                app(\App\Services\EmailService::class)->sendAppointmentDeclinedEmail($sale);
+                if ($wasPaid) {
+                    // Remind the owner to refund the paid booking (manual refund via Sales/Stripe).
+                    app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale);
+                }
+            }
         }
 
         // Send email to the user who submitted the event
@@ -2397,10 +2489,11 @@ class EventController extends Controller
         // Turnstile is enforced earlier, at the code-send step (sendVerificationCode), so it is
         // not re-checked here (the emailed code is the proof, and the token is single-use).
 
-        // Selfhost does not allow public self-registration after the first user (mirrors
-        // RegisteredUserController::store). Block account creation/claim here too so this guest
-        // flow can't be used to mint accounts or take over an invited stub without verification.
-        if (! config('app.hosted') && ! config('app.is_testing') && User::count() > 0) {
+        // Selfhost does not allow public self-registration after the first user unless the
+        // operator sets ALLOW_REGISTRATION (mirrors RegisteredUserController::store). Block
+        // account creation/claim here too so this guest flow can't be used to mint accounts
+        // or take over an invited stub without verification.
+        if (! public_registration_enabled() && ! config('app.is_testing') && User::count() > 0) {
             throw ValidationException::withMessages([
                 'account_email' => [__('messages.account_creation_disabled')],
             ]);
@@ -2961,6 +3054,53 @@ class EventController extends Controller
         return redirect($redirectUrl);
     }
 
+    /**
+     * Where to send an anonymous visitor when the schedule requires an account for fan content.
+     *
+     * Normally the sign-up page (which also offers "log in" for returning visitors). When this
+     * install does not accept new registrations - a plain selfhost without ALLOW_REGISTRATION -
+     * sign-up redirects straight to login, so send them there directly. Either way the pending
+     * submission rides along in the session and is completed by HomeController once they land.
+     */
+    private function fanContentAuthRedirect(array $pendingFanContent)
+    {
+        $route = public_registration_enabled() ? 'sign_up' : 'login';
+
+        return redirect_with_pending_action(
+            app_url(route($route, [], false)),
+            ['pending_fan_content' => $pendingFanContent]
+        );
+    }
+
+    /**
+     * Validate the name/email an anonymous visitor supplied for a fan-content submission.
+     *
+     * Returns the attributes to store on the new row, or a RedirectResponse to bail with.
+     * These forms have no per-field error display, so failures come back as a flash error
+     * the guest page already renders.
+     */
+    private function guestSubmitterAttributes(Request $request)
+    {
+        $name = trim((string) $request->input('guest_name'));
+        $email = trim((string) $request->input('guest_email'));
+
+        if ($name === '' || mb_strlen($name) > 255
+            || $email === '' || mb_strlen($email) > 255
+            || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return redirect()->back()->with('error', __('messages.fan_content_guest_details_required'));
+        }
+
+        $turnstile = new ValidTurnstile;
+        if (! $turnstile->passes('cf-turnstile-response', $request->input('cf-turnstile-response'))) {
+            return redirect()->back()->with('error', __('messages.turnstile_verification_failed'));
+        }
+
+        return [
+            'guest_name' => $name,
+            'guest_email' => mb_strtolower($email),
+        ];
+    }
+
     public function submitVideo(EventVideoSubmitRequest $request, $subdomain, $event_hash)
     {
         $role = Role::where('subdomain', $subdomain)->firstOrFail();
@@ -2998,10 +3138,11 @@ class EventController extends Controller
         // Store only the canonical watch URL so no guest-controlled query string is persisted
         $youtubeUrl = UrlUtils::getCanonicalYouTubeUrl($youtubeUrl);
 
+        $guestAttributes = [];
+
         if (! auth()->check()) {
-            return redirect_with_pending_action(
-                app_url(route('sign_up', [], false)),
-                ['pending_fan_content' => [
+            if ($role->fan_content_require_account) {
+                return $this->fanContentAuthRedirect([
                     'type' => 'video',
                     'subdomain' => $subdomain,
                     'event_hash' => $event_hash,
@@ -3009,8 +3150,13 @@ class EventController extends Controller
                     'event_part_id' => $request->input('event_part_id'),
                     'event_date' => $request->input('event_date'),
                     'return_url' => url()->previous(),
-                ]]
-            );
+                ]);
+            }
+
+            $guestAttributes = $this->guestSubmitterAttributes($request);
+            if (! is_array($guestAttributes)) {
+                return $guestAttributes;
+            }
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -3046,18 +3192,18 @@ class EventController extends Controller
         }
 
         // Auto-approve if user is a member of any schedule associated with this event
-        $isApproved = $request->user()->canEditEvent($event);
+        $isApproved = $request->user() ? $request->user()->canEditEvent($event) : false;
 
-        $video = EventVideo::create([
+        $video = EventVideo::create(array_merge([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
             'event_date' => $eventDate,
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user()?->id,
             'youtube_url' => $youtubeUrl,
             'is_approved' => $isApproved,
-        ]);
+        ], $guestAttributes));
 
-        if (! $request->user()->isConnected($role->subdomain)) {
+        if ($request->user() && ! $request->user()->isConnected($role->subdomain)) {
             $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
@@ -3067,9 +3213,11 @@ class EventController extends Controller
 
         $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
 
+        // The pending list on the guest page is keyed on the signed-in user, so a guest has
+        // nothing to scroll to - the flash message is their confirmation.
         if ($isApproved) {
             $redirect = $redirect->with('scroll_to', 'event-media-section');
-        } else {
+        } elseif ($request->user()) {
             $redirect = $redirect->with('scroll_to', 'pending-video-'.$video->id);
         }
 
@@ -3105,10 +3253,11 @@ class EventController extends Controller
 
         $comment = strip_tags(trim($request->input('comment')));
 
+        $guestAttributes = [];
+
         if (! auth()->check()) {
-            return redirect_with_pending_action(
-                app_url(route('sign_up', [], false)),
-                ['pending_fan_content' => [
+            if ($role->fan_content_require_account) {
+                return $this->fanContentAuthRedirect([
                     'type' => 'comment',
                     'subdomain' => $subdomain,
                     'event_hash' => $event_hash,
@@ -3116,8 +3265,13 @@ class EventController extends Controller
                     'event_part_id' => $request->input('event_part_id'),
                     'event_date' => $request->input('event_date'),
                     'return_url' => url()->previous(),
-                ]]
-            );
+                ]);
+            }
+
+            $guestAttributes = $this->guestSubmitterAttributes($request);
+            if (! is_array($guestAttributes)) {
+                return $guestAttributes;
+            }
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -3132,18 +3286,18 @@ class EventController extends Controller
         $eventDate = $event->days_of_week ? $request->input('event_date') : null;
 
         // Auto-approve if user is a member of any schedule associated with this event
-        $isApproved = $request->user()->canEditEvent($event);
+        $isApproved = $request->user() ? $request->user()->canEditEvent($event) : false;
 
-        $eventComment = EventComment::create([
+        $eventComment = EventComment::create(array_merge([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
             'event_date' => $eventDate,
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user()?->id,
             'comment' => $comment,
             'is_approved' => $isApproved,
-        ]);
+        ], $guestAttributes));
 
-        if (! $request->user()->isConnected($role->subdomain)) {
+        if ($request->user() && ! $request->user()->isConnected($role->subdomain)) {
             $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
@@ -3153,9 +3307,11 @@ class EventController extends Controller
 
         $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
 
+        // The pending list on the guest page is keyed on the signed-in user, so a guest has
+        // nothing to scroll to - the flash message is their confirmation.
         if ($isApproved) {
             $redirect = $redirect->with('scroll_to', 'event-media-section');
-        } else {
+        } elseif ($request->user()) {
             $redirect = $redirect->with('scroll_to', 'pending-comment-'.$eventComment->id);
         }
 
@@ -3267,13 +3423,14 @@ class EventController extends Controller
             return redirect()->back()->with('error', __('messages.invalid_photo'));
         }
 
-        if (! auth()->check()) {
-            $tempFilename = 'photo_'.Str::random(32).'.'.$extension;
-            $file->storeAs('temp', $tempFilename);
+        $guestAttributes = [];
 
-            return redirect_with_pending_action(
-                app_url(route('sign_up', [], false)),
-                ['pending_fan_content' => [
+        if (! auth()->check()) {
+            if ($role->fan_content_require_account) {
+                $tempFilename = 'photo_'.Str::random(32).'.'.$extension;
+                $file->storeAs('temp', $tempFilename);
+
+                return $this->fanContentAuthRedirect([
                     'type' => 'photo',
                     'subdomain' => $subdomain,
                     'event_hash' => $event_hash,
@@ -3283,8 +3440,14 @@ class EventController extends Controller
                     'event_date' => $request->input('event_date'),
                     'return_url' => url()->previous(),
                     'return_to' => $request->input('return_to'),
-                ]]
-            );
+                ]);
+            }
+
+            // Validated before the upload is stored, so a bad submission leaves no file behind.
+            $guestAttributes = $this->guestSubmitterAttributes($request);
+            if (! is_array($guestAttributes)) {
+                return $guestAttributes;
+            }
         }
 
         $eventPartId = $request->input('event_part_id');
@@ -3305,18 +3468,18 @@ class EventController extends Controller
             $file->storeAs('/', $filename);
         }
 
-        $isApproved = $request->user()->canEditEvent($event);
+        $isApproved = $request->user() ? $request->user()->canEditEvent($event) : false;
 
-        $photo = EventPhoto::create([
+        $photo = EventPhoto::create(array_merge([
             'event_id' => $event->id,
             'event_part_id' => $eventPartId ?: null,
             'event_date' => $eventDate,
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user()?->id,
             'photo_url' => $filename,
             'is_approved' => $isApproved,
-        ]);
+        ], $guestAttributes));
 
-        if (! $request->user()->isConnected($role->subdomain)) {
+        if ($request->user() && ! $request->user()->isConnected($role->subdomain)) {
             $request->user()->roles()->attach($role->id, ['level' => 'follower', 'created_at' => now()]);
         }
 
@@ -3329,9 +3492,11 @@ class EventController extends Controller
         } else {
             $redirect = redirect()->to($event->getGuestUrl($subdomain))->with('message', $message);
 
+            // The pending list on the guest page is keyed on the signed-in user, so a guest has
+            // nothing to scroll to - the flash message is their confirmation.
             if ($isApproved) {
                 $redirect = $redirect->with('scroll_to', 'event-media-section');
-            } else {
+            } elseif ($request->user()) {
                 $redirect = $redirect->with('scroll_to', 'pending-photo-'.$photo->id);
             }
         }

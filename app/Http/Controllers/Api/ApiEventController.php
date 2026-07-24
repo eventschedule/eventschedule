@@ -60,6 +60,7 @@ class ApiEventController extends Controller
         );
 
         $events = Event::with(['roles', 'tickets', 'addons', 'parts'])
+            ->whereNull('appointment_type_id') // appointment bookings are not real events
             ->whereHas('roles', function ($q) {
                 $q->whereIn('roles.id', auth()->user()->roles()
                     ->wherePivotIn('level', ['owner', 'admin'])
@@ -548,6 +549,29 @@ class ApiEventController extends Controller
 
         if (! $event->isPro()) {
             return response()->json(['error' => 'API usage is limited to Pro accounts'], 403);
+        }
+
+        // Appointment bookings: cancel (frees the slot, keeps the Sale + refund trail) rather than
+        // hard-delete, which would cascade-delete the Sale.
+        if ($event->appointment_type_id) {
+            $sale = \App\Models\Sale::where('event_id', $event->id)
+                ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])->first();
+            if ($sale) {
+                $wasPaid = $sale->status === 'paid';
+                $sale->status = 'cancelled'; // Sale::booted hook soft-cancels the event + frees slot
+                $sale->save();
+                if ($wasPaid) {
+                    \App\Models\AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
+                }
+                app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
+            } elseif (! $event->is_cancelled) {
+                $event->forceFill(['is_cancelled' => true, 'cancelled_at' => now(), 'ical_sequence' => (int) $event->ical_sequence + 1])->saveQuietly();
+                $event->dispatchCalendarSync('delete');
+            }
+
+            AuditService::log(AuditService::EVENT_CANCEL, auth()->id(), 'Event', $event->id, null, null, $event->name);
+
+            return response()->json(['message' => 'Appointment cancelled']);
         }
 
         AuditService::log(AuditService::EVENT_DELETE, auth()->id(), 'Event', $event->id, null, null, $event->name);

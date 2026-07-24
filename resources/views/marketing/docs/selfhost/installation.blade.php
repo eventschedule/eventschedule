@@ -315,6 +315,24 @@
                                 <p class="text-gray-600 dark:text-gray-300 text-sm">The setup wizard will guide you through the initial configuration and run database migrations automatically.</p>
                             </div>
 
+                            <h3 id="user-accounts" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">User Accounts and Registration</h3>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">A selfhosted install is single user by default. The first account you create in the setup wizard becomes the instance admin, and after that the sign-up page is closed: visiting it sends you to the login page instead.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Most people never need to change this. Your audience does not need accounts to use the site: they can buy tickets, RSVP, leave post-event feedback, and submit fan photos, videos and comments as guests.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If you do want other people to be able to register on your server, enable it in <code class="doc-inline-code">.env</code>:</p>
+
+                            <div class="doc-code-block">
+                                <div class="doc-code-header">
+                                    <span>.env</span>
+                                    <button class="doc-copy-btn">Copy</button>
+                                </div>
+                                <pre><code>ALLOW_REGISTRATION=<span class="code-value">true</span></code></pre>
+                            </div>
+
+                            <div class="doc-callout doc-callout-tip">
+                                <div class="doc-callout-title">Anyone who registers can create schedules</div>
+                                <p>There is no separate attendee-only role: a registered user can create their own schedules and events on your server. Only turn this on for a server you control access to, such as one on a private network or behind an authenticating proxy. If you want to host separate, independent tenants, run in SaaS mode with <code class="doc-inline-code">IS_HOSTED=true</code> instead, which gives each schedule its own plan and settings.</p>
+                            </div>
+
                             <h3 id="reverse-proxy" class="text-lg font-semibold text-gray-900 dark:text-white mb-4 mt-8">Running Behind a Reverse Proxy</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">If Event Schedule sits behind a reverse proxy or CDN (Nginx, Apache, Cloudflare, or a control panel such as HestiaCP), tell it which proxies to trust so it reads the <code class="doc-inline-code">X-Forwarded-Proto</code> and <code class="doc-inline-code">X-Forwarded-For</code> headers those proxies set:</p>
 
