@@ -1342,6 +1342,13 @@ return [
     'max_per_row' => 'Flaiereid rea kohta',
     'no_limit' => 'Automaatne',
     'max_per_row_help' => 'Flaierite arv rea kohta enne järgmisele reale liikumist',
+    'graphic_image_size' => 'Pildi suurus',
+    'graphic_image_size_help' => 'Sobitab graafika sotsiaalmeedia jaoks kindla kujuga. Auto säilitab loomuliku suuruse.',
+    'graphic_size_auto' => 'Auto (sobita sisuga)',
+    'graphic_size_square' => 'Ruut (1080×1080)',
+    'graphic_size_portrait' => 'Vertikaalne (1080×1350)',
+    'graphic_size_story' => 'Story (1080×1920)',
+    'graphic_size_landscape' => 'Horisontaalne (1200×630)',
     'number_events' => 'Lisa sündmuste numbrid',
     'number_events_help' => 'Lisa igale flaierile nummerdatud märk. Kasuta oma tekstimallis {number}, et kuvada vastav number iga sündmuse kõrval.',
 

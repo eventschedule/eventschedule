@@ -105,6 +105,7 @@ class GraphicController extends Controller
             'date_position' => 'nullable|in:overlay,above',
             'event_count' => 'nullable|integer|min:1|max:20',
             'max_per_row' => 'nullable|integer|min:1|max:20',
+            'image_size' => 'nullable|in:auto,square,portrait,story,landscape',
             'overlay_text' => 'nullable|string|max:200',
             'header_text' => 'nullable|string|max:200',
             'footer_text' => 'nullable|string|max:300',
@@ -268,6 +269,11 @@ class GraphicController extends Controller
             $maxPerRow = null;
         }
 
+        // Get image_size from request (fixed social format; empty = auto/native).
+        // Request-driven for the live preview - do NOT fall back to saved settings,
+        // or switching to Auto would keep showing a previously-saved format.
+        $imageSize = $request->get('image_size') ?: null;
+
         // Get overlay_text from request (for custom text on flyers)
         $overlayText = $request->get('overlay_text', '');
 
@@ -327,6 +333,7 @@ class GraphicController extends Controller
         $options = [
             'date_position' => $datePosition,
             'max_per_row' => $maxPerRow,
+            'image_size' => $imageSize,
             'overlay_text' => $overlayText,
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
             'header_text' => $headerText,
@@ -532,6 +539,9 @@ class GraphicController extends Controller
             $maxPerRow = null;
         }
 
+        // Get image_size from settings (fixed social format; empty = auto/native)
+        $imageSize = $graphicSettings['image_size'] ?? null;
+
         $numberEvents = (bool) ($graphicSettings['number_events'] ?? false);
 
         // Get overlay_text from settings (for custom text on flyers)
@@ -585,6 +595,7 @@ class GraphicController extends Controller
         $options = [
             'date_position' => $datePosition,
             'max_per_row' => $maxPerRow,
+            'image_size' => $imageSize,
             'overlay_text' => $overlayText,
             'header_image_url' => $graphicSettings['header_image_url'] ?? null,
             'header_text' => $graphicSettings['header_text'] ?? '',

@@ -128,6 +128,9 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 The generated graphic displays up to 20 upcoming events with their flyer images in a grid or list layout. The text output provides event details in a format optimized for copying and pasting.
                             </p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Use the <strong>Image Size</strong> option to fit the graphic to a fixed social-media shape: Square (1080×1080), Portrait (1080×1350), Story (1080×1920), or Landscape (1200×630). The graphic is centered and padded with your background to match the chosen shape. Leave it on Auto to keep the natural, content-driven size.
+                            </p>
                         </section>
 
                         <!-- Header & Footer Text -->

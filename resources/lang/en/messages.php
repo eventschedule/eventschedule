@@ -1407,6 +1407,13 @@ return [
     'max_per_row' => 'Flyers Per Row',
     'no_limit' => 'Auto',
     'max_per_row_help' => 'Number of flyers per row before wrapping to the next row',
+    'graphic_image_size' => 'Image Size',
+    'graphic_image_size_help' => 'Fit the graphic to a fixed shape for social media. Auto keeps the natural size.',
+    'graphic_size_auto' => 'Auto (fit to content)',
+    'graphic_size_square' => 'Square (1080×1080)',
+    'graphic_size_portrait' => 'Portrait (1080×1350)',
+    'graphic_size_story' => 'Story (1080×1920)',
+    'graphic_size_landscape' => 'Landscape (1200×630)',
     'number_events' => 'Add Event Numbers',
     'number_events_help' => 'Add a numbered badge to each flyer. Use {number} in your text template to display the matching number alongside each event.',
 

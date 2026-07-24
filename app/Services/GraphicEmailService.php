@@ -93,6 +93,7 @@ class GraphicEmailService
             $options = [
                 'date_position' => $datePosition,
                 'max_per_row' => $maxPerRow,
+                'image_size' => $settings['image_size'] ?? null,
                 'overlay_text' => $overlayText,
                 'header_image_url' => $settings['header_image_url'] ?? null,
                 'header_text' => $settings['header_text'] ?? '',

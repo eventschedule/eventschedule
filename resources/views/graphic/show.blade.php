@@ -143,6 +143,8 @@
                                    document.getElementById('event_count_mobile')?.value ?? '';
                 const maxPerRow = document.getElementById('max_per_row')?.value ??
                                   document.getElementById('max_per_row_mobile')?.value ?? '';
+                const imageSize = document.getElementById('image_size')?.value ??
+                                  document.getElementById('image_size_mobile')?.value ?? 'auto';
                 const overlayText = document.getElementById('overlay_text')?.value ??
                                     document.getElementById('overlay_text_mobile')?.value ?? '';
                 const headerText = document.getElementById('header_text')?.value ??
@@ -170,6 +172,7 @@
                     date_position: datePosition,
                     event_count: eventCount,
                     max_per_row: maxPerRow,
+                    image_size: imageSize,
                     overlay_text: overlayText,
                     header_text: headerText,
                     footer_text: footerText,
@@ -283,6 +286,13 @@
                     maxPerRowMobile.value = maxPerRowDesktop.value;
                 }
 
+                // Sync image size
+                const imageSizeDesktop = document.getElementById('image_size');
+                const imageSizeMobile = document.getElementById('image_size_mobile');
+                if (imageSizeDesktop && imageSizeMobile) {
+                    imageSizeMobile.value = imageSizeDesktop.value;
+                }
+
                 // Sync overlay text
                 const overlayTextDesktop = document.getElementById('overlay_text');
                 const overlayTextMobile = document.getElementById('overlay_text_mobile');
@@ -369,6 +379,7 @@
                 const datePositionParam = formSettings.date_position ? '&date_position=' + encodeURIComponent(formSettings.date_position) : '';
                 const eventCountParam = formSettings.event_count ? '&event_count=' + encodeURIComponent(formSettings.event_count) : '';
                 const maxPerRowParam = formSettings.max_per_row ? '&max_per_row=' + encodeURIComponent(formSettings.max_per_row) : '';
+                const imageSizeParam = (formSettings.image_size && formSettings.image_size !== 'auto') ? '&image_size=' + encodeURIComponent(formSettings.image_size) : '';
                 const overlayTextParam = formSettings.overlay_text ? '&overlay_text=' + encodeURIComponent(formSettings.overlay_text) : '';
                 const headerTextParam = '&header_text=' + encodeURIComponent(formSettings.header_text || '');
                 const footerTextParam = '&footer_text=' + encodeURIComponent(formSettings.footer_text || '');
@@ -378,7 +389,7 @@
                 const numberEventsParam = '&number_events=' + (formSettings.number_events ? '1' : '0');
                 const forceEnglishParam = '&force_english=' + (formSettings.force_english ? '1' : '0');
 
-                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam + forceEnglishParam;
+                const baseUrl = '{{ route("event.generate_graphic_data", ["subdomain" => $role->subdomain]) }}' + layoutParam + directParam + aiPromptParam + textTemplateParam + excludeRecurringParam + datePositionParam + eventCountParam + maxPerRowParam + imageSizeParam + overlayTextParam + headerTextParam + footerTextParam + urlIncludeHttpsParam + urlIncludeIdParam + textShowAllParam + numberEventsParam + forceEnglishParam;
 
                 let hasError = false;
 
@@ -644,6 +655,14 @@
                 });
                 toggleMaxPerRowVisibility();
 
+                // Update image size selects
+                ['image_size', 'image_size_mobile'].forEach(id => {
+                    const imageSize = document.getElementById(id);
+                    if (imageSize) {
+                        imageSize.value = currentSettings.image_size || 'auto';
+                    }
+                });
+
                 // Update overlay text inputs
                 ['overlay_text', 'overlay_text_mobile'].forEach(id => {
                     const overlayText = document.getElementById(id);
@@ -873,6 +892,9 @@
                 // Get max per row
                 const maxPerRow = document.getElementById('max_per_row') || document.getElementById('max_per_row_mobile');
 
+                // Get image size
+                const imageSize = document.getElementById('image_size') || document.getElementById('image_size_mobile');
+
                 // Get overlay text
                 const overlayText = document.getElementById('overlay_text') || document.getElementById('overlay_text_mobile');
 
@@ -908,6 +930,7 @@
                     date_position: datePosition ? datePosition.value || null : null,
                     event_count: eventCount && eventCount.value ? parseInt(eventCount.value) : null,
                     max_per_row: maxPerRow && maxPerRow.value ? parseInt(maxPerRow.value) : null,
+                    image_size: imageSize ? imageSize.value || 'auto' : 'auto',
                     overlay_text: overlayText ? overlayText.value : '',
                     header_text: headerText ? headerText.value : '',
                     footer_text: footerText ? footerText.value : '',
@@ -1413,6 +1436,18 @@
                     }
                 });
 
+                // Add change listeners for image size selects
+                ['image_size', 'image_size_mobile'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) {
+                        select.addEventListener('change', function() {
+                            const otherId = id === 'image_size' ? 'image_size_mobile' : 'image_size';
+                            const otherSelect = document.getElementById(otherId);
+                            if (otherSelect) otherSelect.value = this.value;
+                        });
+                    }
+                });
+
                 // Initialize header image preview if exists
                 initHeaderImagePreview();
 
@@ -1699,6 +1734,19 @@
                                 </label>
                             </div>
                             <p id="social_tip_mobile" class="text-xs text-gray-400 dark:text-gray-500 mt-2">{{ __('messages.social_tip_grid') }}</p>
+                        </div>
+
+                        <!-- Image Size (fixed social-media format) -->
+                        <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                            <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_image_size') }}</h4>
+                            <select id="image_size_mobile" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                <option value="auto">{{ __('messages.graphic_size_auto') }}</option>
+                                <option value="square">{{ __('messages.graphic_size_square') }}</option>
+                                <option value="portrait">{{ __('messages.graphic_size_portrait') }}</option>
+                                <option value="story">{{ __('messages.graphic_size_story') }}</option>
+                                <option value="landscape">{{ __('messages.graphic_size_landscape') }}</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_image_size_help') }}</p>
                         </div>
 
                         <!-- Show Text (only for grid and row layouts) -->
@@ -2072,6 +2120,19 @@
                                     </label>
                                 </div>
                                 <p id="social_tip" class="text-xs text-gray-400 dark:text-gray-500 mt-2">{{ __('messages.social_tip_grid') }}</p>
+                            </div>
+
+                            <!-- Image Size (fixed social-media format) -->
+                            <div class="mb-5 pb-5 border-b border-gray-200 dark:border-gray-700">
+                                <h4 class="text-xs font-semibold text-gray-900 dark:text-gray-100 mb-3">{{ __('messages.graphic_image_size') }}</h4>
+                                <select id="image_size" class="w-full px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-[var(--brand-blue)] focus:border-[var(--brand-blue)] dark:bg-gray-700 dark:text-gray-100 text-sm">
+                                    <option value="auto">{{ __('messages.graphic_size_auto') }}</option>
+                                    <option value="square">{{ __('messages.graphic_size_square') }}</option>
+                                    <option value="portrait">{{ __('messages.graphic_size_portrait') }}</option>
+                                    <option value="story">{{ __('messages.graphic_size_story') }}</option>
+                                    <option value="landscape">{{ __('messages.graphic_size_landscape') }}</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('messages.graphic_image_size_help') }}</p>
                             </div>
 
                             <!-- Show Text (only for grid and row layouts) -->

@@ -2412,6 +2412,7 @@ class Role extends Model implements MustVerifyEmail
             'recipient_emails' => '',
             'date_position' => null,
             'event_count' => null,
+            'image_size' => 'auto',
         ];
 
         if (! $value) {

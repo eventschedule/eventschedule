@@ -82,6 +82,16 @@ abstract class AbstractEventDesign
 
     protected const DEFAULT_LINE_HEIGHT = 1.4;
 
+    // Optional fixed social-media output formats (width, height in px). When one is
+    // selected via the 'image_size' option the finished graphic is contain-scaled and
+    // centered onto a canvas of these dimensions; 'auto'/null keeps the native size.
+    protected const SOCIAL_FORMATS = [
+        'square' => [1080, 1080],
+        'portrait' => [1080, 1350],
+        'story' => [1080, 1920],
+        'landscape' => [1200, 630],
+    ];
+
     // Design-specific dimensions
     protected int $totalWidth;
 
@@ -175,6 +185,11 @@ abstract class AbstractEventDesign
         // Render branding watermark (hosted only)
         $this->renderBranding();
 
+        // Optionally fit the finished graphic into a fixed social-media format
+        if ($format = $this->resolveSocialFormat()) {
+            $this->fitIntoFormat($format[0], $format[1]);
+        }
+
         // Output the image
         ob_start();
 
@@ -185,6 +200,77 @@ abstract class AbstractEventDesign
         ob_end_clean();
 
         return $imageData;
+    }
+
+    /**
+     * Resolve the selected fixed output format from the 'image_size' option.
+     * Returns [width, height] or null for 'auto'/null/unknown (native size).
+     */
+    protected function resolveSocialFormat(): ?array
+    {
+        $key = $this->getOption('image_size');
+
+        return self::SOCIAL_FORMATS[$key] ?? null;
+    }
+
+    /**
+     * Contain-scale the finished graphic and center it on a canvas of the given
+     * target dimensions, filling the surrounding padding with the schedule's own
+     * background so the letterbox blends seamlessly. The graphic is never distorted
+     * or cropped.
+     */
+    protected function fitIntoFormat(int $targetWidth, int $targetHeight): void
+    {
+        $native = $this->im;
+        $srcWidth = $this->totalWidth;
+        $srcHeight = $this->totalHeight;
+
+        $canvas = imagecreatetruecolor($targetWidth, $targetHeight);
+        if (! $canvas) {
+            return; // keep the native image on failure
+        }
+
+        imagealphablending($canvas, true);
+        imagesavealpha($canvas, true);
+
+        // Contain-scale (fit entirely inside the target, never distort) and center.
+        $scale = min($targetWidth / $srcWidth, $targetHeight / $srcHeight);
+        $drawWidth = max(1, (int) round($srcWidth * $scale));
+        $drawHeight = max(1, (int) round($srcHeight * $scale));
+        $dstX = (int) round(($targetWidth - $drawWidth) / 2);
+        $dstY = (int) round(($targetHeight - $drawHeight) / 2);
+
+        // Fill the letterbox padding by stretching the graphic's own edge pixels (its
+        // outer MARGIN border is always pure background), so the pad continues the
+        // schedule's gradient/solid/image backdrop with no seam. Re-painting the
+        // background at the target size would misalign a gradient/image against the
+        // baked-in one. With min-scale exactly one axis is padded, so only one branch
+        // runs; the bands tile the full canvas, so no black shows.
+        if ($dstY > 0) {
+            imagecopyresampled($canvas, $native, 0, 0, 0, 0, $targetWidth, $dstY, $srcWidth, 1);
+            $below = $dstY + $drawHeight;
+            imagecopyresampled($canvas, $native, 0, $below, 0, $srcHeight - 1, $targetWidth, $targetHeight - $below, $srcWidth, 1);
+        }
+        if ($dstX > 0) {
+            imagecopyresampled($canvas, $native, 0, 0, 0, 0, $dstX, $targetHeight, 1, $srcHeight);
+            $right = $dstX + $drawWidth;
+            imagecopyresampled($canvas, $native, $right, 0, $srcWidth - 1, 0, $targetWidth - $right, $targetHeight, 1, $srcHeight);
+        }
+
+        // Draw the graphic itself, centered.
+        imagecopyresampled(
+            $canvas, $native,
+            $dstX, $dstY, 0, 0,
+            $drawWidth, $drawHeight,
+            $srcWidth, $srcHeight
+        );
+
+        $this->im = $canvas;
+        $this->totalWidth = $targetWidth;
+        $this->totalHeight = $targetHeight;
+
+        imagedestroy($native);
+        // $this->im now points at $canvas and is freed in __destruct().
     }
 
     // Abstract methods that must be implemented by design classes

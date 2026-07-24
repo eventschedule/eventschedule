@@ -1351,6 +1351,13 @@ return [
     'max_per_row' => 'Afișe pe Rând',
     'no_limit' => 'Automat',
     'max_per_row_help' => 'Numărul de afișe pe rând înainte de a trece la rândul următor',
+    'graphic_image_size' => 'Dimensiunea imaginii',
+    'graphic_image_size_help' => 'Adaptează grafica la o formă fixă pentru rețelele sociale. Auto păstrează dimensiunea naturală.',
+    'graphic_size_auto' => 'Auto (potrivește la conținut)',
+    'graphic_size_square' => 'Pătrat (1080×1080)',
+    'graphic_size_portrait' => 'Portret (1080×1350)',
+    'graphic_size_story' => 'Story (1080×1920)',
+    'graphic_size_landscape' => 'Peisaj (1200×630)',
     'number_events' => 'Adaugă Numere la Evenimente',
     'number_events_help' => 'Adaugă o insignă numerotată pe fiecare afiș. Folosește {number} în șablonul tău de text pentru a afișa numărul corespunzător lângă fiecare eveniment.',
 
