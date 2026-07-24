@@ -40,7 +40,7 @@
                     turnstileToken: '',
                     turnstileWidgetId: null,
                     isSubmitting: false,
-                    rsvpFull: @json($event->isRsvpFull($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d'))),
+                    rsvpFull: @json($event->isRsvpFull($date ?? $event->saleEventDateFromStartsAt())),
                     showPassword: false,
                     individualTickets: @json((bool) $event->individual_tickets),
                     rsvpQuantity: 1,
@@ -136,7 +136,7 @@
                     return this.individualTickets && this.rsvpQuantity > 1;
                 },
                 maxRsvpQuantity() {
-                    const remaining = @json($event->rsvp_limit ? $event->rsvpRemaining($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')) : null);
+                    const remaining = @json($event->rsvp_limit ? $event->rsvpRemaining($date ?? $event->saleEventDateFromStartsAt()) : null);
                     const max = remaining !== null ? Math.min(20, remaining) : 20;
                     return Math.max(1, max);
                 },
@@ -258,7 +258,7 @@
                         },
                         body: JSON.stringify({
                             event_id: @json(\App\Utils\UrlUtils::encodeId($event->id)),
-                            event_date: @json($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')),
+                            event_date: @json($date ?? $event->saleEventDateFromStartsAt()),
                             name: this.name.trim(),
                             email: this.email.trim(),
                         }),
@@ -285,7 +285,7 @@
 </x-slot>
 
 <div id="rsvp-form">
-    @if ($event->isRsvpFull($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')))
+    @if ($event->isRsvpFull($date ?? $event->saleEventDateFromStartsAt()))
         <div>
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <div v-if="!waitlistSuccess">
@@ -332,7 +332,7 @@
     <form action="{{ route('event.rsvp', ['subdomain' => $subdomain]) }}" method="post" v-on:submit="validateForm">
         @csrf
         <input type="hidden" name="event_id" value="{{ \App\Utils\UrlUtils::encodeId($event->id) }}">
-        <input type="hidden" name="event_date" value="{{ $date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d') }}">
+        <input type="hidden" name="event_date" value="{{ $date ?? $event->saleEventDateFromStartsAt() }}">
         <input type="hidden" name="subdomain" value="{{ $subdomain }}">
         <div class="hidden"><input type="text" name="website" autocomplete="off" tabindex="-1"></div>
         @if (request()->embed)
@@ -340,7 +340,7 @@
         @endif
 
         @if ($event->rsvp_limit)
-        @php $remaining = $event->rsvpRemaining($date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d')); @endphp
+        @php $remaining = $event->rsvpRemaining($date ?? $event->saleEventDateFromStartsAt()); @endphp
         <div class="mb-6 text-sm text-gray-600 dark:text-gray-400">
             {{ __('messages.spots_remaining', ['count' => $remaining]) }}
         </div>

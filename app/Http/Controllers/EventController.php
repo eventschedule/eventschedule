@@ -911,7 +911,8 @@ class EventController extends Controller
         }
 
         if ($event->starts_at) {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+            // Schedule-local date so the redirect opens the calendar month the event appears in.
+            $date = Carbon::parse($event->saleEventDateFromStartsAt());
         } else {
             $date = Carbon::now();
         }
@@ -1254,7 +1255,8 @@ class EventController extends Controller
         session()->forget('pending_request_form');
 
         if ($event->starts_at) {
-            $date = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+            // Schedule-local date so the redirect opens the calendar month the event appears in.
+            $date = Carbon::parse($event->saleEventDateFromStartsAt());
         } else {
             $date = Carbon::now();
         }

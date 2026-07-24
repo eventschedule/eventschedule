@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\EventComment;
 use App\Models\EventPoll;
-use App\Models\EventPollVote;
 use App\Models\EventVideo;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,8 +11,8 @@ use Tests\TestCase;
 
 class EventTest extends TestCase
 {
-    use RefreshDatabase;
     use CreatesScheduleData;
+    use RefreshDatabase;
 
     public function test_markdown_description_is_rendered_to_html(): void
     {
@@ -38,6 +36,25 @@ class EventTest extends TestCase
         $this->get($this->guestEventUrl($role, $event))
             ->assertOk()
             ->assertSee('Public Concert');
+    }
+
+    public function test_guest_event_page_shows_the_venue_local_date_not_the_utc_date(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner);
+        // 01:00 UTC = Friday July 10, 9:00 PM in America/New_York; the UTC calendar date is a day ahead.
+        $event = $this->createEvent($role, [
+            'name' => 'Evening Show',
+            'starts_at' => '2026-07-11 01:00:00',
+            'duration' => 2,
+            'creator_role_id' => $role->id,
+        ]);
+
+        $this->get($this->guestEventUrl($role, $event))
+            ->assertOk()
+            ->assertSee('Friday')
+            ->assertSee('2026-07-10T21:00', false)
+            ->assertDontSee('Saturday');
     }
 
     public function test_online_event_stores_and_renders_url(): void
@@ -89,14 +106,14 @@ class EventTest extends TestCase
             'event_id' => UrlUtils::encodeId($event->id),
             'password' => 'wrong',
         ]);
-        $this->assertFalse(session()->has('event_password_' . $event->id));
+        $this->assertFalse(session()->has('event_password_'.$event->id));
 
         // Correct password: access gate granted (stored in session)
         $this->post(route('event.check_password', ['subdomain' => $role->subdomain]), [
             'event_id' => UrlUtils::encodeId($event->id),
             'password' => 'letmein',
         ]);
-        $this->assertTrue(session()->has('event_password_' . $event->id));
+        $this->assertTrue(session()->has('event_password_'.$event->id));
     }
 
     public function test_event_poll_vote_is_recorded(): void
@@ -250,7 +267,7 @@ class EventTest extends TestCase
             'is_approved' => true,
         ]);
 
-        $url = '/' . $role->subdomain . '/' . $event->slug . '/' . UrlUtils::encodeId($event->id) . '/photos';
+        $url = '/'.$role->subdomain.'/'.$event->slug.'/'.UrlUtils::encodeId($event->id).'/photos';
         $this->get($url)
             ->assertOk()
             ->assertViewHas('event', fn ($e) => $e->approvedPhotos->count() === 1);

@@ -441,7 +441,7 @@
                         <div class="text-white/70 print-text-gray mb-[4px]">{{ __('messages.covered_events') }}</div>
                         <ul class="space-y-[2px]">
                             @foreach ($coveredEvents as $ce)
-                            <li class="text-[13px]">{{ $ce->name }}@if ($ce->starts_at) <span class="text-white/50 print-text-gray">&middot; {{ \Carbon\Carbon::parse($ce->starts_at)->format('M j, Y') }}</span>@endif</li>
+                            <li class="text-[13px]">{{ $ce->name }}@if ($ce->starts_at) <span class="text-white/50 print-text-gray">&middot; {{ \Carbon\Carbon::parse($ce->saleEventDateFromStartsAt())->format('M j, Y') }}</span>@endif</li>
                             @endforeach
                         </ul>
                     </div>

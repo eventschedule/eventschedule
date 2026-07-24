@@ -5,7 +5,7 @@
         $contrastColor = accent_contrast_color($accentColor);
         $isTicketMode = request()->get('tickets') === 'true';
         $isRsvpMode = request()->get('rsvp') === 'true';
-        $eventDate = $date ?? \Carbon\Carbon::parse($event->starts_at)->format('Y-m-d');
+        $eventDate = $date ?? $event->saleEventDateFromStartsAt();
     @endphp
 
     <style {!! nonce_attr() !!}>

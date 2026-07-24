@@ -1390,7 +1390,10 @@ class RoleController extends Controller
             }
 
             if ($event->starts_at && ! $date) {
-                $startAtDate = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at);
+                // The schedule-local calendar date, not the UTC one: getStartDateTime() applies
+                // $date after converting to the schedule timezone, so the UTC date of an evening
+                // event west of UTC would render the whole page a day late.
+                $startAtDate = Carbon::parse($event->saleEventDateFromStartsAt());
                 $month = $startAtDate->month;
                 $year = $startAtDate->year;
                 if (! $event->days_of_week) {

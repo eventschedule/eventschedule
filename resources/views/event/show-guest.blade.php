@@ -955,7 +955,7 @@
                 $carpoolUrl .= '/' . $date;
             }
             $carpoolCount = $event->carpoolOffers()->where('status', 'active')
-                ->when($date, fn ($q) => $q->where('event_date', $date))
+                ->when($date && $event->days_of_week, fn ($q) => $q->where('event_date', $date))
                 ->count();
         @endphp
         <a href="{{ $carpoolUrl }}"

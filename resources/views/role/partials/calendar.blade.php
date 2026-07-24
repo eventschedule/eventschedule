@@ -3050,7 +3050,7 @@ const calendarApp = createApp({
             // Add date to path only for recurring events
             if (isRecurring) {
                 // For recurring events, prioritize the occurrence date over the original start date
-                const dateStr = occurrenceDate || event.occurrenceDate || event.utc_date;
+                const dateStr = occurrenceDate || event.occurrenceDate;
                 if (dateStr) {
                     // Parse the date string as UTC to ensure it's always UTC
                     const [year, month, day] = dateStr.split('-').map(Number);
