@@ -3880,4 +3880,7 @@ return [
     'appointment_owner_refund_note' => 'Deze boeking is betaald (:amount, ref. :reference). Markeer deze als terugbetaald op de Verkooppagina en voer de daadwerkelijke terugbetaling uit in Stripe of je betaalprovider.',
     'appointment_owner_review' => 'Verzoek beoordelen',
     'book_a_time' => 'Een afspraak maken',
+    'appointment_payment_due_subject' => 'Rond je betaling af: :name',
+    'appointment_payment_due_intro' => 'Je afspraak met :schedule is tijdelijk gereserveerd. Rond de betaling af om de afspraak te bevestigen. Via de link hieronder kun je je boeking bekijken of annuleren.',
+    'appointments_session_expired' => 'Je sessie is verlopen. Herlaad de pagina en probeer het opnieuw.',
 ];

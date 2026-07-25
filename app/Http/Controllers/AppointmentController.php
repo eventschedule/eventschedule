@@ -211,8 +211,8 @@ class AppointmentController extends Controller
             AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
         }
 
-        // Guest cancelled - let the owner know.
-        app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale);
+        // Guest cancelled - let the owner know (paid state captured pre-cancel for the refund note).
+        app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, $wasPaid && (float) $sale->payment_amount > 0);
 
         return redirect()->route('appointments.manage', $manageParams)
             ->with('message', __('messages.appointments_cancelled_message'));
@@ -250,7 +250,11 @@ class AppointmentController extends Controller
             return response()->json(['redirect_url' => $this->stripeCheckoutUrl($sale, $type, $role)]);
         }
 
-        // payment_url: the merchant's hosted page; payment_url.success/cancel confirm the sale.
+        // payment_url: the guest leaves for the merchant's hosted page and there is no callback,
+        // so email them the manage link + "complete your payment" note NOW - it is their only
+        // artifact until the owner marks the sale paid (which then sends the confirmation).
+        app(\App\Services\EmailService::class)->sendAppointmentPaymentDueEmail($sale);
+
         return response()->json(['redirect_url' => $role->user->payment_url]);
     }
 

@@ -3880,4 +3880,7 @@ return [
     'appointment_owner_refund_note' => 'Questa prenotazione è stata pagata (:amount, rif. :reference). Contrassegnala come rimborsata nella pagina Vendite ed emetti il rimborso effettivo su Stripe o sul tuo fornitore di pagamenti.',
     'appointment_owner_review' => 'Esamina richiesta',
     'book_a_time' => 'Prenota un orario',
+    'appointment_payment_due_subject' => 'Completa il pagamento: :name',
+    'appointment_payment_due_intro' => 'Il tuo appuntamento con :schedule è momentaneamente riservato. Completa il pagamento per confermarlo. Puoi vedere o annullare la prenotazione dal link qui sotto.',
+    'appointments_session_expired' => 'La sessione è scaduta. Ricarica la pagina e riprova.',
 ];

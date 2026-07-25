@@ -3884,4 +3884,7 @@ return [
     'appointment_owner_refund_note' => 'Diese Buchung wurde bezahlt (:amount, Ref. :reference). Markieren Sie sie auf der Verkaufsseite als erstattet und veranlassen Sie die tatsächliche Rückerstattung in Stripe oder bei Ihrem Zahlungsanbieter.',
     'appointment_owner_review' => 'Anfrage prüfen',
     'book_a_time' => 'Termin buchen',
+    'appointment_payment_due_subject' => 'Zahlung abschließen: :name',
+    'appointment_payment_due_intro' => 'Ihr Termin bei :schedule ist vorgemerkt. Schließen Sie die Zahlung ab, um ihn zu bestätigen. Über den Link unten können Sie Ihre Buchung ansehen oder stornieren.',
+    'appointments_session_expired' => 'Ihre Sitzung ist abgelaufen. Bitte laden Sie die Seite neu und versuchen Sie es erneut.',
 ];

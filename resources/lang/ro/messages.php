@@ -3920,4 +3920,7 @@ return [
     'appointment_owner_refund_note' => 'Această rezervare a fost plătită (:amount, ref. :reference). Marcați-o ca rambursată pe pagina Vânzări și efectuați rambursarea efectivă în Stripe sau la procesatorul dumneavoastră de plăți.',
     'appointment_owner_review' => 'Examinați cererea',
     'book_a_time' => 'Rezervă o programare',
+    'appointment_payment_due_subject' => 'Finalizați plata: :name',
+    'appointment_payment_due_intro' => 'Programarea cu :schedule este rezervată temporar. Finalizați plata pentru a o confirma. Puteți vedea sau anula rezervarea folosind linkul de mai jos.',
+    'appointments_session_expired' => 'Sesiunea a expirat. Reîncărcați pagina și încercați din nou.',
 ];

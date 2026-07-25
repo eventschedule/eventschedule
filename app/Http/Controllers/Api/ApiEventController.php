@@ -558,12 +558,16 @@ class ApiEventController extends Controller
                 ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])->first();
             if ($sale) {
                 $wasPaid = $sale->status === 'paid';
+                $wasPaidMoney = $wasPaid && (float) $sale->payment_amount > 0;
                 $sale->status = 'cancelled'; // Sale::booted hook soft-cancels the event + frees slot
                 $sale->save();
                 if ($wasPaid) {
                     \App\Models\AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
                 }
                 app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
+                if ($wasPaidMoney) {
+                    app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
+                }
             } elseif (! $event->is_cancelled) {
                 $event->forceFill(['is_cancelled' => true, 'cancelled_at' => now(), 'ical_sequence' => (int) $event->ical_sequence + 1])->saveQuietly();
                 $event->dispatchCalendarSync('delete');

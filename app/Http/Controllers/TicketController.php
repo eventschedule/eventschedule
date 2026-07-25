@@ -2937,6 +2937,19 @@ class TicketController extends Controller
             $sale->refresh();
         }
 
+        // Appointment bookings cancelled/refunded from the generic Sales page: tell the guest
+        // (every appointment-native cancel path does) and remind the owner to refund real money.
+        if ($actionPerformed
+            && in_array($request->action, ['cancel', 'refund', 'delete'], true)
+            && $sale->event?->appointment_type_id) {
+            $wasPaidMoney = $previousStatus === 'paid' && (float) $sale->payment_amount > 0;
+            app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
+            if ($wasPaidMoney && $request->action !== 'refund') {
+                // A refund action means the owner is already handling the money; cancel/delete get the reminder.
+                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
+            }
+        }
+
         if ($actionPerformed) {
             $auditAction = match ($request->action) {
                 'refund' => AuditService::SALE_REFUND,

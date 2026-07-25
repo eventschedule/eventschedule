@@ -3902,4 +3902,7 @@ return [
     'appointment_owner_refund_note' => 'Эта запись была оплачена (:amount, номер :reference). Отметьте возврат на странице «Продажи» и выполните фактический возврат в Stripe или у вашего платёжного провайдера.',
     'appointment_owner_review' => 'Рассмотреть запрос',
     'book_a_time' => 'Записаться',
+    'appointment_payment_due_subject' => 'Завершите оплату: :name',
+    'appointment_payment_due_intro' => 'Ваша запись к :schedule временно удерживается. Завершите оплату, чтобы подтвердить её. По ссылке ниже можно посмотреть или отменить запись.',
+    'appointments_session_expired' => 'Сеанс истёк. Обновите страницу и попробуйте ещё раз.',
 ];

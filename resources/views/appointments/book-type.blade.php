@@ -1,9 +1,14 @@
 <x-app-guest-layout :role="$role">
     @php
+        // Path-relative URLs: absolute subdomain URLs inside json_encode'd props escape their
+        // slashes, so the ResolveCustomDomain HTML rewrite misses them and custom-domain visitors
+        // would fetch/POST cross-origin (CORS-blocked). Relative paths stay same-origin everywhere.
         $props = [
-            'slotsUrl' => route('appointments.slots', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug]),
-            'bookUrl' => route('appointments.book.store', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug]),
-            'backUrl' => route('appointments.book', ['subdomain' => $role->subdomain]),
+            'slotsUrl' => route('appointments.slots', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug], false),
+            'bookUrl' => route('appointments.book.store', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug], false),
+            'backUrl' => route('appointments.book', ['subdomain' => $role->subdomain], false),
+            'turnstileEnabled' => \App\Utils\TurnstileUtils::isActiveForRequest(),
+            'turnstileSiteKey' => \App\Utils\TurnstileUtils::isActiveForRequest() ? \App\Utils\TurnstileUtils::getSiteKey() : null,
             'csrf' => csrf_token(),
             'initial' => $initialSlots,
             'scheduleTz' => $initialSlots['schedule_timezone'] ?? config('app.timezone'),
@@ -23,7 +28,6 @@
             'authEmail' => auth()->user()->email ?? '',
             't' => [
                 'pickDate' => __('messages.appointments_pick_date'),
-                'pickTime' => __('messages.appointments_pick_time'),
                 'yourDetails' => __('messages.appointments_your_details'),
                 'confirmBooking' => __('messages.appointments_confirm_booking'),
                 'confirmAndPay' => __('messages.appointments_confirm_and_pay', ['price' => $type->isFree() ? '' : strtoupper((string) $type->currency_code).' '.number_format((float) $type->price, 2)]),
@@ -35,6 +39,7 @@
                 'timesShownIn' => __('messages.appointments_times_shown_in'),
                 'scheduleIn' => __('messages.appointments_schedule_in'),
                 'noTimes' => __('messages.appointments_no_times'),
+                'sessionExpired' => __('messages.appointments_session_expired'),
                 'nextAvailable' => __('messages.appointments_next_available'),
                 'morning' => __('messages.appointments_morning'),
                 'afternoon' => __('messages.appointments_afternoon'),
@@ -44,7 +49,6 @@
                 'requiresConfirmation' => __('messages.appointments_requires_confirmation'),
                 'minutes' => __('messages.minutes'),
                 'next' => __('messages.appointments_next_step'),
-                'change' => __('messages.appointments_change'),
             ],
         ];
     @endphp
@@ -53,7 +57,7 @@
         <div class="rounded-2xl border border-gray-200 dark:border-[#2d2d30] overflow-hidden md:flex">
             {{-- Left panel --}}
             <div class="md:w-1/3 p-6 border-b md:border-b-0 md:border-e border-gray-200 dark:border-[#2d2d30]">
-                <a :href="backUrl" class="text-xs text-gray-400">&larr; @{{ t.back }}</a>
+                <a :href="backUrl" class="text-xs text-gray-400"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</a>
                 <h1 class="text-xl font-bold mt-2">@{{ typeName }}</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">@{{ scheduleName }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">@{{ duration }} @{{ t.minutes }} &middot; @{{ priceLabel }}</p>
@@ -103,6 +107,7 @@
                                 </template>
                             </div>
                             <p v-if="loading" class="text-xs text-gray-400 mt-2">&hellip;</p>
+                            <p v-if="!loading && !anySlots && !nextAvailable" class="text-sm text-gray-400 mt-3">@{{ t.noTimes }}</p>
                             <p v-if="!loading && !anySlots && nextAvailable" class="text-xs mt-3">
                                 <button type="button" @click="jumpToNext" class="underline" :style="'color:' + accent">@{{ t.nextAvailable }}: @{{ nextAvailable }}</button>
                             </p>
@@ -136,9 +141,10 @@
 
                 {{-- Step: details --}}
                 <div v-else-if="step === 'details'">
-                    <button type="button" @click="step = 'pick'" class="text-xs text-gray-400 mb-3">&larr; @{{ t.back }}</button>
+                    <button type="button" @click="step = 'pick'" class="text-xs text-gray-400 mb-3"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</button>
+                    <h2 class="mb-3 text-base font-semibold">@{{ t.yourDetails }}</h2>
                     <div class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-[#252526] text-sm">
-                        <div class="font-semibold">@{{ selectedDateLabel }}, @{{ localTime(selectedSlot) }}</div>
+                        <div class="font-semibold">@{{ selectedSlotLabel }}, @{{ localTime(selectedSlot) }}</div>
                         <div class="text-gray-400">@{{ tz }}</div>
                     </div>
                     <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm">@{{ error }}</div>
@@ -149,7 +155,9 @@
                         <input v-model="form.email" type="email" inputmode="email" :placeholder="t.email" autocomplete="email" required class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]">
                         <span v-if="fieldErrors.email" class="text-xs text-red-600">@{{ fieldErrors.email }}</span>
                         <input v-if="askPhone" v-model="form.phone" type="tel" :placeholder="t.phone" autocomplete="tel" :required="requirePhone" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]">
+                        <span v-if="fieldErrors.phone" class="text-xs text-red-600">@{{ fieldErrors.phone }}</span>
                         <textarea v-model="form.notes" :placeholder="t.notes" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]"></textarea>
+                        <div v-if="turnstileEnabled" id="turnstile-booking-widget"></div>
                         <button type="submit" :disabled="submitting" class="w-full py-3 rounded-lg text-white font-semibold disabled:opacity-60" :style="'background-color:' + accent">@{{ ctaLabel }}</button>
                     </form>
                 </div>
@@ -157,7 +165,10 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/vue.global.prod.js') }}"></script>
+    @if (\App\Utils\TurnstileUtils::isActiveForRequest())
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer {!! nonce_attr() !!}></script>
+    @endif
+    <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
         (function () {
             if (typeof Vue === 'undefined') return;
@@ -184,6 +195,8 @@
                         fieldErrors: {},
                         submitting: false,
                         website: '',
+                        turnstileToken: '',
+                        turnstileWidgetId: null,
                         form: { name: props.authName || '', email: props.authEmail || '', phone: '', notes: '' },
                     });
                 },
@@ -212,23 +225,24 @@
                         return cells;
                     },
                     weekdayLabels() {
-                        var base = new Date(Date.UTC(2024, 0, 7)); // a Sunday
                         var labels = [];
                         for (var i = 0; i < 7; i++) {
                             var dow = (this.firstDay + i) % 7;
-                            var dt = new Date(Date.UTC(2024, 0, 7 + dow));
-                            labels.push(new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(dt));
+                            var dt = new Date(Date.UTC(2024, 0, 7 + dow)); // 2024-01-07 is a Sunday
+                            labels.push(new Intl.DateTimeFormat(undefined, { weekday: 'short', timeZone: 'UTC' }).format(dt));
                         }
                         return labels;
                     },
                     monthLabel() {
+                        if (!this.month) return '';
                         var parts = this.month.split('-');
-                        return new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(new Date(Date.UTC(+parts[0], +parts[1] - 1, 1)));
+                        return new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(+parts[0], +parts[1] - 1, 1)));
                     },
                     selectedDateLabel() {
-                        if (!this.selectedDate) return '';
-                        var p = this.selectedDate.split('-');
-                        return new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])));
+                        return this.dayLabel(this.selectedDate);
+                    },
+                    selectedSlotLabel() {
+                        return this.selectedSlot ? this.dayLabel(this.localDate(this.selectedSlot)) : '';
                     },
                     slotGroups() {
                         var slots = this.visitorDays[this.selectedDate] || [];
@@ -243,12 +257,24 @@
                         return (this.visitorDays[this.selectedDate] || []).length > 16;
                     },
                     ctaLabel() {
-                        if (this.requiresApproval) return this.t.requestThisTime;
-                        return this.isFree ? this.t.confirmBooking : this.t.confirmAndPay;
+                        // Online payment happens immediately (fanOut routes to checkout before the
+                        // approval check), so payment wording wins for stripe/payment_url types.
+                        if (!this.isFree) return this.t.confirmAndPay;
+                        return this.requiresApproval ? this.t.requestThisTime : this.t.confirmBooking;
                     },
                 },
                 methods: {
                     hasSlots(date) { return (this.visitorDays[date] || []).length > 0; },
+                    dayLabel(ymd) {
+                        if (!ymd) return '';
+                        var p = ymd.split('-');
+                        return new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' }).format(new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])));
+                    },
+                    scheduleLocalDate(utc) {
+                        var parts = new Intl.DateTimeFormat('en-CA', { timeZone: this.scheduleTz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(utc));
+                        var o = {}; parts.forEach(function (pp) { o[pp.type] = pp.value; });
+                        return o.year + '-' + o.month + '-' + o.day;
+                    },
                     localDate(utc) {
                         var parts = new Intl.DateTimeFormat('en-CA', { timeZone: this.tz, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(utc));
                         var o = {}; parts.forEach(function (p) { o[p.type] = p.value; });
@@ -308,18 +334,64 @@
                         if (this.form.notes) fd.append('notes', this.form.notes);
                         fd.append('slot', this.selectedSlot); fd.append('guest_timezone', this.tz);
                         fd.append('website', this.website);
+                        if (this.turnstileEnabled) fd.append('cf-turnstile-response', this.turnstileToken);
                         try {
                             var res = await fetch(this.bookUrl, { method: 'POST', headers: { 'X-CSRF-TOKEN': this.csrf, 'Accept': 'application/json' }, body: fd });
-                            var j = await res.json();
+                            if (res.status === 419) { this.error = this.t.sessionExpired; this.submitting = false; return; }
+                            var j;
+                            try { j = await res.json(); } catch (pe) { this.error = this.t.sessionExpired; this.submitting = false; return; }
                             if (res.ok && j.redirect_url) { window.location = j.redirect_url; return; }
-                            if (j.error === undefined && j.errors) { this.fieldErrors = {}; Object.keys(j.errors).forEach((k) => { this.fieldErrors[k] = j.errors[k][0] || j.errors[k]; }); }
-                            else if (j.slots) { this.allUtc = this.allUtc.filter((u) => u !== this.selectedSlot); this.mergeDays(j.slots); this.armed = null; this.error = j.error || this.t.slotTaken; this.step = 'pick'; }
+                            if (j.error === undefined && j.errors) {
+                                this.fieldErrors = {};
+                                var leftovers = [];
+                                Object.keys(j.errors).forEach((k) => {
+                                    var msg = Array.isArray(j.errors[k]) ? j.errors[k][0] : j.errors[k];
+                                    this.fieldErrors[k] = msg;
+                                    if (['name', 'email', 'phone'].indexOf(k) === -1) leftovers.push(msg);
+                                });
+                                // Errors without a dedicated field slot (turnstile, notes, slot) surface here.
+                                if (leftovers.length) this.error = leftovers.join(' ');
+                            }
+                            else if (j.slots) {
+                                // Reconcile the whole refreshed schedule-local day, not just the slot we
+                                // tried: siblings booked by others since our fetch must disappear too.
+                                var dayKeys = Object.keys((j.slots && j.slots.days) || {});
+                                if (!dayKeys.length && this.selectedSlot) dayKeys = [this.scheduleLocalDate(this.selectedSlot)];
+                                this.allUtc = this.allUtc.filter((u) => dayKeys.indexOf(this.scheduleLocalDate(u)) === -1);
+                                this.mergeDays(j.slots); this.armed = null; this.selectedSlot = null;
+                                this.error = j.error || this.t.slotTaken; this.step = 'pick';
+                            }
                             else { this.error = j.error || this.t.slotTaken; }
-                        } catch (e) { this.error = this.t.slotTaken; }
+                            if (this.turnstileEnabled && this.turnstileWidgetId !== null && typeof turnstile !== 'undefined') {
+                                this.turnstileToken = ''; turnstile.reset(this.turnstileWidgetId);
+                            }
+                        } catch (e) { this.error = this.t.sessionExpired; }
                         this.submitting = false;
                     },
                 },
                 mounted() {
+                    if (this.turnstileEnabled && this.turnstileSiteKey) {
+                        var self = this;
+                        var renderWidget = function () {
+                            if (typeof turnstile === 'undefined') { setTimeout(renderWidget, 100); return; }
+                            var elw = document.getElementById('turnstile-booking-widget');
+                            if (!elw) { setTimeout(renderWidget, 200); return; }
+                            self.turnstileWidgetId = turnstile.render('#turnstile-booking-widget', {
+                                sitekey: self.turnstileSiteKey,
+                                size: 'flexible',
+                                'retry': 'auto',
+                                'refresh-expired': 'auto',
+                                callback: function (token) { self.turnstileToken = token; },
+                                'error-callback': function () {
+                                    self.turnstileToken = '';
+                                    if (self.turnstileWidgetId !== null && typeof turnstile !== 'undefined') turnstile.reset(self.turnstileWidgetId);
+                                    return true;
+                                },
+                            });
+                        };
+                        // The widget container only exists on the details step; watch for it.
+                        this.$watch('step', function (v) { if (v === 'details') setTimeout(renderWidget, 50); });
+                    }
                     this.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || this.scheduleTz;
                     this.mergeDays(this.initial);
                     this.buildTzList();

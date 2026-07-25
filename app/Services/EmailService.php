@@ -30,6 +30,17 @@ class EmailService
      */
     public function sendTicketEmail(Sale $sale, ?Role $role = null, bool $queue = true): string|true
     {
+        // Appointment bookings never get the QR ticket email. A resend re-sends the appointment
+        // confirmation, and only for a booking that is actually confirmed.
+        if ($sale->event?->appointment_type_id) {
+            if (! $sale->confirmed_at || $sale->event->is_cancelled) {
+                return self::ERROR_SKIPPED;
+            }
+            $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentConfirmed::class);
+
+            return true;
+        }
+
         // Skip sending to test/example email addresses
         if ($this->isTestEmail($sale->email)) {
             return self::ERROR_SKIPPED;
@@ -294,10 +305,21 @@ class EmailService
         // success, and mark-paid, all of which route through here.
         if ($sale->event?->appointment_type_id) {
             $event = $sale->event;
+            if ($event->is_cancelled) {
+                // Late payment on a dead booking (e.g. a Stripe webhook reviving an expired sale):
+                // never send "request received"/confirmation for it. Money reconciliation is manual.
+                Log::warning('Payment arrived for a cancelled appointment booking', ['sale_id' => $sale->id]);
+
+                return;
+            }
             $pivot = $event->roles()->where('roles.id', $event->creator_role_id)->first()?->pivot;
             if ($pivot && is_null($pivot->is_accepted)) {
-                // Paid but awaiting approval: send "request received", not a confirmation.
-                $this->sendAppointmentPendingEmails($sale);
+                // Paid but awaiting approval: send "request received", not a confirmation - but only
+                // when the payment itself is the trigger (online methods). Cash/free pending mails
+                // already went out at booking time; a later mark-paid must not repeat them.
+                if (in_array($sale->payment_method, ['stripe', 'payment_url'], true)) {
+                    $this->sendAppointmentPendingEmails($sale);
+                }
             } else {
                 app(\App\Services\AppointmentService::class)->confirm($sale);
             }
@@ -346,10 +368,6 @@ class EmailService
         }
     }
 
-    /**
-     * Confirmation emails for an appointment booking. Sends the guest an AppointmentConfirmed
-     * (transport-guarded like sendTicketEmail). The owner/editor notification is added in Phase 6.
-     */
     /** Guest confirmation + owner "new booking" notification (called by AppointmentService::confirm). */
     public function sendAppointmentConfirmationEmails(Sale $sale): void
     {
@@ -364,6 +382,12 @@ class EmailService
         $this->sendAppointmentOwnerNotification($sale, 'pending');
     }
 
+    /** Guest "complete your payment" notice with the manage link (payment_url bookings). */
+    public function sendAppointmentPaymentDueEmail(Sale $sale): void
+    {
+        $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentPaymentDue::class);
+    }
+
     /** Guest decline notice. */
     public function sendAppointmentDeclinedEmail(Sale $sale): void
     {
@@ -376,10 +400,13 @@ class EmailService
         $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentCancelled::class);
     }
 
-    /** Owner cancellation notice (guest cancelled the booking). */
-    public function sendAppointmentOwnerCancellation(Sale $sale): void
+    /**
+     * Owner cancellation notice. $wasPaid is captured pre-cancel by the caller (the sale's live
+     * status has already flipped by the time the queued mailable renders).
+     */
+    public function sendAppointmentOwnerCancellation(Sale $sale, ?bool $wasPaid = null): void
     {
-        $this->sendAppointmentOwnerNotification($sale, 'cancelled');
+        $this->sendAppointmentOwnerNotification($sale, 'cancelled', $wasPaid);
     }
 
     protected function sendAppointmentGuestMail(Sale $sale, string $mailClass): void
@@ -405,7 +432,7 @@ class EmailService
         }
     }
 
-    protected function sendAppointmentOwnerNotification(Sale $sale, string $kind): void
+    protected function sendAppointmentOwnerNotification(Sale $sale, string $kind, ?bool $wasPaid = null): void
     {
         try {
             $event = $sale->event;
@@ -417,12 +444,16 @@ class EmailService
                 return;
             }
 
-            foreach ($role->getEditorsWantingNotification('new_sale') as $editor) {
+            // Pending requests block the slot until the owner acts, so they ride the default-on
+            // 'new_request' preference; booked/cancelled notices use the opt-in 'new_sale' one.
+            $preference = $kind === 'pending' ? 'new_request' : 'new_sale';
+
+            foreach ($role->getEditorsWantingNotification($preference) as $editor) {
                 if ($this->isTestEmail($editor->email)) {
                     continue;
                 }
                 SendQueuedEmail::dispatch(
-                    new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind),
+                    new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind, $wasPaid),
                     $editor->email,
                     $role->id,
                     $editor->language_code ?? app()->getLocale()

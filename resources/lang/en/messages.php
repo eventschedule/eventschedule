@@ -3958,4 +3958,7 @@ return [
     'appointment_owner_refund_note' => 'This booking was paid (:amount, ref :reference). Mark it refunded on the Sales page and issue the actual refund in Stripe or your payment provider.',
     'appointment_owner_review' => 'Review request',
     'book_a_time' => 'Book a Time',
+    'appointment_payment_due_subject' => 'Complete your payment: :name',
+    'appointment_payment_due_intro' => 'Your time with :schedule is being held. Complete the payment to confirm your appointment. You can view or cancel your booking with the link below.',
+    'appointments_session_expired' => 'Your session expired. Please reload the page and try again.',
 ];

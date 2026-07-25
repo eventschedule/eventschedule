@@ -15,7 +15,7 @@
 @endif
 {{ __('messages.date') }}: {{ $event->getStartDateTime($sale->event_date, true, $event->timezone)->format('l, F j, Y') }} {{ $event->getStartEndTime($sale->event_date) }} ({{ $event->timezone }})
 @if ((float) $sale->payment_amount > 0)
-{{ __('messages.price') }}: {{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $sale->payment_amount, 2) }} - {{ $sale->status === 'paid' ? __('messages.paid') : __('messages.unpaid') }}
+{{ __('messages.price') }}: {{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $sale->payment_amount, 2) }} - {{ ($paidLabel ?? ($sale->status === 'paid')) ? __('messages.paid') : __('messages.unpaid') }}
 @endif
 @if ($showRefund)
 

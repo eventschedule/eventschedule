@@ -103,9 +103,22 @@ class AppointmentService
             'ical_sequence' => ((int) $event->ical_sequence) + 1,
         ])->saveQuietly();
 
-        DB::afterCommit(function () use ($event) {
+        // A pending booking (pivot is_accepted null) would otherwise linger on the Requests tab
+        // forever - the requests query filters only on the pivot. Close it out like a decline.
+        $event->roles()->updateExistingPivot($event->creator_role_id, ['is_accepted' => false]);
+
+        $expiredPaymentUrl = $sale->status === 'expired' && $sale->payment_method === 'payment_url';
+
+        DB::afterCommit(function () use ($event, $sale, $expiredPaymentUrl) {
             // Push the cancellation to any connected calendars (no-op if never synced).
             $event->dispatchCalendarSync('delete');
+
+            // payment_url holds expire after 24h with no payment callback - the guest may have
+            // paid on the merchant page, so tell them the booking lapsed. Stripe abandonment
+            // stays silent (consistent with ticket checkout).
+            if ($expiredPaymentUrl) {
+                (new EmailService)->sendAppointmentGuestCancellation($sale);
+            }
         });
     }
 

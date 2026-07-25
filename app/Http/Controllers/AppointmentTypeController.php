@@ -75,16 +75,26 @@ class AppointmentTypeController extends Controller
             abort(404);
         }
 
+        // A finished appointment cannot be cancelled (same guard as the guest manage page) -
+        // the guest would otherwise get a cancellation email for something that already happened.
+        $startUtc = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $sale->event->starts_at, 'UTC');
+        if ($startUtc->isPast()) {
+            return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']).'?view=bookings')
+                ->with('error', __('messages.appointments_cannot_cancel_past'));
+        }
+
         if (! in_array($sale->status, ['cancelled', 'refunded', 'expired'])) {
             $wasPaid = $sale->status === 'paid';
+            $wasPaidMoney = $wasPaid && (float) $sale->payment_amount > 0;
             $sale->status = 'cancelled'; // Sale::booted hook cancels the event + frees the slot
             $sale->save();
             if ($wasPaid) {
                 \App\Models\AnalyticsEventsDaily::decrementSale($sale->event_id, (float) $sale->payment_amount, $sale->created_at->toDateString());
             }
             app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
-            if ($wasPaid) {
-                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale);
+            if ($wasPaidMoney) {
+                // Refund reminder: only for real money, with the paid state captured pre-cancel.
+                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
             }
         }
 
@@ -233,13 +243,20 @@ class AppointmentTypeController extends Controller
         $type->name = $data['name'];
         $type->description = $data['description'] ?? null;
         $type->duration_minutes = (int) $data['duration_minutes'];
-        $type->slot_interval_minutes = ! empty($data['slot_interval_minutes']) ? (int) $data['slot_interval_minutes'] : null;
+        // The editor has no field for this yet; only overwrite when the request actually sends it
+        // so values set via backup restore are not silently wiped by an unrelated edit.
+        if (request()->has('slot_interval_minutes')) {
+            $type->slot_interval_minutes = ! empty($data['slot_interval_minutes']) ? (int) $data['slot_interval_minutes'] : null;
+        }
         $type->buffer_before_minutes = (int) ($data['buffer_before_minutes'] ?? 0);
         $type->buffer_after_minutes = (int) ($data['buffer_after_minutes'] ?? 0);
         $type->min_notice_hours = (int) ($data['min_notice_hours'] ?? 0);
         $type->max_advance_days = (int) ($data['max_advance_days'] ?? 60);
         $type->weekly_windows = $data['weekly_windows'];
-        $type->date_overrides = $data['date_overrides'] ?? null;
+        // Same has-guard as slot_interval_minutes: no editor UI exists for overrides yet.
+        if (request()->has('date_overrides')) {
+            $type->date_overrides = $data['date_overrides'] ?? null;
+        }
         $type->location_type = $data['location_type'];
         $type->location_address = $data['location_address'] ?? null;
         $type->location_url = $data['location_url'] ?? null;

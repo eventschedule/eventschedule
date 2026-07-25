@@ -266,6 +266,7 @@ class EventController extends Controller
 
         if ($sale) {
             $wasPaid = $sale->status === 'paid';
+            $wasPaidMoney = $wasPaid && (float) $sale->payment_amount > 0;
             $sale->status = 'cancelled';
             $sale->save();
             if ($wasPaid) {
@@ -273,8 +274,8 @@ class EventController extends Controller
             }
             // Owner cancelled - email the guest, and remind the owner to refund a paid booking.
             app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);
-            if ($wasPaid) {
-                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale);
+            if ($wasPaidMoney) {
+                app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
             }
         } elseif (! $event->is_cancelled) {
             $event->forceFill([
@@ -1039,11 +1040,13 @@ class EventController extends Controller
         }
 
         // Appointment bookings confirm on acceptance: calendar sync + guest AppointmentConfirmed.
+        // Unpaid online payments (stripe/payment_url) defer confirmation to the payment webhook so
+        // the guest never gets "Confirmed" for a booking that can still expire unpaid.
         if ($event->appointment_type_id) {
             $sale = Sale::where('event_id', $event->id)
                 ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                 ->first();
-            if ($sale) {
+            if ($sale && ($sale->status === 'paid' || ! in_array($sale->payment_method, ['stripe', 'payment_url'], true))) {
                 app(\App\Services\AppointmentService::class)->confirm($sale);
             }
         }
@@ -1100,15 +1103,16 @@ class EventController extends Controller
                 ->first();
             if ($sale) {
                 $wasPaid = $sale->status === 'paid';
+                $wasPaidMoney = $wasPaid && (float) $sale->payment_amount > 0;
                 $sale->status = 'cancelled';
                 $sale->save();
                 if ($wasPaid) {
                     AnalyticsEventsDaily::decrementSale($event->id, (float) $sale->payment_amount, $sale->created_at->toDateString());
                 }
                 app(\App\Services\EmailService::class)->sendAppointmentDeclinedEmail($sale);
-                if ($wasPaid) {
+                if ($wasPaidMoney) {
                     // Remind the owner to refund the paid booking (manual refund via Sales/Stripe).
-                    app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale);
+                    app(\App\Services\EmailService::class)->sendAppointmentOwnerCancellation($sale, true);
                 }
             }
         }
@@ -1213,6 +1217,19 @@ class EventController extends Controller
             if ($user->isEditor($subdomain)) {
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
                 $acceptedCount++;
+
+                // Appointment bookings confirm on acceptance (same branch as accept()): calendar
+                // sync + guest AppointmentConfirmed. Unpaid online payments defer to the webhook.
+                if ($event->appointment_type_id) {
+                    $sale = Sale::where('event_id', $event->id)
+                        ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
+                        ->first();
+                    if ($sale && ($sale->status === 'paid' || ! in_array($sale->payment_method, ['stripe', 'payment_url'], true))) {
+                        app(\App\Services\AppointmentService::class)->confirm($sale);
+                    }
+
+                    continue; // the generic submitter email below never applies to bookings
+                }
 
                 // Send email to the user who submitted the event
                 // Only send if they have an email and aren't a member of the accepting role

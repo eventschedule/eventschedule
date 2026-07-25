@@ -3887,4 +3887,7 @@ return [
     'appointment_owner_refund_note' => 'Cette réservation a été payée (:amount, réf. :reference). Marquez-la comme remboursée sur la page Ventes et effectuez le remboursement réel dans Stripe ou votre prestataire de paiement.',
     'appointment_owner_review' => 'Examiner la demande',
     'book_a_time' => 'Prendre rendez-vous',
+    'appointment_payment_due_subject' => 'Finalisez votre paiement : :name',
+    'appointment_payment_due_intro' => 'Votre créneau avec :schedule est réservé temporairement. Finalisez le paiement pour confirmer le rendez-vous. Vous pouvez consulter ou annuler votre réservation via le lien ci-dessous.',
+    'appointments_session_expired' => 'Votre session a expiré. Veuillez recharger la page et réessayer.',
 ];

@@ -1,4 +1,4 @@
-<x-app-guest-layout :role="$role">
+<x-app-guest-layout :role="$role" :noIndex="true">
     @php
         $manageParams = ['event_id' => \App\Utils\UrlUtils::encodeId($event->id), 'secret' => $sale->secret];
     @endphp

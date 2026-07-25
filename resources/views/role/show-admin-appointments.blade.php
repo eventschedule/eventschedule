@@ -26,26 +26,37 @@
         '5' => [['start' => '09:00', 'end' => '17:00']], '6' => []];
     $windows = $editing ? ($editing->weekly_windows ?? $defaultWindows) : $defaultWindows;
 
+    // Whether the booking is still awaiting approval: safe when the creator pivot row is missing
+    // (detached/drifted data must not crash the tab). Shared with the bookings partial.
+    $bookingIsPending = function ($event) {
+        $pivot = $event->roles->firstWhere('id', $event->creator_role_id)?->pivot;
+
+        return $pivot && is_null($pivot->is_accepted);
+    };
+
     $bookings = collect();
-    if ($view === 'bookings') {
+    if ($view === 'bookings' && ! $isGated) {
         $filter = request('filter', 'upcoming');
-        $q = \App\Models\Sale::where('subdomain', $role->subdomain)
+        $bookings = \App\Models\Sale::where('subdomain', $role->subdomain)
             ->whereHas('event', fn ($e) => $e->whereNotNull('appointment_type_id'))
-            ->with(['event.appointmentType'])
-            ->orderByDesc('id');
-        $bookings = $q->get()->filter(function ($s) use ($filter) {
-            $e = $s->event;
-            if (! $e) return false;
-            $cancelled = $e->is_cancelled || in_array($s->status, ['cancelled', 'refunded', 'expired']);
-            $past = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $e->starts_at, 'UTC')->isPast();
-            $pending = is_null(optional($e->roles->firstWhere('id', $e->creator_role_id))->pivot->is_accepted ?? optional($e->roles()->where('roles.id', $e->creator_role_id)->first())->pivot->is_accepted);
-            return match ($filter) {
-                'pending' => $pending && ! $cancelled,
-                'past' => $past && ! $cancelled,
-                'cancelled' => $cancelled,
-                default => ! $past && ! $cancelled,
-            };
-        })->values();
+            ->with(['event.appointmentType', 'event.roles'])
+            ->orderByDesc('id')
+            ->limit(500)
+            ->get()
+            ->filter(function ($s) use ($filter, $bookingIsPending) {
+                $e = $s->event;
+                if (! $e) return false;
+                $cancelled = $e->is_cancelled || in_array($s->status, ['cancelled', 'refunded', 'expired']);
+                $past = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $e->starts_at, 'UTC')->isPast();
+                return match ($filter) {
+                    'pending' => $bookingIsPending($e) && ! $cancelled,
+                    'past' => $past && ! $cancelled,
+                    'cancelled' => $cancelled,
+                    default => ! $past && ! $cancelled,
+                };
+            })
+            ->when($filter === 'upcoming', fn ($c) => $c->sortBy(fn ($s) => $s->event->starts_at))
+            ->values();
     }
 @endphp
 

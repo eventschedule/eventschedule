@@ -3880,4 +3880,7 @@ return [
     'appointment_owner_refund_note' => 'Esta reserva fue pagada (:amount, ref. :reference). Márcala como reembolsada en la página de Ventas y realiza el reembolso real en Stripe o tu proveedor de pagos.',
     'appointment_owner_review' => 'Revisar solicitud',
     'book_a_time' => 'Reservar una cita',
+    'appointment_payment_due_subject' => 'Completa tu pago: :name',
+    'appointment_payment_due_intro' => 'Tu cita con :schedule está reservada temporalmente. Completa el pago para confirmarla. Puedes ver o cancelar tu reserva con el enlace de abajo.',
+    'appointments_session_expired' => 'Tu sesión ha caducado. Recarga la página e inténtalo de nuevo.',
 ];

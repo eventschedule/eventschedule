@@ -16,6 +16,16 @@ class AppointmentReminderTest extends TestCase
     use CreatesScheduleData;
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // The reminder command enforces the hosted SMTP transport gate; run these tests in
+        // selfhost mode so reminders send without per-schedule email settings. Keep the default
+        // log mailer: the sync queue executes SendQueuedEmail inline, and a real smtp transport
+        // would throw, tripping the command's retry path (which resets reminder_sent_at).
+        config(['app.hosted' => false]);
+    }
+
     /** A confirmed (or pending) appointment $hoursOut from now, with a paid cash sale. */
     private function appointment(Role $role, int $hoursOut, $accepted = true): array
     {

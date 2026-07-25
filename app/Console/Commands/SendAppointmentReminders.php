@@ -51,6 +51,11 @@ class SendAppointmentReminders extends Command
             if (! $role || ! $role->isPro()) {
                 continue; // feature lapsed
             }
+            if (config('app.hosted') && ! $role->hasEmailSettings()) {
+                // Same transport gate as every other appointment mail: a schedule whose guests
+                // never got a confirmation must not suddenly get a platform-branded reminder.
+                continue;
+            }
             if (is_demo_role($role) || $this->isTestEmail($sale->email)) {
                 continue;
             }

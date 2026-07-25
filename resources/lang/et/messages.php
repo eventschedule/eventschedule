@@ -3900,4 +3900,7 @@ return [
     'appointment_owner_refund_note' => 'See broneering oli tasutud (:amount, viide :reference). Märkige see müügilehel tagastatuks ja tehke tegelik tagasimakse Stripe\'is või oma makseteenuse pakkuja juures.',
     'appointment_owner_review' => 'Vaata päring üle',
     'book_a_time' => 'Broneeri aeg',
+    'appointment_payment_due_subject' => 'Viige makse lõpule: :name',
+    'appointment_payment_due_intro' => 'Teie kohtumine :schedule-ga on ajutiselt broneeritud. Kinnitamiseks viige makse lõpule. Alloleva lingi kaudu saate broneeringut vaadata või tühistada.',
+    'appointments_session_expired' => 'Teie seanss on aegunud. Palun laadige leht uuesti ja proovige uuesti.',
 ];

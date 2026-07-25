@@ -10,7 +10,6 @@ class HelpUtils
         'newsletters*' => '/docs/newsletters',
         'newsletter-segments*' => '/docs/newsletters#recipients',
         'newsletter-import*' => '/docs/newsletters',
-        'appointments*' => '/docs/appointments',
 
         // Pages with section-level anchor mapping
         '{subdomain}/edit' => [
@@ -131,6 +130,7 @@ class HelpUtils
 
         // Simple page-level mappings
         '{subdomain}/schedule' => '/docs/managing-schedules#schedule',
+        '{subdomain}/appointments' => '/docs/appointments',
         '{subdomain}/templates' => '/docs/managing-schedules#templates',
         '{subdomain}/availability' => '/docs/managing-schedules#availability',
         '{subdomain}/requests' => '/docs/managing-schedules#requests',

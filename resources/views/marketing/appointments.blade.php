@@ -231,7 +231,7 @@
                                     <span class="rounded-lg bg-gradient-to-r from-[#4E81FA] to-[#0EA5E9] px-2 py-1.5 text-center text-xs font-bold text-white shadow-sm">3:00 PM</span>
                                     <span class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-center text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">4:30 PM</span>
                                 </div>
-                                <div class="mt-2 border-t border-gray-100 pt-1.5 text-center text-[10px] font-medium text-gray-400 dark:border-white/5">9:00 AM PST · 7:00 PM CET</div>
+                                <div class="mt-2 border-t border-gray-100 pt-1.5 text-center text-[10px] font-medium text-gray-400 dark:border-white/5">9:00 AM PST · 6:00 PM CET</div>
                             </div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

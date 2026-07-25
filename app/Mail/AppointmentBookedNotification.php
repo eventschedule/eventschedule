@@ -32,13 +32,22 @@ class AppointmentBookedNotification extends Mailable
 
     protected $kind;
 
-    public function __construct(Sale $sale, Event $event, ?Role $role, ?AppointmentType $type, string $kind = 'booked')
+    protected $wasPaid;
+
+    /**
+     * $wasPaid must be captured at DISPATCH time for cancelled-kind mails: SerializesModels
+     * re-fetches the Sale at send time, after its status has already flipped to cancelled, so
+     * deriving "was this paid?" from the live status would always say no. Scalars survive
+     * queue serialization; null falls back to the live status (booked/pending kinds).
+     */
+    public function __construct(Sale $sale, Event $event, ?Role $role, ?AppointmentType $type, string $kind = 'booked', ?bool $wasPaid = null)
     {
         $this->sale = $sale;
         $this->event = $event;
         $this->role = $role;
         $this->type = $type;
         $this->kind = in_array($kind, ['booked', 'pending', 'cancelled'], true) ? $kind : 'booked';
+        $this->wasPaid = $wasPaid;
     }
 
     public function envelope(): Envelope
@@ -76,7 +85,7 @@ class AppointmentBookedNotification extends Mailable
             'tab' => $tab,
         ], false));
 
-        $paid = $this->sale->status === 'paid' && (float) $this->sale->payment_amount > 0;
+        $paid = $this->wasPaid ?? ($this->sale->status === 'paid' && (float) $this->sale->payment_amount > 0);
 
         return new Content(
             view: 'emails.appointment_owner_notification',
@@ -89,6 +98,7 @@ class AppointmentBookedNotification extends Mailable
                 'kind' => $this->kind,
                 'bookingsUrl' => $bookingsUrl,
                 'showRefund' => $this->kind === 'cancelled' && $paid,
+                'paidLabel' => $paid,
             ],
         );
     }

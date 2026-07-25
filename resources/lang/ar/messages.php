@@ -3881,4 +3881,7 @@ return [
     'appointment_owner_refund_note' => 'تم دفع هذا الحجز (:amount، المرجع :reference). ضع علامة على أنه تم رد المبلغ في صفحة المبيعات، ثم نفّذ عملية رد المبلغ الفعلية في Stripe أو لدى مزود الدفع الخاص بك.',
     'appointment_owner_review' => 'مراجعة الطلب',
     'book_a_time' => 'احجز موعدًا',
+    'appointment_payment_due_subject' => 'أكمل الدفع: :name',
+    'appointment_payment_due_intro' => 'موعدك مع :schedule محجوز مؤقتًا. أكمل الدفع لتأكيد الموعد. يمكنك عرض الحجز أو إلغاؤه عبر الرابط أدناه.',
+    'appointments_session_expired' => 'انتهت الجلسة. يرجى إعادة تحميل الصفحة والمحاولة مرة أخرى.',
 ];

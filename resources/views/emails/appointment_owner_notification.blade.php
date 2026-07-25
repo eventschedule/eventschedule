@@ -27,7 +27,7 @@
             @endif
             <p style="margin: 8px 0;"><strong>{{ __('messages.date') }}:</strong> {{ $event->getStartDateTime($sale->event_date, true, $event->timezone)->format('l, F j, Y') }} {{ $event->getStartEndTime($sale->event_date) }} ({{ $event->timezone }})</p>
             @if ((float) $sale->payment_amount > 0)
-                <p style="margin: 8px 0;"><strong>{{ __('messages.price') }}:</strong> {{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $sale->payment_amount, 2) }} &middot; {{ $sale->status === 'paid' ? __('messages.paid') : __('messages.unpaid') }}</p>
+                <p style="margin: 8px 0;"><strong>{{ __('messages.price') }}:</strong> {{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $sale->payment_amount, 2) }} &middot; {{ ($paidLabel ?? ($sale->status === 'paid')) ? __('messages.paid') : __('messages.unpaid') }}</p>
             @endif
             @if ($event->description)
                 <p style="margin: 8px 0;">{{ $event->description }}</p>

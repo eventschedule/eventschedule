@@ -1,4 +1,3 @@
-
 <?php
 
 return [
@@ -3876,4 +3875,7 @@ return [
     'appointment_owner_refund_note' => 'הזמנה זו שולמה (:amount, אסמכתא :reference). סמנו אותה כמוחזרת בעמוד המכירות ובצעו את ההחזר בפועל ב-Stripe או אצל ספק התשלומים שלכם.',
     'appointment_owner_review' => 'בדיקת הבקשה',
     'book_a_time' => 'קביעת פגישה',
+    'appointment_payment_due_subject' => 'השלמת התשלום: :name',
+    'appointment_payment_due_intro' => 'הפגישה שלך עם :schedule שמורה זמנית. יש להשלים את התשלום כדי לאשר אותה. אפשר לצפות בהזמנה או לבטל אותה בקישור למטה.',
+    'appointments_session_expired' => 'פג תוקף החיבור. יש לרענן את הדף ולנסות שוב.',
 ];

@@ -167,8 +167,10 @@
         // Show/hide location fields by type.
         var locType = document.getElementById('location_type');
         function syncLoc() {
-            form.querySelectorAll('.loc-field').forEach(function (f) { f.style.display = 'none'; });
-            form.querySelectorAll('.loc-' + locType.value).forEach(function (f) { f.style.display = 'block'; });
+            // Hidden fields are also disabled: a hidden invalid type="url" value would otherwise
+            // block submit with an un-focusable constraint-validation error.
+            form.querySelectorAll('.loc-field').forEach(function (f) { f.style.display = 'none'; f.disabled = true; });
+            form.querySelectorAll('.loc-' + locType.value).forEach(function (f) { f.style.display = 'block'; f.disabled = false; });
         }
         locType.addEventListener('change', syncLoc);
         syncLoc();
