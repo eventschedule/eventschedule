@@ -47,11 +47,16 @@ class FederationShareTest extends TestCase
         return app(FederationService::class);
     }
 
-    /** An event that will actually qualify: image, accepted role, upcoming. */
+    /**
+     * An event that will actually qualify: image, accepted role, upcoming, and a
+     * schedule that opted in. The opt-in is explicit because the column is now
+     * tri-state and a freshly created schedule starts undecided, which does not
+     * qualify - the same step a real schedule owner takes.
+     */
     private function shareableEvent(array $eventAttrs = [], array $roleAttrs = []): Event
     {
         $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue', $roleAttrs);
+        $role = $this->createRole($owner, 'venue', array_merge(['federation_enabled' => true], $roleAttrs));
 
         return $this->createEvent($role, array_merge([
             'name' => 'Summer Show',
@@ -261,12 +266,129 @@ class FederationShareTest extends TestCase
         $this->assertNull($event->fresh()->federated_at);
     }
 
+    /**
+     * The opt-in guarantee, tested at the wire rather than at the flag. Calling the
+     * service directly is the point: the command checks isEnabled() before it calls
+     * anything, so a test that goes through the command only proves the command is
+     * careful, not that the service is.
+     */
     public function test_nothing_is_sent_when_federation_is_disabled(): void
     {
+        $this->shareableEvent();
         $this->fakeNexus();
         Setting::set('federation_enabled', null);
 
         $this->assertFalse($this->service()->isEnabled());
+
+        $this->service()->push();
+        $this->service()->reconcile();
+        $this->service()->register();
+
+        Http::assertNothingSent();
+    }
+
+    /**
+     * And no identity is minted on the way, either. register() builds its payload from
+     * instanceId() and secret(), both of which persist on first read, so the guard has
+     * to sit ahead of the payload rather than only in send().
+     */
+    public function test_a_disabled_install_does_not_mint_an_instance_identity(): void
+    {
+        $this->shareableEvent();
+        $this->fakeNexus();
+        Setting::set('federation_enabled', null);
+
+        $this->service()->push();
+        $this->service()->register();
+
+        $this->assertNull(Setting::get('federation_instance_id'));
+        $this->assertNull(Setting::get('federation_secret'));
+    }
+
+    public function test_withdrawing_sends_one_empty_final_manifest(): void
+    {
+        $this->shareableEvent();
+
+        // Stubbed in one call, not layered on fakeNexus(): Http::fake() merges, so a
+        // second stub for an endpoint loses to the one registered first.
+        Http::fake([
+            self::EVENTS_ENDPOINT => Http::response(['accepted' => 1, 'skipped' => 0, 'status' => 'approved']),
+            self::REGISTER_ENDPOINT => Http::response(['status' => 'approved', 'registered' => true]),
+            self::RECONCILE_ENDPOINT => Http::response(['removed' => 3, 'missing' => [], 'status' => 'approved']),
+        ]);
+
+        // Registered, so there is something on the other side to take down.
+        $this->service()->register();
+        $this->service()->push();
+
+        // As it happens on the on->off transition: the switch is already off.
+        Setting::set('federation_enabled', null);
+        $result = $this->service()->withdraw();
+
+        $this->assertTrue($result['ok']);
+        $this->assertSame(3, $result['removed']);
+        $this->assertNull(Setting::get('federation_withdraw_pending'));
+
+        Http::assertSent(function ($request) {
+            if (! str_contains($request->url(), '/api/federation/reconcile')) {
+                return false;
+            }
+
+            $body = $request->data();
+
+            // Empty AND final: the nexus stamps nothing with the run token, so its
+            // sweep takes out everything this instance owns.
+            return $body['external_ids'] === []
+                && $body['known_ids'] === []
+                && $body['is_final'] === true;
+        });
+    }
+
+    public function test_an_install_that_never_registered_withdraws_without_calling_out(): void
+    {
+        $this->fakeNexus();
+        Setting::set('federation_enabled', null);
+
+        $result = $this->service()->withdraw();
+
+        $this->assertTrue($result['ok']);
+        Http::assertNothingSent();
+        $this->assertNull(Setting::get('federation_instance_id'));
+    }
+
+    /**
+     * A withdrawal has no other retry - the hourly run returns early while the switch
+     * is off - so a nexus that happened to be down would leave the events published
+     * for good.
+     */
+    public function test_a_failed_withdrawal_is_retried_by_the_next_run(): void
+    {
+        // A closure rather than two Http::fake() calls: stubs merge, so a later one
+        // for the same endpoint would never be reached.
+        $attempts = 0;
+        Http::fake([
+            self::REGISTER_ENDPOINT => Http::response(['status' => 'approved', 'registered' => true]),
+            self::RECONCILE_ENDPOINT => function () use (&$attempts) {
+                $attempts++;
+
+                return $attempts === 1
+                    ? Http::response(['error' => 'nope'], 500)
+                    : Http::response(['removed' => 2, 'missing' => [], 'status' => 'approved']);
+            },
+        ]);
+
+        $this->service()->register();
+        Setting::set('federation_enabled', null);
+
+        $this->assertFalse($this->service()->withdraw()['ok']);
+        $this->assertSame('1', Setting::get('federation_withdraw_pending'));
+
+        // The command carries it out on a later run even though federation is off,
+        // which is the only thing that still happens once the switch is down.
+        $this->artisan('federation:push')->assertSuccessful();
+
+        $this->assertNull(Setting::get('federation_withdraw_pending'));
+        $this->assertSame(2, $attempts);
     }
 
     public function test_the_preview_lists_exactly_what_would_be_shared(): void

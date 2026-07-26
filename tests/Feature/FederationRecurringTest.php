@@ -40,7 +40,8 @@ class FederationRecurringTest extends TestCase
     private function makeEvent(array $attrs = []): Event
     {
         $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        // Explicit: a freshly created schedule is undecided, which does not qualify.
+        $role = $this->createRole($owner, 'venue', ['federation_enabled' => true]);
 
         return $this->createEvent($role, array_merge([
             'name' => 'Weekly Session',

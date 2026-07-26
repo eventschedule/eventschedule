@@ -330,7 +330,7 @@
                                 AI-Powered
                             </div>
                             <h2 class="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 group-hover:text-blue-600 dark:group-hover:text-blue-300 transition-colors">AI-powered features</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Parse text and images, generate flyers and descriptions, create your brand style, translate to 11 languages, and create events via WhatsApp.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Parse text and images, generate flyers and descriptions, create your brand style, translate to 12 languages, and create events via WhatsApp.</p>
                             <div class="flex flex-wrap gap-3 justify-center lg:justify-start mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Smart import</span>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-gray-300 dark:bg-white/10 text-gray-700 dark:text-gray-300 text-sm">Style generation</span>

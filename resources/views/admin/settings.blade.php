@@ -162,12 +162,20 @@
                         @endif
                     @endif
 
-                    {{-- Unverified schedules are held back on purpose, but that looks
-                         exactly like a bug unless it is stated. --}}
-                    @if ($federationUnverified > 0)
-                        <p class="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                            {{ trans_choice('messages.federation_unverified_count', $federationUnverified, ['count' => $federationUnverified]) }}
-                        </p>
+                    {{-- Both of these hold schedules back on purpose, and both look
+                         exactly like a bug unless they are stated - especially on a
+                         fresh install, where every schedule is undecided and the
+                         preview above is therefore empty. --}}
+                    @if ($federationUnverified > 0 || $federationUndecided > 0)
+                        <div class="mt-3 space-y-1 text-xs text-gray-500 dark:text-gray-400">
+                            @if ($federationUnverified > 0)
+                                <p>{{ trans_choice('messages.federation_unverified_count', $federationUnverified, ['count' => $federationUnverified]) }}</p>
+                            @endif
+
+                            @if ($federationUndecided > 0)
+                                <p>{{ trans_choice('messages.federation_undecided_count', $federationUndecided, ['count' => $federationUndecided]) }}</p>
+                            @endif
+                        </div>
                     @endif
                 </div>
 

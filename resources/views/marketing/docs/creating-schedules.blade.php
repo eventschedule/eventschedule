@@ -232,7 +232,7 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Language</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">The language you write your schedule and events in. Choose from 11 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. This affects the interface language on your schedule page.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">The language you write your schedule and events in. Choose from 12 supported languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian. This affects the interface language on your schedule page.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Translation language</h4>
@@ -892,6 +892,10 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Link Directly to Registration</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, clicking events on the calendar or scanning QR codes in event graphics will link directly to the event's registration URL instead of showing the event detail page first. Only affects events that have a registration URL configured.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">List this schedule on the network</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Share this schedule's public events with the listings on eventschedule.com, where each listing links back to the event on your own site. It is on by default and can be switched off per schedule. The toggle only appears once an administrator has enabled federation for the whole installation, so you will not see it on eventschedule.com itself. See <a href="{{ route('marketing.docs.selfhost.federation') }}" class="text-cyan-400 hover:text-cyan-300">Federation</a>.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Default Curator Schedules</h4>

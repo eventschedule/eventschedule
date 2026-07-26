@@ -12,6 +12,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
@@ -27,6 +28,9 @@ class FederationReviewFixesTest extends TestCase
 
     private const EVENTS_ENDPOINT = 'https://eventschedule.com/api/federation/events';
 
+    /** This install's own address. Pinned rather than read off config - see the backlink test. */
+    private const INSTALL_ROOT = 'https://install.test';
+
     private function service(): FederationService
     {
         return app(FederationService::class);
@@ -39,10 +43,11 @@ class FederationReviewFixesTest extends TestCase
         Http::fake([self::EVENTS_ENDPOINT => Http::response(['accepted' => 1, 'skipped' => 0, 'status' => 'approved'])]);
     }
 
-    private function shareable(array $attrs = []): Event
+    private function shareable(array $attrs = [], array $roleAttrs = []): Event
     {
         $owner = $this->createOwner();
-        $role = $this->createRole($owner, 'venue');
+        // Explicit: a freshly created schedule is undecided, which does not qualify.
+        $role = $this->createRole($owner, 'venue', array_merge(['federation_enabled' => true], $roleAttrs));
 
         return $this->createEvent($role, array_merge([
             'name' => 'A Show',
@@ -174,6 +179,11 @@ class FederationReviewFixesTest extends TestCase
      * A federated instance can push any string it likes. setTimezone() throws on an
      * unknown zone, and the card renders on a public page, so an unvalidated value
      * would 500 /browse for every visitor rather than breaking one card.
+     *
+     * The bad row is refused per-item rather than 422-ing the batch: a whole-request
+     * rejection stamps nothing on the sender, so it would rebuild and re-send the same
+     * chunk every hour forever. What matters is that the row is never stored, and that
+     * the sender is told which id was refused so it stops retrying it.
      */
     public function test_an_invalid_timezone_is_rejected_at_the_intake(): void
     {
@@ -200,7 +210,13 @@ class FederationReviewFixesTest extends TestCase
             'CONTENT_TYPE' => 'application/json',
             'HTTP_ACCEPT' => 'application/json',
             'HTTP_X_FEDERATION_SIGNATURE' => 'sha256='.hash_hmac('sha256', $body, str_repeat('a', 40)),
-        ], $body)->assertStatus(422);
+        ], $body)
+            ->assertOk()
+            ->assertJsonPath('accepted', 0)
+            ->assertJsonPath('skipped', 1)
+            ->assertJsonPath('skipped_ids', ['bad-tz']);
+
+        $this->assertSame(0, FederatedEvent::where('external_id', 'bad-tz')->count());
     }
 
     /** Rows stored before that rule existed must not be able to break the page either. */
@@ -428,8 +444,20 @@ class FederationReviewFixesTest extends TestCase
      */
     public function test_the_backlink_is_on_this_installs_own_host(): void
     {
+        // The payload's links come from route(), which resolves against the request
+        // Laravel synthesizes from APP_URL - and CI copies .env.example, which ships
+        // APP_URL empty. So pin the root instead of reading the expected host back off
+        // config, which would be null there. app.url is pinned to match so the payload's
+        // site_url agrees with the links.
+        URL::forceRootUrl(self::INSTALL_ROOT);
+        config(['app.url' => self::INSTALL_ROOT]);
+
         $this->enableSending();
-        $this->shareable();
+        $this->shareable([], [
+            'custom_domain' => 'https://tickets.customer.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
 
         $this->service()->push();
 
@@ -437,10 +465,14 @@ class FederationReviewFixesTest extends TestCase
             if ($request->url() !== self::EVENTS_ENDPOINT) {
                 return false;
             }
-            $item = json_decode($request->body(), true)['items'][0];
-            $host = parse_url($item['url'], PHP_URL_HOST);
+            $body = json_decode($request->body(), true);
+            $item = $body['items'][0];
 
-            return $host === parse_url(config('app.url'), PHP_URL_HOST);
+            // Both links have to be on the host this install registered as its site_url,
+            // never the schedule's own domain, or the nexus refuses them forever.
+            return parse_url($item['url'], PHP_URL_HOST) === 'install.test'
+                && parse_url($item['schedule_url'], PHP_URL_HOST) === 'install.test'
+                && $body['site_url'] === self::INSTALL_ROOT;
         });
     }
 

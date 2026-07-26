@@ -28,7 +28,7 @@
     <div class="doc-callout doc-callout-info">
         <p><strong>What gets shared.</strong> Public, upcoming events, online and in person. Private,
         draft, cancelled and password-protected events are never sent, and neither are events from
-        schedules that have opted out.</p>
+        schedules that have opted out or have not opted in.</p>
     </div>
 </section>
 
@@ -71,11 +71,23 @@
     <p>
         Once the network is on for the install, each schedule gets its own toggle under
         <strong>Settings</strong> on the schedule edit page: <strong>List this schedule on the
-        network</strong>. It is on by default and can be switched off per schedule.
+        network</strong>.
+    </p>
+    <p>
+        A schedule created since federation was added to your install starts out unlisted, and its
+        owner opts in with that toggle, so a new customer is never carried onto the network by your
+        decision alone. Schedules that predate the feature keep the listing they already had and can
+        be switched off individually. The settings page counts the schedules still waiting on that
+        decision, which is the usual reason the preview is shorter than you expected.
     </p>
     <p>
         The toggle only appears after you have enabled the network for the whole install, so on a
         multi-tenant deployment your customers never see an option you have not opted into.
+    </p>
+    <p>
+        On an event with more than one schedule attached, a talent and a venue for instance, any one
+        of them opting out is enough to keep the event off the network: a listing carries every
+        participant's name and the venue's address, so nobody is published on someone else's say-so.
     </p>
 </section>
 
@@ -147,15 +159,18 @@
     </h2>
     <p>
         Only information that is already public on your event pages is sent: the event name, short
-        description, dates, venue and city, the schedule's name, a picture, and the link back to your
-        site. No attendee data, ticket data, contact details or private fields ever leave your install.
+        description, dates, the venue's name, address and coordinates, the schedule's name, a
+        picture, and the link back to your site. No attendee data, ticket data, contact details or
+        private fields ever leave your install.
     </p>
     <p>
         Pictures are copied and stored by eventschedule.com rather than loaded from your server, so
         visitors browsing the listings never make requests to your site until they click through.
     </p>
     <p>
-        Turning the setting off stops sharing immediately, and existing listings are removed on the
-        next sync.
+        Turning the setting off stops sharing immediately and takes your existing listings down with
+        it: switching off tells the network to drop everything it holds from your install, there and
+        then. If it cannot be reached at that moment, the request is retried on the next hourly run
+        until it lands.
     </p>
 </section>

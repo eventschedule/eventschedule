@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Event;
 use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Models\FederationClicksDaily;
 use App\Utils\UrlUtils;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Tests\Feature\Concerns\CreatesScheduleData;
 use Tests\TestCase;
 
 /**
@@ -16,7 +18,22 @@ use Tests\TestCase;
  */
 class FederationBrowseTest extends TestCase
 {
+    use CreatesScheduleData;
     use RefreshDatabase;
+
+    /** A local event that /browse's own discovery query will surface. */
+    private function makeLocalDiscoverableEvent(array $attrs = []): Event
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        return $this->createEvent($role, array_merge([
+            'name' => 'Local Showcase',
+            // Discovery only surfaces events whose card shows a real image.
+            'flyer_image_url' => 'flyer.jpg',
+            'creator_role_id' => $role->id,
+        ], $attrs));
+    }
 
     private function makeInstance(array $attributes = []): FederatedInstance
     {
@@ -70,9 +87,34 @@ class FederationBrowseTest extends TestCase
      */
     public function test_the_outbound_link_is_dofollow(): void
     {
-        $this->makeListing($this->makeInstance());
+        $listing = $this->makeListing($this->makeInstance());
 
-        $this->get('/browse')->assertOk()->assertDontSee('nofollow', false);
+        $html = $this->get('/browse')->assertOk()->getContent();
+
+        // Scoped to the listing's own anchor. Asserting `nofollow` is absent from the
+        // whole page would break the day any unrelated link on /browse legitimately
+        // carries it, and would pass even if this anchor vanished entirely.
+        $anchor = $this->federatedAnchor($html, $listing);
+
+        $this->assertStringContainsString('rel="noopener"', $anchor);
+        $this->assertStringNotContainsString('nofollow', $anchor);
+    }
+
+    /** The single <a> carrying this listing's click marker, so assertions can scope to it. */
+    private function federatedAnchor(string $html, FederatedEvent $listing): string
+    {
+        $marker = 'data-federated-click="'.UrlUtils::encodeId($listing->id).'"';
+        $start = strpos($html, $marker);
+
+        $this->assertNotFalse($start, 'No federated anchor was rendered for the listing.');
+
+        $open = strrpos(substr($html, 0, $start), '<a ');
+        $this->assertNotFalse($open, 'The click marker was not inside an anchor.');
+
+        $end = strpos($html, '</a>', $open);
+        $this->assertNotFalse($end, 'The federated anchor was never closed.');
+
+        return substr($html, $open, $end - $open);
     }
 
     public function test_listings_from_unapproved_instances_do_not_appear(): void
@@ -134,15 +176,43 @@ class FederationBrowseTest extends TestCase
     {
         $this->makeListing($this->makeInstance());
 
+        // A local event, so the ItemList is actually emitted. Without one the block is
+        // absent and this would assert nothing - which is how the original version of
+        // this test passed unconditionally.
+        $this->makeLocalDiscoverableEvent();
+
         $html = $this->get('/browse')->assertOk()->getContent();
 
-        $start = strpos($html, 'application/ld+json');
-        if ($start !== false) {
-            $jsonBlock = substr($html, $start, 4000);
-            $this->assertStringNotContainsString('operator.test', $jsonBlock);
+        $json = $this->itemListJson($html);
+
+        $this->assertStringContainsString('ItemList', $json);
+        $this->assertStringNotContainsString('operator.test', $json);
+    }
+
+    /**
+     * The exact contents of the ItemList ld+json element.
+     *
+     * /browse carries more than one ld+json block (the layout emits its own), so this
+     * picks the ItemList specifically. It also reads to the real closing tag instead of
+     * windowing a fixed number of bytes, and fails loudly when the block is missing
+     * rather than skipping the assertion - which is how the original version of this
+     * test passed unconditionally.
+     */
+    private function itemListJson(string $html): string
+    {
+        preg_match_all(
+            '#<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>#s',
+            $html,
+            $matches
+        );
+
+        foreach ($matches[1] as $block) {
+            if (str_contains($block, 'ItemList')) {
+                return $block;
+            }
         }
 
-        $this->assertTrue(true);
+        $this->fail('The /browse ItemList structured data was not rendered.');
     }
 
     public function test_a_click_is_counted_against_the_instance(): void

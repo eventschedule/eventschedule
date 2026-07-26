@@ -767,7 +767,7 @@
                             </span>
                             <h3 class="text-xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400">AI-Powered</h3>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400">Parse text and images, generate flyers and descriptions, create your brand style, and translate to 11 languages with AI.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Parse text and images, generate flyers and descriptions, create your brand style, and translate to 12 languages with AI.</p>
 
                         <!-- Flyer to event mockup -->
                         <div class="mt-5 grid grid-cols-[1fr_auto_1.2fr] items-center gap-3" aria-hidden="true">

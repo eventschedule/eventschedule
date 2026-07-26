@@ -463,6 +463,8 @@
                                 <li><a href="{{ route('marketing.docs.tickets') }}" class="text-cyan-400 hover:text-cyan-300">Selling Tickets</a> - set up ticketing, payment, and ticket types</li>
                                 <li><a href="{{ route('marketing.docs.tickets') }}#check-in" class="text-cyan-400 hover:text-cyan-300">Check-in at the Door</a> - scanning QR codes and the check-in dashboard</li>
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - add the events your pass covers</li>
+                                <li><a href="{{ route('marketing.docs.gift_cards') }}" class="text-cyan-400 hover:text-cyan-300">Gift Cards</a> - sell a prepaid balance spendable on any event</li>
+                                <li><a href="{{ route('marketing.docs.appointments') }}" class="text-cyan-400 hover:text-cyan-300">Appointments</a> - sell bookable time slots instead of event admission</li>
                             </ul>
                         </section>
 

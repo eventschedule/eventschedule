@@ -427,7 +427,11 @@ class Role extends Model implements MustVerifyEmail
             // customer opt into a network their operator never joined.
             if ($model->isDirty('federation_enabled')
                 && (config('app.is_nexus') || ! Setting::get('federation_enabled'))) {
-                $model->federation_enabled = $model->getOriginal('federation_enabled') ?? true;
+                // Falls back to null, not to a decision. getOriginal() only returns
+                // null for a schedule being created, and a schedule created while the
+                // install is not on a network has not opted into anything - writing
+                // true here would quietly enrol it the day the operator joins one.
+                $model->federation_enabled = $model->getOriginal('federation_enabled');
             }
         });
 

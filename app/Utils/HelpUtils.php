@@ -155,7 +155,7 @@ class HelpUtils
             'anchors' => [
                 'tab-web' => '/docs/analytics',
                 'tab-revenue' => '/docs/analytics#revenue',
-                'tab-checkins' => '/docs/analytics#check-ins',
+                'tab-checkins' => '/docs/analytics#checkins',
             ],
         ],
         'boost*' => '/docs/boost',

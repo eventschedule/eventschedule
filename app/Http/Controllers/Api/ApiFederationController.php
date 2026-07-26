@@ -8,6 +8,7 @@ use App\Models\FederatedEvent;
 use App\Models\FederatedInstance;
 use App\Services\FederationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -55,7 +56,7 @@ class ApiFederationController extends Controller
         abort_unless(config('app.is_nexus'), 404);
 
         try {
-            $validated = $request->validate([
+            $validated = $this->validateSignedBody($request, [
                 'instance_id' => ['required', 'uuid'],
                 'site_url' => ['required', 'url', 'max:255'],
                 'name' => ['nullable', 'string', 'max:191'],
@@ -81,6 +82,14 @@ class ApiFederationController extends Controller
                 return response()->json(['error' => 'Signature verification failed'], 403);
             }
 
+            // A host change is a different site, not a new address for the same one:
+            // isAcceptable() authorises backlinks against whatever site_url currently
+            // says, so silently accepting this would let an instance approved as
+            // goodsite.example start publishing links to spam.example. The flagged_at
+            // tripwire below cannot catch it - that compares a *push* against the
+            // record, and by then the record itself has already been rewritten.
+            $movedHost = $instance->host() !== null && $instance->host() !== $host;
+
             $instance->fill([
                 'site_url' => $validated['site_url'],
                 'name' => $validated['name'] ?? $instance->name,
@@ -89,6 +98,19 @@ class ApiFederationController extends Controller
                 'app_version' => $validated['app_version'] ?? $instance->app_version,
             ]);
             $instance->last_seen_at = now();
+
+            if ($movedHost) {
+                $instance->flagged_at = now();
+
+                // Back to the review queue, but only from approved: re-pending a
+                // suspended instance would hand it an escape from moderation.
+                if ($instance->status === FederatedInstance::STATUS_APPROVED) {
+                    $instance->status = FederatedInstance::STATUS_PENDING;
+                    $instance->approved_at = null;
+                    $instance->approved_by = null;
+                }
+            }
+
             $instance->save();
 
             return response()->json(['status' => $instance->status, 'registered' => true]);
@@ -132,35 +154,14 @@ class ApiFederationController extends Controller
             return $instance;
         }
 
+        // Only the envelope is all-or-nothing. Validating the items together would make
+        // the batch only as good as its worst row: one malformed field 422s everything,
+        // the sender stamps nothing, and it rebuilds the identical chunk next run - a
+        // permanent silent stall. Per-item validation routes the bad row to skipped_ids
+        // instead, which already means "refused, do not retry".
         try {
-            $validated = $request->validate([
+            $envelope = $this->validateSignedBody($request, [
                 'items' => ['required', 'array', 'min:1', 'max:'.self::MAX_ITEMS_PER_REQUEST],
-                'items.*.external_id' => ['required', 'string', 'max:64'],
-                'items.*.url' => ['required', 'url', 'max:1024'],
-                'items.*.name' => ['required', 'string', 'max:255'],
-                'items.*.short_description' => ['nullable', 'string', 'max:2000'],
-                'items.*.language' => ['nullable', 'string', 'max:10'],
-                'items.*.starts_at' => ['nullable', 'date'],
-                'items.*.ends_at' => ['nullable', 'date'],
-                // Must be a real IANA zone. The public card formats occurrences with
-                // setTimezone(), which throws on anything else - so an unvalidated value
-                // here would let one instance take the whole browse page down.
-                'items.*.timezone' => ['nullable', 'timezone'],
-                'items.*.occurrences' => ['nullable', 'array', 'max:50'],
-                'items.*.occurrences.*' => ['date'],
-                'items.*.occurrences_hash' => ['nullable', 'string', 'max:64'],
-                'items.*.schedule_name' => ['nullable', 'string', 'max:255'],
-                'items.*.schedule_url' => ['nullable', 'url', 'max:1024'],
-                'items.*.image_url' => ['nullable', 'url', 'max:1024'],
-                'items.*.event_url' => ['nullable', 'url', 'max:1024'],
-                'items.*.venue_name' => ['nullable', 'string', 'max:255'],
-                'items.*.address' => ['nullable', 'string', 'max:255'],
-                'items.*.city' => ['nullable', 'string', 'max:255'],
-                'items.*.state' => ['nullable', 'string', 'max:255'],
-                'items.*.postal_code' => ['nullable', 'string', 'max:32'],
-                'items.*.country_code' => ['nullable', 'string', 'max:2'],
-                'items.*.geo_lat' => ['nullable', 'numeric', 'between:-90,90'],
-                'items.*.geo_lon' => ['nullable', 'numeric', 'between:-180,180'],
             ]);
         } catch (ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
@@ -173,7 +174,28 @@ class ApiFederationController extends Controller
         // "refused" - conflating them makes it retry a rejected event every hour forever.
         $skippedIds = [];
 
-        foreach ($validated['items'] as $item) {
+        foreach ($envelope['items'] as $item) {
+            if (! is_array($item)) {
+                // No external_id to name it by, so the sender cannot be told which row
+                // this was. Counted, not reported.
+                $skipped++;
+
+                continue;
+            }
+
+            $validator = Validator::make($item, self::itemRules());
+
+            if ($validator->fails()) {
+                $skipped++;
+                if (is_string($item['external_id'] ?? null) && $item['external_id'] !== '') {
+                    $skippedIds[] = $item['external_id'];
+                }
+
+                continue;
+            }
+
+            $item = $validator->validated();
+
             if (! $this->isAcceptable($item, $instance)) {
                 $skipped++;
                 $skippedIds[] = $item['external_id'];
@@ -242,7 +264,7 @@ class ApiFederationController extends Controller
         }
 
         try {
-            $validated = $request->validate([
+            $validated = $this->validateSignedBody($request, [
                 'external_ids' => ['present', 'array', 'max:'.self::MAX_MANIFEST_IDS],
                 'external_ids.*' => ['string', 'max:64'],
                 // One token for the whole pass, repeated on every chunk. This is what
@@ -270,15 +292,23 @@ class ApiFederationController extends Controller
 
         // Sweep: anything still carrying an older token was not in ANY chunk of this
         // pass, so the source no longer considers it federatable.
-        if ($request->boolean('is_final')) {
+        //
+        // The flag comes from validateSignedBody(), so it can only have come from the
+        // bytes the HMAC covers. Neither $request->boolean() nor a plain
+        // $request->validate() would do: both read the merged input bag, so ?is_final=1
+        // on the URL would turn a replayed mid-pass chunk into a full-catalogue sweep.
+        if (filter_var($validated['is_final'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
             // Blocked rows are tombstones: deleting them would let the source
             // resurrect a blocked listing simply by re-publishing it.
-            $removed = FederatedEvent::where('federated_instance_id', $instance->id)
-                ->whereNull('blocked_at')
-                ->where(function ($q) use ($runToken) {
-                    $q->whereNull('manifest_token')->orWhere('manifest_token', '!=', $runToken);
-                })
-                ->delete();
+            // purge(), not delete(): a mass delete fires no model events, so the stored
+            // images would outlive their rows on every hourly reconcile.
+            $removed = FederatedEvent::purge(
+                FederatedEvent::where('federated_instance_id', $instance->id)
+                    ->whereNull('blocked_at')
+                    ->where(function ($q) use ($runToken) {
+                        $q->whereNull('manifest_token')->orWhere('manifest_token', '!=', $runToken);
+                    })
+            );
         }
 
         // Which of the ids the sender believes are synced do we actually not have?
@@ -301,7 +331,9 @@ class ApiFederationController extends Controller
      */
     protected function authenticateInstance(Request $request)
     {
-        $instanceId = strtolower((string) $request->input('instance_id'));
+        // json(), not input(): identity and the site_url tripwire below must be decided
+        // on the signed bytes, or a replayed body could be re-aimed from the URL.
+        $instanceId = strtolower((string) $request->json('instance_id'));
 
         if (! Str::isUuid($instanceId)) {
             return response()->json(['error' => 'Unknown instance'], 403);
@@ -313,7 +345,7 @@ class ApiFederationController extends Controller
             return response()->json(['error' => 'Signature verification failed'], 403);
         }
 
-        $siteUrl = $request->input('site_url');
+        $siteUrl = $request->json('site_url');
         if ($siteUrl && rtrim((string) $siteUrl, '/') !== rtrim((string) $instance->site_url, '/')) {
             // Two hosts sharing one identity, most likely a restored backup. Accept
             // the data but surface it: silently trusting the new host would let a
@@ -343,6 +375,61 @@ class ApiFederationController extends Controller
         $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $secret);
 
         return hash_equals($expected, $header);
+    }
+
+    /**
+     * Validate against the JSON body alone - the exact bytes the HMAC signs.
+     *
+     * $request->validate() runs over the merged input bag, which folds in the query
+     * string. On a signed endpoint that is a hole: anything the sender omitted from the
+     * body can be supplied on the URL, unsigned, and still arrive in $validated. That is
+     * how ?is_final=1 could drive reconcile's full-catalogue sweep.
+     *
+     * @throws ValidationException
+     */
+    protected function validateSignedBody(Request $request, array $rules): array
+    {
+        return Validator::make($request->json()->all(), $rules)->validate();
+    }
+
+    /**
+     * Validation for a single incoming listing.
+     *
+     * Extracted so each item can be judged on its own - see the note in store() about
+     * why a shared `items.*` ruleset is the wrong shape here.
+     */
+    public static function itemRules(): array
+    {
+        return [
+            'external_id' => ['required', 'string', 'max:64'],
+            // Scheme allowlist, not a bare `url`: these land in an href on the public
+            // browse page, and the default rule admits ftp/ws/view-source.
+            'url' => ['required', 'url:http,https', 'max:1024'],
+            'name' => ['required', 'string', 'max:255'],
+            'short_description' => ['nullable', 'string', 'max:2000'],
+            'language' => ['nullable', 'string', 'max:10'],
+            'starts_at' => ['nullable', 'date'],
+            'ends_at' => ['nullable', 'date'],
+            // Must be a real IANA zone. The public card formats occurrences with
+            // setTimezone(), which throws on anything else - so an unvalidated value
+            // here would let one instance take the whole browse page down.
+            'timezone' => ['nullable', 'timezone'],
+            'occurrences' => ['nullable', 'array', 'max:50'],
+            'occurrences.*' => ['date'],
+            'occurrences_hash' => ['nullable', 'string', 'max:64'],
+            'schedule_name' => ['nullable', 'string', 'max:255'],
+            'schedule_url' => ['nullable', 'url:http,https', 'max:1024'],
+            'image_url' => ['nullable', 'url:http,https', 'max:1024'],
+            'event_url' => ['nullable', 'url:http,https', 'max:1024'],
+            'venue_name' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:32'],
+            'country_code' => ['nullable', 'string', 'max:2'],
+            'geo_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'geo_lon' => ['nullable', 'numeric', 'between:-180,180'],
+        ];
     }
 
     /**

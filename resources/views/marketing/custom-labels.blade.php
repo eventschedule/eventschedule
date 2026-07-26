@@ -56,7 +56,7 @@
             "Multi-language support",
             "Per-schedule configuration",
             "Predefined label alternatives",
-            "Automatic translation to 11 languages",
+            "Automatic translation to 12 languages",
             "Pro and Enterprise plans"
         ],
         "url": "{{ url()->current() }}",
@@ -270,7 +270,7 @@
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Auto-translation</h3>
                         <p class="mb-6 text-gray-500 dark:text-gray-400">Selected labels are automatically translated into all supported languages. No manual translation work required.</p>
                         <div class="mt-auto space-y-2 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-2" style="--i: 0;"><svg class="h-3.5 w-3.5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span class="text-[10px] text-gray-600 dark:text-gray-300">11 languages supported</span></div>
+                            <div class="es-ai-field flex items-center gap-2" style="--i: 0;"><svg class="h-3.5 w-3.5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span class="text-[10px] text-gray-600 dark:text-gray-300">12 languages supported</span></div>
                             <div class="es-ai-field flex items-center gap-2" style="--i: 1;"><svg class="h-3.5 w-3.5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg><span class="text-[10px] text-gray-600 dark:text-gray-300">Zero configuration needed</span></div>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>

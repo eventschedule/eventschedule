@@ -2851,6 +2851,8 @@ class AdminController extends Controller
             'federationPreview' => $federationAvailable ? $federation->previewEvents(12) : collect(),
             'federationPreviewTotal' => $federationAvailable ? $federation->federatableQuery()->count() : 0,
             'federationUnverified' => $federationAvailable ? $federation->unverifiedScheduleCount() : 0,
+            // The other reason the preview is shorter than the operator expects.
+            'federationUndecided' => $federationAvailable ? $federation->undecidedScheduleCount() : 0,
         ]);
     }
 
@@ -2907,6 +2909,19 @@ class AdminController extends Controller
             if ($nowEnabled && ! $wasEnabled) {
                 try {
                     app(\App\Services\FederationService::class)->register();
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+
+            // And take everything down the moment they opt out. Turning the switch off
+            // stops the hourly run, which is also what would have told the nexus to
+            // drop the listings - so without this they stay published until each event
+            // expires on its own. The setting is already cleared above whatever
+            // happens here: the operator's decision does not wait on the network.
+            if ($wasEnabled && ! $nowEnabled) {
+                try {
+                    app(\App\Services\FederationService::class)->withdraw();
                 } catch (\Throwable $e) {
                     report($e);
                 }

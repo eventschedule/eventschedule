@@ -4948,9 +4948,20 @@ class MarketingController extends Controller
         // interleaved: every discovery query here ends in a single Eloquent builder
         // with its own ordering and limit, so mixing a second corpus in would need a
         // UNION or a merge-and-re-sort in PHP.
+        // Normalise to a scalar BEFORE the query. filled() is true for an array too, so
+        // ?country[]=US used to reach strtoupper(array) - a TypeError, i.e. a 500 on this
+        // public page. Casting instead of rejecting would only trade that for an
+        // "Array to string conversion" warning and a filter on the string "ARRAY".
+        $federatedCountry = is_scalar($request->input('country'))
+            ? strtoupper(trim((string) $request->input('country')))
+            : '';
+        $federatedLanguage = is_scalar($request->input('lang'))
+            ? trim((string) $request->input('lang'))
+            : '';
+
         $federatedQuery = \App\Models\FederatedEvent::listable()
-            ->when($request->filled('country'), fn ($q) => $q->where('country_code', strtoupper($request->input('country'))))
-            ->when($request->filled('lang'), fn ($q) => $q->where('language', $request->input('lang')))
+            ->when($federatedCountry !== '', fn ($q) => $q->where('country_code', $federatedCountry))
+            ->when($federatedLanguage !== '', fn ($q) => $q->where('language', $federatedLanguage))
             ->orderBy('next_occurrence_at');
 
         $federatedLimit = min(max((int) $request->input('federated_limit', 12), 12), 96);
@@ -4965,8 +4976,8 @@ class MarketingController extends Controller
             'federatedLimit' => $federatedLimit,
             'federatedCountries' => $this->federatedFilterValues('country_code'),
             'federatedLanguages' => $this->federatedFilterValues('language'),
-            'federatedCountry' => strtoupper((string) $request->input('country')),
-            'federatedLanguage' => (string) $request->input('lang'),
+            'federatedCountry' => $federatedCountry,
+            'federatedLanguage' => $federatedLanguage,
         ]);
     }
 
@@ -5210,6 +5221,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Custom Domain', 'description' => 'Set up a custom domain for your schedule using Direct (CNAME) or Redirect (Cloudflare) mode.', 'url' => $r['creating_schedules'].'#custom-domain', 'category' => 'User Guide', 'keywords' => 'custom domain cname dns branded url'],
             ['page' => 'Creating Schedules', 'section' => 'Notifications', 'description' => 'Configure email notification preferences for schedule activity.', 'url' => $r['creating_schedules'].'#settings-notifications', 'category' => 'User Guide', 'keywords' => 'notifications email alerts'],
             ['page' => 'Creating Schedules', 'section' => 'Advanced Settings', 'description' => 'Default new-event visibility, hide videos, default category, first day of week, and other advanced options.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'advanced options visibility default public draft hide videos default category first day week'],
+            ['page' => 'Creating Schedules', 'section' => 'List This Schedule on the Network', 'description' => 'Opt a schedule in or out of federation, which shares its public events with the eventschedule.com listings.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'federation network list schedule share events eventschedule.com listings opt out discovery'],
             ['page' => 'Creating Schedules', 'section' => 'Engagement', 'description' => 'Configure visitor interaction features for your schedule.', 'url' => $r['creating_schedules'].'#engagement', 'category' => 'User Guide', 'keywords' => 'engagement interaction community'],
             ['page' => 'Creating Schedules', 'section' => 'Requests', 'description' => 'Configure public event request submissions.', 'url' => $r['creating_schedules'].'#engagement-requests', 'category' => 'User Guide', 'keywords' => 'submissions public requests'],
             ['page' => 'Creating Schedules', 'section' => 'Fan Content', 'description' => 'Allow visitors to submit photos and videos to events.', 'url' => $r['creating_schedules'].'#engagement-fan-content', 'category' => 'User Guide', 'keywords' => 'fan content photos videos submissions'],
@@ -5246,7 +5258,8 @@ class MarketingController extends Controller
             ['page' => 'Managing Schedules', 'section' => 'Templates', 'description' => 'Save an event as a reusable template (preset) and create new events from it in seconds (Pro).', 'url' => $r['managing_schedules'].'#templates', 'category' => 'User Guide', 'keywords' => 'template preset reusable recurring duplicate clone save as template'],
             ['page' => 'Managing Schedules', 'section' => 'Videos', 'description' => 'Assign YouTube videos for curator schedules.', 'url' => $r['managing_schedules'].'#videos', 'category' => 'User Guide', 'keywords' => 'youtube video curator'],
             ['page' => 'Managing Schedules', 'section' => 'Availability', 'description' => 'Set availability dates for talent schedules.', 'url' => $r['managing_schedules'].'#availability', 'category' => 'User Guide', 'keywords' => 'available dates talent booking'],
-            ['page' => 'Managing Schedules', 'section' => 'Requests', 'description' => 'Manage public event request submissions.', 'url' => $r['managing_schedules'].'#requests', 'category' => 'User Guide', 'keywords' => 'submissions approve reject'],
+            ['page' => 'Managing Schedules', 'section' => 'Appointments', 'description' => 'The Appointments tab: set up bookable types, see your bookings, and share your booking page (Pro).', 'url' => $r['managing_schedules'].'#appointments', 'category' => 'User Guide', 'keywords' => 'appointments tab bookings booking page tab pro calendly'],
+            ['page' => 'Managing Schedules', 'section' => 'Requests', 'description' => 'Manage public event request submissions and appointment bookings that need approval.', 'url' => $r['managing_schedules'].'#requests', 'category' => 'User Guide', 'keywords' => 'submissions approve reject appointment booking approval pending'],
             ['page' => 'Managing Schedules', 'section' => 'Followers', 'description' => 'Manage followers and follow links.', 'url' => $r['managing_schedules'].'#followers', 'category' => 'User Guide', 'keywords' => 'subscribers audience follow'],
             ['page' => 'Managing Schedules', 'section' => 'Team', 'description' => 'Manage team members and permissions.', 'url' => $r['managing_schedules'].'#team', 'category' => 'User Guide', 'keywords' => 'members permissions collaborate'],
             ['page' => 'Managing Schedules', 'section' => 'Plan', 'description' => 'View and manage your subscription plan.', 'url' => $r['managing_schedules'].'#plan', 'category' => 'User Guide', 'keywords' => 'subscription billing upgrade'],
@@ -5344,10 +5357,13 @@ class MarketingController extends Controller
             ['page' => 'Appointments', 'section' => 'Appointment Types', 'description' => 'Create appointment types with a name, duration, and free or paid pricing; toggle them active or inactive.', 'url' => $r['appointments'].'#appointment-types', 'category' => 'User Guide', 'keywords' => 'appointment type duration create toggle active inactive intro call session'],
             ['page' => 'Appointments', 'section' => 'Weekly Hours', 'description' => 'Set the hours you take bookings for each day of the week, in your schedule timezone.', 'url' => $r['appointments'].'#weekly-hours', 'category' => 'User Guide', 'keywords' => 'weekly hours availability days ranges timezone open'],
             ['page' => 'Appointments', 'section' => 'Buffers and Notice', 'description' => 'Add buffers between appointments, require minimum notice, and limit how far ahead guests can book.', 'url' => $r['appointments'].'#buffers-and-notice', 'category' => 'User Guide', 'keywords' => 'buffer minimum notice booking window lead time padding'],
-            ['page' => 'Appointments', 'section' => 'Payments', 'description' => 'Take payment for appointments with Stripe, a payment link, or cash; free bookings confirm instantly.', 'url' => $r['appointments'].'#payments', 'category' => 'User Guide', 'keywords' => 'paid appointment stripe payment link cash price charge'],
+            ['page' => 'Appointments', 'section' => 'Where You Meet', 'description' => 'Set each appointment type as in person, online, or by phone, with the address, meeting link, or number.', 'url' => $r['appointments'].'#location', 'category' => 'User Guide', 'keywords' => 'location in person online phone address meeting link video call zoom number where'],
+            ['page' => 'Appointments', 'section' => 'What You Ask Guests', 'description' => 'Collect a name and email, optionally ask for or require a phone number, and let guests leave notes.', 'url' => $r['appointments'].'#guest-details', 'category' => 'User Guide', 'keywords' => 'guest details name email phone number required notes questions'],
+            ['page' => 'Appointments', 'section' => 'Payments', 'description' => 'Take payment for appointments with Stripe, a payment link, or cash; card bookings are held until paid and refunds are manual.', 'url' => $r['appointments'].'#payments', 'category' => 'User Guide', 'keywords' => 'paid appointment stripe payment link cash price charge payment pending expired unpaid hold refund'],
             ['page' => 'Appointments', 'section' => 'Approval', 'description' => 'Require approval so new bookings arrive as requests you accept or decline.', 'url' => $r['appointments'].'#approval', 'category' => 'User Guide', 'keywords' => 'approval request accept decline confirm pending'],
             ['page' => 'Appointments', 'section' => 'Managing Bookings', 'description' => 'View upcoming, pending, past, and cancelled bookings, and cancel a booking when needed.', 'url' => $r['appointments'].'#bookings', 'category' => 'User Guide', 'keywords' => 'bookings manage cancel upcoming pending past list'],
-            ['page' => 'Appointments', 'section' => 'The Guest Booking Page', 'description' => 'Guests pick an open time in their own timezone and get a confirmation with a calendar invite and reminders.', 'url' => $r['appointments'].'#guest-booking', 'category' => 'User Guide', 'keywords' => 'guest booking page timezone confirmation calendar invite reminder manage link'],
+            ['page' => 'Appointments', 'section' => 'The Booking Page', 'description' => 'Share your /book link or the Book a Time button; guests pick an open time in their own timezone and get a confirmation, a calendar invite, and a reminder.', 'url' => $r['appointments'].'#guest-booking', 'category' => 'User Guide', 'keywords' => 'guest booking page book link share url book a time button timezone confirmation calendar invite reminder manage link cancel'],
+            ['page' => 'Appointments', 'section' => 'Good to Know', 'description' => 'Email settings are required for confirmations, reminders skip unconfirmed bookings, and bookings stay off your public schedule.', 'url' => $r['appointments'].'#good-to-know', 'category' => 'User Guide', 'keywords' => 'email settings required reminder private booking not on schedule deactivate availability difference pro'],
             ['page' => 'Gift Cards', 'section' => 'Overview', 'description' => 'Sell gift cards that customers buy for someone else and redeem toward tickets for any event on your schedule.', 'url' => $r['gift_cards'].'#overview', 'category' => 'User Guide', 'keywords' => 'gift card voucher present buy for someone denomination balance redeem credit'],
             ['page' => 'Gift Cards', 'section' => 'Enabling Gift Cards', 'description' => 'Turn on gift cards, set the denominations, currency, validity period, and how buyers pay.', 'url' => $r['gift_cards'].'#setup', 'category' => 'User Guide', 'keywords' => 'enable setup denominations amounts currency validity expiry payment method pro'],
             ['page' => 'Gift Cards', 'section' => 'Buying a Gift Card', 'description' => 'Buyers pick an amount, enter the recipient details and a message, and pay; the recipient is emailed the code.', 'url' => $r['gift_cards'].'#buying', 'category' => 'User Guide', 'keywords' => 'buy purchase recipient message send to self email delivery receipt'],
@@ -5356,6 +5372,7 @@ class MarketingController extends Controller
 
             // Event Graphics
             ['page' => 'Event Graphics', 'section' => 'Overview', 'description' => 'Generate shareable images for social media.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'graphics images social media flyer'],
+            ['page' => 'Event Graphics', 'section' => 'Image Size', 'description' => 'Fit the graphic to a fixed social format: Square, Portrait, Story, or Landscape, or leave it on Auto.', 'url' => $r['event_graphics'].'#overview', 'category' => 'User Guide', 'keywords' => 'image size square portrait story landscape auto 1080 1200 630 social format instagram facebook dimensions aspect ratio'],
             ['page' => 'Event Graphics', 'section' => 'Header & Footer Text', 'description' => 'Add a headline above and a sign-off below the events.', 'url' => $r['event_graphics'].'#header-footer-text', 'category' => 'User Guide', 'keywords' => 'header footer text headline tagline branding signoff'],
             ['page' => 'Event Graphics', 'section' => 'Text Template', 'description' => 'Customize text formatting for event graphics.', 'url' => $r['event_graphics'].'#text-template', 'category' => 'User Guide', 'keywords' => 'template text format'],
             ['page' => 'Event Graphics', 'section' => 'Quick Reference', 'description' => 'Essential template variables at a glance.', 'url' => $r['event_graphics'].'#quick-reference', 'category' => 'User Guide', 'keywords' => 'variables reference cheatsheet'],
@@ -5544,13 +5561,13 @@ class MarketingController extends Controller
             ['page' => 'Twilio Integration', 'section' => 'Testing', 'description' => 'Test SMS and WhatsApp functionality.', 'url' => $r['saas_twilio'].'#testing', 'category' => 'SaaS', 'keywords' => 'test sms whatsapp verify'],
             ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['saas_federation'].'#overview', 'category' => 'SaaS', 'keywords' => 'federation network listings discovery traffic backlink'],
             ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['saas_federation'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable turn on register approve settings'],
-            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule can opt out of the network.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt out per schedule toggle'],
+            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in or out for itself; new schedules start out unlisted.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto'],
             ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language'],
             ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['saas_federation'].'#sync', 'category' => 'SaaS', 'keywords' => 'sync hourly cron federation:push verified'],
             ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Only public event information leaves your install.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets'],
             ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['selfhost_federation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'federation network listings discovery traffic backlink'],
             ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['selfhost_federation'].'#enable', 'category' => 'Selfhost', 'keywords' => 'enable turn on register approve settings'],
-            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule can opt out of the network.', 'url' => $r['selfhost_federation'].'#per-schedule', 'category' => 'Selfhost', 'keywords' => 'opt out per schedule toggle'],
+            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in or out for itself; new schedules start out unlisted.', 'url' => $r['selfhost_federation'].'#per-schedule', 'category' => 'Selfhost', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto'],
             ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['selfhost_federation'].'#listings', 'category' => 'Selfhost', 'keywords' => 'listing card link backlink filter country language'],
             ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['selfhost_federation'].'#sync', 'category' => 'Selfhost', 'keywords' => 'sync hourly cron federation:push verified'],
             ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Only public event information leaves your install.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets'],

@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule AI Features",
-        "description": "AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 11 languages, create events via WhatsApp, and automate with a full API for AI agents.",
+        "description": "AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 12 languages, create events via WhatsApp, and automate with a full API for AI agents.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -68,7 +68,7 @@
                 "name": "What languages are supported?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The AI can parse events in any language and extract details correctly. The translation feature supports 11 languages including English, Spanish, French, German, Italian, Portuguese, Dutch, Hebrew, Arabic, Estonian, and Russian."
+                    "text": "The AI can parse events in any language and extract details correctly. The translation feature supports 12 languages including English, Spanish, French, German, Italian, Portuguese, Dutch, Hebrew, Arabic, Estonian, Romanian, and Russian."
                 }
             },
             {
@@ -90,7 +90,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "AI Event Management Software",
         "operatingSystem": "Web",
-        "description": "AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 11 languages, create events via WhatsApp, and automate with a full API for AI agents.",
+        "description": "AI-powered event management. Generate flyers, write descriptions, create brand style, parse text and images, scan agendas, translate to 12 languages, create events via WhatsApp, and automate with a full API for AI agents.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -530,7 +530,7 @@
                             Translation
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Instant translation</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Translate your entire schedule automatically. Choose which language to translate into, and visitors can switch between your language and the translation. Support for 11 languages including English, Spanish, French, German, and more.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Translate your entire schedule automatically. Choose which language to translate into, and visitors can switch between your language and the translation. Support for 12 languages including English, Spanish, French, German, and more.</p>
                         <div class="mt-auto flex flex-wrap justify-center gap-2" aria-hidden="true">
                             @foreach (['EN', 'ES', 'FR', 'DE', 'IT', 'PT', 'NL', 'HE', 'AR'] as $li => $lang)
                                 <span class="es-ai-field inline-flex items-center rounded-lg bg-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900 dark:bg-white/10 dark:text-white" style="--i: {{ $li }};">{{ $lang }}</span>
@@ -832,7 +832,7 @@
                     ['How accurate is the AI?', 'The AI is highly accurate for standard event formats. You always get to review and edit the results before saving. You can also add custom prompts to guide the AI for your specific format.'],
                     ['What can AI Style Generation create?', 'AI Style Generation creates a complete visual identity for your schedule including profile image, header image, background image, accent color, and font. You can add custom style instructions to guide the look and regenerate individual elements.'],
                     ['How does WhatsApp event creation work?', 'Send a text message or photo of a flyer to your schedule\'s WhatsApp number. AI parses the details, auto-generates a flyer, and adds the event to your schedule automatically.'],
-                    ['What languages are supported?', 'The AI can parse events in any language and extract details correctly. The translation feature supports 11 languages including English, Spanish, French, German, Italian, Portuguese, Dutch, Hebrew, Arabic, Estonian, and Russian.'],
+                    ['What languages are supported?', 'The AI can parse events in any language and extract details correctly. The translation feature supports 12 languages including English, Spanish, French, German, Italian, Portuguese, Dutch, Hebrew, Arabic, Estonian, Romanian, and Russian.'],
                     ['Can AI agents use Event Schedule programmatically?', 'Yes. Event Schedule provides a full REST API with OpenAPI 3.0 specification, llms.txt for AI discovery, and agents.json for defining agent workflows. AI agents can create, update, and manage events programmatically with smart creation features and webhook notifications.'],
                 ] as [$q, $a])
                     <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">

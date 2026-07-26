@@ -38,7 +38,12 @@ class FederationSettingsTest extends TestCase
     public function test_the_settings_page_shows_the_network_card_and_a_preview(): void
     {
         $admin = $this->adminActing();
-        $role = $this->createRole($admin, 'venue');
+
+        // The system switch has to be on before a schedule can opt in at all - the
+        // model refuses the field otherwise - and the preview lists only what actually
+        // opted in, never an undecided schedule.
+        Setting::set('federation_enabled', '1');
+        $role = $this->createRole($admin, 'venue', ['federation_enabled' => true]);
         $this->createEvent($role, ['name' => 'Preview Me', 'flyer_image_url' => 'f.jpg', 'creator_role_id' => $role->id]);
 
         $this->get(route('admin.settings'))
@@ -148,6 +153,58 @@ class FederationSettingsTest extends TestCase
         ])->assertRedirect();
 
         $this->assertNull(Setting::get('federation_enabled'));
+    }
+
+    /**
+     * A schedule created after the feature landed has not answered the question, and
+     * "not answered" is a third state - not a yes, and importantly not a no either.
+     */
+    public function test_a_new_schedule_starts_undecided_and_is_not_shared(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+
+        $this->assertNull($role->fresh()->federation_enabled);
+        $this->assertSame(1, app(\App\Services\FederationService::class)->undecidedScheduleCount());
+    }
+
+    /**
+     * The reason the column is nullable rather than a boolean defaulting to false.
+     *
+     * federatableQuery() lets any participating schedule veto an event, because a
+     * listing carries every participant's name and the venue's address. If undecided
+     * read as opted out, every unclaimed placeholder and every venue invented by
+     * calendar sync would veto events that publish perfectly well.
+     */
+    public function test_an_undecided_schedule_does_not_veto_a_co_listed_event(): void
+    {
+        Setting::set('federation_enabled', '1');
+
+        $owner = $this->createOwner();
+        $venue = $this->createRole($owner, 'venue');
+        $venue->federation_enabled = true;
+        $venue->save();
+
+        $event = $this->createEvent($venue, [
+            'name' => 'Co-listed',
+            'flyer_image_url' => 'flyer.jpg',
+            'creator_role_id' => $venue->id,
+        ]);
+
+        // A second schedule on the same event that nobody has decided about.
+        $talent = $this->createRole($owner, 'talent');
+        $this->assertNull($talent->fresh()->federation_enabled);
+        $event->roles()->attach($talent->id, ['is_accepted' => true]);
+
+        $query = app(\App\Services\FederationService::class)->federatableQuery();
+        $this->assertTrue($query->where('events.id', $event->id)->exists());
+
+        // An explicit opt-out still vetoes it, unchanged.
+        $talent->federation_enabled = false;
+        $talent->save();
+
+        $query = app(\App\Services\FederationService::class)->federatableQuery();
+        $this->assertFalse($query->where('events.id', $event->id)->exists());
     }
 
     public function test_the_network_card_is_absent_on_the_nexus(): void

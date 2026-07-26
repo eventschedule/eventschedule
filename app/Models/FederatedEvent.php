@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Utils\ImageUtils;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * A listing received from a federated instance. Read-only display data: it is never
@@ -57,9 +58,59 @@ class FederatedEvent extends Model
         'geo_lon' => 'float',
     ];
 
+    protected static function booted(): void
+    {
+        // Covers $model->delete() only. Mass deletes bypass model events entirely, and
+        // deleting an instance drops its rows through the FK cascade without PHP seeing
+        // them at all - purge() below is what those two paths must use.
+        static::deleting(function (self $row) {
+            static::deleteStoredImage($row->image_path);
+        });
+    }
+
     public function instance()
     {
         return $this->belongsTo(FederatedInstance::class, 'federated_instance_id');
+    }
+
+    /**
+     * Remove the locally stored copy of a listing's image.
+     *
+     * Static because the paths that destroy listings cannot all hold a model instance.
+     * Failures are reported rather than thrown: a file we cannot unlink must not stop
+     * the row going away, or the sweep would wedge on one bad object.
+     */
+    public static function deleteStoredImage(?string $path): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        try {
+            Storage::delete(config('filesystems.default') == 'local' ? '/public/'.$path : '/'.$path);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Delete everything the query matches, unlinking stored images first.
+     *
+     * The alternative - letting the rows go and leaving the files - leaks storage on
+     * every hourly reconcile, because that sweep deletes through the query builder.
+     * Chunked: an instance may hold thousands of rows and this runs inside a request.
+     */
+    public static function purge($query): int
+    {
+        (clone $query)->whereNotNull('image_path')
+            ->select(['id', 'image_path'])
+            ->chunkById(500, function ($rows) {
+                foreach ($rows as $row) {
+                    static::deleteStoredImage($row->image_path);
+                }
+            });
+
+        return $query->delete();
     }
 
     /**

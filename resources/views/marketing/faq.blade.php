@@ -214,7 +214,7 @@
                 "name": "What languages does Event Schedule support?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The interface is available in 11 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. You can also use AI-powered translation to automatically translate your event descriptions."
+                    "text": "The interface is available in 12 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian. You can also use AI-powered translation to automatically translate your event descriptions."
                 }
             },
             {
@@ -230,7 +230,7 @@
                 "name": "Does Event Schedule support multiple languages?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. The interface supports 11 languages, and each schedule can have its own language setting. You can also use AI-powered translation to automatically translate event descriptions into other languages."
+                    "text": "Yes. The interface supports 12 languages, and each schedule can have its own language setting. You can also use AI-powered translation to automatically translate event descriptions into other languages."
                 }
             },
             {
@@ -618,7 +618,7 @@
                             <span class="font-semibold text-gray-900 dark:text-white">Does Event Schedule support multiple languages?</span>
                             <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The interface supports 11 languages, and each schedule can have its own language setting. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI-powered translation</a> to automatically translate event descriptions into other languages.</p></div>
+                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">Yes. The interface supports 12 languages, and each schedule can have its own language setting. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI-powered translation</a> to automatically translate event descriptions into other languages.</p></div>
                     </details>
                 </div>
             </div>
@@ -751,7 +751,7 @@
                             <span class="font-semibold text-gray-900 dark:text-white">What languages does Event Schedule support?</span>
                             <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">The interface is available in 11 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI-powered translation</a> to automatically translate your event descriptions.</p></div>
+                        <div class="px-6 pb-5"><p class="faq-answer leading-relaxed text-gray-600 dark:text-gray-300">The interface is available in 12 languages: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian. You can also use <a href="{{ marketing_url('/features/ai') }}" class="text-blue-600 underline hover:text-blue-700">AI-powered translation</a> to automatically translate your event descriptions.</p></div>
                     </details>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Setting;
 use App\Services\FederationService;
 use Illuminate\Console\Command;
 
@@ -17,6 +18,18 @@ class FederateEvents extends Command
             $this->info('This install is the nexus; nothing to federate.');
 
             return self::SUCCESS;
+        }
+
+        // Ahead of the disabled check on purpose: this is the one thing that still has
+        // to happen while federation is off. A withdrawal that could not reach the
+        // nexus when the operator opted out has no other retry - the run below returns
+        // immediately - so their events would stay published for good.
+        if (Setting::get('federation_withdraw_pending')) {
+            $withdraw = $federation->withdraw();
+
+            $this->info($withdraw['ok']
+                ? "Withdrew from the network: {$withdraw['removed']} listing(s) removed."
+                : 'Withdrawal failed; it stays queued for the next run.');
         }
 
         if (! $federation->isEnabled()) {

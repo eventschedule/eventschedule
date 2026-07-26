@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Embed Tickets on Any Website - Event Schedule</x-slot>
-    <x-slot name="description">Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 11 languages.</x-slot>
+    <x-slot name="description">Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 12 languages.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Tickets</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Embed Tickets",
-        "description": "Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 11 languages.",
+        "description": "Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 12 languages.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -66,7 +66,7 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Website Integration Software",
         "operatingSystem": "Web",
-        "description": "Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 11 languages.",
+        "description": "Embed a ticket purchase or RSVP form on any website with one line of code. Supports all payment methods, dark mode, and 12 languages.",
         "offers": {
             "@type": "Offer",
             "price": "0",

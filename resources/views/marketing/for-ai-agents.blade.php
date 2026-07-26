@@ -26,7 +26,7 @@
             "Schedule and event management",
             "Ticket creation and sales tracking",
             "Recurring event patterns",
-            "Auto-translation to 11 languages",
+            "Auto-translation to 12 languages",
             "Rate limiting at 300 GET requests per minute",
             "API key authentication"
         ],
@@ -56,7 +56,7 @@
                 "name": "What can I do with the Event Schedule API?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 11 languages."
+                    "text": "You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 12 languages."
                 }
             },
             {
@@ -454,7 +454,7 @@
                             i18n
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Multi-language</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Events auto-translate to 11 languages. Reach a global audience without extra work.</p>
+                        <p class="mb-6 text-gray-500 dark:text-gray-400">Events auto-translate to 12 languages. Reach a global audience without extra work.</p>
                         <div class="mt-auto space-y-2">
                             <div class="es-ai-field flex items-center gap-3" style="--i: 0;"><span class="w-8 font-mono text-sm text-teal-600 dark:text-teal-400">EN</span><span class="text-sm text-gray-600 dark:text-gray-300">AI Developer Meetup</span></div>
                             <div class="es-ai-field flex items-center gap-3" style="--i: 1;"><span class="w-8 font-mono text-sm text-teal-600 dark:text-teal-400">ES</span><span class="text-sm text-gray-600 dark:text-gray-300">Encuentro de desarrolladores IA</span></div>
@@ -785,7 +785,7 @@
         $faqLink = 'font-medium text-cyan-600 hover:underline dark:text-cyan-400';
         $faqs = [
             ['What is llms.txt?', 'llms.txt is an emerging standard that helps AI models discover and understand your platform. Event Schedule provides both <a href="/llms.txt" class="'.$faqLink.'">llms.txt</a> (a concise summary for initial discovery and routing) and <a href="/llms-full.txt" class="'.$faqLink.'">llms-full.txt</a> (a complete, self-contained reference so agents can work without following additional links).'],
-            ['What can I do with the API?', 'You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 11 languages.'],
+            ['What can I do with the API?', 'You can create, read, update, and delete schedules, events, tickets, sub-schedules, and sales. The API supports smart event creation with venue auto-resolution, member matching, recurring event patterns, and auto-translation to 12 languages.'],
             ['Is the API free to use?', 'Read operations are free on any Pro schedule. Write operations (creating and updating events, tickets, etc.) require a Pro plan. Ticket sales have zero platform fees - you keep 100% of revenue minus payment processing.'],
             ['How does authentication work?', 'Authentication uses API keys passed via the <code class="rounded bg-gray-100 px-1.5 py-0.5 text-sm dark:bg-white/10">X-API-Key</code> header. Generate your API key from your account settings after signing up. Read-only endpoints on public schedules don\'t require authentication.'],
         ];

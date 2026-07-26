@@ -79,7 +79,10 @@ class AdminFederationController extends Controller
         $instance = FederatedInstance::findOrFail(UrlUtils::decodeId($hash));
         $siteUrl = $instance->site_url;
 
-        // Cascades to its listings via the foreign key.
+        // The FK cascade drops the listings at the database level, where PHP never sees
+        // them - so their stored images have to go first or they are orphaned for good.
+        FederatedEvent::purge(FederatedEvent::where('federated_instance_id', $instance->id));
+
         $instance->delete();
 
         AuditService::log(

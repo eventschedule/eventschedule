@@ -34,15 +34,15 @@
         ]
     }
     </script>
-    <a href="{{ route('marketing.docs') }}" class="text-gray-400 hover:text-white transition-colors">Docs</a>
+    <a href="{{ route('marketing.docs') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Docs</a>
     <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
     </svg>
     @if($section)
-        <a href="{{ route($sectionRoute) }}" class="text-gray-400 hover:text-white transition-colors">{{ $sectionTitle }}</a>
+        <a href="{{ route($sectionRoute) }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">{{ $sectionTitle }}</a>
         <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
     @endif
-    <span class="text-white">{{ $currentTitle }}</span>
+    <span class="text-gray-900 dark:text-white">{{ $currentTitle }}</span>
 </nav>

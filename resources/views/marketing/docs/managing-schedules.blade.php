@@ -100,6 +100,7 @@
                         <a href="#templates" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Templates</a>
                         <a href="#videos" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Videos</a>
                         <a href="#availability" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Availability</a>
+                        <a href="#appointments" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Appointments</a>
                         <a href="#requests" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Requests</a>
                         <a href="#followers" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Followers</a>
                         <a href="#team" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Team</a>
@@ -260,6 +261,36 @@
                             </div>
                         </section>
 
+                        <!-- Appointments -->
+                        <section id="appointments" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                                </svg>
+                                Appointments
+                            </h2>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 mb-4">Pro</span>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                The <strong class="text-gray-900 dark:text-white">Appointments</strong> tab is where you offer bookable time slots, Calendly-style. Create appointment types with their own duration, weekly hours, and optional price, and guests book a time on your public booking page.
+                            </p>
+
+                            <ul class="doc-list mb-6">
+                                <li>The tab has two views: <strong>appointment types</strong>, where you set up what can be booked, and <strong>Bookings</strong>, filtered by upcoming, pending, past, and cancelled</li>
+                                <li>A <strong>Your booking page</strong> panel gives you the link to share once a type is active</li>
+                                <li>Bookings are private, so they never appear on your public schedule, and paid ones show up on your Sales page</li>
+                            </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                For the full setup, see the <x-link href="{{ route('marketing.docs.appointments') }}">Appointments</x-link> guide.
+                            </p>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Not the same as Availability</div>
+                                <p>Availability marks whole days your team is free to be booked for events. Appointments sell specific time slots on a public booking page.</p>
+                            </div>
+                        </section>
+
                         <!-- Requests -->
                         <section id="requests" class="doc-section">
                             <h2 class="doc-heading">
@@ -279,6 +310,10 @@
                                 <li>Use <strong>"Accept All"</strong> or <strong>"Reject All"</strong> to handle requests in bulk</li>
                                 <li>Accepted requests become events on your schedule</li>
                             </ul>
+
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                Appointment bookings arrive here too when the appointment type has <strong class="text-gray-900 dark:text-white">Require approval</strong> turned on. Accepting one confirms the booking and emails the guest their calendar invite; declining tells them they are welcome to book another time.
+                            </p>
 
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
                                 To configure the public sign-up link and request settings, see <x-link href="{{ route('marketing.docs.creating_schedules') }}#engagement-requests">Creating Schedules: Requests</x-link>.
@@ -429,6 +464,7 @@
                             <ul class="doc-list">
                                 <li><x-link href="{{ route('marketing.docs.creating_schedules') }}">Creating Schedules</x-link> - Set up and configure your schedule</li>
                                 <li><x-link href="{{ route('marketing.docs.creating_events') }}">Creating Events</x-link> - Add and edit events on your schedule</li>
+                                <li><x-link href="{{ route('marketing.docs.appointments') }}">Appointments</x-link> - Offer bookable time slots on a public booking page</li>
                                 <li><x-link href="{{ route('marketing.docs.sharing') }}">Sharing Your Schedule</x-link> - Share your schedule and grow your audience</li>
                             </ul>
                         </section>

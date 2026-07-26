@@ -7,7 +7,6 @@ use App\Models\FederatedInstance;
 use App\Utils\ImageUtils;
 use App\Utils\UrlUtils;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Nexus-side upkeep for federated listings: fetch their images, drop what has
@@ -72,6 +71,12 @@ class FederationMaintenance extends Command
         // revisited.
         $rows = FederatedEvent::whereNotNull('image_url')
             ->whereNull('blocked_at')
+            // Approved instances only. A listing is not renderable before approval
+            // (scopeListable() requires it), so fetching earlier buys nothing - while
+            // letting anyone who can register spend our storage on images we may never
+            // show. Nothing reclaims them either: pruneStaleInstances() skips instances
+            // that have pushed, and every push refreshes last_seen_at.
+            ->whereHas('instance', fn ($q) => $q->approved())
             ->where(function ($q) {
                 $q->whereNull('image_path')
                     ->orWhereNull('image_fetched_url')
@@ -193,34 +198,36 @@ class FederationMaintenance extends Command
             ->get();
 
         foreach ($instances as $instance) {
-            $this->deleteWithImages($instance->events()->get());
+            // purge() rather than ->get(): an abandoned instance may still hold thousands
+            // of rows, and loading them all to delete them one at a time is what the
+            // per-run bound above is trying to avoid.
+            FederatedEvent::purge(FederatedEvent::where('federated_instance_id', $instance->id));
             $instance->delete();
         }
 
         return $instances->count();
     }
 
-    /** Delete rows and their stored images, so files do not outlive their listings. */
+    /**
+     * Delete rows and their stored images, so files do not outlive their listings.
+     *
+     * The image goes via FederatedEvent's `deleting` hook, which is what also covers
+     * anything else that deletes a single listing through a model instance.
+     */
     protected function deleteWithImages($rows): int
     {
+        $deleted = 0;
+
         foreach ($rows as $row) {
-            $this->deleteImage($row->image_path);
             $row->delete();
+            $deleted++;
         }
 
-        return $rows->count();
+        return $deleted;
     }
 
     protected function deleteImage(?string $path): void
     {
-        if (! $path) {
-            return;
-        }
-
-        try {
-            Storage::delete(config('filesystems.default') == 'local' ? '/public/'.$path : '/'.$path);
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        FederatedEvent::deleteStoredImage($path);
     }
 }

@@ -533,9 +533,14 @@
 
                             <p class="text-gray-600 dark:text-gray-300 mb-6">Each promo code generates a shareable link that pre-fills the code at checkout, making it easy to distribute to your audience.</p>
 
-                            <div class="doc-callout doc-callout-info">
+                            <div class="doc-callout doc-callout-info mb-6">
                                 <div class="doc-callout-title">Invoice Ninja Payment Link Mode</div>
                                 <p>When using Invoice Ninja in payment link mode, only one promo code per event is supported and it applies to all ticket types. Use invoice mode for multiple promo codes with per-ticket targeting.</p>
+                            </div>
+
+                            <div class="doc-callout doc-callout-info">
+                                <div class="doc-callout-title">Gift cards are separate</div>
+                                <p>Checkout also accepts a gift card code, which spends a prepaid balance instead of applying a discount. A buyer can use a promo code and a gift card on the same order. See <a href="{{ route('marketing.docs.gift_cards') }}" class="text-cyan-400 hover:text-cyan-300">Gift Cards</a>.</p>
                             </div>
                         </section>
 
@@ -927,6 +932,8 @@
                             </h2>
                             <ul class="doc-list">
                                 <li><a href="{{ route('marketing.docs.creating_events') }}" class="text-cyan-400 hover:text-cyan-300">Creating Events</a> - Add events to sell tickets for</li>
+                                <li><a href="{{ route('marketing.docs.gift_cards') }}" class="text-cyan-400 hover:text-cyan-300">Gift Cards</a> - Sell prepaid gift cards redeemable at checkout</li>
+                                <li><a href="{{ route('marketing.docs.subscriptions') }}" class="text-cyan-400 hover:text-cyan-300">Subscriptions &amp; Passes</a> - Sell one pass reused across many events</li>
                                 <li><a href="{{ route('marketing.docs.sharing') }}" class="text-cyan-400 hover:text-cyan-300">Sharing Your Schedule</a> - Promote your events</li>
                                 <li><a href="{{ route('marketing.docs.event_graphics') }}" class="text-cyan-400 hover:text-cyan-300">Event Graphics</a> - Create promotional images</li>
                                 <li><a href="{{ route('marketing.docs.analytics') }}" class="text-cyan-400 hover:text-cyan-300">Analytics</a> - Track conversion rates and revenue per view</li>

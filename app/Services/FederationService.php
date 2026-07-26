@@ -9,6 +9,7 @@ use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -91,12 +92,18 @@ class FederationService
         // counting rows, so the prompt only appears when enabling would actually
         // publish something - and stays away on an install holding only demo data.
         //
+        // Undecided schedules count here and nowhere else. Nobody can answer the
+        // per-schedule question before the operator has joined a network - the toggle
+        // is not even rendered until then - so the strict query is empty on exactly
+        // the installs this prompt exists to reach, and the feature would be
+        // undiscoverable.
+        //
         // Cached because the schedule page is one of the most-loaded in the AP and this
         // query is not cheap; the answer flips once and then stays true.
         return Cache::remember(
             'federation:has_shareable_events',
             now()->addMinutes(self::ADOPTION_PROMPT_CACHE_MINUTES),
-            fn () => $this->federatableQuery()->exists()
+            fn () => $this->federatableQuery(true)->exists()
         );
     }
 
@@ -140,6 +147,13 @@ class FederationService
      */
     public function register(): array
     {
+        // Ahead of the payload, not left to send(): instanceId() and secret() below
+        // both mint and persist on first read, so building the payload for an install
+        // that never opted in would give it a federation identity it never asked for.
+        if (! $this->isEnabled()) {
+            return ['ok' => false, 'body' => []];
+        }
+
         $payload = [
             'instance_id' => $this->instanceId(),
             'site_url' => rtrim((string) config('app.url'), '/'),
@@ -334,14 +348,61 @@ class FederationService
     }
 
     /**
+     * Take every listing down, for when the operator switches the network off.
+     *
+     * Switching off stops push() and reconcile() from running at all, so without an
+     * explicit goodbye the nexus is never told anything changed: it keeps publishing
+     * what it already holds until each event's own date passes, which for a recurring
+     * event carrying resolved occurrences is months. "Off" has to mean off on both
+     * sides, and the docs promise exactly that.
+     *
+     * An empty final manifest is the whole message. The nexus stamps nothing with the
+     * run token, so its is_final sweep deletes every row this instance owns. Blocked
+     * rows are tombstones and survive by design - resurrecting one by re-publishing is
+     * the thing the block exists to prevent.
+     */
+    public function withdraw(): array
+    {
+        // Never registered, so there is nothing on the other side to take down - and
+        // nothing worth minting an identity for on the way out.
+        if (! Setting::get('federation_instance_id')) {
+            Setting::set('federation_withdraw_pending', null);
+
+            return ['ok' => true, 'removed' => 0];
+        }
+
+        $result = $this->send('/api/federation/reconcile', [
+            'external_ids' => [],
+            'run_token' => (string) Str::uuid(),
+            'is_final' => true,
+            'known_ids' => [],
+        ], force: true);
+
+        // Nothing else will retry this: the hourly push returns early while the switch
+        // is off, so a nexus that happened to be unreachable at the moment the operator
+        // opted out would keep their events published indefinitely. Record the intent
+        // instead, and let FederateEvents carry it out on a later run.
+        Setting::set('federation_withdraw_pending', $result['ok'] ? null : '1');
+
+        return ['ok' => $result['ok'], 'removed' => (int) ($result['body']['removed'] ?? 0)];
+    }
+
+    /**
      * Events this install is willing to share.
      *
      * Mirrors the nexus's own discovery query rather than inventing a second
      * definition of "public", so a federated listing is held to the same bar as a
      * local one: verified and listed schedule, accepted association, no demo or
      * throwaway-test content.
+     *
+     * @param  bool  $includeUndecided  Count schedules that have not answered the
+     *                                  question yet as willing. Strictly for the
+     *                                  adoption prompt, which asks "would enabling
+     *                                  this publish anything?" - never for the
+     *                                  preview or a push, which must show and send
+     *                                  only what was actually opted in.
      */
-    public function federatableQuery()
+    public function federatableQuery(bool $includeUndecided = false)
     {
         return Event::query()
             ->where(function ($q) {
@@ -356,9 +417,17 @@ class FederationService
             ->where('is_draft', false)
             ->where('is_cancelled', false)
             ->whereNull('event_password')
-            ->whereHas('roles', function ($q) {
+            ->whereHas('roles', function ($q) use ($includeUndecided) {
                 $q->where('event_role.is_accepted', true)
-                    ->where('roles.federation_enabled', true)
+                    // Three states, and the difference matters twice: see the veto
+                    // below. Only an explicit yes qualifies a schedule to publish.
+                    ->where(function ($f) use ($includeUndecided) {
+                        $f->where('roles.federation_enabled', true);
+
+                        if ($includeUndecided) {
+                            $f->orWhereNull('roles.federation_enabled');
+                        }
+                    })
                     ->where('roles.is_deleted', false)
                     ->where('roles.is_unlisted', false)
                     ->whereNotNull('roles.user_id')
@@ -370,11 +439,88 @@ class FederationService
                         });
                     });
             })
+            // The whereHas above is an ANY-match, so on a co-listed event one willing
+            // schedule would drag every other participant onto the network with it -
+            // including their name, and the venue's full address. An opt-out is an
+            // explicit act, so any participant that made it vetoes the whole listing.
+            //
+            // Matching `false` and not "anything other than true" is the whole reason
+            // the column is nullable: schedules created after the operator joined
+            // start as null, and there are a lot of them (every unclaimed placeholder
+            // a curator creates, every venue calendar sync invents). Treating those as
+            // opt-outs would let one of them veto an event its real, opted-in schedule
+            // published perfectly well.
+            ->whereDoesntHave('roles', function ($r) {
+                $r->where('roles.federation_enabled', false);
+            })
             ->whereDoesntHave('roles', function ($r) {
                 $r->where('subdomain', DemoService::DEMO_ROLE_SUBDOMAIN)
                     ->orWhere('subdomain', 'like', 'demo-%');
             })
             ->excludeLikelyTest();
+    }
+
+    /**
+     * The image as a URL the nexus can actually fetch, or null.
+     *
+     * getImageUrl() resolves through accessors whose final branch returns the raw
+     * stored value - a bare filename - on any disk that is not local/public, or
+     * do_spaces while hosted. The nexus validates image_url as a URL, and a batch is
+     * only as good as its worst item, so sending a filename from (say) an S3-backed
+     * selfhost would stall that install's sync permanently. Resolve it against the
+     * configured disk instead, and skip the event rather than send something
+     * unfetchable.
+     */
+    protected function absoluteImageUrl(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (Str::startsWith($value, ['http://', 'https://'])) {
+            return $value;
+        }
+
+        try {
+            $url = (string) Storage::url($value);
+        } catch (\Throwable $e) {
+            // A disk with no public URL concept. Nothing sensible to advertise.
+            report($e);
+
+            return null;
+        }
+
+        // A disk that answers with a path rather than a URL: make it absolute against
+        // this install, which is the host the nexus checks the backlink against anyway.
+        if (! Str::startsWith($url, ['http://', 'https://'])) {
+            $url = $url === '' ? '' : url($url);
+        }
+
+        return Str::startsWith($url, ['http://', 'https://']) ? $url : null;
+    }
+
+    /**
+     * The event's schedules that individually satisfy the federation bar.
+     *
+     * In-memory mirror of federatableQuery()'s whereHas(). That query only asks whether
+     * *some* role qualifies; this says *which*, which is what attribution needs. Sorted
+     * by id so a co-listed event credits the same schedule on every run rather than
+     * whatever order the pivot happened to return.
+     *
+     * Keep in sync with federatableQuery().
+     */
+    public function federatingRoles(Event $event)
+    {
+        return $event->roles
+            ->filter(fn ($role) => $role->pivot->is_accepted
+                && $role->federation_enabled
+                && ! $role->is_deleted
+                && ! $role->is_unlisted
+                && $role->isClaimed())
+            ->sortBy('id')
+            ->values();
     }
 
     /**
@@ -385,7 +531,7 @@ class FederationService
     {
         $event->loadMissing('roles');
 
-        $image = $event->getImageUrl();
+        $image = $this->absoluteImageUrl($event->getImageUrl());
         if (! $image) {
             // The nexus only lists cards that show a real picture, matching what it
             // does with its own events, so sending this would be wasted.
@@ -408,10 +554,23 @@ class FederationService
             return null;
         }
 
-        $venue = $event->venue;
-        // Not role(), which only returns a talent schedule and would leave a
+        // Attribute to a schedule that actually qualifies to federate, not to
+        // getViewableRole() - that returns the first *claimed* role and knows nothing
+        // about federation, so on a multi-role event it could credit (and link to) an
+        // unlisted or unverified schedule that the eligibility query never approved.
+        // $event->roles has no ORDER BY either, so which one it picked was not even
+        // stable between runs.
+        $federating = $this->federatingRoles($event);
+
+        // Still not role(), which only returns a talent schedule and would leave a
         // venue-only event with no attribution at all.
-        $schedule = $event->getViewableRole();
+        $schedule = $federating->first() ?: $event->getViewableRole();
+
+        // The venue is NOT taken from that filtered set. Its consent is already settled -
+        // federatableQuery() drops the whole event if any participant opted out - and
+        // requiring it to qualify in full would demand isClaimed(), which most venues are
+        // not, silently stripping the location off the majority of listings.
+        $venue = $event->venue;
 
         return [
             'external_id' => UrlUtils::encodeId($event->id),
@@ -559,9 +718,21 @@ class FederationService
      * .env configuration in the same trust class as DB_HOST, and guarding it would
      * break local and staging nexus targets, which resolve to private addresses.
      * Inbound, attacker-supplied URLs are a different matter and are guarded.
+     *
+     * @param  bool  $force  Send even though the operator's switch is off. Only
+     *                       withdraw() does this, and only to take listings down.
      */
-    protected function send(string $path, array $payload): array
+    protected function send(string $path, array $payload, bool $force = false): array
     {
+        // The opt-in belongs here, not only in the callers. Every caller today checks
+        // first, but this is the single point where install data leaves the building,
+        // so the guarantee should not depend on the next one remembering to.
+        // Deliberately before instanceId(), which would otherwise mint and persist an
+        // identity for an install that never opted in.
+        if (! $force && ! $this->isEnabled()) {
+            return ['ok' => false, 'body' => []];
+        }
+
         $payload['instance_id'] ??= $this->instanceId();
         $payload['site_url'] ??= rtrim((string) config('app.url'), '/');
 
@@ -612,6 +783,13 @@ class FederationService
             return 'over_limit';
         }
 
+        // Individual listings are refused via skipped_ids, so a 422 now means the
+        // request envelope itself was rejected - worth saying so rather than folding it
+        // into the generic error, because the operator's next step is different.
+        if ($status === 422) {
+            return 'validation';
+        }
+
         if ($status === 404) {
             return 'not_available';
         }
@@ -657,6 +835,22 @@ class FederationService
             ->whereNotNull('user_id')
             ->whereNull('email_verified_at')
             ->whereNull('phone_verified_at')
+            ->count();
+    }
+
+    /**
+     * Schedules that have not answered the per-schedule question yet.
+     *
+     * The other reason a preview looks emptier than the operator expects, and unlike
+     * the unverified count it is not a problem to fix - it is just how a schedule
+     * created after the install joined the network starts out. Stated because an
+     * empty preview with no explanation reads as a broken feature.
+     */
+    public function undecidedScheduleCount(): int
+    {
+        return Role::where('is_deleted', false)
+            ->whereNull('federation_enabled')
+            ->whereNotNull('user_id')
             ->count();
     }
 }

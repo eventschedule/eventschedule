@@ -165,7 +165,7 @@
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">Language</span></td>
-                                            <td>Sets the interface language. Eleven languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, and Russian.</td>
+                                            <td>Sets the interface language. Twelve languages are supported: English, Spanish, German, French, Italian, Portuguese, Hebrew, Dutch, Arabic, Estonian, Romanian, and Russian.</td>
                                         </tr>
                                         <tr>
                                             <td><span class="font-semibold text-gray-900 dark:text-white">24-Hour Time</span></td>
@@ -415,7 +415,7 @@
                             </p>
                             <div class="doc-callout doc-callout-info">
                                 <div class="doc-callout-title">Note</div>
-                                <p>This section is only visible on selfhosted installations. Users on the hosted platform (eventschedule.com) are always on the latest version automatically.</p>
+                                <p>This section never appears on eventschedule.com, where everyone is always on the latest version automatically. On a single-tenant selfhost any signed-in user sees it; on a selfhosted platform running in hosted mode it is limited to the instance administrator, so a customer cannot update the whole installation.</p>
                             </div>
                         </section>
 

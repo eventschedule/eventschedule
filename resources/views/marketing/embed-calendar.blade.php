@@ -1,6 +1,6 @@
 <x-marketing-layout>
     <x-slot name="title">Embed Calendar | Add Events to Any Website - Event Schedule</x-slot>
-    <x-slot name="description">Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 11 languages.</x-slot>
+    <x-slot name="description">Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 12 languages.</x-slot>
     <x-slot name="breadcrumbTitle">Embed Calendar</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule Embed Calendar",
-        "description": "Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 11 languages.",
+        "description": "Embed your event calendar on any website with one line of code. Responsive iframe with dark mode support and 12 languages.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
