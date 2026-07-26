@@ -1,4 +1,14 @@
-<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+<?php
+/*
+ * The static marketing/docs pages of the sitemap, served as the /sitemap-pages.xml child of the
+ * sitemap index by SitemapController. Adding a new page here is still all that is required.
+ *
+ * Schedules, sub-schedules, events and blog posts are NOT listed here: they are streamed in
+ * chunks from SitemapController so memory does not scale with row count.
+ *
+ * Nothing may be emitted before the XML declaration, so this note lives inside the PHP block.
+ */
+echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>{{ url('/') }}</loc>
@@ -7,7 +17,7 @@
         <priority>1.0</priority>
 @include('partials.sitemap-hreflang', ['url' => url('/')])
     </url>
-    @if(config('app.is_nexus') && $showMarketingLinks)
+    @if(config('app.is_nexus'))
     <url>
         <loc>{{ url('/features') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
@@ -953,6 +963,20 @@
 @include('partials.sitemap-hreflang', ['url' => url('/docs/saas/twilio')])
     </url>
     <url>
+        <loc>{{ url('/docs/saas/federation') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/saas/federation')])
+    </url>
+    <url>
+        <loc>{{ url('/docs/selfhost/federation') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/selfhost/federation')])
+    </url>
+    <url>
         <loc>{{ url('/docs/selfhost/boost') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>
@@ -1033,38 +1057,4 @@
         <priority>0.8</priority>
     </url>
     @endif
-    @foreach($blogPosts as $post)
-        <url>
-            <loc>{{ route('blog.show', $post->slug) }}</loc>
-            <lastmod>{{ $post->updated_at->gt($post->published_at) ? $post->updated_at->toIso8601String() : $post->published_at->toIso8601String() }}</lastmod>
-            <changefreq>monthly</changefreq>
-            <priority>0.7</priority>
-        </url>
-    @endforeach
-    @foreach($roles as $role)
-        <url>
-            <loc>{{ url($role->getGuestUrl()) }}</loc>
-            <lastmod>{{ $role->updated_at->toIso8601String() }}</lastmod>
-            <changefreq>daily</changefreq>
-            <priority>0.8</priority>
-        </url>
-        @foreach($role->groups as $group)
-            @if($group->slug)
-                <url>
-                    <loc>{{ url($role->getGuestUrl() . '/' . $group->slug) }}</loc>
-                    <lastmod>{{ $group->updated_at->toIso8601String() }}</lastmod>
-                    <changefreq>daily</changefreq>
-                    <priority>0.7</priority>
-                </url>
-            @endif
-        @endforeach
-    @endforeach
-    @foreach($events as $event)
-        <url>
-            <loc>{{ url($event->getGuestUrl()) }}</loc>
-            <lastmod>{{ $event->updated_at->toIso8601String() }}</lastmod>
-            <changefreq>daily</changefreq>
-            <priority>0.8</priority>
-        </url>
-    @endforeach
 </urlset>

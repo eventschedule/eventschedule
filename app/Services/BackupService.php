@@ -51,6 +51,9 @@ class BackupService
         'event_custom_fields', 'graphic_settings', 'agenda_ai_prompt', 'agenda_show_times',
         'agenda_show_description', 'agenda_save_image', 'slug_pattern', 'direct_registration',
         'default_event_visibility',
+        // Per-schedule federation opt-out. ROLE_EXPORT_FIELDS is an explicit allowlist,
+        // so a new column silently vanishes on export and returns as its default.
+        'federation_enabled',
         'feedback_enabled', 'feedback_delay_hours', 'feedback_public', 'fan_comments_enabled',
         'fan_photos_enabled', 'fan_videos_enabled', 'fan_content_require_account',
         'first_day_of_week', 'sponsor_logos', 'sponsor_section_title',
@@ -66,6 +69,10 @@ class BackupService
         'last_notified_fan_content_count', 'created_at', 'updated_at',
         'description_html', 'description_html_en',
         'ticket_notes_html', 'payment_instructions_html',
+        // Instance-local federation sync state. These are also non-fillable today, and
+        // the exporter iterates getFillable() - but listing them keeps the exclusion
+        // intentional rather than a side effect, if that ever changes.
+        'federated_at', 'federated_hash',
     ];
 
     private const MAX_SCHEDULES = 50;

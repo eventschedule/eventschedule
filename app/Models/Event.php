@@ -151,11 +151,55 @@ class Event extends Model
     /** Per-request memo of pass advance-booking seats reserved, keyed by occurrence date. */
     protected $passReservedSeatsCache = [];
 
+    /**
+     * Columns whose change makes a federated listing stale, either because the listing
+     * displays them, because they change its URL, or because they change whether it
+     * qualifies at all. Keep this in sync with FederationService::buildPayload().
+     */
+    public const FEDERATION_FIELDS = [
+        'name',
+        'short_description',
+        'slug',
+        'starts_at',
+        'duration',
+        'timezone',
+        'days_of_week',
+        'recurring_frequency',
+        'recurring_interval',
+        'recurring_end_type',
+        'recurring_end_value',
+        'recurring_include_dates',
+        'recurring_exclude_dates',
+        'event_url',
+        'flyer_image_url',
+        'is_private',
+        'is_draft',
+        'is_cancelled',
+        'event_password',
+    ];
+
     protected static function boot()
     {
         parent::boot();
 
         static::saving(function ($model) {
+            // Re-queue for federation when something a federated listing actually shows
+            // changes. Hooked here rather than in EventRepo::saveEvent() because that is
+            // not the only write path - inbound Google and Microsoft calendar sync call
+            // $event->save() directly, and those edits must re-publish too.
+            //
+            // Scoped to FEDERATION_FIELDS on purpose: rsvp_sold is rewritten on every
+            // RSVP, and translation_attempts / last_translated_at / attendees_notified_at
+            // / ical_sequence all churn without changing the listing. Invalidating on any
+            // save would turn an hourly sync into a continuous one.
+            if ($model->exists && ! $model->isDirty('federated_at') && $model->isDirty(self::FEDERATION_FIELDS)) {
+                $model->federated_at = null;
+                // Also clear the "network refused this" marker: the usual reason is a
+                // missing flyer or a name that tripped the junk filter, so an edit is
+                // exactly the signal that it is worth trying again.
+                $model->federated_skipped_at = null;
+            }
+
             $model->description_html = MarkdownUtils::convertToHtml($model->description);
             $model->description_html_en = MarkdownUtils::convertToHtml($model->description_en);
             $model->ticket_notes_html = MarkdownUtils::convertToHtml($model->ticket_notes);
@@ -1743,6 +1787,15 @@ class Event extends Model
             return '';
         }
 
+        return $this->buildGuestUrl($data, $useCustomDomain);
+    }
+
+    /**
+     * Build the guest URL from already-resolved getGuestUrlData() output. Split out so callers
+     * that hold the data can reuse it instead of resolving it a second time.
+     */
+    private function buildGuestUrl(array $data, $useCustomDomain)
+    {
         // Select the correct route name based on available data
         $routeName = 'event.view_guest';
         if (isset($data['date'])) {
@@ -1783,13 +1836,35 @@ class Event extends Model
      */
     public function getCanonicalUrl($date = null)
     {
+        $url = $this->getCanonicalUrlOrNull($date);
+
+        if ($url === null) {
+            \Log::error('No subdomain found for event '.$this->id);
+
+            return '';
+        }
+
+        return $url;
+    }
+
+    /**
+     * getCanonicalUrl() without the log-and-empty-string fallback: returns null when the event
+     * has no routable subdomain. Resolves getGuestUrlData() once, and stays silent, so bulk
+     * callers that walk every event in the database (the sitemap) cannot flood the log.
+     */
+    public function getCanonicalUrlOrNull($date = null)
+    {
         $data = $this->getGuestUrlData(false, $date);
+
+        if (! $data['subdomain']) {
+            return null;
+        }
 
         $homeRole = $this->roles->first(function ($role) use ($data) {
             return $role->subdomain == $data['subdomain'];
         });
 
-        return $this->getGuestUrl(false, $date, $homeRole && $homeRole->servesOnCustomDomain());
+        return $this->buildGuestUrl($data, $homeRole && $homeRole->servesOnCustomDomain());
     }
 
     public function getCanonicalPhotoGalleryUrl($date = null)

@@ -2829,9 +2829,28 @@ class AdminController extends Controller
             return redirect()->back()->with('error', __('messages.not_authorized'));
         }
 
+        // The nexus never renders the federation card, so skip the queries that feed
+        // it - federatableQuery() is two EXISTS subqueries plus three REGEXP predicates
+        // over the whole events table, and it was running on every load for nothing.
+        $federationAvailable = ! config('app.is_nexus');
+        $federation = app(\App\Services\FederationService::class);
+
         return view('admin.settings', [
             'custom_header_code' => Setting::get('custom_header_code'),
             'custom_footer_code' => Setting::get('custom_footer_code'),
+            // Federation is an instance-side feature; the nexus has the moderation
+            // queue instead.
+            'federationAvailable' => $federationAvailable,
+            'federationEnabled' => (bool) Setting::get('federation_enabled'),
+            'federationContactEmail' => Setting::get('federation_contact_email'),
+            'federationStatus' => $federation->status(),
+            'federationLastSyncedAt' => Setting::get('federation_last_synced_at'),
+            'federationLastError' => Setting::get('federation_last_error'),
+            // The whole point of enabling this is knowing exactly what leaves your
+            // install, so show it rather than describing it.
+            'federationPreview' => $federationAvailable ? $federation->previewEvents(12) : collect(),
+            'federationPreviewTotal' => $federationAvailable ? $federation->federatableQuery()->count() : 0,
+            'federationUnverified' => $federationAvailable ? $federation->unverifiedScheduleCount() : 0,
         ]);
     }
 
@@ -2850,6 +2869,9 @@ class AdminController extends Controller
         $request->validate([
             'custom_header_code' => ['nullable', 'string', 'max:65535'],
             'custom_footer_code' => ['nullable', 'string', 'max:65535'],
+            'federation_settings_submitted' => ['nullable', 'boolean'],
+            'federation_enabled' => ['nullable', 'boolean'],
+            'federation_contact_email' => ['nullable', 'email', 'max:191'],
         ]);
 
         if (is_demo_mode()) {
@@ -2867,6 +2889,29 @@ class AdminController extends Controller
 
         Setting::set('custom_header_code', $new['custom_header_code']);
         Setting::set('custom_footer_code', $new['custom_footer_code']);
+
+        // Only when the federation form was the one submitted. Both cards on this page
+        // post to this endpoint, and an unchecked toggle is indistinguishable from an
+        // absent field - so without this marker, saving the header/footer card would
+        // silently disable federation and wipe the contact email. Same guard idea as
+        // event_categories_submitted in RoleController::update().
+        if (! config('app.is_nexus') && $request->boolean('federation_settings_submitted')) {
+            $wasEnabled = (bool) Setting::get('federation_enabled');
+            $nowEnabled = $request->boolean('federation_enabled');
+
+            Setting::set('federation_enabled', $nowEnabled ? '1' : null);
+            Setting::set('federation_contact_email', $request->input('federation_contact_email'));
+
+            // Introduce this install the moment the operator opts in, so the
+            // registration is already queued for review before the first push runs.
+            if ($nowEnabled && ! $wasEnabled) {
+                try {
+                    app(\App\Services\FederationService::class)->register();
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+        }
 
         AuditService::log(
             AuditService::ADMIN_SETTINGS_UPDATE,

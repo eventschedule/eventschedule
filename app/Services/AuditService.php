@@ -124,6 +124,14 @@ class AuditService
 
     const ADMIN_TRANSLATION_SUGGESTION_REJECT = 'admin.translation_suggestion_reject';
 
+    const ADMIN_FEDERATION_APPROVE = 'admin.federation_approve';
+
+    const ADMIN_FEDERATION_SUSPEND = 'admin.federation_suspend';
+
+    const ADMIN_FEDERATION_DELETE = 'admin.federation_delete';
+
+    const ADMIN_FEDERATION_BLOCK_EVENT = 'admin.federation_block_event';
+
     // Subscription actions
     const SUBSCRIPTION_CREATE = 'subscription.create';
 

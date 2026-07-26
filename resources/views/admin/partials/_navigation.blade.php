@@ -8,7 +8,13 @@
         $manageKeys = array_merge($manageKeys, ['schedules', 'domains', 'referrals', 'blog']);
     }
     $manageActive = in_array($active, $manageKeys);
-    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'support', 'settings', 'translations']);
+    $systemActive = in_array($active, ['audit-log', 'queue', 'logs', 'support', 'settings', 'translations', 'federation']);
+
+    // Registrations sit unnoticed without a badge, and operators then conclude
+    // federation is broken. Nexus-only, like the queue itself.
+    $federationPending = config('app.is_nexus')
+        ? \App\Models\FederatedInstance::pending()->count()
+        : 0;
 
     $tabActive = 'border-[var(--brand-blue)] text-[var(--brand-blue)]';
     $tabInactive = 'border-transparent text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600 hover:text-gray-700 dark:hover:text-gray-300';
@@ -146,6 +152,14 @@
                         <a href="{{ route('admin.translations') }}" class="{{ $active === 'translations' ? $dropdownItemActive : $dropdownItem }}">
                             @lang('messages.translations')
                         </a>
+                        @if (config('app.is_nexus'))
+                        <a href="{{ route('admin.federation') }}" class="{{ $active === 'federation' ? $dropdownItemActive : $dropdownItem }}">
+                            @lang('messages.federation')
+                            @if ($federationPending > 0)
+                                <span class="ms-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">{{ $federationPending }}</span>
+                            @endif
+                        </a>
+                        @endif
                         @if (config('app.hosted'))
                         <a href="{{ route('admin.support') }}" class="{{ $active === 'support' ? $dropdownItemActive : $dropdownItem }}">
                             Support

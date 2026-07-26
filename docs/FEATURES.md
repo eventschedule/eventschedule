@@ -119,6 +119,18 @@ Available only when `IS_HOSTED=false` (selfhosted deployments).
 | Auto import from URLs/cities | `resources/views/role/edit.blade.php:830`, `!config('app.hosted')` | AI-powered event import from external URLs and city search |
 | App update | `app/Http/Controllers/AppController.php:19`, `!config('app.hosted')` | One-click application updates |
 
+## Network Features
+
+Available on any install that is **not** the nexus (`IS_NEXUS=false`) - that is, both
+single-tenant selfhost and self-hosted SaaS. eventschedule.com itself is the receiving
+end and has the moderation queue instead. Free on all tiers; enabled by the instance
+operator, not per schedule.
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Federation | `FederationService::isEnabled()` - `! config('app.is_nexus') && Setting::get('federation_enabled')` | Shares public events with the eventschedule.com listings; every listing links back to the event on the origin site. Off by default, enabled by an admin at `/admin/settings`. Each schedule can opt out via `roles.federation_enabled` |
+| Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation` |
+
 ## Newsletter Email Limits
 
 Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count individual email recipients, not newsletters. A newsletter sent to 100 followers uses 100 of the monthly allowance.

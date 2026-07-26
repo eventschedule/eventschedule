@@ -38,9 +38,15 @@ return [
     'report_errors' => (bool) env('REPORT_ERRORS', false),
     'is_testing' => (bool) env('APP_TESTING', false),
 
+    // URLs per child sitemap file. The sitemaps.org limit is 50,000; the default leaves plenty of
+    // headroom, including for a schedules page where each schedule also emits its sub-schedules.
+    // Tests lower this to exercise pagination without seeding thousands of rows.
+    'sitemap_urls_per_file' => (int) env('SITEMAP_URLS_PER_FILE', 10000),
+
     'is_nexus' => (bool) env('IS_NEXUS', false),
-    // The upstream nexus app that receives shared translation suggestions.
-    // Separate from marketing_url, which operators may point at their own site.
+    // The upstream nexus app: receives shared translation suggestions AND federated
+    // events. Separate from marketing_url, which operators may point at their own site -
+    // anything that must reach the real upstream belongs here, not there.
     'nexus_url' => env('NEXUS_URL', 'https://eventschedule.com'),
     // Where published translation-override files live. Env-overridable so tests
     // never write into storage/app/lang of the working checkout. A relative env

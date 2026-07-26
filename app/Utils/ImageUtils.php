@@ -108,6 +108,38 @@ class ImageUtils
     }
 
     /**
+     * Public URL for a filename produced by saveImageData().
+     *
+     * Where a stored image is served from depends on the configured disk, so a
+     * hardcoded '/storage/...' silently 404s on any deployment using object storage -
+     * which includes the hosted site. This mirrors the resolution in
+     * Event::getFlyerImageUrlAttribute() and Role::getProfileImageUrlAttribute();
+     * those predate this helper and still carry their own copies.
+     */
+    public static function storedUrl(?string $value): string
+    {
+        if (! $value) {
+            return '';
+        }
+
+        // Demo seed images ship in the repo rather than in storage.
+        if (str_starts_with($value, 'demo_')) {
+            return url('/images/demo/'.$value);
+        }
+
+        if (config('app.hosted') && config('filesystems.default') == 'do_spaces') {
+            return 'https://eventschedule.nyc3.cdn.digitaloceanspaces.com/'.$value;
+        }
+
+        if (in_array(config('filesystems.default'), ['local', 'public'])) {
+            return url('/storage/'.$value);
+        }
+
+        // Already an absolute URL from some other source.
+        return $value;
+    }
+
+    /**
      * Save image data to storage with proper format
      */
     public static function saveImageData(string $imageData, string $imageUrl, string $filenamePrefix = 'flyer_'): string

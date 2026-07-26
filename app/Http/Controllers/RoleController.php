@@ -2405,6 +2405,11 @@ class RoleController extends Controller
             $timezoneMismatchEvents = $this->offTimezoneEvents($role, auth()->user()->id);
         }
 
+        // Federation nudge, on the schedule tab only - this is the page you land on
+        // after creating an event, which is where the prompt is meant to appear.
+        $showFederationPrompt = $tab === 'schedule'
+            && app(\App\Services\FederationService::class)->shouldPromptAdoption(auth()->user());
+
         return view('role/show-admin', compact(
             'subdomain',
             'role',
@@ -2423,6 +2428,7 @@ class RoleController extends Controller
             'sortBy',
             'sortDir',
             'venueDuplicateGroupCount',
+            'showFederationPrompt',
             'timezoneMismatchEvents',
         ));
     }

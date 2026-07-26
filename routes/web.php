@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminFederationController;
 use App\Http\Controllers\AdminNewsletterController;
 use App\Http\Controllers\AdminTranslationController;
 use App\Http\Controllers\AnalyticsController;
@@ -37,6 +38,7 @@ use App\Http\Controllers\PromoCodeController;
 use App\Http\Controllers\PushController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
@@ -163,8 +165,36 @@ if (! config('app.is_nexus') && ! config('app.is_testing')) {
 
 require __DIR__.'/auth.php';
 
-Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
-Route::get('/sitemap.xml.gz', [HomeController::class, 'sitemap'])->name('sitemap.gz');
+// /sitemap.xml is a sitemap index; the children are streamed.
+//
+// withoutMiddleware('web') because this is pure crawler traffic that never needs a session: the
+// group's StartSession and CSRF middleware attach laravel_session and XSRF-TOKEN cookies, and a
+// response carrying Set-Cookie is never cached by Cloudflare, which would make the sitemap's
+// Cache-Control header pointless. The group NAME is used rather than a list of classes so this
+// keeps covering whatever bootstrap/app.php puts in the group. Global middleware still applies.
+$sitemapRoutes = function () {
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+    Route::get('/sitemap.xml.gz', [SitemapController::class, 'index'])->name('sitemap.gz');
+    // The {section} constraint keeps an unknown name from reaching the controller.
+    Route::get('/sitemap-{section}.xml', [SitemapController::class, 'section'])
+        ->where('section', 'pages|blog-[0-9]+|schedules-[0-9]+|events-[0-9]+')
+        ->name('sitemap.section');
+    Route::get('/sitemap-{section}.xml.gz', [SitemapController::class, 'section'])
+        ->where('section', 'pages|blog-[0-9]+|schedules-[0-9]+|events-[0-9]+')
+        ->name('sitemap.section_gz');
+};
+
+if (config('app.hosted') && ! config('app.is_testing')) {
+    // Pin to the canonical host. Without this the domain-less routes also match on app. and www.
+    // (the tenant group above excludes those two subdomains), and url() resolves against the
+    // request host, so those hosts would serve a sitemap full of URLs that do not exist there.
+    // Tenant subdomains, blog. and custom domains are already covered by the /{slug} catch-all in
+    // the group above, which is the correct outcome - they should not serve the global sitemap.
+    Route::domain(_base_domain())->withoutMiddleware('web')->group($sitemapRoutes);
+} else {
+    // Selfhost is path-routed on an arbitrary host, so no domain constraint.
+    Route::withoutMiddleware('web')->group($sitemapRoutes);
+}
 Route::get('/unsubscribe', [RoleController::class, 'showUnsubscribe'])->name('role.show_unsubscribe');
 Route::post('/unsubscribe', [RoleController::class, 'unsubscribe'])->name('role.unsubscribe')->middleware('throttle:2,2');
 Route::get('/user/unsubscribe', [RoleController::class, 'unsubscribeUser'])->name('user.unsubscribe')->middleware('throttle:2,2');
@@ -222,6 +252,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/dashboard', [HomeController::class, 'home'])->name('home');
     Route::get('/dashboard/api/calendar-events', [HomeController::class, 'calendarEvents'])->name('home.calendar_events');
     Route::post('/dashboard/config', [HomeController::class, 'saveDashboardConfig'])->name('home.save_config');
+    Route::post('/dashboard/federation-prompt/dismiss', [HomeController::class, 'dismissFederationPrompt'])->name('home.federation_prompt_dismiss');
     Route::get('/getting-started', [HomeController::class, 'gettingStarted'])->name('getting-started');
     Route::get('/new/{type}', [RoleController::class, 'create'])->name('new');
     Route::post('/validate_address', [RoleController::class, 'validateAddress'])->name('validate_address')->middleware('throttle:25,1440');
@@ -542,6 +573,16 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
         Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
         Route::post('/admin/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
+
+        // Federation moderation. Registered everywhere but runtime-404s off the nexus,
+        // because phpunit pins IS_NEXUS=true and a registration-time gate would be
+        // untestable (same reasoning as the translation review routes below).
+        Route::get('/admin/federation', [AdminFederationController::class, 'index'])->name('admin.federation');
+        Route::post('/admin/federation/bulk', [AdminFederationController::class, 'bulk'])->name('admin.federation.bulk');
+        Route::post('/admin/federation/{hash}/approve', [AdminFederationController::class, 'approve'])->name('admin.federation.approve');
+        Route::post('/admin/federation/{hash}/suspend', [AdminFederationController::class, 'suspend'])->name('admin.federation.suspend');
+        Route::post('/admin/federation/{hash}/delete', [AdminFederationController::class, 'destroy'])->name('admin.federation.delete');
+        Route::post('/admin/federation/event/{hash}/block', [AdminFederationController::class, 'blockEvent'])->name('admin.federation.block_event');
         if (config('app.hosted')) {
             Route::get('/admin/domains', [AdminController::class, 'domains'])->name('admin.domains');
             Route::post('/admin/domains/{role}/reprovision', [AdminController::class, 'domainReprovision'])->name('admin.domains.reprovision');
@@ -666,6 +707,11 @@ if (config('app.is_nexus')) {
         Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
         Route::get('/browse', [MarketingController::class, 'browse'])->name('marketing.browse');
         Route::post('/browse/event/{hash}/toggle-discovery', [MarketingController::class, 'toggleEventDiscovery'])->name('marketing.discovery.toggle')->middleware('auth');
+        Route::post('/browse/federated/{hash}/block', [MarketingController::class, 'toggleFederatedBlock'])->name('marketing.federation.block')->middleware('auth');
+        // Beacon target for outbound clicks on a federated listing. The card link
+        // itself stays a direct followable link to the origin, so this cannot be a
+        // tracking redirect without destroying the backlink federation exists to give.
+        Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1');
         Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
         Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
         Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -846,6 +892,8 @@ if (config('app.is_nexus')) {
         Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
         Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
         Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
+        Route::get('/docs/saas/federation', [MarketingController::class, 'docsSaasFederation'])->name('marketing.docs.saas.federation');
+        Route::get('/docs/selfhost/federation', [MarketingController::class, 'docsSelfhostFederation'])->name('marketing.docs.selfhost.federation');
         // Developer section
         Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
         Route::get('/docs/developer/webhooks', [MarketingController::class, 'docsDeveloperWebhooks'])->name('marketing.docs.developer.webhooks');
@@ -870,6 +918,11 @@ if (config('app.is_nexus')) {
             Route::get('/search', [MarketingController::class, 'search'])->name('marketing.search');
             Route::get('/browse', [MarketingController::class, 'browse'])->name('marketing.browse');
             Route::post('/browse/event/{hash}/toggle-discovery', [MarketingController::class, 'toggleEventDiscovery'])->name('marketing.discovery.toggle')->middleware('auth');
+            Route::post('/browse/federated/{hash}/block', [MarketingController::class, 'toggleFederatedBlock'])->name('marketing.federation.block')->middleware('auth');
+            // Beacon target for outbound clicks on a federated listing. The card link
+            // itself stays a direct followable link to the origin, so this cannot be a
+            // tracking redirect without destroying the backlink federation exists to give.
+            Route::post('/browse/federated/{hash}/click', [MarketingController::class, 'federatedClick'])->name('marketing.federation.click')->middleware('throttle:120,1');
             Route::get('/faq', [MarketingController::class, 'faq'])->name('marketing.faq');
             Route::get('/why-create-account', [MarketingController::class, 'whyCreateAccount'])->name('marketing.why_create_account');
             Route::get('/features/ticketing', [MarketingController::class, 'ticketing'])->name('marketing.ticketing');
@@ -1052,6 +1105,8 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas', [MarketingController::class, 'docsSaasSetup'])->name('marketing.docs.saas.setup');
             Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
             Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
+            Route::get('/docs/saas/federation', [MarketingController::class, 'docsSaasFederation'])->name('marketing.docs.saas.federation');
+            Route::get('/docs/selfhost/federation', [MarketingController::class, 'docsSelfhostFederation'])->name('marketing.docs.selfhost.federation');
             // Developer section
             Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
             Route::get('/docs/developer/webhooks', [MarketingController::class, 'docsDeveloperWebhooks'])->name('marketing.docs.developer.webhooks');
@@ -1240,6 +1295,8 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas', fn () => redirect('https://'._base_domain().'/docs/saas', 301));
             Route::get('/docs/saas/custom-domains', fn () => redirect('https://'._base_domain().'/docs/saas/custom-domains', 301));
             Route::get('/docs/saas/twilio', fn () => redirect('https://'._base_domain().'/docs/saas/twilio', 301));
+            Route::get('/docs/saas/federation', fn () => redirect('https://'._base_domain().'/docs/saas/federation', 301));
+            Route::get('/docs/selfhost/federation', fn () => redirect('https://'._base_domain().'/docs/selfhost/federation', 301));
             // Developer section
             Route::get('/docs/developer/api', fn () => redirect('https://'._base_domain().'/docs/developer/api', 301));
             Route::get('/docs/developer/webhooks', fn () => redirect('https://'._base_domain().'/docs/developer/webhooks', 301));
@@ -1379,6 +1436,8 @@ if (config('app.is_nexus')) {
     Route::get('/docs/saas', fn () => redirect()->route('home'))->name('marketing.docs.saas.setup');
     Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');
     Route::get('/docs/saas/twilio', fn () => redirect()->route('home'))->name('marketing.docs.saas.twilio');
+    Route::get('/docs/saas/federation', fn () => redirect()->route('home'))->name('marketing.docs.saas.federation');
+    Route::get('/docs/selfhost/federation', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.federation');
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
     Route::get('/docs/developer/api', fn () => redirect()->route('home'))->name('marketing.docs.developer.api');

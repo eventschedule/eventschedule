@@ -58,9 +58,12 @@ class RouteLoadTest extends TestCase
 
             $response = $request->get($url);
 
+            // getStatusCode(), not status(): TestResponse forwards unknown methods to the base
+            // response, and a streamed response (the sitemap) is a plain Symfony StreamedResponse
+            // without Laravel's status() helper.
             $this->assertTrue(
-                $response->status() < 500,
-                "Route {$url} returned status {$response->status()}"
+                $response->getStatusCode() < 500,
+                "Route {$url} returned status {$response->getStatusCode()}"
             );
         }
     }
@@ -72,6 +75,8 @@ class RouteLoadTest extends TestCase
             '/sign_up',
             '/reset-password',
             '/sitemap.xml',
+            '/sitemap.xml.gz',
+            '/sitemap-pages.xml',
             '/unsubscribe',
             '/robots.txt',
             '/blog',

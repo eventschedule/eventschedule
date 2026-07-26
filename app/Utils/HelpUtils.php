@@ -165,6 +165,11 @@ class HelpUtils
         'referrals' => '/docs/referral-program',
         'admin/support' => '/docs/saas#support-chat',
         'admin/translations*' => '/docs/selfhost/admin#system-translations',
+        // Federation is mirrored into both docs trees; point the AP Help button at the
+        // selfhost copy, which is the one every non-nexus install can act on.
+        // Deliberately not mapping admin/settings: federation is one card on a page
+        // that is mostly about header/footer code, so that would mislead.
+        'admin/federation*' => '/docs/selfhost/federation',
         'new/*' => '/docs/creating-schedules',
     ];
 

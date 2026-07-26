@@ -144,6 +144,91 @@
                 </div>
             @endif
 
+            {{-- Federated listings from other Event Schedule installs.
+
+                 Their own section rather than mixed into the grid above: provenance
+                 stays obvious, and the local query keeps its single ordering and limit.
+                 Not rendered at all when the network has nothing to show. --}}
+            @if($federatedEvents->count() > 0 || $federatedCountry || $federatedLanguage)
+                <div id="network" class="mt-20">
+                    <div class="mb-2 flex flex-wrap items-end justify-between gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.federation_browse_heading') }}</h2>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.federation_browse_intro') }}</p>
+                        </div>
+
+                        {{-- Plain GET filters. In-person events make location filtering
+                             essential, and keeping this server-side means the page stays
+                             crawlable, shareable, and free of a JS mount. --}}
+                        <form method="GET" action="{{ marketing_url('/browse') }}" class="flex flex-wrap items-center gap-2">
+                            <label for="federated-country" class="sr-only">{{ __('messages.federation_filter_all_countries') }}</label>
+                            <select id="federated-country" name="country" data-auto-submit
+                                    class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-white">
+                                <option value="">{{ __('messages.federation_filter_all_countries') }}</option>
+                                @foreach($federatedCountries as $code)
+                                    <option value="{{ $code }}" @selected($federatedCountry === $code)>{{ \App\Utils\CountryUtils::getName($code) ?: $code }}</option>
+                                @endforeach
+                            </select>
+
+                            <label for="federated-language" class="sr-only">{{ __('messages.federation_filter_all_languages') }}</label>
+                            <select id="federated-language" name="lang" data-auto-submit
+                                    class="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] dark:border-white/10 dark:bg-white/5 dark:text-white">
+                                <option value="">{{ __('messages.federation_filter_all_languages') }}</option>
+                                @foreach($federatedLanguages as $code)
+                                    <option value="{{ $code }}" @selected($federatedLanguage === $code)>{{ ucfirst(config('app.supported_languages')[$code] ?? $code) }}</option>
+                                @endforeach
+                            </select>
+
+                            <noscript>
+                                <button type="submit" class="rounded-xl bg-[#4E81FA] px-4 py-2 text-sm font-semibold text-white">{{ __('messages.filter') }}</button>
+                            </noscript>
+                        </form>
+                    </div>
+
+                    @if($federatedEvents->count() > 0)
+                        <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            @foreach($federatedEvents as $federatedEvent)
+                                @include('marketing.partials.federated-event-card', ['event' => $federatedEvent])
+                            @endforeach
+                        </div>
+
+                        @if($federatedTotal > $federatedEvents->count() && $federatedLimit < 96)
+                            <div class="mt-10 text-center">
+                                <a href="{{ request()->fullUrlWithQuery(['federated_limit' => $federatedLimit + 24]) }}#network"
+                                   class="inline-flex items-center rounded-2xl border border-gray-200 bg-white px-6 py-3 font-semibold text-gray-700 transition-all hover:border-blue-400/50 dark:border-white/10 dark:bg-white/5 dark:text-gray-200">
+                                    {{ __('messages.federation_show_more') }}
+                                </a>
+                            </div>
+                        @endif
+                    @else
+                        {{-- Visitor-facing wording: federation_preview_empty is about the
+                             sender's eligibility rules and means nothing to someone who
+                             just picked a country. --}}
+                        <p class="mt-8 text-gray-500 dark:text-gray-400">{{ __('messages.federation_browse_no_results') }}</p>
+                    @endif
+                </div>
+
+                {{-- Count the visit without touching the href, which must stay a direct
+                     followable link to the origin. Delegated rather than an inline
+                     handler, which CSP blocks. --}}
+                <script {!! nonce_attr() !!}>
+                    // Submit the filter form on change. The AP layout has a shared
+                    // data-auto-submit handler, but marketing pages do not load it.
+                    document.addEventListener('change', function (e) {
+                        var control = e.target.closest('[data-auto-submit]');
+                        if (control && control.form) control.form.submit();
+                    });
+
+                    document.addEventListener('click', function (e) {
+                        var link = e.target.closest('[data-federated-click]');
+                        if (!link || !navigator.sendBeacon) return;
+                        var body = new FormData();
+                        body.append('_token', '{{ csrf_token() }}');
+                        navigator.sendBeacon('{{ marketing_url('/browse/federated/') }}' + link.dataset.federatedClick + '/click', body);
+                    });
+                </script>
+            @endif
+
             {{-- Admin-only: hidden events management --}}
             @if($hiddenEvents->count() > 0)
                 <div class="mt-20">

@@ -96,6 +96,7 @@
 - 🔐 **Social Login:** Sign in quickly using Google or Facebook accounts.
 - 🎪 **Eventbrite Import:** Import events from Eventbrite into your schedule.
 - 🔔 **Webhooks:** Receive POST notifications for sales, events, and check-ins.
+- 🌐 **Federation:** Optionally share your public events with the eventschedule.com listings, with every listing linking back to the event on your own site.
 - 💬 **WhatsApp Event Creation:** Create events by sending messages or images via WhatsApp with AI parsing.
 
 ### AI-Powered

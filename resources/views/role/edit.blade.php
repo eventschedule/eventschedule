@@ -3258,6 +3258,20 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
                             </div>
 
+                            {{-- Only rendered once the operator has switched the network
+                                 on for the whole install. Without that gate a SaaS
+                                 operator's customers could opt into a network the
+                                 operator never joined. --}}
+                            @if (! config('app.is_nexus') && \App\Models\Setting::get('federation_enabled'))
+                            <div class="mb-6">
+                                <x-toggle name="federation_enabled"
+                                    label="{{ __('messages.federation_schedule_toggle') }}"
+                                    checked="{{ old('federation_enabled', $role->federation_enabled) }}"
+                                    help="{{ __('messages.federation_schedule_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('federation_enabled')" />
+                            </div>
+                            @endif
+
                             @if (! $role->isTalent())
                             <div class="mb-6">
                                 <x-toggle name="hide_videos"

@@ -54,6 +54,12 @@
 </div>
 @endif
 
+{{-- Below the two banners above on purpose: those warn about real problems, this is an
+     optional invitation and must not outrank them. --}}
+@if(!empty($showFederationPrompt))
+    @include('partials.federation-prompt')
+@endif
+
 @include('role/partials/calendar', ['route' => 'admin', 'tab' => 'schedule'])
 
 @if (count($unscheduled))

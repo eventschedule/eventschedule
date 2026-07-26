@@ -1397,7 +1397,7 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 8. Federation (coming soon)                                  -->
+    <!-- 8. Federation                                                -->
     <!-- ============================================================ -->
     <section id="federation" class="border-t border-gray-200 bg-gray-50 py-24 scroll-mt-24 dark:border-white/5 dark:bg-[#0f0f14]">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -1407,13 +1407,13 @@
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        Coming Soon
+                        Free, opt-in
                     </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl"><span class="text-gradient-saas">Federation</span> is on the way</h2>
+                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl"><span class="text-gradient-saas">Federation</span> sends traffic back to you</h2>
                     <p class="mb-6 text-lg text-gray-500 dark:text-gray-400 sm:text-xl">An optional network that sends discovery traffic back to your platform.</p>
-                    <p class="mb-6 text-gray-600 dark:text-gray-300">Operators will be able to share their customers' online events to the eventschedule.com listings. Every listing links back to the event on your platform: extra reach and SEO for your customers, opt-in and off by default.</p>
+                    <p class="mb-6 text-gray-600 dark:text-gray-300">Share your customers' public events, online and in person, to the eventschedule.com listings. Every listing links straight back to the event on your platform: extra reach and SEO for your customers, opt-in and off by default.</p>
                     <ul class="space-y-3">
-                        @foreach (['Discovery traffic flows to your installation', 'Your customers reach a wider audience', 'Completely optional, off by default'] as $li)
+                        @foreach (['Discovery traffic flows to your installation', 'Your customers reach a wider audience', 'Off by default, and every schedule can opt out'] as $li)
                             <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                                 <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                                 {{ $li }}

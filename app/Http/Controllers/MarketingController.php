@@ -1190,6 +1190,23 @@ class MarketingController extends Controller
     }
 
     /**
+     * Federation documentation.
+     *
+     * Mirrored across both docs trees because federation is available to any
+     * non-nexus install, single-tenant selfhost and selfhosted SaaS alike. Both
+     * pages share one body partial so they cannot drift apart.
+     */
+    public function docsSaasFederation()
+    {
+        return view('marketing.docs.saas.federation');
+    }
+
+    public function docsSelfhostFederation()
+    {
+        return view('marketing.docs.selfhost.federation');
+    }
+
+    /**
      * Boost documentation page
      */
     public function docsSelfhostBoost()
@@ -4927,16 +4944,106 @@ class MarketingController extends Controller
                 ->get()
             : collect();
 
+        // Federated listings render as their own labelled section rather than being
+        // interleaved: every discovery query here ends in a single Eloquent builder
+        // with its own ordering and limit, so mixing a second corpus in would need a
+        // UNION or a merge-and-re-sort in PHP.
+        $federatedQuery = \App\Models\FederatedEvent::listable()
+            ->when($request->filled('country'), fn ($q) => $q->where('country_code', strtoupper($request->input('country'))))
+            ->when($request->filled('lang'), fn ($q) => $q->where('language', $request->input('lang')))
+            ->orderBy('next_occurrence_at');
+
+        $federatedLimit = min(max((int) $request->input('federated_limit', 12), 12), 96);
+        $federatedTotal = (clone $federatedQuery)->count();
+        $federatedEvents = $federatedQuery->limit($federatedLimit)->get();
+
         return view('marketing.browse', [
             'events' => $events,
             'hiddenEvents' => $hiddenEvents,
+            'federatedEvents' => $federatedEvents,
+            'federatedTotal' => $federatedTotal,
+            'federatedLimit' => $federatedLimit,
+            'federatedCountries' => $this->federatedFilterValues('country_code'),
+            'federatedLanguages' => $this->federatedFilterValues('language'),
+            'federatedCountry' => strtoupper((string) $request->input('country')),
+            'federatedLanguage' => (string) $request->input('lang'),
         ]);
+    }
+
+    /**
+     * Distinct filter values actually present in the federated corpus, so the
+     * dropdowns never offer a choice that returns nothing.
+     */
+    private function federatedFilterValues(string $column): array
+    {
+        return \App\Models\FederatedEvent::listable()
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->distinct()
+            ->orderBy($column)
+            ->pluck($column)
+            ->all();
+    }
+
+    /**
+     * Record a click sent out to a federated instance.
+     *
+     * Fired by a beacon rather than by routing the link through a redirect: the
+     * card's href must stay a direct, followable link to the origin, because that
+     * backlink IS what federation offers operators. A tracking redirect would point
+     * the link at this domain and quietly destroy it.
+     */
+    public function federatedClick(Request $request, string $hash)
+    {
+        abort_unless(config('app.is_nexus'), 404);
+
+        // Resolved through listable() so counts cannot be inflated by posting hashes for
+        // listings that are blocked, expired, or from an unapproved instance.
+        $event = \App\Models\FederatedEvent::listable()
+            ->whereKey(UrlUtils::decodeId($hash))
+            ->first();
+
+        if ($event) {
+            \App\Models\FederationClicksDaily::incrementClick($event->federated_instance_id);
+        }
+
+        return response()->noContent();
     }
 
     /**
      * Admin-only: toggle whether an event is hidden from the platform discovery
      * surfaces (homepage Discover, /browse, /search). Does not unpublish the event.
      */
+    /**
+     * Block or unblock a federated listing from the browse page.
+     *
+     * Lives here rather than on AdminFederationController because /browse is served
+     * from the base domain, while the admin routes sit behind the app-subdomain group:
+     * posting there gets 302'd by RedirectToAppSubdomain, which browsers replay as GET
+     * (405), and the admin password-confirm gate would drop the body anyway. Same shape
+     * as toggleEventDiscovery below, which solves this for local events.
+     */
+    public function toggleFederatedBlock(string $hash)
+    {
+        abort_unless(config('app.is_nexus'), 404);
+        abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
+
+        $listing = \App\Models\FederatedEvent::findOrFail(UrlUtils::decodeIdOrFail($hash));
+        $listing->isBlocked() ? $listing->unblock() : $listing->block();
+
+        AuditService::log(
+            AuditService::ADMIN_FEDERATION_BLOCK_EVENT,
+            auth()->id(),
+            'FederatedEvent',
+            $listing->id,
+            null,
+            ['blocked' => $listing->isBlocked()],
+            $listing->isBlocked() ? 'Blocked federated listing' : 'Unblocked federated listing',
+        );
+
+        return back()->with('message', __('messages.saved'));
+    }
+
     public function toggleEventDiscovery(string $hash)
     {
         abort_unless(auth()->check() && auth()->user()->isAdmin(), 403);
@@ -5064,6 +5171,8 @@ class MarketingController extends Controller
             'saas_setup' => route('marketing.docs.saas.setup'),
             'saas_custom_domains' => route('marketing.docs.saas.custom_domains'),
             'saas_twilio' => route('marketing.docs.saas.twilio'),
+            'saas_federation' => route('marketing.docs.saas.federation'),
+            'selfhost_federation' => route('marketing.docs.selfhost.federation'),
             'developer_api' => route('marketing.docs.developer.api'),
             'developer_webhooks' => route('marketing.docs.developer.webhooks'),
             'embed_calendar_feature' => route('marketing.embed_calendar'),
@@ -5433,6 +5542,18 @@ class MarketingController extends Controller
             ['page' => 'Twilio Integration', 'section' => 'Phone Verification', 'description' => 'Implement phone number verification.', 'url' => $r['saas_twilio'].'#phone-verification', 'category' => 'SaaS', 'keywords' => 'phone verify number sms'],
             ['page' => 'Twilio Integration', 'section' => 'WhatsApp Setup', 'description' => 'Register and configure WhatsApp messaging.', 'url' => $r['saas_twilio'].'#whatsapp', 'category' => 'SaaS', 'keywords' => 'whatsapp messaging sender'],
             ['page' => 'Twilio Integration', 'section' => 'Testing', 'description' => 'Test SMS and WhatsApp functionality.', 'url' => $r['saas_twilio'].'#testing', 'category' => 'SaaS', 'keywords' => 'test sms whatsapp verify'],
+            ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['saas_federation'].'#overview', 'category' => 'SaaS', 'keywords' => 'federation network listings discovery traffic backlink'],
+            ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['saas_federation'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable turn on register approve settings'],
+            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule can opt out of the network.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt out per schedule toggle'],
+            ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language'],
+            ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['saas_federation'].'#sync', 'category' => 'SaaS', 'keywords' => 'sync hourly cron federation:push verified'],
+            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Only public event information leaves your install.', 'url' => $r['saas_federation'].'#privacy', 'category' => 'SaaS', 'keywords' => 'privacy data shared attendees tickets'],
+            ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['selfhost_federation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'federation network listings discovery traffic backlink'],
+            ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['selfhost_federation'].'#enable', 'category' => 'Selfhost', 'keywords' => 'enable turn on register approve settings'],
+            ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule can opt out of the network.', 'url' => $r['selfhost_federation'].'#per-schedule', 'category' => 'Selfhost', 'keywords' => 'opt out per schedule toggle'],
+            ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['selfhost_federation'].'#listings', 'category' => 'Selfhost', 'keywords' => 'listing card link backlink filter country language'],
+            ['page' => 'Federation', 'section' => 'Keeping it in sync', 'description' => 'Sharing runs hourly and removes events that stop qualifying.', 'url' => $r['selfhost_federation'].'#sync', 'category' => 'Selfhost', 'keywords' => 'sync hourly cron federation:push verified'],
+            ['page' => 'Federation', 'section' => 'What is shared', 'description' => 'Only public event information leaves your install.', 'url' => $r['selfhost_federation'].'#privacy', 'category' => 'Selfhost', 'keywords' => 'privacy data shared attendees tickets'],
 
             // ===== DEVELOPER =====
 

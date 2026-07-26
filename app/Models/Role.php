@@ -113,6 +113,7 @@ class Role extends Model implements MustVerifyEmail
         'ai_style_instructions',
         'ai_content_instructions',
         'hide_past_events',
+        'federation_enabled',
         'draft_events_default',
         'default_event_visibility',
         'hide_videos',
@@ -164,6 +165,7 @@ class Role extends Model implements MustVerifyEmail
         'renewal_reminder_sent_at' => 'datetime',
         'custom_labels' => 'array',
         'hide_past_events' => 'boolean',
+        'federation_enabled' => 'boolean',
         'draft_events_default' => 'boolean',
         'hide_videos' => 'boolean',
         'show_accessibility_widget' => 'boolean',
@@ -213,6 +215,27 @@ class Role extends Model implements MustVerifyEmail
 
         return in_array($style, ['banner', 'compact'], true) ? $style : 'banner';
     }
+
+    /**
+     * Columns whose change makes this schedule's federated listings stale: the name
+     * shown on the card, the venue address flattened into each listing, and the
+     * subdomain the backlink is built from.
+     */
+    public const FEDERATION_FIELDS = [
+        'name',
+        'subdomain',
+        'address1',
+        'address2',
+        'city',
+        'state',
+        'postal_code',
+        'country_code',
+        'formatted_address',
+        'geo_lat',
+        'geo_lon',
+        'profile_image_url',
+        'language_code',
+    ];
 
     protected static function boot()
     {
@@ -396,9 +419,37 @@ class Role extends Model implements MustVerifyEmail
         // When the translation TARGET changes, every stored `_en` value is now in the wrong
         // language. Clear them (and reset attempts) so the cron regenerates in the new target;
         // sub-schedule names are re-translated inline by the job since the cron skips groups.
+        static::saving(function ($model) {
+            // The per-schedule federation toggle is only rendered once the operator
+            // has switched the network on for the whole install. Re-assert that here
+            // rather than in the controller: RoleController fills from the request in
+            // three separate places, and a hand-crafted POST would otherwise let a
+            // customer opt into a network their operator never joined.
+            if ($model->isDirty('federation_enabled')
+                && (config('app.is_nexus') || ! Setting::get('federation_enabled'))) {
+                $model->federation_enabled = $model->getOriginal('federation_enabled') ?? true;
+            }
+        });
+
         static::updated(function ($model) {
             if ($model->wasChanged('translation_language_code')) {
                 \App\Jobs\RegenerateRoleTranslations::dispatch($model);
+            }
+
+            // A federated listing carries this schedule's name and its flattened venue
+            // address, and its backlink is built from the subdomain - none of which
+            // touch the event row, so nothing else would re-queue them. Without this,
+            // renaming a venue leaves every federated listing for it stale, and changing
+            // a subdomain leaves the network holding links that no longer resolve.
+            // Explicit Event query rather than $model->events()->update(), which would
+            // update through the belongsToMany join and can hit ambiguous columns.
+            // A query-builder update fires no model events, so this cannot recurse.
+            if ($model->wasChanged(self::FEDERATION_FIELDS)) {
+                Event::whereIn('id', $model->events()->pluck('events.id'))
+                    ->where(function ($q) {
+                        $q->whereNotNull('federated_at')->orWhereNotNull('federated_skipped_at');
+                    })
+                    ->update(['federated_at' => null, 'federated_skipped_at' => null]);
             }
         });
 

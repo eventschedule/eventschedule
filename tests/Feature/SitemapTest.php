@@ -1,0 +1,559 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\BlogPost;
+use App\Models\Event;
+use App\Models\Role;
+use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Tests\Feature\Concerns\CreatesScheduleData;
+use Tests\TestCase;
+
+/**
+ * /sitemap.xml is a sitemap index whose children are streamed in chunks.
+ *
+ * The regression this guards: the previous single-file implementation hydrated every schedule and
+ * every public event at once and rendered the whole document into one cached string, which grew
+ * until it exhausted the PHP memory limit and returned a zero-byte 500 in production. Memory here
+ * must stay flat, no path may fail to produce valid XML, and the index must never advertise a
+ * child it cannot serve.
+ */
+class SitemapTest extends TestCase
+{
+    use CreatesScheduleData;
+    use RefreshDatabase;
+
+    /** Fetch a streamed sitemap and return its body. */
+    private function xml(string $path): string
+    {
+        return $this->get($path)->assertOk()->streamedContent();
+    }
+
+    private function parse(string $xml): \SimpleXMLElement
+    {
+        $parsed = simplexml_load_string($xml);
+
+        $this->assertNotFalse($parsed, 'Sitemap is not valid XML: '.substr($xml, 0, 200));
+
+        return $parsed;
+    }
+
+    /** The `<loc>` values of a sitemap document, as plain strings. */
+    private function locs(string $xml): array
+    {
+        $parsed = $this->parse($xml);
+        $nodes = $parsed->getName() === 'sitemapindex' ? $parsed->sitemap : $parsed->url;
+
+        return collect(iterator_to_array($nodes, false))->map(fn ($n) => (string) $n->loc)->all();
+    }
+
+    /** The paths of the children the index currently advertises. */
+    private function advertisedChildren(): array
+    {
+        return collect($this->locs($this->xml('/sitemap.xml')))
+            ->map(fn ($loc) => parse_url($loc, PHP_URL_PATH))
+            ->all();
+    }
+
+    public function test_index_is_a_valid_sitemapindex(): void
+    {
+        $response = $this->get('/sitemap.xml')->assertOk();
+        $response->assertHeader('Content-Type', 'application/xml');
+        $response->assertHeader('Cache-Control', 'max-age=3600, public');
+
+        $xml = $response->streamedContent();
+
+        $this->assertSame('sitemapindex', $this->parse($xml)->getName());
+        $this->assertStringContainsString('/sitemap-pages.xml', $xml);
+    }
+
+    /**
+     * The direct regression guard for the 500: every URL the index advertises must return valid
+     * XML, even with nothing in the database.
+     */
+    public function test_every_advertised_child_is_valid_on_an_empty_database(): void
+    {
+        $this->assertSame('sitemapindex', $this->parse($this->xml('/sitemap.xml'))->getName());
+
+        $children = $this->advertisedChildren();
+        $this->assertNotEmpty($children, 'the index must never be empty');
+
+        foreach ($children as $path) {
+            $this->assertSame('urlset', $this->parse($this->xml($path))->getName(), $path.' is not a urlset');
+        }
+    }
+
+    public function test_every_advertised_child_is_valid_with_data(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $this->createGroup($role);
+        $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        foreach ($this->advertisedChildren() as $path) {
+            $this->assertSame('urlset', $this->parse($this->xml($path))->getName(), $path.' is not a urlset');
+        }
+    }
+
+    /**
+     * Crawler traffic never needs a session, and Cloudflare will not cache a response that sets a
+     * cookie - which would make the Cache-Control header pointless. Guards the
+     * withoutMiddleware('web') on the sitemap routes.
+     */
+    public function test_sitemap_responses_do_not_set_cookies(): void
+    {
+        foreach (['/sitemap.xml', '/sitemap.xml.gz', '/sitemap-pages.xml'] as $path) {
+            $response = $this->get($path)->assertOk();
+
+            $this->assertEmpty(
+                $response->headers->getCookies(),
+                $path.' set a cookie, which stops Cloudflare caching it'
+            );
+            $this->assertNull($response->headers->get('Set-Cookie'), $path.' set a cookie');
+        }
+    }
+
+    public function test_gzipped_variants_decode_to_the_plain_body(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        // Children only. The index deliberately differs between the two variants - it lists .gz
+        // children when served as .gz - and has its own test below.
+        foreach ($this->advertisedChildren() as $path) {
+            $response = $this->get($path.'.gz')->assertOk();
+            $response->assertHeader('Content-Encoding', 'gzip');
+
+            $decoded = gzdecode($response->streamedContent());
+
+            $this->assertNotFalse($decoded, $path.'.gz is not valid gzip');
+            $this->assertSame($this->xml($path), $decoded, $path.'.gz does not match the plain body');
+        }
+
+        // The index still has to be valid gzip and valid XML in both variants.
+        $index = gzdecode($this->get('/sitemap.xml.gz')->assertOk()->streamedContent());
+        $this->assertNotFalse($index, '/sitemap.xml.gz is not valid gzip');
+        $this->assertSame('sitemapindex', $this->parse($index)->getName());
+    }
+
+    /**
+     * A body larger than the flush threshold crosses ZLIB_SYNC_FLUSH boundaries mid-stream. Get
+     * that wrong and the gzip stream is corrupt in production while every small fixture still
+     * passes, so this deliberately produces a document big enough to flush several times.
+     */
+    public function test_a_large_body_survives_mid_stream_flushes(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $this->seedEvents($role, 900);
+
+        $plain = $this->xml('/sitemap-events-1.xml');
+        $this->assertGreaterThan(65536, strlen($plain), 'fixture is too small to trigger a flush');
+
+        $decoded = gzdecode($this->get('/sitemap-events-1.xml.gz')->assertOk()->streamedContent());
+
+        $this->assertNotFalse($decoded, 'large gzipped body is corrupt');
+        $this->assertSame($plain, $decoded);
+        $this->assertSame(900, substr_count($decoded, '<loc>'));
+    }
+
+    /** Bulk-insert public events, bypassing the per-model save path for speed. */
+    private function seedEvents(Role $role, int $count): void
+    {
+        $now = now();
+        $events = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $events[] = [
+                'user_id' => $role->user_id,
+                'creator_role_id' => $role->id,
+                'name' => 'Bulk Event '.$i,
+                'slug' => 'bulk-event-'.$i,
+                'starts_at' => $now->copy()->addDays(7)->setTime(12, 0)->format('Y-m-d H:i:s'),
+                'duration' => 2,
+                'is_draft' => false,
+                'is_private' => false,
+                'is_cancelled' => false,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        foreach (array_chunk($events, 200) as $chunk) {
+            DB::table('events')->insert($chunk);
+        }
+
+        $pivots = DB::table('events')
+            ->where('creator_role_id', $role->id)
+            ->pluck('id')
+            ->map(fn ($id) => ['event_id' => $id, 'role_id' => $role->id, 'is_accepted' => true])
+            ->all();
+
+        foreach (array_chunk($pivots, 200) as $chunk) {
+            DB::table('event_role')->insert($chunk);
+        }
+    }
+
+    /** A crawler that asked for the compressed index should not get a list of uncompressed children. */
+    public function test_gzipped_index_lists_gzipped_children(): void
+    {
+        $xml = gzdecode($this->get('/sitemap.xml.gz')->assertOk()->streamedContent());
+
+        foreach ($this->locs($xml) as $loc) {
+            $this->assertStringEndsWith('.xml.gz', $loc);
+        }
+    }
+
+    public function test_pages_child_holds_the_static_marketing_urls(): void
+    {
+        $xml = $this->xml('/sitemap-pages.xml');
+
+        $this->assertSame('urlset', $this->parse($xml)->getName());
+        $this->assertStringContainsString(url('/'), $xml);
+        $this->assertStringContainsString(url('/pricing'), $xml);
+        $this->assertStringContainsString(url('/docs/getting-started'), $xml);
+    }
+
+    public function test_children_paginate_at_the_configured_cap(): void
+    {
+        config(['app.sitemap_urls_per_file' => 2]);
+
+        $owner = $this->createOwner();
+        $subdomains = [];
+        for ($i = 0; $i < 5; $i++) {
+            $subdomains[] = $this->createRole($owner, 'venue')->subdomain;
+        }
+
+        $index = $this->xml('/sitemap.xml');
+        foreach ([1, 2, 3] as $page) {
+            $this->assertStringContainsString('/sitemap-schedules-'.$page.'.xml', $index);
+        }
+        $this->assertStringNotContainsString('/sitemap-schedules-4.xml', $index);
+
+        // Every schedule appears exactly once across the pages - no gaps, no duplicates.
+        $seen = [];
+        foreach ([1, 2, 3] as $page) {
+            foreach ($this->locs($this->xml('/sitemap-schedules-'.$page.'.xml')) as $loc) {
+                $seen[] = basename(parse_url($loc, PHP_URL_PATH));
+            }
+        }
+
+        $this->assertSame(count($seen), count(array_unique($seen)), 'a schedule was listed more than once');
+        $this->assertEqualsCanonicalizing($subdomains, $seen);
+
+        $this->get('/sitemap-schedules-4.xml')->assertNotFound();
+    }
+
+    /** Events paginate descending, so page 1 holds the newest. */
+    public function test_event_pages_have_no_gaps_or_duplicates(): void
+    {
+        config(['app.sitemap_urls_per_file' => 2]);
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        $slugs = [];
+        for ($i = 0; $i < 5; $i++) {
+            $slugs[] = $this->createEvent($role, ['name' => 'Event '.$i, 'creator_role_id' => $role->id])->slug;
+        }
+
+        $seen = [];
+        foreach ([1, 2, 3] as $page) {
+            $xml = $this->xml('/sitemap-events-'.$page.'.xml');
+            $this->assertLessThanOrEqual(2, substr_count($xml, '<loc>'), 'page '.$page.' exceeds the cap');
+
+            foreach ($slugs as $slug) {
+                if (str_contains($xml, '/'.$slug.'/')) {
+                    $seen[] = $slug;
+                }
+            }
+        }
+
+        $this->assertSame(count($seen), count(array_unique($seen)), 'an event was listed more than once');
+        $this->assertEqualsCanonicalizing($slugs, $seen);
+    }
+
+    /**
+     * A schedules page emits one URL per schedule plus one per sub-schedule. Weighting by that is
+     * what keeps the page under the cap.
+     */
+    public function test_sub_schedules_count_towards_the_page_cap(): void
+    {
+        config(['app.sitemap_urls_per_file' => 3]);
+
+        $owner = $this->createOwner();
+        for ($i = 0; $i < 3; $i++) {
+            $role = $this->createRole($owner, 'venue');
+            $this->createGroup($role);
+            $this->createGroup($role);
+        }
+
+        foreach ($this->advertisedChildren() as $path) {
+            if (! str_contains($path, 'schedules')) {
+                continue;
+            }
+
+            $this->assertLessThanOrEqual(3, substr_count($this->xml($path), '<loc>'), $path.' exceeds the cap');
+        }
+    }
+
+    public function test_sub_schedules_are_listed_under_their_schedule(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $group = $this->createGroup($role);
+
+        $this->assertStringContainsString(
+            $role->getCanonicalUrl().'/'.$group->slug,
+            $this->xml('/sitemap-schedules-1.xml')
+        );
+    }
+
+    /**
+     * The page holding the newest ids is left unbounded, so a row created after the section list
+     * was cached still lands in an existing page instead of falling outside every range.
+     */
+    public function test_rows_created_after_the_index_is_cached_still_appear(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $this->createEvent($role, ['name' => 'First', 'creator_role_id' => $role->id]);
+
+        // Warms the cached section list, including the page id ranges.
+        $this->xml('/sitemap.xml');
+
+        $later = $this->createEvent($role, ['name' => 'Later', 'creator_role_id' => $role->id]);
+
+        $this->assertStringContainsString($later->slug, $this->xml('/sitemap-events-1.xml'));
+    }
+
+    /** A child the index advertises must never 404, even after the rows behind it are deleted. */
+    public function test_deleting_rows_does_not_make_an_advertised_child_404(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        $children = $this->advertisedChildren();
+        $this->assertContains('/sitemap-events-1.xml', $children);
+
+        DB::table('event_role')->where('event_id', $event->id)->delete();
+        Event::whereKey($event->id)->delete();
+
+        foreach ($children as $path) {
+            $this->assertSame('urlset', $this->parse($this->xml($path))->getName(), $path.' should still serve');
+        }
+    }
+
+    /**
+     * A schedule with a verified email but no owner is not claimed, so getGuestUrl() returns an
+     * empty string. The old query did not check user_id, so the view rendered url('') and emitted
+     * the site root as a duplicate <loc>, once per ownerless schedule.
+     */
+    public function test_unclaimed_schedules_are_excluded_and_the_root_is_not_duplicated(): void
+    {
+        $owner = $this->createOwner();
+        $claimed = $this->createRole($owner, 'venue', ['name' => 'Claimed Venue']);
+        $orphan = $this->createRole($owner, 'venue', ['name' => 'Orphan Venue']);
+        DB::table('roles')->where('id', $orphan->id)->update(['user_id' => null]);
+
+        $xml = $this->xml('/sitemap-schedules-1.xml');
+
+        $this->assertStringContainsString($claimed->subdomain, $xml);
+        $this->assertStringNotContainsString($orphan->subdomain, $xml);
+        $this->assertSame(0, substr_count($xml, '<loc>'.url('/').'</loc>'));
+    }
+
+    /**
+     * The date segment of a recurring event's URL is the schedule's calendar date, not the UTC
+     * one. The old eager load omitted creatorRole.timezone, and loadMissing() will not refetch an
+     * already-loaded relation, so it silently fell back to UTC and advertised the wrong day.
+     */
+    public function test_recurring_event_url_uses_the_creator_schedule_timezone(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+
+        // 02:00 UTC is the previous evening in New York.
+        $startsAt = Carbon::now()->addDays(7)->setTime(2, 0);
+        $event = $this->createRecurringEvent($role, [
+            'starts_at' => $startsAt->format('Y-m-d H:i:s'),
+            'creator_role_id' => $role->id,
+        ]);
+
+        $localDate = $startsAt->copy()->timezone('America/New_York')->format('Y-m-d');
+        $this->assertNotSame($startsAt->format('Y-m-d'), $localDate, 'fixture no longer straddles midnight');
+
+        $xml = $this->xml('/sitemap-events-1.xml');
+
+        $this->assertStringContainsString($event->slug, $xml);
+        $this->assertStringContainsString('/'.$localDate.'<', $xml);
+        $this->assertStringNotContainsString('/'.$startsAt->format('Y-m-d').'<', $xml);
+    }
+
+    /**
+     * A schedule served directly on an active custom domain canonicalizes to that domain, so the
+     * sitemap must advertise the same URL rather than the subdomain Google would discard.
+     */
+    public function test_custom_domain_schedules_are_listed_at_their_canonical_url(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', [
+            'custom_domain' => 'https://sitemap-direct.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
+        $this->createEvent($role, ['creator_role_id' => $role->id]);
+
+        $schedules = $this->xml('/sitemap-schedules-1.xml');
+        $this->assertStringContainsString('<loc>https://sitemap-direct.test</loc>', $schedules);
+        $this->assertStringNotContainsString(url('/'.$role->subdomain).'<', $schedules);
+
+        $this->assertStringContainsString('<loc>https://sitemap-direct.test/', $this->xml('/sitemap-events-1.xml'));
+    }
+
+    /** Walking every event in the database must not write one log line per unroutable event. */
+    public function test_unroutable_events_are_skipped_without_logging_an_error(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $event = $this->createEvent($role, ['creator_role_id' => null]);
+        DB::table('roles')->where('id', $role->id)->update(['user_id' => null]);
+
+        Log::spy();
+
+        $this->assertStringNotContainsString($event->slug, $this->xml('/sitemap-events-1.xml'));
+
+        Log::shouldNotHaveReceived('error');
+    }
+
+    public function test_hidden_events_are_excluded(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        $visible = $this->createEvent($role, ['name' => 'Visible', 'creator_role_id' => $role->id]);
+        $hidden = [
+            $this->createEvent($role, ['name' => 'Private', 'is_private' => true, 'creator_role_id' => $role->id]),
+            $this->createEvent($role, ['name' => 'Draft', 'is_draft' => true, 'creator_role_id' => $role->id]),
+            $this->createEvent($role, ['name' => 'Cancelled', 'is_cancelled' => true, 'creator_role_id' => $role->id]),
+            $this->createEvent($role, ['name' => 'Locked', 'event_password' => 'secret', 'creator_role_id' => $role->id]),
+            $this->createEvent($role, ['name' => 'Unaccepted', 'is_accepted' => false, 'creator_role_id' => $role->id]),
+        ];
+
+        $xml = $this->xml('/sitemap-events-1.xml');
+
+        $this->assertStringContainsString($visible->slug, $xml);
+
+        foreach ($hidden as $event) {
+            $this->assertStringNotContainsString($event->slug, $xml, $event->name.' should not be listed');
+        }
+    }
+
+    /**
+     * A single XML-illegal control character makes the whole document non-well-formed, so Google
+     * rejects the file rather than the offending row. htmlspecialchars does not strip them.
+     */
+    public function test_control_characters_in_a_slug_do_not_break_the_document(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $group = $this->createGroup($role);
+        DB::table('groups')->where('id', $group->id)->update(['slug' => "bad\x08slug"]);
+
+        $this->assertSame('urlset', $this->parse($this->xml('/sitemap-schedules-1.xml'))->getName());
+    }
+
+    public function test_blog_posts_are_listed_and_paginated(): void
+    {
+        config(['app.sitemap_urls_per_file' => 2]);
+
+        $slugs = [];
+        for ($i = 0; $i < 3; $i++) {
+            $post = new BlogPost;
+            $post->title = 'Post '.$i;
+            $post->slug = 'post-'.$i.'-'.strtolower(Str::random(4));
+            $post->content = 'Body';
+            $post->is_published = true;
+            $post->published_at = now()->subDays($i + 1);
+            $post->save();
+
+            $slugs[] = $post->slug;
+        }
+
+        $children = $this->advertisedChildren();
+        $this->assertContains('/sitemap-blog-1.xml', $children);
+        $this->assertContains('/sitemap-blog-2.xml', $children);
+
+        $seen = [];
+        foreach (['/sitemap-blog-1.xml', '/sitemap-blog-2.xml'] as $path) {
+            $xml = $this->xml($path);
+            $this->assertLessThanOrEqual(2, substr_count($xml, '<loc>'), $path.' exceeds the cap');
+
+            foreach ($slugs as $slug) {
+                if (str_contains($xml, $slug)) {
+                    $seen[] = $slug;
+                }
+            }
+        }
+
+        $this->assertEqualsCanonicalizing($slugs, $seen);
+    }
+
+    public function test_unknown_sections_are_not_served(): void
+    {
+        // The route constraint keeps an unknown name out of the controller entirely, so this URL
+        // falls through to whatever the app does with any other unknown path. All that matters
+        // here is that it is never answered with a sitemap.
+        $this->assertNotSame(200, $this->get('/sitemap-bogus.xml')->getStatusCode());
+
+        // A well-formed name that is not in the index does reach the controller, and 404s there.
+        $this->get('/sitemap-schedules-0.xml')->assertNotFound();
+        $this->get('/sitemap-events-0.xml')->assertNotFound();
+        $this->get('/sitemap-events-99.xml')->assertNotFound();
+    }
+
+    /** Query strings no longer fan out the cache or change the response. */
+    public function test_legacy_query_parameters_are_ignored(): void
+    {
+        $plain = $this->xml('/sitemap.xml');
+
+        $this->assertSame($plain, $this->xml('/sitemap.xml?events=1'));
+        $this->assertSame($plain, $this->xml('/sitemap.xml?roles=1'));
+    }
+
+    /** Peak memory must not scale with row count. */
+    public function test_streaming_memory_does_not_scale_with_row_count(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->createEvent($role, ['name' => 'Small '.$i, 'creator_role_id' => $role->id]);
+        }
+
+        gc_collect_cycles();
+        $before = memory_get_usage();
+        $this->xml('/sitemap-events-1.xml');
+        $small = memory_get_usage() - $before;
+
+        for ($i = 0; $i < 100; $i++) {
+            $this->createEvent($role, ['name' => 'Large '.$i, 'creator_role_id' => $role->id]);
+        }
+
+        gc_collect_cycles();
+        $before = memory_get_usage();
+        $this->xml('/sitemap-events-1.xml');
+        $large = memory_get_usage() - $before;
+
+        $this->assertSame(105, Role::find($role->id)->events()->count());
+        // 21x the rows must not mean 21x the retained memory. Generous bound: the point is that
+        // the whole result set is never resident, not a precise byte budget.
+        $this->assertLessThan(max(2 * 1024 * 1024, $small * 4 + 512 * 1024), $large);
+    }
+}

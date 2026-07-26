@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BlogPost;
 use App\Models\BoostCampaign;
 use App\Models\Event;
 use App\Models\EventComment;
@@ -17,8 +16,8 @@ use App\Utils\DateUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -255,6 +254,10 @@ class HomeController extends Controller
         // dashboard, and only shown when something is pending.
         $pendingActionItems = $this->getPendingActionItems($roleIds);
 
+        // Nudge admins to turn federation on once there is something worth sharing.
+        $showFederationPrompt = app(\App\Services\FederationService::class)
+            ->shouldPromptAdoption($user);
+
         return view('home', compact(
             'events',
             'month',
@@ -281,7 +284,7 @@ class HomeController extends Controller
             'venues',
             'curators',
             'defaultCurrency',
-            'pendingActionItems',
+            'pendingActionItems', 'showFederationPrompt',
         ));
     }
 
@@ -489,98 +492,6 @@ class HomeController extends Controller
             ->get();
 
         return $this->buildCalendarResponse($events, collect(), false, null, null, (int) $month, (int) $year, $timezone, 0);
-    }
-
-    public function sitemap()
-    {
-        try {
-            $cacheKey = 'sitemap:'.md5(request()->fullUrl());
-
-            $content = Cache::remember($cacheKey, 3600, function () {
-                $roles = Role::select([
-                    'id', 'subdomain', 'email', 'email_verified_at', 'phone', 'phone_verified_at',
-                    'user_id', 'custom_domain', 'custom_domain_mode', 'custom_domain_status',
-                    'is_deleted', 'updated_at',
-                ])
-                    ->with(['groups:id,role_id,slug,updated_at'])
-                    ->where(function ($query) {
-                        $query->where(function ($q) {
-                            $q->whereNotNull('email')
-                                ->whereNotNull('email_verified_at');
-                        })->orWhere(function ($q) {
-                            $q->whereNotNull('phone')
-                                ->whereNotNull('phone_verified_at');
-                        });
-                    })
-                    ->where('is_deleted', false)
-                    ->orderBy(request()->has('roles') ? 'id' : 'subdomain', request()->has('roles') ? 'desc' : 'asc')
-                    ->get();
-
-                $events = Event::select([
-                    'id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id',
-                    'is_private', 'is_draft', 'is_cancelled', 'event_password', 'updated_at',
-                ])
-                    ->with([
-                        'roles:id,subdomain,type,email_verified_at,phone_verified_at,user_id,custom_domain,custom_domain_mode,custom_domain_status',
-                        'creatorRole:id,subdomain,type,email_verified_at,phone_verified_at,user_id',
-                    ])
-                    ->whereNotNull('starts_at')
-                    ->where('is_private', false)
-                    ->where('is_draft', false)
-                    ->where('is_cancelled', false)
-                    ->whereNull('event_password')
-                    ->whereHas('roles', fn ($q) => $q->where('is_accepted', true))
-                    ->orderBy(request()->has('events') ? 'id' : 'starts_at', 'desc')
-                    ->get();
-
-                $blogPosts = BlogPost::select(['id', 'slug', 'published_at', 'updated_at', 'is_published'])
-                    ->published()
-                    ->orderBy('published_at', 'desc')
-                    ->get();
-
-                $hasQueryFilter = request()->has('events') || request()->has('roles');
-
-                // Static marketing/docs pages change on deploy, not per crawl. Derive
-                // <lastmod> from the newest marketing view mtime so it reflects real
-                // content changes instead of "now" (which trains crawlers to ignore it).
-                $staticMtime = collect(glob(resource_path('views/marketing/*.blade.php')) ?: [])
-                    ->push(resource_path('views/sitemap.blade.php'))
-                    ->map(fn ($f) => @filemtime($f) ?: 0)
-                    ->max();
-                $staticLastmod = now()->setTimestamp($staticMtime ?: now()->getTimestamp())->toIso8601String();
-
-                return view('sitemap', [
-                    'roles' => ! request()->has('events') ? $roles : [],
-                    'events' => ! request()->has('roles') ? $events : [],
-                    'blogPosts' => $hasQueryFilter ? [] : $blogPosts,
-                    'showMarketingLinks' => ! $hasQueryFilter,
-                    'lastmod' => $staticLastmod,
-                ])->render();
-            });
-
-            $isGzipped = str_ends_with(request()->path(), '.gz');
-
-            if ($isGzipped) {
-                $gzipped = gzencode($content, 1);
-
-                return response($gzipped)
-                    ->header('Content-Type', 'application/xml')
-                    ->header('Content-Encoding', 'gzip');
-            }
-
-            return response($content)
-                ->header('Content-Type', 'application/xml');
-        } catch (\Throwable $e) {
-            report($e);
-
-            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-            $xml .= '<url><loc>'.url('/').'</loc></url>';
-            $xml .= '</urlset>';
-
-            return response($xml)
-                ->header('Content-Type', 'application/xml');
-        }
     }
 
     public function saveDashboardConfig(Request $request): JsonResponse
@@ -962,5 +873,25 @@ class HomeController extends Controller
         }
 
         return $returnUrl;
+    }
+
+    /**
+     * Permanently hide the federation suggestion for this user.
+     *
+     * redirect()->back() rather than a fixed route, because the banner appears on both
+     * the dashboard and the schedule page and one action serves both.
+     */
+    public function dismissFederationPrompt(Request $request): RedirectResponse
+    {
+        if (is_demo_mode()) {
+            return redirect()->back();
+        }
+
+        $user = $request->user();
+        $user->federation_prompt_dismissed = true;
+        // saveQuietly: dismissing a banner should not bump users.updated_at.
+        $user->saveQuietly();
+
+        return redirect()->back();
     }
 }

@@ -124,6 +124,10 @@
         </div>
         @endif
 
+        @if(!empty($showFederationPrompt))
+            @include('partials.federation-prompt')
+        @endif
+
         {{-- Needs attention: pending items to handle across all editable schedules. Only shown when there are any. --}}
         @if($pendingActionItems->isNotEmpty())
             @include('home.partials.needs-attention')

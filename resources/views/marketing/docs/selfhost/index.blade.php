@@ -237,6 +237,25 @@
                     </div>
                 </a>
 
+                <!-- Federation -->
+                <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-card block">
+                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-cyan-100 dark:bg-cyan-500/20">
+                            <svg aria-hidden="true" class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Federation</h2>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Share your public events with the eventschedule.com listings. Every listing links back to your own site, so the discovery traffic comes to you.</p>
+                        <div class="mt-auto inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
+                            Read guide
+                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
                 <!-- Web accessibility -->
                 <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-card block">
                     <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900">

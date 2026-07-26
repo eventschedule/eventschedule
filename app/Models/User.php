@@ -71,6 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'carpool_agreed_at',
         'carpool_notifications_enabled',
         'follow_consent_dismissed',
+        'federation_prompt_dismissed',
         'push_settings',
     ];
 
@@ -185,6 +186,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'carpool_agreed_at' => 'datetime',
             'carpool_notifications_enabled' => 'boolean',
             'follow_consent_dismissed' => 'boolean',
+            'federation_prompt_dismissed' => 'boolean',
             'push_settings' => 'array',
             'schedule_form_viewed_at' => 'datetime',
             'event_form_viewed_at' => 'datetime',

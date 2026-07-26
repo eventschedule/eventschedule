@@ -824,6 +824,7 @@ CUSTOM_LINK_3_URL=</code></pre>
                             <ul class="doc-list">
                                 <li><x-link href="/docs/saas/custom-domains">Custom Domains</x-link> - Allow your customers to use their own domain names with their schedules, including DigitalOcean App Platform setup</li>
                                 <li><x-link href="/docs/saas/twilio">Twilio Integration</x-link> - Set up phone number verification and WhatsApp messaging</li>
+                                <li><x-link href="/docs/saas/federation">Federation</x-link> - Share your customers' public events with the eventschedule.com listings, with every listing linking back to your platform</li>
                             </ul>
                         </section>
 

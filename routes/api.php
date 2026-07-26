@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ApiAuthController;
 use App\Http\Controllers\Api\ApiEventController;
+use App\Http\Controllers\Api\ApiFederationController;
 use App\Http\Controllers\Api\ApiFeedbackController;
 use App\Http\Controllers\Api\ApiGroupController;
 use App\Http\Controllers\Api\ApiSaleController;
@@ -19,6 +20,16 @@ Route::post('/login', [ApiAuthController::class, 'login']);
 // The api group carries no default throttle, so the route sets its own.
 if (config('app.is_nexus')) {
     Route::post('/translations/suggestions', [ApiTranslationSuggestionController::class, 'store'])
+        ->middleware('throttle:30,1');
+
+    // Federation intake. Signed with the instance's shared secret rather than an
+    // API key, since these publish third-party content and links on this domain.
+    // Each route carries its own throttle for the same reason as above.
+    Route::post('/federation/register', [ApiFederationController::class, 'register'])
+        ->middleware('throttle:10,1');
+    Route::post('/federation/events', [ApiFederationController::class, 'store'])
+        ->middleware('throttle:60,1');
+    Route::post('/federation/reconcile', [ApiFederationController::class, 'reconcile'])
         ->middleware('throttle:30,1');
 }
 

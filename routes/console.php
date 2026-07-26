@@ -69,6 +69,14 @@ Schedule::call(function () {
 })->hourly()->name('send-appointment-reminders')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
 
 Schedule::call(function () {
+    Artisan::call('federation:push');
+})->hourly()->name('federation-push')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
+    Artisan::call('federation:maintain');
+})->hourly()->name('federation-maintain')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
+Schedule::call(function () {
     Artisan::call('caldav:sync');
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
 

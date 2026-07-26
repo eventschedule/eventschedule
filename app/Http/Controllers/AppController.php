@@ -261,6 +261,12 @@ class AppController extends Controller
                     \Log::error('Scheduled command app:send-appointment-reminders failed: '.$e->getMessage());
                     report($e);
                 }
+                try {
+                    \Artisan::call('federation:push');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command federation:push failed: '.$e->getMessage());
+                    report($e);
+                }
 
                 if (config('app.hosted')) {
                     try {
@@ -271,13 +277,20 @@ class AppController extends Controller
                     }
                 }
 
-                // Run translation last: it is slow (per-item sleeps + external API)
-                // and the most likely to time out, so it must not starve the
-                // commands above.
+                // Run the slow ones last, for the same reason: both make external calls
+                // (translation hits an API with per-item sleeps; federation:maintain
+                // downloads images and deletes from object storage), so a timeout in
+                // either must not starve the commands above.
                 try {
                     \Artisan::call('app:translate');
                 } catch (\Throwable $e) {
                     \Log::error('Scheduled command app:translate failed: '.$e->getMessage());
+                    report($e);
+                }
+                try {
+                    \Artisan::call('federation:maintain');
+                } catch (\Throwable $e) {
+                    \Log::error('Scheduled command federation:maintain failed: '.$e->getMessage());
                     report($e);
                 }
             }
