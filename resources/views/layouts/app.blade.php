@@ -10,7 +10,8 @@
     <link rel="icon" href="{{ asset('images/favicon.png') }}">
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <meta name="theme-color" content="#4E81FA">
-    <link rel="sitemap" type="application/xml" href="{{ config('app.url') . route('sitemap', [], false) }}">
+    {{-- Host-aware: this layout's head renders on guest pages too, custom domains included. --}}
+    <link rel="sitemap" type="application/xml" href="{{ sitemap_url() }}">
 
     @if (\App\Services\OneSignalService::isConfigured())
         @include('partials.onesignal')

@@ -415,18 +415,13 @@ class AppController extends Controller
 
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
 
-        // A custom domain points at its own sitemap. Google rejects a third-party host inside the
-        // global sitemap ("URL not allowed") whatever robots.txt says, so pointing there would
-        // advertise a sitemap that cannot carry a single one of this host's URLs.
-        //
-        // Everywhere else keeps the global sitemap line untouched: on tenant subdomains that line
-        // is the cross-submission grant that keeps their URLs legal inside it.
-        $customDomainHost = request()->attributes->get('custom_domain_host');
-        $sitemapBase = $customDomainHost ? 'https://'.$customDomainHost : config('app.url');
-
+        // sitemap_url() is host-aware: a custom domain points at its own sitemap, because Google
+        // rejects a third-party host inside the global one ("URL not allowed") whatever robots.txt
+        // says. The same helper builds the <link rel="sitemap"> tag in layouts/app.blade.php, so
+        // the two can never disagree on a page served from this host.
         $content = $isAppSubdomain
             ? $disallowRules
-            : $disallowRules."\nSitemap: ".$sitemapBase."/sitemap.xml\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
+            : $disallowRules."\nSitemap: ".sitemap_url()."\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
     }

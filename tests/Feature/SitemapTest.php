@@ -542,16 +542,18 @@ class SitemapTest extends TestCase
     }
 
     /**
-     * robots.txt is how a sitemap is discovered. A custom domain has to point at its own, because
-     * the global sitemap is not allowed to carry a single one of that host's URLs.
+     * robots.txt is how a sitemap is discovered, and <link rel="sitemap"> in the page head says the
+     * same thing a second time. A custom domain has to point both at its own, because the global
+     * sitemap is not allowed to carry a single one of that host's URLs. Asserted together so the
+     * two can never drift - they share sitemap_url().
      */
-    public function test_robots_txt_points_a_custom_domain_at_its_own_sitemap(): void
+    public function test_a_custom_domain_advertises_its_own_sitemap(): void
     {
         // Pinned: _base_domain() and the robots line both derive from app.url, which is empty in CI.
         config(['app.url' => 'https://eventschedule.test', 'app.hosted' => true]);
 
         $owner = $this->createOwner();
-        $this->createRole($owner, 'talent', [
+        $role = $this->createRole($owner, 'talent', [
             'custom_domain' => 'https://robots-direct.test',
             'custom_domain_mode' => 'direct',
             'custom_domain_status' => 'active',
@@ -560,19 +562,38 @@ class SitemapTest extends TestCase
         $robots = $this->get('http://robots-direct.test/robots.txt')->assertOk()->getContent();
 
         $this->assertStringContainsString('Sitemap: https://robots-direct.test/sitemap.xml', $robots);
-        $this->assertStringNotContainsString('Sitemap: https://eventschedule.test/sitemap.xml', $robots);
+        $this->assertStringNotContainsString('eventschedule.test/sitemap.xml', $robots);
+
+        $page = $this->get('http://robots-direct.test/'.$role->subdomain)->assertOk()->getContent();
+
+        $this->assertStringContainsString(
+            '<link rel="sitemap" type="application/xml" href="https://robots-direct.test/sitemap.xml">',
+            $page
+        );
+        $this->assertStringNotContainsString('eventschedule.test/sitemap.xml', $page);
     }
 
     /**
-     * Everywhere else keeps the global line. On a tenant subdomain it is the cross-submission grant
-     * that keeps that subdomain's URLs legal inside the global sitemap - drop it and Google rejects
-     * them the same way it rejects the custom-domain ones.
+     * Everywhere else keeps the global one. On a tenant subdomain that robots.txt line is the
+     * cross-submission grant that keeps the subdomain's URLs legal inside the global sitemap - drop
+     * it and Google rejects them the same way it rejects the custom-domain ones.
      */
-    public function test_robots_txt_keeps_the_global_sitemap_on_other_hosts(): void
+    public function test_other_hosts_advertise_the_global_sitemap(): void
     {
-        $robots = $this->get('/robots.txt')->assertOk()->getContent();
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
 
-        $this->assertStringContainsString('Sitemap: '.config('app.url').'/sitemap.xml', $robots);
+        $expected = config('app.url').'/sitemap.xml';
+
+        $this->assertStringContainsString(
+            'Sitemap: '.$expected,
+            $this->get('/robots.txt')->assertOk()->getContent()
+        );
+
+        $this->assertStringContainsString(
+            '<link rel="sitemap" type="application/xml" href="'.$expected.'">',
+            $this->get('/'.$role->subdomain)->assertOk()->getContent()
+        );
     }
 
     /** Walking every event in the database must not write one log line per unroutable event. */

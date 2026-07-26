@@ -332,6 +332,30 @@ if (! function_exists('app_url')) {
     }
 }
 
+if (! function_exists('sitemap_url')) {
+    /**
+     * The sitemap that applies to the host the current request arrived on.
+     *
+     * A custom domain gets its own. The global sitemap may not carry a third-party host's URLs -
+     * Google reports every one as "URL not allowed" and discards it - so pointing a custom domain
+     * at the global sitemap advertises one containing none of that host's pages. Every other host
+     * keeps the global sitemap, which on tenant subdomains is also the cross-submission grant that
+     * keeps their URLs legal inside it.
+     *
+     * Not custom_domain_url(): that rewrites the subdomain and app. hosts only, so the apex URL
+     * this builds would pass through it unchanged.
+     */
+    function sitemap_url(): string
+    {
+        $customDomainHost = request()->attributes->get('custom_domain_host');
+        $base = $customDomainHost ? 'https://'.$customDomainHost : config('app.url');
+
+        // Relative form, so the path stays tied to the route definition. It ignores the route's
+        // domain constraint, which is what makes it usable from a custom-domain request.
+        return $base.route('sitemap', [], false);
+    }
+}
+
 if (! function_exists('canonical_url')) {
     /**
      * Build an absolute URL whose base path comes from APP_URL rather than from the
