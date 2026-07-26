@@ -133,6 +133,7 @@ class RegenerateRoleTranslations implements ShouldQueue
         }
 
         Event::whereHas('roles', fn ($q) => $q->where('roles.id', $this->role->id))
+            ->where(fn ($q) => $this->scopeToGovernedEvents($q))
             ->update([
                 'name_en' => null,
                 'short_description_en' => null,
@@ -142,12 +143,36 @@ class RegenerateRoleTranslations implements ShouldQueue
             ]);
 
         EventPart::whereHas('event.roles', fn ($q) => $q->where('roles.id', $this->role->id))
+            ->whereHas('event', fn ($q) => $this->scopeToGovernedEvents($q))
             ->update([
                 'name_en' => null,
                 'description_en' => null,
                 'description_html_en' => null,
                 'translation_attempts' => 0,
             ]);
+    }
+
+    /**
+     * Narrow an Event query to the events whose translation target this role actually decides.
+     *
+     * Event::getTranslationLanguageCode() resolves the venue FIRST and only falls back to the first
+     * talent. Every role has a non-empty target (the column defaults to 'en'), so for any event that
+     * has a venue, the venue decides - and a talent changing its own target leaves that event's
+     * effective target untouched. Nulling those rows anyway would blank the guest page until the
+     * hourly cron re-translated them into the very same language, at full Gemini cost.
+     *
+     * Mirrors the curator early-return above: only the governing role resets.
+     */
+    protected function scopeToGovernedEvents($query)
+    {
+        if (! $this->role->isTalent()) {
+            return $query; // a venue governs every event it is attached to
+        }
+
+        return $query->whereDoesntHave('roles', fn ($r) => $r
+            ->where('roles.type', 'venue')
+            ->whereNotNull('roles.translation_language_code')
+            ->where('roles.translation_language_code', '!=', ''));
     }
 
     /**

@@ -40,6 +40,24 @@ class PublicRegistrationTest extends TestCase
     }
 
     /**
+     * Selfhost config for the OAuth tests.
+     *
+     * `app.is_testing => false` is what makes the controller's registration gate reachable, but it
+     * also re-arms selfhost_needs_setup(), which reads an empty APP_URL as a fresh install and has
+     * EnsureSelfhostSetup redirect every request to the setup wizard - so the callback would never
+     * run. CI copies .env.example, which ships APP_URL empty, so pin it here.
+     */
+    private function selfhost(bool $allowRegistration): void
+    {
+        config([
+            'app.hosted' => false,
+            'app.allow_registration' => $allowRegistration,
+            'app.is_testing' => false,
+            'app.url' => config('app.url') ?: 'http://localhost',
+        ]);
+    }
+
+    /**
      * Stand in for the Google OAuth round-trip so the callback can be driven directly.
      */
     private function fakeGoogleUser(string $email, string $googleId): void
@@ -64,7 +82,7 @@ class PublicRegistrationTest extends TestCase
         // no selfhost gate at all, so a selfhost with Google configured could be registered
         // into by anyone (issue #108).
         User::factory()->create();
-        config(['app.hosted' => false, 'app.allow_registration' => false, 'app.is_testing' => false]);
+        $this->selfhost(false);
 
         $this->fakeGoogleUser('stranger@example.com', 'google-stranger');
 
@@ -79,7 +97,7 @@ class PublicRegistrationTest extends TestCase
     public function test_google_oauth_creates_an_account_when_registration_is_open(): void
     {
         User::factory()->create();
-        config(['app.hosted' => false, 'app.allow_registration' => true, 'app.is_testing' => false]);
+        $this->selfhost(true);
 
         $this->fakeGoogleUser('newcomer@example.com', 'google-newcomer');
 
@@ -93,7 +111,7 @@ class PublicRegistrationTest extends TestCase
     {
         // The gate sits after both existing-user branches, so a linked account keeps working.
         $existing = User::factory()->create(['email' => 'owner@example.com', 'google_oauth_id' => 'google-owner']);
-        config(['app.hosted' => false, 'app.allow_registration' => false, 'app.is_testing' => false]);
+        $this->selfhost(false);
 
         $this->fakeGoogleUser('owner@example.com', 'google-owner');
 

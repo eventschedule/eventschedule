@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Models\Event;
 use App\Models\Role;
+use App\Models\Sale;
 
 /**
  * Single-event iCalendar (.ics) invite for appointment emails. Ported from
@@ -11,14 +12,14 @@ use App\Models\Role;
  */
 class IcsUtils
 {
-    public static function buildInvite(Event $event, ?Role $role = null): string
+    public static function buildInvite(Event $event, ?Role $role = null, ?Sale $sale = null): string
     {
         $domain = parse_url(config('app.url'), PHP_URL_HOST) ?: 'eventschedule.com';
         $uid = 'appointment-'.$event->id.'@'.$domain;
 
         $title = $event->name;
         $description = $event->description ? strip_tags($event->description) : '';
-        $location = $event->event_url ?: '';
+        $location = self::resolveLocation($event, $sale);
         $duration = $event->duration > 0 ? $event->duration : 2;
 
         $startAt = $event->getStartDateTime();
@@ -49,6 +50,30 @@ class IcsUtils
         $ics .= "END:VCALENDAR\r\n";
 
         return $ics;
+    }
+
+    /**
+     * LOCATION for the invite. Only online types put their URL on the event itself, so an
+     * in-person or phone booking has to read the address/number off the appointment type -
+     * otherwise the calendar entry the guest saves has no location at all. Mirrors the branch
+     * in emails/appointment_confirmed.blade.php.
+     */
+    private static function resolveLocation(Event $event, ?Sale $sale = null): string
+    {
+        if ($event->event_url) {
+            return $event->event_url;
+        }
+
+        $type = $event->appointmentType;
+        if (! $type) {
+            return '';
+        }
+
+        return match ($type->location_type) {
+            'in_person' => (string) $type->location_address,
+            'phone' => (string) ($type->location_phone ?: $sale?->phone),
+            default => '',
+        };
     }
 
     private static function escape(string $text): string

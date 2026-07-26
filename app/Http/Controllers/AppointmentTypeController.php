@@ -77,8 +77,7 @@ class AppointmentTypeController extends Controller
 
         // A finished appointment cannot be cancelled (same guard as the guest manage page) -
         // the guest would otherwise get a cancellation email for something that already happened.
-        $startUtc = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $sale->event->starts_at, 'UTC');
-        if ($startUtc->isPast()) {
+        if ($sale->event->getStartDateTime()->isPast()) {
             return redirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']).'?view=bookings')
                 ->with('error', __('messages.appointments_cannot_cancel_past'));
         }

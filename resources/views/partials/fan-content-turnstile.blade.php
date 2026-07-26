@@ -7,7 +7,10 @@
     into whichever form is submitted (see partials.fan-content-guest-fields).
 --}}
 @php $fanGuestRole = $role ?? null; @endphp
-@if ($fanGuestRole && ! auth()->check() && ! $fanGuestRole->fan_content_require_account && \App\Utils\TurnstileUtils::isEnabled())
+{{-- isActiveForRequest(), not isEnabled(): the site key is registered for the platform domain, so
+     on a custom domain Cloudflare rejects it and the guest sees a challenge that can never pass.
+     ValidTurnstile skips verification on custom domains, so rendering nothing here is safe. --}}
+@if ($fanGuestRole && ! auth()->check() && ! $fanGuestRole->fan_content_require_account && \App\Utils\TurnstileUtils::isActiveForRequest())
 @once
 {{-- w-full: on the event page this sits in a flex-wrap row of buttons, and without it the
      widget is laid out as another button rather than on its own line. --}}

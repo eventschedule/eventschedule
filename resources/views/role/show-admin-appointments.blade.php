@@ -37,26 +37,53 @@
     $bookings = collect();
     if ($view === 'bookings' && ! $isGated) {
         $filter = request('filter', 'upcoming');
-        $bookings = \App\Models\Sale::where('subdomain', $role->subdomain)
-            ->whereHas('event', fn ($e) => $e->whereNotNull('appointment_type_id'))
-            ->with(['event.appointmentType', 'event.roles'])
-            ->orderByDesc('id')
-            ->limit(500)
-            ->get()
-            ->filter(function ($s) use ($filter, $bookingIsPending) {
-                $e = $s->event;
-                if (! $e) return false;
-                $cancelled = $e->is_cancelled || in_array($s->status, ['cancelled', 'refunded', 'expired']);
-                $past = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $e->starts_at, 'UTC')->isPast();
-                return match ($filter) {
-                    'pending' => $bookingIsPending($e) && ! $cancelled,
-                    'past' => $past && ! $cancelled,
-                    'cancelled' => $cancelled,
-                    default => ! $past && ! $cancelled,
-                };
-            })
-            ->when($filter === 'upcoming', fn ($c) => $c->sortBy(fn ($s) => $s->event->starts_at))
-            ->values();
+        $terminal = ['cancelled', 'refunded', 'expired'];
+        // starts_at is stored as a UTC 'Y-m-d H:i:s' string, so a lexicographic compare against a
+        // UTC-formatted "now" is a correct past/upcoming split.
+        $nowUtc = now('UTC')->format('Y-m-d H:i:s');
+
+        // Every predicate runs in SQL. Filtering a capped result set in PHP instead would silently
+        // hide older bookings once a schedule passes the cap - Past and Cancelled grow forever.
+        $bookingQuery = \App\Models\Sale::query()
+            ->select('sales.*')
+            ->join('events', 'events.id', '=', 'sales.event_id')
+            ->where('sales.subdomain', $role->subdomain)
+            ->where('sales.is_deleted', false)
+            ->whereNotNull('events.appointment_type_id')
+            ->with(['event.appointmentType', 'event.roles']);
+
+        $excludeCancelled = fn ($q) => $q
+            ->whereNotIn('sales.status', $terminal)
+            ->where('events.is_cancelled', false);
+
+        if ($filter === 'cancelled') {
+            $bookingQuery->where(fn ($q) => $q
+                ->whereIn('sales.status', $terminal)
+                ->orWhere('events.is_cancelled', true));
+        } elseif ($filter === 'pending') {
+            $excludeCancelled($bookingQuery);
+            // Awaiting approval: the creator schedule's pivot row is still NULL.
+            $bookingQuery->whereExists(fn ($q) => $q
+                ->selectRaw('1')
+                ->from('event_role')
+                ->whereColumn('event_role.event_id', 'sales.event_id')
+                ->whereColumn('event_role.role_id', 'events.creator_role_id')
+                ->whereNull('event_role.is_accepted'));
+        } elseif ($filter === 'past') {
+            $excludeCancelled($bookingQuery);
+            $bookingQuery->where('events.starts_at', '<', $nowUtc);
+        } else {
+            $excludeCancelled($bookingQuery);
+            $bookingQuery->where('events.starts_at', '>=', $nowUtc);
+        }
+
+        // Soonest first for upcoming (what the owner acts on next), newest first otherwise -
+        // the same ordering the previous in-PHP sort produced.
+        $filter === 'upcoming'
+            ? $bookingQuery->orderBy('events.starts_at')
+            : $bookingQuery->orderByDesc('sales.id');
+
+        $bookings = $bookingQuery->paginate(50)->withQueryString();
     }
 @endphp
 

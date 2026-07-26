@@ -207,6 +207,7 @@ return [
     'offer_translation_help' => 'Traduisez automatiquement votre calendrier et vos événements dans une autre langue. Les visiteurs disposent d\'un bouton pour basculer entre votre langue et la traduction.',
     'translate_into' => 'Traduire en',
     'translation_language_notice' => 'Les traductions sont générées automatiquement et peuvent mettre jusqu\'à une heure à apparaître. Changer de langue retraduit tout ; modifier un événement actualise sa traduction.',
+    'translation_disable_warning' => 'Désactiver cette option supprime les traductions déjà enregistrées pour cet horaire. Continuer ?',
     'arabic' => 'Arabe',
     'english' => 'Anglais',
     'dutch' => 'Néerlandais',

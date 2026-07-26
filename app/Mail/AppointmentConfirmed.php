@@ -98,7 +98,7 @@ class AppointmentConfirmed extends Mailable
     public function attachments(): array
     {
         return [
-            Attachment::fromData(fn () => IcsUtils::buildInvite($this->event, $this->role), 'appointment.ics')
+            Attachment::fromData(fn () => IcsUtils::buildInvite($this->event, $this->role, $this->sale), 'appointment.ics')
                 ->withMime('text/calendar'),
         ];
     }

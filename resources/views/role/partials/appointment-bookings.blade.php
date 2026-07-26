@@ -51,4 +51,10 @@
             </tbody>
         </table>
     </div>
+
+    @if ($bookings instanceof \Illuminate\Contracts\Pagination\Paginator && $bookings->hasPages())
+        <div class="mt-4">
+            {{ $bookings->links() }}
+        </div>
+    @endif
 @endif

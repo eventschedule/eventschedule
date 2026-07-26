@@ -202,6 +202,7 @@ return [
     'offer_translation_help' => 'Traduce automáticamente tu calendario y tus eventos a otro idioma. Los visitantes tendrán un botón para cambiar entre tu idioma y la traducción.',
     'translate_into' => 'Traducir a',
     'translation_language_notice' => 'Las traducciones se generan automáticamente y pueden tardar hasta una hora en aparecer. Cambiar el idioma vuelve a traducir todo; al editar un evento se actualiza su traducción.',
+    'translation_disable_warning' => 'Al desactivar esta opción se eliminan las traducciones ya guardadas de esta programación. ¿Continuar?',
     'arabic' => 'Árabe',
     'english' => 'Inglés',
     'dutch' => 'Holandés',

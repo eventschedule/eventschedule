@@ -2939,8 +2939,11 @@ class TicketController extends Controller
 
         // Appointment bookings cancelled/refunded from the generic Sales page: tell the guest
         // (every appointment-native cancel path does) and remind the owner to refund real money.
+        // Only when the booking was still live: 'delete' reports success even for an already
+        // cancelled/refunded/expired sale, which would otherwise re-send the cancellation email.
         if ($actionPerformed
             && in_array($request->action, ['cancel', 'refund', 'delete'], true)
+            && ! in_array($previousStatus, ['cancelled', 'refunded', 'expired'], true)
             && $sale->event?->appointment_type_id) {
             $wasPaidMoney = $previousStatus === 'paid' && (float) $sale->payment_amount > 0;
             app(\App\Services\EmailService::class)->sendAppointmentGuestCancellation($sale);

@@ -198,6 +198,7 @@ return [
     'offer_translation_help' => 'Traduza automaticamente sua agenda e seus eventos para outro idioma. Os visitantes terão um botão para alternar entre o seu idioma e a tradução.',
     'translate_into' => 'Traduzir para',
     'translation_language_notice' => 'As traduções são geradas automaticamente e podem levar até uma hora para aparecer. Alterar o idioma traduz tudo novamente; editar um evento atualiza a sua tradução.',
+    'translation_disable_warning' => 'Desativar esta opção elimina as traduções já guardadas para esta programação. Continuar?',
     'search' => 'Pesquisar',
     'pending' => 'Pendente',
     'availability' => 'Disponibilidade',

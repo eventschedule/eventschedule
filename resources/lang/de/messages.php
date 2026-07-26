@@ -182,6 +182,7 @@ return [
     'offer_translation_help' => 'Übersetzen Sie Ihren Kalender und Ihre Veranstaltungen automatisch in eine andere Sprache. Besucher erhalten eine Schaltfläche, um zwischen Ihrer Sprache und der Übersetzung zu wechseln.',
     'translate_into' => 'Übersetzen in',
     'translation_language_notice' => 'Übersetzungen werden automatisch erstellt und können bis zu einer Stunde dauern, bis sie erscheinen. Das Ändern der Sprache übersetzt alles neu; das Bearbeiten einer Veranstaltung aktualisiert deren Übersetzung.',
+    'translation_disable_warning' => 'Wenn du dies deaktivierst, werden die bereits gespeicherten Übersetzungen dieses Zeitplans gelöscht. Fortfahren?',
     'arabic' => 'Arabisch',
     'english' => 'Englisch',
     'dutch' => 'Niederländisch',

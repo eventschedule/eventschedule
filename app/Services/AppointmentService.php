@@ -28,9 +28,13 @@ class AppointmentService
      * Every slot start is a UTC instant; the client renders it in the visitor's timezone. Windows
      * are wall-clock in the schedule's timezone and anchored per-date so DST is handled correctly.
      *
+     * $withNextAvailable drives the "next available date" lookahead, which re-runs the whole slot
+     * computation (and its busy-interval queries) over up to 15 further 31-day chunks. Callers that
+     * only need membership - isSlotAvailable(), which runs inside the booking row lock - pass false.
+     *
      * @return array{schedule_timezone:string, days:array<string,array<int,array{utc:string,date:string,label:string}>>, next_available_date:?string}
      */
-    public function availableSlots(AppointmentType $type, string $fromDate, int $days = 31, ?Carbon $now = null): array
+    public function availableSlots(AppointmentType $type, string $fromDate, int $days = 31, ?Carbon $now = null, bool $withNextAvailable = true): array
     {
         $days = max(1, min(31, $days));
         $tz = $type->timezone();
@@ -54,7 +58,7 @@ class AppointmentService
             $result['days'] = $this->computeDays($type, $startDay, $endDay, $earliest);
         }
 
-        if (empty($result['days'])) {
+        if ($withNextAvailable && empty($result['days'])) {
             $result['next_available_date'] = $this->nextAvailableDate($type, $endDay->copy()->addDay(), $now, $earliest, $lastDay);
         }
 
@@ -74,7 +78,8 @@ class AppointmentService
 
         $tz = $type->timezone();
         $date = $s->copy()->setTimezone($tz)->format('Y-m-d');
-        $slots = $this->availableSlots($type, $date, 1, $now);
+        // No lookahead: this runs inside book()'s schedule-wide row lock and only needs membership.
+        $slots = $this->availableSlots($type, $date, 1, $now, false);
 
         foreach ($slots['days'][$date] ?? [] as $slot) {
             if ($slot['utc'] === $s->format('Y-m-d\TH:i:s\Z')) {

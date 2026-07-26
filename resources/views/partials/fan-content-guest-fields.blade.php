@@ -20,7 +20,10 @@
            placeholder="{{ __('messages.email') }}" autocomplete="email"
            class="w-full text-sm rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 px-3 py-2">
 </div>
-@if (\App\Utils\TurnstileUtils::isEnabled())
+{{-- isActiveForRequest(), not isEnabled(): the site key is registered for the platform domain,
+     so on a custom domain the widget can never issue a token. ValidTurnstile skips the check
+     there for the same reason, so the token field must not render either. --}}
+@if (\App\Utils\TurnstileUtils::isActiveForRequest())
 <input type="hidden" name="cf-turnstile-response" class="fan-content-turnstile-token">
 @endif
 @endif

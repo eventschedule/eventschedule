@@ -224,6 +224,7 @@ return [
     'offer_translation_help' => 'Automatically translate your schedule and events into another language. Visitors get a button to switch between your language and the translation.',
     'translate_into' => 'Translate into',
     'translation_language_notice' => 'Translations are generated automatically and can take up to an hour to appear. Changing the language re-translates everything; editing an event refreshes its own translation.',
+    'translation_disable_warning' => 'Turning this off deletes the translations already stored for this schedule. Continue?',
     'arabic' => 'Arabic',
     'english' => 'English',
     'dutch' => 'Dutch',

@@ -197,6 +197,7 @@ return [
     'offer_translation_help' => 'Vertaal je schema en evenementen automatisch naar een andere taal. Bezoekers krijgen een knop om te wisselen tussen jouw taal en de vertaling.',
     'translate_into' => 'Vertalen naar',
     'translation_language_notice' => 'Vertalingen worden automatisch gegenereerd en kunnen tot een uur duren voordat ze verschijnen. Als je de taal wijzigt, wordt alles opnieuw vertaald; het bewerken van een evenement vernieuwt de vertaling ervan.',
+    'translation_disable_warning' => 'Als je dit uitschakelt, worden de al opgeslagen vertalingen van dit schema verwijderd. Doorgaan?',
     'search' => 'Zoeken',
     'pending' => 'In Afwachting',
     'availability' => 'Beschikbaarheid',

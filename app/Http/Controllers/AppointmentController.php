@@ -171,8 +171,9 @@ class AppointmentController extends Controller
             return 'awaiting_payment';
         }
 
-        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
-        if ($startUtc->isPast()) {
+        // getStartDateTime() returns UTC here and tolerates a date-only starts_at; a bare
+        // createFromFormat('Y-m-d H:i:s') would throw on one and 500 the page.
+        if ($event->getStartDateTime()->isPast()) {
             return 'passed';
         }
 
@@ -190,8 +191,7 @@ class AppointmentController extends Controller
             return redirect()->route('appointments.manage', $manageParams);
         }
 
-        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $event->starts_at, 'UTC');
-        if ($startUtc->isPast()) {
+        if ($event->getStartDateTime()->isPast()) {
             return redirect()->route('appointments.manage', $manageParams)
                 ->with('error', __('messages.appointments_cannot_cancel_past'));
         }

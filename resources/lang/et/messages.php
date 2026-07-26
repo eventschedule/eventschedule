@@ -224,6 +224,7 @@ return [
     'offer_translation_help' => 'Tõlgi oma ajakava ja sündmused automaatselt teise keelde. Külastajad saavad nupu, et vahetada sinu keele ja tõlke vahel.',
     'translate_into' => 'Tõlgi keelde',
     'translation_language_notice' => 'Tõlked luuakse automaatselt ja nende ilmumine võib võtta kuni tunni. Keele muutmine tõlgib kõik uuesti; sündmuse muutmine värskendab selle tõlget.',
+    'translation_disable_warning' => 'Selle väljalülitamine kustutab selle ajakava jaoks juba salvestatud tõlked. Kas jätkata?',
     'arabic' => 'araabia keel',
     'english' => 'inglise keel',
     'dutch' => 'hollandi keel',

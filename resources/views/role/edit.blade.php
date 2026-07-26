@@ -1283,7 +1283,18 @@
                                 }
                             }
 
+                            // Turning translation off sets the target back to the authored language,
+                            // which discards every stored translation for this schedule (including
+                            // hand-written custom field / label overrides). Confirm before losing them.
+                            var disableWarning = @json(__('messages.translation_disable_warning'), JSON_UNESCAPED_UNICODE);
+                            var wasEnabled = toggle.checked;
+
                             toggle.addEventListener('change', function () {
+                                if (wasEnabled && !this.checked && !window.confirm(disableWarning)) {
+                                    this.checked = true;
+
+                                    return;
+                                }
                                 wrapper.classList.toggle('hidden', !this.checked);
                                 if (this.checked) ensureValidTarget();
                             });

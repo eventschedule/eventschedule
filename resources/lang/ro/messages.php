@@ -224,6 +224,7 @@ return [
     'offer_translation_help' => 'Traduce automat programul și evenimentele într-o altă limbă. Vizitatorii primesc un buton pentru a comuta între limba ta și traducere.',
     'translate_into' => 'Tradu în',
     'translation_language_notice' => 'Traducerile sunt generate automat și pot dura până la o oră să apară. Schimbarea limbii retraduce tot; editarea unui eveniment îi actualizează traducerea.',
+    'translation_disable_warning' => 'Dezactivarea acestei opțiuni șterge traducerile deja salvate pentru acest program. Continuați?',
     'arabic' => 'Arabă',
     'english' => 'Engleză',
     'dutch' => 'Olandeză',

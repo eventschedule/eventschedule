@@ -2279,7 +2279,8 @@ class RoleController extends Controller
         $startOfMonth = '';
         $datesUnavailable = [];
 
-        $requests = Event::with('roles')
+        // sales + appointmentType are read by the appointment branch of show-admin-requests.
+        $requests = Event::with(['roles', 'sales', 'appointmentType'])
             ->where(function ($query) use ($role) {
                 $query->whereHas('roles', function ($query) use ($role) {
                     $query->where('role_id', $role->id)
