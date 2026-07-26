@@ -23,6 +23,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * Nothing is written to disk. The hosted deployment has an ephemeral, per-container filesystem, so
  * pre-generated files would be wiped on every deploy and would only exist on whichever container
  * generated them.
+ *
+ * There is one representation per sitemap and it is uncompressed; the CDN negotiates the encoding.
+ * The legacy /sitemap*.xml.gz paths redirect here (routes/web.php), and /sitemap.xml is the URL
+ * every robots.txt advertises - which is what authorises the tenant-subdomain and custom-domain
+ * URLs the children are made of to be cross-submitted from this host.
  */
 class SitemapController extends Controller
 {
@@ -40,13 +45,19 @@ class SitemapController extends Controller
     /** How long a stale section list may still be served while it refreshes in the background. */
     private const CACHE_STALE_SECONDS = 7200;
 
+    /**
+     * 2000-01-01. Anything older is a build artifact rather than a real edit: reproducible-build
+     * images rewrite every file mtime to a fixed epoch. See staticLastmodFallback().
+     */
+    private const MIN_PLAUSIBLE_MTIME = 946684800;
+
     /** Per-request memo of the section list. */
     private ?array $sections = null;
 
     private ?string $staticLastmod = null;
 
     /**
-     * GET /sitemap.xml and /sitemap.xml.gz - the sitemap index.
+     * GET /sitemap.xml - the sitemap index.
      *
      * Query strings are ignored entirely. The old implementation keyed its cache on
      * md5(fullUrl()), so any crawler-appended parameter minted a new entry and a fresh full
@@ -56,17 +67,13 @@ class SitemapController extends Controller
     {
         $sections = $this->sections();
 
-        // The .gz index points at .gz children, so a crawler that asked for the compressed
-        // variant is not handed a list of uncompressed ones.
-        $suffix = $this->isGzipped() ? '.xml.gz' : '.xml';
-
-        return $this->streamed(function (callable $write) use ($sections, $suffix) {
+        return $this->streamed(function (callable $write) use ($sections) {
             $write('<?xml version="1.0" encoding="UTF-8"?>'."\n");
             $write('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'."\n");
 
             foreach ($sections as $section) {
                 $write('    <sitemap>'."\n");
-                $write('        <loc>'.$this->escape(url('/sitemap-'.$section['name'].$suffix)).'</loc>'."\n");
+                $write('        <loc>'.$this->escape(url('/sitemap-'.$section['name'].'.xml')).'</loc>'."\n");
 
                 if (! empty($section['lastmod'])) {
                     $write('        <lastmod>'.$section['lastmod'].'</lastmod>'."\n");
@@ -80,7 +87,7 @@ class SitemapController extends Controller
     }
 
     /**
-     * GET /sitemap-{section}.xml and .gz - one child sitemap.
+     * GET /sitemap-{section}.xml - one child sitemap.
      *
      * The section must appear in the same list index() renders, so the index can never advertise
      * a child that 404s and a page number outside the current range is rejected here rather than
@@ -432,13 +439,19 @@ class SitemapController extends Controller
     }
 
     /**
-     * Wrap a writer in a streamed response, compressing incrementally for the .gz URLs so the body
-     * is never held in memory in full.
+     * Wrap a writer in a streamed response, flushing incrementally so the body is never held in
+     * memory in full.
+     *
+     * Nothing is compressed here. The bodies used to be gzipped in-process for the .xml.gz URLs
+     * and served with Content-Encoding: gzip, but that header describes the *transport*, so any
+     * proxy is free to decode it and re-negotiate - Cloudflare does, which meant the same .gz URL
+     * returned a gzip stream or bare XML depending on the caller's Accept-Encoding, and never the
+     * gzip *file* a .gz sitemap is supposed to be. Content negotiation at the edge already gets
+     * the same bytes on the wire (776KB of events XML leaves as 72KB), so the .gz paths are now
+     * redirects and there is one representation of each sitemap.
      */
     private function streamed(callable $emit): StreamedResponse
     {
-        $isGzipped = $this->isGzipped();
-
         $headers = [
             // Keep this as application/xml. ResolveCustomDomain calls setContent() on text/html
             // and application/json responses, and StreamedResponse::setContent() throws on
@@ -447,38 +460,24 @@ class SitemapController extends Controller
             'Cache-Control' => 'public, max-age='.self::CACHE_SECONDS,
         ];
 
-        if ($isGzipped) {
-            $headers['Content-Encoding'] = 'gzip';
-        }
-
-        return response()->stream(function () use ($emit, $isGzipped) {
-            $context = $isGzipped ? deflate_init(ZLIB_ENCODING_GZIP, ['level' => 6]) : null;
+        return response()->stream(function () use ($emit) {
             $pending = 0;
 
-            $write = function (string $chunk) use ($context, &$pending) {
+            $write = function (string $chunk) use (&$pending) {
                 $pending += strlen($chunk);
-                $flush = $pending >= self::FLUSH_BYTES;
 
                 // Symfony only flushes after the whole callback returns, so without this an
                 // unbounded output_buffering (or zlib.output_compression) would buffer the entire
                 // document in memory - reintroducing the exact OOM this controller exists to fix.
-                // ZLIB_SYNC_FLUSH at the same points makes bytes actually leave the deflate
-                // context; NO_FLUSH in between keeps the compression ratio.
-                echo $context
-                    ? deflate_add($context, $chunk, $flush ? ZLIB_SYNC_FLUSH : ZLIB_NO_FLUSH)
-                    : $chunk;
+                echo $chunk;
 
-                if ($flush) {
+                if ($pending >= self::FLUSH_BYTES) {
                     $pending = 0;
                     $this->flushOutput();
                 }
             };
 
             $emit($write);
-
-            if ($context) {
-                echo deflate_add($context, '', ZLIB_FINISH);
-            }
 
             $this->flushOutput();
         }, 200, $headers);
@@ -491,11 +490,6 @@ class SitemapController extends Controller
         }
 
         flush();
-    }
-
-    private function isGzipped(): bool
-    {
-        return str_ends_with(request()->path(), '.gz');
     }
 
     /*
@@ -585,6 +579,37 @@ class SitemapController extends Controller
             ->map(fn ($file) => @filemtime($file) ?: 0)
             ->max();
 
-        return $this->staticLastmod = now()->setTimestamp($mtime ?: now()->getTimestamp())->toIso8601String();
+        return $this->staticLastmod = $mtime > self::MIN_PLAUSIBLE_MTIME
+            ? now()->setTimestamp($mtime)->toIso8601String()
+            : $this->staticLastmodFallback();
+    }
+
+    /**
+     * <lastmod> for deployments whose filesystem has no usable mtimes.
+     *
+     * Reproducible-build images normalize every file to a fixed timestamp - the buildpack the
+     * hosted deployment runs on stamps 1980-01-01T00:00:01Z - so filemtime() there reports that
+     * the marketing pages last changed 46 years ago and crawlers stop revisiting them.
+     *
+     * The release is the honest substitute: record when the running version was first served and
+     * reuse it until the next one ships. rememberForever (not remember) and keyed on the version,
+     * so the value is stable for every container on that release and moves only on deploy.
+     */
+    private function staticLastmodFallback(): string
+    {
+        $now = now()->toIso8601String();
+
+        try {
+            return Cache::rememberForever(
+                'sitemap:static_lastmod:'.config('self-update.version_installed'),
+                fn () => $now
+            );
+        } catch (\Throwable $e) {
+            // staticLastmod() is the one part of the index that has to survive a broken cache
+            // store - sections() falls back to the pages section alone, which needs this value.
+            report($e);
+
+            return $now;
+        }
     }
 }

@@ -167,20 +167,34 @@ require __DIR__.'/auth.php';
 
 // /sitemap.xml is a sitemap index; the children are streamed.
 //
-// withoutMiddleware('web') because this is pure crawler traffic that never needs a session: the
-// group's StartSession and CSRF middleware attach laravel_session and XSRF-TOKEN cookies, and a
-// response carrying Set-Cookie is never cached by Cloudflare, which would make the sitemap's
-// Cache-Control header pointless. The group NAME is used rather than a list of classes so this
-// keeps covering whatever bootstrap/app.php puts in the group. Global middleware still applies.
-$sitemapRoutes = function () {
+// The bodies are served uncompressed and the CDN negotiates gzip/br from Accept-Encoding. The
+// .xml.gz paths are legacy: they used to serve the same XML under a Content-Encoding: gzip
+// transport header, which is not what a .gz sitemap is (that has to be a gzip *file*), and any
+// proxy that re-negotiates encoding - Cloudflare does - turned the same URL into plain XML for
+// callers that did not ask for gzip. They now redirect onto the canonical .xml, which is also the
+// only URL robots.txt advertises and therefore the only one authorised to cross-submit the tenant
+// and custom-domain URLs the children are made of.
+//
+// The sitemap paths sit outside 'web' because this is pure crawler traffic that never needs a
+// session: the group's StartSession and CSRF middleware attach laravel_session and XSRF-TOKEN
+// cookies, and a response carrying Set-Cookie is never cached by Cloudflare, which would make the
+// sitemap's Cache-Control header pointless. The group NAME is used rather than a list of classes
+// so this keeps covering whatever bootstrap/app.php puts in the group. Global middleware still
+// applies.
+$sitemapSections = 'pages|blog-[0-9]+|schedules-[0-9]+|events-[0-9]+';
+
+$sitemapRoutes = function () use ($sitemapSections) {
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-    Route::get('/sitemap.xml.gz', [SitemapController::class, 'index'])->name('sitemap.gz');
     // The {section} constraint keeps an unknown name from reaching the controller.
     Route::get('/sitemap-{section}.xml', [SitemapController::class, 'section'])
-        ->where('section', 'pages|blog-[0-9]+|schedules-[0-9]+|events-[0-9]+')
+        ->where('section', $sitemapSections)
         ->name('sitemap.section');
-    Route::get('/sitemap-{section}.xml.gz', [SitemapController::class, 'section'])
-        ->where('section', 'pages|blog-[0-9]+|schedules-[0-9]+|events-[0-9]+')
+
+    // A closure rather than Route::permanentRedirect(), which appends any route parameter it did
+    // not consume in the target as a query string.
+    Route::get('/sitemap.xml.gz', fn () => redirect('/sitemap.xml', 301))->name('sitemap.gz');
+    Route::get('/sitemap-{section}.xml.gz', fn (string $section) => redirect('/sitemap-'.$section.'.xml', 301))
+        ->where('section', $sitemapSections)
         ->name('sitemap.section_gz');
 };
 
@@ -191,6 +205,22 @@ if (config('app.hosted') && ! config('app.is_testing')) {
     // Tenant subdomains, blog. and custom domains are already covered by the /{slug} catch-all in
     // the group above, which is the correct outcome - they should not serve the global sitemap.
     Route::domain(_base_domain())->withoutMiddleware('web')->group($sitemapRoutes);
+
+    // www. is the one host that has to answer rather than fall through: it is a plausible thing to
+    // submit to a search console, and without this the /{slug} catch-all sends it to the dashboard,
+    // which reads as an unfetchable sitemap. Everything else on www. already 301s to the apex.
+    Route::domain('www.'._base_domain())->withoutMiddleware('web')->group(function () use ($sitemapSections) {
+        $apex = 'https://'._base_domain();
+
+        foreach (['/sitemap.xml', '/sitemap.xml.gz'] as $path) {
+            Route::get($path, fn () => redirect($apex.'/sitemap.xml', 301));
+        }
+
+        foreach (['/sitemap-{section}.xml', '/sitemap-{section}.xml.gz'] as $path) {
+            Route::get($path, fn (string $section) => redirect($apex.'/sitemap-'.$section.'.xml', 301))
+                ->where('section', $sitemapSections);
+        }
+    });
 } else {
     // Selfhost is path-routed on an arbitrary host, so no domain constraint.
     Route::withoutMiddleware('web')->group($sitemapRoutes);

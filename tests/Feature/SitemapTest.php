@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Controllers\SitemapController;
 use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\Role;
@@ -106,7 +107,7 @@ class SitemapTest extends TestCase
      */
     public function test_sitemap_responses_do_not_set_cookies(): void
     {
-        foreach (['/sitemap.xml', '/sitemap.xml.gz', '/sitemap-pages.xml'] as $path) {
+        foreach (['/sitemap.xml', '/sitemap-pages.xml'] as $path) {
             $response = $this->get($path)->assertOk();
 
             $this->assertEmpty(
@@ -117,34 +118,47 @@ class SitemapTest extends TestCase
         }
     }
 
-    public function test_gzipped_variants_decode_to_the_plain_body(): void
+    /**
+     * The .gz paths used to serve the same XML under a Content-Encoding: gzip transport header,
+     * which is not a gzip file and which any proxy may re-negotiate away - so the same URL returned
+     * gzip or bare XML depending on the caller. They are redirects now, and there must be exactly
+     * one representation of each sitemap. Kept rather than deleted because Search Console and
+     * anything else that already discovered a .gz URL has to land somewhere real.
+     */
+    public function test_gz_paths_redirect_to_the_canonical_sitemap(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'venue');
         $this->createEvent($role, ['creator_role_id' => $role->id]);
 
-        // Children only. The index deliberately differs between the two variants - it lists .gz
-        // children when served as .gz - and has its own test below.
+        $this->get('/sitemap.xml.gz')->assertRedirect('/sitemap.xml')->assertStatus(301);
+
         foreach ($this->advertisedChildren() as $path) {
-            $response = $this->get($path.'.gz')->assertOk();
-            $response->assertHeader('Content-Encoding', 'gzip');
-
-            $decoded = gzdecode($response->streamedContent());
-
-            $this->assertNotFalse($decoded, $path.'.gz is not valid gzip');
-            $this->assertSame($this->xml($path), $decoded, $path.'.gz does not match the plain body');
+            $this->get($path.'.gz')->assertRedirect($path)->assertStatus(301);
         }
+    }
 
-        // The index still has to be valid gzip and valid XML in both variants.
-        $index = gzdecode($this->get('/sitemap.xml.gz')->assertOk()->streamedContent());
-        $this->assertNotFalse($index, '/sitemap.xml.gz is not valid gzip');
-        $this->assertSame('sitemapindex', $this->parse($index)->getName());
+    /** Nothing may advertise or serve a .gz sitemap as its own document any more. */
+    public function test_no_sitemap_response_is_content_encoded(): void
+    {
+        foreach (array_merge(['/sitemap.xml'], $this->advertisedChildren()) as $path) {
+            $response = $this->get($path)->assertOk();
+
+            $this->assertNull(
+                $response->headers->get('Content-Encoding'),
+                $path.' sets Content-Encoding, which proxies re-negotiate'
+            );
+
+            foreach ($this->locs($response->streamedContent()) as $loc) {
+                $this->assertStringNotContainsString('.xml.gz', $loc, $path.' advertises a .gz URL');
+            }
+        }
     }
 
     /**
-     * A body larger than the flush threshold crosses ZLIB_SYNC_FLUSH boundaries mid-stream. Get
-     * that wrong and the gzip stream is corrupt in production while every small fixture still
-     * passes, so this deliberately produces a document big enough to flush several times.
+     * A body larger than the flush threshold is written out in several passes. Get that wrong and
+     * the document is truncated or duplicated in production while every small fixture still passes,
+     * so this deliberately produces a document big enough to flush several times.
      */
     public function test_a_large_body_survives_mid_stream_flushes(): void
     {
@@ -152,14 +166,11 @@ class SitemapTest extends TestCase
         $role = $this->createRole($owner, 'talent');
         $this->seedEvents($role, 900);
 
-        $plain = $this->xml('/sitemap-events-1.xml');
-        $this->assertGreaterThan(65536, strlen($plain), 'fixture is too small to trigger a flush');
+        $xml = $this->xml('/sitemap-events-1.xml');
 
-        $decoded = gzdecode($this->get('/sitemap-events-1.xml.gz')->assertOk()->streamedContent());
-
-        $this->assertNotFalse($decoded, 'large gzipped body is corrupt');
-        $this->assertSame($plain, $decoded);
-        $this->assertSame(900, substr_count($decoded, '<loc>'));
+        $this->assertGreaterThan(65536, strlen($xml), 'fixture is too small to trigger a flush');
+        $this->assertSame('urlset', $this->parse($xml)->getName());
+        $this->assertSame(900, substr_count($xml, '<loc>'));
     }
 
     /** Bulk-insert public events, bypassing the per-model save path for speed. */
@@ -199,16 +210,6 @@ class SitemapTest extends TestCase
         }
     }
 
-    /** A crawler that asked for the compressed index should not get a list of uncompressed children. */
-    public function test_gzipped_index_lists_gzipped_children(): void
-    {
-        $xml = gzdecode($this->get('/sitemap.xml.gz')->assertOk()->streamedContent());
-
-        foreach ($this->locs($xml) as $loc) {
-            $this->assertStringEndsWith('.xml.gz', $loc);
-        }
-    }
-
     public function test_pages_child_holds_the_static_marketing_urls(): void
     {
         $xml = $this->xml('/sitemap-pages.xml');
@@ -217,6 +218,53 @@ class SitemapTest extends TestCase
         $this->assertStringContainsString(url('/'), $xml);
         $this->assertStringContainsString(url('/pricing'), $xml);
         $this->assertStringContainsString(url('/docs/getting-started'), $xml);
+    }
+
+    /**
+     * The static <lastmod> comes from view mtimes, and reproducible-build images rewrite those to a
+     * fixed epoch - the hosted buildpack stamps 1980-01-01, which told crawlers the marketing pages
+     * had not changed in 46 years. Any pre-2000 timestamp is a build artifact, never a real edit.
+     */
+    public function test_static_lastmods_are_not_build_artifacts(): void
+    {
+        $floor = Carbon::create(2000, 1, 1);
+        $documents = ['/sitemap.xml' => 'sitemap', '/sitemap-pages.xml' => 'url'];
+
+        foreach ($documents as $path => $node) {
+            foreach ($this->parse($this->xml($path))->{$node} as $entry) {
+                if (! isset($entry->lastmod)) {
+                    continue;
+                }
+
+                $this->assertTrue(
+                    Carbon::parse((string) $entry->lastmod)->gt($floor),
+                    $path.' reports an implausible lastmod: '.$entry->lastmod
+                );
+            }
+        }
+    }
+
+    /**
+     * The fallback stands in for the deploy date, so it has to be identical for every container on
+     * a release and move only when a new version ships.
+     */
+    public function test_static_lastmod_fallback_is_stable_per_release(): void
+    {
+        // Private: the fallback is an implementation detail of staticLastmod(), but it only fires
+        // on a filesystem whose mtimes are normalized, which is not reproducible from a test.
+        $method = new \ReflectionMethod(SitemapController::class, 'staticLastmodFallback');
+        $lastmod = fn () => $method->invoke(new SitemapController);
+
+        config(['self-update.version_installed' => 'v9.9.9']);
+        $first = $lastmod();
+
+        Carbon::setTestNow(now()->addDay());
+
+        $this->assertSame($first, $lastmod(), 'the fallback moved without a deploy');
+
+        config(['self-update.version_installed' => 'v9.9.10']);
+
+        $this->assertNotSame($first, $lastmod(), 'the fallback did not move on a new release');
     }
 
     public function test_children_paginate_at_the_configured_cap(): void
