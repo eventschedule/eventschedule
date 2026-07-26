@@ -54,21 +54,24 @@
     @endphp
 
     <div id="booking-app" data-props="{{ json_encode($props) }}" class="max-w-4xl mx-auto px-4 py-8">
-        <div class="rounded-2xl border border-gray-200 dark:border-[#2d2d30] overflow-hidden md:flex">
+        {{-- The guest page background comes from the schedule's own theme and does not follow
+             dark mode, so the widget takes its own dark surface and every child inside it
+             carries a dark: text color. Light mode is unchanged. --}}
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800 overflow-hidden md:flex">
             {{-- Left panel --}}
-            <div class="md:w-1/3 p-6 border-b md:border-b-0 md:border-e border-gray-200 dark:border-[#2d2d30]">
+            <div class="md:w-1/3 p-6 border-b md:border-b-0 md:border-e border-gray-200 dark:border-gray-700">
                 <a :href="backUrl" class="text-xs text-gray-400"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</a>
-                <h1 class="text-xl font-bold mt-2">@{{ typeName }}</h1>
+                <h1 class="text-xl font-bold dark:text-gray-100 mt-2">@{{ typeName }}</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">@{{ scheduleName }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">@{{ duration }} @{{ t.minutes }} &middot; @{{ priceLabel }}</p>
-                <p v-if="requiresApproval" class="inline-block mt-2 text-xs px-2 py-1 rounded-full border border-gray-300 dark:border-[#2d2d30]">@{{ t.requiresConfirmation }}</p>
+                <p v-if="requiresApproval" class="inline-block mt-2 text-xs px-2 py-1 rounded-full border border-gray-300 dark:border-gray-600 dark:text-gray-300">@{{ t.requiresConfirmation }}</p>
                 <p v-if="typeDescription" class="text-sm text-gray-600 dark:text-gray-300 mt-3">@{{ typeDescription }}</p>
 
                 <div class="mt-6">
-                    <button type="button" @click="tzOpen = !tzOpen" class="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30]">
+                    <button type="button" @click="tzOpen = !tzOpen" class="inline-flex items-center gap-1 text-xs px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 dark:text-gray-300">
                         <span>&#127760;</span> @{{ t.timesShownIn }} @{{ tz }}
                     </button>
-                    <select v-if="tzOpen" v-model="tz" class="mt-2 w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]">
+                    <select v-if="tzOpen" v-model="tz" class="mt-2 w-full text-sm px-2 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 dark:text-gray-100">
                         <option v-for="z in tzList" :key="z" :value="z">@{{ z }}</option>
                     </select>
                     <p v-if="tz !== scheduleTz" class="text-xs text-gray-400 mt-1">@{{ t.scheduleIn }} @{{ scheduleTz }}</p>
@@ -83,10 +86,10 @@
                         {{-- Calendar --}}
                         <div class="sm:w-1/2">
                             <div class="flex items-center justify-between mb-3">
-                                <div class="font-semibold">@{{ monthLabel }}</div>
+                                <div class="font-semibold dark:text-gray-100">@{{ monthLabel }}</div>
                                 <div class="flex gap-1">
-                                    <button type="button" @click="changeMonth(-1)" class="px-2 py-1 rounded border border-gray-200 dark:border-[#2d2d30] rtl:rotate-180">&lsaquo;</button>
-                                    <button type="button" @click="changeMonth(1)" class="px-2 py-1 rounded border border-gray-200 dark:border-[#2d2d30] rtl:rotate-180">&rsaquo;</button>
+                                    <button type="button" @click="changeMonth(-1)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-600 dark:text-gray-300 rtl:rotate-180">&lsaquo;</button>
+                                    <button type="button" @click="changeMonth(1)" class="px-2 py-1 rounded border border-gray-200 dark:border-gray-600 dark:text-gray-300 rtl:rotate-180">&rsaquo;</button>
                                 </div>
                             </div>
                             <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-400 mb-1">
@@ -99,7 +102,7 @@
                                         @click="selectDate(cell.date)"
                                         :style="selectedDate === cell.date ? ('background-color:' + accent + ';color:#fff') : ''"
                                         :class="['aspect-square rounded-lg text-sm flex items-center justify-center relative',
-                                            hasSlots(cell.date) ? 'hover:bg-gray-100 dark:hover:bg-[#2d2d30] font-medium cursor-pointer' : 'text-gray-300 dark:text-gray-600 cursor-default']">
+                                            hasSlots(cell.date) ? 'dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium cursor-pointer' : 'text-gray-300 dark:text-gray-500 cursor-default']">
                                         @{{ cell.day }}
                                         <span v-if="hasSlots(cell.date) && selectedDate !== cell.date" class="absolute bottom-1 w-1 h-1 rounded-full" :style="'background-color:' + accent"></span>
                                     </button>
@@ -117,7 +120,7 @@
                         <div class="sm:w-1/2 mt-6 sm:mt-0">
                             <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm">@{{ error }}</div>
                             <div v-if="selectedDate">
-                                <div class="font-semibold mb-2">@{{ selectedDateLabel }}</div>
+                                <div class="font-semibold dark:text-gray-100 mb-2">@{{ selectedDateLabel }}</div>
                                 <template v-for="group in ['morning','afternoon','evening']" :key="group">
                                     <div v-if="slotGroups[group].length" class="mb-3">
                                         <div v-if="showGroups" class="text-xs text-gray-400 uppercase mb-1">@{{ t[group] }}</div>
@@ -142,21 +145,21 @@
                 {{-- Step: details --}}
                 <div v-else-if="step === 'details'">
                     <button type="button" @click="step = 'pick'" class="text-xs text-gray-400 mb-3"><span class="inline-block rtl:rotate-180">&larr;</span> @{{ t.back }}</button>
-                    <h2 class="mb-3 text-base font-semibold">@{{ t.yourDetails }}</h2>
-                    <div class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-[#252526] text-sm">
-                        <div class="font-semibold">@{{ selectedSlotLabel }}, @{{ localTime(selectedSlot) }}</div>
+                    <h2 class="mb-3 text-base font-semibold dark:text-gray-100">@{{ t.yourDetails }}</h2>
+                    <div class="mb-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm">
+                        <div class="font-semibold dark:text-gray-100">@{{ selectedSlotLabel }}, @{{ localTime(selectedSlot) }}</div>
                         <div class="text-gray-400">@{{ tz }}</div>
                     </div>
                     <div v-if="error" class="mb-3 p-2 rounded bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-sm">@{{ error }}</div>
                     <form @submit.prevent="submit" class="space-y-3 max-w-md">
                         <input type="text" style="display:none" v-model="website" tabindex="-1" autocomplete="off">
-                        <input v-model="form.name" :placeholder="t.name" autocomplete="name" required class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]">
-                        <span v-if="fieldErrors.name" class="text-xs text-red-600">@{{ fieldErrors.name }}</span>
-                        <input v-model="form.email" type="email" inputmode="email" :placeholder="t.email" autocomplete="email" required class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]">
-                        <span v-if="fieldErrors.email" class="text-xs text-red-600">@{{ fieldErrors.email }}</span>
-                        <input v-if="askPhone" v-model="form.phone" type="tel" :placeholder="t.phone" autocomplete="tel" :required="requirePhone" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]">
-                        <span v-if="fieldErrors.phone" class="text-xs text-red-600">@{{ fieldErrors.phone }}</span>
-                        <textarea v-model="form.notes" :placeholder="t.notes" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-[#2d2d30] bg-white dark:bg-[#252526]"></textarea>
+                        <input v-model="form.name" :placeholder="t.name" autocomplete="name" required class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
+                        <span v-if="fieldErrors.name" class="block text-xs text-red-600 dark:text-red-400">@{{ fieldErrors.name }}</span>
+                        <input v-model="form.email" type="email" inputmode="email" :placeholder="t.email" autocomplete="email" required class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
+                        <span v-if="fieldErrors.email" class="block text-xs text-red-600 dark:text-red-400">@{{ fieldErrors.email }}</span>
+                        <input v-if="askPhone" v-model="form.phone" type="tel" :placeholder="t.phone" autocomplete="tel" :required="requirePhone" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500">
+                        <span v-if="fieldErrors.phone" class="block text-xs text-red-600 dark:text-red-400">@{{ fieldErrors.phone }}</span>
+                        <textarea v-model="form.notes" :placeholder="t.notes" rows="3" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500"></textarea>
                         <div v-if="turnstileEnabled" id="turnstile-booking-widget"></div>
                         <button type="submit" :disabled="submitting" class="w-full py-3 rounded-lg text-white font-semibold disabled:opacity-60" :style="'background-color:' + accent">@{{ ctaLabel }}</button>
                     </form>

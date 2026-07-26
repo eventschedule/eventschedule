@@ -64,6 +64,12 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         // Must be registered here, ahead of the domain-less marketing "/" routes below,
         // otherwise those match first on every host and send schedule home pages to login.
         Route::get('/', [RoleController::class, 'viewGuest'])->name('role.view_guest');
+        // This schedule's own sitemap. It exists for custom domains, whose URLs the global sitemap
+        // is not allowed to carry - see SitemapController::schedule(). withoutMiddleware('web') for
+        // the same reason the global sitemap routes use it: a Set-Cookie stops Cloudflare caching.
+        Route::get('/sitemap.xml', [SitemapController::class, 'schedule'])
+            ->name('sitemap.schedule')
+            ->withoutMiddleware('web');
         Route::get('/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
@@ -1490,6 +1496,9 @@ if (config('app.is_testing') || config('app.env') == 'local' || ! config('app.ho
 // The hosted counterparts of these routes live in the subdomain group near the top of this
 // file; role.view_guest in particular must register before the domain-less "/" routes above.
 if (! config('app.hosted') || config('app.is_testing')) {
+    Route::get('/{subdomain}/sitemap.xml', [SitemapController::class, 'schedule'])
+        ->name('sitemap.schedule')
+        ->withoutMiddleware('web');
     Route::get('/{subdomain}/api/past-events', [RoleController::class, 'listPastEvents'])->name('role.list_past_events');
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');

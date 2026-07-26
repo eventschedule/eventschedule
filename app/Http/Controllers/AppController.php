@@ -414,9 +414,19 @@ class AppController extends Controller
         $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /admin\n";
 
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
+
+        // A custom domain points at its own sitemap. Google rejects a third-party host inside the
+        // global sitemap ("URL not allowed") whatever robots.txt says, so pointing there would
+        // advertise a sitemap that cannot carry a single one of this host's URLs.
+        //
+        // Everywhere else keeps the global sitemap line untouched: on tenant subdomains that line
+        // is the cross-submission grant that keeps their URLs legal inside it.
+        $customDomainHost = request()->attributes->get('custom_domain_host');
+        $sitemapBase = $customDomainHost ? 'https://'.$customDomainHost : config('app.url');
+
         $content = $isAppSubdomain
             ? $disallowRules
-            : $disallowRules."\nSitemap: ".config('app.url')."/sitemap.xml\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
+            : $disallowRules."\nSitemap: ".$sitemapBase."/sitemap.xml\n# AI/LLM-friendly docs: ".config('app.url')."/llms.txt\n";
 
         return response($content, 200)->header('Content-Type', 'text/plain');
     }

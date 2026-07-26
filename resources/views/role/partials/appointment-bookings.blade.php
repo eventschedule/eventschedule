@@ -3,7 +3,7 @@
 <div class="flex gap-2 flex-wrap">
     @foreach (['upcoming', 'pending', 'past', 'cancelled'] as $f)
         <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?view=bookings&filter={{ $f }}"
-           class="px-3 py-1.5 rounded-full text-xs font-medium {{ $filter === $f ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-100 dark:bg-[#2d2d30] text-gray-500 dark:text-gray-400' }}">{{ __('messages.appointments_filter_'.$f) }}</a>
+           class="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 {{ $filter === $f ? 'bg-[var(--brand-button-bg)] text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' }}">{{ __('messages.appointments_filter_'.$f) }}</a>
     @endforeach
 </div>
 
@@ -11,8 +11,8 @@
     <div class="ap-card rounded-xl p-8 text-center text-gray-500 dark:text-gray-400">{{ __('messages.appointments_no_bookings') }}</div>
 @else
     <div class="ap-card rounded-xl overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-gray-50 dark:bg-[#252526] text-left text-gray-500 dark:text-gray-400">
+        <table class="w-full text-sm text-gray-900 dark:text-gray-100">
+            <thead class="bg-gray-50 dark:bg-gray-800 text-left text-gray-500 dark:text-gray-400">
                 <tr>
                     <th class="p-3 font-medium">{{ __('messages.date') }}</th>
                     <th class="p-3 font-medium">{{ __('messages.appointment_types') }}</th>
@@ -30,12 +30,12 @@
                         $confirmedRow = ! $cancelled && ! $pending && $s->status === 'paid';
                         $statusLabel = $cancelled ? __('messages.appointments_cancelled') : ($pending ? __('messages.appointments_request_sent') : ($confirmedRow ? __('messages.appointments_confirmed_label') : __('messages.appointments_awaiting_payment')));
                     @endphp
-                    <tr class="border-t border-gray-100 dark:border-[#2d2d30]">
-                        <td class="p-3 whitespace-nowrap">{{ $e->getStartDateTime($s->event_date, true, $e->timezone)->format('M j, Y') }}<div class="text-xs text-gray-400">{{ $e->getStartEndTime($s->event_date) }}</div></td>
+                    <tr class="border-t border-gray-100 dark:border-gray-700">
+                        <td class="p-3 whitespace-nowrap">{{ $e->getStartDateTime($s->event_date, true, $e->timezone)->format('M j, Y') }}<div class="text-xs text-gray-500 dark:text-gray-400">{{ $e->getStartEndTime($s->event_date) }}</div></td>
                         <td class="p-3">{{ $e->appointmentType?->name }}</td>
-                        <td class="p-3">{{ $s->name }}<div class="text-xs text-gray-400">{{ $s->email }}</div></td>
+                        <td class="p-3">{{ $s->name }}<div class="text-xs text-gray-500 dark:text-gray-400">{{ $s->email }}</div></td>
                         <td class="p-3">
-                            <span class="inline-block px-2 py-1 rounded-full text-xs {{ $cancelled ? 'bg-gray-100 dark:bg-[#2d2d30] text-gray-500' : ($confirmedRow ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400') }}">{{ $statusLabel }}</span>
+                            <span class="inline-block px-2 py-1 rounded-full text-xs {{ $cancelled ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300' : ($confirmedRow ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400') }}">{{ $statusLabel }}</span>
                         </td>
                         <td class="p-3 text-right whitespace-nowrap">
                             <a href="{{ route('appointments.manage', ['event_id' => UrlUtils::encodeId($e->id), 'secret' => $s->secret]) }}" target="_blank" rel="noopener" class="text-xs text-[var(--brand-blue)] me-3">{{ __('messages.view') }}</a>

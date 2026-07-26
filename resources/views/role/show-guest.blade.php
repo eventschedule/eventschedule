@@ -40,9 +40,11 @@
   html[data-es-view="calendar"] [data-view-width] { max-width: 200rem !important; }
   html[data-es-view="list"] [data-view-width] { max-width: 56rem !important; }
   html[data-es-view="list"] #toggle-calendar-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
-  html[data-es-view="list"] #toggle-list-btn { background-color: transparent !important; color: inherit !important; }
+  html[data-es-view="list"] #toggle-list-btn { background-color: transparent !important; color: #1e1e1e !important; }
   html[data-es-view="calendar"] #toggle-list-btn { background-color: {{ $accentColor }} !important; color: {{ $contrastColor }} !important; }
-  html[data-es-view="calendar"] #toggle-calendar-btn { background-color: transparent !important; color: inherit !important; }
+  html[data-es-view="calendar"] #toggle-calendar-btn { background-color: transparent !important; color: #1e1e1e !important; }
+  html.dark[data-es-view="list"] #toggle-list-btn,
+  html.dark[data-es-view="calendar"] #toggle-calendar-btn { color: #ffffff !important; }
   html[data-es-view="list"] #month-year-title { display: none !important; }
 html[data-es-view="list"] #month-nav-controls { display: none !important; }
 html[data-es-view="list"] #calendar-panel-wrapper {

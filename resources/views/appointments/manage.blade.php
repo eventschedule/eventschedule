@@ -11,37 +11,37 @@
             <div class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300">{{ session('error') }}</div>
         @endif
 
-        <div class="rounded-xl border border-gray-200 dark:border-[#2d2d30] p-6">
+        <div class="rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800 p-6">
             @switch($state)
                 @case('pending')
-                    <h1 class="text-xl font-bold">{{ __('messages.appointments_request_sent') }}</h1>
-                    <p class="text-gray-500 mt-1">{{ __('messages.appointments_pending_note', ['schedule' => $role?->name ?? '']) }}</p>
+                    <h1 class="text-xl font-bold dark:text-gray-100">{{ __('messages.appointments_request_sent') }}</h1>
+                    <p class="text-gray-500 dark:text-gray-400 mt-1">{{ __('messages.appointments_pending_note', ['schedule' => $role?->name ?? '']) }}</p>
                     @break
                 @case('awaiting_payment')
-                    <h1 class="text-xl font-bold">{{ __('messages.appointments_awaiting_payment') }}</h1>
+                    <h1 class="text-xl font-bold dark:text-gray-100">{{ __('messages.appointments_awaiting_payment') }}</h1>
                     <form method="POST" action="{{ route('appointments.pay', $manageParams) }}" class="mt-3">
                         @csrf
                         <button type="submit" class="px-4 py-3 text-base rounded-lg text-white" style="background: {{ $role->accent_color ?? '#4E81FA' }}">{{ __('messages.appointments_complete_payment') }}</button>
                     </form>
                     @break
                 @case('cancelled')
-                    <h1 class="text-xl font-bold">{{ __('messages.appointments_cancelled') }}</h1>
+                    <h1 class="text-xl font-bold dark:text-gray-100">{{ __('messages.appointments_cancelled') }}</h1>
                     @break
                 @case('passed')
-                    <h1 class="text-xl font-bold">{{ __('messages.appointments_passed') }}</h1>
+                    <h1 class="text-xl font-bold dark:text-gray-100">{{ __('messages.appointments_passed') }}</h1>
                     @break
                 @default
-                    <h1 class="text-xl font-bold">{{ __('messages.appointments_youre_booked') }}</h1>
+                    <h1 class="text-xl font-bold dark:text-gray-100">{{ __('messages.appointments_youre_booked') }}</h1>
             @endswitch
 
-            <div class="mt-4 space-y-1">
-                <div class="font-semibold text-lg">{{ $type?->name ?? $event->name }}</div>
+            <div class="mt-4 space-y-1 dark:text-gray-300">
+                <div class="font-semibold text-lg dark:text-gray-100">{{ $type?->name ?? $event->name }}</div>
                 <div>{{ $event->getStartDateTime($sale->event_date, true, $event->timezone)->format('l, F j, Y') }}</div>
                 <div>{{ $event->getStartEndTime($sale->event_date) }} ({{ $event->timezone }})</div>
                 @if ($event->event_url)
                     <div><a href="{{ $event->event_url }}" class="text-blue-600 dark:text-blue-400 break-all">{{ $event->event_url }}</a></div>
                 @elseif ($type && $type->location_type === 'in_person' && $type->location_address)
-                    <div class="text-gray-500">{{ $type->location_address }}</div>
+                    <div class="text-gray-500 dark:text-gray-400">{{ $type->location_address }}</div>
                 @endif
             </div>
 

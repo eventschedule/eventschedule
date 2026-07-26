@@ -1,15 +1,17 @@
 <x-app-guest-layout :role="$role">
     <div class="max-w-2xl mx-auto px-4 py-10">
+        {{-- Page header sits directly on the schedule's own background, which does not follow
+             dark mode, so it must keep the guest layout's inherited text color. --}}
         <h1 class="text-2xl font-bold mb-1">{{ $role->customLabel('book_a_time') }}</h1>
         <p class="text-gray-500 mb-6">{{ __('messages.appointments_with', ['schedule' => $role->name]) }}</p>
 
         <div class="space-y-4">
             @foreach ($types as $type)
                 <a href="{{ route('appointments.book_type', ['subdomain' => $role->subdomain, 'typeSlug' => $type->slug]) }}"
-                   class="block p-5 rounded-xl border border-gray-200 dark:border-[#2d2d30] hover:shadow-md transition-all duration-200">
-                    <div class="font-semibold text-lg">{{ $type->name }}</div>
+                   class="block p-5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-800 hover:shadow-md transition-all duration-200">
+                    <div class="font-semibold text-lg dark:text-gray-100">{{ $type->name }}</div>
                     @if ($type->description)
-                        <div class="text-gray-500 mt-1">{{ $type->description }}</div>
+                        <div class="text-gray-500 dark:text-gray-400 mt-1">{{ $type->description }}</div>
                     @endif
                     <div class="text-sm text-gray-400 mt-2">
                         {{ $type->duration_minutes }} {{ __('messages.minutes') }}

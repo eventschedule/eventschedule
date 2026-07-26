@@ -445,10 +445,12 @@ class SitemapTest extends TestCase
     }
 
     /**
-     * A schedule served directly on an active custom domain canonicalizes to that domain, so the
-     * sitemap must advertise the same URL rather than the subdomain Google would discard.
+     * A schedule served directly on an active custom domain canonicalizes to that domain, and the
+     * global sitemap is not allowed to carry a third-party host: Google reports every one of them
+     * as "URL not allowed" and discards it (940 event URLs and 7 schedules, in production). They
+     * belong in that host's own sitemap instead, which is where they are actually in scope.
      */
-    public function test_custom_domain_schedules_are_listed_at_their_canonical_url(): void
+    public function test_custom_domain_urls_are_excluded_from_the_global_sitemap(): void
     {
         $owner = $this->createOwner();
         $role = $this->createRole($owner, 'talent', [
@@ -458,11 +460,119 @@ class SitemapTest extends TestCase
         ]);
         $this->createEvent($role, ['creator_role_id' => $role->id]);
 
-        $schedules = $this->xml('/sitemap-schedules-1.xml');
-        $this->assertStringContainsString('<loc>https://sitemap-direct.test</loc>', $schedules);
-        $this->assertStringNotContainsString(url('/'.$role->subdomain).'<', $schedules);
+        foreach (['/sitemap-schedules-1.xml', '/sitemap-events-1.xml'] as $path) {
+            $xml = $this->xml($path);
 
-        $this->assertStringContainsString('<loc>https://sitemap-direct.test/', $this->xml('/sitemap-events-1.xml'));
+            $this->assertStringNotContainsString('sitemap-direct.test', $xml, $path.' lists a custom domain');
+            // Nor may it fall back to the subdomain: that page canonicalizes to the custom domain.
+            $this->assertStringNotContainsString(url('/'.$role->subdomain).'<', $xml);
+        }
+    }
+
+    /**
+     * The scope rule Google enforces, tested at the predicate: a URL off this host is "URL not
+     * allowed", and a host whose label exceeds the 63-octet DNS limit is "Invalid URL" (subdomains
+     * predating the 50-character cap in Role::cleanSubdomain() - those hosts do not resolve at all).
+     *
+     * Not driven through a sitemap request because the suite is path-routed: a subdomain lands in
+     * the path there, never in the host, so no fixture can produce an over-long DNS label.
+     */
+    public function test_only_in_scope_hosts_with_valid_labels_are_listable(): void
+    {
+        $method = new \ReflectionMethod(SitemapController::class, 'isListable');
+        $controller = new SitemapController;
+
+        (new \ReflectionMethod(SitemapController::class, 'scopeToBaseDomain'))->invoke($controller);
+
+        $base = _base_domain();
+        $long = str_repeat('a', 64);
+
+        foreach (["https://{$base}/pricing", "https://tenant.{$base}", "https://blog.{$base}/post"] as $loc) {
+            $this->assertTrue($method->invoke($controller, $loc), $loc.' should be listable');
+        }
+
+        foreach ([
+            'https://emeklive.co.il/magal-30-7/Fz3n7C',  // a customer custom domain
+            "https://{$long}.{$base}/event/abc",         // label over the DNS limit
+            "https://{$base}.evil.test",                 // suffix match must not be a substring match
+            'not a url',
+        ] as $loc) {
+            $this->assertFalse($method->invoke($controller, $loc), $loc.' should not be listable');
+        }
+    }
+
+    /** A schedule's own sitemap carries its URLs and nobody else's. */
+    public function test_schedule_sitemap_lists_only_that_schedules_urls(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent');
+        $other = $this->createRole($owner, 'talent');
+        $event = $this->createEvent($role, ['creator_role_id' => $role->id]);
+        $this->createEvent($other, ['creator_role_id' => $other->id]);
+
+        $response = $this->get('/'.$role->subdomain.'/sitemap.xml')->assertOk();
+        $response->assertHeader('Content-Type', 'application/xml');
+        $this->assertEmpty($response->headers->getCookies(), 'the schedule sitemap set a cookie');
+
+        $xml = $response->streamedContent();
+        $locs = $this->locs($xml);
+
+        $this->assertSame('urlset', $this->parse($xml)->getName());
+        $this->assertContains($role->getCanonicalUrl(), $locs);
+        $this->assertContains($event->getCanonicalUrl(), $locs);
+        $this->assertNotContains($other->getCanonicalUrl(), $locs);
+    }
+
+    /**
+     * Unknown, or canonical on a host other than the one being asked. The second case is a schedule
+     * with an active custom domain asked at its subdomain: every URL it would emit belongs to the
+     * custom domain, so an empty urlset would be the only honest body - and a 404 says it better.
+     */
+    public function test_schedule_sitemap_404s_when_it_has_nothing_to_serve(): void
+    {
+        $owner = $this->createOwner();
+        $elsewhere = $this->createRole($owner, 'talent', [
+            'custom_domain' => 'https://sitemap-elsewhere.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
+
+        $this->get('/no-such-schedule/sitemap.xml')->assertNotFound();
+        $this->get('/'.$elsewhere->subdomain.'/sitemap.xml')->assertNotFound();
+    }
+
+    /**
+     * robots.txt is how a sitemap is discovered. A custom domain has to point at its own, because
+     * the global sitemap is not allowed to carry a single one of that host's URLs.
+     */
+    public function test_robots_txt_points_a_custom_domain_at_its_own_sitemap(): void
+    {
+        // Pinned: _base_domain() and the robots line both derive from app.url, which is empty in CI.
+        config(['app.url' => 'https://eventschedule.test', 'app.hosted' => true]);
+
+        $owner = $this->createOwner();
+        $this->createRole($owner, 'talent', [
+            'custom_domain' => 'https://robots-direct.test',
+            'custom_domain_mode' => 'direct',
+            'custom_domain_status' => 'active',
+        ]);
+
+        $robots = $this->get('http://robots-direct.test/robots.txt')->assertOk()->getContent();
+
+        $this->assertStringContainsString('Sitemap: https://robots-direct.test/sitemap.xml', $robots);
+        $this->assertStringNotContainsString('Sitemap: https://eventschedule.test/sitemap.xml', $robots);
+    }
+
+    /**
+     * Everywhere else keeps the global line. On a tenant subdomain it is the cross-submission grant
+     * that keeps that subdomain's URLs legal inside the global sitemap - drop it and Google rejects
+     * them the same way it rejects the custom-domain ones.
+     */
+    public function test_robots_txt_keeps_the_global_sitemap_on_other_hosts(): void
+    {
+        $robots = $this->get('/robots.txt')->assertOk()->getContent();
+
+        $this->assertStringContainsString('Sitemap: '.config('app.url').'/sitemap.xml', $robots);
     }
 
     /** Walking every event in the database must not write one log line per unroutable event. */

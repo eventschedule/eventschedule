@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlogPost;
 use App\Models\Event;
 use App\Models\Role;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -51,10 +52,21 @@ class SitemapController extends Controller
      */
     private const MIN_PLAUSIBLE_MTIME = 946684800;
 
+    /** The longest a DNS label may be. See isListable(). */
+    private const MAX_LABEL_LENGTH = 63;
+
     /** Per-request memo of the section list. */
     private ?array $sections = null;
 
     private ?string $staticLastmod = null;
+
+    /**
+     * The host this sitemap is being served for, and whether its subdomains count as in scope.
+     * Set by whichever entry point is running; see isListable().
+     */
+    private ?string $scopeHost = null;
+
+    private bool $scopeIncludesSubdomains = false;
 
     /**
      * GET /sitemap.xml - the sitemap index.
@@ -65,6 +77,8 @@ class SitemapController extends Controller
      */
     public function index(): StreamedResponse
     {
+        $this->scopeToBaseDomain();
+
         $sections = $this->sections();
 
         return $this->streamed(function (callable $write) use ($sections) {
@@ -95,6 +109,8 @@ class SitemapController extends Controller
      */
     public function section(string $section)
     {
+        $this->scopeToBaseDomain();
+
         $meta = collect($this->sections())->firstWhere('name', $section);
 
         if (! $meta) {
@@ -110,6 +126,103 @@ class SitemapController extends Controller
             'events' => $this->urlset(fn (callable $write) => $this->writeEvents($meta, $write)),
             default => abort(404),
         };
+    }
+
+    /**
+     * GET /sitemap.xml on a tenant host - one schedule's own sitemap.
+     *
+     * This exists because a customer custom domain cannot be covered by the global sitemap: Google
+     * honours the robots.txt cross-submission grant for our own subdomains but rejects a
+     * third-party host as "URL not allowed", so those URLs are discarded wherever else they are
+     * listed. Served here, on the host that owns them, they are in scope.
+     *
+     * A single urlset rather than an index: this is one schedule, and the largest custom-domain
+     * schedule is three orders of magnitude below the per-file cap.
+     */
+    public function schedule(Request $request, ?string $subdomain = null)
+    {
+        // ResolveCustomDomain rewrites the Host header to {subdomain}.{base} so tenant routing
+        // matches, and stashes what the request actually arrived on. That original host - not the
+        // rewritten one - is what this sitemap is allowed to list.
+        $this->scopeHost = $request->attributes->get('custom_domain_host') ?: $request->getHost();
+        $this->scopeIncludesSubdomains = false;
+
+        $subdomain = $request->attributes->get('custom_domain_subdomain') ?: $subdomain;
+
+        $role = $subdomain
+            ? $this->scheduleQuery()->where('subdomain', $subdomain)->first()
+            : null;
+
+        $url = $role ? $role->getCanonicalUrl() : null;
+
+        // Unknown, deleted or unclaimed - or canonical somewhere other than the host being asked,
+        // which is what a schedule with an active custom domain looks like when its subdomain is
+        // asked instead. A 404 rather than an empty document: a crawler retries a 404, and an
+        // empty urlset would read as "this schedule has nothing".
+        if (! $url || ! $this->isListable($url)) {
+            abort(404);
+        }
+
+        return $this->urlset(fn (callable $write) => $this->writeSchedule($role, $url, $write));
+    }
+
+    /** One schedule, its sub-schedules and its events, in that order. */
+    private function writeSchedule(Role $role, string $url, callable $write): void
+    {
+        $cap = $this->urlsPerFile();
+        $written = 0;
+
+        $write($this->urlNode($url, $role->updated_at));
+        $written++;
+
+        foreach ($role->groups()->whereNotNull('slug')->get(['id', 'role_id', 'slug', 'updated_at']) as $group) {
+            $write($this->urlNode(rtrim($url, '/').'/'.rawurlencode($group->slug), $group->updated_at));
+            $written++;
+        }
+
+        $this->eventQuery()
+            ->select(['id', 'slug', 'starts_at', 'days_of_week', 'creator_role_id', 'updated_at'])
+            // Same shape as eventQuery()'s acceptance check, narrowed to this schedule.
+            ->whereExists(fn ($q) => $q->select(DB::raw(1))
+                ->from('event_role')
+                ->whereColumn('event_role.event_id', 'events.id')
+                ->where('event_role.role_id', $role->id)
+                ->where('event_role.is_accepted', true))
+            ->with([
+                'roles:id,subdomain,type,user_id,email_verified_at,phone_verified_at,custom_domain,custom_domain_mode,custom_domain_status',
+                'creatorRole:id,subdomain,type,user_id,email_verified_at,phone_verified_at,timezone',
+            ])
+            ->chunkByIdDesc(self::HYDRATE_CHUNK, function ($events) use ($write, $cap, &$written) {
+                foreach ($events as $event) {
+                    if ($written >= $cap) {
+                        return false;
+                    }
+
+                    $url = $event->getCanonicalUrlOrNull();
+
+                    // An event listed on several schedules is canonical on only one of them, so
+                    // this drops the ones whose home schedule is a different host.
+                    if (! $url || ! $this->isListable($url)) {
+                        continue;
+                    }
+
+                    $write($this->urlNode($url, $event->updated_at));
+                    $written++;
+                }
+            });
+
+        if ($written >= $cap) {
+            // Never silently truncate: a schedule this large needs the paginated treatment the
+            // global sitemap gets, and this is the signal to go build it.
+            Log::warning('sitemap: schedule '.$role->subdomain.' hit the '.$cap.'-URL cap and was truncated');
+        }
+    }
+
+    /** The global sitemap covers this install's own host and everything under it. */
+    private function scopeToBaseDomain(): void
+    {
+        $this->scopeHost = _base_domain();
+        $this->scopeIncludesSubdomains = true;
     }
 
     /*
@@ -314,7 +427,9 @@ class SitemapController extends Controller
                 foreach ($roles as $role) {
                     $url = $role->getCanonicalUrl();
 
-                    if (! $url) {
+                    // Skipping the schedule takes its sub-schedules with it, which is right: they
+                    // are emitted as paths under this same host.
+                    if (! $url || ! $this->isListable($url)) {
                         continue;
                     }
 
@@ -350,7 +465,7 @@ class SitemapController extends Controller
                     // event. Walking every event in the database would otherwise flood the log.
                     $url = $event->getCanonicalUrlOrNull();
 
-                    if (! $url) {
+                    if (! $url || ! $this->isListable($url)) {
                         $skipped++;
 
                         continue;
@@ -361,7 +476,7 @@ class SitemapController extends Controller
             });
 
         if ($skipped) {
-            Log::info('sitemap: skipped '.$skipped.' events with no routable subdomain');
+            Log::info('sitemap: skipped '.$skipped.' events with no routable or in-scope URL');
         }
     }
 
@@ -497,6 +612,39 @@ class SitemapController extends Controller
     | Helpers
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * Whether a <loc> may appear in the sitemap being served.
+     *
+     * Google rejects both of these, and both were live in production: a URL outside the sitemap's
+     * own host as "URL not allowed" (the robots.txt cross-submission grant covers our own
+     * subdomains, but not the customer custom domains getCanonicalUrl() returns for a schedule that
+     * servesOnCustomDomain()), and a host with an over-long label as "Invalid URL". The label limit
+     * is not cosmetic - such a host predates the 50-character cap in Role::cleanSubdomain() and
+     * does not resolve at all, so those URLs are dead links.
+     */
+    private function isListable(string $loc): bool
+    {
+        $host = parse_url($loc, PHP_URL_HOST);
+
+        if (! $host) {
+            return false;
+        }
+
+        $labels = explode('.', $host);
+
+        foreach ($labels as $label) {
+            if (strlen($label) > self::MAX_LABEL_LENGTH) {
+                return false;
+            }
+        }
+
+        if ($host === $this->scopeHost) {
+            return true;
+        }
+
+        return $this->scopeIncludesSubdomains && str_ends_with($host, '.'.$this->scopeHost);
+    }
 
     private function urlNode(string $loc, $lastmod = null): string
     {
