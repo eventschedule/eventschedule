@@ -31,8 +31,25 @@ jobs:
       - name: Install npm dependencies
         run: npm ci --ignore-scripts
 
+      # Fail only on real vulnerabilities. When npm's advisory API is broken or
+      # unreachable the CLI also exits 1, but its --json output is an error object
+      # with no auditReportVersion key - warn and move on in that case.
       - name: npm security audit
-        run: npm audit --omit=dev --audit-level=critical
+        run: |
+          set +e
+          npm audit --omit=dev --audit-level=critical --json > "$RUNNER_TEMP/npm-audit.json"
+          status=$?
+          set -e
+          if jq -e 'has("auditReportVersion")' "$RUNNER_TEMP/npm-audit.json" > /dev/null; then
+            jq '.metadata.vulnerabilities' "$RUNNER_TEMP/npm-audit.json"
+            if [ "$status" -ne 0 ]; then
+              echo "::error::npm audit found vulnerabilities at or above the critical level"
+              jq '.vulnerabilities' "$RUNNER_TEMP/npm-audit.json"
+            fi
+            exit $status
+          fi
+          echo "::warning::npm audit endpoint unavailable - skipping audit"
+          jq -r '.message // .' "$RUNNER_TEMP/npm-audit.json" 2>/dev/null || cat "$RUNNER_TEMP/npm-audit.json"
 
   feature-tests:
     runs-on: ubuntu-latest
