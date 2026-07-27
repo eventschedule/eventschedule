@@ -20,7 +20,7 @@
 @if ($hasDescription || $hasContact || $role->isVenue())
 <div class="py-3 border-t {{ $onDark ? 'border-white/10' : 'border-gray-200 dark:border-gray-700' }} flex flex-col sm:flex-row sm:items-start gap-x-6 gap-y-3 {{ $isRtl ? 'rtl' : '' }}" v-pre>
     @if ($hasDescription)
-    <details class="es-desc min-w-0 flex-1">
+    <details class="es-desc min-w-0 flex-1" dir="{{ content_dir($role, false, $role->translatedDescription()) }}">
         <summary class="es-desc-summary cursor-pointer flex items-start gap-1.5 text-sm {{ $onDark ? 'text-white/80' : 'text-[#33383C] dark:text-gray-300' }}">
             <span class="es-desc-text custom-content min-w-0 flex-1">{!! \App\Utils\UrlUtils::convertUrlsToLinks($role->translatedDescription()) !!}</span>
             <svg class="es-desc-chevron w-4 h-4 mt-0.5 flex-shrink-0 transition-transform duration-200 {{ $onDark ? 'text-white/50' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -2000,6 +2000,7 @@ return [
     'editor_ordered_list' => 'Nummerierung',
     'editor_preview' => 'Vorschau',
     'editor_guide' => 'Markdown-Anleitung',
+    'editor_text_direction' => 'Textrichtung',
 
     // Why create account page
     'why_create_account_title' => 'Warum ein Konto erstellen?',
@@ -3026,7 +3027,13 @@ return [
     'sponsor_logos_help' => 'Laden Sie die Logos Ihrer Sponsoren und Partner hoch, um sie auf Ihrer Kalenderseite anzuzeigen.',
     'sponsor_section_title' => 'Abschnittstitel',
     'sponsor_section_title_help' => 'Passen Sie die Überschrift an, die über den Sponsorenlogos auf Ihrer Kalenderseite angezeigt wird.',
-    'max_sponsors_reached' => 'Maximal 12 Sponsoren erreicht.',
+    'max_sponsors_reached' => 'Maximal :count Sponsoren erreicht.',
+    'save_sponsors_before_adding_more' => 'Speichern Sie Ihre Änderungen, bevor Sie weitere Logos hinzufügen, sonst werden möglicherweise nicht alle Uploads gespeichert.',
+    'sponsor_background' => 'Hintergrund',
+    'sponsor_background_default' => 'Standard',
+    'sponsor_background_transparent' => 'Transparent',
+    'sponsor_background_custom' => 'Eigene Farbe',
+    'sponsor_background_help' => 'Legen Sie den Hintergrund hinter den Sponsorenlogos auf Ihrer Zeitplanseite fest.',
     'upgrade_sponsor_logos' => 'Upgraden Sie auf Pro, um Sponsoren- und Partnerlogos auf Ihrer Kalenderseite anzuzeigen.',
     'gold' => 'Gold',
     'silver' => 'Silber',

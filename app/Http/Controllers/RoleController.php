@@ -65,9 +65,10 @@ class RoleController extends Controller
 {
     use Traits\CalendarDataTrait;
 
-    // Max events loaded for the guest list layout (event_layout = 'list'). The list only displays
-    // up to 100 upcoming events client-side, so the nearest 200 upcoming rows are a safe superset
-    // while keeping the query bounded (prevents hydrating the full event table on large schedules).
+    // Max events loaded whenever the month window is dropped: the guest list layout
+    // (event_layout = 'list') and the admin calendar endpoint. Both display at most 100 upcoming
+    // events client-side, so the nearest 200 upcoming rows are a safe superset while keeping the
+    // query bounded (prevents hydrating the full event table on large schedules).
     private const LIST_EVENT_CAP = 200;
 
     protected $eventRepo;
@@ -2124,11 +2125,15 @@ class RoleController extends Controller
         $firstDayOfWeek = $role->first_day_of_week ?? 0;
         $startOfGrid = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth()->startOfWeek($firstDayOfWeek);
         $startOfGridUtc = $startOfGrid->copy()->setTimezone('UTC');
-        $endOfGridUtc = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->endOfMonth()->endOfWeek(($firstDayOfWeek + 6) % 7)->addDays(2)->setTimezone('UTC');
 
+        // No upper date bound. The desktop grid only renders the viewed month, but the mobile
+        // agenda is a flat list spanning four months and has no month navigation at all (the
+        // controls are hidden below md), so stopping at the month boundary left later events
+        // permanently unreachable there. Cap the row count instead: bounded memory on large
+        // schedules, and a safe superset of what either layout displays.
         if ($role->isCurator()) {
             $events = Event::with('roles', 'parts', 'tickets')
-                ->inMonth($startOfGridUtc, $endOfGridUtc)
+                ->inMonth($startOfGridUtc, null)
                 ->whereIn('id', function ($query) use ($role) {
                     $query->select('event_id')
                         ->from('event_role')
@@ -2136,6 +2141,7 @@ class RoleController extends Controller
                         ->where('is_accepted', true);
                 })
                 ->orderBy('starts_at')
+                ->limit(self::LIST_EVENT_CAP)
                 ->get();
         } else {
             $events = Event::with('roles', 'parts', 'tickets')
@@ -2145,8 +2151,9 @@ class RoleController extends Controller
                             ->where('is_accepted', true);
                     });
                 })
-                ->inMonth($startOfGridUtc, $endOfGridUtc)
+                ->inMonth($startOfGridUtc, null)
                 ->orderBy('starts_at')
+                ->limit(self::LIST_EVENT_CAP)
                 ->get();
         }
 
@@ -3432,6 +3439,7 @@ class RoleController extends Controller
         if (! $role->isPro()) {
             $request->merge([
                 'sponsor_logos' => $role->sponsor_logos,
+                'sponsor_background_color' => $role->sponsor_background_color,
             ]);
             $request->files->remove('new_sponsor_logos');
         }
@@ -4264,8 +4272,10 @@ class RoleController extends Controller
             $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+            $maxSponsors = config('app.max_sponsors');
+
             foreach ($newFiles as $index => $file) {
-                if (count($sponsors) >= 12) {
+                if (count($sponsors) >= $maxSponsors) {
                     break;
                 }
 
@@ -4285,8 +4295,7 @@ class RoleController extends Controller
                 ];
             }
 
-            // Cap at 12
-            $sponsors = array_slice($sponsors, 0, 12);
+            $sponsors = array_slice($sponsors, 0, $maxSponsors);
 
             // Delete orphaned logo files
             $currentLogoFiles = array_filter(array_column($sponsors, 'logo'));

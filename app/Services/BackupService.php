@@ -56,7 +56,7 @@ class BackupService
         'federation_enabled',
         'feedback_enabled', 'feedback_delay_hours', 'feedback_public', 'fan_comments_enabled',
         'fan_photos_enabled', 'fan_videos_enabled', 'fan_content_require_account',
-        'first_day_of_week', 'sponsor_logos', 'sponsor_section_title',
+        'first_day_of_week', 'sponsor_logos', 'sponsor_background_color', 'sponsor_section_title',
         'sponsor_section_title_en', 'custom_labels', 'ai_style_instructions', 'ai_content_instructions',
         'social_links', 'payment_links', 'youtube_links', 'background_image', 'header_image',
         'profile_image_url', 'header_image_url', 'background_image_url',

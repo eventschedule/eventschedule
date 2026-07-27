@@ -199,7 +199,8 @@
             unorderedList: @json(__('messages.editor_unordered_list')),
             orderedList: @json(__('messages.editor_ordered_list')),
             preview: @json(__('messages.editor_preview')),
-            guide: @json(__('messages.editor_guide'))
+            guide: @json(__('messages.editor_guide')),
+            textDirection: @json(__('messages.editor_text_direction'))
         };
     </script>
 

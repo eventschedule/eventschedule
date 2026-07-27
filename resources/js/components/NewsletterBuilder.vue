@@ -834,7 +834,15 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
-import { applyEditorDirection, attachEditorObserver } from '../editor-helpers';
+import {
+    applyEditorDirection,
+    attachDirectionShortcut,
+    attachEditorObserver,
+    attachPasteSanitizer,
+    resolveEditorDirection,
+    toggleEditorDirection,
+    unlockEditorDirection,
+} from '../editor-helpers';
 
 const props = defineProps({
     initialBlocks: { type: Array, default: () => [] },
@@ -959,6 +967,7 @@ function initEasyMDE(blockId) {
     if (!block) return;
 
     const t = window.editorTranslations || {};
+    const initialDir = resolveEditorDirection(el, block.data.content || '');
     const instance = new EasyMDE({
         element: el,
         toolbar: [
@@ -970,6 +979,7 @@ function initEasyMDE(blockId) {
             { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: t.quote || "Quote", text: "\"" },
             { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: t.unorderedList || "Unordered List", text: "UL" },
             { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: t.orderedList || "Ordered List", text: "OL" },
+            { name: "direction", action: (editor) => toggleEditorDirection(editor, el), className: "editor-button-text no-disable", title: (t.textDirection || "Text Direction") + " (Ctrl+Shift)", text: initialDir.toUpperCase() },
             "|",
             { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: t.preview || "Toggle Preview", text: "\ud83d\udc41" },
             { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: t.guide || "Markdown Guide", text: "?" },
@@ -979,9 +989,11 @@ function initEasyMDE(blockId) {
         spellChecker: true,
         nativeSpellcheck: true,
         status: false,
+        direction: initialDir,
     });
 
-    instance.codemirror.on('change', () => {
+    instance.codemirror.on('change', (cm, changeObj) => {
+        unlockEditorDirection(el, changeObj && changeObj.origin);
         applyEditorDirection(instance, el);
         updateBlockData(blockId, 'content', instance.value());
     });
@@ -990,6 +1002,8 @@ function initEasyMDE(blockId) {
 
     applyEditorDirection(instance, el);
     attachEditorObserver(instance);
+    attachDirectionShortcut(instance, el);
+    attachPasteSanitizer(instance);
 }
 
 function destroyEasyMDE(blockId) {

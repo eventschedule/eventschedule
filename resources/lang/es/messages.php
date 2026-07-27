@@ -1996,6 +1996,7 @@ return [
     'editor_ordered_list' => 'Lista numerada',
     'editor_preview' => 'Vista previa',
     'editor_guide' => 'Guía Markdown',
+    'editor_text_direction' => 'Dirección del texto',
 
     // Why create account page
     'why_create_account_title' => '¿Por qué crear una cuenta?',
@@ -3022,7 +3023,13 @@ return [
     'sponsor_logos_help' => 'Sube los logotipos de tus patrocinadores y socios para mostrarlos en tu página de calendario.',
     'sponsor_section_title' => 'Título de la Sección',
     'sponsor_section_title_help' => 'Personaliza el encabezado que se muestra sobre los logotipos de los patrocinadores en tu página de calendario.',
-    'max_sponsors_reached' => 'Se alcanzó el máximo de 12 patrocinadores.',
+    'max_sponsors_reached' => 'Se alcanzó el máximo de :count patrocinadores.',
+    'save_sponsors_before_adding_more' => 'Guarda los cambios antes de añadir más logotipos; de lo contrario, es posible que algunas subidas no se guarden.',
+    'sponsor_background' => 'Fondo',
+    'sponsor_background_default' => 'Predeterminado',
+    'sponsor_background_transparent' => 'Transparente',
+    'sponsor_background_custom' => 'Color personalizado',
+    'sponsor_background_help' => 'Define el fondo detrás de los logotipos de patrocinadores en la página de tu agenda.',
     'upgrade_sponsor_logos' => 'Actualiza a Pro para mostrar logotipos de patrocinadores y socios en tu página de calendario.',
     'gold' => 'Oro',
     'silver' => 'Plata',

@@ -325,6 +325,7 @@ html[data-es-view="list"] #calendar-panel-wrapper {
           <x-sponsor-grid
               :sponsors="$sponsorLogos"
               :title="$role->translatedSponsorSectionTitle()"
+              :background="$role->sponsorBackground()"
               :maxWidth="($role->event_layout ?? 'calendar') === 'list' ? '56rem' : '200rem'" />
       </div>
       @endif

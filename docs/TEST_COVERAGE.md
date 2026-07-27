@@ -96,7 +96,7 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Custom schedule URLs (subdomain slug) | ✓ | `RoleUpdateCharacterizationTest` (subdomain change round trip) |
 | Mobile-optimized / responsive design | ✗ | — (non-functional) |
 | Venue location maps (Google Maps) | ✗ | — |
-| Sponsor / partner logos (Pro) | ✗ | — |
+| Sponsor / partner logos (Pro) | ✓ | `SponsorsTest` (cap, grid density, panel background, load gating) |
 | Schedule / venue merge | ✓ | `ScheduleFeaturesTest` |
 | Schedule audit log (owner) | ✓ | `ScheduleFeaturesTest` |
 | YouTube video matching (Talent) | ✓ | `ScheduleFeaturesTest` |

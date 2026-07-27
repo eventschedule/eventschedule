@@ -1028,11 +1028,15 @@
                             <div class="space-y-4 mb-6">
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Adding Sponsors</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter a sponsor name, optional URL, tier level, and upload a logo. You can add up to 12 sponsors per schedule.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Enter a sponsor name, optional URL, tier level, and upload a logo. You can add up to {{ config('app.max_sponsors') }} sponsors per schedule.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop sponsors to change their display order on the public schedule page.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Background</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Choose how the sponsors section blends into your page: the default panel, transparent so your own background shows through, or a custom color. Text colors adjust automatically for readability.</p>
                                 </div>
                             </div>
 

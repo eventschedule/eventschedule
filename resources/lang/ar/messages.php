@@ -2057,6 +2057,7 @@ return [
     'editor_ordered_list' => 'قائمة مرقمة',
     'editor_preview' => 'معاينة',
     'editor_guide' => 'دليل Markdown',
+    'editor_text_direction' => 'اتجاه النص',
 
     // Why create account page
     'why_create_account_title' => 'لماذا إنشاء حساب؟',
@@ -3083,7 +3084,13 @@ return [
     'sponsor_logos_help' => 'قم بتحميل شعارات الرعاة والشركاء لعرضها على صفحة التقويم الخاصة بك.',
     'sponsor_section_title' => 'عنوان القسم',
     'sponsor_section_title_help' => 'خصّص العنوان الظاهر فوق شعارات الرعاة في صفحة التقويم الخاصة بك.',
-    'max_sponsors_reached' => 'تم الوصول إلى الحد الأقصى وهو 12 راعياً.',
+    'max_sponsors_reached' => 'تم الوصول إلى الحد الأقصى وهو :count راعياً.',
+    'save_sponsors_before_adding_more' => 'احفظ التغييرات قبل إضافة المزيد من الشعارات، وإلا فقد لا يتم حفظ بعض الملفات المرفوعة.',
+    'sponsor_background' => 'الخلفية',
+    'sponsor_background_default' => 'افتراضي',
+    'sponsor_background_transparent' => 'شفاف',
+    'sponsor_background_custom' => 'لون مخصص',
+    'sponsor_background_help' => 'حدد الخلفية خلف شعارات الرعاة في صفحة الجدول الخاص بك.',
     'upgrade_sponsor_logos' => 'قم بالترقية إلى Pro لعرض شعارات الرعاة والشركاء على صفحة التقويم الخاصة بك.',
     'gold' => 'ذهبي',
     'silver' => 'فضي',

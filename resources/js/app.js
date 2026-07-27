@@ -40,12 +40,21 @@ window.flatpickrLocales = {
 
 import EasyMDE from 'easymde';
 import 'easymde/dist/easymde.min.css';
-import { applyEditorDirection, attachEditorObserver } from './editor-helpers';
+import {
+    applyEditorDirection,
+    attachDirectionShortcut,
+    attachEditorObserver,
+    attachPasteSanitizer,
+    resolveEditorDirection,
+    toggleEditorDirection,
+    unlockEditorDirection,
+} from './editor-helpers';
 
 function initEasyMDEOn(element) {
     if (element._easyMDE) return;
 
     const t = window.editorTranslations || {};
+    const initialDir = resolveEditorDirection(element, element.value);
     const easyMDE = new EasyMDE({
         element: element,
         toolbar: [
@@ -101,6 +110,15 @@ function initEasyMDEOn(element) {
                 title: t.orderedList || "Ordered List",
                 text: "OL"
             },
+            {
+                name: "direction",
+                action: function(editor) {
+                    toggleEditorDirection(editor, element);
+                },
+                className: "editor-button-text no-disable",
+                title: (t.textDirection || "Text Direction") + " (Ctrl+Shift)",
+                text: initialDir.toUpperCase()
+            },
             "|",
             {
                 name: "preview",
@@ -121,14 +139,20 @@ function initEasyMDEOn(element) {
         spellChecker: true,
         nativeSpellcheck: true,
         status: false,
+        // Passing the direction here rather than only setting it afterwards avoids a
+        // full CodeMirror redraw on init (setDirection invalidates every line's order).
+        direction: initialDir,
     });
 
     element._easyMDE = easyMDE;
 
     applyEditorDirection(easyMDE, element);
     attachEditorObserver(easyMDE);
+    attachDirectionShortcut(easyMDE, element);
+    attachPasteSanitizer(easyMDE);
 
-    easyMDE.codemirror.on('change', function() {
+    easyMDE.codemirror.on('change', function(cm, changeObj) {
+        unlockEditorDirection(element, changeObj && changeObj.origin);
         applyEditorDirection(easyMDE, element);
         element.dispatchEvent(new Event('change', { bubbles: true }));
     });
@@ -153,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Make EasyMDE available globally for Vue components (tiny version for agenda descriptions)
 window.initTinyMDE = function(element, onChange) {
     const t = window.editorTranslations || {};
+    const initialDir = resolveEditorDirection(element, element.value);
     const easyMDE = new EasyMDE({
         element: element,
         toolbar: [
@@ -163,6 +188,7 @@ window.initTinyMDE = function(element, onChange) {
             { name: "quote", action: EasyMDE.toggleBlockquote, className: "editor-button-text", title: t.quote || "Quote", text: "\"" },
             { name: "unordered-list", action: EasyMDE.toggleUnorderedList, className: "editor-button-text", title: t.unorderedList || "Unordered List", text: "UL" },
             { name: "ordered-list", action: EasyMDE.toggleOrderedList, className: "editor-button-text", title: t.orderedList || "Ordered List", text: "OL" },
+            { name: "direction", action: (editor) => toggleEditorDirection(editor, element), className: "editor-button-text no-disable", title: (t.textDirection || "Text Direction") + " (Ctrl+Shift)", text: initialDir.toUpperCase() },
             "|",
             { name: "preview", action: EasyMDE.togglePreview, className: "editor-button-text no-disable", title: t.preview || "Toggle Preview", text: "👁" },
             { name: "guide", action: "https://www.markdownguide.org/basic-syntax/", className: "editor-button-text", title: t.guide || "Markdown Guide", text: "?" }
@@ -170,14 +196,18 @@ window.initTinyMDE = function(element, onChange) {
         minHeight: "80px",
         spellChecker: false,
         status: false,
+        direction: initialDir,
     });
 
     element._easyMDE = easyMDE;
 
     applyEditorDirection(easyMDE, element);
     attachEditorObserver(easyMDE);
+    attachDirectionShortcut(easyMDE, element);
+    attachPasteSanitizer(easyMDE);
 
-    easyMDE.codemirror.on('change', function() {
+    easyMDE.codemirror.on('change', function(cm, changeObj) {
+        unlockEditorDirection(element, changeObj && changeObj.origin);
         applyEditorDirection(easyMDE, element);
         if (onChange) onChange();
     });

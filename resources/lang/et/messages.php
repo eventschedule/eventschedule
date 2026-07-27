@@ -2011,6 +2011,7 @@ return [
     'editor_ordered_list' => 'Nummerdatud loend',
     'editor_preview' => 'Eelvaade',
     'editor_guide' => 'Markdown juhend',
+    'editor_text_direction' => 'Teksti suund',
 
     // Why Create Account page
     'why_create_account_title' => 'Miks luua konto?',
@@ -3037,7 +3038,13 @@ return [
     'sponsor_logos_help' => 'Laadige üles oma sponsorite ja partnerite logod, et neid oma kalendrilehel kuvada.',
     'sponsor_section_title' => 'Jaotise Pealkiri',
     'sponsor_section_title_help' => 'Kohandage pealkirja, mis kuvatakse sponsorite logode kohal teie kalendrilehel.',
-    'max_sponsors_reached' => 'Maksimaalselt 12 sponsorit on täis.',
+    'max_sponsors_reached' => 'Maksimaalselt :count sponsorit on täis.',
+    'save_sponsors_before_adding_more' => 'Salvesta muudatused enne uute logode lisamist, vastasel juhul ei pruugi kõik üleslaadimised salvestuda.',
+    'sponsor_background' => 'Taust',
+    'sponsor_background_default' => 'Vaikimisi',
+    'sponsor_background_transparent' => 'Läbipaistev',
+    'sponsor_background_custom' => 'Kohandatud värv',
+    'sponsor_background_help' => 'Määra taust sponsorite logode taga sinu ajakava lehel.',
     'upgrade_sponsor_logos' => 'Uuendage Pro-le, et kuvada sponsorite ja partnerite logosid oma kalendrilehel.',
     'gold' => 'Kuld',
     'silver' => 'Hõbe',

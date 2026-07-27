@@ -2003,6 +2003,7 @@ return [
     'editor_ordered_list' => 'Genummerde lijst',
     'editor_preview' => 'Voorbeeld',
     'editor_guide' => 'Markdown Gids',
+    'editor_text_direction' => 'Tekstrichting',
 
     // Why create account page
     'why_create_account_title' => 'Waarom een account aanmaken?',
@@ -3020,7 +3021,13 @@ return [
     'sponsor_logos_help' => 'Upload de logo\'s van uw sponsors en partners om ze op uw agendapagina weer te geven.',
     'sponsor_section_title' => 'Sectietitel',
     'sponsor_section_title_help' => 'Pas de kop aan die boven de sponsorlogo\'s op uw agendapagina wordt weergegeven.',
-    'max_sponsors_reached' => 'Maximum van 12 sponsors bereikt.',
+    'max_sponsors_reached' => 'Maximum van :count sponsors bereikt.',
+    'save_sponsors_before_adding_more' => 'Sla je wijzigingen op voordat je meer logo\'s toevoegt, anders worden sommige uploads mogelijk niet opgeslagen.',
+    'sponsor_background' => 'Achtergrond',
+    'sponsor_background_default' => 'Standaard',
+    'sponsor_background_transparent' => 'Transparant',
+    'sponsor_background_custom' => 'Aangepaste kleur',
+    'sponsor_background_help' => 'Stel de achtergrond achter de sponsorlogo\'s op je schemapagina in.',
     'upgrade_sponsor_logos' => 'Upgrade naar Pro om sponsor- en partnerlogo\'s op uw agendapagina weer te geven.',
     'gold' => 'Goud',
     'silver' => 'Zilver',

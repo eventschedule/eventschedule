@@ -1,6 +1,7 @@
 @if ($role->description_html)
+@php $roleDescriptionDir = content_dir($role, false, $role->description_html); @endphp
 <div class="ap-card mt-5 overflow-hidden rounded-lg shadow-md">
-    <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content">
+    <div class="px-4 py-5 sm:p-6 text-gray-700 dark:text-gray-300 custom-content {{ $roleDescriptionDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $roleDescriptionDir }}">
         {!! \App\Utils\UrlUtils::convertUrlsToLinks($role->description_html) !!}
     </div>
 </div>

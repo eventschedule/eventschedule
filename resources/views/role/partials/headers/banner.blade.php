@@ -242,10 +242,14 @@
 
               {{-- Description below --}}
               @if($role->translatedDescription())
-              @php $descPreview = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...'); @endphp
+              @php
+                $descPreview = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...');
+                $descDir = content_dir($role, false, $role->translatedDescription());
+              @endphp
               <div class="w-full mt-2">
                 <div x-data="{ expanded: false, long: false }"
                      x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
+                     dir="{{ $descDir }}"
                      class="text-start text-sm text-[#33383C] dark:text-gray-300">
                   <div x-show="long && !expanded" x-cloak>{{ $descPreview }}</div>
                   <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">
@@ -459,9 +463,13 @@
 
               {{-- Description below (full width) --}}
               @if($role->translatedDescription())
-              @php $descPreviewDesktop = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...'); @endphp
+              @php
+                $descPreviewDesktop = \Illuminate\Support\Str::words(html_entity_decode(strip_tags($role->translatedDescription())), 5, '...');
+                $descDirDesktop = content_dir($role, false, $role->translatedDescription());
+              @endphp
               <div x-data="{ expanded: false, long: false }"
                    x-init="$nextTick(() => { long = $refs.content.scrollHeight > $refs.content.clientHeight })"
+                   dir="{{ $descDirDesktop }}"
                    class="mt-2 text-sm text-[#33383C] dark:text-gray-300">
                 <div x-show="long && !expanded" x-cloak>{{ $descPreviewDesktop }}</div>
                 <div x-ref="content" x-show="!long || expanded" :class="{ 'line-clamp-3': !long }" class="custom-content">

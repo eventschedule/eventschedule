@@ -2082,6 +2082,7 @@ return [
     'editor_ordered_list' => 'Ordered List',
     'editor_preview' => 'Toggle Preview',
     'editor_guide' => 'Markdown Guide',
+    'editor_text_direction' => 'Text Direction',
 
     // Why create account page
     'why_create_account_title' => 'Why Create an Account?',
@@ -3198,7 +3199,13 @@ return [
     'sponsor_logos_help' => 'Upload logos of your sponsors and partners to display on your schedule page.',
     'sponsor_section_title' => 'Section Title',
     'sponsor_section_title_help' => 'Customize the heading shown above sponsor logos on your schedule page.',
-    'max_sponsors_reached' => 'Maximum of 12 sponsors reached.',
+    'max_sponsors_reached' => 'Maximum of :count sponsors reached.',
+    'save_sponsors_before_adding_more' => 'Save your changes before adding more logos, otherwise some uploads may not be saved.',
+    'sponsor_background' => 'Background',
+    'sponsor_background_default' => 'Default',
+    'sponsor_background_transparent' => 'Transparent',
+    'sponsor_background_custom' => 'Custom color',
+    'sponsor_background_help' => 'Set the background behind the sponsor logos on your schedule page.',
     'upgrade_sponsor_logos' => 'Upgrade to Pro to display sponsor and partner logos on your schedule page.',
     'gold' => 'Gold',
     'silver' => 'Silver',

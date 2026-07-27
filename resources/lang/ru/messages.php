@@ -2071,6 +2071,7 @@ return [
     'editor_ordered_list' => 'Упорядоченный список',
     'editor_preview' => 'Переключить предварительный просмотр',
     'editor_guide' => 'Руководство по уценке',
+    'editor_text_direction' => 'Направление текста',
     'why_create_account_title' => 'Зачем создавать учетную запись?',
 
     // Why create account page
@@ -3099,7 +3100,13 @@ return [
     'sponsor_logos_help' => 'Загрузите логотипы ваших спонсоров и партнёров для отображения на странице календаря.',
     'sponsor_section_title' => 'Заголовок раздела',
     'sponsor_section_title_help' => 'Настройте заголовок, отображаемый над логотипами спонсоров на вашей странице календаря.',
-    'max_sponsors_reached' => 'Достигнут максимум в 12 спонсоров.',
+    'max_sponsors_reached' => 'Достигнут максимум в :count спонсоров.',
+    'save_sponsors_before_adding_more' => 'Сохраните изменения перед добавлением новых логотипов, иначе часть загрузок может не сохраниться.',
+    'sponsor_background' => 'Фон',
+    'sponsor_background_default' => 'По умолчанию',
+    'sponsor_background_transparent' => 'Прозрачный',
+    'sponsor_background_custom' => 'Свой цвет',
+    'sponsor_background_help' => 'Задайте фон за логотипами спонсоров на странице вашего расписания.',
     'upgrade_sponsor_logos' => 'Перейдите на Pro, чтобы отображать логотипы спонсоров и партнёров на странице календаря.',
     'gold' => 'Золото',
     'silver' => 'Серебро',

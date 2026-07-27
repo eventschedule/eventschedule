@@ -108,6 +108,7 @@ class Role extends Model implements MustVerifyEmail
         'approved_subdomains',
         'default_curator_ids',
         'sponsor_logos',
+        'sponsor_background_color',
         'sponsor_section_title',
         'sponsor_section_title_en',
         'custom_labels',
@@ -276,6 +277,11 @@ class Role extends Model implements MustVerifyEmail
 
             if ($model->accent_color == '#ffffff') {
                 $model->accent_color = '#000000';
+            }
+
+            // Store the default panel as null rather than an empty string.
+            if ($model->sponsor_background_color === '') {
+                $model->sponsor_background_color = null;
             }
 
             $address = $model->fullAddressRaw();
@@ -1869,6 +1875,28 @@ class Role extends Model implements MustVerifyEmail
     public function translatedSponsorSectionTitle()
     {
         return $this->customLabel('our_sponsors');
+    }
+
+    /**
+     * Background for the sponsors panel on guest pages.
+     *
+     * Returns null for the default translucent card, 'transparent' to let the schedule's
+     * own background show through, or a #rrggbb colour. Anything else is treated as null
+     * so a bad stored value can never break the panel.
+     */
+    public function sponsorBackground(): ?string
+    {
+        $value = $this->sponsor_background_color;
+
+        if ($value === 'transparent') {
+            return 'transparent';
+        }
+
+        if (is_string($value) && preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
+            return $value;
+        }
+
+        return null;
     }
 
     public function translatedShortDescription()

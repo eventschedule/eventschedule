@@ -2056,6 +2056,7 @@ return [
     'editor_ordered_list' => 'רשימה ממוספרת',
     'editor_preview' => 'תצוגה מקדימה',
     'editor_guide' => 'מדריך Markdown',
+    'editor_text_direction' => 'כיוון טקסט',
 
     // Why create account page
     'why_create_account_title' => 'למה ליצור חשבון?',
@@ -3073,7 +3074,13 @@ return [
     'sponsor_logos_help' => 'העלו לוגואים של נותני החסות והשותפים שלכם להצגה בדף לוח השנה.',
     'sponsor_section_title' => 'כותרת הקטע',
     'sponsor_section_title_help' => 'התאימו את הכותרת המוצגת מעל לוגואי נותני החסות בדף לוח השנה שלכם.',
-    'max_sponsors_reached' => 'הגעתם למקסימום של 12 נותני חסות.',
+    'max_sponsors_reached' => 'הגעתם למקסימום של :count נותני חסות.',
+    'save_sponsors_before_adding_more' => 'שמור את השינויים לפני הוספת לוגואים נוספים, אחרת ייתכן שחלק מההעלאות לא יישמרו.',
+    'sponsor_background' => 'רקע',
+    'sponsor_background_default' => 'ברירת מחדל',
+    'sponsor_background_transparent' => 'שקוף',
+    'sponsor_background_custom' => 'צבע מותאם אישית',
+    'sponsor_background_help' => 'קבע את הרקע שמאחורי לוגואי נותני החסות בעמוד הלוח שלך.',
     'upgrade_sponsor_logos' => 'שדרגו לתוכנית Pro כדי להציג לוגואים של נותני חסות ושותפים בדף לוח השנה שלכם.',
     'gold' => 'זהב',
     'silver' => 'כסף',

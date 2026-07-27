@@ -630,7 +630,7 @@
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Customize</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Define event-specific sponsors. Add logos, names, URLs, and tiers just like schedule-level sponsors. Up to 12 sponsors per event.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Define event-specific sponsors. Add logos, names, URLs, and tiers just like schedule-level sponsors. Up to {{ config('app.max_sponsors') }} sponsors per event.</p>
                                 </div>
                             </div>
 

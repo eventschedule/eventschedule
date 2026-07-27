@@ -311,6 +311,7 @@
 
                 {{-- Description with expand/collapse --}}
                 @if ($each->description_html)
+                  @php $eachDir = content_dir($each, false, $each->description_html); @endphp
                   @if(str_word_count(strip_tags($each->description_html)) > 5)
                     <div x-data="{ expanded: false }" class="text-sm text-gray-700 dark:text-gray-300">
                       <span x-show="!expanded" class="description-collapsed">
@@ -320,7 +321,7 @@
                         </button>
                       </span>
                       <div x-show="expanded" x-cloak class="description-expanded">
-                        <div class="custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                        <div class="custom-content {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
                           {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                         </div>
                         <button :aria-expanded="expanded" @click="expanded = false" class="font-medium hover:underline whitespace-nowrap mt-1 text-blue-600 dark:text-blue-400">
@@ -329,7 +330,7 @@
                       </div>
                     </div>
                   @else
-                    <div class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                    <div class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $eachDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $eachDir }}">
                       {!! \App\Utils\UrlUtils::convertUrlsToLinks($each->description_html) !!}
                     </div>
                   @endif
@@ -403,11 +404,12 @@
                 </p>
               @endif
               @if ($event->venue->translatedDescription())
+                @php $venueDir = content_dir($event->venue, false, $event->venue->translatedDescription()); @endphp
                 <div x-data="{ expanded: false, needsExpand: false }" x-init="$nextTick(() => { let el = $refs.collapsed; needsExpand = el.scrollHeight > el.clientHeight })">
-                  <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                  <div x-show="!expanded" x-ref="collapsed" class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3 custom-content {{ $venueDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $venueDir }}">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
-                  <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $role->isRtl() ? 'rtl' : '' }}">
+                  <div x-show="expanded" x-cloak class="text-sm text-gray-700 dark:text-gray-300 custom-content {{ $venueDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $venueDir }}">
                     {!! \App\Utils\UrlUtils::convertUrlsToLinks($event->venue->translatedDescription()) !!}
                   </div>
                   <button x-show="!expanded && needsExpand" :aria-expanded="expanded" @click="expanded = true" class="text-sm font-medium hover:underline mt-1 text-blue-600 dark:text-blue-400">
@@ -1191,13 +1193,17 @@
 
         {{-- Description --}}
         @if ($translation ? $translation->description_translated : $event->translatedDescription())
+        @php
+          $descriptionHtml = $translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription();
+          $descriptionDir = content_dir($contentRole, !$translation && $translateMode && (bool)$event->description_html_en, $descriptionHtml);
+        @endphp
         <article class="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm sm:rounded-2xl p-6 sm:p-8">
           <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4">
             {{ $role->customLabel('about') }}
           </h2>
-          <div class="{{ $role->isRtl() || ($translation && $translation->role?->isRtl()) ? 'rtl' : '' }}" dir="{{ content_dir($contentRole, !$translation && $translateMode && (bool)$event->description_html_en) }}">
+          <div class="{{ $descriptionDir === 'rtl' ? 'rtl' : '' }}" dir="{{ $descriptionDir }}">
             <div class="text-gray-700 dark:text-gray-300 text-base custom-content">
-              {!! \App\Utils\UrlUtils::convertUrlsToLinks($translation ? ($translation->description_html_translated ?: $translation->description_translated) : $event->translatedDescription()) !!}
+              {!! \App\Utils\UrlUtils::convertUrlsToLinks($descriptionHtml) !!}
             </div>
           </div>
         </article>
@@ -1233,7 +1239,7 @@
                   @endif
                   <span dir="{{ content_dir($role, $translateMode && (bool)$part->name_en) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
                   @if ($part->translatedDescription())
-                  <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
+                  <div dir="{{ content_dir($role, $translateMode && (bool)$part->description_html_en, $part->translatedDescription()) }}" class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
@@ -1427,7 +1433,7 @@
                 <div class="flex-1">
                   <span dir="{{ content_dir($role, $translateMode && (bool)$part->name_en) }}" class="text-gray-900 dark:text-gray-100 font-medium">{!! str_replace(' , ', '<br>', e($part->translatedName())) !!}</span>
                   @if ($part->translatedDescription())
-                  <div class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
+                  <div dir="{{ content_dir($role, $translateMode && (bool)$part->description_html_en, $part->translatedDescription()) }}" class="text-sm text-gray-500 dark:text-gray-400 block mt-0.5 prose prose-sm dark:prose-invert max-w-none">{!! $part->translatedDescription() !!}</div>
                   @endif
                   @if (!is_demo_role($role))
                   @php
@@ -2004,7 +2010,8 @@
         @if (!empty($eventSponsors))
           <x-sponsor-grid
               :sponsors="$eventSponsors"
-              :title="$role->translatedSponsorSectionTitle()" />
+              :title="$role->translatedSponsorSectionTitle()"
+              :background="$role->sponsorBackground()" />
         @endif
 
         {{-- End of content section --}}

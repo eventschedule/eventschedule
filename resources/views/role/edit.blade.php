@@ -3737,7 +3737,38 @@
 
                             @php
                                 $existingSponsors = json_decode($role->sponsor_logos ?? '[]', true) ?: [];
+                                $maxSponsors = config('app.max_sponsors');
+                                $sponsorBackground = old('sponsor_background_color', $role->sponsor_background_color);
+                                if ($sponsorBackground === 'transparent') {
+                                    $sponsorBackgroundMode = 'transparent';
+                                } elseif (preg_match('/^#[0-9a-fA-F]{6}$/', (string) $sponsorBackground)) {
+                                    $sponsorBackgroundMode = 'custom';
+                                } else {
+                                    $sponsorBackgroundMode = 'default';
+                                }
                             @endphp
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                <div>
+                                    <x-input-label for="sponsor_background_mode" :value="__('messages.sponsor_background')" />
+                                    <select id="sponsor_background_mode" data-action="sponsor-background-change"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                        <option value="default" @selected($sponsorBackgroundMode === 'default')>{{ __('messages.sponsor_background_default') }}</option>
+                                        <option value="transparent" @selected($sponsorBackgroundMode === 'transparent')>{{ __('messages.sponsor_background_transparent') }}</option>
+                                        <option value="custom" @selected($sponsorBackgroundMode === 'custom')>{{ __('messages.sponsor_background_custom') }}</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.sponsor_background_help') }}</p>
+                                </div>
+                                <div id="sponsor_background_color_wrapper" class="{{ $sponsorBackgroundMode === 'custom' ? '' : 'hidden' }}">
+                                    <x-input-label for="sponsor_background_color_input" :value="__('messages.color')" />
+                                    <x-text-input id="sponsor_background_color_input" type="color" class="mt-1 block w-1/2"
+                                        :value="$sponsorBackgroundMode === 'custom' ? $sponsorBackground : '#ffffff'"
+                                        data-action="sponsor-background-change" />
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="sponsor_background_color" id="sponsor_background_color" value="{{ $sponsorBackgroundMode === 'default' ? '' : $sponsorBackground }}" />
+                            <x-input-error class="mb-4" :messages="$errors->get('sponsor_background_color')" />
 
                             <div id="sponsors-list" class="space-y-3 mb-6">
                                 @foreach ($existingSponsors as $index => $sponsor)
@@ -3793,18 +3824,29 @@
                                 @endforeach
                             </div>
 
-                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= 12 ? '' : 'hidden' }}">
+                            <div id="sponsor-limit-message" class="mb-4 {{ count($existingSponsors) >= $maxSponsors ? '' : 'hidden' }}">
                                 <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                                     <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
                                         <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                         </svg>
-                                        <span>{{ __('messages.max_sponsors_reached') }}</span>
+                                        <span>{{ __('messages.max_sponsors_reached', ['count' => $maxSponsors]) }}</span>
                                     </p>
                                 </div>
                             </div>
 
-                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= 12 ? 'hidden' : '' }}">
+                            <div id="sponsor-pending-uploads-message" class="mb-4 hidden">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <span>{{ __('messages.save_sponsors_before_adding_more') }}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div id="add-sponsor-form" class="{{ count($existingSponsors) >= $maxSponsors ? 'hidden' : '' }}">
                                 <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                         <div>
@@ -7240,6 +7282,10 @@ function deleteRoleImage(url, token, element) {
 // ============================================================
 var sponsorFileCounter = 0;
 var editingSponsorItem = null;
+var MAX_SPONSORS = @json(config('app.max_sponsors'));
+// PHP's max_file_uploads defaults to 20, and every unsaved sponsor adds one file input to the
+// same POST. Warn well before that so uploads can't be silently dropped.
+var MAX_PENDING_SPONSOR_UPLOADS = 15;
 
 function updateSponsorHiddenInput() {
     var items = document.querySelectorAll('#sponsors-list .sponsor-item');
@@ -7254,12 +7300,37 @@ function updateSponsorHiddenInput() {
     updateSponsorLimitVisibility();
 }
 
+function updateSponsorBackground() {
+    var mode = document.getElementById('sponsor_background_mode');
+    var hidden = document.getElementById('sponsor_background_color');
+    if (!mode || !hidden) return;
+
+    var colorInput = document.getElementById('sponsor_background_color_input');
+    var wrapper = document.getElementById('sponsor_background_color_wrapper');
+    var isCustom = mode.value === 'custom';
+
+    if (wrapper) wrapper.classList.toggle('hidden', !isCustom);
+
+    if (isCustom) {
+        hidden.value = colorInput ? colorInput.value : '';
+    } else if (mode.value === 'transparent') {
+        hidden.value = 'transparent';
+    } else {
+        hidden.value = '';
+    }
+}
+
 function updateSponsorLimitVisibility() {
     var count = document.querySelectorAll('#sponsors-list .sponsor-item').length;
+    var pending = document.querySelectorAll('#sponsors-list .sponsor-item[data-new-idx]').length;
     var limitMsg = document.getElementById('sponsor-limit-message');
+    var pendingMsg = document.getElementById('sponsor-pending-uploads-message');
     var addForm = document.getElementById('add-sponsor-form');
-    if (limitMsg) limitMsg.classList.toggle('hidden', count < 12);
-    if (addForm) addForm.classList.toggle('hidden', count >= 12);
+    if (limitMsg) limitMsg.classList.toggle('hidden', count < MAX_SPONSORS);
+    if (pendingMsg) pendingMsg.classList.toggle('hidden', pending < MAX_PENDING_SPONSOR_UPLOADS);
+    // The add form doubles as the edit form, so it has to stay open while a row is being
+    // edited - otherwise the pencil button silently does nothing once the list is at the cap.
+    if (addForm) addForm.classList.toggle('hidden', count >= MAX_SPONSORS && !editingSponsorItem);
 }
 
 function previewSponsorLogo(input) {
@@ -7315,6 +7386,9 @@ function editSponsor(btn) {
     // Highlight the card being edited
     item.classList.add('ring-2', 'ring-[var(--brand-blue)]');
 
+    // Reveal the shared add/edit form, which is hidden while the list is at the cap
+    updateSponsorLimitVisibility();
+
     // Switch button to Save mode
     var actionText = document.getElementById('sponsor-action-text');
     var actionIcon = document.getElementById('sponsor-action-icon');
@@ -7367,6 +7441,9 @@ function resetSponsorEditState() {
     if (logoLabel && logoLabel.textContent.indexOf('*') === -1) {
         logoLabel.textContent = logoLabel.textContent + ' *';
     }
+
+    // Hide the form again if the list is at the cap
+    updateSponsorLimitVisibility();
 }
 
 function cancelEditSponsor() {
@@ -7491,7 +7568,7 @@ function addSponsor() {
     var file = fileInput.files[0];
 
     var count = document.querySelectorAll('#sponsors-list .sponsor-item').length;
-    if (count >= 12) return;
+    if (count >= MAX_SPONSORS) return;
 
     var idx = sponsorFileCounter++;
 
@@ -7930,6 +8007,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'subdomain-sanitize':
                 el.value = el.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
                 break;
+            case 'sponsor-background-change':
+                updateSponsorBackground();
+                break;
         }
     });
 
@@ -7952,6 +8032,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'header-style-change':
                 updatePreview();
                 toggleHeaderImageForStyle();
+                break;
+            case 'sponsor-background-change':
+                updateSponsorBackground();
                 break;
             case 'toggle-field-options':
                 toggleEventFieldOptions(el);

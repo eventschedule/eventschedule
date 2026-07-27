@@ -960,8 +960,10 @@ class EventRepo
                 $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                 $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
+                $maxSponsors = config('app.max_sponsors');
+
                 foreach ($newFiles as $index => $file) {
-                    if (count($sponsors) >= 12) {
+                    if (count($sponsors) >= $maxSponsors) {
                         break;
                     }
 
@@ -981,8 +983,7 @@ class EventRepo
                     ];
                 }
 
-                // Cap at 12
-                $sponsors = array_slice($sponsors, 0, 12);
+                $sponsors = array_slice($sponsors, 0, $maxSponsors);
 
                 // Delete orphaned logo files
                 $currentLogoFiles = array_filter(array_column($sponsors, 'logo'));

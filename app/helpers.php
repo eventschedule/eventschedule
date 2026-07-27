@@ -215,21 +215,62 @@ if (! function_exists('rtl_class')) {
     }
 }
 
+if (! function_exists('detect_content_dir')) {
+    /**
+     * Base direction ('rtl'|'ltr') of a piece of text, or null when it has nothing to go on.
+     *
+     * Whichever script has more strong directional characters wins. That beats first-strong
+     * (`dir="auto"`) detection for real content: "DJ Mike presents: <hebrew>" is Hebrew text
+     * that first-strong would call LTR. Mirrors detectDir() in resources/js/editor-helpers.js
+     * so the editor and the published page agree.
+     *
+     * Accepts either markdown or rendered HTML. Tags and URLs are dropped first, otherwise
+     * their Latin characters would drag the count toward 'ltr'.
+     */
+    function detect_content_dir(?string $text): ?string
+    {
+        if ($text === null || trim($text) === '') {
+            return null;
+        }
+
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('~\b(?:https?://|www\.)\S+~iu', '', $text);
+
+        $rtl = preg_match_all('/[\p{Hebrew}\p{Arabic}\p{Syriac}\p{Thaana}]/u', $text);
+        $ltr = preg_match_all('/[\p{Latin}\p{Greek}\p{Cyrillic}]/u', $text);
+
+        if (! $rtl && ! $ltr) {
+            return null;
+        }
+
+        return $rtl > $ltr ? 'rtl' : 'ltr';
+    }
+}
+
 if (! function_exists('content_dir')) {
     /**
      * Base direction ('rtl'|'ltr') for schedule content.
      *
-     * When showing authored content, uses the schedule's language (viewer-independent, via
-     * isContentRtl) so mixed Latin/Hebrew text keeps the schedule's intended base direction,
-     * matching the WhatsApp export. When showing the translated (`_en`) value, uses the
-     * schedule's TARGET language direction so an RTL translation renders correctly. Defaults
-     * to 'en' (=> 'ltr'), reproducing the original behavior.
+     * When $content is given and has strong directional characters, the content itself decides.
+     * That keeps the published page in step with the editor, which detects the same way, and
+     * handles a Hebrew description written in an English-language schedule (and the reverse).
+     *
+     * Otherwise it falls back to the schedule's language: for authored content the schedule's
+     * own language (viewer-independent, via isContentRtl) so mixed Latin/Hebrew text keeps the
+     * schedule's intended base direction, matching the WhatsApp export; for the translated
+     * (`_en`) value the schedule's TARGET language, so an RTL translation renders correctly.
+     * Defaults to 'en' (=> 'ltr'), reproducing the original behavior.
      *
      * @param  object|null  $role  The schedule whose language governs the content
      * @param  bool  $showingTranslation  True when the translated (`_en`) value is shown
+     * @param  string|null  $content  The text being rendered, when it is available
      */
-    function content_dir(?object $role, bool $showingTranslation = false): string
+    function content_dir(?object $role, bool $showingTranslation = false, ?string $content = null): string
     {
+        if ($detected = detect_content_dir($content)) {
+            return $detected;
+        }
+
         if ($showingTranslation) {
             $target = ($role && ! empty($role->translation_language_code)) ? $role->translation_language_code : 'en';
 

@@ -1999,6 +1999,7 @@ return [
     'editor_ordered_list' => 'Liste numérotée',
     'editor_preview' => 'Aperçu',
     'editor_guide' => 'Guide Markdown',
+    'editor_text_direction' => 'Sens du texte',
 
     // Why create account page
     'why_create_account_title' => 'Pourquoi créer un compte ?',
@@ -3025,7 +3026,13 @@ return [
     'sponsor_logos_help' => 'Téléchargez les logos de vos sponsors et partenaires pour les afficher sur votre page de calendrier.',
     'sponsor_section_title' => 'Titre de la Section',
     'sponsor_section_title_help' => 'Personnalisez le titre affiché au-dessus des logos des sponsors sur votre page de calendrier.',
-    'max_sponsors_reached' => 'Maximum de 12 sponsors atteint.',
+    'max_sponsors_reached' => 'Maximum de :count sponsors atteint.',
+    'save_sponsors_before_adding_more' => 'Enregistrez vos modifications avant d\'ajouter d\'autres logos, sinon certains envois risquent de ne pas être enregistrés.',
+    'sponsor_background' => 'Arrière-plan',
+    'sponsor_background_default' => 'Par défaut',
+    'sponsor_background_transparent' => 'Transparent',
+    'sponsor_background_custom' => 'Couleur personnalisée',
+    'sponsor_background_help' => 'Définissez l\'arrière-plan derrière les logos des sponsors sur la page de votre programme.',
     'upgrade_sponsor_logos' => 'Passez à Pro pour afficher les logos de sponsors et partenaires sur votre page de calendrier.',
     'gold' => 'Or',
     'silver' => 'Argent',

@@ -138,6 +138,8 @@ class RoleUpdateRequest extends FormRequest
             'gift_card_currency_code' => ['nullable', 'string', 'size:3'],
             'gift_card_valid_days' => ['nullable', 'integer', 'min:1', 'max:3650'],
             'gift_card_payment_method' => ['nullable', 'in:cash,stripe,invoiceninja,payment_url'],
+            'existing_sponsors' => ['nullable', 'string', 'json'],
+            'sponsor_background_color' => ['nullable', 'string', 'regex:/^(transparent|#[0-9a-fA-F]{6})$/'],
             'new_sponsor_logos.*' => ['image', 'max:2500'],
             'new_sponsor_names.*' => ['nullable', 'string', 'max:100'],
             'new_sponsor_urls.*' => ['nullable', 'url', 'max:500'],

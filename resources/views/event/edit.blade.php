@@ -4130,19 +4130,31 @@
                                     </div>
 
                                     <!-- Limit message -->
-                                    <div v-if="eventSponsors.length >= 12" class="mb-4">
+                                    <div v-if="eventSponsors.length >= maxSponsors" class="mb-4">
                                         <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
                                             <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
                                                 <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                 </svg>
-                                                <span>{{ __('messages.max_sponsors_reached') }}</span>
+                                                <span>{{ __('messages.max_sponsors_reached', ['count' => config('app.max_sponsors')]) }}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Unsaved-uploads advisory: PHP caps files per request -->
+                                    <div v-if="eventSponsors.filter(s => s.newFile).length >= maxPendingSponsorUploads" class="mb-4">
+                                        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                <span>{{ __('messages.save_sponsors_before_adding_more') }}</span>
                                             </p>
                                         </div>
                                     </div>
 
                                     <!-- Add/Edit sponsor form -->
-                                    <div v-if="eventSponsors.length < 12 || editingSponsorIndex >= 0">
+                                    <div v-if="eventSponsors.length < maxSponsors || editingSponsorIndex >= 0">
                                         <div class="p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg border-dashed">
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                                                 <div>
@@ -4982,6 +4994,10 @@
         eventSponsorSortableInstance: null,
         eventSponsorFileCounter: 0,
         eventSponsors: @json($eventSponsorsWithUrls),
+        maxSponsors: @json(config('app.max_sponsors')),
+        // PHP's max_file_uploads defaults to 20, and every unsaved sponsor adds one file input
+        // to the same POST. Warn well before that so uploads can't be silently dropped.
+        maxPendingSponsorUploads: 15,
         promoCodes: (() => {
           var pcs = @json($event->promoCodes ?? []).map(pc => ({
             ...pc,
@@ -5139,7 +5155,7 @@
         } else {
           // Adding new
           if (!this.sponsorLogoFile) return;
-          if (this.eventSponsors.length >= 12) return;
+          if (this.eventSponsors.length >= this.maxSponsors) return;
           this.eventSponsors.push({
             name: name,
             logo: '',

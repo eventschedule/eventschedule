@@ -2026,6 +2026,7 @@ return [
     'editor_ordered_list' => 'Listă Ordonată',
     'editor_preview' => 'Comută Previzualizare',
     'editor_guide' => 'Ghid Markdown',
+    'editor_text_direction' => 'Direcția textului',
 
     // Why create account page
     'why_create_account_title' => 'De Ce Să Creezi un Cont?',
@@ -3061,7 +3062,13 @@ return [
     'sponsor_logos_help' => 'Încărcați logo-urile sponsorilor și partenerilor pentru a le afișa pe pagina calendarului.',
     'sponsor_section_title' => 'Titlul Secțiunii',
     'sponsor_section_title_help' => 'Personalizați titlul afișat deasupra logo-urilor sponsorilor pe pagina calendarului.',
-    'max_sponsors_reached' => 'S-a atins maximul de 12 sponsori.',
+    'max_sponsors_reached' => 'S-a atins maximul de :count sponsori.',
+    'save_sponsors_before_adding_more' => 'Salvează modificările înainte de a adăuga mai multe logouri, altfel unele încărcări ar putea să nu fie salvate.',
+    'sponsor_background' => 'Fundal',
+    'sponsor_background_default' => 'Implicit',
+    'sponsor_background_transparent' => 'Transparent',
+    'sponsor_background_custom' => 'Culoare personalizată',
+    'sponsor_background_help' => 'Stabilește fundalul din spatele logourilor sponsorilor pe pagina programului tău.',
     'upgrade_sponsor_logos' => 'Treceți la Pro pentru a afișa logo-urile sponsorilor și partenerilor pe pagina calendarului.',
     'gold' => 'Aur',
     'silver' => 'Argint',

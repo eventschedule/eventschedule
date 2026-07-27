@@ -205,4 +205,17 @@ return [
         'ru' => 'russian',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Maximum Sponsors
+    |--------------------------------------------------------------------------
+    |
+    | The number of sponsor/partner logos that can be added to a schedule or to
+    | an individual event. Referenced by the server-side caps, the admin editors
+    | and the "maximum reached" message, so it only needs changing here.
+    |
+    */
+
+    'max_sponsors' => 50,
+
 ];
