@@ -3914,17 +3914,13 @@ function updateHeroFiltersButton() {
                 btn.classList.remove('md:flex');
                 btn.style.display = 'none';
             }
-            // Active = filled accent (clearly on); inactive = outline (accent border + themed icon)
+            // Always filled with the schedule accent, matching the Follow button;
+            // the count badge is what signals active filters.
             const accent = btn.dataset.accent;
             const contrast = btn.dataset.contrast;
             btn.style.borderColor = accent;
-            if (active) {
-                btn.style.backgroundColor = accent;
-                btn.style.color = contrast;
-            } else {
-                btn.style.backgroundColor = 'transparent';
-                btn.style.color = ''; // fall through to text-gray-900 / dark:text-white
-            }
+            btn.style.backgroundColor = accent;
+            btn.style.color = contrast;
         }
         if (badge) {
             if (active) {

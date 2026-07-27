@@ -1,0 +1,277 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\BoostCampaign;
+use App\Models\FederatedInstance;
+use App\Models\Referral;
+use App\Models\Role;
+use App\Models\Sale;
+use App\Models\SupportMessage;
+use App\Models\TranslationOverride;
+use App\Models\TranslationSuggestion;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
+
+/**
+ * Aggregates every queue in /admin that is waiting on a site admin into a single
+ * sorted list of to-do rows, so the admin dashboard can show them in one panel and
+ * the admin nav can badge the sections they live under.
+ *
+ * Rows are shaped like HomeController::getPendingActionItems() output (type, count,
+ * title, subtitle, url, color) so both dashboards share the needs-attention
+ * component, plus two keys only the nav reads: 'nav' (which dropdown) and 'tab'
+ * (which item inside it).
+ *
+ * Each count deliberately reuses the query the destination page already runs, so a
+ * badge and the page it links to can never disagree.
+ */
+class AdminAlertService
+{
+    /**
+     * Ordered alert definitions. Position in this array is the sort priority:
+     * breakage and held-up money first, then review queues, then informational rows
+     * that have no admin action but that operators asked to see.
+     */
+    private const DEFINITIONS = [
+        'jobs_failed',
+        'domains_failed',
+        'boosts_stuck',
+        'boosts_failed',
+        'sales_mismatch',
+        'boosts_mismatch',
+        'federation_flagged',
+        'federation',
+        'translation_suggestions',
+        'support_unread',
+        'boosts_disapproved',
+        'domains_pending',
+        'translations_unshared',
+        'schedules_unverified',
+        'referrals_pending',
+    ];
+
+    /**
+     * How far back a boost failure or ad rejection still counts as actionable.
+     * Nothing ever transitions a campaign out of 'failed', and Meta's DISAPPROVED
+     * is never cleared, so an unbounded count would pin a permanent badge.
+     * Public because AdminController::boost() windows its lists to match.
+     */
+    public const BOOST_ALERT_DAYS = 30;
+
+    /**
+     * Nav badge colour precedence. A group's badge takes the highest severity it
+     * contains, so a red badge keeps meaning "something is broken" even when
+     * informational rows are counted alongside it.
+     */
+    private const SEVERITY = ['red' => 3, 'amber' => 2, 'blue' => 1];
+
+    /**
+     * Memoized for the request: the nav composer and the dashboard controller both
+     * ask for this, and it is a dozen COUNT queries.
+     */
+    private static ?Collection $cache = null;
+
+    /**
+     * The three `roles` counts resolved in one pass. `custom_domain_status`,
+     * `email_verified_at` and `phone_verified_at` are all unindexed, and the nav
+     * composer runs on every admin page, so three separate COUNTs meant three full
+     * scans of the tenant table per render.
+     */
+    private static ?object $roleCounts = null;
+
+    /**
+     * Every pending admin action, highest priority first. Rows with a zero count are
+     * omitted, so an empty collection means there is nothing to do.
+     */
+    public static function items(): Collection
+    {
+        if (self::$cache !== null) {
+            return self::$cache;
+        }
+
+        $isNexus = config('app.is_nexus');
+        $isHosted = config('app.hosted');
+
+        $counts = [
+            'jobs_failed' => fn () => DB::table('failed_jobs')->count(),
+
+            'domains_failed' => fn () => $isHosted ? (int) self::roleCounts()->domains_failed : 0,
+
+            // "pending_payment" is normal for a few minutes; past that the Stripe
+            // callback never arrived and someone has to look. Mirrors AdminController::boost().
+            'boosts_stuck' => fn () => BoostCampaign::where('status', 'pending_payment')
+                ->where('created_at', '<', now()->subMinutes(30))
+                ->count(),
+
+            'boosts_failed' => fn () => BoostCampaign::where('status', 'failed')
+                ->where('created_at', '>=', now()->subDays(self::BOOST_ALERT_DAYS))
+                ->count(),
+
+            'sales_mismatch' => fn () => Sale::where('status', 'amount_mismatch')->count(),
+
+            'boosts_mismatch' => fn () => BoostCampaign::where('billing_status', 'amount_mismatch')->count(),
+
+            // Nexus-only: AdminFederationController and the suggestion endpoints abort
+            // at runtime on the wrong install type, so counting there would badge a 404.
+            //
+            // An instance whose site_url stops matching is flagged. ApiFederationController
+            // downgrades it to pending only when the change arrives on the register
+            // endpoint; the sync path flags an approved instance and leaves it approved,
+            // where the queue's default status=pending filter hides it. Scoped to
+            // approved on purpose: a flagged *suspended* instance is already dealt with,
+            // and surfacing it would undo "no escape from moderation".
+            'federation_flagged' => fn () => $isNexus
+                ? FederatedInstance::whereNotNull('flagged_at')
+                    ->where('status', FederatedInstance::STATUS_APPROVED)
+                    ->count()
+                : 0,
+
+            'federation' => fn () => $isNexus ? FederatedInstance::pending()->count() : 0,
+
+            'translation_suggestions' => fn () => $isNexus ? TranslationSuggestion::pending()->count() : 0,
+
+            'support_unread' => fn () => $isHosted
+                ? SupportMessage::where('is_from_admin', false)->whereNull('read_at')->count()
+                : 0,
+
+            // Meta's verdict lands in boost_ads.meta_status; boost_ads.status is a
+            // separate lowercase app enum that is never set to DISAPPROVED. Matching on
+            // `status` here would be a permanently dead alert.
+            'boosts_disapproved' => fn () => BoostCampaign::where('created_at', '>=', now()->subDays(self::BOOST_ALERT_DAYS))
+                ->whereHas('ads', function ($query) {
+                    $query->where('meta_status', 'DISAPPROVED');
+                })->count(),
+
+            'domains_pending' => fn () => $isHosted ? (int) self::roleCounts()->domains_pending : 0,
+
+            // The mirror image of translation_suggestions: on a selfhosted install
+            // these are local fixes that have not been offered back to the nexus yet.
+            'translations_unshared' => fn () => $isNexus ? 0 : TranslationOverride::unshared()->count(),
+
+            'schedules_unverified' => fn () => $isHosted ? (int) self::roleCounts()->schedules_unverified : 0,
+
+            'referrals_pending' => fn () => $isHosted ? Referral::where('status', 'pending')->count() : 0,
+        ];
+
+        $items = collect();
+
+        foreach (self::DEFINITIONS as $type) {
+            $count = (int) $counts[$type]();
+
+            if ($count > 0 && $row = self::row($type, $count)) {
+                $items->push($row);
+            }
+        }
+
+        return self::$cache = $items;
+    }
+
+    /**
+     * Badge data for the admin nav, keyed by dropdown and by item:
+     * ['nav' => [dropdown => ['count' => int, 'color' => string]], 'tab' => [item => ...]].
+     *
+     * Each group carries the highest severity it contains. Without this a permanently
+     * non-zero informational row (unverified schedules, uncredited referrals) would
+     * paint the nav the same red as a failed queue and drain the signal from both.
+     */
+    public static function badges(): array
+    {
+        $items = self::items();
+
+        $group = fn (string $key) => $items->groupBy($key)->map(fn ($rows) => [
+            'count' => $rows->sum('count'),
+            'color' => $rows->sortByDesc(fn ($row) => self::SEVERITY[$row['color']] ?? 0)->first()['color'],
+        ])->all();
+
+        return [
+            'nav' => $group('nav'),
+            'tab' => $group('tab'),
+        ];
+    }
+
+    /**
+     * Drop the memoized counts. Only needed in tests, which seed rows after a page
+     * render has already primed the cache.
+     */
+    public static function flush(): void
+    {
+        self::$cache = null;
+        self::$roleCounts = null;
+    }
+
+    /**
+     * All three `roles` tallies in one scan, memoized for the request.
+     *
+     * The domain predicates mirror AdminController::domains() exactly - base
+     * `whereNotNull('custom_domain')` plus the status filter, and deliberately NO
+     * custom_domain_mode filter, because the list the alert links to has none either.
+     * (Filtering on mode here would undercount: RoleController's provisioning catch
+     * block sets custom_domain_status = 'failed' even while switching a role away
+     * from direct mode.)
+     *
+     * The verification predicate mirrors AdminController::schedules()'s base query
+     * plus its "verification=unverified" filter, demo exclusions and all.
+     */
+    private static function roleCounts(): object
+    {
+        if (self::$roleCounts !== null) {
+            return self::$roleCounts;
+        }
+
+        return self::$roleCounts = Role::selectRaw(
+            "SUM(custom_domain IS NOT NULL AND custom_domain_status = 'failed') AS domains_failed,
+             SUM(custom_domain IS NOT NULL AND custom_domain_status = 'pending') AS domains_pending,
+             SUM(user_id IS NOT NULL
+                 AND email_verified_at IS NULL
+                 AND phone_verified_at IS NULL
+                 AND subdomain <> ?
+                 AND subdomain NOT LIKE 'demo-%') AS schedules_unverified",
+            [DemoService::DEMO_ROLE_SUBDOMAIN]
+        )->first();
+    }
+
+    /**
+     * Build one to-do row, or null when the destination route is not registered on
+     * this install. Titles are pluralized; subtitles name the destination section so
+     * a row reads "3 instances awaiting approval / Federation".
+     */
+    private static function row(string $type, int $count): ?array
+    {
+        [$nav, $tab, $name, $params, $fragment, $color, $subtitle] = match ($type) {
+            'jobs_failed' => ['system', 'queue', 'admin.queue', [], '', 'red', __('messages.queue')],
+            'domains_failed' => ['manage', 'domains', 'admin.domains', ['status' => 'failed'], '', 'red', __('messages.domains')],
+            'boosts_stuck' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
+            'boosts_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
+            'sales_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
+            'boosts_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
+            'federation_flagged' => ['system', 'federation', 'admin.federation', ['status' => 'approved'], '', 'red', __('messages.federation')],
+            'federation' => ['system', 'federation', 'admin.federation', [], '', 'amber', __('messages.federation')],
+            'translation_suggestions' => ['system', 'translations', 'admin.translations.suggestions', [], '', 'blue', __('messages.translations')],
+            'support_unread' => ['system', 'support', 'admin.support', [], '', 'blue', 'Support'],
+            'boosts_disapproved' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'amber', 'Boost'],
+            'domains_pending' => ['manage', 'domains', 'admin.domains', ['status' => 'pending'], '', 'amber', __('messages.domains')],
+            'translations_unshared' => ['system', 'translations', 'admin.translations', [], '', 'blue', __('messages.translations')],
+            'schedules_unverified' => ['manage', 'schedules', 'admin.schedules', ['verification' => 'unverified'], '', 'amber', __('messages.schedules')],
+            'referrals_pending' => ['manage', 'referrals', 'admin.referrals', ['status' => 'pending'], '', 'blue', __('messages.referrals')],
+        };
+
+        // Several admin routes are registered only on hosted installs. The counts are
+        // gated to match, but never let a mismatch 500 the dashboard: no route, no row.
+        if (! Route::has($name)) {
+            return null;
+        }
+
+        return [
+            'type' => $type,
+            'count' => $count,
+            'title' => trans_choice("messages.admin_alert_{$type}", $count, ['count' => $count]),
+            'subtitle' => $subtitle,
+            'url' => route($name, $params).$fragment,
+            'color' => $color,
+            'nav' => $nav,
+            'tab' => $tab,
+        ];
+    }
+}

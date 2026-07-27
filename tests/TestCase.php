@@ -17,5 +17,9 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->withoutVite();
+
+        // Its counts are memoized for the request; tests share a process, so a
+        // previous test's totals would otherwise carry over.
+        \App\Services\AdminAlertService::flush();
     }
 }

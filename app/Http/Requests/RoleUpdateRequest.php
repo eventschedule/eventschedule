@@ -93,6 +93,9 @@ class RoleUpdateRequest extends FormRequest
             'event_custom_fields.*.options' => ['nullable', 'string', 'max:500'],
             'event_custom_fields.*.required' => ['nullable'],
             'event_custom_fields.*.private' => ['nullable'],
+            'event_custom_fields.*.show_on_request' => ['nullable'],
+            'event_custom_fields.*.regex' => ['nullable', 'string', 'max:200'],
+            'event_custom_fields.*.regex_hint' => ['nullable', 'string', 'max:200'],
             'event_custom_fields.*.ai_prompt' => ['nullable', 'string', 'max:500'],
             'short_description' => ['nullable', 'string', 'max:200'],
             'banner_enabled' => ['nullable', 'boolean'],
@@ -151,6 +154,24 @@ class RoleUpdateRequest extends FormRequest
 
     public function withValidator($validator): void
     {
+        $validator->after(function ($validator) {
+            // A custom field's validation pattern is owner-authored, so reject anything PCRE
+            // cannot compile here - otherwise it saves silently and is skipped at validation time,
+            // leaving the owner believing the field is guarded when it is not.
+            foreach ((array) $this->input('event_custom_fields') as $fieldKey => $field) {
+                if (! is_array($field) || ! isset($field['regex'])) {
+                    continue;
+                }
+
+                if (! \App\Utils\CustomFieldUtils::isValidPattern($field['regex'])) {
+                    $validator->errors()->add(
+                        "event_custom_fields.{$fieldKey}.regex",
+                        __('messages.field_regex_invalid')
+                    );
+                }
+            }
+        });
+
         $validator->after(function ($validator) {
             $entries = $this->input('event_categories');
             if (! is_array($entries)) {

@@ -5,6 +5,11 @@
 
         @include('admin.partials._date-range-filter', ['range' => $range])
 
+        {{-- Everything waiting on an admin, aggregated from AdminAlertService. Only shown when there is something to do. --}}
+        @if ($adminAlerts->isNotEmpty())
+            <x-needs-attention :items="$adminAlerts" />
+        @endif
+
         {{-- Key Metrics Cards --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {{-- Total Users --}}

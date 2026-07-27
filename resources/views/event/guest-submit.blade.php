@@ -8,6 +8,28 @@
   $importFields = $role->import_config['fields'] ?? [];
   $requiredImportFields = $role->import_config['required_fields'] ?? [];
   $hasRequiredImportFields = (bool) array_filter($requiredImportFields);
+
+  // Custom fields the schedule asks on its request form. Rendered by Vue rather than server-side:
+  // this page is a Vue mount, so owner-authored labels and options echoed into it would be compiled
+  // as a template. Passed as data and interpolated with Vue's own mustaches, they never are.
+  $requestCustomFields = [];
+  $requestCustomFieldValues = [];
+  if ($role->isPro()) {
+      foreach ($role->getRequestFormCustomFields() as $fieldKey => $field) {
+          $requestCustomFields[] = [
+              'key' => $fieldKey,
+              'label' => $role->customFieldLabel($field, $fieldKey, true),
+              'type' => $field['type'] ?? 'string',
+              'options' => \App\Models\Role::customFieldOptions($field),
+              'required' => ! empty($field['required']),
+              'regex' => $field['regex'] ?? '',
+              'regex_hint' => $field['regex_hint'] ?? '',
+          ];
+          $requestCustomFieldValues[$fieldKey] = ($field['type'] ?? 'string') === 'multiselect'
+              ? []
+              : (($field['type'] ?? 'string') === 'switch' ? '0' : '');
+      }
+  }
 @endphp
 
 <script src="{{ asset('js/vue.global.prod.js') }}" {!! nonce_attr() !!}></script>
@@ -341,6 +363,79 @@
               </div>
             </div>
 
+            {{-- Schedule-defined request questions. Labels and options come through Vue data and are
+                 interpolated with Vue's own mustaches, so owner-authored text is never compiled as a
+                 template (see the note where $requestCustomFields is built). --}}
+            <div class="ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4" v-if="requestCustomFields.length">
+              <div class="max-w-2xl mx-auto">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.additional_information') }}</h3>
+
+                <div v-for="field in requestCustomFields" :key="field.key" class="mb-4">
+                  <label :for="'submit_custom_field_' + field.key" class="block font-medium text-sm text-gray-700 dark:text-gray-300">
+                    @{{ field.label }}<span v-if="field.required" class="text-red-500"> *</span>
+                  </label>
+
+                  <input v-if="field.type === 'string'"
+                    :id="'submit_custom_field_' + field.key"
+                    type="text"
+                    v-model="customFieldValues[field.key]"
+                    :pattern="field.regex || null"
+                    :title="field.regex_hint || null"
+                    :class="errClass('cf_' + field.key)"
+                    dir="auto"
+                    autocomplete="off"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+
+                  <textarea v-else-if="field.type === 'multiline_string'"
+                    :id="'submit_custom_field_' + field.key"
+                    rows="3"
+                    dir="auto"
+                    v-model="customFieldValues[field.key]"
+                    :title="field.regex_hint || null"
+                    :class="errClass('cf_' + field.key)"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"></textarea>
+
+                  <div v-else-if="field.type === 'switch'" class="mt-2">
+                    <input type="checkbox"
+                      :id="'submit_custom_field_' + field.key"
+                      v-model="customFieldValues[field.key]"
+                      true-value="1"
+                      false-value="0"
+                      class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                  </div>
+
+                  <input v-else-if="field.type === 'date'"
+                    :id="'submit_custom_field_' + field.key"
+                    type="date"
+                    v-model="customFieldValues[field.key]"
+                    :class="errClass('cf_' + field.key)"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+
+                  <select v-else-if="field.type === 'dropdown'"
+                    :id="'submit_custom_field_' + field.key"
+                    v-model="customFieldValues[field.key]"
+                    :class="errClass('cf_' + field.key)"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                    <option value="">{{ __('messages.please_select') }}</option>
+                    <option v-for="option in field.options" :key="option" :value="option">@{{ option }}</option>
+                  </select>
+
+                  <div v-else-if="field.type === 'multiselect'" :id="'submit_custom_field_' + field.key" class="mt-1 space-y-1">
+                    <label v-for="option in field.options" :key="option" class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                      <input type="checkbox"
+                        :value="option"
+                        v-model="customFieldValues[field.key]"
+                        class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                      @{{ option }}
+                    </label>
+                  </div>
+
+                  <p v-if="field.regex_hint && (field.type === 'string' || field.type === 'multiline_string')"
+                    class="mt-1 text-xs text-gray-500 dark:text-gray-400">@{{ field.regex_hint }}</p>
+                </div>
+              </div>
+            </div>
+
             {{-- Account / identity panel --}}
             <div class="ap-card p-4 sm:p-8 shadow-md sm:rounded-xl mt-4">
               <div class="max-w-2xl mx-auto">
@@ -499,6 +594,11 @@
               <p v-show="triedSubmit && missingFields.length" class="mt-2 text-sm text-red-600 dark:text-red-400 text-center" aria-live="polite">
                 {{ __('messages.still_needed') }} @{{ missingFields.join(', ') }}
               </p>
+              {{-- Separate from "still needed": these fields are answered, just not in the format
+                   the schedule asked for. --}}
+              <p v-show="triedSubmit && customFieldFormatErrors.length" class="mt-2 text-sm text-red-600 dark:text-red-400 text-center" aria-live="polite">
+                {{ __('messages.check_format') }} @{{ customFieldFormatErrors.join(', ') }}
+              </p>
             </div>
           </form>
 
@@ -585,6 +685,8 @@
                 deviceTimezone: '',
                 timezoneMismatchText: @json(__('messages.guest_submit_timezone_mismatch')),
                 requiredFields: @json($requiredImportFields),
+                requestCustomFields: @json($requestCustomFields),
+                customFieldValues: @json($requestCustomFieldValues),
                 groups: @json(($role->groups ?? collect())->map(fn($g) => ['id' => \App\Utils\UrlUtils::encodeId($g->id), 'name' => $g->translatedName()])->values()),
                 categoryIds: @json(array_map('strval', array_keys(get_translated_categories($role)))),
                 timeOptions: [],
@@ -812,12 +914,42 @@
                     }
                 }
 
+                // Schedule-defined request questions. Keys are prefixed so they cannot collide with
+                // the fixed fields above. Both an unanswered required field and a value that fails
+                // its pattern block the submit and get the error ring; they are told apart in
+                // customFieldFormatErrorKeys below, because "still needed" is the wrong words for a
+                // field that is filled in but wrongly formatted.
+                this.requestCustomFields.forEach((field) => {
+                    m['cf_' + field.key] = this.customFieldIsMissing(field)
+                        || this.customFieldFailsPattern(field);
+                });
+
                 return m;
+            },
+
+            // Filled in, but does not match the schedule's pattern. The server checks the same
+            // anchored expression, so the two agree.
+            customFieldFormatErrorKeys() {
+                return this.requestCustomFields
+                    .filter((field) => !this.customFieldIsMissing(field) && this.customFieldFailsPattern(field))
+                    .map((field) => 'cf_' + field.key);
+            },
+
+            // Labelled for the hint line under the submit button, quoting the schedule's own hint
+            // when it wrote one - that is the only place the expected format is spelled out.
+            customFieldFormatErrors() {
+                return this.requestCustomFields
+                    .filter((field) => this.customFieldFormatErrorKeys.includes('cf_' + field.key))
+                    .map((field) => field.regex_hint ? field.label + ' (' + field.regex_hint + ')' : field.label);
             },
 
             // [field key, label, element id] in visual order; single source for the hint
             // text and the scroll-to-first-missing target.
             missingFieldOrder() {
+                const customFieldEntries = this.requestCustomFields.map(
+                    (field) => ['cf_' + field.key, field.label, 'submit_custom_field_' + field.key]
+                );
+
                 return [
                     ['name', @json(__('messages.event_name')), 'submit_event_name'],
                     ['event_date', @json(__('messages.date')), 'submit_event_date'],
@@ -831,6 +963,7 @@
                     ['coupon_code', @json(__('messages.coupon_code')), 'submit_coupon_code'],
                     ['category_id', @json(__('messages.category')), 'submit_category_id'],
                     ['group_id', @json(__('messages.schedule')), 'submit_group_id'],
+                    ...customFieldEntries,
                     ['account_email', @json(__('messages.email')), 'account_email'],
                     ['account_name', @json(__('messages.name')), 'account_name'],
                     ['account_password', @json(__('messages.password')), this.accountMode === 'login' ? 'login_password' : 'account_password'],
@@ -841,7 +974,7 @@
 
             missingFields() {
                 return this.missingFieldOrder
-                    .filter((f) => this.missingMap[f[0]])
+                    .filter((f) => this.missingMap[f[0]] && ! this.customFieldFormatErrorKeys.includes(f[0]))
                     .map((f) => f[1]);
             },
 
@@ -863,7 +996,10 @@
             },
 
             canSubmit() {
-                return this.missingFields.length === 0 && !this.emailChecking;
+                // Format errors are kept out of missingFields for wording, so check them here too.
+                return this.missingFields.length === 0
+                    && this.customFieldFormatErrors.length === 0
+                    && !this.emailChecking;
             },
         },
 
@@ -886,6 +1022,40 @@
                     options.push({ value: value, label: label });
                 }
                 return options;
+            },
+
+            customFieldIsMissing(field) {
+                if (! field.required) {
+                    return false;
+                }
+
+                const value = this.customFieldValues[field.key];
+
+                if (field.type === 'multiselect') {
+                    return !(value || []).length;
+                }
+
+                // A switch always holds '0' or '1', so it is never "missing".
+                return field.type !== 'switch' && !String(value ?? '').trim();
+            },
+
+            customFieldFailsPattern(field) {
+                if (! field.regex || (field.type !== 'string' && field.type !== 'multiline_string')) {
+                    return false;
+                }
+
+                const text = String(this.customFieldValues[field.key] ?? '');
+                if (! text) {
+                    return false;
+                }
+
+                try {
+                    return ! new RegExp('^(?:' + field.regex + ')$', 'u').test(text);
+                } catch (e) {
+                    // An uncompilable pattern is rejected when the schedule saves it; if one slips
+                    // through anyway, let the server have the final say rather than blocking here.
+                    return false;
+                }
             },
 
             // Ring-only error styling (no border-width change) so borderless wrappers like
@@ -1344,6 +1514,7 @@
                     coupon_code: this.event.coupon_code,
                     category_id: this.event.category_id || null,
                     curator_group_id: this.event.group_id || null,
+                    custom_field_values: this.customFieldValues,
                     account_mode: this.accountMode,
                     account_email: this.userEmail,
                     account_password: this.userPassword,

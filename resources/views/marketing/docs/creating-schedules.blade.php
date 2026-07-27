@@ -435,6 +435,14 @@
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Hide the field's value from the guest portal. The value still appears in the admin portal and can be referenced in graphic templates and slug patterns via <code>{custom_N}</code>. Public dropdown and multiselect fields become guest-portal filters; mark them private to remove the filter chip.</p>
                                 </div>
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">On Request Form</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Ask the field as a question on your public <a href="#engagement-requests" class="text-cyan-400 hover:text-cyan-300">event request form</a>, so visitors answer it when they submit an event. On by default. Uncheck it to keep a field for your own use in the admin portal. Combine a <strong class="text-gray-900 dark:text-white">Multiselect</strong> field with this to offer a checklist, for example which of your equipment the visitor needs.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Validation Pattern</h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">For <strong class="text-gray-900 dark:text-white">String</strong> and <strong class="text-gray-900 dark:text-white">Multiline String</strong> fields you can require entries to match a pattern, such as a reference code or a phone number. Pick one of the ready-made patterns (email address, phone number, web address, numbers only, letters and numbers) or write your own regular expression, and use the built-in tester to try a sample value before saving. The optional <strong class="text-gray-900 dark:text-white">Hint</strong> is shown under the field so visitors know what format you expect. Patterns are enforced both in the browser and on the server.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Reordering</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Drag and drop fields to change the order they appear on event forms.</p>
                                 </div>
@@ -948,6 +956,10 @@
                                 <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
                                     <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Event Request Form</h4>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">Choose the type of request form shown to visitors: <strong class="text-gray-900 dark:text-white">AI Import</strong> (paste event text or upload a flyer and let AI extract the details) or <strong class="text-gray-900 dark:text-white">Booking Form</strong> (a structured form with predefined fields). Available for Venue and Curator schedules.</p>
+                                </div>
+                                <div class="bg-gray-100 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10">
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Your Own Questions <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 ml-1">Pro</span></h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Add your own questions to whichever request form you use, with <a href="#customize-custom-fields" class="text-cyan-400 hover:text-cyan-300">Custom Fields</a> marked <strong class="text-gray-900 dark:text-white">On request form</strong>. Ask anything you need before accepting an event: which of your equipment the visitor needs (a multiselect checklist), a reference number in a specific format (a validation pattern), an expected head count, and so on. Answers appear on the request card in <strong class="text-gray-900 dark:text-white">Admin Panel &rarr; Requests</strong> and on the event itself once accepted.</p>
                                 </div>
                             </div>
 

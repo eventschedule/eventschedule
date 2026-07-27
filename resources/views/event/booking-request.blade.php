@@ -165,6 +165,16 @@
               <textarea id="event_description" name="description" rows="4" class="html-editor mt-1 block w-full"></textarea>
             </div>
 
+            {{-- Custom fields the schedule chose to ask on the request form --}}
+            @php $requestCustomFields = $role->isPro() ? $role->getRequestFormCustomFields() : []; @endphp
+            @if (count($requestCustomFields))
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.additional_information') }}</h3>
+
+            @foreach ($requestCustomFields as $fieldKey => $field)
+            <x-custom-field-input :role="$role" :field="$field" :field-key="$fieldKey" :for-guest="true" />
+            @endforeach
+            @endif
+
             {{-- Location Section --}}
             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('messages.location') }}</h3>
 
@@ -560,6 +570,48 @@
       });
     });
 
+    // Validation errors come back as JSON (this form posts over fetch), so the per-field messages
+    // have to be written into the [data-error-for] anchors by hand.
+    function clearFieldErrors() {
+      document.querySelectorAll('[data-error-for]').forEach(function(el) {
+        el.textContent = '';
+        el.classList.add('hidden');
+      });
+    }
+
+    function showFieldErrors(errors) {
+      if (!errors) return null;
+
+      var firstEl = null;
+      Object.keys(errors).forEach(function(key) {
+        // Laravel reports a multiselect member as custom_field_values.key.2; the anchor is on the
+        // field itself, so drop a trailing numeric segment before looking it up.
+        var anchorKey = key.replace(/\.\d+$/, '');
+        var el = document.querySelector('[data-error-for="' + CSS.escape(anchorKey) + '"]');
+        if (!el) return;
+
+        el.textContent = Array.isArray(errors[key]) ? errors[key][0] : errors[key];
+        el.classList.remove('hidden');
+        if (!firstEl) firstEl = el;
+      });
+
+      return firstEl;
+    }
+
+    // A required multiselect cannot carry the `required` attribute (any one box satisfies it), so
+    // check the group here rather than letting the server be the only gate - the other request form
+    // checks the same rule client-side.
+    function requiredGroupErrors(form) {
+      var errors = {};
+      form.querySelectorAll('[data-required-group]').forEach(function(group) {
+        if (!group.querySelector('input[type="checkbox"]:checked')) {
+          errors[group.dataset.requiredGroup] = ['{{ __('messages.field_is_required') }}'];
+        }
+      });
+
+      return Object.keys(errors).length ? errors : null;
+    }
+
     document.getElementById('booking-request-form').addEventListener('submit', function(e) {
       e.preventDefault();
 
@@ -567,9 +619,20 @@
       var submitBtn = document.getElementById('submit-btn');
       var messageDiv = document.getElementById('form-message');
 
+      messageDiv.classList.add('hidden');
+      clearFieldErrors();
+
+      var groupErrors = requiredGroupErrors(form);
+      if (groupErrors) {
+        var firstGroupError = showFieldErrors(groupErrors);
+        if (firstGroupError) {
+          firstGroupError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.textContent = '...';
-      messageDiv.classList.add('hidden');
 
       var formData = new FormData(form);
 
@@ -608,11 +671,21 @@
             errorMessage = errors.map(function(e) { return e[0]; }).join('\n');
           }
 
+          // Also place each message next to its own field, so a failed custom-field pattern points
+          // at the input that has to change instead of only landing in the summary below.
+          clearFieldErrors();
+          var firstErrorEl = showFieldErrors(result.data.errors);
+
           messageDiv.className = 'mt-4 p-4 rounded-lg text-sm bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200';
+          messageDiv.style.whiteSpace = 'pre-line';
           messageDiv.textContent = errorMessage;
           messageDiv.classList.remove('hidden');
           submitBtn.disabled = false;
           submitBtn.textContent = '{{ __("messages.submit") }}';
+
+          if (firstErrorEl) {
+            firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
         }
       })
       .catch(function() {

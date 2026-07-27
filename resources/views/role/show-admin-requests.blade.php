@@ -9,8 +9,11 @@
     <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-gray-100">{{ __('messages.no_requests') }}</h3>
     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('messages.share_your_sign_up_link_to_get_more_requests') }}</p>
     <div class="mt-3">
-        <x-link href="{{ route('event.sign_up', ['subdomain' => $role->subdomain]) }}" target="_blank">
-            {{ \App\Utils\UrlUtils::clean(route('event.sign_up', ['subdomain' => $role->subdomain])) }}
+        {{-- role.request is the public request page this copy is describing. The former
+             'event.sign_up' name has no route, so this branch used to throw - and it is reachable,
+             since the empty state also renders when the schedule's email is unverified. --}}
+        <x-link href="{{ route('role.request', ['subdomain' => $role->subdomain]) }}" target="_blank">
+            {{ \App\Utils\UrlUtils::clean(route('role.request', ['subdomain' => $role->subdomain])) }}
         </x-link>
     </div>
 </div>
@@ -106,6 +109,38 @@
                 <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full mb-2">
                     {{ $group->translatedName() }}
                 </span>
+            @endif
+
+            {{-- Answers to the schedule's request-form questions. Owner-only surface, so private
+                 fields are shown here too. --}}
+            @php
+                $requestFields = $role->getRequestFormCustomFields();
+                $requestValues = $event->getCustomFieldValues();
+            @endphp
+            @if ($requestFields && $requestValues)
+            <dl class="mt-2 w-full space-y-2 text-start">
+                @foreach ($requestFields as $fieldKey => $field)
+                    @php $answer = $requestValues[$fieldKey] ?? null; @endphp
+                    @if ($answer !== null && $answer !== '')
+                    <div>
+                        <dt class="text-xs font-semibold text-gray-500 dark:text-gray-400" dir="auto">{{ $role->customFieldLabel($field, $fieldKey) }}</dt>
+                        <dd class="text-sm text-gray-700 dark:text-gray-300">
+                            @if (($field['type'] ?? '') === 'multiselect')
+                                <div class="flex flex-wrap gap-1 mt-1">
+                                    @foreach (array_filter(array_map('trim', explode(',', (string) $answer))) as $answerPart)
+                                    <span class="inline-block bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs px-2 py-0.5 rounded-full" dir="auto">{{ $answerPart }}</span>
+                                    @endforeach
+                                </div>
+                            @elseif (($field['type'] ?? '') === 'switch')
+                                {{ $answer ? __('messages.yes') : __('messages.no') }}
+                            @else
+                                <span class="line-clamp-3" dir="auto">{{ $answer }}</span>
+                            @endif
+                        </dd>
+                    </div>
+                    @endif
+                @endforeach
+            </dl>
             @endif
 
             {{-- Description --}}

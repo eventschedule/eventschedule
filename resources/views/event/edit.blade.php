@@ -1829,93 +1829,11 @@
                             @endphp
 
                             @foreach($eventCustomFields as $fieldKey => $field)
-                            <div class="mb-6">
-                                <x-input-label for="custom_field_{{ $fieldKey }}">
-                                    {{ (app()->getLocale() === 'en' && !empty($field['name_en'])) ? $field['name_en'] : $field['name'] }}{{ !empty($field['required']) ? ' *' : '' }}
-                                    @if (!empty($field['private']))
-                                        <span class="ms-1 inline-flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400" title="{{ __('messages.field_private_help') }}">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                                            </svg>
-                                            {{ __('messages.field_private') }}
-                                        </span>
-                                    @endif
-                                </x-input-label>
-
-                                @if(($field['type'] ?? 'string') === 'string')
-                                <x-text-input
-                                    id="custom_field_{{ $fieldKey }}"
-                                    name="custom_field_values[{{ $fieldKey }}]"
-                                    type="text"
-                                    class="mt-1 block w-full"
-                                    :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
-                                    :required="!empty($field['required'])" />
-                                @elseif(($field['type'] ?? '') === 'multiline_string')
-                                <textarea
-                                    id="custom_field_{{ $fieldKey }}"
-                                    name="custom_field_values[{{ $fieldKey }}]"
-                                    rows="3"
-                                    dir="auto"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                    {{ !empty($field['required']) ? 'required' : '' }}>{{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') }}</textarea>
-                                @elseif(($field['type'] ?? '') === 'switch')
-                                <div class="mt-2">
-                                    <input type="hidden" name="custom_field_values[{{ $fieldKey }}]" value="0" />
-                                    <input type="checkbox"
-                                        id="custom_field_{{ $fieldKey }}"
-                                        name="custom_field_values[{{ $fieldKey }}]"
-                                        value="1"
-                                        class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded"
-                                        {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') ? 'checked' : '' }} />
-                                </div>
-                                @elseif(($field['type'] ?? '') === 'date')
-                                <x-text-input
-                                    id="custom_field_{{ $fieldKey }}"
-                                    name="custom_field_values[{{ $fieldKey }}]"
-                                    type="date"
-                                    class="mt-1 block w-full"
-                                    :value="old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '')"
-                                    :required="!empty($field['required'])" />
-                                @elseif(($field['type'] ?? '') === 'dropdown')
-                                <select
-                                    id="custom_field_{{ $fieldKey }}"
-                                    name="custom_field_values[{{ $fieldKey }}]"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
-                                    {{ !empty($field['required']) ? 'required' : '' }}>
-                                    <option value="">{{ __('messages.select') }}...</option>
-                                    @foreach(explode(',', $field['options'] ?? '') as $option)
-                                        @php $option = trim($option); @endphp
-                                        @if($option)
-                                        <option value="{{ $option }}" {{ old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '') === $option ? 'selected' : '' }}>
-                                            {{ $option }}
-                                        </option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @elseif(($field['type'] ?? '') === 'multiselect')
-                                @php
-                                    $oldValue = old('custom_field_values.' . $fieldKey, $customFieldValues[$fieldKey] ?? '');
-                                    $selectedValues = is_array($oldValue) ? $oldValue : array_map('trim', explode(',', $oldValue));
-                                @endphp
-                                <div class="mt-1 space-y-1">
-                                    @foreach(explode(',', $field['options'] ?? '') as $option)
-                                        @php $option = trim($option); @endphp
-                                        @if($option)
-                                        <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                                            <input type="checkbox"
-                                                name="custom_field_values[{{ $fieldKey }}][]"
-                                                value="{{ $option }}"
-                                                {{ in_array($option, $selectedValues) ? 'checked' : '' }}
-                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded" />
-                                            {{ $option }}
-                                        </label>
-                                        @endif
-                                    @endforeach
-                                </div>
-                                @endif
-
-                                <x-input-error class="mt-2" :messages="$errors->get('custom_field_values.' . $fieldKey)" />
-                            </div>
+                            <x-custom-field-input
+                                :role="$role"
+                                :field="$field"
+                                :field-key="$fieldKey"
+                                :value="$customFieldValues[$fieldKey] ?? ''" />
                             @endforeach
                         </div>
                         {{-- End Panel 4 --}}

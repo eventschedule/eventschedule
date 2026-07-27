@@ -652,14 +652,23 @@
                         </div>
 
                         <!-- Custom Fields Section -->
-                        @if ($role->isPro() && count($role->getEventCustomFields()) > 0)
+                        @php
+                            // Guests only see the fields the schedule opted to put on its request
+                            // form; the admin import page still shows every field.
+                            $isGuestImport = isset($isGuest) && $isGuest;
+                            $eventCustomFields = $isGuestImport
+                                ? $role->getRequestFormCustomFields()
+                                : $role->getEventCustomFields();
+                        @endphp
+                        @if ($role->isPro() && count($eventCustomFields) > 0)
                         <div class="mt-6">
-                            @php
-                                $eventCustomFields = $role->getEventCustomFields();
-                            @endphp
                             @foreach($eventCustomFields as $fieldKey => $field)
+                            @php
+                                $fieldRegex = $field['regex'] ?? '';
+                                $fieldRegexHint = $field['regex_hint'] ?? '';
+                            @endphp
                             <div class="mt-4">
-                                <x-input-label for="custom_field_{{ $fieldKey }}_@{{ idx }}" :value="$field['name'] . (!empty($field['required']) ? ' *' : '')" />
+                                <x-input-label for="custom_field_{{ $fieldKey }}_@{{ idx }}" :value="$role->customFieldLabel($field, $fieldKey, $isGuestImport) . (!empty($field['required']) ? ' *' : '')" />
 
                                 @if(($field['type'] ?? 'string') === 'string')
                                 <x-text-input
@@ -668,6 +677,8 @@
                                     class="mt-1 block w-full"
                                     v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                     v-bind:readonly="savedEvents[idx]"
+                                    :pattern="$fieldRegex ?: null"
+                                    :title="$fieldRegexHint ?: null"
                                     autocomplete="off" />
                                 @elseif(($field['type'] ?? '') === 'multiline_string')
                                 <textarea
@@ -675,6 +686,7 @@
                                     rows="2"
                                     dir="auto"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                                    {!! $fieldRegexHint ? 'title="' . e($fieldRegexHint) . '"' : '' !!}
                                     v-model="preview.parsed[idx].custom_field_values.{{ $fieldKey }}"
                                     v-bind:readonly="savedEvents[idx]"></textarea>
                                 @elseif(($field['type'] ?? '') === 'switch')
@@ -725,6 +737,10 @@
                                         @endif
                                     @endforeach
                                 </div>
+                                @endif
+
+                                @if ($fieldRegexHint && in_array($field['type'] ?? 'string', ['string', 'multiline_string'], true))
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $fieldRegexHint }}</p>
                                 @endif
                             </div>
                             @endforeach
@@ -1701,11 +1717,44 @@
                         if (!event.custom_field_values) {
                             event.custom_field_values = {};
                         }
-                        // Ensure all custom fields have at least empty values for Vue reactivity
-                        const roleCustomFields = @json($role->getEventCustomFields());
+                        // Ensure all custom fields have at least empty values for Vue reactivity.
+                        // Same subset the form renders, so seeded keys and inputs agree.
+                        @php
+                            // Recomputed rather than reusing $isGuestImport from the markup above:
+                            // that block sits inside the preview card, so its scope is not
+                            // guaranteed to have run by the time this script renders.
+                            $seedCustomFields = (isset($isGuest) && $isGuest)
+                                ? $role->getRequestFormCustomFields()
+                                : $role->getEventCustomFields();
+                        @endphp
+                        const roleCustomFields = @json($seedCustomFields);
                         Object.keys(roleCustomFields).forEach(fieldKey => {
                             if (event.custom_field_values[fieldKey] === undefined) {
                                 event.custom_field_values[fieldKey] = '';
+                                return;
+                            }
+
+                            // AI parsing can guess a value that is not one of the allowed options.
+                            // Vue renders such a select blank while keeping the value, so leaving it
+                            // would fail server validation on a field the guest sees as empty.
+                            const fieldType = roleCustomFields[fieldKey].type || '';
+                            if (fieldType !== 'dropdown' && fieldType !== 'multiselect') {
+                                return;
+                            }
+
+                            const allowed = (roleCustomFields[fieldKey].options || '')
+                                .split(',').map(s => s.trim()).filter(s => s);
+                            const current = event.custom_field_values[fieldKey];
+
+                            if (fieldType === 'dropdown') {
+                                if (current && allowed.indexOf(String(current)) === -1) {
+                                    event.custom_field_values[fieldKey] = '';
+                                }
+                            } else {
+                                const kept = String(current || '').split(',')
+                                    .map(s => s.trim())
+                                    .filter(s => s && allowed.indexOf(s) !== -1);
+                                event.custom_field_values[fieldKey] = kept.join(', ');
                             }
                         });
 

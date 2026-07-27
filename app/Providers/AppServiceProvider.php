@@ -128,9 +128,12 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
+        // Badge counts for every /admin queue waiting on an admin. The service gates
+        // each count by install type (nexus / hosted) and memoizes for the request, so
+        // the nav and the admin dashboard share one pass.
         View::composer('admin.partials._navigation', function ($view) {
-            if (config('app.hosted') && auth()->check() && auth()->user()->isAdmin()) {
-                $view->with('supportUnreadCount', \App\Models\SupportMessage::where('is_from_admin', false)->whereNull('read_at')->count());
+            if (auth()->check() && auth()->user()->isAdmin()) {
+                $view->with('adminAlertBadges', \App\Services\AdminAlertService::badges());
             }
         });
 

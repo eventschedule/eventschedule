@@ -130,7 +130,7 @@
 
         {{-- Needs attention: pending items to handle across all editable schedules. Only shown when there are any. --}}
         @if($pendingActionItems->isNotEmpty())
-            @include('home.partials.needs-attention')
+            <x-needs-attention :items="$pendingActionItems" />
         @endif
 
         {{-- Configurable Dashboard Panels --}}

@@ -3681,11 +3681,21 @@ class RoleController extends Controller
                     }
                 }
 
+                $fieldType = $fieldData['type'] ?? 'string';
+                // A pattern only makes sense on free text; the other types are already constrained
+                // by their own widget, so drop a stale pattern when the type is switched.
+                $acceptsRegex = in_array($fieldType, ['string', 'multiline_string'], true);
+
                 $eventCustomFields[$fieldKey] = [
                     'name' => $fieldData['name'],
-                    'type' => $fieldData['type'] ?? 'string',
+                    'type' => $fieldType,
                     'required' => ! empty($fieldData['required']),
                     'private' => ! empty($fieldData['private']),
+                    // Missing means an older row that predates the checkbox, which has always been
+                    // shown on the request form - the editor posts a paired hidden 0 for new rows.
+                    'show_on_request' => (bool) ($fieldData['show_on_request'] ?? true),
+                    'regex' => $acceptsRegex ? trim($fieldData['regex'] ?? '') : '',
+                    'regex_hint' => $acceptsRegex ? trim($fieldData['regex_hint'] ?? '') : '',
                     'options' => implode(',', array_map('trim', explode(',', $fieldData['options'] ?? ''))),
                     'ai_prompt' => $fieldData['ai_prompt'] ?? '',
                     'index' => $fieldIndex,

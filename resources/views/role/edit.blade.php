@@ -2509,6 +2509,7 @@
                         @if ($role->isPro())
                         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                             {{ __('messages.event_custom_fields_help') }}
+                            {{ __('messages.event_custom_fields_request_help') }}
                         </p>
 
                         <input type="hidden" name="event_custom_fields_submitted" value="1">
@@ -2516,6 +2517,7 @@
                             @php
                                 $eventCustomFields = $role->event_custom_fields ?? [];
                                 $fieldIndex = 0;
+                                $customFieldRegexPresets = \App\Utils\CustomFieldUtils::regexPresets();
                             @endphp
                             @foreach($eventCustomFields as $fieldKey => $field)
                             <div class="mb-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg event-custom-field-item flex items-start gap-3" data-field-key="{{ $fieldKey }}" data-field-index="{{ $field['index'] ?? '' }}">
@@ -2562,6 +2564,38 @@
                                         class="mt-1 block w-full"
                                         :placeholder="__('messages.options_placeholder')" />
                                 </div>
+                                <div class="mt-3 event-field-regex-container" style="{{ in_array($field['type'] ?? 'string', ['string', 'multiline_string']) ? '' : 'display: none;' }}">
+                                    <x-input-label :value="__('messages.field_regex')" class="text-sm" />
+                                    <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <select data-action="custom-field-regex-preset"
+                                            class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                                            <option value="">{{ __('messages.field_regex_preset') }}</option>
+                                            @foreach ($customFieldRegexPresets as $presetLabel => $presetPattern)
+                                            <option value="{{ $presetPattern }}" {{ ($field['regex'] ?? '') === $presetPattern ? 'selected' : '' }}>{{ $presetLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                        <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][regex]"
+                                            value="{{ $field['regex'] ?? '' }}"
+                                            data-action="custom-field-regex-input"
+                                            class="block w-full font-mono text-sm event-field-regex-input"
+                                            :placeholder="__('messages.field_regex_placeholder')" />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('messages.field_regex_help') }}</p>
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <x-text-input type="text"
+                                            data-action="custom-field-regex-test"
+                                            class="block w-full text-sm event-field-regex-test"
+                                            :placeholder="__('messages.field_regex_test')" />
+                                        <span class="event-field-regex-result text-xs whitespace-nowrap" aria-live="polite"></span>
+                                    </div>
+                                    <div class="mt-2">
+                                        <x-input-label :value="__('messages.field_regex_hint')" class="text-sm" />
+                                        <x-text-input type="text" name="event_custom_fields[{{ $fieldKey }}][regex_hint]"
+                                            value="{{ $field['regex_hint'] ?? '' }}"
+                                            class="mt-1 block w-full"
+                                            :placeholder="__('messages.field_regex_hint_placeholder')" />
+                                    </div>
+                                </div>
                                 <div class="mt-3">
                                     <x-input-label :value="__('messages.ai_prompt_custom_field')" class="text-sm" />
                                     <textarea name="event_custom_fields[{{ $fieldKey }}][ai_prompt]"
@@ -2587,6 +2621,17 @@
                                                 {{ !empty($field['private']) ? 'checked' : '' }}
                                                 class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                                             <label for="event_field_private_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_private') }}</label>
+                                        </div>
+                                        <div class="flex items-center" title="{{ __('messages.field_show_on_request_help') }}">
+                                            {{-- Paired hidden 0: this checkbox defaults to on, so an unchecked box has to post
+                                                 something the controller can tell apart from an older field that has no flag. --}}
+                                            <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][show_on_request]" value="0">
+                                            <input type="checkbox" name="event_custom_fields[{{ $fieldKey }}][show_on_request]"
+                                                id="event_field_show_on_request_{{ $fieldKey }}"
+                                                value="1"
+                                                {{ ($field['show_on_request'] ?? true) ? 'checked' : '' }}
+                                                class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                                            <label for="event_field_show_on_request_{{ $fieldKey }}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{{ __('messages.field_show_on_request') }}</label>
                                         </div>
                                         <input type="hidden" name="event_custom_fields[{{ $fieldKey }}][index]" value="{{ $field['index'] ?? '' }}">
                                         @if(!empty($field['index']))
@@ -3540,6 +3585,17 @@
                                 dir="auto"
                                 placeholder="{{ __('messages.enter_request_terms') }}">{{ old('request_terms', $role->request_terms) }}</textarea>
                             <x-input-error class="mt-2" :messages="$errors->get('request_terms')" />
+                        </div>
+
+                        {{-- The questions themselves live in Customize > Custom Fields, which is not
+                             where someone looking for "extra questions on my request form" looks. --}}
+                        <div class="mb-6">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ __('messages.request_custom_fields_pointer') }}
+                                <button type="button" data-action="goto-custom-fields" class="text-[var(--brand-blue)] hover:underline">
+                                    {{ __('messages.custom_fields') }}
+                                </button>
+                            </p>
                         </div>
 
                         </div>
@@ -6713,6 +6769,11 @@ let eventCustomFieldCounter = {{ max(array_map(function($key) { return str_start
 let usedEventFieldIndices = @json(array_values(array_filter(array_map(fn($f) => $f['index'] ?? null, $role->event_custom_fields ?? []))));
 const aiPromptExamples = @json(array_map(fn($i) => __("messages.ai_prompt_example_$i"), range(1, 20)));
 const aiPromptEgPrefix = @json(__('messages.eg'));
+@php $customFieldRegexPresetsJs = \App\Utils\CustomFieldUtils::regexPresets(); @endphp
+const eventFieldRegexPresets = @json($customFieldRegexPresetsJs);
+const eventFieldRegexMatchText = @json(__('messages.field_regex_matches'));
+const eventFieldRegexNoMatchText = @json(__('messages.field_regex_does_not_match'));
+const eventFieldRegexInvalidText = @json(__('messages.field_regex_invalid'));
 
 function getRandomAiPromptPlaceholder() {
     const usedPlaceholders = [];
@@ -6773,6 +6834,7 @@ function addEventCustomField() {
                 <div>
                     <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_name') !!} *</label>
                     <input type="text" name="event_custom_fields[${fieldKey}][name]"
+                        dir="auto" autocomplete="off"
                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm" required />
                 </div>
                 <div>
@@ -6793,6 +6855,7 @@ function addEventCustomField() {
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.english_name') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][name_en]"
+                        dir="auto" autocomplete="off"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.auto_translated_placeholder') !!}" />
             </div>
@@ -6800,8 +6863,43 @@ function addEventCustomField() {
             <div class="mt-3 event-field-options-container" style="display: none;">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_options') !!}</label>
                 <input type="text" name="event_custom_fields[${fieldKey}][options]"
+                        dir="auto" autocomplete="off"
                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
                     placeholder="{!! __('messages.options_placeholder') !!}" />
+            </div>
+            {{-- Visible because a new field defaults to type=string; toggleEventFieldOptions()
+                 takes over from here. Mirrors the style attribute on the Blade row above. --}}
+            <div class="mt-3 event-field-regex-container" style="">
+                <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_regex') !!}</label>
+                <div class="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {{-- Options are appended from eventFieldRegexPresets after insertion: the
+                         patterns contain backslashes, which a JS template literal would eat. --}}
+                    <select data-action="custom-field-regex-preset"
+                        class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm">
+                        <option value="">{!! __('messages.field_regex_preset') !!}</option>
+                    </select>
+                    <input type="text" name="event_custom_fields[${fieldKey}][regex]"
+                        dir="auto" autocomplete="off"
+                        data-action="custom-field-regex-input"
+                        class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm font-mono text-sm event-field-regex-input"
+                        placeholder="{!! __('messages.field_regex_placeholder') !!}" />
+                </div>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{!! __('messages.field_regex_help') !!}</p>
+                <div class="mt-2 flex items-center gap-2">
+                    <input type="text"
+                        data-action="custom-field-regex-test"
+                        dir="auto" autocomplete="off"
+                        class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm text-sm event-field-regex-test"
+                        placeholder="{!! __('messages.field_regex_test') !!}" />
+                    <span class="event-field-regex-result text-xs whitespace-nowrap" aria-live="polite"></span>
+                </div>
+                <div class="mt-2">
+                    <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.field_regex_hint') !!}</label>
+                    <input type="text" name="event_custom_fields[${fieldKey}][regex_hint]"
+                        dir="auto" autocomplete="off"
+                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm"
+                        placeholder="{!! __('messages.field_regex_hint_placeholder') !!}" />
+                </div>
             </div>
             <div class="mt-3">
                 <label class="block font-medium text-sm text-gray-700 dark:text-gray-300">{!! __('messages.ai_prompt_custom_field') !!}</label>
@@ -6827,6 +6925,18 @@ function addEventCustomField() {
                             class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
                         <label for="event_field_private_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_private') !!}</label>
                     </div>
+                    <div class="flex items-center" title="{!! __('messages.field_show_on_request_help') !!}">
+                        {{-- Checked by default, mirroring ($field['show_on_request'] ?? true) in the
+                             Blade row above. The paired hidden 0 is what lets an unchecked box post
+                             something the controller can tell apart from a field with no flag. --}}
+                        <input type="hidden" name="event_custom_fields[${fieldKey}][show_on_request]" value="0">
+                        <input type="checkbox" name="event_custom_fields[${fieldKey}][show_on_request]"
+                            id="event_field_show_on_request_${fieldKey}"
+                            value="1"
+                            checked
+                            class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded">
+                        <label for="event_field_show_on_request_${fieldKey}" class="ms-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">{!! __('messages.field_show_on_request') !!}</label>
+                    </div>
                     <input type="hidden" name="event_custom_fields[${fieldKey}][index]" value="${fieldIndex || ''}">
                     ${fieldIndex ? `<span class="text-xs text-gray-400 dark:text-gray-500 font-mono">→ {custom_${fieldIndex}}</span>` : ''}
                 </div>
@@ -6839,9 +6949,19 @@ function addEventCustomField() {
     `;
 
     container.insertAdjacentHTML('beforeend', fieldHtml);
-    const newTextarea = container.querySelector('.event-custom-field-item:last-child .ai-prompt-textarea');
+    const newItem = container.querySelector('.event-custom-field-item:last-child');
+    const newTextarea = newItem ? newItem.querySelector('.ai-prompt-textarea') : null;
     if (newTextarea) {
         newTextarea.placeholder = getRandomAiPromptPlaceholder();
+    }
+    const newPresetSelect = newItem ? newItem.querySelector('[data-action="custom-field-regex-preset"]') : null;
+    if (newPresetSelect) {
+        Object.keys(eventFieldRegexPresets).forEach(function (label) {
+            const option = document.createElement('option');
+            option.value = eventFieldRegexPresets[label];
+            option.textContent = label;
+            newPresetSelect.appendChild(option);
+        });
     }
     // Show all drag handles when there are 2+ fields
     const fieldItems = container.querySelectorAll('.event-custom-field-item');
@@ -6876,6 +6996,84 @@ function toggleEventFieldOptions(selectElement) {
         optionsContainer.style.display = 'block';
     } else {
         optionsContainer.style.display = 'none';
+    }
+
+    // A validation pattern only applies to free text - the other widgets constrain themselves.
+    const regexContainer = fieldItem.querySelector('.event-field-regex-container');
+    if (regexContainer) {
+        const acceptsRegex = selectElement.value === 'string' || selectElement.value === 'multiline_string';
+        regexContainer.style.display = acceptsRegex ? 'block' : 'none';
+    }
+}
+
+// Live pattern tester: the owner types a sample value and sees immediately whether their pattern
+// accepts it. Anchored the same way the server anchors it, so the two agree.
+function updateEventFieldRegexResult(fieldItem) {
+    if (!fieldItem) return;
+
+    const patternInput = fieldItem.querySelector('.event-field-regex-input');
+    const testInput = fieldItem.querySelector('.event-field-regex-test');
+    const result = fieldItem.querySelector('.event-field-regex-result');
+    if (!patternInput || !testInput || !result) return;
+
+    const pattern = patternInput.value.trim();
+    result.className = 'event-field-regex-result text-xs whitespace-nowrap';
+
+    if (!pattern) {
+        result.textContent = '';
+        return;
+    }
+
+    let regex;
+    try {
+        regex = new RegExp('^(?:' + pattern + ')$', 'u');
+    } catch (e) {
+        result.textContent = eventFieldRegexInvalidText;
+        result.classList.add('text-red-600', 'dark:text-red-400');
+        return;
+    }
+
+    if (!testInput.value) {
+        result.textContent = '';
+        return;
+    }
+
+    if (regex.test(testInput.value)) {
+        result.textContent = '✓ ' + eventFieldRegexMatchText;
+        result.classList.add('text-green-600', 'dark:text-green-400');
+    } else {
+        result.textContent = '✗ ' + eventFieldRegexNoMatchText;
+        result.classList.add('text-red-600', 'dark:text-red-400');
+    }
+}
+
+// Jump from Engagement > Requests to where the request-form questions are actually defined.
+function gotoCustomFieldsTab() {
+    const sectionLink = document.querySelector('.section-nav-link[data-section="section-subschedules"]')
+        || document.querySelector('.mobile-section-header[data-section="section-subschedules"]');
+    if (sectionLink) {
+        sectionLink.click();
+    }
+
+    const tabButton = document.querySelector('.customize-tab[data-tab="custom-fields"]');
+    if (tabButton) {
+        tabButton.click();
+    }
+
+    const container = document.getElementById('event-custom-fields-container');
+    if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+function applyEventFieldRegexPreset(selectElement) {
+    const fieldItem = selectElement.closest('.event-custom-field-item');
+    if (!fieldItem || !selectElement.value) return;
+
+    const patternInput = fieldItem.querySelector('.event-field-regex-input');
+    if (patternInput) {
+        patternInput.value = selectElement.value;
+        updateEventFieldRegexResult(fieldItem);
     }
 }
 
@@ -7663,6 +7861,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'add-import-city':
                 addImportCityField();
                 break;
+            case 'goto-custom-fields':
+                gotoCustomFieldsTab();
+                break;
             case 'add-custom-field':
                 addEventCustomField();
                 break;
@@ -7703,6 +7904,10 @@ document.addEventListener('DOMContentLoaded', function() {
         switch (action) {
             case 'update-preview-on-input':
                 updatePreview();
+                break;
+            case 'custom-field-regex-input':
+            case 'custom-field-regex-test':
+                updateEventFieldRegexResult(el.closest('.event-custom-field-item'));
                 break;
             case 'header-image-input':
                 updatePreview();
@@ -7750,6 +7955,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'toggle-field-options':
                 toggleEventFieldOptions(el);
+                break;
+            case 'custom-field-regex-preset':
+                applyEventFieldRegexPreset(el);
                 break;
             case 'header-image-input':
                 updatePreview();

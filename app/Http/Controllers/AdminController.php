@@ -20,6 +20,7 @@ use App\Models\Sale;
 use App\Models\Setting;
 use App\Models\UsageDaily;
 use App\Models\User;
+use App\Services\AdminAlertService;
 use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
@@ -375,7 +376,11 @@ class AdminController extends Controller
         $pendingJobsCount = DB::table('jobs')->count();
         $failedJobsCount = DB::table('failed_jobs')->count();
 
+        // Everything across /admin that is waiting on an admin, as one to-do list.
+        $adminAlerts = AdminAlertService::items();
+
         return view('admin.dashboard', compact(
+            'adminAlerts',
             'totalUsers',
             'totalSchedules',
             'totalEvents',
@@ -2592,18 +2597,27 @@ class AdminController extends Controller
             ->where('created_at', '<', now()->subMinutes(30))
             ->get();
 
+        // Windowed rather than capped at 10: nothing ever transitions a campaign out of
+        // 'failed', and Meta's DISAPPROVED is never cleared, so an all-time list only
+        // grows and a silent limit(10) would hide the newest entries behind old ones.
+        // The window matches AdminAlertService::BOOST_ALERT_DAYS so the dashboard alert
+        // count and this list always agree.
+        $boostAlertSince = now()->subDays(AdminAlertService::BOOST_ALERT_DAYS);
+
         $failedCampaigns = BoostCampaign::with(['event:id,name', 'user:id,name,email'])
             ->where('status', 'failed')
+            ->where('created_at', '>=', $boostAlertSince)
             ->orderByDesc('created_at')
-            ->limit(10)
             ->get();
 
+        // Meta writes its verdict to boost_ads.meta_status; boost_ads.status is a
+        // separate lowercase app enum that never holds DISAPPROVED.
         $disapprovedCampaigns = BoostCampaign::with(['event:id,name', 'user:id,name,email'])
+            ->where('created_at', '>=', $boostAlertSince)
             ->whereHas('ads', function ($q) {
-                $q->where('status', 'DISAPPROVED');
+                $q->where('meta_status', 'DISAPPROVED');
             })
             ->orderByDesc('created_at')
-            ->limit(10)
             ->get();
 
         // Status distribution

@@ -2307,10 +2307,37 @@ class EventController extends Controller
             'short_description_en' => ['nullable', 'string', 'max:255'],
         ]);
 
-        // Prevent guests from injecting any visibility state
-        $request->request->remove('is_draft');
-        $request->request->remove('is_private');
-        $request->request->remove('is_internal');
+        // Prevent guests from injecting any visibility state. Both callers of this endpoint post
+        // JSON, and Request::getInputSource() reads the JSON bag for those - so removing from
+        // $request->request alone does nothing to what $request->all() (and therefore
+        // $event->fill()) sees. Clear both bags. Unset rather than force false, so the schedule's
+        // default_event_visibility still applies.
+        foreach (['is_draft', 'is_private', 'is_internal'] as $visibilityKey) {
+            $request->json()->remove($visibilityKey);
+            $request->request->remove($visibilityKey);
+        }
+
+        // Custom fields the schedule opted to ask on its request form. Normalizing before the rules
+        // run reconciles the two shapes the request pages send (the AI import page posts a
+        // multiselect as one comma-joined string) and clears AI-guessed values that are not on the
+        // option list, which would otherwise fail on a field the guest sees as blank.
+        $requestCustomFields = $role->isPro() ? $role->getRequestFormCustomFields() : [];
+        $customFieldValues = $requestCustomFields
+            // Keep only keys for fields actually on the form, so a crafted post cannot set the rest.
+            ? array_intersect_key((array) $request->input('custom_field_values', []), $requestCustomFields)
+            : [];
+        // Merge [] rather than null: input() returns a present null as-is, not the default.
+        $request->merge([
+            'custom_field_values' => $role->normalizeCustomFieldValues($customFieldValues, $requestCustomFields),
+        ]);
+
+        if ($requestCustomFields) {
+            $request->validate(
+                $role->getEventCustomFieldValidationRules($requestCustomFields),
+                [],
+                $role->getEventCustomFieldValidationAttributes($requestCustomFields, forGuest: true)
+            );
+        }
 
         // Curators that require an account collect the account + schedule + event on this one
         // page and own the event on the submitter's own talent schedule (linked to the curator).
@@ -2500,11 +2527,29 @@ class EventController extends Controller
             $request->merge(['venue_language_code' => $contentLang]);
         }
 
+        // The answers belong to the CURATOR's fields, but saveEvent() below runs against the
+        // talent schedule and would whitelist them against the talent's own field definitions -
+        // dropping them. Sanitize here and reapply after the save instead.
+        $curatorCustomFields = $role->isPro() ? $role->getRequestFormCustomFields() : [];
+        $curatorCustomFieldValues = $curatorCustomFields
+            ? $role->sanitizeCustomFieldValues($request->input('custom_field_values', []), $curatorCustomFields)
+            : [];
+
+        // Same two-bag removal as in guestImport(): this endpoint receives JSON, so the json bag is
+        // what saveEvent() will read.
+        $request->json()->remove('custom_field_values');
+        $request->request->remove('custom_field_values');
+
         try {
             // The event saves onto the submitter's talent schedule, but the time they typed is the
             // event's local time on the curator's page, so anchor the capture to the curator. Without
             // the override an existing talent schedule in another timezone shifts the published time.
             $event = $this->eventRepo->saveEvent($talent, $request, null, false, $role->timezone);
+
+            if (! empty($curatorCustomFieldValues)) {
+                $event->custom_field_values = $curatorCustomFieldValues;
+                $event->save();
+            }
 
             $this->attachGuestFlyerImage($request, $event);
 
@@ -2864,7 +2909,16 @@ class EventController extends Controller
             $rules['contact_email'] = ['required', 'string', 'email', 'max:255'];
         }
 
-        $request->validate($rules);
+        // Custom fields the schedule opted to ask here. This form posts as FormData, so a
+        // multiselect already arrives as an array and needs no normalizing.
+        $requestCustomFields = $role->isPro() ? $role->getRequestFormCustomFields() : [];
+        $customFieldAttributes = [];
+        if ($requestCustomFields) {
+            $rules = array_merge($rules, $role->getEventCustomFieldValidationRules($requestCustomFields));
+            $customFieldAttributes = $role->getEventCustomFieldValidationAttributes($requestCustomFields, forGuest: true);
+        }
+
+        $request->validate($rules, [], $customFieldAttributes);
 
         // Handle user creation if requested
         // Map contact fields to account fields for createAndLoginUser
@@ -2954,6 +3008,16 @@ class EventController extends Controller
 
         $user = $user ?: $role->user;
         $event->user_id = $user->id;
+
+        // This path builds the Event by hand instead of going through EventRepo::saveEvent(), so it
+        // has to run the same option whitelist itself.
+        if ($requestCustomFields) {
+            $customFieldValues = $role->sanitizeCustomFieldValues(
+                $request->input('custom_field_values', []),
+                $requestCustomFields
+            );
+            $event->custom_field_values = ! empty($customFieldValues) ? $customFieldValues : null;
+        }
 
         $eventName = $request->event_name ?: __('messages.booking_request');
         $event->slug = Str::slug($eventName).'-'.strtolower(Str::random(6));

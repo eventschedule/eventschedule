@@ -65,7 +65,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 | Webhooks | `WebhookService::dispatch()`, `$event->isPro()` | POST notifications for sales, events, check-ins |
 | Event boosting with ads | `BoostController:101,202`, `$role->isPro()` | Meta Ads integration |
 | Custom CSS styling | `RoleController:1748`, `$role->isPro()` | Custom CSS on schedule pages |
-| Custom fields | `RoleController:1822`, `$role->isPro()` | Custom data fields on events |
+| Custom fields | `RoleController:1822`, `$role->isPro()` | Custom data fields on events. Each field can also be shown on the public event request form (on by default), so visitors answer it when submitting an event; text fields accept an optional validation pattern (ready-made presets or a regular expression) with a hint, enforced in the browser and on the server. Answers show on the Requests tab |
 | Event polls | `EventController`, `$role->isPro()` | Create polls on events, guests vote |
 | Event templates | `EventTemplateController`, `$role->isPro()` | Save an event as a reusable template and create new events from it (Templates tab) |
 | Check-in dashboard | `CheckInController`, `$role->isPro()` | Real-time attendance tracking with per-ticket breakdown |

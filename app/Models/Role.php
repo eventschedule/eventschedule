@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Notifications\VerifyEmail as CustomVerifyEmail;
 use App\Traits\RoleBillable;
 use App\Utils\CssUtils;
+use App\Utils\CustomFieldUtils;
 use App\Utils\GeminiUtils;
 use App\Utils\MarkdownUtils;
 use App\Utils\UrlUtils;
@@ -2355,10 +2356,144 @@ class Role extends Model implements MustVerifyEmail
         );
     }
 
-    public function getEventCustomFieldValidationRules(): array
+    /**
+     * The subset of custom fields shown on the public event request forms.
+     *
+     * The flag is missing on every field defined before it existed, and the AI import request page
+     * has always shown all of them, so an absent value means "shown" - the checkbox is an opt-out.
+     */
+    public function getRequestFormCustomFields(): array
+    {
+        return array_filter(
+            $this->getEventCustomFields(),
+            fn ($field) => $field['show_on_request'] ?? true
+        );
+    }
+
+    /**
+     * The allowed values of a dropdown/multiselect field, trimmed and without blanks.
+     */
+    public static function customFieldOptions(array $field): array
+    {
+        return array_values(array_filter(array_map('trim', explode(',', $field['options'] ?? ''))));
+    }
+
+    /**
+     * The label to show for a custom field. The two contexts pick English by different signals and
+     * the caller has to say which it is - do not merge them.
+     *
+     * Guest surfaces follow the translate toggle, like Group::translatedName(). The AP keys off the
+     * admin's UI locale, deliberately NOT the toggle: `session('translate')` is set on guest pages
+     * and survives for the rest of the session, so an owner who viewed their own translated guest
+     * page would otherwise see English labels back in the admin portal.
+     */
+    public function customFieldLabel(array $field, ?string $fallback = null, bool $forGuest = false): string
+    {
+        $nameEn = $field['name_en'] ?? '';
+        $wantsEnglish = $forGuest ? showing_translation($this) : app()->getLocale() === 'en';
+
+        if ($nameEn !== '' && $wantsEnglish) {
+            return $nameEn;
+        }
+
+        return $field['name'] ?? ($fallback ?? '');
+    }
+
+    /**
+     * Reshape submitted answers into what the validation rules expect. Run this BEFORE validating.
+     *
+     * Two request forms disagree with the rules on their own:
+     * - the AI import page posts a multiselect as one comma-joined string, while the Blade forms
+     *   post an array, and the rule below is `array`;
+     * - AI parsing can prefill a dropdown with a value that is not on the list. Vue renders such a
+     *   select blank while keeping the value, so Rule::in would reject a field the guest sees as
+     *   empty. Clearing it here lets the guest fix (or ignore) a field they can actually see.
+     */
+    public function normalizeCustomFieldValues($values, ?array $fields = null): array
+    {
+        $values = (array) $values;
+
+        foreach ($fields ?? $this->getEventCustomFields() as $fieldKey => $field) {
+            if (! array_key_exists($fieldKey, $values)) {
+                continue;
+            }
+
+            $type = $field['type'] ?? '';
+            if (! in_array($type, ['dropdown', 'multiselect'], true)) {
+                continue;
+            }
+
+            $options = self::customFieldOptions($field);
+            $value = $values[$fieldKey];
+
+            if ($type === 'dropdown') {
+                if (is_array($value) || (! in_array((string) $value, $options, true) && (string) $value !== '')) {
+                    $values[$fieldKey] = '';
+                }
+
+                continue;
+            }
+
+            $selected = is_array($value) ? $value : explode(',', (string) $value);
+            $selected = array_map(fn ($v) => is_string($v) ? trim($v) : $v, $selected);
+
+            $values[$fieldKey] = array_values(array_filter(
+                $selected,
+                fn ($v) => is_string($v) && $v !== '' && in_array($v, $options, true)
+            ));
+        }
+
+        return $values;
+    }
+
+    /**
+     * Drop empty answers and any dropdown/multiselect value that is not an allowed option, and
+     * collapse a multiselect to the comma-joined string the column stores.
+     *
+     * Every write path shares this: EventRepo::saveEvent(), the booking-request form and the
+     * structured guest submission, which each reach the events table by a different route.
+     */
+    public function sanitizeCustomFieldValues($values, ?array $fields = null): array
+    {
+        $values = array_filter(
+            (array) $values,
+            fn ($value) => $value !== null && $value !== ''
+        );
+
+        // Passing an explicit subset means "only these fields", so keys outside it are dropped -
+        // otherwise a crafted post could set a field the form deliberately does not show. Callers
+        // that pass null (the admin save path) keep the historic pass-through behaviour.
+        if ($fields !== null) {
+            $values = array_intersect_key($values, $fields);
+        }
+
+        foreach ($fields ?? $this->getEventCustomFields() as $fieldKey => $field) {
+            $type = $field['type'] ?? '';
+
+            if ($type === 'dropdown' && isset($values[$fieldKey])) {
+                if (! in_array($values[$fieldKey], self::customFieldOptions($field), true)) {
+                    unset($values[$fieldKey]);
+                }
+            } elseif ($type === 'multiselect' && isset($values[$fieldKey])) {
+                $options = self::customFieldOptions($field);
+                $selected = is_array($values[$fieldKey])
+                    ? array_map('trim', $values[$fieldKey])
+                    : array_map('trim', explode(',', $values[$fieldKey]));
+                $valid = array_filter($selected, fn ($v) => in_array($v, $options, true));
+                $values[$fieldKey] = ! empty($valid) ? implode(', ', $valid) : null;
+            }
+        }
+
+        return $values;
+    }
+
+    /**
+     * @param  array|null  $fields  Restrict the rules to a subset (e.g. the request-form fields).
+     */
+    public function getEventCustomFieldValidationRules(?array $fields = null): array
     {
         $rules = [];
-        foreach ($this->getEventCustomFields() as $fieldKey => $field) {
+        foreach ($fields ?? $this->getEventCustomFields() as $fieldKey => $field) {
             $type = $field['type'] ?? 'string';
             $required = ! empty($field['required']);
             $key = "custom_field_values.{$fieldKey}";
@@ -2367,18 +2502,25 @@ class Role extends Model implements MustVerifyEmail
             if (in_array($type, ['string', 'multiline_string'], true)) {
                 $fieldRules[] = 'string';
                 $fieldRules[] = 'max:5000';
+
+                // Optional schedule-authored format check. An uncompilable pattern yields null and
+                // is skipped here; RoleUpdateRequest rejects one before it can be saved.
+                $pattern = CustomFieldUtils::compilePattern($field['regex'] ?? null);
+                if ($pattern) {
+                    $fieldRules[] = 'regex:'.$pattern;
+                }
             } elseif ($type === 'switch') {
                 $fieldRules[] = 'in:0,1';
             } elseif ($type === 'date') {
                 $fieldRules[] = 'date';
             } elseif ($type === 'dropdown') {
-                $options = array_values(array_filter(array_map('trim', explode(',', $field['options'] ?? ''))));
+                $options = self::customFieldOptions($field);
                 if (! empty($options)) {
                     $fieldRules[] = \Illuminate\Validation\Rule::in($options);
                 }
             } elseif ($type === 'multiselect') {
                 $fieldRules[] = 'array';
-                $options = array_values(array_filter(array_map('trim', explode(',', $field['options'] ?? ''))));
+                $options = self::customFieldOptions($field);
                 if (! empty($options)) {
                     $rules["{$key}.*"] = ['string', \Illuminate\Validation\Rule::in($options)];
                 }
@@ -2390,17 +2532,18 @@ class Role extends Model implements MustVerifyEmail
         return $rules;
     }
 
-    public function getEventCustomFieldValidationAttributes(): array
+    /**
+     * Names used in validation messages. Called from both the AP form requests (via
+     * ValidatesEventCustomFields) and the public request forms, so the label rule follows the
+     * caller - see customFieldLabel().
+     *
+     * @param  array|null  $fields  Restrict the attributes to the same subset as the rules.
+     */
+    public function getEventCustomFieldValidationAttributes(?array $fields = null, bool $forGuest = false): array
     {
         $attrs = [];
-        foreach ($this->getEventCustomFields() as $fieldKey => $field) {
-            // Match the field label shown in the AP event form (event/edit.blade.php), which keys
-            // off the admin's UI locale - not the guest translate toggle. This runs in the AP
-            // (EventCreate/UpdateRequest), where the guest `translate` session flag is never set.
-            $name = (app()->getLocale() === 'en' && ! empty($field['name_en']))
-                ? $field['name_en']
-                : ($field['name'] ?? $fieldKey);
-            $attrs["custom_field_values.{$fieldKey}"] = $name;
+        foreach ($fields ?? $this->getEventCustomFields() as $fieldKey => $field) {
+            $attrs["custom_field_values.{$fieldKey}"] = $this->customFieldLabel($field, $fieldKey, $forGuest);
         }
 
         return $attrs;

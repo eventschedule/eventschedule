@@ -78,7 +78,7 @@
 
         {{-- Amount Mismatch Sales --}}
         @if ($mismatchSales->count() > 0 || $mismatchBoosts->count() > 0)
-        <div class="ap-card rounded-xl shadow p-6 border-l-4 border-amber-500">
+        <div id="amount-mismatch" class="ap-card rounded-xl shadow p-6 border-l-4 border-amber-500 scroll-mt-4">
             <h3 class="text-lg font-medium text-amber-600 dark:text-amber-400 mb-4">@lang('messages.amount_mismatch_sales')</h3>
             @if ($mismatchSales->count() > 0)
             <div class="overflow-x-auto mb-6">
