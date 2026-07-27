@@ -1276,6 +1276,12 @@ class Role extends Model implements MustVerifyEmail
             'pricing',
             'about',
             'ticketing',
+            // Disallowed in robots.txt or owned by an app route, so a schedule holding one of these would
+            // have its own pages de-indexed (selfhost serves tenants from the same path space).
+            'appointment',
+            'appointments',
+            'checkout',
+            'settings',
         ];
 
         if (config('app.hosted') && in_array($subdomain, $reserved)) {

@@ -310,6 +310,9 @@ class BackupService
         $eventData['is_cancelled'] = (bool) $event->is_cancelled;
         $eventData['cancelled_at'] = optional($event->cancelled_at)->toDateTimeString();
         $eventData['ical_sequence'] = (int) $event->ical_sequence;
+        // Also not fillable: it gates the reschedule cooldown, so losing it on restore would let a
+        // just-moved booking be moved again immediately.
+        $eventData['rescheduled_at'] = optional($event->rescheduled_at)->toDateTimeString();
 
         if ($includeImages) {
             $this->collectEventImages($event, $eventData, $imageFiles);
@@ -1339,6 +1342,7 @@ class BackupService
         $event->is_cancelled = (bool) ($data['is_cancelled'] ?? false);
         $event->cancelled_at = $data['cancelled_at'] ?? null;
         $event->ical_sequence = (int) ($data['ical_sequence'] ?? 0);
+        $event->rescheduled_at = $data['rescheduled_at'] ?? null;
 
         // Remap the appointment type (not fillable). Drop the link if the type didn't import.
         $apptRefId = $data['_appointment_type_ref_id'] ?? null;

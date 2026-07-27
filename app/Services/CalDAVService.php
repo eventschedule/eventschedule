@@ -782,6 +782,15 @@ class CalDAVService
                 return false;
             }
 
+            // Appointment bookings are owned by this app, never by the calendar. Our own outbound
+            // dispatchCalendarSync('update') can come straight back in here, and this method would
+            // then rewrite name, description, starts_at and duration from the remote copy -
+            // overwriting the guest's notes with a rendered description template, and turning a
+            // 30-minute booking into a 2-hour block when the remote has no DTEND.
+            if ($event->appointment_type_id) {
+                return false;
+            }
+
             $event->name = $eventData['summary'] ?: __('messages.untitled_event');
 
             // Only overwrite the description when the remote provides one, so an

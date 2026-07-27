@@ -270,10 +270,27 @@ Route::get('/ticket/qr_code/{event_id}/{secret}', [TicketController::class, 'qrC
 Route::get('/ticket/view/{event_id}/{secret}', [TicketController::class, 'view'])->name('ticket.view')->middleware('throttle:100,1');
 Route::post('/rsvp/cancel/{sale_id}', [TicketController::class, 'cancelRsvp'])->name('rsvp.cancel')->middleware('throttle:10,1');
 // Appointment manage/cancel via the sale secret ({event_id} is UrlUtils-encoded, like ticket.view).
-Route::get('/appointment/view/{event_id}/{secret}', [AppointmentController::class, 'manage'])->name('appointments.manage')->middleware('throttle:100,1');
-Route::post('/appointment/cancel/{event_id}/{secret}', [AppointmentController::class, 'cancelBooking'])->name('appointments.manage_cancel')->middleware('throttle:10,1');
-Route::post('/appointment/pay/{event_id}/{secret}', [AppointmentController::class, 'pay'])->name('appointments.pay')->middleware('throttle:10,1');
-Route::get('/appointment/checkout/success/{sale_id}', [AppointmentController::class, 'checkoutSuccess'])->name('appointments.checkout_success')->middleware('throttle:100,1');
+Route::get('/appointment/view/{event_id}/{secret}', [AppointmentController::class, 'manage'])->name('appointments.manage')->middleware('throttle:100,1,appt_manage');
+Route::post('/appointment/cancel/{event_id}/{secret}', [AppointmentController::class, 'cancelBooking'])->name('appointments.manage_cancel')->middleware('throttle:10,1,appt_cancel');
+Route::post('/appointment/pay/{event_id}/{secret}', [AppointmentController::class, 'pay'])->name('appointments.pay')->middleware('throttle:10,1,appt_pay');
+Route::get('/appointment/checkout/success/{sale_id}', [AppointmentController::class, 'checkoutSuccess'])->name('appointments.checkout_success')->middleware('throttle:100,1,appt_success');
+// Bookings are is_private events, so EventController::downloadIcal() 404s for the guest who made
+// them. Same secret-link protection as the manage page, no new auth surface.
+//
+// Every route in this block carries a DISTINCT throttle prefix. For an unauthenticated request the
+// limiter key is $prefix.sha1(domain|ip) with no route name in it, so unprefixed routes shared one
+// counter while each still applied its own limit - the tightest one therefore governed all of them.
+// With manage (100/min) and ical (60/min) feeding the same bucket as pay and cancel (10/min each), a
+// guest who reloaded the manage page and used the add-to-calendar menu a few times could no longer pay
+// for their own booking. Note ThrottleRequests short-circuits when app.is_testing, so no test can catch
+// a regression here - check it by hand with APP_TESTING=false.
+Route::get('/appointment/ical/{event_id}/{secret}', [AppointmentController::class, 'ical'])->name('appointments.ical')->middleware('throttle:60,1,appt_ical');
+// Reschedule. The third throttle argument is load-bearing, not cosmetic: for guests the rate-limit
+// signature is domain|ip with no route name, so without a prefix every route in this block shares one
+// counter and ten month-navigations in the picker would exhaust the POST's allowance of 10.
+Route::get('/appointment/reschedule/{event_id}/{secret}', [AppointmentController::class, 'showReschedule'])->name('appointments.reschedule')->middleware('throttle:100,1,resched');
+Route::get('/appointment/reschedule/{event_id}/{secret}/slots', [AppointmentController::class, 'rescheduleSlots'])->name('appointments.reschedule_slots')->middleware('throttle:60,1,resched_slots');
+Route::post('/appointment/reschedule/{event_id}/{secret}', [AppointmentController::class, 'reschedule'])->name('appointments.reschedule.store')->middleware('throttle:10,1,resched_post');
 Route::post('/ticket/book/{event_id}/{secret}', [TicketController::class, 'passBook'])->name('pass.book')->middleware('throttle:30,1');
 Route::post('/ticket/cancel-booking/{event_id}/{secret}', [TicketController::class, 'passCancelBooking'])->name('pass.cancel_booking')->middleware('throttle:30,1');
 Route::post('/pass/resend-link', [TicketController::class, 'resendPassLink'])->name('pass.resend_link')->middleware('throttle:5,1');
@@ -499,6 +516,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::put('/{subdomain}/appointments/{hash}', [AppointmentTypeController::class, 'update'])->name('appointments.update');
     Route::delete('/{subdomain}/appointments/{hash}', [AppointmentTypeController::class, 'destroy'])->name('appointments.destroy');
     Route::post('/{subdomain}/appointments/{hash}/toggle', [AppointmentTypeController::class, 'toggle'])->name('appointments.toggle');
+    Route::post('/{subdomain}/appointments/{hash}/duplicate', [AppointmentTypeController::class, 'duplicate'])->name('appointments.duplicate');
+    // Owner-side reschedule. Throttled like the other write routes: it drives the same inline calendar
+    // fan-out and guest mail, so a compromised editor account should not be unbounded.
+    Route::get('/{subdomain}/appointments/bookings/{saleHash}/reschedule', [AppointmentTypeController::class, 'showBookingReschedule'])->name('appointments.booking_reschedule');
+    Route::get('/{subdomain}/appointments/bookings/{saleHash}/reschedule/slots', [AppointmentTypeController::class, 'bookingRescheduleSlots'])->name('appointments.booking_reschedule_slots')->middleware('throttle:60,1,owner_resched_slots');
+    Route::post('/{subdomain}/appointments/bookings/{saleHash}/reschedule', [AppointmentTypeController::class, 'bookingReschedule'])->name('appointments.booking_reschedule.store')->middleware('throttle:30,1,owner_resched_post');
     Route::post('/{subdomain}/appointments/bookings/{saleHash}/cancel', [AppointmentTypeController::class, 'bookingCancel'])->name('appointments.booking_cancel');
     Route::post('/{subdomain}/publish-event/{hash}', [EventController::class, 'publish'])->name('event.publish');
     Route::post('/{subdomain}/preview-link', [RoleController::class, 'previewLink'])->name('role.preview_link');

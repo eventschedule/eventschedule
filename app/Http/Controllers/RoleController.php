@@ -2279,6 +2279,12 @@ class RoleController extends Controller
         $startOfMonth = '';
         $datesUnavailable = [];
 
+        $appointmentTypes = collect();
+        $appointmentEditing = null;
+        $appointmentBookings = collect();
+        $appointmentBookingCounts = [];
+        $currencies = [];
+
         // sales + appointmentType are read by the appointment branch of show-admin-requests.
         $requests = Event::with(['roles', 'sales', 'appointmentType'])
             ->where(function ($query) use ($role) {
@@ -2289,6 +2295,20 @@ class RoleController extends Controller
             })
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Appointment bookings still awaiting a decision. Derived from $requests - which is already
+        // loaded with its sales - so the tab badge costs no extra query and cannot disagree with the
+        // count on the Bookings > Pending filter.
+        //
+        // Zero when the tab is gated: appointmentsTabData() returns an empty booking list for a lapsed
+        // plan, so a badge here promised a count and then led to an upgrade prompt and nothing else.
+        $appointmentsGated = config('app.hosted') && ! $role->isPro();
+        $pendingBookingCount = $appointmentsGated ? 0 : collect($requests)
+            ->filter(fn ($event) => $event->appointment_type_id
+                && ! $event->is_cancelled
+                && $event->sales->contains(fn ($sale) => ! $sale->is_deleted
+                    && ! in_array($sale->status, ['cancelled', 'refunded', 'expired'], true)))
+            ->count();
 
         if ($tab == 'requests' && ! count($requests)) {
             return redirect(route('role.view_admin', ['subdomain' => $subdomain, 'tab' => 'schedule']));
@@ -2385,6 +2405,14 @@ class RoleController extends Controller
                 ->withQueryString();
         } elseif ($tab == 'templates') {
             $eventTemplates = $role->eventTemplates;
+        } elseif ($tab == 'appointments') {
+            [
+                $appointmentTypes,
+                $appointmentEditing,
+                $appointmentBookings,
+                $appointmentBookingCounts,
+                $currencies,
+            ] = $this->appointmentsTabData($role);
         }
 
         if (isset($followerSortBy)) {
@@ -2430,7 +2458,123 @@ class RoleController extends Controller
             'venueDuplicateGroupCount',
             'showFederationPrompt',
             'timezoneMismatchEvents',
+            'appointmentTypes',
+            'appointmentEditing',
+            'appointmentBookings',
+            'appointmentBookingCounts',
+            'pendingBookingCount',
+            'currencies',
         ));
+    }
+
+    /**
+     * Data for the Appointments tab. Lifted out of show-admin-appointments.blade.php, which was
+     * building a paginated query inside a @php block.
+     *
+     * @return array{0: \Illuminate\Support\Collection, 1: ?\App\Models\AppointmentType, 2: mixed, 3: array<int,int>, 4: array}
+     */
+    protected function appointmentsTabData(Role $role): array
+    {
+        $gated = config('app.hosted') && ! $role->isPro();
+
+        $types = $role->appointmentTypes()->where('is_deleted', false)->orderBy('name')->get();
+
+        $editHash = request('edit');
+        $editing = $editHash
+            ? $types->firstWhere('id', UrlUtils::decodeId($editHash))
+            : null;
+
+        // storage/currencies.json, same source the event form uses for its currency select.
+        $currencies = json_decode(file_get_contents(base_path('storage/currencies.json'))) ?: [];
+
+        if ($gated) {
+            return [$types, $editing, collect(), [], $currencies];
+        }
+
+        // starts_at is stored as a UTC 'Y-m-d H:i:s' string, so a lexicographic compare against a
+        // UTC-formatted "now" is a correct past/upcoming split.
+        $nowUtc = now('UTC')->format('Y-m-d H:i:s');
+        $terminal = ['cancelled', 'refunded', 'expired'];
+
+        // No select() here on purpose: pluck() only sets the column list when it is still null, so a
+        // pre-set 'sales.*' would survive into the grouped count query and break only_full_group_by.
+        //
+        // Scoped on events.creator_role_id, NOT sales.subdomain. That column is a booking-time snapshot
+        // and RoleController::update() never rewrites it on rename, so scoping on it meant a renamed
+        // schedule lost every booking from this list (while the tab badge, which reads the event_role
+        // pivot, still counted them) - and worse, whoever next claimed the freed subdomain saw the
+        // original schedule's bookings, guest names, emails and phone numbers included. book() sets
+        // creator_role_id from the type's own role, so this is the same scope resolveOwnedBooking() uses
+        // and it matches every legitimate row.
+        $base = fn () => Sale::query()
+            ->join('events', 'events.id', '=', 'sales.event_id')
+            ->where('events.creator_role_id', $role->id)
+            ->where('sales.is_deleted', false)
+            ->whereNotNull('events.appointment_type_id');
+
+        // Awaiting approval: the creator schedule's pivot row is still NULL.
+        $awaitingApproval = fn ($q) => $q->whereExists(fn ($sub) => $sub
+            ->selectRaw('1')
+            ->from('event_role')
+            ->whereColumn('event_role.event_id', 'sales.event_id')
+            ->whereColumn('event_role.role_id', 'events.creator_role_id')
+            ->whereNull('event_role.is_accepted'));
+
+        $excludeCancelled = fn ($q) => $q
+            ->whereNotIn('sales.status', $terminal)
+            ->where('events.is_cancelled', false);
+
+        // Every predicate runs in SQL. Filtering a capped result set in PHP instead would silently
+        // hide older bookings once a schedule passes the cap - Past and Cancelled grow forever.
+        $filter = request('filter', 'upcoming');
+        // The join means an unqualified select would collide `events.id` onto `sales.id`.
+        $bookingQuery = $base()->select('sales.*')->with(['event.appointmentType', 'event.roles']);
+
+        // Name/email search, mirroring the Sales page's own filter param.
+        if ($search = trim((string) request('search'))) {
+            $bookingQuery->where(fn ($q) => $q
+                ->where('sales.name', 'like', '%'.$search.'%')
+                ->orWhere('sales.email', 'like', '%'.$search.'%'));
+        }
+
+        if ($filter === 'cancelled') {
+            $bookingQuery->where(fn ($q) => $q
+                ->whereIn('sales.status', $terminal)
+                ->orWhere('events.is_cancelled', true));
+        } elseif ($filter === 'pending') {
+            $excludeCancelled($bookingQuery);
+            $awaitingApproval($bookingQuery);
+        } elseif ($filter === 'past') {
+            $excludeCancelled($bookingQuery);
+            $bookingQuery->where('events.starts_at', '<', $nowUtc);
+        } else {
+            $excludeCancelled($bookingQuery);
+            $bookingQuery->where('events.starts_at', '>=', $nowUtc);
+            // Pending bookings have their own filter and their own count badge; leaving them here as
+            // well double-counts them and buries the ones needing a decision among the settled ones.
+            $bookingQuery->whereNotExists(fn ($sub) => $sub
+                ->selectRaw('1')
+                ->from('event_role')
+                ->whereColumn('event_role.event_id', 'sales.event_id')
+                ->whereColumn('event_role.role_id', 'events.creator_role_id')
+                ->whereNull('event_role.is_accepted'));
+        }
+
+        // Soonest first for upcoming (what the owner acts on next), newest first otherwise.
+        $filter === 'upcoming'
+            ? $bookingQuery->orderBy('events.starts_at')
+            : $bookingQuery->orderByDesc('sales.id');
+
+        $bookings = $bookingQuery->paginate(50)->withQueryString();
+
+        // One grouped query for the per-type counts, so the type list does not fire one each.
+        $counts = $excludeCancelled($base())
+            ->where('events.starts_at', '>=', $nowUtc)
+            ->groupBy('events.appointment_type_id')
+            ->pluck(DB::raw('count(*)'), 'events.appointment_type_id')
+            ->all();
+
+        return [$types, $editing, $bookings, $counts, $currencies];
     }
 
     public function createMember(Request $request, $subdomain)

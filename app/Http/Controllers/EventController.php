@@ -1033,6 +1033,14 @@ class EventController extends Controller
         $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
 
+        // Approving a booking whose time has already passed would mail the guest "You're booked!"
+        // for a slot in the past. cancelBooking() has always guarded this; accept() did not, and the
+        // one-click Approve on the bookings list makes it easy to hit.
+        if ($event->appointment_type_id && $event->getStartDateTime()->isPast()) {
+            return $this->redirectAfterRequestDecision($request, $subdomain)
+                ->with('error', __('messages.appointments_cannot_approve_past'));
+        }
+
         if ($user->isEditor($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
             $role->last_notified_request_count = 0;
@@ -1075,8 +1083,35 @@ class EventController extends Controller
 
         AuditService::log(AuditService::EVENT_ACCEPT, $user->id, 'Event', $event->id, null, null, $role->name);
 
-        return redirect('/'.$subdomain.'/schedule')
+        return $this->redirectAfterRequestDecision($request, $subdomain)
             ->with('message', __('messages.request_accepted'));
+    }
+
+    /**
+     * Where to land after accepting or declining a request.
+     *
+     * accept() used to hardcode the schedule tab and ignore `redirect_to` entirely, so an inline
+     * Approve on the Appointments > Bookings list would bounce the owner out to the calendar.
+     */
+    protected function redirectAfterRequestDecision(Request $request, string $subdomain, string $default = 'schedule')
+    {
+        $target = $request->redirect_to ?: $default;
+        // Unrecognised values fall back to the caller's default, which is what decline()'s original
+        // if/else did - it treated anything that was not 'schedule' as the requests tab.
+        if (! in_array($target, ['appointments', 'requests', 'schedule'], true)) {
+            $target = $default;
+        }
+
+        return match ($target) {
+            'appointments' => redirect()->route('role.view_admin', [
+                'subdomain' => $subdomain,
+                'tab' => 'appointments',
+                'view' => 'bookings',
+                'filter' => 'pending',
+            ]),
+            'requests' => redirect('/'.$subdomain.'/requests'),
+            default => redirect('/'.$subdomain.'/schedule'),
+        };
     }
 
     public function decline(Request $request, $subdomain, $hash)
@@ -1141,13 +1176,8 @@ class EventController extends Controller
 
         AuditService::log(AuditService::EVENT_DECLINE, $user->id, 'Event', $event->id, null, null, $role->name);
 
-        if ($request->redirect_to == 'schedule') {
-            return redirect('/'.$subdomain.'/schedule')
-                ->with('message', __('messages.request_declined'));
-        } else {
-            return redirect('/'.$subdomain.'/requests')
-                ->with('message', __('messages.request_declined'));
-        }
+        return $this->redirectAfterRequestDecision($request, $subdomain, 'requests')
+            ->with('message', __('messages.request_declined'));
     }
 
     public function publish(Request $request, $subdomain, $hash)
@@ -1212,9 +1242,20 @@ class EventController extends Controller
             ->get();
 
         $acceptedCount = 0;
+        $skippedPastCount = 0;
 
         foreach ($pendingEvents as $event) {
             if ($user->isEditor($subdomain)) {
+                // Same guard accept() carries, and it has to be here too: a booking that returned to
+                // pending (a guest move on an approval-required type does that) can go stale in this
+                // list, and confirming it would mail the guest "You're booked!" for a slot in the past
+                // and create a calendar entry at that past time. Skip it rather than aborting the batch.
+                if ($event->appointment_type_id && $event->getStartDateTime()->isPast()) {
+                    $skippedPastCount++;
+
+                    continue;
+                }
+
                 $event->roles()->updateExistingPivot($role->id, ['is_accepted' => true]);
                 $acceptedCount++;
 
@@ -1222,6 +1263,7 @@ class EventController extends Controller
                 // sync + guest AppointmentConfirmed. Unpaid online payments defer to the webhook.
                 if ($event->appointment_type_id) {
                     $sale = Sale::where('event_id', $event->id)
+                        ->where('is_deleted', false)
                         ->whereNotIn('status', ['cancelled', 'refunded', 'expired'])
                         ->first();
                     if ($sale && ($sale->status === 'paid' || ! in_array($sale->payment_method, ['stripe', 'payment_url'], true))) {
@@ -1258,8 +1300,20 @@ class EventController extends Controller
         $role->last_notified_request_count = 0;
         $role->save();
 
-        return redirect('/'.$subdomain.'/requests')
+        $redirect = redirect('/'.$subdomain.'/requests')
             ->with('message', __('messages.all_requests_accepted', ['count' => $acceptedCount]));
+
+        // Say so rather than silently doing less than the button's count promised. trans_choice, not
+        // __(): the string is pluralised, and __() would render the raw "{1} …|[2,*] …" syntax.
+        if ($skippedPastCount > 0) {
+            $redirect->with('error', trans_choice(
+                'messages.appointments_skipped_past',
+                $skippedPastCount,
+                ['count' => $skippedPastCount]
+            ));
+        }
+
+        return $redirect;
     }
 
     public function createDefault()

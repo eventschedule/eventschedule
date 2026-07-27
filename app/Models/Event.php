@@ -125,6 +125,9 @@ class Event extends Model
         'is_cancelled' => 'boolean',
         'cancelled_at' => 'datetime',
         'attendees_notified_at' => 'datetime',
+        // When an appointment booking was last moved. Written only by AppointmentService::reschedule()
+        // via forceFill, so deliberately NOT in $fillable - the event edit form must not touch it.
+        'rescheduled_at' => 'datetime',
         'ical_sequence' => 'integer',
         // Set only by the platform-admin discovery toggle (intentionally NOT in $fillable).
         'is_hidden_from_discovery' => 'boolean',
@@ -655,6 +658,22 @@ class Event extends Model
     public function isAppointment(): bool
     {
         return ! is_null($this->appointment_type_id);
+    }
+
+    /**
+     * Whether the creator schedule has neither accepted nor declined this event yet - the state an
+     * appointment booking sits in while `requires_approval` is pending.
+     *
+     * Reads the already-loaded `roles` relation when it is there, so callers rendering a list do not
+     * fire a query per row. Null-safe: detached or drifted rows must not crash the caller.
+     */
+    public function isAwaitingCreatorApproval(): bool
+    {
+        $pivot = $this->relationLoaded('roles')
+            ? $this->roles->firstWhere('id', $this->creator_role_id)?->pivot
+            : $this->roles()->where('roles.id', $this->creator_role_id)->first()?->pivot;
+
+        return $pivot && is_null($pivot->is_accepted);
     }
 
     /**

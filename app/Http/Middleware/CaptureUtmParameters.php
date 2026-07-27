@@ -10,6 +10,14 @@ class CaptureUtmParameters
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // The guest appointment surfaces authenticate on a 32-char secret in the PATH, and this
+        // middleware would persist that path as `utm_landing_page` into a 30-day cookie, the session,
+        // and eventually a `landing_page` column. Attribution from a booking-management link is
+        // meaningless anyway - the guest has already booked - so skip the whole middleware.
+        if (str_starts_with($request->path(), 'appointment/')) {
+            return $next($request);
+        }
+
         // Capture referral code (first-touch)
         if (! $request->session()->has('referral_code') && $request->has('ref')) {
             $refCode = preg_replace('/[^a-zA-Z0-9]/', '', $request->query('ref'));

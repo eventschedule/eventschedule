@@ -164,9 +164,11 @@ class ReleaseReviewFixesTest extends TestCase
 
         $url = route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']).'?view=bookings&filter=';
 
-        // A pending booking in the future is also "upcoming" - same semantics as before the fix.
+        // A booking awaiting approval belongs to Pending ONLY. It used to be counted under Upcoming
+        // as well, which double-counts it against the pending badge and buries the one row that still
+        // needs a decision among the settled ones - and contradicts this test's own name.
         $upcoming = $this->actingAs($owner)->get($url.'upcoming');
-        $upcoming->assertSee('Ada')->assertSee('Marie')->assertDontSee('Grace')->assertDontSee('Hedy');
+        $upcoming->assertSee('Ada')->assertDontSee('Marie')->assertDontSee('Grace')->assertDontSee('Hedy');
 
         $past = $this->actingAs($owner)->get($url.'past');
         $past->assertSee('Grace')->assertDontSee('Ada')->assertDontSee('Hedy');

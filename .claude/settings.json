@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan test:*)",
+      "Bash(php -l:*)",
+      "Bash(php storage/check_translations.php:*)",
+      "Bash(php artisan route:list:*)",
+      "Bash(./vendor/bin/pint --test:*)",
+      "Bash(php artisan migrate:status:*)",
+      "Bash(sips -g:*)",
+      "Bash(npm audit:*)",
+      "Bash(xmllint --noout:*)"
+    ]
+  }
+}

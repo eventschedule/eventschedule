@@ -12,6 +12,8 @@ use App\Models\Sale;
 use App\Services\AppointmentService;
 use App\Services\AuditService;
 use App\Services\WebhookService;
+use App\Traits\ReschedulesAppointments;
+use App\Utils\IcsUtils;
 use App\Utils\MoneyUtils;
 use App\Utils\TurnstileUtils;
 use App\Utils\UrlUtils;
@@ -26,6 +28,8 @@ use Stripe\StripeClient;
  */
 class AppointmentController extends Controller
 {
+    use ReschedulesAppointments;
+
     public function __construct(protected AppointmentService $appointments) {}
 
     /** GET /book - list bookable types (redirect when exactly one; 404 when none or gated). */
@@ -74,7 +78,12 @@ class AppointmentController extends Controller
         $role = $this->resolveRole($subdomain);
         $type = $this->resolveBookableType($role, $typeSlug);
 
-        $from = $request->input('from', Carbon::now($type->timezone())->format('Y-m-d'));
+        // Validated, because availableSlots() takes `string $fromDate`: ?from[]=x makes input('from')
+        // an array, which is an uncaught TypeError -> 500 rather than a 422. Garbage STRINGS were already
+        // safe (parseDay catches Throwable and falls back to today).
+        $request->validate(['from' => 'nullable|date_format:Y-m-d', 'days' => 'nullable|integer']);
+
+        $from = $request->input('from') ?: Carbon::now($type->timezone())->format('Y-m-d');
         $days = max(1, min(31, (int) $request->input('days', 31)));
 
         return response()->json($this->appointments->availableSlots($type, $from, $days));
@@ -95,6 +104,13 @@ class AppointmentController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'slot' => ['required', 'string', 'regex:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'],
+            // Deliberately NOT `timezone`: that rule tests DateTimeZone::ALL, which omits
+            // backward-compat aliases - Asia/Calcutta, Europe/Kiev, Asia/Saigon and US/Eastern are all
+            // valid zones that fail it. The picker posts whatever Intl.DateTimeFormat() reports, so the
+            // strict rule rejected real browsers and the booking could not be completed at all.
+            // Validation happens on READ instead: every consumer goes through Sale::guestTimezone() ->
+            // AppointmentTimeUtils::resolveTimezone(), which membership-tests and falls back to the
+            // schedule's zone, so nothing can hand a bad value to setTimezone().
             'guest_timezone' => 'nullable|string|max:64',
             'notes' => 'nullable|string|max:5000',
         ];
@@ -151,8 +167,116 @@ class AppointmentController extends Controller
         $role = $event->creatorRole;
         $type = $event->appointmentType;
         $state = $this->bookingState($event, $sale);
+        // Same helper the reschedule endpoints use, so the button can never offer something the POST
+        // would refuse.
+        $rescheduleBlocked = $this->rescheduleBlockedReason($event, $sale, $role);
 
-        return view('appointments.manage', compact('event', 'sale', 'role', 'type', 'state'));
+        return view('appointments.manage', compact('event', 'sale', 'role', 'type', 'state', 'rescheduleBlocked'));
+    }
+
+    /**
+     * GET /appointment/ical/{event_id}/{secret} - the .ics for a booking.
+     *
+     * Bookings are created with is_private = true, so the normal event iCal download aborts 404 for
+     * the guest who made the booking. This serves the same invite the confirmation mail attaches,
+     * behind the same secret link as the manage page.
+     */
+    public function ical(Request $request, $eventId, $secret)
+    {
+        [$event, $sale] = $this->resolveBookingBySecret($eventId, $secret);
+
+        return response(IcsUtils::buildInvite($event, $event->creatorRole, $sale), 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="appointment.ics"',
+        ]);
+    }
+
+    /** GET /appointment/reschedule/{event_id}/{secret} - the picker, in reschedule mode. */
+    public function showReschedule(Request $request, $eventId, $secret)
+    {
+        [$event, $sale] = $this->resolveBookingBySecret($eventId, $secret);
+        $role = $event->creatorRole;
+        $type = $event->appointmentType;
+
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role)) {
+            return redirect()->route('appointments.manage', [
+                'event_id' => $eventId, 'secret' => $secret,
+            ])->with('error', $blocked);
+        }
+
+        $today = Carbon::now($type->timezone())->format('Y-m-d');
+        $initial = $this->appointments->availableSlots($type, $today, 31, null, true, $event->id);
+        if (empty($initial['days']) && ! empty($initial['next_available_date'])) {
+            $initial = $this->appointments->availableSlots($type, $initial['next_available_date'], 31, null, true, $event->id);
+        }
+
+        return view('appointments.book-type', [
+            'role' => $role,
+            'type' => $type,
+            'initialSlots' => $initial,
+            'mode' => 'reschedule',
+            'sale' => $sale,
+            'event' => $event,
+            'rescheduleUrl' => route('appointments.reschedule.store', ['event_id' => $eventId, 'secret' => $secret], false),
+            'rescheduleSlotsUrl' => route('appointments.reschedule_slots', ['event_id' => $eventId, 'secret' => $secret], false),
+            'backUrl' => route('appointments.manage', ['event_id' => $eventId, 'secret' => $secret], false),
+        ]);
+    }
+
+    /** GET /appointment/reschedule/{event_id}/{secret}/slots - slot JSON excluding this booking. */
+    public function rescheduleSlots(Request $request, $eventId, $secret)
+    {
+        [$event, $sale] = $this->resolveBookingBySecret($eventId, $secret);
+        $type = $event->appointmentType;
+
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $event->creatorRole)) {
+            return response()->json(['error' => $blocked], 422);
+        }
+
+        // Validated, because availableSlots() takes `string $fromDate`: ?from[]=x makes input('from')
+        // an array, which is an uncaught TypeError -> 500, and this URL carries the booking secret in
+        // its path, so that 500 writes the secret into the log. Garbage STRINGS were already safe
+        // (parseDay catches Throwable and falls back to today).
+        $request->validate(['from' => 'nullable|date_format:Y-m-d', 'days' => 'nullable|integer']);
+
+        $from = $request->input('from') ?: Carbon::now($type->timezone())->format('Y-m-d');
+        $days = max(1, min(31, (int) $request->input('days', 31)));
+
+        // excludeEventId is derived from the resolved sale, NEVER from the request: busyIntervals()
+        // includes inbound-synced private events, so a caller-supplied id would read back the start
+        // times and durations of the owner's personal calendar.
+        return response()->json(
+            $this->appointments->availableSlots($type, $from, $days, null, true, $event->id)
+        );
+    }
+
+    /** POST /appointment/reschedule/{event_id}/{secret} - move the booking. Always returns JSON. */
+    public function reschedule(Request $request, $eventId, $secret)
+    {
+        [$event, $sale] = $this->resolveBookingBySecret($eventId, $secret);
+        $role = $event->creatorRole;
+
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role, checkCooldown: false)) {
+            return response()->json(['error' => $blocked], 422);
+        }
+
+        $validated = $request->validate([
+            'slot' => ['required', 'string', 'regex:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'],
+            'from_slot' => ['nullable', 'string', 'regex:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'],
+            // Same reasoning as book(): `timezone` rejects real browser-reported aliases. The value is
+            // re-validated on read by AppointmentTimeUtils::resolveTimezone().
+            'guest_timezone' => 'nullable|string|max:64',
+        ]);
+
+        return $this->applyReschedule(
+            $sale,
+            $event,
+            $role,
+            $validated['slot'],
+            'guest',
+            $validated['from_slot'] ?? null,
+            $validated['guest_timezone'] ?? null
+        );
     }
 
     /** Human-facing lifecycle state for the manage page. */
@@ -412,7 +536,13 @@ class AppointmentController extends Controller
         if (! $event->appointment_type_id) {
             abort(404);
         }
-        $sale = Sale::where('event_id', $event->id)->where('secret', $secret)->firstOrFail();
+        // is_deleted was never filtered here. A deleted sale is invisible in the owner's Bookings list
+        // (that query filters it) but would still resolve and be reschedulable, leaving ticket.sold
+        // keyed to a date nothing points at any more.
+        $sale = Sale::where('event_id', $event->id)
+            ->where('secret', $secret)
+            ->where('is_deleted', false)
+            ->firstOrFail();
 
         return [$event, $sale];
     }
@@ -425,7 +555,13 @@ class AppointmentController extends Controller
         ]);
     }
 
-    /** Refreshed single-day slot map for the slot-taken recovery UI. */
+    /**
+     * Refreshed single-day slot map for the slot-taken recovery UI, for the BOOKING path.
+     *
+     * No exclusion or owner-mode arguments: there is no event yet when booking, and the reschedule paths
+     * use ReschedulesAppointments::refreshDayForReschedule(), which needs both. Those two parameters were
+     * added here as well and no caller ever passed them.
+     */
     protected function refreshDay(AppointmentType $type, string $slotUtc): array
     {
         try {

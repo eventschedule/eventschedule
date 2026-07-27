@@ -411,7 +411,9 @@ class AppController extends Controller
 
     public function robots()
     {
-        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /admin\n";
+        // /appointment/ carries the booking secret in the path, so it must never be crawled or indexed.
+        // The pages themselves also send noindex; this stops the URL being fetched at all.
+        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /appointment/\nDisallow: /admin\n";
 
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
 

@@ -92,12 +92,14 @@
                         <a href="#overview" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">How booking works</a>
                         <a href="#appointment-types" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Appointment types</a>
                         <a href="#weekly-hours" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Weekly hours</a>
+                        <a href="#date-overrides" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Date overrides</a>
                         <a href="#buffers-and-notice" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Buffers, notice &amp; window</a>
                         <a href="#location" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Where you meet</a>
                         <a href="#guest-details" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">What you ask guests</a>
                         <a href="#payments" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Payments</a>
                         <a href="#approval" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Approval</a>
                         <a href="#bookings" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Managing bookings</a>
+                        <a href="#rescheduling" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Rescheduling</a>
                         <a href="#guest-booking" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">The booking page</a>
                         <a href="#good-to-know" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">Good to know</a>
                         <a href="#see-also" class="doc-nav-link block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 rounded-lg transition-colors">See also</a>
@@ -162,6 +164,23 @@
                                 <p>If your schedule has no timezone set, slots are worked out in the application's default timezone and the Appointments tab warns you. Set it under your schedule's Details before you share your booking page.</p>
                             </div>
                             <p class="text-gray-600 dark:text-gray-300">Open times also respect what is already on your schedule. Any event that overlaps a slot removes it, including events synced in from Google Calendar, Outlook, or CalDAV, and bookings for your other appointment types.</p>
+                        </section>
+
+                        <!-- Date overrides -->
+                        <section id="date-overrides" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Date overrides
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Weekly hours repeat every week, so use a date override when one particular day is different. Pick the date, then either leave it marked <strong class="text-gray-900 dark:text-white">Unavailable</strong> to close it completely, or untick that and set the hours you are open just for that date.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">An override replaces the weekly hours for that date rather than adding to them. Public holidays, a day off, a morning-only Friday before a long weekend, and a one-off late evening are all overrides.</p>
+                            <div class="doc-callout mb-6">
+                                <div class="doc-callout-title">Overrides are per appointment type</div>
+                                <p>Each type keeps its own overrides, so closing a date for one type does not close it for the others. If you take a whole week off, add the override to every type you have active, or deactivate the types instead.</p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300">Past overrides stay listed so you can tidy them up, and they have no effect on open times. Removing a row puts that date back on its normal weekly hours.</p>
                         </section>
 
                         <!-- Buffers and notice -->
@@ -259,10 +278,34 @@
                             </h2>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Switch the Appointments tab to <strong class="text-gray-900 dark:text-white">Bookings</strong> to see what has been booked, filtered by <strong class="text-gray-900 dark:text-white">Upcoming</strong>, <strong class="text-gray-900 dark:text-white">Pending</strong>, <strong class="text-gray-900 dark:text-white">Past</strong>, or <strong class="text-gray-900 dark:text-white">Cancelled</strong>. Open a booking to see the guest's details and notes.</p>
                             <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">Reschedule</strong> a booking to move it to another time without cancelling it. See <x-link href="#rescheduling">Rescheduling</x-link>.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Cancel</strong> a booking and the guest is emailed. The slot is released, so someone else can take it.</li>
                                 <li><strong class="text-gray-900 dark:text-white">New bookings email you too</strong>, whether they are confirmed or waiting for your approval.</li>
                                 <li><strong class="text-gray-900 dark:text-white">Paid bookings appear on the Sales page</strong>, where you mark refunds and see the revenue with the rest of your sales.</li>
                             </ul>
+                        </section>
+
+                        <!-- Rescheduling -->
+                        <section id="rescheduling" class="doc-section">
+                            <h2 class="doc-heading">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                                Rescheduling
+                            </h2>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">A booking can be moved to another time instead of being cancelled and booked again. The booking keeps its payment, its private link, and its place on your Sales page, so nothing has to be refunded and re-charged to change a time.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Either side can start it:</p>
+                            <ul class="doc-list mb-6">
+                                <li><strong class="text-gray-900 dark:text-white">The guest</strong> uses <strong class="text-gray-900 dark:text-white">Reschedule</strong> on their private link, picks from the same times anyone else would see, and can do it right up until the appointment starts.</li>
+                                <li><strong class="text-gray-900 dark:text-white">You</strong> use <strong class="text-gray-900 dark:text-white">Reschedule</strong> on the Bookings row. Your picker ignores the type's minimum notice and how far ahead guests may book, so you can move something to later today or up to a year out. Times that have already passed are not offered, and buffers and times you are already booked still apply, so you cannot double-book yourself.</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Whoever did not start the move is emailed about it. The guest's email carries an updated calendar invite that moves the entry already in their calendar rather than adding a second one, and your own connected calendars are updated too. When you move a booking you can add a note for the guest, or choose not to email them at all.</p>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">If a guest moves a booking less than a day before its original time, the email to you says so, and the Bookings row is marked <strong class="text-gray-900 dark:text-white">Moved</strong> so it is still obvious later.</p>
+                            <div class="doc-callout doc-callout-warning mb-6">
+                                <div class="doc-callout-title">On a type that requires approval</div>
+                                <p>A guest moving their own booking sends it back to your Requests tab, because you approved one time and not any time. Their old slot is released the moment they pick a new one, and the guest is told that before they commit. A move you make yourself does not need your own approval and stays confirmed.</p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">A booking cannot be moved once it has started, been cancelled, or if it is a card or link booking still waiting on payment: those holds expire on their own clock, so the guest pays first and can then move it freely. There is no limit on how many times a booking can be moved. A booking can be moved straight after it is made, and there is a short pause of a few minutes between one move and the next.</p>
                         </section>
 
                         <!-- The booking page -->
@@ -278,7 +321,7 @@
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Guests see each type with its duration and price, then pick a day and a time. Times are grouped into morning, afternoon, and evening, with a shortcut to the next available slot, and shown in the guest's own timezone. After they enter their details they get:</p>
                             <ul class="doc-list mb-6">
                                 <li>A confirmation email with a calendar invite they can add in one click.</li>
-                                <li>A private link to manage the booking, which they can use to cancel while the appointment is still in the future.</li>
+                                <li>A private link to manage the booking, which they can use to <x-link href="#rescheduling">move it to another time</x-link> or cancel it while the appointment is still in the future.</li>
                                 <li>A reminder email about 24 hours before it starts.</li>
                             </ul>
                         </section>

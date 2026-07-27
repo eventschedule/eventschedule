@@ -117,4 +117,67 @@ class AppointmentApprovalTest extends TestCase
             ->get(route('event.edit', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
             ->assertRedirect(route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']));
     }
+
+    /**
+     * accept() used to hardcode a redirect to the schedule tab and ignore redirect_to entirely, so
+     * the inline Approve on the bookings list would have thrown the owner out to the calendar.
+     */
+    public function test_redirect_to_appointments_returns_to_the_pending_bookings_view(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+        $expected = route('role.view_admin', [
+            'subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings', 'filter' => 'pending',
+        ]);
+
+        foreach (['event.accept', 'event.decline'] as $i => $action) {
+            $type = $this->createAppointmentType($role, [
+                'slug' => 'redirect-'.$i,
+                'weekly_windows' => $this->allDays(),
+                'requires_approval' => true,
+            ]);
+            [$event] = $this->book($role, $type);
+
+            $this->actingAs($owner)
+                ->post(route($action, ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]), [
+                    'redirect_to' => 'appointments',
+                ])
+                ->assertRedirect($expected);
+        }
+    }
+
+    public function test_declining_still_defaults_to_the_requests_tab(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+        $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays(), 'requires_approval' => true]);
+        [$event] = $this->book($role, $type);
+
+        // No redirect_to: the pre-existing default for decline() must be unchanged.
+        $this->actingAs($owner)
+            ->post(route('event.decline', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]))
+            ->assertRedirect('/'.$role->subdomain.'/requests');
+    }
+
+    public function test_a_past_booking_cannot_be_approved(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+        $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays(), 'requires_approval' => true]);
+
+        [$event, $sale] = $this->book($role, $type);
+
+        // The slot has come and gone while the owner sat on the decision.
+        $event->forceFill(['starts_at' => Carbon::now('UTC')->subDay()->format('Y-m-d H:i:s')])->saveQuietly();
+
+        $this->actingAs($owner)
+            ->post(route('event.accept', ['subdomain' => $role->subdomain, 'hash' => UrlUtils::encodeId($event->id)]), [
+                'redirect_to' => 'appointments',
+            ])
+            ->assertSessionHas('error', __('messages.appointments_cannot_approve_past'));
+
+        // Still pending, and no "You're booked!" went out.
+        $this->assertNull($event->fresh()->roles()->where('roles.id', $role->id)->first()->pivot->is_accepted);
+        $this->assertNull($sale->fresh()->confirmed_at);
+    }
 }

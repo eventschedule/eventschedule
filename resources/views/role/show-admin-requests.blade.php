@@ -41,7 +41,15 @@
             @if ($event->appointment_type_id)
                 {{-- Appointment booking request --}}
                 @php $bookingSale = $event->sales->first(); @endphp
-                <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full mb-2">{{ $event->appointmentType?->name ?? __('messages.appointments') }}</span>
+                <div class="flex flex-wrap items-center justify-center gap-1 mb-2">
+                    <span class="inline-block bg-blue-100 dark:bg-blue-900/30 text-[var(--brand-blue)] dark:text-blue-400 text-xs font-semibold px-3 py-1 rounded-full">{{ $event->appointmentType?->name ?? __('messages.appointments') }}</span>
+                    {{-- A booking that came BACK to pending after a move renders identically to a brand new
+                         request otherwise, and this list is ordered by the booking's original created_at -
+                         so it can sit pages down and get swept up by Accept all. --}}
+                    @if ((int) $event->ical_sequence > 0)
+                        <span class="inline-block bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-semibold px-3 py-1 rounded-full">{{ __('messages.appointments_moved_badge') }}</span>
+                    @endif
+                </div>
                 <div class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1" dir="auto">{{ $bookingSale?->name }}</div>
                 @if ($bookingSale?->email)
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $bookingSale->email }}</div>
@@ -49,14 +57,19 @@
                 @if ($event->starts_at)
                     <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $event->localStartsAt(true) }}</div>
                 @endif
-                @if ($bookingSale && $bookingSale->payment_amount > 0)
-                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ strtoupper($event->ticket_currency_code) }} {{ number_format((float) $bookingSale->payment_amount, 2) }} &middot; {{ $bookingSale->status === 'paid' ? __('messages.paid') : __('messages.unpaid') }}</div>
+                @if ($bookingSale?->phone)
+                    <div class="text-sm mb-1"><a href="tel:{{ $bookingSale->phone }}" class="text-[var(--brand-blue)] hover:underline">{{ $bookingSale->phone }}</a></div>
                 @endif
-                <div class="flex gap-2 mt-4">
-                    <a href="{{ route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments']) }}?view=bookings&filter=pending" class="px-4 py-2 bg-[var(--brand-button-bg)] text-white text-sm font-semibold rounded hover:bg-[var(--brand-button-bg-hover)] transition">
-                        {{ __('messages.view') }}
-                    </a>
-                </div>
+                @if ($bookingSale && $bookingSale->payment_amount > 0)
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ \App\Utils\MoneyUtils::format((float) $bookingSale->payment_amount, $event->ticket_currency_code) }} &middot; {{ $bookingSale->status === 'paid' ? __('messages.paid') : __('messages.unpaid') }}</div>
+                @endif
+                @if ($event->description)
+                    {{-- The guest's own notes, captured at booking. --}}
+                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-2 line-clamp-4" dir="auto">{{ $event->description }}</div>
+                @endif
+                {{-- No "View" button: it used to link to Appointments > Bookings > Pending, which is
+                     where the owner usually arrived FROM, and Accept/Decline already sit in the card
+                     footer below. --}}
             @else
             {{-- Profile Image --}}
             @if ($role->isVenue() || $role->isCurator())

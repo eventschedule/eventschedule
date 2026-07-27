@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AppointmentType;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Traits\ReschedulesAppointments;
 use App\Utils\UrlUtils;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -16,6 +17,8 @@ use Illuminate\Validation\ValidationException;
  */
 class AppointmentTypeController extends Controller
 {
+    use ReschedulesAppointments;
+
     public function store(Request $request, $subdomain)
     {
         $role = $this->gate($request, $subdomain);
@@ -59,21 +62,170 @@ class AppointmentTypeController extends Controller
         $role = $this->gate($request, $subdomain);
         $type = $this->resolveType($role, $hash);
 
-        $type->is_active = ! $type->is_active;
+        // The list posts an explicit value from a toggle switch. Honouring it makes the action
+        // idempotent, so a double submit or a re-post cannot flip the type back again. Falls back to
+        // inverting for callers that post an empty body.
+        $type->is_active = $request->has('is_active')
+            ? $request->boolean('is_active')
+            : ! $type->is_active;
         $type->save();
 
         return $this->back($role, __('messages.appointments_type_saved'));
+    }
+
+    /**
+     * Copy a type so a near-identical one does not have to be rebuilt by hand. Created inactive and
+     * opened in the editor, so the owner renames it before it can be booked - the same flow as
+     * cloning a newsletter.
+     */
+    public function duplicate(Request $request, $subdomain, $hash)
+    {
+        $role = $this->gate($request, $subdomain);
+        $type = $this->resolveType($role, $hash);
+
+        $copy = $type->replicate();
+        $copy->name = $type->name.' ('.__('messages.copy').')';
+        $copy->slug = $this->uniqueSlug($role, $copy->name);
+        $copy->is_active = false;
+        $copy->save();
+
+        return redirect(route('role.view_admin', [
+            'subdomain' => $role->subdomain,
+            'tab' => 'appointments',
+            'edit' => $copy->hashedId(),
+        ]))->with('message', __('messages.appointments_type_saved'));
+    }
+
+    /** GET .../bookings/{saleHash}/reschedule - the picker, in owner reschedule mode. */
+    public function showBookingReschedule(Request $request, $subdomain, $saleHash)
+    {
+        $role = $this->gate($request, $subdomain);
+        $sale = $this->resolveOwnedBooking($role, $saleHash);
+        $event = $sale->event;
+        $type = $event->appointmentType;
+
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role)) {
+            return $this->backToBookings($role, $blocked, true);
+        }
+
+        $service = app(\App\Services\AppointmentService::class);
+        $today = \Carbon\Carbon::now($type->timezone())->format('Y-m-d');
+        // ownerMode: min-notice and the booking window are guest-facing limits. An owner moving
+        // tomorrow's appointment on a 48-hour-notice type would otherwise see an empty calendar.
+        $initial = $service->availableSlots($type, $today, 31, null, true, $event->id, true);
+        if (empty($initial['days']) && ! empty($initial['next_available_date'])) {
+            $initial = $service->availableSlots($type, $initial['next_available_date'], 31, null, true, $event->id, true);
+        }
+
+        $params = ['subdomain' => $role->subdomain, 'saleHash' => $saleHash];
+
+        return view('appointments.book-type', [
+            'role' => $role,
+            'type' => $type,
+            'initialSlots' => $initial,
+            'mode' => 'reschedule',
+            'ownerMode' => true,
+            'sale' => $sale,
+            'event' => $event,
+            'rescheduleUrl' => route('appointments.booking_reschedule.store', $params, false),
+            'rescheduleSlotsUrl' => route('appointments.booking_reschedule_slots', $params, false),
+            'backUrl' => route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings'], false),
+        ]);
+    }
+
+    /** GET .../bookings/{saleHash}/reschedule/slots - owner-mode slot JSON. */
+    public function bookingRescheduleSlots(Request $request, $subdomain, $saleHash)
+    {
+        $role = $this->gate($request, $subdomain, json: true);
+        $sale = $this->resolveOwnedBooking($role, $saleHash);
+        $event = $sale->event;
+        $type = $event->appointmentType;
+
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role)) {
+            return response()->json(['error' => $blocked], 422);
+        }
+
+        // See AppointmentController::rescheduleSlots - an array `from` is a TypeError, not a 422.
+        $request->validate(['from' => 'nullable|date_format:Y-m-d', 'days' => 'nullable|integer']);
+
+        $from = $request->input('from') ?: \Carbon\Carbon::now($type->timezone())->format('Y-m-d');
+        $days = max(1, min(31, (int) $request->input('days', 31)));
+
+        return response()->json(
+            app(\App\Services\AppointmentService::class)
+                ->availableSlots($type, $from, $days, null, true, $event->id, true)
+        );
+    }
+
+    /** POST .../bookings/{saleHash}/reschedule - owner moves the booking. Always JSON. */
+    public function bookingReschedule(Request $request, $subdomain, $saleHash)
+    {
+        $role = $this->gate($request, $subdomain, json: true);
+        $sale = $this->resolveOwnedBooking($role, $saleHash);
+        $event = $sale->event;
+
+        if ($blocked = $this->rescheduleBlockedReason($event, $sale, $role, checkCooldown: false)) {
+            return response()->json(['error' => $blocked], 422);
+        }
+
+        $validated = $request->validate([
+            'slot' => ['required', 'string', 'regex:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'],
+            'from_slot' => ['nullable', 'string', 'regex:/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/'],
+            // Optional note to the guest, and the ability to move without emailing them at all -
+            // the same choice the event editor already offers when a time changes.
+            'note' => 'nullable|string|max:280',
+            'notify' => 'nullable|boolean',
+        ]);
+
+        return $this->applyReschedule(
+            $sale,
+            $event,
+            $role,
+            $validated['slot'],
+            'owner',
+            $validated['from_slot'] ?? null,
+            null,
+            true,
+            $request->boolean('notify', true),
+            $validated['note'] ?? null
+        );
+    }
+
+    /**
+     * Resolve a booking the acting schedule actually owns.
+     *
+     * Scoped on creator_role_id, NOT sales.subdomain: that column is a booking-time snapshot and is
+     * never rewritten when a schedule is renamed, so a freed subdomain claimed by another schedule
+     * would expose the original owner's bookings here.
+     */
+    protected function resolveOwnedBooking(Role $role, string $saleHash): Sale
+    {
+        $sale = Sale::with('event.appointmentType')->findOrFail(UrlUtils::decodeId($saleHash));
+
+        if ($sale->is_deleted
+            || ! $sale->event?->appointment_type_id
+            || (int) $sale->event->creator_role_id !== (int) $role->id) {
+            abort(404);
+        }
+
+        return $sale;
+    }
+
+    protected function backToBookings(Role $role, string $message, bool $isError = false)
+    {
+        $url = route('role.view_admin', [
+            'subdomain' => $role->subdomain, 'tab' => 'appointments', 'view' => 'bookings',
+        ]);
+
+        return redirect($url)->with($isError ? 'error' : 'message', $message);
     }
 
     /** Owner cancels a booking from the Bookings sub-view. */
     public function bookingCancel(Request $request, $subdomain, $saleHash)
     {
         $role = $this->gate($request, $subdomain);
-        $sale = Sale::findOrFail(UrlUtils::decodeId($saleHash));
-
-        if ($sale->subdomain !== $role->subdomain || ! $sale->event?->appointment_type_id) {
-            abort(404);
-        }
+        // Same ownership scoping as the reschedule path - sales.subdomain drifts on rename.
+        $sale = $this->resolveOwnedBooking($role, $saleHash);
 
         // A finished appointment cannot be cancelled (same guard as the guest manage page) -
         // the guest would otherwise get a cancellation email for something that already happened.
@@ -101,8 +253,16 @@ class AppointmentTypeController extends Controller
             ->with('message', __('messages.appointments_cancelled_message'));
     }
 
-    /** Resolve the schedule, require an editor, and enforce the Pro gate on hosted. */
-    protected function gate(Request $request, $subdomain): Role
+    /**
+     * Resolve the schedule, require an editor, and enforce the Pro gate on hosted.
+     *
+     * $json is for endpoints the picker calls with fetch(). The plan gate normally aborts with a
+     * REDIRECT, and abort() carrying a Response throws it verbatim no matter what the client asked for -
+     * so fetch() followed it, got HTML, failed to parse, and the picker reported "session expired" for a
+     * lapsed plan. That is exactly the misleading outcome these endpoints exist to avoid, so they answer
+     * in JSON instead. Page endpoints keep the redirect, which is correct for a normal navigation.
+     */
+    protected function gate(Request $request, $subdomain, bool $json = false): Role
     {
         $role = Role::subdomain($subdomain)->firstOrFail();
 
@@ -111,8 +271,10 @@ class AppointmentTypeController extends Controller
         }
 
         if (config('app.hosted') && ! $role->isPro()) {
-            abort(redirect()->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])
-                ->with('error', __('messages.upgrade_required')));
+            abort($json
+                ? response()->json(['error' => __('messages.upgrade_required')], 403)
+                : redirect()->route('role.view_admin', ['subdomain' => $role->subdomain, 'tab' => 'plan'])
+                    ->with('error', __('messages.upgrade_required')));
         }
 
         return $role;
@@ -242,8 +404,9 @@ class AppointmentTypeController extends Controller
         $type->name = $data['name'];
         $type->description = $data['description'] ?? null;
         $type->duration_minutes = (int) $data['duration_minutes'];
-        // The editor has no field for this yet; only overwrite when the request actually sends it
-        // so values set via backup restore are not silently wiped by an unrelated edit.
+        // Only overwrite when the request actually sends it, so a value set by a backup restore or the API
+        // is not wiped by a form that omits the field. (The editor does render both this and
+        // date_overrides now - an earlier comment here claimed it did not.)
         if (request()->has('slot_interval_minutes')) {
             $type->slot_interval_minutes = ! empty($data['slot_interval_minutes']) ? (int) $data['slot_interval_minutes'] : null;
         }
@@ -252,7 +415,7 @@ class AppointmentTypeController extends Controller
         $type->min_notice_hours = (int) ($data['min_notice_hours'] ?? 0);
         $type->max_advance_days = (int) ($data['max_advance_days'] ?? 60);
         $type->weekly_windows = $data['weekly_windows'];
-        // Same has-guard as slot_interval_minutes: no editor UI exists for overrides yet.
+        // Same has-guard as slot_interval_minutes, for the same reason.
         if (request()->has('date_overrides')) {
             $type->date_overrides = $data['date_overrides'] ?? null;
         }
@@ -265,7 +428,10 @@ class AppointmentTypeController extends Controller
         $type->payment_method = ((float) ($data['price'] ?? 0) > 0) ? ($data['payment_method'] ?? 'cash') : null;
         $type->requires_approval = request()->boolean('requires_approval');
         $type->ask_phone = request()->boolean('ask_phone');
-        $type->require_phone = request()->boolean('require_phone');
+        // Requiring a field that is never asked for is meaningless - the booking validation only
+        // reads require_phone inside `if ($type->ask_phone)`. Normalise rather than storing the
+        // contradiction.
+        $type->require_phone = $type->ask_phone && request()->boolean('require_phone');
         $type->is_active = request()->boolean('is_active');
     }
 

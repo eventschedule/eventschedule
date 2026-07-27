@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\BusinessException;
+use App\Exceptions\SlotUnavailableException;
 use App\Models\AppointmentType;
 use App\Models\Event;
 use App\Models\Role;
@@ -10,6 +11,7 @@ use App\Models\Sale;
 use App\Models\SaleTicket;
 use App\Models\Ticket;
 use App\Models\User;
+use App\Utils\AppointmentTimeUtils;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -34,14 +36,38 @@ class AppointmentService
      *
      * @return array{schedule_timezone:string, days:array<string,array<int,array{utc:string,date:string,label:string}>>, next_available_date:?string}
      */
-    public function availableSlots(AppointmentType $type, string $fromDate, int $days = 31, ?Carbon $now = null, bool $withNextAvailable = true): array
-    {
+    public function availableSlots(
+        AppointmentType $type,
+        string $fromDate,
+        int $days = 31,
+        ?Carbon $now = null,
+        bool $withNextAvailable = true,
+        ?int $excludeEventId = null,
+        bool $ownerMode = false
+    ): array {
         $days = max(1, min(31, $days));
         $tz = $type->timezone();
 
         $now = ($now ? $now->copy() : Carbon::now())->setTimezone($tz);
-        $earliest = $now->copy()->addHours((int) $type->min_notice_hours); // absolute min-notice instant
-        $lastDay = $now->copy()->startOfDay()->addDays((int) $type->max_advance_days);
+        // Owner mode drops the two GUEST-facing limits: min-notice and booking-window exist to stop
+        // guests booking too close or too far out, and an owner moving tomorrow's appointment on a
+        // 48-hour-notice type would otherwise be shown an empty calendar. Buffers, date overrides,
+        // weekly windows and busy intervals all still apply, so double-booking stays impossible.
+        //
+        // It drops min-notice down to zero, NOT below: $earliest is the only past-slot floor
+        // computeDays() has, so startOfDay() here offered this morning's elapsed slots. Moving a booking
+        // into the past leaves it unmovable AND uncancellable, since both guards reject past bookings.
+        $earliest = $ownerMode
+            ? $now->copy()
+            : $now->copy()->addHours((int) $type->min_notice_hours);
+        // Owner mode lifts the guest booking window, but not to infinity: $lastDay also bounds the
+        // next-available lookahead, which re-runs the whole slot computation over up to 15 further 31-day
+        // chunks (two busy-interval queries each) and only runs when the visible range came back empty.
+        // A year is far past any real appointment and keeps that walk to roughly what a guest's window
+        // costs. The generous end of the guest range is honoured too, for a type that allows more.
+        $lastDay = $ownerMode
+            ? $now->copy()->startOfDay()->addDays(max(365, (int) $type->max_advance_days))
+            : $now->copy()->startOfDay()->addDays((int) $type->max_advance_days);
 
         $startDay = $this->parseDay($fromDate, $tz);
         if ($startDay->lt($now->copy()->startOfDay())) {
@@ -55,11 +81,11 @@ class AppointmentService
         $result = ['schedule_timezone' => $tz, 'days' => [], 'next_available_date' => null];
 
         if ($endDay->gte($startDay)) {
-            $result['days'] = $this->computeDays($type, $startDay, $endDay, $earliest);
+            $result['days'] = $this->computeDays($type, $startDay, $endDay, $earliest, $excludeEventId);
         }
 
         if ($withNextAvailable && empty($result['days'])) {
-            $result['next_available_date'] = $this->nextAvailableDate($type, $endDay->copy()->addDay(), $now, $earliest, $lastDay);
+            $result['next_available_date'] = $this->nextAvailableDate($type, $endDay->copy()->addDay(), $now, $earliest, $lastDay, $excludeEventId);
         }
 
         return $result;
@@ -69,8 +95,13 @@ class AppointmentService
      * Whether a specific UTC slot instant is still bookable. Recomputes that date's slots and
      * requires exact membership - the caller re-checks this inside the booking lock.
      */
-    public function isSlotAvailable(AppointmentType $type, string $utcIso, ?Carbon $now = null): bool
-    {
+    public function isSlotAvailable(
+        AppointmentType $type,
+        string $utcIso,
+        ?Carbon $now = null,
+        ?int $excludeEventId = null,
+        bool $ownerMode = false
+    ): bool {
         $s = $this->parseUtc($utcIso);
         if (! $s) {
             return false;
@@ -79,7 +110,7 @@ class AppointmentService
         $tz = $type->timezone();
         $date = $s->copy()->setTimezone($tz)->format('Y-m-d');
         // No lookahead: this runs inside book()'s schedule-wide row lock and only needs membership.
-        $slots = $this->availableSlots($type, $date, 1, $now, false);
+        $slots = $this->availableSlots($type, $date, 1, $now, false, $excludeEventId, $ownerMode);
 
         foreach ($slots['days'][$date] ?? [] as $slot) {
             if ($slot['utc'] === $s->format('Y-m-d\TH:i:s\Z')) {
@@ -234,6 +265,197 @@ class AppointmentService
         });
     }
 
+    /** Minutes a booking must rest between moves. Bounds the per-move mail + calendar fan-out. */
+    public const RESCHEDULE_COOLDOWN_MINUTES = 3;
+
+    /**
+     * Move an existing booking to a new slot, in place.
+     *
+     * This deliberately MOVES the Event and Sale rather than cancel-and-rebook: that keeps the sale id,
+     * the secret link, the payment (`status`/`transaction_reference` untouched, no Stripe call needed),
+     * the analytics row and the guest's calendar entry - and avoids double-counting `EVENT_CREATE` and
+     * churning two Ticket rows.
+     *
+     * Returns the OLD `starts_at` as a UTC string so the caller can render "moved from X". It has to be
+     * a scalar: `SerializesModels` re-fetches models when a queued mail is built, which would show the
+     * new time on both sides (same reason AppointmentBookedNotification takes `$wasPaid` as a scalar).
+     *
+     * @param  string  $initiator  'guest' | 'owner' - drives the pending reset and who gets mailed.
+     * @param  ?string  $fromSlotUtc  The slot the page was rendered with. Supplying it makes the write
+     *                                idempotent; a replay with a stale value is rejected instead of
+     *                                re-firing the calendar sync, the webhook and the mail.
+     *
+     * @throws BusinessException
+     */
+    public function reschedule(
+        Sale $sale,
+        string $slotUtc,
+        string $initiator = 'guest',
+        ?string $fromSlotUtc = null,
+        ?string $guestTimezone = null,
+        bool $ownerMode = false
+    ): string {
+        $start = $this->parseUtc($slotUtc);
+        if (! $start) {
+            throw new BusinessException(__('messages.appointments_slot_taken'));
+        }
+
+        $event = $sale->event;
+        $type = $event?->appointmentType;
+        $role = $event?->creatorRole;
+        if (! $event || ! $type || ! $role) {
+            throw new BusinessException(__('messages.appointments_slot_taken'));
+        }
+
+        $newStartsAt = $start->format('Y-m-d H:i:s');
+
+        return DB::transaction(function () use ($sale, $event, $type, $role, $start, $newStartsAt, $initiator, $fromSlotUtc, $guestTimezone, $ownerMode) {
+            // Same schedule-wide lock as book(), because overlap conflicts span types and no unique
+            // index can express them. Then the Sale: a reschedule mutates it, and every transition that
+            // races us locks the Sale (guest cancel, the Stripe webhook, ReleaseTickets, the reminder
+            // claim). Role -> Sale is a safe order; nothing in the codebase takes Sale -> Role.
+            Role::whereKey($role->id)->lockForUpdate()->first();
+            $lockedSale = Sale::whereKey($sale->id)->lockForUpdate()->first();
+            $lockedEvent = Event::whereKey($event->id)->first();
+
+            if (! $lockedSale || ! $lockedEvent
+                || $lockedSale->is_deleted
+                || $lockedEvent->is_cancelled
+                || in_array($lockedSale->status, ['cancelled', 'refunded', 'expired'], true)) {
+                // The :schedule replacement is not optional - this string reads "Contact :schedule if you
+                // need to change the time", and an unmatched placeholder renders verbatim to the guest.
+                throw new BusinessException(__('messages.appointments_reschedule_unavailable', [
+                    'schedule' => $role->name,
+                ]));
+            }
+
+            $oldStartsAt = (string) $lockedEvent->starts_at;
+
+            // Conflict detection: the caller tells us what the page was showing, so two people moving the
+            // same booking to different slots resolve to a single winner rather than last-write-wins.
+            //
+            // NOT idempotency - the no-op return below already provided that, and this check running
+            // first used to defeat it. A duplicate delivery (guest taps once on a flaky connection, the
+            // request commits, the response is lost, they tap again) arrives with a from_slot that is now
+            // stale but a target that already IS the live start. Rejecting that told the guest their
+            // successful move had failed, and because the picker's recovery never refreshes
+            // currentSlotUtc, every retry re-sent the same stale from_slot: a dead end until reload.
+            if ($fromSlotUtc !== null) {
+                $fromParsed = $this->parseUtc($fromSlotUtc);
+                if (! $fromParsed || $fromParsed->format('Y-m-d H:i:s') !== $oldStartsAt) {
+                    if ($oldStartsAt === $newStartsAt) {
+                        return $oldStartsAt; // already where they asked for; report success
+                    }
+
+                    throw new SlotUnavailableException(__('messages.appointments_slot_taken'));
+                }
+            }
+
+            // Nothing to do - and nothing to announce.
+            if ($oldStartsAt === $newStartsAt) {
+                return $oldStartsAt;
+            }
+
+            // Per-booking cooldown. The per-IP throttle cannot bound this: the capability is the secret,
+            // not the address. Each accepted move costs an owner email plus INLINE Google/Microsoft/CalDAV
+            // calls (dispatchSync), so a guest rotating IPs could otherwise walk a booking across the
+            // calendar one notification at a time.
+            //
+            // Keyed on rescheduled_at, NOT updated_at. updated_at is set when the booking is created, so
+            // it refused the most common move of all - a guest fixing a slot seconds after booking it -
+            // with the actively false "this booking was just moved". It is also written by jobs that have
+            // nothing to do with rescheduling (the hourly Translate command has no is_private filter, and
+            // inbound calendar sync calls save()), which turned a legitimate move into a random failure.
+            if ($lockedEvent->rescheduled_at
+                && $lockedEvent->rescheduled_at->diffInMinutes(now()) < self::RESCHEDULE_COOLDOWN_MINUTES) {
+                throw new BusinessException(__('messages.appointments_reschedule_too_soon'));
+            }
+
+            if ($lockedEvent->getStartDateTime()->isPast()) {
+                throw new BusinessException(__('messages.appointments_reschedule_unavailable', [
+                    'schedule' => $role->name,
+                ]));
+            }
+
+            // A floor on the NEW start. Belt-and-braces with the $earliest clamp in availableSlots():
+            // A/B'd, and either one alone closes the hole, but a booking parked in the past can no
+            // longer be moved OR cancelled by anyone, so an unrecoverable state is worth two guards.
+            // Do not remove the clamp on the strength of this check, or vice versa.
+            if ($start->isPast()) {
+                throw new SlotUnavailableException(__('messages.appointments_slot_taken'));
+            }
+
+            // Re-check inside the lock, excluding this booking's own event so it does not block itself.
+            // book()'s duplicate guard is deliberately NOT reused: it matches on subdomain + email + the
+            // exact target instant without excluding the current sale, so it would always false-positive.
+            if (! $this->isSlotAvailable($type, $start->format('Y-m-d\TH:i:s\Z'), null, $lockedEvent->id, $ownerMode)) {
+                throw new SlotUnavailableException(__('messages.appointments_slot_taken'));
+            }
+
+            $wasAccepted = $this->isPivotAccepted($lockedEvent);
+            // Branch on the LIVE pivot, not $type->requires_approval: the type is mutable, and an owner
+            // who switched approval off leaves older bookings pivot-null. And only a GUEST move needs
+            // re-approval - an owner would otherwise have to approve their own action.
+            $backToPending = $initiator === 'guest' && $type->requires_approval && $wasAccepted;
+
+            // duration is NOT optional. The slot grid is validated against the type's CURRENT duration
+            // while busyIntervals() blocks using the event's stored one, so leaving a stale 30 minutes on
+            // an event that now occupies a 60-minute slot lets a second guest book the uncovered half.
+            // Plain save() (not saveQuietly): the Event::saving cascade re-keys ticket.sold and rewrites
+            // sales.event_date off the new date, and saveQuietly would skip it.
+            $lockedEvent->forceFill([
+                'starts_at' => $newStartsAt,
+                'duration' => $type->duration_minutes / 60.0,
+                'ical_sequence' => ((int) $lockedEvent->ical_sequence) + 1,
+                // Only this method ever writes it, which is the whole point: it stays null until a real
+                // move happens, so a first move is never refused.
+                'rescheduled_at' => now(),
+            ])->save();
+
+            // AFTER the event write, and as a targeted update rather than a read-modify-write.
+            //
+            // The Event::saving cascade rewrote sales.event_date through its OWN freshly-loaded Sale
+            // instances, so every Sale object we are holding is now stale on that column. A plain
+            // $sale->save() would NOT actually write the old value back (dirty tracking excludes an
+            // untouched attribute - verified), but an update() or forceFill() that named event_date
+            // would, and the in-memory value is wrong either way. Hence: targeted update here, and a
+            // refresh below so callers building mail or guest URLs off this Sale see the new date.
+            $saleChanges = ['reminder_sent_at' => null];
+            if ($guestTimezone && AppointmentTimeUtils::resolveTimezone($guestTimezone)) {
+                $saleChanges['guest_timezone'] = $guestTimezone;
+            }
+            if ($backToPending) {
+                // confirm() is a one-shot latch on confirmed_at; without clearing it, re-approval would
+                // silently send no confirmation and never sync the calendar.
+                $saleChanges['confirmed_at'] = null;
+            }
+            Sale::whereKey($lockedSale->id)->update($saleChanges);
+
+            if ($backToPending) {
+                $lockedEvent->roles()->updateExistingPivot($role->id, ['is_accepted' => null]);
+            }
+
+            DB::afterCommit(function () use ($lockedEvent) {
+                // dispatchSync runs these jobs INLINE and they re-throw. An afterCommit throw propagates
+                // out of commit() after the row is already written, so the guest would see an error for
+                // a move that happened and retry it.
+                try {
+                    $lockedEvent->dispatchCalendarSync('update');
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            });
+
+            // The caller's instances are stale on event_date (rewritten by the cascade) and on
+            // starts_at/duration/ical_sequence. Refresh both so mail and guest URLs built from them
+            // afterwards describe the booking as it now is.
+            $sale->refresh();
+            $event->refresh();
+
+            return $oldStartsAt;
+        });
+    }
+
     /**
      * Transition a booking to CONFIRMED once (guarded by sales.confirmed_at): push the calendar
      * create and send the guest confirmation, both after commit. No-ops while pending approval
@@ -259,7 +481,14 @@ class AppointmentService
         $sale->confirmed_at = now(); // keep the in-memory model consistent for the closure below
 
         DB::afterCommit(function () use ($event, $sale) {
-            $event->dispatchCalendarSync('create');
+            // 'update', not 'create'. The confirmed_at latch above used to make 'create' safe because it
+            // could only ever fire once - but reschedule() clears confirmed_at when a guest move sends an
+            // approval-required booking back to pending, so a second approval re-arms this. createEvent()
+            // then makes a NEW remote event and overwrites the CalendarSync row, orphaning the entry it
+            // replaced: unreachable by a later delete, and blocking that time on the owner's real calendar
+            // forever. Every provider's updateEvent() falls back to createEvent() when no external id is
+            // recorded (Google, Microsoft and CalDAV all do), so a first confirmation is unaffected.
+            $event->dispatchCalendarSync('update');
             (new EmailService)->sendAppointmentConfirmationEmails($sale);
         });
     }
@@ -301,10 +530,10 @@ class AppointmentService
      *
      * @return array<string,array<int,array{utc:string,date:string,label:string}>>
      */
-    protected function computeDays(AppointmentType $type, Carbon $startDay, Carbon $endDay, Carbon $earliest): array
+    protected function computeDays(AppointmentType $type, Carbon $startDay, Carbon $endDay, Carbon $earliest, ?int $excludeEventId = null): array
     {
         $tz = $type->timezone();
-        $busy = $this->busyIntervals($type->role, $startDay, $endDay, $tz);
+        $busy = $this->busyIntervals($type->role, $startDay, $endDay, $tz, $excludeEventId);
 
         $duration = (int) $type->duration_minutes;
         $step = max(1, $type->stepMinutes());
@@ -359,7 +588,7 @@ class AppointmentService
      * First schedule-local date (from $fromDay, capped at max_advance) that has at least one open
      * slot, or null. Scans forward in 31-day chunks so far-off availability stays bounded.
      */
-    protected function nextAvailableDate(AppointmentType $type, Carbon $fromDay, Carbon $now, Carbon $earliest, Carbon $lastDay): ?string
+    protected function nextAvailableDate(AppointmentType $type, Carbon $fromDay, Carbon $now, Carbon $earliest, Carbon $lastDay, ?int $excludeEventId = null): ?string
     {
         $cursor = $fromDay->copy()->startOfDay();
         if ($cursor->lt($now->copy()->startOfDay())) {
@@ -374,7 +603,7 @@ class AppointmentService
                 $chunkEnd = $lastDay->copy();
             }
 
-            $days = $this->computeDays($type, $cursor->copy(), $chunkEnd, $earliest);
+            $days = $this->computeDays($type, $cursor->copy(), $chunkEnd, $earliest, $excludeEventId);
             if (! empty($days)) {
                 return array_key_first($days);
             }
@@ -392,7 +621,7 @@ class AppointmentService
      *
      * @return array<int,array{0:Carbon,1:Carbon}>
      */
-    protected function busyIntervals(Role $role, Carbon $startDay, Carbon $endDay, string $tz): array
+    protected function busyIntervals(Role $role, Carbon $startDay, Carbon $endDay, string $tz, ?int $excludeEventId = null): array
     {
         $padStart = $startDay->copy()->setTimezone('UTC')->subDay();
         $padEnd = $endDay->copy()->endOfDay()->setTimezone('UTC')->addDay();
@@ -405,6 +634,11 @@ class AppointmentService
                             ->orWhere('event_role.is_accepted', true);
                     });
             })
+            // A booking being rescheduled must not block its own move, nor hide the neighbouring slots
+            // that overlap the time it currently holds. ALWAYS server-derived from the resolved sale:
+            // this set includes inbound-synced private events, so a request-supplied id would turn the
+            // slots endpoint into an oracle for the owner's personal calendar.
+            ->when($excludeEventId, fn ($q) => $q->where('events.id', '!=', $excludeEventId))
             ->where('is_cancelled', false);
 
         $intervals = [];

@@ -31,12 +31,15 @@ class AppointmentReviewFixesTest extends TestCase
         return array_fill_keys(['0', '1', '2', '3', '4', '5', '6'], [['start' => '09:00', 'end' => '17:00']]);
     }
 
-    private function book($role, AppointmentType $type): array
+    private function book($role, AppointmentType $type, string $email = 'jane@gmail.com'): array
     {
         $from = Carbon::now('America/New_York')->addDay()->format('Y-m-d');
         $slots = app(AppointmentService::class)->availableSlots($type, $from, 1);
-        $slot = $slots['days'][array_key_first($slots['days'])][0]['utc'];
-        $sale = app(AppointmentService::class)->book($type, $role, ['name' => 'Jane', 'email' => 'jane@gmail.com', 'slot' => $slot]);
+        // Take the first slot still free, so a second booking in the same fixture does not collide.
+        $slot = collect($slots['days'][array_key_first($slots['days'])])->pluck('utc')->first(
+            fn ($utc) => app(AppointmentService::class)->isSlotAvailable($type, $utc)
+        );
+        $sale = app(AppointmentService::class)->book($type, $role, ['name' => 'Jane', 'email' => $email, 'slot' => $slot]);
 
         return [$sale->event, $sale];
     }
@@ -70,6 +73,43 @@ class AppointmentReviewFixesTest extends TestCase
 
         $this->assertNotNull($sale->fresh()->confirmed_at, 'Accept All must confirm appointment bookings');
         $this->assertTrue((bool) $event->roles()->where('roles.id', $role->id)->first()->pivot->is_accepted);
+    }
+
+    /**
+     * accept() guards against approving a booking whose slot has passed; acceptAll() confirms through
+     * the same branch and did not. A guest move on an approval-required type sends a booking back to
+     * pending, so stale pending rows are now easy to accumulate - and confirming one mails the guest
+     * "You're booked!" for a past slot and puts a calendar entry at that past time.
+     */
+    public function test_accept_all_skips_bookings_whose_slot_has_already_passed(): void
+    {
+        Queue::fake();
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+        $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays(), 'requires_approval' => true]);
+
+        [$futureEvent, $futureSale] = $this->book($role, $type);
+        [$pastEvent, $pastSale] = $this->book($role, $type, 'other@gmail.com');
+
+        // Only the second one goes stale. Written straight to the column so the fixture does not have
+        // to depend on the slot engine offering a past time.
+        Event::whereKey($pastEvent->id)->update(['starts_at' => now('UTC')->subDay()->format('Y-m-d H:i:s')]);
+
+        $this->actingAs($owner)->post(route('event.accept_all', ['subdomain' => $role->subdomain]));
+
+        // The future booking is confirmed as before - the batch is not aborted.
+        $this->assertNotNull($futureSale->fresh()->confirmed_at);
+        $this->assertTrue((bool) $futureEvent->roles()->where('roles.id', $role->id)->first()->pivot->is_accepted);
+
+        // The past one is left alone, pivot included, so it stays actionable rather than silently wrong.
+        $this->assertNull($pastSale->fresh()->confirmed_at, 'a past booking must not be confirmed');
+        $this->assertNull($pastEvent->roles()->where('roles.id', $role->id)->first()->pivot->is_accepted);
+
+        // confirmed_at is the right thing to assert on rather than the mail: confirm() queues
+        // AppointmentConfirmed from DB::afterCommit(), which never fires inside RefreshDatabase's
+        // enclosing transaction. The latch is what gates that mail, so pinning it pins the mail too.
+        $this->assertSame(1, \App\Models\Sale::whereIn('id', [$futureSale->id, $pastSale->id])
+            ->whereNotNull('confirmed_at')->count());
     }
 
     public function test_accepting_unpaid_stripe_request_defers_confirmation(): void

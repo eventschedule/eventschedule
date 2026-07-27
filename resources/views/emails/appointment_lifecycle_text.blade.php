@@ -3,8 +3,7 @@
 {{ $intro }}
 
 {{ $type?->name ?? $event->name }}
-{{ __('messages.date') }}: {{ $event->getStartDateTime($sale->event_date, true, $event->timezone)->format('l, F j, Y') }}
-{{ __('messages.time') }}: {{ $event->getStartEndTime($sale->event_date) }} ({{ $event->timezone }})
+@include('emails.partials.appointment_datetime_text')
 
 @if ($rebookUrl)
 {{ __('messages.appointments_book_again') }}: {{ $rebookUrl }}

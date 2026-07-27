@@ -35,6 +35,18 @@ return [
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#send-default-pii
     'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
 
+    // Strips the 32-char booking secret out of /appointment/* URLs, Referer headers, transaction names
+    // and exception messages, so an error on a guest booking page never ships a working link to
+    // someone else's appointment. Expressed as a [class, method] pair rather than a closure: only the
+    // pair survives `php artisan config:cache`, which var_exports this file.
+    'before_send' => [\App\Utils\SentryScrubber::class, 'beforeSend'],
+
+    // Transactions need the SAME scrub and go through a SEPARATE callback. RequestIntegration is
+    // registered as a global event processor with no event-type filter, so it stamps request.url onto
+    // performance events too - and Client dispatches those to getBeforeSendTransactionCallback(). With
+    // tracing enabled, leaving this unset shipped the secret on every request, no error required.
+    'before_send_transaction' => [\App\Utils\SentryScrubber::class, 'beforeSend'],
+
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore-exceptions
     // 'ignore_exceptions' => [],
 

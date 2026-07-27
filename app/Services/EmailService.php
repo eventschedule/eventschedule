@@ -409,7 +409,55 @@ class EmailService
         $this->sendAppointmentOwnerNotification($sale, 'cancelled', $wasPaid);
     }
 
-    protected function sendAppointmentGuestMail(Sale $sale, string $mailClass): void
+    /**
+     * Reschedule notices.
+     *
+     * Deliberately NOT AppointmentPending for the back-to-pending case: that mailable cannot attach an
+     * .ics, so the guest's calendar would keep showing the old time while the owner's had already
+     * moved - exactly backwards. AppointmentRescheduled covers both, with a pending variant.
+     *
+     * @param  string  $oldStartsAt  Previous UTC `starts_at`, passed as a scalar (SerializesModels
+     *                               re-fetches the event, which now holds the new time).
+     * @param  bool  $notifyGuest  False when an owner chose "Don't notify". The calendar sync and the
+     *                             other editors' notifications still happen.
+     */
+    public function sendAppointmentRescheduledEmails(
+        Sale $sale,
+        string $oldStartsAt,
+        string $initiator = 'guest',
+        bool $notifyGuest = true,
+        ?string $note = null
+    ): void {
+        $event = $sale->event;
+        if (! $event) {
+            return;
+        }
+
+        $pending = $event->isAwaitingCreatorApproval();
+
+        if ($notifyGuest) {
+            $this->sendAppointmentGuestMail($sale, \App\Mail\AppointmentRescheduled::class, [
+                $oldStartsAt, $pending, $note,
+            ]);
+        }
+
+        // The acting owner gets nothing, but their co-admins must: otherwise a second admin's calendar
+        // silently shifts with no explanation. A guest-initiated move notifies everyone.
+        //
+        // 'rescheduled_pending', not a bare 'pending': a guest move on an approval-required type sends
+        // the booking back to pending, and reporting that as an ordinary new request gave the owner an
+        // email identical to any first-time booking - no old time, no short-notice warning, and no hint
+        // that something they had already approved had changed underneath them.
+        $this->sendAppointmentOwnerNotification(
+            $sale,
+            $pending ? 'rescheduled_pending' : 'rescheduled',
+            null,
+            $oldStartsAt,
+            $initiator === 'owner' ? auth()->id() : null
+        );
+    }
+
+    protected function sendAppointmentGuestMail(Sale $sale, string $mailClass, array $extraArgs = []): void
     {
         try {
             $event = $sale->event;
@@ -422,7 +470,7 @@ class EmailService
             }
 
             SendQueuedEmail::dispatch(
-                new $mailClass($sale, $event, $role, $event->appointmentType),
+                new $mailClass($sale, $event, $role, $event->appointmentType, ...$extraArgs),
                 $sale->email,
                 $role?->id,
                 app()->getLocale()
@@ -432,8 +480,13 @@ class EmailService
         }
     }
 
-    protected function sendAppointmentOwnerNotification(Sale $sale, string $kind, ?bool $wasPaid = null): void
-    {
+    protected function sendAppointmentOwnerNotification(
+        Sale $sale,
+        string $kind,
+        ?bool $wasPaid = null,
+        ?string $oldStartsAt = null,
+        ?int $excludeUserId = null
+    ): void {
         try {
             $event = $sale->event;
             if (! $event) {
@@ -446,14 +499,29 @@ class EmailService
 
             // Pending requests block the slot until the owner acts, so they ride the default-on
             // 'new_request' preference; booked/cancelled notices use the opt-in 'new_sale' one.
-            $preference = $kind === 'pending' ? 'new_request' : 'new_sale';
+            $isMove = in_array($kind, ['rescheduled', 'rescheduled_pending'], true);
+            $preference = ($isMove || $kind === 'pending') ? 'new_request' : 'new_sale';
 
-            foreach ($role->getEditorsWantingNotification($preference) as $editor) {
+            // A move satisfies EITHER preference. getEditorsWantingNotification() returns true only when
+            // the key is absent, so an owner who explicitly set new_request:false - entirely reasonable on
+            // an auto-approve schedule - got no notice of any reschedule at all, which is the exact silent
+            // calendar drift the notification exists to prevent. Someone who turned BOTH off has asked for
+            // silence and still gets it.
+            $editors = $role->getEditorsWantingNotification($preference);
+            if ($isMove) {
+                $editors = $editors->concat($role->getEditorsWantingNotification('new_sale'))->unique('id');
+            }
+
+            foreach ($editors as $editor) {
                 if ($this->isTestEmail($editor->email)) {
                     continue;
                 }
+                // The editor who performed the action does not need telling.
+                if ($excludeUserId && $editor->id === $excludeUserId) {
+                    continue;
+                }
                 SendQueuedEmail::dispatch(
-                    new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind, $wasPaid),
+                    new \App\Mail\AppointmentBookedNotification($sale, $event, $role, $event->appointmentType, $kind, $wasPaid, $oldStartsAt),
                     $editor->email,
                     $role->id,
                     $editor->language_code ?? app()->getLocale()

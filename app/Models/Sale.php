@@ -186,6 +186,18 @@ class Sale extends Model
         return $this->saleTickets->contains(fn ($saleTicket) => $saleTicket->ticket?->is_pass);
     }
 
+    /**
+     * The booking guest's own timezone, when a recognised one was captured - otherwise null so
+     * callers fall back to the schedule's zone.
+     *
+     * Validated on read as well as on write: BackupService restores this column straight from the
+     * archive, so a legacy or hand-edited row can still hold anything.
+     */
+    public function guestTimezone(): ?string
+    {
+        return \App\Utils\AppointmentTimeUtils::resolveTimezone($this->guest_timezone);
+    }
+
     public function boostCampaign()
     {
         return $this->belongsTo(BoostCampaign::class);

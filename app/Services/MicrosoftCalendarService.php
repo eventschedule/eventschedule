@@ -897,6 +897,15 @@ class MicrosoftCalendarService
      */
     protected function updateEventFromMicrosoft(array $item, Event $event, Role $role): bool
     {
+        // Appointment bookings are owned by this app, never by the calendar. Our own outbound
+        // dispatchCalendarSync('update') can come straight back in here, and this method would then
+        // rewrite name, description, starts_at and duration from the remote copy - so a schedule with
+        // calendar_description_template set would get the rendered template written back over the
+        // guest's notes, and a rescheduled booking could be dragged back to its old time.
+        if ($event->appointment_type_id) {
+            return false;
+        }
+
         $event->name = ($item['subject'] ?? '') ?: __('messages.untitled_event');
 
         if (! empty($item['body']['content'])) {

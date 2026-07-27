@@ -123,6 +123,150 @@ class AppointmentSlotTest extends TestCase
         $this->assertContains('16:00', $labels);
     }
 
+    /**
+     * A booking being rescheduled must stop blocking itself. Without the exclusion, its own slot and
+     * every neighbouring slot that overlaps the time it holds are hidden - so the guest cannot even
+     * pick the adjacent half hour.
+     */
+    public function test_exclude_event_id_frees_the_bookings_own_slot_and_its_neighbours(): void
+    {
+        $role = $this->role();
+        $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays(), 'slot_interval_minutes' => 15]);
+
+        // The booking under move: 10:00-10:30 EDT (14:00 UTC), and an unrelated one at 13:00 EDT.
+        $mine = $this->createEvent($role, ['starts_at' => '2026-09-07 14:00:00', 'duration' => 0.5, 'is_accepted' => true]);
+        $other = $this->createEvent($role, ['starts_at' => '2026-09-07 17:00:00', 'duration' => 0.5, 'is_accepted' => true]);
+
+        $now = Carbon::parse('2026-09-07 00:00:00', 'America/New_York');
+        $labels = fn ($exclude) => array_column(
+            $this->service()->availableSlots($type, '2026-09-07', 1, $now, true, $exclude)['days']['2026-09-07'],
+            'label'
+        );
+
+        // Without the exclusion its own block and the overlapping neighbours are gone.
+        $before = $labels(null);
+        $this->assertNotContains('10:00', $before);
+        $this->assertNotContains('10:15', $before);
+
+        // With it, they are all offered again - including the slot it currently holds, which is a
+        // legitimate "keep this time" no-op.
+        $after = $labels($mine->id);
+        $this->assertContains('10:00', $after);
+        $this->assertContains('10:15', $after);
+
+        // Excluding one booking must not free anyone else's.
+        $this->assertNotContains('13:00', $after);
+        // ...and excluding the other one frees 13:00 while 10:00 goes back to being blocked.
+        $otherExcluded = $labels($other->id);
+        $this->assertContains('13:00', $otherExcluded);
+        $this->assertNotContains('10:00', $otherExcluded);
+    }
+
+    public function test_exclude_event_id_flows_through_is_slot_available(): void
+    {
+        $role = $this->role();
+        $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays()]);
+        $mine = $this->createEvent($role, ['starts_at' => '2026-09-07 14:00:00', 'duration' => 0.5, 'is_accepted' => true]);
+
+        $now = Carbon::parse('2026-09-07 00:00:00', 'America/New_York');
+
+        $this->assertFalse($this->service()->isSlotAvailable($type, '2026-09-07T14:00:00Z', $now));
+        $this->assertTrue($this->service()->isSlotAvailable($type, '2026-09-07T14:00:00Z', $now, $mine->id));
+    }
+
+    /**
+     * The exclusion must reach nextAvailableDate(), a third computeDays() caller. Without it the
+     * "next available" link skips the very day the guest is trying to move within.
+     */
+    public function test_exclude_event_id_reaches_the_next_available_lookahead(): void
+    {
+        $role = $this->role();
+        $type = $this->createAppointmentType($role, [
+            // One 30-minute slot per day, so a single booking fills a day completely.
+            'weekly_windows' => $this->allDays('09:00', '09:30'),
+            // The queried day is closed, which forces the lookahead to run in both branches.
+            'date_overrides' => ['2026-09-08' => []],
+        ]);
+        // Fills 2026-09-09's only slot: 09:00 EDT = 13:00 UTC.
+        $mine = $this->createEvent($role, ['starts_at' => '2026-09-09 13:00:00', 'duration' => 0.5, 'is_accepted' => true]);
+
+        $now = Carbon::parse('2026-09-07 08:00:00', 'America/New_York');
+
+        $withoutExclusion = $this->service()->availableSlots($type, '2026-09-08', 1, $now);
+        $withExclusion = $this->service()->availableSlots($type, '2026-09-08', 1, $now, true, $mine->id);
+
+        // Both had to fall through to the lookahead.
+        $this->assertEmpty($withoutExclusion['days']);
+        $this->assertEmpty($withExclusion['days']);
+
+        // The booking hides its own day from the lookahead; excluding it brings that day back.
+        $this->assertSame('2026-09-10', $withoutExclusion['next_available_date']);
+        $this->assertSame('2026-09-09', $withExclusion['next_available_date']);
+    }
+
+    /**
+     * Owner mode drops min-notice and the booking window, which exist to constrain guests. Buffers
+     * and busy intervals must survive it or the owner could double-book.
+     */
+    public function test_owner_mode_ignores_min_notice_and_booking_window_but_not_busy_time(): void
+    {
+        $role = $this->role();
+        $type = $this->createAppointmentType($role, [
+            'weekly_windows' => $this->allDays(),
+            'min_notice_hours' => 48,
+            'max_advance_days' => 1,
+        ]);
+        $this->createEvent($role, ['starts_at' => '2026-09-07 14:00:00', 'duration' => 1, 'is_accepted' => true]);
+
+        $now = Carbon::parse('2026-09-07 09:00:00', 'America/New_York');
+
+        // Guest path: 48h notice wipes today out entirely.
+        $guest = $this->service()->availableSlots($type, '2026-09-07', 1, $now)['days']['2026-09-07'] ?? [];
+        $this->assertEmpty($guest);
+
+        // Owner path: today is offered.
+        $owner = $this->service()->availableSlots($type, '2026-09-07', 1, $now, true, null, true)['days']['2026-09-07'] ?? [];
+        $this->assertNotEmpty($owner);
+        $ownerLabels = array_column($owner, 'label');
+        $this->assertContains('12:00', $ownerLabels);
+        // ...but the 10:00-11:00 booking still blocks.
+        $this->assertNotContains('10:00', $ownerLabels);
+        $this->assertNotContains('10:30', $ownerLabels);
+
+        // And max_advance_days = 1 no longer caps the owner.
+        $farOut = $this->service()->availableSlots($type, '2026-10-15', 1, $now, true, null, true)['days'] ?? [];
+        $this->assertNotEmpty($farOut);
+        $guestFarOut = $this->service()->availableSlots($type, '2026-10-15', 1, $now)['days'] ?? [];
+        $this->assertEmpty($guestFarOut);
+    }
+
+    /**
+     * Owner mode drops min-notice to zero, not below it. $earliest is the only past-slot floor
+     * computeDays() has, so relaxing it to startOfDay() offered this morning's elapsed slots - and a
+     * booking moved into the past can no longer be moved OR cancelled by anyone.
+     */
+    public function test_owner_mode_never_offers_an_elapsed_slot(): void
+    {
+        $type = $this->createAppointmentType($this->role(), [
+            'weekly_windows' => $this->allDays(),
+            'min_notice_hours' => 48,
+        ]);
+
+        // Mid-window, so there are elapsed slots to leak and open ones to keep.
+        $now = Carbon::parse('2026-09-07 13:20:00', 'America/New_York');
+
+        $labels = array_column(
+            $this->service()->availableSlots($type, '2026-09-07', 1, $now, true, null, true)['days']['2026-09-07'] ?? [],
+            'label'
+        );
+
+        $this->assertNotEmpty($labels, 'owner mode still ignores the 48h notice');
+        foreach (['09:00', '10:00', '12:00', '13:00'] as $elapsed) {
+            $this->assertNotContains($elapsed, $labels, "$elapsed already passed and must not be offered");
+        }
+        $this->assertContains('13:30', $labels, 'the next slot after now is still offered');
+    }
+
     public function test_recurring_event_blocks_matching_days(): void
     {
         $role = $this->role();
