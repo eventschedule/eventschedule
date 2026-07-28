@@ -136,20 +136,12 @@
             background-clip: text;
         }
 
-        /* Signature motif: a row of verdict marks (check vs cross) */
-        .es-verdict {
-            flex: 0 0 auto;
-            animation: es-verdict-pulse var(--vd-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--vd-delay, 0s);
-        }
-        @keyframes es-verdict-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); }
-        }
+        /* The hero used to carry a pulsing row of check/cross verdict marks
+           along its bottom edge. Removed by request - the pulsing read as
+           distracting. Do not reintroduce it. */
 
         @media (prefers-reduced-motion: reduce) {
-            .es-verdict, .animate-pulse-slow { animation: none !important; }
-            .es-verdict { opacity: 0.55; transform: none; }
+            .animate-pulse-slow { animation: none !important; }
         }
     </style>
 
@@ -172,20 +164,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <div class="es-verdicts absolute bottom-6 left-0 right-0 mx-auto hidden h-14 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 14; $i++)
-                    @php $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.28; $win = $i % 3 !== 2; $sz = [20, 26, 18, 24][$i % 4]; @endphp
-                    <span class="es-verdict {{ $win ? 'text-emerald-500' : 'text-gray-400 dark:text-gray-600' }}" style="--vd-dur: {{ $dur }}s; --vd-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                            @if ($win)
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            @else
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            @endif
-                        </svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">

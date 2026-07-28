@@ -1,0 +1,1468 @@
+/**
+ * Documentation design system.
+ *
+ * Loaded only by the docs layout (see the `docs` prop on MarketingLayout), so
+ * none of this weighs on the 100+ other marketing pages. It replaces the
+ * 337-line <style> partial that used to be inlined on every doc page.
+ *
+ * Every colour is a custom property declared twice - once on :root, once under
+ * .dark - the same shape as --brand-blue in marketing-app.css. Nothing below
+ * hardcodes a hex except the code rail, which is dark in BOTH modes by design.
+ *
+ * Plain CSS on purpose: marketing-app.css already emits Tailwind's
+ * base/components/utilities layers, and a second copy would duplicate them.
+ * Tailwind's content globs already cover resources/views/**, so the utility
+ * classes used by the docs components still generate normally.
+ */
+
+/* ==========================================================================
+   1. Tokens
+   ========================================================================== */
+
+:root {
+    /* Surfaces */
+    --doc-ground: #ffffff;
+    --doc-ground-alt: #f9fafb;
+    --doc-surface: #ffffff;
+    --doc-surface-2: #f9fafb;
+    --doc-surface-3: #f3f4f6;
+    --doc-surface-solid: #ffffff;
+
+    /* Borders */
+    --doc-border: rgba(17, 24, 39, 0.10);
+    --doc-border-soft: rgba(17, 24, 39, 0.06);
+    --doc-border-strong: rgba(17, 24, 39, 0.18);
+
+    /* Text ramp - aligned to the tailwind.config.js gray overrides so tokens
+       and utility classes never drift. */
+    --doc-text-strong: #1e1e1e;
+    --doc-text: #3e3e42;
+    --doc-text-muted: #6b7280;
+    --doc-text-faint: #9ca3af;
+
+    /* Links - the same blue <x-link> renders, so the two are one thing */
+    --doc-link: #2563eb;
+    --doc-link-hover: #1d4ed8;
+    --doc-link-underline: rgba(37, 99, 235, 0.35);
+
+    --doc-focus: #4e81fa;
+
+    /* Section accent, overridden by the .doc-accent-* classes below */
+    --doc-hue: #2563eb;
+    --doc-hue-2: #06b6d4;
+    --doc-hue-soft: rgba(37, 99, 235, 0.10);
+    --doc-hue-text: #1d4ed8;
+
+    /* Inline code is deliberately NEUTRAL, not tinted: at ~576 occurrences a
+       coloured chip competes with the body links, which are also blue, and the
+       reader loses "blue means clickable". */
+    --doc-inline-bg: rgba(17, 24, 39, 0.055);
+    --doc-inline-fg: #2d2d30;
+    --doc-inline-border: rgba(17, 24, 39, 0.08);
+
+    /* Callout tints. Weighted on purpose - see section 5. */
+    --doc-info-bg: rgba(37, 99, 235, 0.05);
+    --doc-info-line: rgba(37, 99, 235, 0.24);
+    --doc-info-fg: #1d4ed8;
+
+    --doc-tip-bg: rgba(6, 182, 212, 0.07);
+    --doc-tip-line: rgba(6, 182, 212, 0.28);
+    --doc-tip-fg: #0e7490;
+
+    --doc-ok-bg: rgba(16, 185, 129, 0.07);
+    --doc-ok-line: rgba(16, 185, 129, 0.28);
+    --doc-ok-fg: #047857;
+
+    --doc-warn-bg: rgba(245, 158, 11, 0.11);
+    --doc-warn-line: rgba(245, 158, 11, 0.38);
+    --doc-warn-fg: #b45309;
+
+    --doc-plan-bg: rgba(17, 24, 39, 0.045);
+    --doc-plan-line: rgba(17, 24, 39, 0.12);
+    --doc-plan-fg: #2d2d30;
+
+    /* Tables */
+    --doc-zebra: rgba(17, 24, 39, 0.022);
+    --doc-row-hover: rgba(78, 129, 250, 0.055);
+
+    /* Shadows */
+    --doc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --doc-shadow-md: 0 1px 2px rgba(15, 23, 42, 0.05), 0 8px 24px -14px rgba(15, 23, 42, 0.30);
+    --doc-shadow-lg: 0 1px 2px rgba(15, 23, 42, 0.06), 0 20px 44px -24px rgba(15, 23, 42, 0.38);
+
+    --doc-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+
+    /* Layout rhythm. The marketing header is sticky at h-16 (64px); the docs
+       scripts scroll to headerOffset 80. All three agree at 5rem. */
+    --doc-header-h: 4rem;
+    --doc-scroll-offset: 5rem;
+    --doc-rail-top: 5rem;
+}
+
+.dark {
+    --doc-ground: #0a0a0f;
+    --doc-ground-alt: #0f0f14;
+    --doc-surface: rgba(255, 255, 255, 0.04);
+    --doc-surface-2: rgba(255, 255, 255, 0.055);
+    --doc-surface-3: rgba(255, 255, 255, 0.09);
+    --doc-surface-solid: #15151c;
+
+    --doc-border: rgba(255, 255, 255, 0.10);
+    --doc-border-soft: rgba(255, 255, 255, 0.06);
+    --doc-border-strong: rgba(255, 255, 255, 0.20);
+
+    --doc-text-strong: #ffffff;
+    --doc-text: #d1d5db;
+    --doc-text-muted: #9ca3af;
+    --doc-text-faint: #6b7280;
+
+    --doc-link: #6b9aff;
+    --doc-link-hover: #a5c8ff;
+    --doc-link-underline: rgba(107, 154, 255, 0.38);
+
+    --doc-focus: #7ca8ff;
+
+    --doc-hue: #7ca8ff;
+    --doc-hue-2: #22d3ee;
+    --doc-hue-soft: rgba(124, 168, 255, 0.16);
+    --doc-hue-text: #93c5fd;
+
+    --doc-inline-bg: rgba(255, 255, 255, 0.08);
+    --doc-inline-fg: #e5e7eb;
+    --doc-inline-border: rgba(255, 255, 255, 0.10);
+
+    --doc-info-bg: rgba(96, 165, 250, 0.08);
+    --doc-info-line: rgba(96, 165, 250, 0.24);
+    --doc-info-fg: #93c5fd;
+
+    --doc-tip-bg: rgba(34, 211, 238, 0.10);
+    --doc-tip-line: rgba(34, 211, 238, 0.26);
+    --doc-tip-fg: #67e8f9;
+
+    --doc-ok-bg: rgba(52, 211, 153, 0.10);
+    --doc-ok-line: rgba(52, 211, 153, 0.26);
+    --doc-ok-fg: #6ee7b7;
+
+    --doc-warn-bg: rgba(251, 191, 36, 0.12);
+    --doc-warn-line: rgba(251, 191, 36, 0.38);
+    --doc-warn-fg: #fcd34d;
+
+    --doc-plan-bg: rgba(255, 255, 255, 0.05);
+    --doc-plan-line: rgba(255, 255, 255, 0.12);
+    --doc-plan-fg: #e5e7eb;
+
+    --doc-zebra: rgba(255, 255, 255, 0.022);
+    --doc-row-hover: rgba(107, 154, 255, 0.07);
+
+    --doc-shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
+    --doc-shadow-md: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 12px 32px -22px rgba(0, 0, 0, 0.9);
+    --doc-shadow-lg: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 24px 56px -28px rgba(0, 0, 0, 1);
+}
+
+/* ==========================================================================
+   2. Section accents
+   A class rather than an inline style, because the value has to be
+   mode-aware. Set once on the page wrapper; every primitive below reads it.
+   ========================================================================== */
+
+.doc-accent-guide { --doc-hue: #2563eb; --doc-hue-2: #0ea5e9; --doc-hue-soft: rgba(37, 99, 235, 0.10); --doc-hue-text: #1d4ed8; }
+.doc-accent-selfhost { --doc-hue: #0284c7; --doc-hue-2: #22d3ee; --doc-hue-soft: rgba(2, 132, 199, 0.10); --doc-hue-text: #0369a1; }
+.doc-accent-saas { --doc-hue: #0891b2; --doc-hue-2: #2dd4bf; --doc-hue-soft: rgba(8, 145, 178, 0.10); --doc-hue-text: #0e7490; }
+.doc-accent-developer { --doc-hue: #059669; --doc-hue-2: #14b8a6; --doc-hue-soft: rgba(5, 150, 105, 0.10); --doc-hue-text: #047857; }
+
+.dark .doc-accent-guide { --doc-hue: #7ca8ff; --doc-hue-2: #38bdf8; --doc-hue-soft: rgba(124, 168, 255, 0.16); --doc-hue-text: #93c5fd; }
+.dark .doc-accent-selfhost { --doc-hue: #38bdf8; --doc-hue-2: #22d3ee; --doc-hue-soft: rgba(56, 189, 248, 0.16); --doc-hue-text: #7dd3fc; }
+.dark .doc-accent-saas { --doc-hue: #22d3ee; --doc-hue-2: #5eead4; --doc-hue-soft: rgba(34, 211, 238, 0.16); --doc-hue-text: #67e8f9; }
+.dark .doc-accent-developer { --doc-hue: #34d399; --doc-hue-2: #2dd4bf; --doc-hue-soft: rgba(52, 211, 153, 0.16); --doc-hue-text: #6ee7b7; }
+
+/* ==========================================================================
+   3. Shell
+   The content column is CAPPED, not 1fr: at 1920px a fluid column renders
+   ~110ch of prose, far past the comfortable 60-75ch. Capping and centering
+   turns the surplus into outer margin instead.
+   ========================================================================== */
+
+.doc-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 2.5rem;
+    justify-content: center;
+}
+
+@media (min-width: 1024px) {
+    .doc-shell {
+        grid-template-columns: 16rem minmax(0, 52rem);
+    }
+}
+
+@media (min-width: 1280px) {
+    .doc-shell {
+        grid-template-columns: 16rem minmax(0, 52rem) 16rem;
+    }
+}
+
+/* The reference layout (API docs) keeps a two-column shell: its endpoint/code
+   split lives INSIDE the content column, so a third rail would not fit. */
+@media (min-width: 1024px) {
+    .doc-shell--reference {
+        grid-template-columns: 16rem minmax(0, 1fr);
+    }
+}
+
+.doc-shell--reference .doc-main {
+    /* overflow-x: clip leaves overflow-y visible, which is the one combination
+       that does not kill position: sticky on the rails. Do not use hidden. */
+    overflow-x: clip;
+}
+
+.doc-rail {
+    position: sticky;
+    top: var(--doc-rail-top);
+    max-height: calc(100vh - var(--doc-rail-top) - 1.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    padding-bottom: 1.5rem;
+}
+
+.doc-rail::-webkit-scrollbar { width: 3px; }
+.doc-rail::-webkit-scrollbar-thumb { background: var(--doc-border); border-radius: 3px; }
+
+.doc-rail-left { display: none; }
+.doc-rail-right { display: none; }
+
+@media (min-width: 1024px) {
+    .doc-rail-left { display: block; }
+}
+
+@media (min-width: 1280px) {
+    .doc-rail-right { display: block; }
+}
+
+/* Tailwind's display utilities (flex, block, grid) beat the [hidden]
+   attribute's UA `display: none`, so an element toggled with `hidden` in JS
+   stays visible. The search widget's clear button and its "/" hint are both
+   absolutely positioned in the same spot, so without this they overlap. */
+[hidden] {
+    display: none !important;
+}
+
+/* The grid fades out before the content starts, so the hero band and the
+   shell below meet without a hard seam. */
+.doc-hero-grid {
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 92%);
+    mask-image: linear-gradient(to bottom, black 0%, transparent 92%);
+}
+
+/* ==========================================================================
+   4. Prose, sections, headings
+   ========================================================================== */
+
+.doc-prose {
+    /* The old .prose-dark carried `padding-bottom: 20vh` so the final section
+       could scroll high enough for the scroll-position spy to register it. The
+       spy is an IntersectionObserver now, so the runway is no longer needed
+       and the page tail no longer opens with a large void. */
+    padding-bottom: 1rem;
+    color: var(--doc-text);
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.doc-prose p { margin: 0 0 1rem; }
+.doc-prose > p:last-child { margin-bottom: 0; }
+.doc-prose strong { color: var(--doc-text-strong); font-weight: 600; }
+
+.doc-section {
+    padding-bottom: 2.5rem;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--doc-border-soft);
+    scroll-margin-top: var(--doc-scroll-offset);
+}
+
+.doc-section:last-of-type { border-bottom: 0; margin-bottom: 0; }
+.doc-section [id] { scroll-margin-top: var(--doc-scroll-offset); }
+
+.doc-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0 0 1.125rem;
+    font-size: clamp(1.375rem, 1.15rem + 0.7vw, 1.625rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.012em;
+    color: var(--doc-text-strong);
+    scroll-margin-top: var(--doc-scroll-offset);
+}
+
+/* The leading icon becomes a tinted chip. `.doc-heading > svg` (0,1,1)
+   outranks the inline `.w-5 .h-5 .text-gray-400` utilities (0,1,0), so all 41
+   pages pick this up with no markup change. The copy-link button's svg is not
+   a direct child, so it stays untouched. */
+.doc-heading > svg {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 1.875rem;
+    height: 1.875rem;
+    padding: 0.3125rem;
+    border-radius: 0.5625rem;
+    background: var(--doc-hue-soft);
+    color: var(--doc-hue-text);
+}
+
+/* h3. Replaces `class="doc-heading text-lg ..."`, which relied on source order
+   to beat .doc-heading's own 1.5rem. The gutter tick is what makes a sub-head
+   findable while scrolling a 1600-line page; bolder text alone is not. */
+.doc-subheading {
+    position: relative;
+    margin: 2.5rem 0 0.875rem;
+    padding-inline-start: 0.875rem;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: -0.006em;
+    color: var(--doc-text-strong);
+    scroll-margin-top: var(--doc-scroll-offset);
+}
+
+.doc-subheading::before {
+    content: "";
+    position: absolute;
+    inset-block: 0.2em 0.2em;
+    inset-inline-start: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--doc-hue);
+}
+
+.doc-heading + .doc-subheading { margin-top: 1.25rem; }
+.doc-subheading + p,
+.doc-subheading + ul,
+.doc-subheading + ol { margin-top: 0; }
+
+.doc-heading-copy {
+    background: none;
+    border: 0;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--doc-text-faint);
+    opacity: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: opacity 0.2s, color 0.2s;
+}
+
+.doc-heading:hover .doc-heading-copy,
+.doc-heading-copy:focus-visible { opacity: 1; }
+.doc-heading-copy:hover { color: var(--doc-hue); }
+.doc-heading-copy:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: 2px; }
+
+/* ==========================================================================
+   5. Links
+   ========================================================================== */
+
+.doc-prose a,
+.doc-link {
+    color: var(--doc-link);
+    text-decoration: underline;
+    text-decoration-color: var(--doc-link-underline);
+    text-decoration-thickness: from-font;
+    text-underline-offset: 0.18em;
+    border-radius: 0.125rem;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.doc-prose a:hover,
+.doc-link:hover { color: var(--doc-link-hover); text-decoration-color: currentColor; }
+.doc-prose a:focus-visible,
+.doc-link:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: 2px; }
+
+/* Structural links (cards, nav, buttons) are not prose and opt out. */
+.doc-prose a.doc-unstyled,
+.doc-prose a.doc-unstyled:hover { color: inherit; text-decoration: none; }
+
+/* Inline code inside a link keeps the link colour as the only colour cue. */
+a .doc-inline-code { color: inherit; }
+
+/* ==========================================================================
+   6. Callouts
+   Icons arrive via a CSS mask on ::before, so all 184 existing callouts get
+   one without touching a single blade file. Body text stays the normal prose
+   colour - only the title and icon carry the tint. Tinting the whole block is
+   why info callouts used to read as a wall of blue.
+   ========================================================================== */
+
+.doc-callout {
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    column-gap: 0.75rem;
+    padding: 0.9375rem 1.125rem;
+    margin: 0 0 1.5rem;
+    border: 1px solid var(--doc-callout-line);
+    border-inline-start-width: 3px;
+    border-radius: 0.75rem;
+    background: var(--doc-callout-bg);
+    color: var(--doc-text);
+    font-size: 0.9375rem;
+    line-height: 1.65;
+}
+
+.doc-callout > * { grid-column: 2; }
+.doc-callout > :last-child { margin-bottom: 0; }
+
+.doc-callout::before {
+    content: "";
+    grid-column: 1;
+    grid-row: 1;
+    align-self: start;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.0625rem;
+    background-color: var(--doc-callout-fg);
+    -webkit-mask: var(--doc-callout-icon) center / 1.25rem 1.25rem no-repeat;
+    mask: var(--doc-callout-icon) center / 1.25rem 1.25rem no-repeat;
+}
+
+.doc-callout-title {
+    margin-bottom: 0.25rem;
+    font-weight: 650;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    color: var(--doc-callout-fg);
+}
+
+.doc-callout .doc-inline-code { background: var(--doc-inline-bg); }
+
+/* info is the quietest of the set on purpose: it is 58% of all callouts, and
+   at that share an attention-grabbing treatment stops meaning anything. */
+.doc-callout-info {
+    --doc-callout-bg: var(--doc-info-bg);
+    --doc-callout-line: var(--doc-info-line);
+    --doc-callout-fg: var(--doc-info-fg);
+    --doc-callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11.5v4.5M12 7.75h.01'/%3E%3C/svg%3E");
+}
+
+.doc-callout-tip {
+    --doc-callout-bg: var(--doc-tip-bg);
+    --doc-callout-line: var(--doc-tip-line);
+    --doc-callout-fg: var(--doc-tip-fg);
+    --doc-callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.5 18h5M10.5 21h3M12 3a6 6 0 0 0-3.6 10.8c.5.4.8 1 .9 1.6l.1.6h5.2l.1-.6c.1-.6.4-1.2.9-1.6A6 6 0 0 0 12 3Z'/%3E%3C/svg%3E");
+}
+
+.doc-callout-success {
+    --doc-callout-bg: var(--doc-ok-bg);
+    --doc-callout-line: var(--doc-ok-line);
+    --doc-callout-fg: var(--doc-ok-fg);
+    --doc-callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='m8.4 12.2 2.4 2.4 4.8-5'/%3E%3C/svg%3E");
+}
+
+/* the only variant that should stop the eye */
+.doc-callout-warning {
+    --doc-callout-bg: var(--doc-warn-bg);
+    --doc-callout-line: var(--doc-warn-line);
+    --doc-callout-fg: var(--doc-warn-fg);
+    --doc-callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 4.4 2.7 17.5A1.9 1.9 0 0 0 4.4 20.4h15.2a1.9 1.9 0 0 0 1.7-2.9L13.7 4.4a1.9 1.9 0 0 0-3.4 0Z'/%3E%3Cpath d='M12 9.5v3.8M12 16.7h.01'/%3E%3C/svg%3E");
+}
+
+/* Graphite on purpose: the colour comes from the <x-doc-badge> inside, so a
+   plan notice can never be mistaken for an info callout. */
+.doc-callout-plan {
+    --doc-callout-bg: var(--doc-plan-bg);
+    --doc-callout-line: var(--doc-plan-line);
+    --doc-callout-fg: var(--doc-plan-fg);
+    --doc-callout-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4.5' y='10.5' width='15' height='9.5' rx='2'/%3E%3Cpath d='M8.25 10.5V7.75a3.75 3.75 0 0 1 7.5 0v2.75'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   7. Spec cards
+   The surface flips from gray-inset (a box punched INTO the page) to raised,
+   which is what stops a run of them reading as a wall of flat gray boxes.
+   ========================================================================== */
+
+.doc-fields { display: grid; gap: 0.75rem; margin: 0 0 1.5rem; }
+.doc-fields--2 { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); }
+
+.doc-field {
+    position: relative;
+    overflow: hidden;
+    padding: 0.875rem 1.0625rem;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.875rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-sm);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+/* Hue tick in the gutter: quiet at rest, full on hover. Gives a stack of cards
+   rhythm without adding colour weight. */
+.doc-field::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    background: var(--doc-hue);
+    opacity: 0.28;
+    transition: opacity 0.18s ease;
+}
+
+.doc-field:hover {
+    border-color: var(--doc-border-strong);
+    box-shadow: var(--doc-shadow-md);
+    transform: translateY(-1px);
+}
+
+.doc-field:hover::before { opacity: 1; }
+
+/* Element selectors, so the existing inner nodes keep their utilities
+   harmlessly - `.doc-field > h4` (0,1,1) beats `.font-semibold` (0,1,0). */
+.doc-field > h4,
+.doc-field > h3,
+.doc-field-title {
+    margin: 0 0 0.25rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--doc-text-strong);
+}
+
+.doc-field > p,
+.doc-field-desc {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--doc-text-muted);
+}
+
+.doc-field > p + p { margin-top: 0.5rem; }
+
+/* Opt-in for the 9 runs of 6+ cards, where individual raised cards start to
+   read as a wall again. Collapses them into one container of hairline rows. */
+.doc-fields--grouped {
+    gap: 0;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.875rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-sm);
+    overflow: hidden;
+}
+
+.doc-fields--grouped .doc-field {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    transform: none;
+    border-bottom: 1px solid var(--doc-border-soft);
+}
+
+.doc-fields--grouped .doc-field:last-child { border-bottom: 0; }
+.doc-fields--grouped .doc-field::before { opacity: 0; }
+.doc-fields--grouped .doc-field:hover { background: var(--doc-surface-2); transform: none; box-shadow: none; }
+.doc-fields--grouped .doc-field:hover::before { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-field { transition: none; }
+    .doc-field:hover { transform: none; }
+}
+
+/* ==========================================================================
+   8. FAQ accordion
+   ========================================================================== */
+
+.doc-faqs { display: grid; gap: 0.625rem; margin: 0 0 1.5rem; }
+
+.doc-faq {
+    overflow: hidden;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.875rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-sm);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.doc-faq:hover { border-color: var(--doc-border-strong); box-shadow: var(--doc-shadow-md); }
+.doc-faq[open] { border-color: var(--doc-hue-soft); }
+
+.doc-faq > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.0625rem;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--doc-text-strong);
+    list-style: none;
+}
+
+.doc-faq > summary::-webkit-details-marker { display: none; }
+.doc-faq > summary::marker { content: ""; }
+.doc-faq > summary:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: -2px; }
+
+.doc-faq-chev {
+    flex: 0 0 auto;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--doc-text-faint);
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.doc-faq[open] > summary .doc-faq-chev { transform: rotate(180deg); color: var(--doc-hue); }
+
+.doc-faq-body {
+    padding: 0 1.0625rem 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--doc-text-muted);
+}
+
+.doc-faq-body > :last-child { margin-bottom: 0; }
+.doc-faq[open] > .doc-faq-body { animation: doc-faq-in 0.18s ease-out; }
+
+@keyframes doc-faq-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-faq[open] > .doc-faq-body { animation: none; }
+    .doc-faq-chev { transition: none; }
+}
+
+/* ==========================================================================
+   9. Tables
+   ========================================================================== */
+
+.doc-table-wrap {
+    position: relative;
+    margin: 0 0 1.5rem;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.875rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-sm);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    /* "There is more to the right" cue, pure CSS: the two gradient shadows are
+       background-attachment: scroll, so they only show while content is
+       clipped. The two surface-coloured layers are local and mask them out at
+       the ends. */
+    background-image:
+        linear-gradient(to right, var(--doc-surface-solid), transparent),
+        linear-gradient(to left, var(--doc-surface-solid), transparent),
+        linear-gradient(to right, rgba(15, 23, 42, 0.10), transparent),
+        linear-gradient(to left, rgba(15, 23, 42, 0.10), transparent);
+    background-repeat: no-repeat;
+    background-size: 32px 100%, 32px 100%, 14px 100%, 14px 100%;
+    background-position: 0 0, 100% 0, 0 0, 100% 0;
+    background-attachment: local, local, scroll, scroll;
+}
+
+.dark .doc-table-wrap {
+    background-image:
+        linear-gradient(to right, #15151c, transparent),
+        linear-gradient(to left, #15151c, transparent),
+        linear-gradient(to right, rgba(0, 0, 0, 0.5), transparent),
+        linear-gradient(to left, rgba(0, 0, 0, 0.5), transparent);
+}
+
+.doc-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+
+.doc-table thead th {
+    padding: 0.625rem 1rem;
+    text-align: start;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--doc-text-muted);
+    background: var(--doc-surface-2);
+    border-bottom: 1px solid var(--doc-border);
+}
+
+.doc-table tbody td {
+    padding: 0.6875rem 1rem;
+    line-height: 1.55;
+    color: var(--doc-text);
+    border-bottom: 1px solid var(--doc-border-soft);
+    vertical-align: top;
+}
+
+.doc-table tbody tr:last-child td { border-bottom: 0; }
+.doc-table tbody tr:nth-child(even) td { background: var(--doc-zebra); }
+.doc-table tbody tr:hover td { background: var(--doc-row-hover); }
+
+/* Column 1 is the key/name in practically every docs table. */
+.doc-table tbody td:first-child { color: var(--doc-text-strong); font-weight: 500; }
+.doc-table td .doc-inline-code { white-space: nowrap; }
+
+@media (max-width: 640px) {
+    .doc-table { font-size: 0.8125rem; }
+    .doc-table thead th,
+    .doc-table tbody td { padding: 0.5625rem 0.75rem; }
+
+    /* Freeze the key column so a row never loses its label while scrolling. */
+    .doc-table tbody td:first-child,
+    .doc-table thead th:first-child {
+        position: sticky;
+        inset-inline-start: 0;
+        z-index: 1;
+        background: var(--doc-surface-solid);
+        box-shadow: 1px 0 0 var(--doc-border-soft);
+    }
+
+    .doc-table thead th:first-child { background: var(--doc-surface-2); }
+    .doc-table tbody tr:nth-child(even) td:first-child { background: var(--doc-surface-solid); }
+}
+
+/* ==========================================================================
+   10. Code
+   The rail is #0d1117 in BOTH modes. Code is a different medium, and the
+   pages that actually carry code are the install and API guides, where a dark
+   terminal block is what a reader expects: the 19 prose-heavy User Guide
+   pages contain 2 code blocks between them. One always-dark surface also
+   means ONE syntax palette rather than two that must both be contrast-checked
+   and kept from drifting - which is why the old violet/pink set could never
+   be fixed in isolation.
+   ========================================================================== */
+
+.doc-code-block {
+    --code-bg: #0d1117;
+    --code-fg: #d7dee8;
+    --code-comment: #8b98a9;
+    --code-keyword: #79c0ff;
+    --code-string: #7ee787;
+    --code-variable: #56d4dd;
+    --code-value: #f0b849;
+
+    position: relative;
+    margin: 0 0 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.875rem;
+    overflow: hidden;
+    background: var(--code-bg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.10), 0 16px 36px -26px rgba(15, 23, 42, 0.55);
+}
+
+.dark .doc-code-block {
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 20px 44px -30px rgba(0, 0, 0, 1);
+}
+
+.doc-code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.625rem 0.5rem 0.875rem;
+    background: rgba(255, 255, 255, 0.035);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    font-size: 0.75rem;
+    color: var(--code-comment);
+}
+
+/* Language chip - the first <span> in the existing markup, no change needed. */
+.doc-code-header > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    background: rgba(255, 255, 255, 0.06);
+    color: #c9d1d9;
+    font-family: var(--doc-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.doc-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    color: #c9d1d9;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.doc-copy-btn:hover { background: rgba(255, 255, 255, 0.13); border-color: rgba(255, 255, 255, 0.20); color: #fff; }
+.doc-copy-btn:focus-visible { outline: 2px solid #7cb0ff; outline-offset: 2px; }
+
+/* docs.js adds .text-green-400 on success; keep that contract but make it
+   legible on the dark rail. */
+.doc-copy-btn.text-green-400 {
+    color: #7ee787 !important;
+    border-color: rgba(126, 231, 135, 0.35);
+    background: rgba(126, 231, 135, 0.12);
+}
+
+.doc-code-block pre {
+    margin: 0;
+    padding: 1rem 1.125rem;
+    overflow-x: auto;
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    tab-size: 2;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.doc-code-block pre::-webkit-scrollbar { height: 8px; }
+.doc-code-block pre::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.16); border-radius: 4px; }
+
+.doc-code-block code {
+    font-family: var(--doc-mono);
+    font-variant-ligatures: none;
+    color: var(--code-fg);
+}
+
+.doc-code-block--wrap pre code { white-space: pre-wrap; word-break: break-word; }
+
+/* Hue assignment keeps the two nearest colours apart in practice: in .env
+   files a cyan key is followed by an amber value, in SQL a blue keyword is
+   followed by a green string. Blue/cyan/green is the brand ramp; amber is the
+   only outsider and is already in the system as Enterprise/warning. */
+.code-comment { color: var(--code-comment); font-style: italic; }
+.code-keyword { color: var(--code-keyword); }
+.code-string { color: var(--code-string); }
+.code-variable { color: var(--code-variable); }
+.code-value { color: var(--code-value); }
+
+.doc-inline-code {
+    padding: 0.0625rem 0.3125rem;
+    border: 1px solid var(--doc-inline-border);
+    border-radius: 0.3125rem;
+    background: var(--doc-inline-bg);
+    color: var(--doc-inline-fg);
+    font-family: var(--doc-mono);
+    font-size: 0.85em;
+    font-variant-ligatures: none;
+    word-break: break-word;
+}
+
+.doc-heading .doc-inline-code,
+.doc-subheading .doc-inline-code { font-size: 0.78em; }
+
+/* ==========================================================================
+   11. Lists and steps
+   ========================================================================== */
+
+.doc-list { list-style: none; margin: 0 0 1.25rem; padding-inline-start: 0; color: var(--doc-text); }
+.doc-list li { position: relative; padding-inline-start: 1.375rem; line-height: 1.65; }
+.doc-list li + li { margin-top: 0.4375rem; }
+
+.doc-list li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.25rem;
+    top: 0.6875rem;
+    width: 0.3125rem;
+    height: 0.3125rem;
+    border-radius: 50%;
+    background: var(--doc-hue);
+    opacity: 0.55;
+}
+
+.doc-list .doc-list { margin: 0.4375rem 0 0; padding-inline-start: 0.5rem; }
+
+.doc-list.doc-list-numbered { counter-reset: doc-li; }
+.doc-list.doc-list-numbered li { counter-increment: doc-li; padding-inline-start: 2.125rem; }
+
+.doc-list.doc-list-numbered li::before {
+    content: counter(doc-li);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inset-inline-start: 0;
+    top: 0.1875rem;
+    width: 1.3125rem;
+    height: 1.3125rem;
+    border-radius: 50%;
+    background: var(--doc-hue-soft);
+    color: var(--doc-hue-text);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 1;
+}
+
+/* Procedure primitive with a connector rail, for walkthroughs whose steps
+   carry a screenshot or a callout - things .doc-list's single-line <li>
+   cannot hold. */
+.doc-steps { list-style: none; counter-reset: doc-step; margin: 0 0 1.75rem; padding: 0; }
+
+.doc-step {
+    counter-increment: doc-step;
+    position: relative;
+    padding-inline-start: 3rem;
+    padding-bottom: 1.75rem;
+}
+
+.doc-step:last-child { padding-bottom: 0; }
+
+.doc-step::before {
+    content: counter(doc-step);
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 50%;
+    background: var(--doc-hue-soft);
+    color: var(--doc-hue-text);
+    border: 2px solid var(--doc-ground);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.doc-step::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.875rem;
+    top: 2.125rem;
+    bottom: 0.25rem;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--doc-border);
+}
+
+.doc-step:last-child::after { display: none; }
+
+.doc-step-title {
+    margin: 0.1875rem 0 0.4375rem;
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.4;
+    color: var(--doc-text-strong);
+}
+
+.doc-step > p { margin: 0 0 0.75rem; }
+.doc-step > :last-child { margin-bottom: 0; }
+.doc-steps--compact .doc-step { padding-bottom: 1rem; }
+
+/* ==========================================================================
+   12. Screenshots
+   ========================================================================== */
+
+.doc-shot { margin: 1.5rem 0; }
+
+.doc-shot-frame {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: 0.9375rem;
+    border: 1px solid var(--doc-border);
+    background: var(--doc-surface-2);
+    box-shadow: var(--doc-shadow-lg);
+    text-decoration: none;
+}
+
+.doc-shot-img { display: block; width: 100%; height: auto; }
+
+.doc-shot-zoom {
+    position: absolute;
+    inset-block-end: 0.625rem;
+    inset-inline-end: 0.625rem;
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.375rem;
+    background: rgba(10, 10, 15, 0.78);
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+}
+
+a.doc-shot-frame:hover .doc-shot-zoom,
+a.doc-shot-frame:focus-visible .doc-shot-zoom { opacity: 1; transform: none; }
+a.doc-shot-frame:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: 3px; }
+
+.doc-shot figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--doc-text-muted);
+    text-align: center;
+}
+
+.doc-shot--chrome .doc-shot-frame {
+    border-start-start-radius: 0;
+    border-start-end-radius: 0;
+    border-top: 0;
+}
+
+.doc-shot-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--doc-border);
+    border-bottom: 0;
+    border-start-start-radius: 0.9375rem;
+    border-start-end-radius: 0.9375rem;
+    background: var(--doc-surface-2);
+}
+
+.doc-shot-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--doc-border-strong); }
+
+.doc-shot-url {
+    margin-inline-start: 0.5rem;
+    padding: 0.0625rem 0.5rem;
+    border-radius: 0.3125rem;
+    background: var(--doc-ground);
+    color: var(--doc-text-faint);
+    font-family: var(--doc-mono);
+    font-size: 0.6875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-shot-zoom { transition: none; }
+}
+
+/* ==========================================================================
+   13. See also, pager, CTA
+   ========================================================================== */
+
+.doc-seealso { display: grid; gap: 0.625rem; }
+
+@media (min-width: 640px) {
+    .doc-seealso { grid-template-columns: 1fr 1fr; }
+}
+
+.doc-seealso-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1.125rem;
+    align-items: center;
+    column-gap: 0.75rem;
+    padding: 0.8125rem 1rem;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.8125rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-sm);
+    text-decoration: none !important;
+    transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.doc-seealso-item:hover {
+    border-color: var(--doc-hue);
+    box-shadow: var(--doc-shadow-md);
+    transform: translateY(-1px);
+}
+
+.doc-seealso-title { grid-column: 1; font-size: 0.9375rem; font-weight: 600; color: var(--doc-text-strong); }
+.doc-seealso-blurb { grid-column: 1; font-size: 0.8125rem; line-height: 1.5; color: var(--doc-text-muted); }
+
+.doc-seealso-arrow {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--doc-text-faint);
+    transition: transform 0.18s, color 0.18s;
+}
+
+.doc-seealso-item:hover .doc-seealso-arrow { color: var(--doc-hue); transform: translateX(2px); }
+[dir="rtl"] .doc-seealso-item:hover .doc-seealso-arrow { transform: translateX(-2px); }
+
+/* Prev / next. A slim bar, not two chunky cards - it shares the page tail
+   with #see-also and the CTA, and only one of the three should have weight. */
+.doc-pager {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--doc-border-soft);
+}
+
+@media (min-width: 640px) {
+    .doc-pager { grid-template-columns: 1fr 1fr; }
+}
+
+.doc-pager-item {
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.875rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-sm);
+    text-decoration: none !important;
+    transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.doc-pager-item:hover { border-color: var(--doc-hue); box-shadow: var(--doc-shadow-md); transform: translateY(-1px); }
+
+.doc-pager-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--doc-text-faint);
+}
+
+.doc-pager-title { margin-top: 0.25rem; font-size: 0.9375rem; font-weight: 600; color: var(--doc-text-strong); }
+.doc-pager-item--next { text-align: end; align-items: flex-end; }
+.doc-pager-item--next .doc-pager-label { flex-direction: row-reverse; }
+.doc-pager-spacer { display: none; }
+
+@media (min-width: 640px) {
+    .doc-pager-spacer { display: block; }
+}
+
+/* End-of-page panel. Deliberately not es-finale-panel: no confetti, no
+   data-reveal, one static glow. */
+.doc-cta {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 2.5rem;
+    padding: 1.375rem 1.5rem;
+    border: 1px solid var(--doc-border);
+    border-radius: 1.125rem;
+    background: var(--doc-surface);
+    box-shadow: var(--doc-shadow-md);
+}
+
+.doc-cta::before {
+    content: "";
+    position: absolute;
+    inset-block-start: -60%;
+    inset-inline-end: -12%;
+    width: 20rem;
+    height: 20rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle, var(--doc-hue), transparent 62%);
+    opacity: 0.10;
+    pointer-events: none;
+}
+
+.dark .doc-cta::before { opacity: 0.16; }
+
+.doc-cta-icon {
+    position: relative;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.8125rem;
+    background: var(--doc-hue-soft);
+    color: var(--doc-hue-text);
+}
+
+.doc-cta-body { position: relative; flex: 1 1 16rem; min-width: 0; }
+.doc-cta-title { margin: 0 0 0.1875rem; font-size: 1.0625rem; font-weight: 700; color: var(--doc-text-strong); }
+.doc-cta-text { margin: 0; font-size: 0.875rem; line-height: 1.55; color: var(--doc-text-muted); }
+.doc-cta-actions { position: relative; display: flex; flex-wrap: wrap; gap: 0.625rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-seealso-item,
+    .doc-pager-item { transition: none; }
+    .doc-seealso-item:hover,
+    .doc-pager-item:hover { transform: none; }
+}
+
+/* ==========================================================================
+   14. Right rail - "On this page"
+   ========================================================================== */
+
+.doc-toc-title {
+    margin: 0 0 0.625rem;
+    padding-inline-start: 0.875rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--doc-text-faint);
+}
+
+.doc-toc-list { position: relative; padding-inline-start: 0.875rem; }
+
+.doc-toc-rail {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--doc-border-soft);
+}
+
+/* The moving thumb. docs.js sets --toc-y / --toc-h / --toc-o on .doc-toc-list. */
+.doc-toc-rail::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0;
+    width: 2px;
+    height: var(--toc-h, 0px);
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--doc-hue), var(--doc-hue-2));
+    opacity: var(--toc-o, 0);
+    transform: translateY(var(--toc-y, 0px));
+    transition:
+        transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.2s ease;
+}
+
+.doc-toc-link {
+    display: block;
+    padding: 0.3125rem 0.5rem;
+    border-radius: 0.4375rem;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--doc-text-muted);
+    text-decoration: none;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.doc-toc-link:hover { color: var(--doc-text-strong); background: var(--doc-surface-2); }
+.doc-toc-link:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: -2px; }
+/* The rail is the indicator, so the link itself only needs weight. */
+.doc-toc-link.active { color: var(--doc-text-strong); font-weight: 600; }
+.doc-toc-link--sub { padding-inline-start: 1.25rem; font-size: 0.78125rem; }
+
+/* ==========================================================================
+   15. Left rail - all-pages nav
+   ========================================================================== */
+
+.doc-nav { font-size: 0.8125rem; }
+
+.doc-nav-group + .doc-nav-group { margin-top: 1.25rem; }
+
+.doc-nav-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.375rem 0.5rem;
+    border: 0;
+    background: none;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--doc-text-faint);
+    text-decoration: none;
+    transition: color 0.15s;
+}
+
+a.doc-nav-group-header:hover { color: var(--doc-text-strong); }
+.doc-nav-group.is-current > .doc-nav-group-header { color: var(--doc-hue-text); }
+
+.doc-nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0.5rem 0.375rem 0.75rem;
+    border-radius: 0.4375rem;
+    color: var(--doc-text-muted);
+    text-decoration: none;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.doc-nav-link:hover { color: var(--doc-text-strong); background: var(--doc-surface-2); }
+.doc-nav-link:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: -2px; }
+
+.doc-nav-link[aria-current="page"] {
+    color: var(--doc-text-strong);
+    font-weight: 600;
+    background: var(--doc-hue-soft);
+}
+
+.doc-nav-link[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    inset-block: 0.3125rem;
+    inset-inline-start: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--doc-hue);
+}
+
+/* Accordion, used only in the right rail now: the left rail renders every
+   group expanded, because collapsing hides the cross-section discoverability
+   a persistent nav exists to provide. Rows animate on grid-template-rows
+   rather than a max-height guess, which used to clip at 600px. */
+.doc-nav-chevron { width: 14px; height: 14px; flex-shrink: 0; transition: transform 0.2s; }
+.doc-nav-group.expanded .doc-nav-chevron { transform: rotate(90deg); }
+[dir="rtl"] .doc-nav-group.expanded .doc-nav-chevron { transform: rotate(-90deg); }
+
+.doc-nav-group-items {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+}
+
+.doc-nav-group-items > * { overflow: hidden; min-height: 0; }
+.doc-nav-group.expanded .doc-nav-group-items { grid-template-rows: 1fr; }
+
+/* ==========================================================================
+   16. Mobile bar and drawers
+   Sticky UNDER the header, not fixed to the bottom: the accessibility widget
+   owns bottom-right at z-index 2147483647.
+   ========================================================================== */
+
+.doc-mobilebar {
+    position: sticky;
+    top: var(--doc-header-h);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--doc-border);
+    background: var(--doc-ground);
+    transition: transform 0.25s ease;
+}
+
+/* Hidden on scroll down, re-pinned on scroll up: 64px of header plus 48px of
+   bar is 17% of a 667px viewport spent on chrome while reading. */
+.doc-mobilebar.is-hidden { transform: translateY(calc(-100% - var(--doc-header-h))); }
+
+@media (min-width: 1024px) {
+    .doc-mobilebar { display: none; }
+}
+
+.doc-mobilebar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0.4375rem 0.625rem;
+    border: 1px solid var(--doc-border);
+    border-radius: 0.625rem;
+    background: var(--doc-surface);
+    color: var(--doc-text-strong);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.doc-mobilebar-btn:focus-visible { outline: 2px solid var(--doc-focus); outline-offset: 2px; }
+.doc-mobilebar-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.doc-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    /* No backdrop-filter here: it would make this a containing block for any
+       fixed descendant. */
+}
+
+.doc-drawer-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+@media (max-width: 1023px) {
+    .doc-rail.doc-drawer {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        z-index: 60;
+        display: block;
+        width: min(20rem, 85vw);
+        max-height: none;
+        padding: 1.25rem 1rem;
+        background: var(--doc-surface-solid);
+        box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6);
+        /* transform on the PANEL is fine - the ban is on html/body only. */
+        transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .doc-rail-left.doc-drawer {
+        inset-inline-start: 0;
+        border-inline-end: 1px solid var(--doc-border);
+        transform: translateX(-100%);
+    }
+
+    .doc-rail-right.doc-drawer {
+        inset-inline-end: 0;
+        border-inline-start: 1px solid var(--doc-border);
+        transform: translateX(100%);
+    }
+
+    [dir="rtl"] .doc-rail-left.doc-drawer { transform: translateX(100%); }
+    [dir="rtl"] .doc-rail-right.doc-drawer { transform: translateX(-100%); }
+
+    .doc-rail.doc-drawer.is-open { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .doc-mobilebar,
+    .doc-rail.doc-drawer,
+    .doc-drawer-backdrop,
+    .doc-toc-rail::after,
+    .doc-nav-chevron,
+    .doc-nav-group-items { transition: none; }
+}
+
+/* ==========================================================================
+   17. Print and forced colors
+   ========================================================================== */
+
+@media print {
+    .doc-code-block {
+        --code-bg: #f3f4f6;
+        --code-fg: #2d2d30;
+        --code-comment: #57606a;
+        --code-keyword: #1d4ed8;
+        --code-string: #047857;
+        --code-variable: #0e7490;
+        --code-value: #b45309;
+        border-color: #e5e7eb;
+        box-shadow: none;
+    }
+
+    .doc-code-header { background: rgba(0, 0, 0, 0.04); border-bottom-color: #e5e7eb; color: #57606a; }
+
+    .doc-copy-btn,
+    .doc-rail,
+    .doc-mobilebar,
+    .doc-cta,
+    .doc-pager { display: none !important; }
+
+    .doc-shell { display: block; }
+}
+
+@media (forced-colors: active) {
+    .doc-field,
+    .doc-callout,
+    .doc-code-block,
+    .doc-table-wrap,
+    .doc-faq,
+    .doc-cta { border: 1px solid CanvasText; }
+
+    .doc-callout::before,
+    .doc-subheading::before,
+    .doc-field::before { forced-color-adjust: none; }
+}

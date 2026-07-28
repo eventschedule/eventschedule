@@ -102,21 +102,8 @@
             50% { transform: translateY(-12px) rotate(0.6deg); }
         }
 
-        /* Signature motif: a row of two-way sync arrows pulsing in sync */
-        .es-sync-icon {
-            flex: 0 0 auto;
-            color: rgba(0, 120, 212, 0.8);
-            animation: es-sync-pulse var(--sy-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--sy-delay, 0s);
-        }
-        @keyframes es-sync-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 6px rgba(0, 120, 212, 0.5)); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .es-outlook-float, .es-sync-icon, .animate-pulse-slow, .animate-sync, .animate-pulse { animation: none !important; }
-            .es-sync-icon { opacity: 0.55; transform: none; }
+            .es-outlook-float, .animate-pulse-slow, .animate-sync, .animate-pulse { animation: none !important; }
         }
     </style>
 
@@ -139,15 +126,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <!-- Two-way sync motif along the bottom edge -->
-            <div class="es-syncs absolute bottom-8 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-sync-icon" style="--sy-dur: {{ $dur }}s; --sy-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -533,14 +511,6 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(0, 120, 212, 0.3), rgba(0, 120, 212, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-syncs absolute bottom-6 left-0 right-0 mx-auto flex h-14 items-center justify-center gap-6 px-8 opacity-45" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                        @for ($i = 0; $i < 9; $i++)
-                            @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                            <span class="es-sync-icon" style="--sy-dur: {{ $dur }}s; --sy-delay: {{ $delay }}s;">
-                                <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                            </span>
-                        @endfor
-                    </div>
                 </div>
 
                 <div class="relative z-10">

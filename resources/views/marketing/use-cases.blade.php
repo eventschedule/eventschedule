@@ -3,310 +3,88 @@
     <x-slot name="description">Event scheduling software for musicians, venues, restaurants, and theaters. Share events, sell tickets, send newsletters. Free forever with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">Use Cases</x-slot>
 
+    @php
+        // Shared with /for-talent, which renders the same twelve cards. Editing a
+        // blurb or tag in one place used to leave the other page stale.
+        $performers = config('marketing_audiences.performers');
+        $venues = [
+            ['url' => '/for-bars', 'name' => 'Bars & Pubs', 'blurb' => 'Keep your entertainment calendar fresh and bring in crowds.', 'tags' => ['Craft Beer Bars', 'Wine Bars', 'Sports Bars', 'Cocktail Lounges', 'Irish & British Pubs', 'Dive Bars'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />'],
+            ['url' => '/for-nightclubs', 'name' => 'Nightclubs', 'blurb' => 'Promote DJ lineups, themed nights, and special events.', 'tags' => ['Dance Clubs & EDM', 'Hip-Hop & Urban', 'Latin Clubs', 'Rooftop Clubs', 'Underground & Warehouse', 'VIP Lounges'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />'],
+            ['url' => '/for-music-venues', 'name' => 'Music Venues', 'blurb' => 'Manage concert schedules and sell tickets for every show.', 'tags' => ['Concert Halls', 'Live Music Bars', 'Jazz Clubs', 'Folk & Acoustic', 'Rock & Indie Venues', 'Outdoor Amphitheaters'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />'],
+            ['url' => '/for-theaters', 'name' => 'Theaters', 'blurb' => 'Share your season schedule and sell tickets for every production.', 'tags' => ['Community Theaters', 'Regional Theaters', 'Black Box Theaters', 'Dinner Theaters', 'Children\'s Theaters', 'Outdoor Amphitheaters'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />'],
+            ['url' => '/for-comedy-clubs', 'name' => 'Comedy Clubs', 'blurb' => 'Fill seats with a lineup calendar your audience will love.', 'tags' => ['Stand-up Clubs', 'Improv Theaters', 'Open Mic Venues', 'Comedy Bars', 'Sketch Comedy Venues', 'Live Podcast Studios'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'],
+            ['url' => '/for-restaurants', 'name' => 'Restaurants', 'blurb' => 'Promote special dinners, live music nights, and tasting events.', 'tags' => ['Fine Dining', 'Wine Bars & Tapas', 'Farm-to-Table', 'Supper Clubs', 'Casual Dining & Bistros', 'Chef\'s Tables'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18z" />'],
+            ['url' => '/for-breweries-and-wineries', 'name' => 'Breweries & Wineries', 'blurb' => 'Share tastings, tap takeovers, live music, and seasonal events.', 'tags' => ['Craft Breweries', 'Brewpubs & Taprooms', 'Wineries & Vineyards', 'Cideries & Orchards', 'Meaderies & Distilleries', 'Taproom-Only'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />'],
+            ['url' => '/for-art-galleries', 'name' => 'Art Galleries', 'blurb' => 'Promote exhibitions, openings, and artist talks to collectors and fans.', 'tags' => ['Contemporary Art', 'Fine Art Studios', 'Photography Galleries', 'Craft & Maker Studios', 'Artist Collectives', 'Pop-up Spaces'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />'],
+            ['url' => '/for-community-centers', 'name' => 'Community Centers', 'blurb' => 'Keep your community informed about classes, meetings, and events.', 'tags' => ['Recreation Centers', 'Senior Centers', 'Youth Centers', 'Cultural Centers', 'Neighborhood Centers', 'Faith-Based Centers'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />'],
+            ['url' => '/for-farmers-markets', 'name' => 'Farmers Markets', 'blurb' => 'Share your market schedule and build a loyal shopper community.', 'tags' => ['Weekly Farmers Markets', 'Artisan & Craft Markets', 'Flea Markets', 'Holiday Markets', 'Night Markets', 'Specialty Food Markets'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />'],
+            ['url' => '/for-hotels-and-resorts', 'name' => 'Hotels & Resorts', 'blurb' => 'Elevate the guest experience with activity calendars and events.', 'tags' => ['Boutique Hotels', 'Beach Resorts', 'Conference Hotels', 'Spa & Wellness', 'Mountain Lodges', 'Casino Hotels'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />'],
+            ['url' => '/for-libraries', 'name' => 'Libraries', 'blurb' => 'Share programs, author events, and community activities with patrons.', 'tags' => ['Public Libraries', 'University Libraries', 'Community Reading Rooms', 'Children\'s Libraries', 'Archive Centers', 'Mobile Libraries'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'],
+        ];
+        $online = [
+            ['url' => '/for-webinars', 'name' => 'Webinars', 'blurb' => 'Host webinars with built-in registration, ticketing, and streaming link integration.', 'tags' => ['Product Demos', 'Training Sessions', 'Workshops', 'Panel Discussions', 'All-Hands', 'Lectures'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
+            ['url' => '/for-online-classes', 'name' => 'Online Classes', 'blurb' => 'Schedule and sell online classes with recurring sessions and student notifications.', 'tags' => ['Yoga & Fitness', 'Cooking Classes', 'Art & Music Lessons', 'Language Courses', 'Coding Bootcamps', 'Tutoring'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />'],
+            ['url' => '/for-virtual-conferences', 'name' => 'Virtual Conferences', 'blurb' => 'Manage multi-day agendas with tiered ticketing and attendee notifications.', 'tags' => ['Tech Summits', 'Industry Conferences', 'Company Retreats', 'Professional Summits', 'Annual Meetings', 'Panel Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />'],
+            ['url' => '/for-live-qa-sessions', 'name' => 'Live Q&A Sessions', 'blurb' => 'Schedule live Q&A sessions with registration, ticketing, and streaming links.', 'tags' => ['AMAs', 'Town Halls', 'Expert Panels', 'Fireside Chats', 'Community Q&As', 'Office Hours'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />'],
+            ['url' => '/for-watch-parties', 'name' => 'Watch Parties', 'blurb' => 'Schedule watch parties with registration, ticketing, and streaming platform integration.', 'tags' => ['Premiere Screenings', 'Movie Nights', 'Sports Watch Parties', 'Series Finales', 'Documentary Screenings', 'Gaming Events'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />'],
+            ['url' => '/for-live-concerts', 'name' => 'Live Concerts', 'blurb' => 'Stream live concerts, sell virtual tickets alongside venue tickets, and email fans directly.', 'tags' => ['Acoustic Sets', 'Rock Shows', 'Jazz Nights', 'Festival Streams', 'Album Release Shows', 'DJ Sets'], 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />'],
+        ];
+        $faqs = [
+            ['q' => 'Is Event Schedule free?', 'a' => 'Yes. Event Schedule is free forever for creating and sharing your event calendar. You can upgrade to Pro or Enterprise for advanced features like ticketing and newsletters. There are no platform fees on ticket sales - you only pay Stripe\'s standard processing fees.'],
+            ['q' => 'What types of events can I manage?', 'a' => 'Any kind. Musicians share gig schedules, bars list their weekly lineups, theaters manage their season calendars, fitness instructors schedule classes, and conference organizers run multi-day programs. Event Schedule works for in-person events, online events, and hybrid events across every industry.'],
+            ['q' => 'Can I sell tickets with Event Schedule?', 'a' => 'Yes. Sell tickets directly through your event page with Stripe integration. Buyers get QR code tickets for easy check-in at the door. There are no platform fees - you only pay Stripe\'s standard processing fees, so you keep more of your revenue.'],
+            ['q' => 'Does Event Schedule work for online events?', 'a' => 'Yes. Add a streaming link to any event and attendees see it when the event starts. Works with Zoom, Google Meet, YouTube Live, Twitch, or any platform. You can sell tickets for virtual events, run webinars, schedule online classes, and manage virtual conferences.'],
+            ['q' => 'Is Event Schedule open source?', 'a' => 'Yes. Event Schedule is fully open source. You can use the hosted version at eventschedule.com or selfhost it on your own server for complete control over your data and branding. The selfhosted version includes all features with no limits.'],
+        ];
+
+        // The three schedule-type hubs and the developer page are not cards in the
+        // grids, so they are listed explicitly for the ItemList and the counts.
+        $hubPages = [
+            ['url' => '/for-talent', 'name' => 'For Talent'],
+            ['url' => '/for-venues', 'name' => 'For Venues'],
+            ['url' => '/for-curators', 'name' => 'For Curators'],
+            ['url' => '/for-ai-agents', 'name' => 'For AI Agents'],
+        ];
+
+        // Everything the page links, in document order - drives numberOfItems so the
+        // schema can never drift from the markup.
+        $allAudiences = array_merge(
+            [$hubPages[0]], $performers,
+            [$hubPages[1]], $venues,
+            [$hubPages[2]],
+            $online,
+            [$hubPages[3]],
+        );
+
+    @endphp
+
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "name": "Free Event Scheduling Software for Every Industry",
-        "description": "Event scheduling software for musicians, venues, restaurants, theaters, and more. Share events, sell tickets, send newsletters. Free forever with zero platform fees.",
-        "url": "{{ url()->current() }}",
+        "name": "Event Scheduling for Every Industry",
+        "description": "Event scheduling and ticketing for musicians, venues, restaurants, theaters, online events, and more.",
+        "url": "{{ url('/use-cases') }}",
         "mainEntity": {
-        "@type": "ItemList",
-        "name": "Event Schedule Use Cases",
-        "numberOfItems": 34,
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "For Talent",
-                "description": "Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience.",
-                "url": "{{ config('app.url') }}/for-talent"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "For Musicians",
-                "description": "Share your gigs, sync calendars, and let fans follow your shows.",
-                "url": "{{ config('app.url') }}/for-musicians"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "For DJs",
-                "description": "Promote your sets, manage bookings, and grow your following.",
-                "url": "{{ config('app.url') }}/for-djs"
-            },
-            {
-                "@type": "ListItem",
-                "position": 4,
-                "name": "For Comedians",
-                "description": "List your shows, sell tickets, and build your comedy brand.",
-                "url": "{{ config('app.url') }}/for-comedians"
-            },
-            {
-                "@type": "ListItem",
-                "position": 5,
-                "name": "For Circus & Acrobatics",
-                "description": "Showcase circus performances, manage tour dates, and sell tickets directly.",
-                "url": "{{ config('app.url') }}/for-circus-acrobatics"
-            },
-            {
-                "@type": "ListItem",
-                "position": 6,
-                "name": "For Magicians",
-                "description": "Share your magic show schedule, sell tickets, and reach your audience directly.",
-                "url": "{{ config('app.url') }}/for-magicians"
-            },
-            {
-                "@type": "ListItem",
-                "position": 7,
-                "name": "For Spoken Word",
-                "description": "Share your poetry readings and spoken word performances with your audience.",
-                "url": "{{ config('app.url') }}/for-spoken-word"
-            },
-            {
-                "@type": "ListItem",
-                "position": 8,
-                "name": "For Dance Groups",
-                "description": "Schedule performances, workshops, and recitals for your dance company.",
-                "url": "{{ config('app.url') }}/for-dance-groups"
-            },
-            {
-                "@type": "ListItem",
-                "position": 9,
-                "name": "For Theater Performers",
-                "description": "Share your theater schedule, manage auditions, and sell tickets to your shows.",
-                "url": "{{ config('app.url') }}/for-theater-performers"
-            },
-            {
-                "@type": "ListItem",
-                "position": 10,
-                "name": "For Visual Artists",
-                "description": "Share exhibition openings, studio events, and art shows with your audience.",
-                "url": "{{ config('app.url') }}/for-visual-artists"
-            },
-            {
-                "@type": "ListItem",
-                "position": 11,
-                "name": "For Venues",
-                "description": "Bars, clubs, theaters, and event spaces that want to fill their calendar with great events.",
-                "url": "{{ config('app.url') }}/for-venues"
-            },
-            {
-                "@type": "ListItem",
-                "position": 12,
-                "name": "For Bars & Pubs",
-                "description": "Keep your entertainment calendar fresh and bring in crowds.",
-                "url": "{{ config('app.url') }}/for-bars"
-            },
-            {
-                "@type": "ListItem",
-                "position": 13,
-                "name": "For Nightclubs",
-                "description": "Promote DJ sets, themed nights, and special events to your audience.",
-                "url": "{{ config('app.url') }}/for-nightclubs"
-            },
-            {
-                "@type": "ListItem",
-                "position": 14,
-                "name": "For Music Venues",
-                "description": "Fill your stage with great acts. Accept booking requests and sell tickets.",
-                "url": "{{ config('app.url') }}/for-music-venues"
-            },
-            {
-                "@type": "ListItem",
-                "position": 15,
-                "name": "For Theaters",
-                "description": "Manage your season calendar, sell tickets, and promote your productions.",
-                "url": "{{ config('app.url') }}/for-theaters"
-            },
-            {
-                "@type": "ListItem",
-                "position": 16,
-                "name": "For Comedy Clubs",
-                "description": "Book comedians, manage your lineup, and sell tickets to shows.",
-                "url": "{{ config('app.url') }}/for-comedy-clubs"
-            },
-            {
-                "@type": "ListItem",
-                "position": 17,
-                "name": "For Restaurants",
-                "description": "Promote dinner events, wine tastings, and live entertainment to your diners.",
-                "url": "{{ config('app.url') }}/for-restaurants"
-            },
-            {
-                "@type": "ListItem",
-                "position": 18,
-                "name": "For Breweries & Wineries",
-                "description": "Schedule tastings, live music, and taproom events for your guests.",
-                "url": "{{ config('app.url') }}/for-breweries-and-wineries"
-            },
-            {
-                "@type": "ListItem",
-                "position": 19,
-                "name": "For Art Galleries",
-                "description": "Promote exhibitions, openings, and art events to collectors and enthusiasts.",
-                "url": "{{ config('app.url') }}/for-art-galleries"
-            },
-            {
-                "@type": "ListItem",
-                "position": 20,
-                "name": "For Community Centers",
-                "description": "Organize programs, classes, and community events in one shared calendar.",
-                "url": "{{ config('app.url') }}/for-community-centers"
-            },
-            {
-                "@type": "ListItem",
-                "position": 21,
-                "name": "For Hotels & Resorts",
-                "description": "Share guest activities, entertainment, and experiences in one calendar.",
-                "url": "{{ config('app.url') }}/for-hotels-and-resorts"
-            },
-            {
-                "@type": "ListItem",
-                "position": 22,
-                "name": "For Libraries",
-                "description": "Schedule programs, author events, and reading groups for your community.",
-                "url": "{{ config('app.url') }}/for-libraries"
-            },
-            {
-                "@type": "ListItem",
-                "position": 23,
-                "name": "For Curators",
-                "description": "Event curators and promoters who organize and promote events across multiple venues.",
-                "url": "{{ config('app.url') }}/for-curators"
-            },
-            {
-                "@type": "ListItem",
-                "position": 24,
-                "name": "For Food Trucks & Vendors",
-                "description": "Share your location schedule and let customers follow your route.",
-                "url": "{{ config('app.url') }}/for-food-trucks-and-vendors"
-            },
-            {
-                "@type": "ListItem",
-                "position": 25,
-                "name": "For Farmers Markets",
-                "description": "Organize vendor schedules, seasonal markets, and special events.",
-                "url": "{{ config('app.url') }}/for-farmers-markets"
-            },
-            {
-                "@type": "ListItem",
-                "position": 26,
-                "name": "For Fitness & Yoga",
-                "description": "Schedule classes, workshops, and retreats for your fitness community.",
-                "url": "{{ config('app.url') }}/for-fitness-and-yoga"
-            },
-            {
-                "@type": "ListItem",
-                "position": 27,
-                "name": "For Workshop Instructors",
-                "description": "Schedule and promote workshops, courses, and hands-on classes.",
-                "url": "{{ config('app.url') }}/for-workshop-instructors"
-            },
-            {
-                "@type": "ListItem",
-                "position": 28,
-                "name": "For Webinars",
-                "description": "Host webinars with built-in registration, ticketing, and streaming link integration.",
-                "url": "{{ config('app.url') }}/for-webinars"
-            },
-            {
-                "@type": "ListItem",
-                "position": 29,
-                "name": "For Online Classes",
-                "description": "Schedule and sell online classes with built-in registration and video platform integration.",
-                "url": "{{ config('app.url') }}/for-online-classes"
-            },
-            {
-                "@type": "ListItem",
-                "position": 30,
-                "name": "For Virtual Conferences",
-                "description": "Schedule and manage virtual conferences with multi-track programs and ticketing.",
-                "url": "{{ config('app.url') }}/for-virtual-conferences"
-            },
-            {
-                "@type": "ListItem",
-                "position": 31,
-                "name": "For Live Q&A Sessions",
-                "description": "Schedule live Q&A sessions with registration, ticketing, and streaming links.",
-                "url": "{{ config('app.url') }}/for-live-qa-sessions"
-            },
-            {
-                "@type": "ListItem",
-                "position": 32,
-                "name": "For Watch Parties",
-                "description": "Schedule watch parties with registration, ticketing, and streaming platform integration.",
-                "url": "{{ config('app.url') }}/for-watch-parties"
-            },
-            {
-                "@type": "ListItem",
-                "position": 33,
-                "name": "For Live Concerts",
-                "description": "Promote live concert events with ticketing, lineups, and fan notifications.",
-                "url": "{{ config('app.url') }}/for-live-concerts"
-            },
-            {
-                "@type": "ListItem",
-                "position": 34,
-                "name": "For AI Agents",
-                "description": "Full REST API with OpenAPI spec for AI agents and developers to automate scheduling.",
-                "url": "{{ config('app.url') }}/for-ai-agents"
-            }
-        ]
+            "@type": "ItemList",
+            "numberOfItems": {{ count($allAudiences) }},
+            "itemListElement": [
+                @foreach ($allAudiences as $i => $a)
+                {
+                    "@type": "ListItem",
+                    "position": {{ $i + 1 }},
+                    "name": {!! json_encode($a['name'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!},
+                    "url": {!! json_encode(marketing_url($a['url']), JSON_UNESCAPED_SLASHES) !!}
+                }@if (! $loop->last),@endif
+                @endforeach
+            ]
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for creating and sharing your event calendar. You can upgrade to Pro or Enterprise for advanced features like ticketing and newsletters. There are no platform fees on ticket sales - you only pay Stripe's standard processing fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "What types of events can I manage?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Any kind. Musicians share gig schedules, bars list their weekly lineups, theaters manage their season calendars, fitness instructors schedule classes, and conference organizers run multi-day programs. Event Schedule works for in-person events, online events, and hybrid events across every industry."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets with Event Schedule?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Sell tickets directly through your event page with Stripe integration. Buyers get QR code tickets for easy check-in at the door. There are no platform fees - you only pay Stripe's standard processing fees, so you keep more of your revenue."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does Event Schedule work for online events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Add a streaming link to any event and attendees see it when the event starts. Works with Zoom, Google Meet, YouTube Live, Twitch, or any platform. You can sell tickets for virtual events, run webinars, schedule online classes, and manage virtual conferences."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule open source?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is fully open source. You can use the hosted version at eventschedule.com or selfhost it on your own server for complete control over your data and branding. The selfhosted version includes all features with no limits."
-                }
-            }
-        ]
-    }
-    </script>
     </x-slot>
+
+    <x-seo.faq-schema :items="$faqs" />
 
     <style {!! nonce_attr() !!}>
         .text-gradient-usecases {
@@ -337,10 +115,12 @@
         }
     </script>
 
-    <!-- Hero Section -->
-    <section class="es-hero relative flex min-h-[calc(66svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <!-- ============================================================ -->
+    <!-- Hero (compact - on a directory page the cards are the CTA)  -->
+    <!-- ============================================================ -->
+    <section id="top" class="es-hero relative flex min-h-[calc(46svh-4rem)] items-center overflow-hidden bg-white py-14 dark:bg-[#0a0a0f] noise">
         <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 70%, rgba(37, 99, 235, 0.28), rgba(37, 99, 235, 0) 65%);"></div>
             <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 32%, rgba(14, 165, 233, 0.26), rgba(14, 165, 233, 0) 65%);"></div>
             <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.14), rgba(6, 182, 212, 0) 60%);"></div>
             <div class="es-rays absolute inset-0"></div>
@@ -348,802 +128,333 @@
         </div>
 
         <div class="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Use Cases</span>
+            <div class="es-fade-up es-d-1 mb-6 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
+                <span class="relative flex h-2 w-2">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                </span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">Whatever you run</span>
             </div>
 
-            <h1 class="es-balance mb-6 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Event scheduling for every</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-usecases">stage and venue</span></span></span>
+            <h1 class="es-balance mb-5 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Built for every kind</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-usecases">of organizer</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-                Whether you're a performer sharing gigs or a venue filling seats, Event Schedule is designed for you.
+            <p class="es-fade-up es-d-2 mx-auto mb-7 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+                Share your events, <a href="{{ marketing_url('/features/ticketing') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">sell tickets</a> with zero platform fees, and <a href="{{ marketing_url('/features/newsletters') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">email your followers</a> when new dates land. Free forever, open source, and <a href="{{ marketing_url('/selfhost') }}" class="font-medium text-blue-600 hover:underline dark:text-blue-400">selfhostable</a> if you want it on your own server.
             </p>
-        </div>
 
-    </section>
-
-    <!-- Intro Section -->
-    <section class="bg-gray-50 dark:bg-[#0d0d14] py-16">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center">The simple way to share your events</h2>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-4">
-                Event Schedule is a free, <a href="{{ marketing_url('/selfhost') }}" class="text-blue-600 dark:text-blue-400 hover:underline">open-source</a> platform for sharing events, selling tickets, and growing your audience. Whether you run a bar with weekly trivia, perform at venues across the country, or organize virtual conferences, Event Schedule gives you a shareable calendar, built-in <a href="{{ marketing_url('/features/ticketing') }}" class="text-blue-600 dark:text-blue-400 hover:underline">ticketing</a> with zero platform fees, and direct <a href="{{ marketing_url('/features/newsletters') }}" class="text-blue-600 dark:text-blue-400 hover:underline">email newsletters</a> to your followers.
-            </p>
-            <p class="text-lg text-gray-600 dark:text-gray-400">
-                No algorithms, no middlemen. Create your schedule, add your events, and let your audience follow you. Explore the use cases below to see how Event Schedule works for your industry.
-            </p>
+            {{-- Jump row: the mobile wayfinding answer, since the dot nav is lg-only. --}}
+            <nav class="es-fade-up es-d-3 flex flex-wrap items-center justify-center gap-2 lg:hidden" aria-label="Jump to a category">
+                <a href="#performers" class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-400/30 dark:bg-blue-500/10 dark:text-blue-300 dark:hover:bg-blue-500/20">Performers</a>
+                <a href="#venues" class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3.5 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20">Venues</a>
+                <a href="#curators" class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20">Curators</a>
+                <a href="#online" class="inline-flex items-center gap-1.5 rounded-full border border-cyan-200 bg-cyan-50 px-3.5 py-1.5 text-sm font-medium text-cyan-700 transition-colors hover:bg-cyan-100 dark:border-cyan-400/30 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:bg-cyan-500/20">Online</a>
+                <a href="#developers" class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-400/30 dark:bg-slate-500/10 dark:text-slate-300 dark:hover:bg-slate-500/20">Developers</a>
+            </nav>
         </div>
     </section>
 
-    <!-- For Talent Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="{{ marketing_url('/for-talent') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Performers & Artists</h2>
-                    <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+
+    <!-- ============================================================ -->
+    <!-- Performers & Artists                                        -->
+    <!-- ============================================================ -->
+    <section id="performers" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-500/20">
+                        <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                    </span>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Performers &amp; Artists</h2>
+                </div>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, let venues add you to their lineup through booking requests, and email your fans directly when new dates are announced.</p>
+
+                <a href="{{ marketing_url('/for-talent') }}"
+                   class="group mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all text-blue-700 ring-blue-200 hover:bg-blue-50 dark:text-blue-300 dark:ring-blue-400/30 dark:hover:bg-blue-500/10">
+                    See the full Talent guide
+                    <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
             </div>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Musicians, DJs, performers, and artists who want to share their upcoming shows and build their audience. Sync with Google Calendar, let venues add you to their lineup through booking requests, and email your fans directly when new dates are announced.</p>
 
-            <div data-reveal-group="60" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Musicians -->
-                <a href="{{ marketing_url('/for-musicians') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Musicians</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your gigs, sync calendars, and let fans follow your shows.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Solo Artists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Rock & Pop Bands</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Jazz Musicians</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cover Bands</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Tribute Acts</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Session Musicians</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-reveal-group="55">
 
-                <!-- DJs -->
-                <a href="{{ marketing_url('/for-djs') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">DJs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote your sets, manage bookings, and grow your following.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Resident DJs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Touring DJs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">B2B Partners</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Underground DJs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Open Format DJs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Producers</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Comedians -->
-                <a href="{{ marketing_url('/for-comedians') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Comedians</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">List your shows, sell tickets, and build your comedy brand.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stand-Up Comics</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Improv Performers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Sketch Comedy Groups</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Open Mic Regulars</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Touring Headliners</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Comedy Hosts & MCs</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Circus & Acrobatics -->
-                <a href="{{ marketing_url('/for-circus-acrobatics') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Circus & Acrobatics</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Showcase performances and manage tour dates with ease.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Aerialists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Circus Troupes</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Fire Performers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Contortionists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Jugglers & Prop Artists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stilt Walkers</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Magicians -->
-                <a href="{{ marketing_url('/for-magicians') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Magicians</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Book more shows and let audiences find your next performance.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Close-Up Magicians</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stage Illusionists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Mentalists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Children's Entertainers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Corporate Magicians</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Variety Artists</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Spoken Word -->
-                <a href="{{ marketing_url('/for-spoken-word') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-teal-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Spoken Word</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your readings, slams, and open mic nights with your community.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Slam Poets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Spoken Word Artists</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Page Poets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Open Mic Hosts</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Literary Curators</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Workshop Leaders</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Dance Groups -->
-                <a href="{{ marketing_url('/for-dance-groups') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Dance Groups</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote performances, classes, and recitals in one place.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Ballet Companies</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Hip-Hop Crews</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Ballroom & Latin</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Contemporary & Modern</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Folk & Cultural</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Dance Fitness</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Theater Performers -->
-                <a href="{{ marketing_url('/for-theater-performers') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theater Performers</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your productions and auditions with theater fans.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Musical Theater</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Drama & Straight Plays</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Community Theater</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Improv & Sketch</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Experimental & Fringe</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Children's & Youth</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Food Trucks & Vendors -->
-                <a href="{{ marketing_url('/for-food-trucks-and-vendors') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-orange-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Food Trucks & Vendors</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Let customers know where to find you every day of the week.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Food Trucks</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Coffee & Beverage Carts</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">BBQ & Smoker Trucks</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Catering Businesses</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Pop-up Kitchens</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Market Vendors</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Fitness & Yoga Instructors -->
-                <a href="{{ marketing_url('/for-fitness-and-yoga') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Fitness & Yoga Instructors</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your class schedule and let students follow your sessions.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Yoga Teachers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Personal Trainers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Pilates Instructors</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">CrossFit Coaches</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Group Fitness</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Meditation Guides</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Workshop Instructors -->
-                <a href="{{ marketing_url('/for-workshop-instructors') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Workshop Instructors</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">List your workshops and courses to fill every seat.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cooking Classes</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Pottery & Ceramics</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Photography</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Craft & Maker</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Art Teachers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Music Lessons</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Visual Artists -->
-                <a href="{{ marketing_url('/for-visual-artists') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Visual Artists</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Announce exhibitions, open studios, and art fairs to collectors.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Painters & Illustrators</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Sculptors</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Photographers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Printmakers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Mixed Media</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Digital Artists</span>
-                        </div>
-                    </div>
-                </a>
+                @foreach ($performers as $a)
+                    <x-marketing.audience-card
+                        :url="marketing_url($a['url'])"
+                        :name="$a['name']"
+                        :blurb="$a['blurb']"
+                        accent="blue"
+                        :tags="$a['tags']">
+                        <x-slot name="icon">{!! $a['icon'] !!}</x-slot>
+                    </x-marketing.audience-card>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- For Venues Section -->
-    <section class="bg-gray-50 dark:bg-[#0d0d14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="{{ marketing_url('/for-venues') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Venues & Event Spaces</h2>
-                    <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+    <!-- ============================================================ -->
+    <!-- Venues & Event Spaces                                       -->
+    <!-- ============================================================ -->
+    <section id="venues" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-500/20">
+                        <svg class="h-6 w-6 text-amber-700 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                    </span>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Venues &amp; Event Spaces</h2>
+                </div>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Bars, clubs, theaters, restaurants, and every other space that hosts events. Publish your lineup, take booking requests from performers, sell tickets with zero platform fees, and keep your regulars in the loop.</p>
+
+                <a href="{{ marketing_url('/for-venues') }}"
+                   class="group mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all text-amber-800 ring-amber-200 hover:bg-amber-50 dark:text-amber-300 dark:ring-amber-400/30 dark:hover:bg-amber-500/10">
+                    See the full Venues guide
+                    <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </a>
             </div>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Bars, clubs, theaters, and event spaces that host regular events and need to keep their calendar updated. Set up recurring weekly events, accept booking requests from performers, send newsletters to your regulars, and sell tickets with QR code check-in.</p>
 
-            <div data-reveal-group="60" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Bars & Pubs -->
-                <a href="{{ marketing_url('/for-bars') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900 dark:to-yellow-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Bars & Pubs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Keep your entertainment calendar fresh and bring in crowds.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Craft Beer Bars</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Wine Bars</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Sports Bars</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cocktail Lounges</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Irish & British Pubs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Dive Bars</span>
-                        </div>
-                    </div>
-                </a>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" data-reveal-group="55">
 
-                <!-- Nightclubs -->
-                <a href="{{ marketing_url('/for-nightclubs') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Nightclubs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote DJ lineups, themed nights, and special events.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Dance Clubs & EDM</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Hip-Hop & Urban</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Latin Clubs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Rooftop Clubs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Underground & Warehouse</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">VIP Lounges</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Music Venues -->
-                <a href="{{ marketing_url('/for-music-venues') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Music Venues</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Manage concert schedules and sell tickets for every show.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Concert Halls</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Live Music Bars</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Jazz Clubs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Folk & Acoustic</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Rock & Indie Venues</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Outdoor Amphitheaters</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Theaters -->
-                <a href="{{ marketing_url('/for-theaters') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-red-100 to-amber-100 dark:from-red-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-red-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Theaters</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your season schedule and sell tickets for every production.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Community Theaters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Regional Theaters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Black Box Theaters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Dinner Theaters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Children's Theaters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Outdoor Amphitheaters</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Comedy Clubs -->
-                <a href="{{ marketing_url('/for-comedy-clubs') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-100 to-amber-100 dark:from-yellow-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-yellow-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Comedy Clubs</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Fill seats with a lineup calendar your audience will love.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Stand-up Clubs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Improv Theaters</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Open Mic Venues</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Comedy Bars</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Sketch Comedy Venues</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Live Podcast Studios</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Restaurants -->
-                <a href="{{ marketing_url('/for-restaurants') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900 dark:to-emerald-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Restaurants</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote special dinners, live music nights, and tasting events.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Fine Dining</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Wine Bars & Tapas</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Farm-to-Table</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Supper Clubs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Casual Dining & Bistros</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Chef's Tables</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Breweries & Wineries -->
-                <a href="{{ marketing_url('/for-breweries-and-wineries') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Breweries & Wineries</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share tastings, tap takeovers, live music, and seasonal events.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Craft Breweries</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Brewpubs & Taprooms</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Wineries & Vineyards</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cideries & Orchards</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Meaderies & Distilleries</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Taproom-Only</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Art Galleries -->
-                <a href="{{ marketing_url('/for-art-galleries') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Art Galleries</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Promote exhibitions, openings, and artist talks to collectors and fans.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Contemporary Art</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Fine Art Studios</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Photography Galleries</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Craft & Maker Studios</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Artist Collectives</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Pop-up Spaces</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Community Centers -->
-                <a href="{{ marketing_url('/for-community-centers') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Community Centers</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Keep your community informed about classes, meetings, and events.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Recreation Centers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Senior Centers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Youth Centers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cultural Centers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Neighborhood Centers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Faith-Based Centers</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Farmers Markets -->
-                <a href="{{ marketing_url('/for-farmers-markets') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Farmers Markets</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share your market schedule and build a loyal shopper community.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Weekly Farmers Markets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Artisan & Craft Markets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Flea Markets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Holiday Markets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Night Markets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Specialty Food Markets</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Hotels & Resorts -->
-                <a href="{{ marketing_url('/for-hotels-and-resorts') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-amber-100 dark:from-slate-900 dark:to-amber-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-slate-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Hotels & Resorts</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Elevate the guest experience with activity calendars and events.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Boutique Hotels</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Beach Resorts</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Conference Hotels</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Spa & Wellness</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Mountain Lodges</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Casino Hotels</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Libraries -->
-                <a href="{{ marketing_url('/for-libraries') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Libraries</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Share programs, author events, and community activities with patrons.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Public Libraries</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">University Libraries</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Community Reading Rooms</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Children's Libraries</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Archive Centers</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Mobile Libraries</span>
-                        </div>
-                    </div>
-                </a>
+                @foreach ($venues as $a)
+                    <x-marketing.audience-card
+                        :url="marketing_url($a['url'])"
+                        :name="$a['name']"
+                        :blurb="$a['blurb']"
+                        accent="amber"
+                        :tags="$a['tags']">
+                        <x-slot name="icon">{!! $a['icon'] !!}</x-slot>
+                    </x-marketing.audience-card>
+                @endforeach
             </div>
         </div>
     </section>
 
-    <!-- For Curators Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="{{ marketing_url('/for-curators') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Curators & Promoters</h2>
-                    <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+    <!-- ============================================================ -->
+    <!-- Curators & Promoters                                        -->
+    <!-- ============================================================ -->
+    <section id="curators" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/20">
+                        <svg class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                    </span>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Curators &amp; Promoters</h2>
+                </div>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Event promoters, bloggers, and community organizers who aggregate and share events from multiple sources. Import events with AI, pull lineups from venues and performers automatically, and become the go-to calendar for your local scene.</p>
             </div>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Event promoters, bloggers, and community organizers who aggregate and share events from multiple sources. Import events with AI, pull lineups from venues and performers automatically, and become the go-to calendar for your local scene.</p>
 
-            <a href="{{ marketing_url('/for-curators') }}" class="group block relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-blue-100 dark:from-slate-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.01] transition-all">
-                <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <a href="{{ marketing_url('/for-curators') }}" data-reveal data-tilt="1.5"
+               class="es-bento es-tilt-inner group relative block overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-xl dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
                 <div class="relative">
-                    <h3 class="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3">Curate events from across your scene</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-base lg:text-lg mb-6 max-w-3xl">Aggregate events from multiple venues and performers into one shareable schedule. Be the go-to source for what's happening in your community.</p>
-                    <div class="flex flex-wrap gap-2 mb-8">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Event Promoters</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Music Bloggers</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Community Organizers</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Scene Guides</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Local Media</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Tourism Boards</span>
+                    <h3 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400 lg:text-3xl">Curate events from across your scene</h3>
+                    <p class="mb-6 max-w-3xl text-base text-gray-600 dark:text-gray-400 lg:text-lg">Aggregate events from multiple venues and performers into one shareable schedule. Be the go-to source for what's happening in your community.</p>
+                    <p class="mb-6 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">{{ implode(' · ', ['Event Promoters', 'Music Bloggers', 'Community Organizers', 'Scene Guides', 'Local Media', 'Tourism Boards']) }}</p>
+
+                    @php
+                        $curatorTiles = [
+                            ['AI Import', 'Paste a URL or image, AI extracts event details', 'M13 10V3L4 14h7v7l9-11h-7z'],
+                            ['Aggregation', 'Pull events from venues, performers, and other curators', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'],
+                            ['Approval Workflow', 'Review and approve events before publishing', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                            ['Build Your Following', 'Followers get notified when you add events', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                        ];
+                    @endphp
+                    <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach ($curatorTiles as [$tileTitle, $tileBody, $tilePath])
+                            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-white/5">
+                                <span class="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-500/20">
+                                    <svg class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $tilePath }}" /></svg>
+                                </span>
+                                <h4 class="mb-1 text-sm font-semibold text-gray-900 dark:text-white">{{ $tileTitle }}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $tileBody }}</p>
+                            </div>
+                        @endforeach
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                        <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
-                                <svg aria-hidden="true" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
-                            </div>
-                            <h4 class="text-gray-900 dark:text-white font-semibold text-sm mb-1">AI Import</h4>
-                            <p class="text-gray-400 text-xs">Paste a URL or image, AI extracts event details</p>
-                        </div>
-                        <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
-                                <svg aria-hidden="true" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </div>
-                            <h4 class="text-gray-900 dark:text-white font-semibold text-sm mb-1">Aggregation</h4>
-                            <p class="text-gray-400 text-xs">Pull events from venues, performers, and other curators</p>
-                        </div>
-                        <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
-                                <svg aria-hidden="true" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h4 class="text-gray-900 dark:text-white font-semibold text-sm mb-1">Approval Workflow</h4>
-                            <p class="text-gray-400 text-xs">Review and approve events before publishing</p>
-                        </div>
-                        <div class="rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5">
-                            <div class="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center mb-3">
-                                <svg aria-hidden="true" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </div>
-                            <h4 class="text-gray-900 dark:text-white font-semibold text-sm mb-1">Build Your Following</h4>
-                            <p class="text-gray-400 text-xs">Followers get notified when you add events</p>
-                        </div>
-                    </div>
-
-                    <span class="inline-flex items-center text-blue-600 dark:text-blue-400 font-semibold group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
+                    <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-600 transition-all group-hover:gap-2.5 dark:text-emerald-400">
                         Learn more
-                        <svg aria-hidden="true" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                        <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                 </div>
+                <div class="es-glare"></div>
             </a>
         </div>
     </section>
 
-    <!-- For Online Events Section -->
-    <section class="bg-gray-50 dark:bg-[#0d0d14] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="{{ marketing_url('/features/online-events') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Online Events</h2>
-                    <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Webinars, virtual conferences, live streams, and online classes. Schedule events with built-in registration, ticketing, and streaming platform integration.</p>
-
-            <div data-reveal-group="60" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Webinars -->
-                <a href="{{ marketing_url('/for-webinars') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Webinars</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Host webinars with built-in registration, ticketing, and streaming link integration.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Product Demos</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Training Sessions</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Workshops</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Panel Discussions</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">All-Hands</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Lectures</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Online Classes -->
-                <a href="{{ marketing_url('/for-online-classes') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Online Classes</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Schedule and sell online classes with recurring sessions and student notifications.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Yoga & Fitness</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Cooking Classes</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Art & Music Lessons</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Language Courses</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Coding Bootcamps</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Tutoring</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Virtual Conferences -->
-                <a href="{{ marketing_url('/for-virtual-conferences') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Virtual Conferences</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Manage multi-day agendas with tiered ticketing and attendee notifications.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Tech Summits</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Industry Conferences</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Company Retreats</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Professional Summits</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Annual Meetings</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Panel Events</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Live Q&A Sessions -->
-                <a href="{{ marketing_url('/for-live-qa-sessions') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-amber-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Q&A Sessions</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Schedule live Q&A sessions with registration, ticketing, and streaming links.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">AMAs</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Town Halls</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Expert Panels</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Fireside Chats</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Community Q&As</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Office Hours</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Watch Parties -->
-                <a href="{{ marketing_url('/for-watch-parties') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Watch Parties</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Schedule watch parties with registration, ticketing, and streaming platform integration.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Premiere Screenings</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Movie Nights</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Sports Watch Parties</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Series Finales</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Documentary Screenings</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Gaming Events</span>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Live Concerts -->
-                <a href="{{ marketing_url('/for-live-concerts') }}" data-reveal class="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 border border-gray-200 dark:border-white/10 p-8 hover:scale-[1.02] transition-all">
-                    <div class="absolute inset-0 bg-gradient-to-br from-teal-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="relative flex flex-col h-full">
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Live Concerts</h3>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-grow">Stream live concerts, sell virtual tickets alongside venue tickets, and email fans directly.</p>
-                        <div class="flex flex-wrap gap-2">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Acoustic Sets</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Rock Shows</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Jazz Nights</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Festival Streams</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Album Release Shows</span>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">DJ Sets</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- For Developers Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-24">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="{{ marketing_url('/for-ai-agents') }}" class="group inline-flex items-center gap-2">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">For Developers & AI Agents</h2>
-                    <svg aria-hidden="true" class="w-6 h-6 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mb-12 max-w-3xl">Automate event scheduling with a full REST API, OpenAPI spec, llms.txt, and agents.json. Build integrations or let AI agents manage events programmatically.</p>
-
-            <a href="{{ marketing_url('/for-ai-agents') }}" class="group block relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-100 to-sky-100 dark:from-slate-900 dark:to-sky-900 border border-gray-200 dark:border-white/10 p-8 lg:p-10 hover:scale-[1.01] transition-all max-w-2xl">
-                <div class="absolute inset-0 bg-gradient-to-br from-sky-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="relative">
-                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">AI Agents & API</h3>
-                    <p class="text-gray-600 dark:text-gray-300 text-base mb-6">Full REST API with OpenAPI spec for AI agents and developers to create events, manage tickets, and automate scheduling. Zero fees.</p>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">OpenAI</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Claude</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">LangChain</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">Custom Agents</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gray-200 dark:bg-white/10 text-gray-600 dark:text-gray-300 text-xs">REST API</span>
-                    </div>
-                    <span class="inline-flex items-center text-blue-600 dark:text-blue-400 font-semibold group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">
-                        Learn more
-                        <svg aria-hidden="true" class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+    <!-- ============================================================ -->
+    <!-- Online Events                                               -->
+    <!-- ============================================================ -->
+    <section id="online" class="scroll-mt-24 bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-500/20">
+                        <svg class="h-6 w-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
                     </span>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Online Events</h2>
                 </div>
-            </a>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Webinars, classes, conferences, and watch parties that happen on a screen instead of in a room. Add your streaming link to any event and attendees get it on their ticket. <a href="{{ marketing_url('/features/online-events') }}" class="font-medium text-cyan-700 hover:underline dark:text-cyan-400">See how online events work</a>.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="55">
+                @foreach ($online as $a)
+                    <x-marketing.audience-card
+                        :url="marketing_url($a['url'])"
+                        :name="$a['name']"
+                        :blurb="$a['blurb']"
+                        accent="cyan"
+                        :tags="$a['tags']">
+                        <x-slot name="icon">{!! $a['icon'] !!}</x-slot>
+                    </x-marketing.audience-card>
+                @endforeach
+            </div>
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="bg-gray-100 dark:bg-black/30 py-24">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
+    <!-- ============================================================ -->
+    <!-- Developers & AI Agents                                      -->
+    <!-- ============================================================ -->
+    <section id="developers" class="scroll-mt-24 bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-10 max-w-3xl" data-reveal>
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-500/20">
+                        <svg class="h-6 w-6 text-slate-600 dark:text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                    </span>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">For Developers &amp; AI Agents</h2>
+                </div>
+                <p class="text-lg text-gray-600 dark:text-gray-400">Every schedule is also a REST API, a set of signed webhooks, and a public calendar feed. Agents can discover all of it on their own and run multi-step flows without anyone wiring them up first.</p>
+                <a href="{{ marketing_url('/for-ai-agents') }}"
+                   class="group mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all text-slate-700 ring-slate-300 hover:bg-slate-100 dark:text-slate-300 dark:ring-slate-400/30 dark:hover:bg-slate-500/10">
+                    See the full developer guide
+                    <svg aria-hidden="true" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+            </div>
+
+            {{-- Live request. es-band-dark is fixed-dark in both themes, the same treatment
+                 /for-ai-agents uses for its quickstart. --}}
+            <div class="es-band-dark noise relative mb-6 overflow-hidden rounded-[2.5rem] border border-white/[0.06] p-6 sm:p-8 lg:p-10" data-reveal="panel">
+                <div class="mb-5 flex items-center gap-1.5">
+                    <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FF5F57;"></span>
+                    <span class="h-2.5 w-2.5 rounded-full" style="background-color: #FEBC2E;"></span>
+                    <span class="h-2.5 w-2.5 rounded-full" style="background-color: #28C840;"></span>
+                    <span dir="ltr" class="ms-3 font-mono text-[11px] text-gray-500">GET /api/events</span>
+                </div>
+                <pre dir="ltr" class="overflow-x-auto font-mono text-[12px] leading-relaxed text-gray-300 sm:text-[13px]"><code><span class="text-emerald-400">$ curl https://eventschedule.com/api/events \
+    -H "X-API-Key: $EVENTSCHEDULE_KEY"</span>
+
+{
+  "data": [
+    {
+      "id": "8Q2Kx",
+      "name": "Jazz Night",
+      "starts_at": "2026-03-15 20:00:00",
+      "venue_name": "Blue Note",
+      "url": "https://bluenote.eventschedule.com/jazz-night"
+    }
+  ],
+  "meta": { "per_page": 100, "total": 42 }
+}</code></pre>
+                <p class="mt-5 text-xs text-gray-400">300 read / 30 write requests per minute &middot; offset pagination &middot; the same API on selfhosted installs</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group="55">
+                <x-marketing.audience-card
+                    :url="marketing_url('/docs/developer/api#authentication')"
+                    name="REST API"
+                    blurb="Create schedules, events, tickets and sales from your own code. JSON in, JSON out, on every plan."
+                    accent="slate"
+                    :external="false"
+                    :tags="['Schedules', 'Events', 'Sales', 'Categories', 'Feedback', 'Sub-schedules']">
+                    <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></x-slot>
+                </x-marketing.audience-card>
+                <x-marketing.audience-card
+                    :url="marketing_url('/docs/developer/webhooks#event-types')"
+                    name="Webhooks"
+                    blurb="Get a signed POST the moment a ticket sells, an event changes, or someone scans in at the door."
+                    accent="slate"
+                    :external="false"
+                    :tags="['HMAC-SHA256 signed', 'Automatic retries', 'Delivery log']">
+                    <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></x-slot>
+                </x-marketing.audience-card>
+                <x-marketing.audience-card
+                    :url="url('/api/openapi.json')"
+                    name="OpenAPI spec"
+                    blurb="Every operation described in OpenAPI 3.0.3, so you can generate a typed client in your language."
+                    accent="slate"
+                    :external="true"
+                    :tags="['26 operations', 'Generate a client', 'Always current']">
+                    <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></x-slot>
+                </x-marketing.audience-card>
+                <x-marketing.audience-card
+                    :url="marketing_url('/for-ai-agents')"
+                    name="Built for AI agents"
+                    blurb="Agents discover the API on their own and run multi-step flows without a human wiring them up."
+                    accent="slate"
+                    :external="false"
+                    :tags="['llms.txt', 'llms-full.txt', 'agents.json', 'Named flows']">
+                    <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></x-slot>
+                </x-marketing.audience-card>
+                <x-marketing.audience-card
+                    :url="marketing_url('/docs/sharing#calendar-feeds')"
+                    name="Calendar feeds"
+                    blurb="Every schedule publishes a public iCal and RSS feed. No auth, no tokens, just a URL to subscribe to."
+                    accent="slate"
+                    :external="false"
+                    :tags="['iCal', 'RSS', 'No auth needed', 'Auto-updating']">
+                    <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" /></x-slot>
+                </x-marketing.audience-card>
+                <x-marketing.audience-card
+                    :url="marketing_url('/features/embed-calendar')"
+                    name="Embed anywhere"
+                    blurb="Drop your calendar or a ticket checkout into any site with a single iframe."
+                    accent="slate"
+                    :external="false"
+                    :tags="['Calendar embed', 'Ticket widget', 'One iframe']">
+                    <x-slot name="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25z" /></x-slot>
+                </x-marketing.audience-card>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- FAQ                                                         -->
+    <!-- ============================================================ -->
+    <section class="bg-white py-16 dark:bg-[#0a0a0f] lg:py-24">
+        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div class="mb-12 text-center">
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
                     Frequently asked <span class="text-gradient-usecases">questions</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal>
                     Common questions about Event Schedule.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                <details name="faq" data-reveal class="bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900 rounded-2xl border border-blue-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is Event Schedule free?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Event Schedule is free forever for creating and sharing your event calendar. You can upgrade to Pro or Enterprise for advanced features like ticketing and newsletters. There are no platform fees on ticket sales - you only pay Stripe's standard processing fees.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900 rounded-2xl border border-sky-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            What types of events can I manage?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Any kind. Musicians share gig schedules, bars list their weekly lineups, theaters manage their season calendars, fitness instructors schedule classes, and conference organizers run multi-day programs. Event Schedule works for in-person events, online events, and hybrid events across every industry.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 rounded-2xl border border-emerald-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Can I sell tickets with Event Schedule?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Sell tickets directly through your event page with Stripe integration. Buyers get QR code tickets for easy check-in at the door. There are no platform fees - you only pay Stripe's standard processing fees, so you keep more of your revenue.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 rounded-2xl border border-amber-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Does Event Schedule work for online events?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Add a streaming link to any event and attendees see it when the event starts. Works with Zoom, Google Meet, YouTube Live, Twitch, or any platform. You can sell tickets for virtual events, run webinars, schedule online classes, and manage virtual conferences.
-                    </p>
-                </details>
-
-                <details name="faq" data-reveal class="bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900 rounded-2xl border border-teal-200 dark:border-white/10 shadow-sm overflow-hidden group/faq">
-                    <summary class="flex items-center justify-between p-6 cursor-pointer">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            Is Event Schedule open source?
-                        </h3>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </summary>
-                    <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">
-                        Yes. Event Schedule is fully open source. You can use the hosted version at eventschedule.com or selfhost it on your own server for complete control over your data and branding. The selfhosted version includes all features with no limits.
-                    </p>
-                </details>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faq)
+                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-colors hover:border-blue-300 dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-blue-500/40">
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-gray-400 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </summary>
+                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $faq['a'] }}</p>
+                    </details>
+                @endforeach
             </div>
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
     <!-- Finale                                                      -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-gray-50 px-2 py-16 dark:bg-[#0d0d14] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
             <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-blue-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -1153,10 +464,10 @@
 
                 <div class="relative z-10">
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Ready to share <span class="text-gradient-usecases">your events?</span>
+                        Whatever you run, <span class="text-gradient-usecases">start free</span>
                     </h2>
                     <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Create your free schedule and start reaching your audience today.
+                        Create your schedule in seconds. No credit card, no platform fees, ever.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
@@ -1181,7 +492,32 @@
         </div>
     </section>
 
+    <!-- Section dot navigation (desktop) -->
+    @php
+        $dotSections = [
+            ['top', 'Top'],
+            ['performers', 'Performers'],
+            ['venues', 'Venues'],
+            ['curators', 'Curators'],
+            ['online', 'Online'],
+            ['developers', 'Developers'],
+            ['claim', 'Get started'],
+        ];
+    @endphp
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#15151c] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
     <!-- Local confetti (no CDN) + motion engines -->
-    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}"></script>
+    <script {!! nonce_attr() !!} src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" defer></script>
     @vite('resources/js/marketing-home.js')
 </x-marketing-layout>

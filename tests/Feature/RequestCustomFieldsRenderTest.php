@@ -67,6 +67,11 @@ class RequestCustomFieldsRenderTest extends TestCase
      */
     public function test_the_public_import_page_marks_owner_text_v_pre(): void
     {
+        // The form only renders when an AI key is configured (event/import.blade.php), and without
+        // one the page is just <x-gemini-setup-guide />. CI copies .env.example, whose keys are
+        // blank, so pin it here or this passes locally and fails in CI. A GET makes no AI call.
+        config(['services.google.gemini_key' => 'test-key']);
+
         $curator = $this->createCurator($this->createOwner(), [
             'accept_requests' => true,
             'require_account' => false,

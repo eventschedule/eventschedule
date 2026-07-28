@@ -428,15 +428,8 @@
             html.es-anim .es-steps[data-active-step="2"] .es-step-2 { opacity: 1; }
         }
 
-        /* Terminal cursor (paths section homage to /selfhost) */
-        .es-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 1.05em;
-            vertical-align: text-bottom;
-            background: #34d399;
-            animation: es-caret 1.1s step-end infinite;
-        }
+        /* The command line here used to end in a blinking green caret.
+           Removed by request along with the other blinking motifs. */
 
         /* --------------------------------------------------------------
            Federation constellation
@@ -491,7 +484,6 @@
             .es-fed-dot,
             .es-node-pulse,
             .es-caret,
-            .es-cursor,
             .es-tenant,
             .animate-ping {
                 animation: none !important;
@@ -1463,7 +1455,7 @@
                     <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Selfhost for yourself</h3>
                     <p class="mb-5 text-gray-500 dark:text-gray-400">Run Event Schedule for your own events, with every Enterprise feature unlocked and zero platform fees.</p>
                     <div class="mb-6 rounded-xl bg-[#0b0f19] px-4 py-3 font-mono text-sm text-gray-200" aria-hidden="true">
-                        <span class="text-emerald-400">$</span> docker compose up -d <span class="es-cursor" aria-hidden="true"></span>
+                        <span class="text-emerald-400">$</span> docker compose up -d
                     </div>
                     <a href="{{ route('marketing.selfhost') }}" class="mt-auto inline-flex items-center gap-2 self-start font-semibold text-emerald-600 hover:text-emerald-500 dark:text-emerald-400 dark:hover:text-emerald-300">
                         Explore selfhosting

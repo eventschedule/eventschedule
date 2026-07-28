@@ -566,7 +566,7 @@
     <!-- ============================================================ -->
     @php
         $quickstart = [
-            ['1', 'Get your API key', '<a href="'.app_url('/sign_up').'" class="font-medium text-cyan-300 hover:underline">Sign up for free</a> and generate an API key from your account settings.', 'Authorization: Bearer YOUR_API_KEY'],
+            ['1', 'Get your API key', '<a href="'.app_url('/sign_up').'" class="font-medium text-cyan-300 hover:underline">Sign up for free</a> and generate an API key from your account settings.', 'X-API-Key: YOUR_API_KEY'],
             ['2', 'Create a schedule', 'POST to /api/schedules with a name and subdomain. Your schedule is live instantly.', 'curl -X POST /api/schedules \\<br>&nbsp;&nbsp;-d \'{"name": "My Schedule"}\''],
             ['3', 'Start managing events', 'Create events, set up tickets, and manage your schedule programmatically.', 'curl -X POST /api/events \\<br>&nbsp;&nbsp;-d \'{"name": "AI Meetup"}\''],
         ];

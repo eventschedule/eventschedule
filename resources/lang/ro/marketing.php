@@ -13,8 +13,8 @@ return [
     'about_title' => 'Despre Event Schedule | Platformă open source pentru gestionarea evenimentelor',
     'about_description' => 'Event Schedule ajută artiștii, locațiile și organizatorii să distribuie evenimente și să vândă bilete. Open source, axat pe confidențialitate și susținut de comunitate.',
 
-    'selfhost_title' => 'Găzduiește singur Event Schedule - rulează pe propriul server',
-    'selfhost_description' => 'Găzduiește Event Schedule pe propriul server. 100% open source, cu instalare Docker dintr-un clic, actualizări automate și funcții AI exclusive.',
+    'selfhost_title' => 'Găzduiește singur Event Schedule - toate funcțiile gratuit pe serverul tău',
+    'selfhost_description' => 'Găzduiește Event Schedule pe propriul server și toate funcțiile Pro și Enterprise sunt incluse gratuit. Open source, instalare dintr-un clic, fără comisioane de platformă, iar datele tale nu îți părăsesc niciodată infrastructura.',
 
     'ticketing_title' => 'Vânzare de bilete fără taxe - Event Schedule',
     'ticketing_description' => 'Vinde bilete direct prin calendarul tău de evenimente, cu coduri QR, mai multe tipuri de bilete și procesare sigură a plăților.',

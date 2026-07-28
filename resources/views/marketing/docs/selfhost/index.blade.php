@@ -1,353 +1,52 @@
-<x-marketing-layout>
-    <x-slot name="title">Selfhost Documentation - Event Schedule</x-slot>
-    <x-slot name="breadcrumbTitle">Selfhost</x-slot>
-    <x-slot name="description">Technical documentation for selfhosting Event Schedule. Learn to install, configure email, set up Stripe payments, enable Google Calendar sync, and add AI.</x-slot>
-    <x-slot name="structuredData">
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "TechArticle",
-        "headline": "Selfhost Documentation - Event Schedule",
-        "description": "Technical documentation for selfhosting Event Schedule. Learn how to install, configure email, set up Stripe payments, enable Google Calendar sync, and connect AI features.",
-        "author": {
-            "@type": "Organization",
-            "name": "Event Schedule"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Event Schedule",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "{{ config('app.url') }}/images/light_logo.png",
-                "width": 712,
-                "height": 140
-            }
-        },
-        "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "{{ url()->current() }}"
-        },
-        "datePublished": "2024-01-01",
-        "dateModified": "2026-02-01"
-    }
-    </script>
-    </x-slot>
+<x-docs-page
+    key="selfhost/index"
+    title="Selfhost Documentation - Event Schedule"
+    heading="Selfhost Installation"
+    description="Technical documentation for selfhosting Event Schedule. Learn to install, configure email, set up Stripe payments, enable AI, and run your own instance."
+    lede="Deploy Event Schedule on your own server. Full control, complete customization, no vendor lock-in."
+    :with-toc="false"
+>
+    {{-- The 9 cards below used to be hand-written here, each duplicating a
+         page's title, blurb and icon from what is now config/docs.php - and
+         each carrying a saturated dark:from-*-900 gradient fill, which is why
+         a wall of them read as a rainbow wash in dark mode. --}}
 
-    <style {!! nonce_attr() !!}>
-        @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .doc-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .doc-card:hover {
-            transform: translateY(-8px);
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-    </style>
+    <section id="guides" class="doc-section">
+        <h2 class="doc-heading">
+            <x-docs.icon name="server" />
+            Selfhost guides
+        </h2>
+        <p class="mb-6">
+            Start with the installation guide, then add only the integrations you need. Every page here applies to a single-tenant install on your own domain; if you are running a multi-tenant platform, see the <x-link :href="route('marketing.docs.saas.setup')">SaaS documentation</x-link> as well.
+        </p>
 
-    {{-- Motion gate: hidden pre-reveal states only apply when this class is present. --}}
-    <script {!! nonce_attr() !!}>
-        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            document.documentElement.classList.add('es-anim');
-        }
-    </script>
+        <x-docs.card-grid group="selfhost" except="selfhost/index" accent="sky" />
+    </section>
 
-    <!-- Hero Section -->
-    <section class="relative bg-white dark:bg-[#0a0a0f] py-20 overflow-hidden noise">
-        <!-- Animated background -->
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0) 62%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.18), rgba(14, 165, 233, 0) 62%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-        </div>
+    <section id="more" class="doc-section">
+        <h2 class="doc-heading">
+            <x-docs.icon name="book" />
+            Beyond selfhosting
+        </h2>
+        <p class="mb-6">
+            The rest of the documentation applies to every deployment.
+        </p>
 
-        <!-- Grid -->
-        <div class="absolute inset-0 grid-pattern"></div>
-
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Breadcrumb -->
-            <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm mb-6">
-                <a href="{{ route('marketing.docs') }}" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Docs</a>
-                <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        <div class="doc-seealso">
+            <a href="{{ route('marketing.docs') }}" class="doc-seealso-item doc-unstyled">
+                <span class="doc-seealso-title">All documentation</span>
+                <span class="doc-seealso-blurb">User guides, SaaS setup and the developer API.</span>
+                <svg class="doc-seealso-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
                 </svg>
-                <span class="text-gray-900 dark:text-white">Selfhost</span>
-            </nav>
-
-            <div class="text-center">
-                <div class="es-fade-up es-d-1 inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-gray-200 dark:border-white/10 mb-8">
-                    <svg aria-hidden="true" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                    </svg>
-                    <span class="text-sm text-gray-600 dark:text-gray-300">Selfhost Documentation</span>
-                </div>
-
-                <h1 class="es-fade-up es-d-2 es-balance text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
-                    Selfhost <span class="text-gradient">Installation</span>
-                </h1>
-
-                <p class="es-fade-up es-d-3 text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-                    Deploy Event Schedule on your own server. Full control, complete customization, no vendor lock-in.
-                </p>
-            </div>
+            </a>
+            <a href="{{ route('marketing.docs.saas.setup') }}" class="doc-seealso-item doc-unstyled">
+                <span class="doc-seealso-title">Run it as a SaaS</span>
+                <span class="doc-seealso-blurb">Multi-tenant routing, custom domains and plans.</span>
+                <svg class="doc-seealso-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+                </svg>
+            </a>
         </div>
     </section>
-
-    <!-- Documentation Cards -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-16">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Installation Guide -->
-                <a href="{{ route('marketing.docs.selfhost.installation') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-cyan-100 dark:bg-cyan-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Installation Guide</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Event Schedule on your own server with this step-by-step guide.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Stripe Integration -->
-                <a href="{{ route('marketing.docs.selfhost.stripe') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-emerald-100 dark:bg-emerald-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Stripe Integration</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Set up Stripe Connect for ticket sales and Laravel Cashier for subscription billing.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Google Calendar -->
-                <a href="{{ route('marketing.docs.selfhost.google_calendar') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-blue-100 to-sky-100 dark:from-blue-900 dark:to-sky-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-blue-100 dark:bg-blue-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Google Calendar</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enable bidirectional sync between Event Schedule and Google Calendar.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Outlook Calendar -->
-                <a href="{{ route('marketing.docs.selfhost.microsoft_calendar') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-indigo-100 to-blue-100 dark:from-indigo-900 dark:to-blue-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-indigo-100 dark:bg-indigo-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Outlook Calendar</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Enable two-way sync between Event Schedule and Outlook / Microsoft 365 via Microsoft Graph.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Boost Setup -->
-                <a href="{{ route('marketing.docs.selfhost.boost') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-amber-100 dark:bg-amber-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M13.13 22.19L11.5 18.36C13.07 17.78 14.54 17 15.9 16.09L13.13 22.19M5.64 12.5L1.81 10.87L7.91 8.1C7 9.46 6.22 10.93 5.64 12.5M19.22 4C19.5 4 19.75 4 19.96 4.05C20.13 5.44 19.94 8.3 16.66 11.58C14.96 13.29 12.93 14.6 10.65 15.47L8.5 13.37C9.42 11.06 10.73 9.03 12.42 7.34C14.71 5.05 17.11 4.1 18.78 4.04C18.91 4 19.06 4 19.22 4Z"/>
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Boost Setup</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure Meta/Facebook ads integration to let users promote events through paid social media campaigns.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-amber-600 dark:text-amber-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Email Setup -->
-                <a href="{{ route('marketing.docs.selfhost.email') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-teal-100 to-cyan-100 dark:from-teal-900 dark:to-cyan-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-teal-100 dark:bg-teal-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Email Setup</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Configure SMTP or other mail drivers for ticket confirmations, newsletters, and notifications.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-teal-600 dark:text-teal-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- AI Setup -->
-                <a href="{{ route('marketing.docs.selfhost.ai') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900 dark:to-cyan-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-blue-100 dark:bg-blue-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">AI Setup</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Connect Google Gemini and OpenAI to enable AI-powered event importing, agenda scanning, translations, and image generation.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Federation -->
-                <a href="{{ route('marketing.docs.selfhost.federation') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-cyan-100 to-sky-100 dark:from-cyan-900 dark:to-sky-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-cyan-100 dark:bg-cyan-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Federation</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Share your public events with the eventschedule.com listings. Every listing links back to your own site, so the discovery traffic comes to you.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-cyan-600 dark:text-cyan-400">
-                            Read guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Web accessibility -->
-                <a href="{{ route('marketing.docs.selfhost.accessibility') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900 dark:to-blue-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4a4 4 0 014 4v1h1a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2h1V8a4 4 0 118 0z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Web accessibility</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">If you serve visitors in regulated markets, you may need your own accessibility declaration on your domain.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
-                            Read guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- Admin Panel -->
-                <a href="{{ route('marketing.docs.selfhost.admin') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-gray-100 to-slate-200 dark:from-gray-800 dark:to-slate-800">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-gray-200 dark:bg-gray-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Admin Panel</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Monitor users, revenue, analytics, and manage platform settings from the admin panel.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400">
-                            Read Guide
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-
-                <!-- All documentation -->
-                <a href="{{ route('marketing.docs') }}" class="doc-card block">
-                    <div class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/10 p-6 h-full flex flex-col bg-gradient-to-br from-sky-100 to-cyan-100 dark:from-sky-900 dark:to-cyan-900">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 bg-sky-100 dark:bg-sky-500/20">
-                            <svg aria-hidden="true" class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">All documentation</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Browse the full docs hub for user guides, SaaS setup, developer API, and more.</p>
-                        <div class="mt-auto inline-flex items-center text-sm font-medium text-sky-600 dark:text-sky-400">
-                            Open docs
-                            <svg aria-hidden="true" class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Open Source Section -->
-    <section class="bg-white dark:bg-[#0a0a0f] py-20 border-t border-gray-200 dark:border-white/5">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-200 dark:bg-white/10 mb-6">
-                    <svg aria-hidden="true" class="w-8 h-8 text-gray-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                    </svg>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                    100% Open Source
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-xl mx-auto">
-                    Event Schedule is fully open source. Explore the code, report issues, or contribute on GitHub.
-                </p>
-
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a href="https://github.com/eventschedule/eventschedule" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-300 dark:border-white/20 rounded-xl text-gray-900 dark:text-white font-medium transition-colors">
-                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        View on GitHub
-                    </a>
-                    <a href="https://github.com/eventschedule/eventschedule/discussions" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 border border-gray-300 dark:border-white/20 rounded-xl text-gray-900 dark:text-white font-medium transition-colors">
-                        <svg aria-hidden="true" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                        </svg>
-                        Discussions
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-</x-marketing-layout>
+</x-docs-page>

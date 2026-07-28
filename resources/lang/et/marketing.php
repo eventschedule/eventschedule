@@ -13,8 +13,8 @@ return [
     'about_title' => 'Event Schedule\'ist | Avatud lähtekoodiga sündmuste haldamise platvorm',
     'about_description' => 'Event Schedule aitab esinejaid, kohti ja korraldajaid sündmusi jagada ning pileteid müüa. Avatud lähtekood, privaatsusele orienteeritud ja kogukonnapõhine.',
 
-    'selfhost_title' => 'Majuta Event Schedule ise - kasuta oma serveris',
-    'selfhost_description' => 'Majuta Event Schedule oma serveris. 100% avatud lähtekoodiga, ühe klikiga Dockeri paigaldus, automaatsed uuendused ja eksklusiivsed AI-funktsioonid.',
+    'selfhost_title' => 'Majuta Event Schedule ise - kõik funktsioonid tasuta sinu serveris',
+    'selfhost_description' => 'Majuta Event Schedule oma serveris ja kõik Pro- ja Enterprise-funktsioonid on tasuta kaasas. Avatud lähtekoodiga, ühe klikiga paigaldus, ilma platvormitasudeta, ja sinu andmed ei lahku kunagi sinu taristust.',
 
     'ticketing_title' => 'Piletimüük ilma tasudeta - Event Schedule',
     'ticketing_description' => 'Müü pileteid otse oma sündmuste kalendri kaudu QR-koodide, mitme piletitüübi ja turvalise maksete töötlusega.',

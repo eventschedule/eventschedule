@@ -26,6 +26,13 @@ return [
         ['title' => 'Examples', 'path' => '/examples', 'blurb' => 'Real schedules built by venues, artists, and organizers.'],
     ],
 
+    'use-cases' => [
+        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, whatever kind of events you run.'],
+        ['title' => 'Examples', 'path' => '/examples', 'blurb' => 'Explore live demo schedules built for different industries.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'Free forever, with zero platform fees on ticket sales.'],
+        ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
+    ],
+
     'pricing' => [
         ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature on one page, with the plan each one needs.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
@@ -33,11 +40,18 @@ return [
         ['title' => 'Compare Alternatives', 'path' => '/compare', 'blurb' => 'See how Event Schedule stacks up against other platforms.'],
     ],
 
+    'compare' => [
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'What each plan costs, with no platform fees on any of them.'],
+        ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Everything the comparison grid is measuring, explained.'],
+        ['title' => 'Replace Your Tools', 'path' => '/replace', 'blurb' => 'Swapping a spreadsheet or a form rather than a platform.'],
+        ['title' => 'Selfhost', 'path' => '/selfhost', 'blurb' => 'Run it on your own server with every paid feature included.'],
+    ],
+
     'selfhost' => [
         ['title' => 'White-Label SaaS', 'path' => '/saas', 'blurb' => 'Turn your install into a ticketing business you own.'],
         ['title' => 'All Features', 'path' => '/features', 'blurb' => 'Every feature included in the selfhosted build.'],
-        ['title' => 'AI Features', 'path' => '/features/ai', 'blurb' => 'Connect your own Gemini key for AI import and blog generation.'],
-        ['title' => 'Developer Docs', 'path' => '/docs/developer', 'blurb' => 'REST API reference and contributor guide.'],
+        ['title' => 'Pricing', 'path' => '/pricing', 'blurb' => 'What the hosted plans cost, if you would rather not run a server.'],
+        ['title' => 'Open Source', 'path' => '/open-source', 'blurb' => 'The licence, the repositories and how to contribute.'],
     ],
 
     'saas' => [
@@ -94,6 +108,22 @@ return [
         ['title' => 'For Circus & Acrobatics', 'path' => '/for-circus-acrobatics', 'blurb' => 'Shows, residencies, and private bookings in one place.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets to your shows with zero platform fees.'],
         ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate show posters for your socials.'],
+    ],
+
+    'for-talent' => [
+        ['title' => 'For Venues', 'path' => '/for-venues', 'blurb' => 'The other side of the booking: how venues build a lineup.'],
+        ['title' => 'For Curators', 'path' => '/for-curators', 'blurb' => 'Run a festival or multi-artist bill across many schedules.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
+        ['title' => 'Linktree Replacement', 'path' => '/linktree-replacement', 'blurb' => 'One bio link that shows your actual dates, not just buttons.'],
+    ],
+
+    // The for-curators page already links the neighbouring audience pages inline,
+    // so this strip carries the features a curator reaches for instead.
+    'for-curators' => [
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Sort what arrives into the sections of your guide.'],
+        ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Drop the guide into the site you already have.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's highlights to your subscribers."],
+        ['title' => 'AI Features', 'path' => '/features/ai', 'blurb' => 'Turn pasted text or a photo of a flyer into a listed event.'],
     ],
 
     'for-venues' => [

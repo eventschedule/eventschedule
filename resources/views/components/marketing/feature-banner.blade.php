@@ -13,6 +13,9 @@
     aria-hidden link. They cannot be one element - a stretched overlay covering
     the mockup would swallow the pointermove that `data-tilt` needs, and tilt
     would silently never fire.
+
+    `ground="dark"` is a fixed-dark band, dark in light mode too, for pages that
+    dive somewhere else mid-scroll. Opt-in; /features passes only white/gray.
 --}}
 @props([
     'href',
@@ -30,58 +33,102 @@
 
 @php
     // Full class strings - interpolated Tailwind colour classes do not JIT-generate.
+    // `badgeDark`/`headDark`/`linkDark` are the same hues with the light-mode step
+    // dropped, for `ground="dark"` (see below).
     $accents = [
         'sky' => [
             'badge' => 'bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300',
+            'badgeDark' => 'bg-sky-500/20 text-sky-300',
             'head' => 'group-hover:text-sky-600 dark:group-hover:text-sky-400',
+            'headDark' => 'group-hover:text-sky-400',
             'link' => 'text-sky-600 dark:text-sky-400',
+            'linkDark' => 'text-sky-400',
         ],
         'blue' => [
             'badge' => 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+            'badgeDark' => 'bg-blue-500/20 text-blue-300',
             'head' => 'group-hover:text-blue-600 dark:group-hover:text-blue-400',
+            'headDark' => 'group-hover:text-blue-400',
             'link' => 'text-blue-600 dark:text-blue-400',
+            'linkDark' => 'text-blue-400',
         ],
         'cyan' => [
             'badge' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/20 dark:text-cyan-300',
+            'badgeDark' => 'bg-cyan-500/20 text-cyan-300',
             'head' => 'group-hover:text-cyan-600 dark:group-hover:text-cyan-400',
+            'headDark' => 'group-hover:text-cyan-400',
             'link' => 'text-cyan-600 dark:text-cyan-400',
+            'linkDark' => 'text-cyan-400',
         ],
         'teal' => [
             'badge' => 'bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-300',
+            'badgeDark' => 'bg-teal-500/20 text-teal-300',
             'head' => 'group-hover:text-teal-600 dark:group-hover:text-teal-400',
+            'headDark' => 'group-hover:text-teal-400',
             'link' => 'text-teal-600 dark:text-teal-400',
+            'linkDark' => 'text-teal-400',
         ],
         'emerald' => [
             'badge' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+            'badgeDark' => 'bg-emerald-500/20 text-emerald-300',
             'head' => 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400',
+            'headDark' => 'group-hover:text-emerald-400',
             'link' => 'text-emerald-600 dark:text-emerald-400',
+            'linkDark' => 'text-emerald-400',
         ],
         'amber' => [
             'badge' => 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300',
+            'badgeDark' => 'bg-amber-500/20 text-amber-300',
             'head' => 'group-hover:text-amber-600 dark:group-hover:text-amber-400',
+            'headDark' => 'group-hover:text-amber-400',
             'link' => 'text-amber-600 dark:text-amber-400',
+            'linkDark' => 'text-amber-400',
         ],
         'yellow' => [
             'badge' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300',
+            'badgeDark' => 'bg-yellow-500/20 text-yellow-300',
             'head' => 'group-hover:text-yellow-600 dark:group-hover:text-yellow-400',
+            'headDark' => 'group-hover:text-yellow-400',
             'link' => 'text-yellow-600 dark:text-yellow-400',
+            'linkDark' => 'text-yellow-400',
         ],
         'orange' => [
             'badge' => 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
+            'badgeDark' => 'bg-orange-500/20 text-orange-300',
             'head' => 'group-hover:text-orange-600 dark:group-hover:text-orange-400',
+            'headDark' => 'group-hover:text-orange-400',
             'link' => 'text-orange-600 dark:text-orange-400',
+            'linkDark' => 'text-orange-400',
         ],
         'gray' => [
             'badge' => 'bg-gray-200 text-gray-700 dark:bg-white/10 dark:text-gray-300',
+            'badgeDark' => 'bg-white/10 text-gray-300',
             'head' => 'group-hover:text-gray-600 dark:group-hover:text-gray-300',
+            'headDark' => 'group-hover:text-gray-300',
             'link' => 'text-gray-600 dark:text-gray-400',
+            'linkDark' => 'text-gray-400',
         ],
     ];
     $a = $accents[$accent] ?? $accents['blue'];
 
-    $groundClass = $ground === 'gray'
-        ? 'bg-gray-50 dark:bg-[#0f0f14]'
-        : 'bg-white dark:bg-[#0a0a0f]';
+    // `dark` is a FIXED-dark ground - dark in light mode too - so every `dark:`
+    // variant below has to be forced on unconditionally, or a light-mode visitor
+    // gets black text on a black band. The frames are the deliberate exception:
+    // a white browser/phone frame on a dark ground reads as a lit screen.
+    $isDark = $ground === 'dark';
+    $groundClass = match ($ground) {
+        'gray' => 'bg-gray-50 dark:bg-[#0f0f14]',
+        'dark' => 'es-band-dark noise',
+        default => 'bg-white dark:bg-[#0a0a0f]',
+    };
+    $badgeClass = $isDark ? $a['badgeDark'] : $a['badge'];
+    $headClass = $isDark ? $a['headDark'] : $a['head'];
+    $linkClass = $isDark ? $a['linkDark'] : $a['link'];
+    $headingColor = $isDark ? 'text-white' : 'text-gray-900 dark:text-white';
+    $ledeColor = $isDark ? 'text-gray-400' : 'text-gray-500 dark:text-gray-400';
+    $chipClass = $isDark
+        ? 'border-white/10 bg-white/[0.06] text-gray-300'
+        : 'border-gray-200 bg-gray-100 text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300';
 
     // Mobile stays tight; the desktop values are far too airy on a phone.
     $pad = $lead ? 'py-12 lg:py-20' : 'py-10 lg:py-14';
@@ -104,27 +151,27 @@
 
             {{-- Text column: `relative` scopes the stretched link to this side only. --}}
             <div class="relative flex-1 text-center lg:text-start" data-reveal="{{ $textReveal }}">
-                <div class="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium {{ $a['badge'] }}">
+                <div class="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm font-medium {{ $badgeClass }}">
                     {{ $badgeIcon ?? '' }}
                     {{ $badge }}
                 </div>
 
-                <h2 class="es-balance mb-4 {{ $headSize }} font-black tracking-tight text-gray-900 transition-colors dark:text-white {{ $a['head'] }}">
+                <h2 class="es-balance mb-4 {{ $headSize }} font-black tracking-tight {{ $headingColor }} transition-colors {{ $headClass }}">
                     <a href="{{ $href }}"
-                       class="rounded-sm after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4E81FA]">{{ $heading }}</a>
+                       class="rounded-sm after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 {{ $isDark ? 'focus-visible:ring-sky-300' : 'focus-visible:ring-[#4E81FA]' }}">{{ $heading }}</a>
                 </h2>
 
-                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">{{ $lede }}</p>
+                <p class="mb-6 text-lg {{ $ledeColor }}">{{ $lede }}</p>
 
                 @if (! empty($chips))
                     <div class="mb-6 flex flex-wrap justify-center gap-2.5 lg:justify-start">
                         @foreach ($chips as $i => $chip)
-                            <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300 {{ $i >= 4 ? 'hidden sm:inline-flex' : '' }}">{{ $chip }}</span>
+                            <span class="inline-flex items-center rounded-full border px-3 py-1 text-sm {{ $chipClass }} {{ $i >= 4 ? 'hidden sm:inline-flex' : '' }}">{{ $chip }}</span>
                         @endforeach
                     </div>
                 @endif
 
-                <span class="inline-flex items-center gap-2 font-medium transition-all group-hover:gap-3 {{ $a['link'] }}">
+                <span class="inline-flex items-center gap-2 font-medium transition-all group-hover:gap-3 {{ $linkClass }}">
                     Learn more
                     <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

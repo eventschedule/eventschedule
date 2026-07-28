@@ -172,11 +172,11 @@
         $skipBreadcrumb = false;
         if ($path === 'docs') {
             $breadcrumbs[] = ['name' => 'Documentation', 'url' => url()->current()];
-        } elseif ($path === 'docs/selfhost') {
-            $breadcrumbs[] = ['name' => 'Documentation', 'url' => url('/docs')];
-            $breadcrumbs[] = ['name' => 'Selfhost', 'url' => url()->current()];
         } elseif (str_starts_with($path, 'docs/')) {
-            // Leaf docs pages render their own visible BreadcrumbList via <x-docs-breadcrumb>; skip the layout's here to avoid a duplicate.
+            // Every page under /docs/ is an <x-docs-page> and renders its own
+            // visible BreadcrumbList via <x-docs-breadcrumb>; skip the layout's
+            // to avoid a duplicate. /docs/selfhost used to be special-cased
+            // above this branch and so emitted a second one.
             $skipBreadcrumb = true;
         } elseif (str_starts_with($path, 'features/')) {
             $breadcrumbs[] = ['name' => 'Features', 'url' => url('/features')];
@@ -235,11 +235,31 @@
 
     {{ $preload ?? '' }}
 
-    @vite([
+    @vite(array_merge([
         'resources/css/marketing-app.css',
         'resources/css/marketing.css',
         'resources/js/marketing.js',
-    ])
+    ], ($docs ?? false) ? [
+        'resources/css/docs.css',
+        'resources/js/docs.js',
+    ] : []))
+
+    @if ($docs ?? false)
+        {{-- Motion gate. Hidden pre-reveal states only apply when this class is
+             present, so no-JS visitors, crawlers and reduced-motion users always
+             see everything. Skipped on anchor arrival: docs are routinely entered
+             mid-page from search, the AP Help button and release notes, and a hero
+             animating in above an already-scrolled viewport just reads as jank.
+
+             Deliberately gated on $docs rather than hoisted to every marketing
+             page - marketing.css hides [data-reveal] content behind html.es-anim,
+             and a page that never loads the reveal observer would hide it forever. --}}
+        <script {!! nonce_attr() !!}>
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && !window.location.hash) {
+                document.documentElement.classList.add('es-anim');
+            }
+        </script>
+    @endif
 
     <script {!! nonce_attr() !!}>
         // Theme Management

@@ -20,8 +20,8 @@ return [
     'about_title' => 'About Event Schedule | Open Source Event Management Platform',
     'about_description' => 'Event Schedule helps talent, venues, and organizers share events and sell tickets. Open source, privacy-focused, and community-driven.',
 
-    'selfhost_title' => 'Selfhost Event Schedule - Run on Your Own Server',
-    'selfhost_description' => 'Selfhost Event Schedule on your own server. 100% open source with one-click Docker installation, automatic updates, and exclusive AI-powered features.',
+    'selfhost_title' => 'Selfhost Event Schedule - Every Feature Free on Your Own Server',
+    'selfhost_description' => 'Selfhost Event Schedule on your own server and every Pro and Enterprise feature is included free. Open source, one-click installs, no platform fees, and your data never leaves your infrastructure.',
 
     'ticketing_title' => 'Event Ticketing with No Fees - Event Schedule',
     'ticketing_description' => 'Sell tickets directly from your event schedule with zero platform fees. QR code check-in, multiple ticket types, promo codes, and secure Stripe payments.',

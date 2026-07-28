@@ -200,14 +200,6 @@
             50% { background-position: 100% 50%; }
         }
 
-        /* Velvet-rope divider (rope-and-post line drawing) */
-        .nc-rope-post { stroke: #94a3b8; stroke-width: 2; stroke-linecap: round; }
-        .dark .nc-rope-post { stroke: #64748b; }
-        .nc-rope-cap { fill: #f59e0b; }
-        .dark .nc-rope-cap { fill: #fbbf24; }
-        .nc-rope { stroke: #2563eb; stroke-width: 2.5; stroke-linecap: round; }
-        .dark .nc-rope { stroke: #38bdf8; filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.55)); }
-
         /* Laser-dot step numbers (radiating ping ring) */
         .nc-step-dot::before {
             content: "";
@@ -388,15 +380,6 @@
                                 <div class="flex-1 text-sm text-gray-600 dark:text-gray-300">Sarah K. +1</div>
                                 <span class="inline-flex items-center rounded bg-emerald-300 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">Confirmed</span>
                             </div>
-                        </div>
-                        <div class="nc-velvet mt-4" aria-hidden="true">
-                            <svg viewBox="0 0 260 40" fill="none" class="h-7 w-full">
-                                <path d="M30 38h-10m10 0h10m-10 0V14" class="nc-rope-post" />
-                                <circle cx="30" cy="10" r="4" class="nc-rope-cap" />
-                                <path d="M230 38h-10m10 0h10m-10 0V14" class="nc-rope-post" />
-                                <circle cx="230" cy="10" r="4" class="nc-rope-cap" />
-                                <path d="M30 13Q130 40 230 13" class="nc-rope" />
-                            </svg>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>

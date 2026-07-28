@@ -48,21 +48,8 @@
             50% { transform: translateY(-12px) rotate(0.6deg); }
         }
 
-        /* Signature motif: a row of envelopes pulsing (get in touch) */
-        .es-envelope {
-            flex: 0 0 auto;
-            color: rgba(37, 99, 235, 0.8);
-            animation: es-envelope-pulse var(--ev-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--ev-delay, 0s);
-        }
-        @keyframes es-envelope-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.5)); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .es-contact-float, .es-envelope, .animate-pulse-slow { animation: none !important; }
-            .es-envelope { opacity: 0.55; transform: none; }
+            .es-contact-float, .animate-pulse-slow { animation: none !important; }
         }
     </style>
 
@@ -85,15 +72,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <!-- Envelope motif along the bottom edge -->
-            <div class="es-envelopes absolute bottom-8 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-envelope" style="--ev-dur: {{ $dur }}s; --ev-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -125,7 +103,7 @@
             <div data-reveal="panel" class="relative mx-auto mb-10 max-w-[52rem] overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-blue-100 to-sky-100 p-8 transition-all duration-300 hover:scale-[1.01] dark:border-white/10 dark:from-blue-900 dark:to-sky-900 md:p-12">
                 <div class="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-blue-500/10 blur-[100px]" aria-hidden="true"></div>
                 <div class="pointer-events-none absolute bottom-0 left-0 h-64 w-64 rounded-full bg-sky-500/10 blur-[100px]" aria-hidden="true"></div>
-                <div class="relative flex items-center justify-between">
+                <div class="relative">
                     <div>
                         <div class="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-200 px-3 py-1 text-sm font-medium text-blue-700 dark:bg-white/10 dark:text-blue-200">
                             <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -144,11 +122,6 @@
                             {{ config('app.support_email') }}
                             <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                         </a>
-                    </div>
-                    <div class="ml-8 hidden shrink-0 md:block" aria-hidden="true">
-                        <svg class="h-32 w-32 text-white/10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="0.75">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                        </svg>
                     </div>
                 </div>
             </div>

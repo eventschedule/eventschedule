@@ -335,18 +335,6 @@
         .es-ticket-stub-perf::before { top: -7px; }
         .es-ticket-stub-perf::after { bottom: -7px; }
 
-        /* Faint stage-plot line glyphs on the deep-dive rows */
-        .es-stageplot-glyph {
-            position: absolute;
-            pointer-events: none;
-            color: #94a3b8;
-            opacity: 0.13;
-        }
-        .dark .es-stageplot-glyph {
-            color: #cbd5e1;
-            opacity: 0.09;
-        }
-
         @media (prefers-reduced-motion: reduce) {
             .es-vu-needle,
             .es-signal i {
@@ -469,9 +457,6 @@
 
             <!-- Artist booking -->
             <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div class="es-stageplot-glyph hidden lg:block" style="left: 0; bottom: 0;" aria-hidden="true">
-                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="6" width="16" height="30" rx="8"/><line x1="27" y1="14" x2="37" y2="14"/><line x1="27" y1="20" x2="37" y2="20"/><path d="M18 30a14 14 0 0 0 28 0"/><line x1="32" y1="44" x2="32" y2="54"/><line x1="24" y1="58" x2="40" y2="58"/></svg>
-                </div>
                 <div data-reveal>
                     <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
@@ -520,9 +505,6 @@
 
             <!-- Multi-stage -->
             <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div class="es-stageplot-glyph hidden lg:block" style="right: 0; bottom: 0;" aria-hidden="true">
-                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 50 L54 50 L47 25 L21 29 Z"/><circle cx="33" cy="41" r="8"/><circle cx="28" cy="30" r="3"/></svg>
-                </div>
                 <div class="order-2 lg:order-1">
                     <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
                         <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
@@ -565,9 +547,6 @@
 
             <!-- Ticket comparison -->
             <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div class="es-stageplot-glyph hidden lg:block" style="left: 0; bottom: 0;" aria-hidden="true">
-                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="20" width="40" height="24" rx="3"/><circle cx="24" cy="32" r="4"/><circle cx="40" cy="32" r="4"/><line x1="16" y1="44" x2="16" y2="52"/><line x1="48" y1="44" x2="48" y2="52"/></svg>
-                </div>
                 <div data-reveal>
                     <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
                         <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -616,9 +595,6 @@
 
             <!-- Fan newsletter -->
             <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div class="es-stageplot-glyph hidden lg:block" style="right: 0; bottom: 0;" aria-hidden="true">
-                    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="18" y="8" width="28" height="48" rx="3"/><circle cx="32" cy="24" r="9"/><circle cx="32" cy="44" r="5"/></svg>
-                </div>
                 <div class="order-2 lg:order-1">
                     <div class="es-bento group relative mx-auto max-w-md" data-tilt="4" data-reveal="panel">
                         <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">

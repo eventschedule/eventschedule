@@ -13,8 +13,8 @@ return [
     'about_title' => 'Over Event Schedule | Open source platform voor evenementenbeheer',
     'about_description' => 'Event Schedule helpt artiesten, locaties en organisatoren om evenementen te delen en tickets te verkopen. Open source, privacyvriendelijk en gedragen door de community.',
 
-    'selfhost_title' => 'Host Event Schedule zelf - Draai het op je eigen server',
-    'selfhost_description' => 'Host Event Schedule op je eigen server. 100% open source met Docker-installatie in één klik, automatische updates en exclusieve AI-functies.',
+    'selfhost_title' => 'Host Event Schedule zelf - alle functies gratis op je eigen server',
+    'selfhost_description' => 'Host Event Schedule op je eigen server en alle Pro- en Enterprise-functies zijn gratis inbegrepen. Open source, installatie in één klik, geen platformkosten, en je gegevens verlaten nooit je eigen infrastructuur.',
 
     'ticketing_title' => 'Ticketverkoop zonder kosten - Event Schedule',
     'ticketing_description' => 'Verkoop tickets rechtstreeks via je evenementenagenda met QR-codes, meerdere tickettypes en veilige betalingsverwerking.',

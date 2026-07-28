@@ -804,15 +804,6 @@
                                 <div class="absolute left-2 top-2 flex items-center gap-1.5 rounded bg-red-600 px-2 py-1 text-xs font-bold text-white">
                                     <span class="h-2 w-2 motion-safe:animate-pulse rounded-full bg-white"></span> LIVE
                                 </div>
-                                <svg aria-hidden="true" class="h-24 w-24 text-amber-400/60" viewBox="0 0 100 100" fill="none">
-                                    <path d="M50 5 L50 95" stroke="currentColor" stroke-width="1.5" opacity="0.6"/>
-                                    <circle cx="50" cy="30" r="5" fill="currentColor"/>
-                                    <path d="M50 35 L50 55" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    <path d="M50 40 Q35 45, 30 35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                    <path d="M50 40 Q55 30, 52 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                    <path d="M50 55 Q60 70, 70 65" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                    <path d="M50 55 Q45 65, 40 75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                </svg>
                                 <div class="absolute bottom-2 right-2 flex items-center gap-1 rounded bg-black/60 px-2 py-1 text-xs text-white">
                                     <svg aria-hidden="true" class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                                     <span data-count-to="847">847</span> watching
@@ -917,17 +908,6 @@
     <!-- ============================================================ -->
     <section class="bg-[#f8efe6] py-20 dark:bg-[#0f0f14] lg:py-28">
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <!-- Trapeze rig (decorative) -->
-            <div class="absolute -top-2 right-8 hidden lg:block" aria-hidden="true">
-                <svg class="h-24 w-32 text-amber-500/40 dark:text-amber-400/30" viewBox="0 0 120 96" fill="none" stroke="currentColor" stroke-linecap="round">
-                    <path d="M20 0 V46" stroke-width="2" />
-                    <path d="M100 0 V46" stroke-width="2" />
-                    <path d="M12 46 H108" stroke-width="3" />
-                    <path d="M20 10 A 54 54 0 0 0 100 10" stroke-width="1.5" stroke-dasharray="3 6" opacity="0.5" />
-                </svg>
-                <span class="es-circus-star bg-amber-400" style="top:10%;right:-6px;width:0.35rem;height:0.35rem;--d:0.5s;"></span>
-            </div>
-
             <div class="mx-auto mb-14 max-w-3xl text-center">
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
                     Perfect for all types of <span class="es-circus-gold">circus performers</span>

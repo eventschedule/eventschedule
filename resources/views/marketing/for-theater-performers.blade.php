@@ -110,8 +110,8 @@
     <style {!! nonce_attr() !!}>
         /* For-theater-performers "The Ghost Light" styles. The shared es-*
            motion system lives in marketing.css; this holds this page's own
-           effects: the warm ivory->amber ghost gradient, the single bare bulb
-           on a stand with its radial light pool, the slow curtain-sway shadow
+           effects: the warm ivory->amber ghost gradient, the radial ghost-light
+           pool, the slow curtain-sway shadow
            at section boundaries, ghost-light timeline markers, ivory season
            card stock, and the playbill serif. This page owns no marquee bulbs
            (those now belong to for-theaters). */
@@ -142,20 +142,6 @@
                 rgba(245, 158, 11, 0.17) 26%,
                 rgba(245, 158, 11, 0.05) 48%,
                 transparent 72%);
-        }
-
-        /* The bare bulb on a stand */
-        .ghost-stand { display: block; width: 4.5rem; height: 9.5rem; }
-        .ghost-bulb {
-            fill: #fef3c7;
-            filter:
-                drop-shadow(0 0 6px rgba(254, 243, 199, 0.9))
-                drop-shadow(0 0 16px rgba(245, 158, 11, 0.7));
-            animation: ghost-breathe 5s ease-in-out infinite;
-        }
-        @keyframes ghost-breathe {
-            0%, 100% { opacity: 0.88; }
-            50% { opacity: 1; }
         }
 
         /* Ivory->amber dot (replaces the old gold marquee dot) */
@@ -227,7 +213,6 @@
         .dark .ghost-faq summary:hover h3 { color: #fbbf24; }
 
         @media (prefers-reduced-motion: reduce) {
-            .ghost-bulb,
             .curtain-sway { animation: none !important; }
         }
     </style>
@@ -247,19 +232,9 @@
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
-        <!-- The ghost light: one bare bulb on a stand, in its pool of warm light -->
+        <!-- The ghost light: a pool of warm light on the empty stage -->
         <div class="pointer-events-none absolute left-0 right-0 top-0 h-full overflow-hidden" aria-hidden="true">
             <div class="ghost-pool absolute" style="left: 50%; bottom: -6rem; width: 40rem; height: 40rem; transform: translateX(-50%);"></div>
-            <div class="absolute" style="left: 50%; bottom: 0; transform: translateX(-50%);">
-                <svg class="ghost-stand" viewBox="0 0 80 176" fill="none" aria-hidden="true">
-                    <ellipse cx="40" cy="170" rx="20" ry="4.5" fill="rgba(60, 52, 46, 0.45)"/>
-                    <path d="M30 170 L50 170 L47 150 L33 150 Z" fill="rgba(120, 110, 100, 0.85)"/>
-                    <rect x="37.5" y="54" width="5" height="98" rx="2.5" fill="rgba(120, 110, 100, 0.85)"/>
-                    <rect x="34" y="45" width="12" height="11" rx="2" fill="rgba(88, 80, 72, 0.9)"/>
-                    <circle class="ghost-bulb" cx="40" cy="31" r="16"/>
-                    <path d="M34 32 q6 -9 12 0" stroke="rgba(180, 83, 9, 0.65)" stroke-width="1.5" fill="none"/>
-                </svg>
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -895,19 +870,9 @@
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
                 <div class="curtain-sway pointer-events-none absolute left-0 right-0 top-0" style="height: 4rem;" aria-hidden="true"></div>
-                <!-- The ghost light returns for the closing image -->
+                <!-- The pool of warm light returns for the closing image -->
                 <div class="pointer-events-none absolute left-0 right-0 top-0 h-full overflow-hidden" aria-hidden="true">
                     <div class="ghost-pool absolute" style="left: 50%; bottom: -8rem; width: 44rem; height: 44rem; transform: translateX(-50%);"></div>
-                    <div class="absolute" style="left: 50%; bottom: 0; transform: translateX(-50%);">
-                        <svg class="ghost-stand" viewBox="0 0 80 176" fill="none" aria-hidden="true">
-                            <ellipse cx="40" cy="170" rx="20" ry="4.5" fill="rgba(60, 52, 46, 0.5)"/>
-                            <path d="M30 170 L50 170 L47 150 L33 150 Z" fill="rgba(150, 140, 128, 0.8)"/>
-                            <rect x="37.5" y="54" width="5" height="98" rx="2.5" fill="rgba(150, 140, 128, 0.8)"/>
-                            <rect x="34" y="45" width="12" height="11" rx="2" fill="rgba(110, 100, 90, 0.9)"/>
-                            <circle class="ghost-bulb" cx="40" cy="31" r="16"/>
-                            <path d="M34 32 q6 -9 12 0" stroke="rgba(180, 83, 9, 0.65)" stroke-width="1.5" fill="none"/>
-                        </svg>
-                    </div>
                 </div>
 
                 <div class="relative z-10">

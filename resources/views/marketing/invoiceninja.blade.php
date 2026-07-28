@@ -104,21 +104,8 @@
             50% { transform: translateY(-12px) rotate(0.6deg); }
         }
 
-        /* Signature motif: a row of invoice documents pulsing */
-        .es-invoice-icon {
-            flex: 0 0 auto;
-            color: rgba(16, 185, 129, 0.8);
-            animation: es-invoice-pulse var(--in-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--in-delay, 0s);
-        }
-        @keyframes es-invoice-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5)); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .es-invoice-float, .es-invoice-icon, .animate-pulse-slow, .animate-pulse { animation: none !important; }
-            .es-invoice-icon { opacity: 0.55; transform: none; }
+            .es-invoice-float, .animate-pulse-slow, .animate-pulse { animation: none !important; }
         }
     </style>
 
@@ -141,15 +128,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <!-- Invoice-document motif along the bottom edge -->
-            <div class="es-invoices absolute bottom-8 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-invoice-icon" style="--in-dur: {{ $dur }}s; --in-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -725,14 +703,6 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-invoices absolute bottom-6 left-0 right-0 mx-auto flex h-14 items-center justify-center gap-6 px-8 opacity-45" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                        @for ($i = 0; $i < 9; $i++)
-                            @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                            <span class="es-invoice-icon" style="--in-dur: {{ $dur }}s; --in-delay: {{ $delay }}s;">
-                                <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </span>
-                        @endfor
-                    </div>
                 </div>
 
                 <div class="relative z-10">

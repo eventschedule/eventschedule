@@ -925,6 +925,9 @@ if (config('app.is_nexus')) {
         Route::get('/self-host-event-schedule/', fn () => redirect()->route('marketing.selfhost', [], 301));
         Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
         Route::get('/docs', [MarketingController::class, 'docsIndex'])->name('marketing.docs');
+        // Fetched lazily by the docs search on first focus. Kept under /docs/ so the
+        // {subdomain} negative lookaheads already exclude it.
+        Route::get('/docs/search-index.json', [MarketingController::class, 'docsSearchIndex'])->name('marketing.docs.search_index');
         // User Guide (at root level)
         Route::get('/docs/getting-started', [MarketingController::class, 'docsGettingStarted'])->name('marketing.docs.getting_started');
         Route::get('/docs/creating-schedules', [MarketingController::class, 'docsCreatingSchedules'])->name('marketing.docs.creating_schedules');
@@ -1138,6 +1141,9 @@ if (config('app.is_nexus')) {
             Route::get('/self-host-event-schedule/', fn () => redirect()->route('marketing.selfhost', [], 301));
             Route::get('/saas', [MarketingController::class, 'saas'])->name('marketing.saas');
             Route::get('/docs', [MarketingController::class, 'docsIndex'])->name('marketing.docs');
+            // Fetched lazily by the docs search on first focus. Kept under /docs/ so the
+            // {subdomain} negative lookaheads already exclude it.
+            Route::get('/docs/search-index.json', [MarketingController::class, 'docsSearchIndex'])->name('marketing.docs.search_index');
             // User Guide (at root level)
             Route::get('/docs/getting-started', [MarketingController::class, 'docsGettingStarted'])->name('marketing.docs.getting_started');
             Route::get('/docs/creating-schedules', [MarketingController::class, 'docsCreatingSchedules'])->name('marketing.docs.creating_schedules');

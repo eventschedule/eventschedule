@@ -6,10 +6,12 @@ use App\Models\Event;
 use App\Models\Role;
 use App\Services\AuditService;
 use App\Services\DemoService;
+use App\Utils\DocsUtils;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class MarketingController extends Controller
 {
@@ -64,7 +66,7 @@ class MarketingController extends Controller
      */
     public function docsReferralProgram()
     {
-        return view('marketing.docs.referral-program', $this->getDocNavigation('marketing.docs.referral_program'));
+        return view('marketing.docs.referral-program');
     }
 
     public function about()
@@ -356,7 +358,32 @@ class MarketingController extends Controller
      */
     public function forTalent()
     {
-        return view('marketing.for-talent');
+        return view('marketing.for-talent', [
+            // Real upcoming shows from talent schedules, used as the page's proof
+            // rail. Same visibility rules as /browse and the homepage: only events
+            // whose card resolves to a real image, so no placeholder ever ships.
+            // The section hides itself entirely when this comes back empty - it is
+            // never padded with demo flyers, which would read as fake proof.
+            'talentEvents' => $this->publicUpcomingEventsQuery()
+                ->where('is_hidden_from_discovery', false)
+                ->whereHas('roles', function ($r) {
+                    $r->where('roles.type', 'talent');
+                })
+                ->where(function ($sub) {
+                    $sub->where(function ($f) {
+                        $f->whereNotNull('flyer_image_url')
+                            ->where('flyer_image_url', '!=', '');
+                    })
+                        ->orWhereHas('roles', function ($r) {
+                            $r->where('roles.type', 'talent')
+                                ->whereNotNull('roles.profile_image_url')
+                                ->where('roles.profile_image_url', '!=', '');
+                        });
+                })
+                ->orderByRaw('CASE WHEN starts_at >= ? THEN 0 ELSE 1 END, starts_at IS NULL, starts_at ASC', [Carbon::today()])
+                ->limit(8)
+                ->get(),
+        ]);
     }
 
     /**
@@ -638,7 +665,68 @@ class MarketingController extends Controller
     {
         return view('marketing.compare', [
             'sections' => $this->getHubComparisonData(),
+            'headToHead' => $this->getHubHeadToHead(),
+            'rates' => $this->getHubFeeRates(),
+            // The open-source card renders the live star badge, which is a
+            // no-op without this and leaves the card visibly empty.
+            'githubStars' => \App\Utils\GitHubUtils::getStars(),
         ]);
+    }
+
+    /**
+     * Every rate quoted on /compare, in one place.
+     *
+     * These numbers used to be retyped in the table, the calculator markup,
+     * the calculator JS, the FAQ and the JSON-LD: Luma's monthly price alone
+     * appeared four times and Stripe's rate six. The view and its script now
+     * both read this, so a change lands everywhere at once.
+     *
+     * Our own price comes from the same config /pricing reads, so the two
+     * pages cannot quote different figures.
+     */
+    private function getHubFeeRates(): array
+    {
+        return [
+            'stripe' => ['percent' => 0.029, 'fixed' => 0.30, 'label' => '2.9% + $0.30 per ticket'],
+
+            'eventschedule' => [
+                'name' => 'Event Schedule',
+                'monthly' => (int) config('services.stripe_platform.price_monthly_amount', 5),
+                'percent' => 0.0,
+                'fixed' => 0.0,
+                'label' => '0% platform fee',
+            ],
+
+            // Published rates. Each competitor's own comparison page carries
+            // the same figure; see getComparisonData().
+            'eventbrite' => [
+                'name' => 'Eventbrite',
+                'monthly' => 0,
+                'percent' => 0.037,
+                'fixed' => 1.79,
+                'stripe' => false, // their fee is quoted as inclusive of processing
+                'label' => '3.7% + $1.79 per ticket',
+            ],
+            'luma' => [
+                'name' => 'Luma',
+                'monthly' => 59,
+                'percent' => 0.05,
+                'fixed' => 0.0,
+                'label' => '5% on the free plan, 0% on Plus at $59/mo',
+            ],
+            'ticket-tailor' => [
+                'name' => 'Ticket Tailor',
+                'monthly' => 0,
+                'percent' => 0.0,
+                // Published as a $0.28-$0.60 per-ticket band that narrows with
+                // volume. The midpoint is used for the estimate and the range
+                // is stated in the footnote, so the page quotes one number
+                // instead of the three it used to.
+                'fixed' => 0.44,
+                'range' => '$0.28-$0.60 per ticket',
+                'label' => '$0.28-$0.60 per ticket',
+            ],
+        ];
     }
 
     /**
@@ -956,9 +1044,49 @@ class MarketingController extends Controller
      */
     public function docsIndex()
     {
-        return view('marketing.docs.index', [
-            'searchIndex' => $this->getDocSearchIndex(),
-        ]);
+        // No searchIndex here on purpose: the widget fetches the cached
+        // /docs/search-index.json endpoint instead of having 364 rows inlined
+        // into the page. Passing it built those rows and made ~35 route() calls
+        // on every request, uncached, only to throw the array away.
+        return view('marketing.docs.index');
+    }
+
+    /**
+     * The docs search index, served as JSON.
+     *
+     * 364 entries, ~97 KB raw. Inlining that into all 41 doc pages would add
+     * ~18 KB gzipped to every one of them, so the search widget fetches this
+     * on first focus instead and the browser caches it across the section.
+     *
+     * The payload is host-independent (rows carry the same URLs the index
+     * always used), so it is safe to cache globally.
+     */
+    public function docsSearchIndex()
+    {
+        $index = Cache::remember(
+            'docs.search-index.'.app()->getLocale(),
+            now()->addDay(),
+            function () {
+                // Attach the manifest's icon key to each row so the results can
+                // render <use href="#docs-icon-..."> against the page sprite.
+                // The /docs search widget used to carry its own hand-written
+                // 26-entry copy of the icon paths in JavaScript.
+                $icons = [];
+                foreach (DocsUtils::pages() as $page) {
+                    $icons[$page['title']] = $page['icon'];
+                }
+
+                return array_map(function ($row) use ($icons) {
+                    $row['icon'] = $icons[$row['page']] ?? 'book';
+
+                    return $row;
+                }, $this->getDocSearchIndex());
+            }
+        );
+
+        return response()
+            ->json($index)
+            ->header('Cache-Control', 'public, max-age=3600');
     }
 
     // ==========================================
@@ -970,7 +1098,7 @@ class MarketingController extends Controller
      */
     public function docsGettingStarted()
     {
-        return view('marketing.docs.getting-started', $this->getDocNavigation('marketing.docs.getting_started'));
+        return view('marketing.docs.getting-started');
     }
 
     /**
@@ -999,7 +1127,7 @@ class MarketingController extends Controller
 
         return view('marketing.docs.creating-schedules', array_merge([
             'customFieldsData' => $customFieldsData,
-        ], $this->getDocNavigation('marketing.docs.creating_schedules')));
+        ]));
     }
 
     /**
@@ -1007,7 +1135,7 @@ class MarketingController extends Controller
      */
     public function docsScheduleStyling()
     {
-        return view('marketing.docs.schedule-styling', $this->getDocNavigation('marketing.docs.schedule_styling'));
+        return view('marketing.docs.schedule-styling');
     }
 
     /**
@@ -1015,7 +1143,7 @@ class MarketingController extends Controller
      */
     public function docsCreatingEvents()
     {
-        return view('marketing.docs.creating-events', $this->getDocNavigation('marketing.docs.creating_events'));
+        return view('marketing.docs.creating-events');
     }
 
     /**
@@ -1023,7 +1151,7 @@ class MarketingController extends Controller
      */
     public function docsSharing()
     {
-        return view('marketing.docs.sharing', $this->getDocNavigation('marketing.docs.sharing'));
+        return view('marketing.docs.sharing');
     }
 
     /**
@@ -1031,7 +1159,7 @@ class MarketingController extends Controller
      */
     public function docsTickets()
     {
-        return view('marketing.docs.tickets', $this->getDocNavigation('marketing.docs.tickets'));
+        return view('marketing.docs.tickets');
     }
 
     /**
@@ -1039,7 +1167,7 @@ class MarketingController extends Controller
      */
     public function docsSubscriptions()
     {
-        return view('marketing.docs.subscriptions', $this->getDocNavigation('marketing.docs.subscriptions'));
+        return view('marketing.docs.subscriptions');
     }
 
     /**
@@ -1047,12 +1175,12 @@ class MarketingController extends Controller
      */
     public function docsGiftCards()
     {
-        return view('marketing.docs.gift-cards', $this->getDocNavigation('marketing.docs.gift_cards'));
+        return view('marketing.docs.gift-cards');
     }
 
     public function docsAppointments()
     {
-        return view('marketing.docs.appointments', $this->getDocNavigation('marketing.docs.appointments'));
+        return view('marketing.docs.appointments');
     }
 
     /**
@@ -1060,7 +1188,7 @@ class MarketingController extends Controller
      */
     public function docsNewsletters()
     {
-        return view('marketing.docs.newsletters', $this->getDocNavigation('marketing.docs.newsletters'));
+        return view('marketing.docs.newsletters');
     }
 
     /**
@@ -1090,7 +1218,7 @@ class MarketingController extends Controller
 
         return view('marketing.docs.event-graphics', array_merge([
             'customFieldsData' => $customFieldsData,
-        ], $this->getDocNavigation('marketing.docs.event_graphics')));
+        ]));
     }
 
     /**
@@ -1098,7 +1226,7 @@ class MarketingController extends Controller
      */
     public function docsAnalytics()
     {
-        return view('marketing.docs.analytics', $this->getDocNavigation('marketing.docs.analytics'));
+        return view('marketing.docs.analytics');
     }
 
     /**
@@ -1106,7 +1234,7 @@ class MarketingController extends Controller
      */
     public function docsAccountSettings()
     {
-        return view('marketing.docs.account-settings', $this->getDocNavigation('marketing.docs.account_settings'));
+        return view('marketing.docs.account-settings');
     }
 
     /**
@@ -1114,7 +1242,7 @@ class MarketingController extends Controller
      */
     public function docsManagingSchedules()
     {
-        return view('marketing.docs.managing-schedules', $this->getDocNavigation('marketing.docs.managing_schedules'));
+        return view('marketing.docs.managing-schedules');
     }
 
     /**
@@ -1122,7 +1250,7 @@ class MarketingController extends Controller
      */
     public function docsBoost()
     {
-        return view('marketing.docs.boost', $this->getDocNavigation('marketing.docs.boost'));
+        return view('marketing.docs.boost');
     }
 
     /**
@@ -1130,7 +1258,7 @@ class MarketingController extends Controller
      */
     public function docsAiImport()
     {
-        return view('marketing.docs.ai-import', $this->getDocNavigation('marketing.docs.ai_import'));
+        return view('marketing.docs.ai-import');
     }
 
     /**
@@ -1138,7 +1266,7 @@ class MarketingController extends Controller
      */
     public function docsScanAgenda()
     {
-        return view('marketing.docs.scan-agenda', $this->getDocNavigation('marketing.docs.scan_agenda'));
+        return view('marketing.docs.scan-agenda');
     }
 
     // ==========================================
@@ -1389,6 +1517,96 @@ class MarketingController extends Controller
                 ['Selfhosting', 'Yes', 'No', 'No', 'No', 'No'],
             ],
         ];
+    }
+
+    /**
+     * The order competitors appear in the /compare picker: roughly how often
+     * people arrive already using them. The first eight are the ones shown
+     * before the "show all" expander on small screens.
+     */
+    private const HUB_PICKER_ORDER = [
+        'eventbrite', 'luma', 'ticket-tailor', 'google-calendar',
+        'meetup', 'dice', 'humanitix', 'tito',
+        'sched', 'whova', 'splash', 'accelevents',
+        'brown-paper-tickets', 'addevent', 'pretix', 'eventzilla',
+    ];
+
+    /**
+     * Feature rows the /compare head-to-head prefers, highest signal first.
+     * Every label here exists on at least 14 of the 16 competitors, so in
+     * practice 15 of them fill all six slots from this list alone.
+     */
+    private const HUB_HEAD_TO_HEAD_ROWS = [
+        'Platform fees',
+        'Paid plan price',
+        'Free plan',
+        'Ticketing',
+        'Google Calendar sync',
+        'Open source',
+        'Selfhosting',
+    ];
+
+    /**
+     * Compact head-to-head summaries for the /compare picker, one per
+     * competitor, derived from the same getComparisonData() rows that drive
+     * the detail pages so the hub and the detail page can never disagree.
+     *
+     * Deriving rather than restating also means no competitor fact is ever
+     * authored twice. getComparisonData() is pinned byte-for-byte by
+     * MarketingDataCharacterizationTest, so it is read here and never touched.
+     *
+     * Labels vary between competitors (Google Calendar has no ticketing rows
+     * at all), so the preferred list above is applied first and any competitor
+     * left short is topped up from its own rows, in their authored order.
+     */
+    private function getHubHeadToHead(): array
+    {
+        $out = [];
+
+        foreach (self::HUB_PICKER_ORDER as $slug) {
+            $data = $this->getComparisonData($slug);
+
+            // Flatten the competitor's sections to label => row. Later
+            // sections win on the rare duplicate label, which is harmless
+            // because the values agree.
+            $byLabel = [];
+            foreach ($data['sections'] as $rows) {
+                foreach ($rows as $row) {
+                    $byLabel[$row[0]] = $row;
+                }
+            }
+
+            $picked = [];
+            foreach (self::HUB_HEAD_TO_HEAD_ROWS as $label) {
+                if (count($picked) >= 6) {
+                    break;
+                }
+                if (isset($byLabel[$label])) {
+                    $picked[$label] = $byLabel[$label];
+                }
+            }
+            foreach ($byLabel as $label => $row) {
+                if (count($picked) >= 6) {
+                    break;
+                }
+                $picked[$label] = $row;
+            }
+
+            $out[$slug] = [
+                'name' => $data['name'],
+                'slug' => $data['slug'] ?? $slug,
+                'tagline' => $data['tagline'] ?? '',
+                'route' => 'marketing.compare_'.str_replace('-', '_', $slug),
+                'rows' => array_values(array_map(fn ($row) => [
+                    'feature' => $row[0],
+                    'ours' => $row[1],
+                    'theirs' => $row[2],
+                    'esWins' => (bool) ($row[3] ?? false),
+                ], $picked)),
+            ];
+        }
+
+        return $out;
     }
 
     /**
@@ -4474,46 +4692,6 @@ class MarketingController extends Controller
         return array_merge($tools[$tool], [
             'githubStars' => \App\Utils\GitHubUtils::getStars(),
         ]);
-    }
-
-    /**
-     * Get prev/next navigation data for a user guide doc page
-     */
-    protected function getDocNavigation(string $currentRoute): array
-    {
-        $pages = [
-            ['route' => 'marketing.docs.getting_started', 'title' => 'Getting Started'],
-            ['route' => 'marketing.docs.creating_schedules', 'title' => 'Creating Schedules'],
-            ['route' => 'marketing.docs.managing_schedules', 'title' => 'Managing Schedules'],
-            ['route' => 'marketing.docs.creating_events', 'title' => 'Creating Events'],
-            ['route' => 'marketing.docs.ai_import', 'title' => 'AI Import'],
-            ['route' => 'marketing.docs.scan_agenda', 'title' => 'Scan Agenda'],
-            ['route' => 'marketing.docs.tickets', 'title' => 'Selling Tickets'],
-            ['route' => 'marketing.docs.subscriptions', 'title' => 'Subscriptions & Passes'],
-            ['route' => 'marketing.docs.gift_cards', 'title' => 'Gift Cards'],
-            ['route' => 'marketing.docs.appointments', 'title' => 'Appointments'],
-            ['route' => 'marketing.docs.sharing', 'title' => 'Sharing Your Schedule'],
-            ['route' => 'marketing.docs.event_graphics', 'title' => 'Event Graphics'],
-            ['route' => 'marketing.docs.newsletters', 'title' => 'Newsletters'],
-            ['route' => 'marketing.docs.boost', 'title' => 'Boost'],
-            ['route' => 'marketing.docs.schedule_styling', 'title' => 'Schedule Styling'],
-            ['route' => 'marketing.docs.analytics', 'title' => 'Analytics'],
-            ['route' => 'marketing.docs.account_settings', 'title' => 'Account Settings'],
-            ['route' => 'marketing.docs.referral_program', 'title' => 'Referral Program'],
-        ];
-
-        $currentIndex = null;
-        foreach ($pages as $index => $page) {
-            if ($page['route'] === $currentRoute) {
-                $currentIndex = $index;
-                break;
-            }
-        }
-
-        return [
-            'prevDoc' => $currentIndex > 0 ? $pages[$currentIndex - 1] : null,
-            'nextDoc' => $currentIndex < count($pages) - 1 ? $pages[$currentIndex + 1] : null,
-        ];
     }
 
     /**

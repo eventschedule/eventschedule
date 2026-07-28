@@ -48,21 +48,8 @@
             50% { transform: translateY(-12px) rotate(0.6deg); }
         }
 
-        /* Signature motif: a row of keys (unlock your account benefits) */
-        .es-key {
-            flex: 0 0 auto;
-            color: rgba(37, 99, 235, 0.8);
-            animation: es-key-pulse var(--k-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--k-delay, 0s);
-        }
-        @keyframes es-key-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82) rotate(-8deg); }
-            50% { opacity: 0.9; transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.5)); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .es-account-float, .es-key, .animate-pulse-slow, .animate-float { animation: none !important; }
-            .es-key { opacity: 0.55; transform: none; }
+            .es-account-float, .animate-pulse-slow, .animate-float { animation: none !important; }
         }
     </style>
 
@@ -85,15 +72,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <!-- Key motif along the bottom edge (unlock account benefits) -->
-            <div class="es-keys absolute bottom-8 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-key" style="--k-dur: {{ $dur }}s; --k-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4-2a6 6 0 01-7.743 5.743L11 14H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -454,14 +432,6 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-keys absolute bottom-6 left-0 right-0 mx-auto flex h-14 items-center justify-center gap-6 px-8 opacity-40" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                        @for ($i = 0; $i < 9; $i++)
-                            @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                            <span class="es-key" style="--k-dur: {{ $dur }}s; --k-delay: {{ $delay }}s; color: rgba(96, 165, 250, 0.8);">
-                                <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4-2a6 6 0 01-7.743 5.743L11 14H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-                            </span>
-                        @endfor
-                    </div>
                 </div>
 
                 <div class="relative z-10">

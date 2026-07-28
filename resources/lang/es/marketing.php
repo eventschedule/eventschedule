@@ -13,8 +13,8 @@ return [
     'about_title' => 'Acerca de Event Schedule | Plataforma de gestión de eventos de código abierto',
     'about_description' => 'Event Schedule ayuda a artistas, recintos y organizadores a compartir eventos y vender entradas. Código abierto, enfocado en la privacidad y dirigido por la comunidad.',
 
-    'selfhost_title' => 'Autoaloja Event Schedule - Ejecuta en tu propio servidor',
-    'selfhost_description' => 'Autoaloja Event Schedule en tu propio servidor. 100% código abierto con instalación con un clic vía Docker, actualizaciones automáticas y funciones exclusivas con IA.',
+    'selfhost_title' => 'Autoaloja Event Schedule - todas las funciones gratis en tu propio servidor',
+    'selfhost_description' => 'Autoaloja Event Schedule en tu propio servidor y todas las funciones Pro y Enterprise están incluidas gratis. Código abierto, instalación con un clic, sin comisiones de plataforma, y tus datos nunca salen de tu infraestructura.',
 
     'ticketing_title' => 'Venta de entradas sin comisiones - Event Schedule',
     'ticketing_description' => 'Vende entradas directamente a través de tu calendario de eventos con códigos QR, múltiples tipos de entrada y procesamiento de pagos seguro.',

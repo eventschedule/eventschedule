@@ -13,8 +13,8 @@ return [
     'about_title' => 'אודות Event Schedule | פלטפורמת קוד פתוח לניהול אירועים',
     'about_description' => 'Event Schedule עוזרת לאמנים, מופעים ומארגנים לשתף אירועים ולמכור כרטיסים. קוד פתוח, ממוקדת פרטיות ומונעת על ידי הקהילה.',
 
-    'selfhost_title' => 'אירוח עצמי של Event Schedule - הפעילו בשרת שלכם',
-    'selfhost_description' => 'אירחו את Event Schedule בשרת שלכם. 100% קוד פתוח עם התקנת Docker בלחיצה אחת, עדכונים אוטומטיים ותכונות AI ייחודיות.',
+    'selfhost_title' => 'אירוח עצמי של Event Schedule - כל התכונות בחינם בשרת שלכם',
+    'selfhost_description' => 'אחסנו את Event Schedule בשרת שלכם וכל תכונות Pro ו-Enterprise כלולות בחינם. קוד פתוח, התקנה בלחיצה אחת, ללא עמלות פלטפורמה, והנתונים שלכם לעולם לא עוזבים את התשתית שלכם.',
 
     'ticketing_title' => 'מכירת כרטיסים ללא עמלות - Event Schedule',
     'ticketing_description' => 'מכרו כרטיסים ישירות דרך לוח האירועים שלכם עם קודי QR, סוגי כרטיסים מרובים ועיבוד תשלום מאובטח.',

@@ -24,7 +24,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | Use Cases | `/use-cases` | |
 | ✅ | Contact | `/contact` | |
 | ✅ | Open Source | `/open-source` | |
-| ✅ | Selfhost | `/selfhost` | |
+| ✅ | Selfhost | `/selfhost` | "The Terminal" ground-up rebuild |
 | ✅ | SaaS | `/saas` | White-label SaaS operator landing |
 
 ## Feature pages (30)
@@ -68,13 +68,13 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Updated | Verified | Page | URL | Notes |
 |:--------:|:-------:|:-------:|------|-----|-------|
-| ✅ |  | ✅ | For Talent | `/for-talent` | |
-| ✅ |  | ✅ | For Venues | `/for-venues` | |
-| ✅ |  | ✅ fixed 2 headings | For Curators | `/for-curators` | |
+| ✅ | ✅ | ✅ | For Talent | `/for-talent` | Rebuilt July 2026 to match `/`, `/features`, `/pricing` and `/use-cases`: brand blue→sky→cyan (retiring the amber/rose "Center Stage" gels), hero schedule mockup, a five-banner "Life of a gig" run via `<x-marketing.feature-banner>`, a `#live` rail of real talent events (hides below 4), the `#keep` fee band, an accurate free/Pro split, and the 12 performer cards via `<x-marketing.audience-card>` off the shared `config/marketing_audiences.php`. |
+| ✅ | ✅ | ✅ | For Venues | `/for-venues` | "Front of House" ground-up rebuild, July 2026. Two acts: front of house (calendar, box office, own brand, private hire) and back of house (booking inbox, the door, rooms, the numbers), hinged by a full-bleed "pass door" that carries the mid-page CTA. The two acts read through copy, ground colour and lighting - the facade-elevation and floor-plan line drawings that originally carried the motif were removed in the July 2026 line-drawing sweep. Act 02 uses the new `ground="dark"` on `<x-marketing.feature-banner>`/`feature-chapter` (fixed dark in both colour modes). Adds a week board, a "stack this replaces" row linking seven `replace`/`compare` pages, a venue-specific plan strip reading prices from config, `HowTo` schema, and the 12 venue cards via `<x-marketing.audience-card>` off the shared `config/marketing_audiences.php`. Fixed a wrong FAQ answer that claimed a "door staff" role. |
+| ✅ | ✅ | ✅ fixed 2 headings | For Curators | `/for-curators` | "The Listings" ground-up rebuild |
 
 ## Audience "For" pages (31)
 
-> **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; no new dependencies or external assets.
+> **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; never use decorative line drawings (outline SVG illustrations of objects or scenes) - see CLAUDE.md; no new dependencies or external assets.
 
 **Restyle progress:** 5 / 31 applied
 
@@ -118,7 +118,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 | Reviewed | Page | URL | Notes |
 |:--------:|------|-----|-------|
-| ✅ | Compare (hub) | `/compare` | Hub page; the 16 singles below share the `compare-single` template |
+| ✅ | Compare (hub) | `/compare` | "Head to Head" ground-up rebuild; the 16 singles below share the `compare-single` template, which is still first-wave |
 | ✅ | Eventbrite Alternative | `/eventbrite-alternative` | |
 | ✅ | Luma Alternative | `/luma-alternative` | |
 | ✅ | Ticket Tailor Alternative | `/ticket-tailor-alternative` | |

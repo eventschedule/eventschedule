@@ -13,8 +13,8 @@ return [
     'about_title' => 'Informazioni su Event Schedule | Piattaforma open source per la gestione di eventi',
     'about_description' => 'Event Schedule aiuta artisti, locali e organizzatori a condividere eventi e vendere biglietti. Open source, attento alla privacy e guidato dalla community.',
 
-    'selfhost_title' => 'Event Schedule in self-hosting - Eseguilo sul tuo server',
-    'selfhost_description' => 'Ospita Event Schedule sul tuo server. 100% open source con installazione Docker con un clic, aggiornamenti automatici e funzionalità AI esclusive.',
+    'selfhost_title' => 'Event Schedule in self-hosting - tutte le funzionalità gratis sul tuo server',
+    'selfhost_description' => 'Ospita Event Schedule sul tuo server e tutte le funzionalità Pro ed Enterprise sono incluse gratuitamente. Open source, installazione con un clic, senza commissioni di piattaforma, e i tuoi dati non lasciano mai la tua infrastruttura.',
 
     'ticketing_title' => 'Biglietteria senza commissioni - Event Schedule',
     'ticketing_description' => 'Vendi biglietti direttamente tramite il tuo calendario eventi con codici QR, più tipologie di biglietti e pagamenti sicuri.',

@@ -232,8 +232,6 @@
             ['81%', 4, '10.5s', '1.3s', '0.45', 'rgba(132, 204, 22, 0.9)'],
             ['92%', 6, '12s', '3s', '0.35', 'rgba(249, 115, 22, 0.9)'],
         ];
-        // Bunting pennant fill classes, cycled
-        $pennants = ['fill-lime-500/25', 'fill-amber-500/25', 'fill-orange-500/25', 'fill-red-500/20'];
     @endphp
 
     <!-- ============================================================ -->
@@ -253,16 +251,6 @@
             </div>
         </div>
 
-        <!-- Bunting across the top -->
-        <div class="pointer-events-none absolute inset-x-0 top-16 hidden h-16 overflow-hidden md:block" aria-hidden="true">
-            <svg class="w-full" height="60" viewBox="0 0 1200 60" preserveAspectRatio="none" fill="none">
-                <path d="M0,10 Q300,25 600,10 Q900,25 1200,10" stroke="currentColor" stroke-width="1.5" class="text-gray-300 dark:text-gray-600" fill="none" />
-                @for ($p = 0; $p < 14; $p++)
-                    @php $x = 80 + $p * 80; $fill = $pennants[$p % 4]; @endphp
-                    <polygon points="{{ $x }},13 {{ $x + 20 }},51 {{ $x + 40 }},13" class="{{ $fill }}" />
-                @endfor
-            </svg>
-        </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
             <div class="es-fade-up es-d-1 wood-grain-badge mb-8 inline-flex items-center gap-3 rounded-lg border border-amber-300/50 px-5 py-2.5 backdrop-blur-sm dark:border-amber-600/30">
@@ -576,16 +564,6 @@
                         <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; background: {{ $col }}; --seed-dur: {{ $d }}; --seed-delay: {{ $dl }}; --seed-op: {{ $op }};"></span>
                     @endforeach
                 </div>
-                <!-- Bunting across the band top -->
-                <div class="absolute inset-x-0 top-6 hidden h-12 overflow-hidden md:block">
-                    <svg class="w-full" height="52" viewBox="0 0 1200 52" preserveAspectRatio="none" fill="none">
-                        <path d="M0,8 Q300,22 600,8 Q900,22 1200,8" stroke="currentColor" stroke-width="1.5" class="text-white/20" fill="none" />
-                        @for ($p = 0; $p < 14; $p++)
-                            @php $x = 80 + $p * 80; $fill = $pennants[$p % 4]; @endphp
-                            <polygon points="{{ $x }},11 {{ $x + 20 }},46 {{ $x + 40 }},11" class="{{ $fill }}" />
-                        @endfor
-                    </svg>
-                </div>
             </div>
 
             <div class="pointer-events-none absolute right-5 top-5 z-20 hidden lg:block" aria-hidden="true">
@@ -888,16 +866,6 @@
                         @foreach ($seeds as [$l, $s, $d, $dl, $op, $col])
                             <span style="left: {{ $l }}; width: {{ $s }}px; height: {{ $s }}px; background: {{ $col }}; --seed-dur: {{ $d }}; --seed-delay: {{ $dl }}; --seed-op: {{ $op }};"></span>
                         @endforeach
-                    </div>
-                    <!-- Bunting along the finale top edge -->
-                    <div class="absolute inset-x-0 top-5 hidden h-12 overflow-hidden md:block">
-                        <svg class="w-full" height="52" viewBox="0 0 1200 52" preserveAspectRatio="none" fill="none">
-                            <path d="M0,8 Q300,22 600,8 Q900,22 1200,8" stroke="currentColor" stroke-width="1.5" class="text-white/20" fill="none" />
-                            @for ($p = 0; $p < 14; $p++)
-                                @php $x = 80 + $p * 80; $fill = $pennants[$p % 4]; @endphp
-                                <polygon points="{{ $x }},11 {{ $x + 20 }},46 {{ $x + 40 }},11" class="{{ $fill }}" />
-                            @endfor
-                        </svg>
                     </div>
                 </div>
 

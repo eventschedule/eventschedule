@@ -240,19 +240,6 @@
             background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(251, 191, 36, 0.13), transparent 60%);
         }
 
-        /* Mic-stand silhouette beside the lineup tracker */
-        .es-comic-mic {
-            position: absolute;
-            bottom: 0;
-            left: 0.75rem;
-            width: 44px;
-            height: 150px;
-            color: rgba(180, 83, 9, 0.16);
-            filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.38));
-            pointer-events: none;
-        }
-        .dark .es-comic-mic { color: rgba(251, 191, 36, 0.24); }
-
         /* Stacked set-list paper edge (warmed for the ivory rooms) */
         .es-comic-paper { box-shadow: 4px 5px 0 -1px #ece7db, 9px 11px 0 -2px #e0dacb; }
         .dark .es-comic-paper { box-shadow: 4px 5px 0 -1px #1b1b22, 9px 11px 0 -2px #141419; }
@@ -418,19 +405,10 @@
         .es-comic-link { color: #b45309; }
         .dark .es-comic-link { color: #fbbf24; }
 
-        /* Mic drop in the finale: tips over once the panel reveals */
-        .es-comic-drop {
-            transform-origin: 88% 96%;
-            transition: transform 0.7s cubic-bezier(0.34, 1.3, 0.5, 1);
-            transition-delay: 1s;
-        }
-        html.es-anim [data-reveal].is-revealed .es-comic-drop { transform: rotate(78deg); }
-
         @media (prefers-reduced-motion: reduce) {
             .es-comic-cone,
             .es-comic-beat i { animation: none !important; }
             .es-comic-row:hover { transform: none; }
-            .es-comic-drop { transition: none !important; transform: none !important; }
         }
     </style>
 
@@ -635,17 +613,6 @@
                 <!-- BIT 01: The One-Link Bit -->
                 <article id="bit-1" class="es-comic-bit es-bento group relative scroll-mt-24" data-tilt="2" data-reveal="panel">
                     <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-12">
-                        <svg class="es-comic-mic" viewBox="0 0 44 150" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                            <rect x="15" y="6" width="14" height="26" rx="7" />
-                            <line x1="19" y1="13" x2="25" y2="13" />
-                            <line x1="19" y1="19" x2="25" y2="19" />
-                            <line x1="19" y1="25" x2="25" y2="25" />
-                            <path d="M9 26a13 12 0 0 0 26 0" />
-                            <line x1="22" y1="38" x2="22" y2="126" />
-                            <line x1="9" y1="140" x2="35" y2="140" />
-                            <line x1="22" y1="126" x2="11" y2="140" />
-                            <line x1="22" y1="126" x2="33" y2="140" />
-                        </svg>
                         <div class="relative mb-8 flex flex-wrap items-center justify-between gap-3">
                             <span class="es-comic-bit-num" aria-hidden="true"></span>
                             <span class="es-comic-chip es-comic-mono">5 MIN IN</span>
@@ -1202,18 +1169,6 @@
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
 
-                <!-- The mic drop -->
-                <svg class="es-comic-drop pointer-events-none absolute bottom-6 h-24 w-8 text-amber-400/40 ltr:right-10 rtl:left-10" viewBox="0 0 44 150" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                    <rect x="15" y="6" width="14" height="26" rx="7" />
-                    <line x1="19" y1="13" x2="25" y2="13" />
-                    <line x1="19" y1="19" x2="25" y2="19" />
-                    <line x1="19" y1="25" x2="25" y2="25" />
-                    <path d="M9 26a13 12 0 0 0 26 0" />
-                    <line x1="22" y1="38" x2="22" y2="126" />
-                    <line x1="9" y1="140" x2="35" y2="140" />
-                    <line x1="22" y1="126" x2="11" y2="140" />
-                    <line x1="22" y1="126" x2="33" y2="140" />
-                </svg>
 
                 <div class="relative z-10">
                     <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-4 py-1.5">

@@ -179,13 +179,6 @@
             50% { opacity: 0.9; transform: translateY(0) scale(1); box-shadow: 0 0 8px var(--qb-glow, rgba(245, 158, 11, 0.5)); }
         }
 
-        /* Raised-hand pulse in the dark band - a hand waving to be called on. */
-        @keyframes es-hand-raise {
-            0%, 100% { transform: translateY(0) rotate(-5deg); opacity: 0.55; }
-            50% { transform: translateY(-6px) rotate(5deg); opacity: 1; }
-        }
-        .es-hand { color: rgba(251, 191, 36, 0.8); transform-origin: bottom center; animation: es-hand-raise 3s ease-in-out infinite; }
-
         /* Upvote tick: the answer-voice vote chip nudges up on a loop. */
         @keyframes es-upvote { 0%, 55%, 100% { transform: translateY(0); } 28% { transform: translateY(-3px); } }
         .es-upvote-tick { animation: es-upvote 2.6s ease-in-out infinite; }
@@ -224,9 +217,8 @@
         .dark .qa-related-card:hover .qa-related-arrow { color: #fbbf24; }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-qbubble-dot, .es-hand, .es-upvote-tick { animation: none !important; }
+            .es-qbubble-dot, .es-upvote-tick { animation: none !important; }
             .es-qbubble-dot { opacity: 0.55; transform: none; }
-            .es-hand { transform: none; opacity: 0.8; }
         }
     </style>
 
@@ -590,11 +582,6 @@
                 <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 25%, rgba(217, 119, 6, 0.26), rgba(217, 119, 6, 0) 60%); opacity: 0.6;"></div>
                 <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 65%, rgba(234, 88, 12, 0.2), rgba(234, 88, 12, 0) 60%); opacity: 0.55;"></div>
                 <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-hand absolute right-8 top-24 z-10 hidden lg:block" aria-hidden="true">
-                    <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M10.05 4.575a1.575 1.575 0 1 0-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 0 1 3.15 0v1.5m-3.15 0 .075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 0 1 3.15 0V15M6.9 7.575a1.575 1.575 0 1 0-3.15 0v8.175a6.75 6.75 0 0 0 6.75 6.75h2.018a5.25 5.25 0 0 0 3.712-1.538l1.732-1.732a5.25 5.25 0 0 0 1.538-3.712l.003-2.024a.668.668 0 0 1 .198-.471 1.575 1.575 0 1 0-2.228-2.228 3.818 3.818 0 0 0-1.12 2.687M6.9 7.575V12" />
-                    </svg>
-                </div>
                 <div class="es-qbubble absolute bottom-0 left-0 right-0 flex h-16 items-end justify-center gap-2 px-8 pb-4 opacity-30" style="mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);">
                     @for ($i = 0; $i < 26; $i++)
                         @php $dur = 2.4 + ($i % 5) * 0.28; $delay = ($i % 9) * 0.15; $voice = $i % 2 === 0 ? '' : 'is-a'; @endphp

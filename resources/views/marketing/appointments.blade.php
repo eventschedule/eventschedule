@@ -86,21 +86,8 @@
             background-clip: text;
         }
 
-        /* Signature motif: a row of clocks pulsing along the bottom edge */
-        .es-appt-icon {
-            flex: 0 0 auto;
-            color: rgba(14, 165, 233, 0.8);
-            animation: es-appt-pulse var(--ap-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--ap-delay, 0s);
-        }
-        @keyframes es-appt-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.5)); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .es-appt-icon, .animate-pulse-slow, .animate-pulse { animation: none !important; }
-            .es-appt-icon { opacity: 0.55; transform: none; }
+            .animate-pulse-slow, .animate-pulse { animation: none !important; }
         }
     </style>
 
@@ -123,15 +110,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <!-- Clock motif along the bottom edge -->
-            <div class="absolute bottom-8 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-appt-icon" style="--ap-dur: {{ $dur }}s; --ap-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -474,14 +452,6 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="absolute bottom-6 left-0 right-0 mx-auto flex h-14 items-center justify-center gap-6 px-8 opacity-45" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                        @for ($i = 0; $i < 9; $i++)
-                            @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                            <span class="es-appt-icon" style="--ap-dur: {{ $dur }}s; --ap-delay: {{ $delay }}s;">
-                                <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
-                            </span>
-                        @endfor
-                    </div>
                 </div>
 
                 <div class="relative z-10">

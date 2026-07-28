@@ -111,21 +111,8 @@
             50% { transform: translateY(-12px) rotate(1.2deg); }
         }
 
-        /* Signature motif: a row of gift icons pulsing along the bottom edge */
-        .es-gift-icon {
-            flex: 0 0 auto;
-            color: rgba(14, 165, 233, 0.8);
-            animation: es-gift-pulse var(--gc-dur, 2.8s) ease-in-out infinite;
-            animation-delay: var(--gc-delay, 0s);
-        }
-        @keyframes es-gift-pulse {
-            0%, 100% { opacity: 0.2; transform: scale(0.82); }
-            50% { opacity: 0.9; transform: scale(1); filter: drop-shadow(0 0 6px rgba(14, 165, 233, 0.5)); }
-        }
-
         @media (prefers-reduced-motion: reduce) {
-            .es-gift-float, .es-gift-icon, .animate-pulse-slow, .animate-pulse { animation: none !important; }
-            .es-gift-icon { opacity: 0.55; transform: none; }
+            .es-gift-float, .animate-pulse-slow, .animate-pulse { animation: none !important; }
         }
     </style>
 
@@ -148,15 +135,6 @@
             <div class="es-rays absolute inset-0"></div>
             <div class="absolute inset-0 grid-pattern"></div>
 
-            <!-- Gift motif along the bottom edge -->
-            <div class="es-gifts absolute bottom-8 left-0 right-0 mx-auto hidden h-16 max-w-4xl items-center justify-center gap-6 px-8 opacity-55 md:flex" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                @for ($i = 0; $i < 12; $i++)
-                    @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                    <span class="es-gift-icon" style="--gc-dur: {{ $dur }}s; --gc-delay: {{ $delay }}s;">
-                        <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>
-                    </span>
-                @endfor
-            </div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
@@ -480,14 +458,6 @@
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
                     <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="es-gifts absolute bottom-6 left-0 right-0 mx-auto flex h-14 items-center justify-center gap-6 px-8 opacity-45" style="mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);">
-                        @for ($i = 0; $i < 9; $i++)
-                            @php $sz = [18, 26, 16, 22, 30][$i % 5]; $dur = 2.6 + ($i % 5) * 0.4; $delay = ($i % 7) * 0.3; @endphp
-                            <span class="es-gift-icon" style="--gc-dur: {{ $dur }}s; --gc-delay: {{ $delay }}s;">
-                                <svg width="{{ $sz }}" height="{{ $sz }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" /></svg>
-                            </span>
-                        @endfor
-                    </div>
                 </div>
 
                 <div class="relative z-10">
