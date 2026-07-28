@@ -96,6 +96,15 @@ return [
         ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Auto-generate show flyers for your socials.'],
     ],
 
+    // The for-spoken-word page already links the neighbouring audience pages
+    // inline, so this strip carries the features an open mic host reaches for.
+    'for-spoken-word' => [
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set the weekly mic once, and skip the weeks you are closed.'],
+        ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Ask what they are reading right on the sign-up form.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep the mic, the reading series, and workshops apart.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Email the regulars when the next night is up."],
+    ],
+
     'for-circus-acrobatics' => [
         ['title' => 'For Magicians', 'path' => '/for-magicians', 'blurb' => 'Shows, residencies, and private bookings on one schedule.'],
         ['title' => 'For Dance Groups', 'path' => '/for-dance-groups', 'blurb' => 'Rehearsals, recitals, and touring dates in one place.'],

@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Spoken Word | Share Your Readings</x-slot>
-    <x-slot name="description">Share your poetry readings, open mics, and workshops. Sell tickets directly and reach fans with newsletters. Zero platform fees. Free forever.</x-slot>
+    <x-slot name="title">Open Mic and Reading Schedules for Poets | Event Schedule</x-slot>
+    <x-slot name="description">Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, recurring dates that skip the holidays, and zero platform fees on tickets.</x-slot>
     <x-slot name="breadcrumbTitle">For Spoken Word</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Spoken Word",
-        "description": "Share your poetry readings, open mics, and workshops. Sell tickets directly, reach fans with newsletters. Zero platform fees.",
+        "description": "Run open mic sign-ups, reading series, and workshops from one link. Free registration with a capacity limit, recurring dates, and zero platform fees on tickets.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -18,48 +18,8 @@
         "serviceType": "Event Management",
         "audience": {
             "@type": "Audience",
-            "audienceType": "Spoken Word Artists"
+            "audienceType": "Poets, Storytellers, and Open Mic Hosts"
         }
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for spoken word artists?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your performance schedule, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I promote open mics, slams, and readings together?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use sub-schedules to organize by event type - open mics, poetry slams, book readings, workshops, and featured sets. Each event can include descriptions, featured performer info, venue details, and signup information."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do poetry fans discover my events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans can follow your schedule and receive email notifications when you add new events. Share your schedule link on social media, literary websites, or embed it on your personal site."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to featured shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Set different prices for general admission and featured seating. Event Schedule charges zero platform fees."
-                }
-            }
-        ]
     }
     </script>
     <!-- Product Schema for Rich Snippets -->
@@ -67,11 +27,10 @@
     {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "Event Schedule for Poets & Spoken Word",
+        "name": "Event Schedule for Poets and Spoken Word",
         "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Poetry Reading Scheduling Software",
+        "applicationSubCategory": "Open Mic and Poetry Reading Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Share your poetry readings, open mics, and workshops. Sell tickets directly, reach fans with newsletters. Built for spoken word artists, slam poets, and writers.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,20 +38,54 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Open mic and reading tracking across multiple venues",
-            "Zero-fee ticket sales with chapbook bundling",
-            "Direct newsletter communication with readers",
-            "Virtual reading and workshop support",
-            "Two-way Google Calendar sync",
-            "Workshop scheduling and registration",
-            "Auto-generated promotional graphics for social media"
+            "Free registration with an optional capacity limit for open mic slots",
+            "Recurring weekly and monthly mics with date exceptions for holidays",
+            "Sub-schedules that keep the mic, the reading series, and workshops apart",
+            "A public submission form so performers can put themselves forward",
+            "Custom questions on the registration form for what is being read",
+            "Zero-fee ticket sales with QR check-in for featured readings",
+            "Direct newsletters to the people who follow your schedule",
+            "Fan photos, videos, and comments from the night with an approval queue",
+            "Two-way Google, Outlook, and CalDAV calendar sync",
+            "Auto-generated flyers and social graphics for each night",
+            "Embeddable calendar for a venue, bookstore, or personal site",
+            "Online and hybrid readings for people who cannot make the room"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "spoken word schedule, poetry event calendar, spoken word booking, poetry slam management, free spoken word scheduling",
+        "keywords": "open mic schedule, poetry reading calendar, open mic sign up sheet, spoken word event management, poetry slam scheduling, storytelling event calendar, free open mic software",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to run an open mic sign-up list with Event Schedule",
+        "description": "Put your open mic list online in three steps.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Start the list",
+                "text": "Add the mic as a recurring event, turn on registration, and set how many spots there are. Skip a date when the room is closed for a holiday."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Share one link",
+                "text": "Put the link in your bio, on the venue's site, and on the back of your chapbook, or embed the calendar on a page you already have."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Let them sign up",
+                "text": "Poets take a spot themselves. You can see the list from anywhere, and the page stops taking names once every spot is gone."
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -106,163 +99,517 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-spoken-word "The Reading" styles. The shared es-* motion system
-           lives in marketing.css; this holds the deepened ink-and-sepia gradient
-           text (sepia #92400e -> rose #e11d48, so it reads darker than the
-           brighter for-comedians amber-rose), the faint serif words, a serif
-           pull-quote, small serif pilcrows, and one gentle motion: an ink
-           underline that draws itself under gradient headings on reveal.
-           Type does the work; motion stays minimal. */
-        .text-gradient-poetry {
-            background: linear-gradient(135deg, #92400e, #e11d48);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .dark .text-gradient-poetry {
-            background: linear-gradient(135deg, #fcd34d, #fb7185);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .es-word {
-            position: absolute;
-            font-family: Georgia, 'Times New Roman', serif;
-            color: rgba(120, 53, 15, 0.06);
-            pointer-events: none;
-            user-select: none;
-        }
-        .dark .es-word { color: rgba(253, 230, 138, 0.05); }
+        /* ==============================================================
+           For-spoken-word "The Sign-Up Sheet" styles. The page is the
+           clipboard by the door at an open mic. The SHEET is a physical
+           object: it stays warm ivory in BOTH colour modes and only the
+           room around it changes (a bright cafe wall in light mode, the
+           back of the room in dark), so anything inside .es-sheet-paper
+           deliberately carries no dark: variants. Two inks do all the
+           work: the performers' ballpoint blue and the host's red
+           felt-tip. Slot numbers 01..12 run down the page as the
+           section numerals, each sitting in the sheet's red margin.
 
-        /* Ink underline: a hairline of sepia-rose ink that draws itself under
-           gradient heading words when the section reveals. Falls back to fully
-           drawn for no-JS / reduced-motion visitors. */
-        .es-ink-underline { position: relative; }
-        .es-ink-underline::after {
+           Consequence of the fixed paper: any accent text placed on a
+           fixed-dark band needs the always-lit "-lit" variant, or a
+           light-mode visitor gets dark ink on a dark ground.
+
+           BLADE RULE for this block: never use @supports probes here.
+           A "#" hex inside a parenthesized at-rule condition breaks
+           Blade compilation of every later parenthesized directive.
+           ============================================================== */
+
+        /* --- Accent text: ballpoint ink into felt-tip red --- */
+        /* The stops are weighted late on purpose: a plain blue-to-red ramp
+           spends its middle in a desaturated mauve, which both looks washed
+           out and drifts toward a hue the brand rules rule out. Holding the
+           ink flat to 35% keeps it reading as ballpoint that lands on the
+           host's felt-tip. */
+        .text-gradient-signup {
+            background-image: linear-gradient(135deg, #1c3d6e 0%, #1c3d6e 35%, #b91c1c 88%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        .dark .text-gradient-signup {
+            background-image: linear-gradient(135deg, #93c5fd 0%, #93c5fd 35%, #f87171 88%);
+        }
+        /* Always-lit variant for the fixed-dark bands (both colour modes). */
+        .text-gradient-signup-lit {
+            background-image: linear-gradient(135deg, #93c5fd 0%, #93c5fd 35%, #f87171 88%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Eyebrow tags --- */
+        .es-sheet-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: #1c3d6e;
+        }
+        .dark .es-sheet-tag,
+        .es-sheet-band .es-sheet-tag { color: #93c5fd; }
+        /* Inside the sheet the room never changes, so pin the ink. */
+        .es-sheet-paper .es-sheet-tag { color: #1c3d6e; }
+
+        /* --- Links and buttons --- */
+        .es-sheet-link { color: #1c3d6e; }
+        .es-sheet-link:hover { color: #b91c1c; }
+        .dark .es-sheet-link { color: #93c5fd; }
+        .dark .es-sheet-link:hover { color: #f87171; }
+
+        .es-sheet-btn {
+            background-image: linear-gradient(to right, #1c3d6e, #2f5d9e);
+            box-shadow: 0 20px 40px -12px rgba(28, 61, 110, 0.45);
+        }
+        .es-sheet-btn:hover {
+            background-image: linear-gradient(to right, #16305a, #1c3d6e);
+            box-shadow: 0 24px 48px -12px rgba(28, 61, 110, 0.55);
+        }
+
+        /* --- FAQ / related-card hover recolor --- */
+        .es-sheet-hover:hover { border-color: rgba(28, 61, 110, 0.4); }
+        .dark .es-sheet-hover:hover { border-color: rgba(147, 197, 253, 0.35); }
+        .es-sheet-hover:hover .es-sheet-hover-title,
+        .es-sheet-hover:hover .es-sheet-hover-arrow { color: #1c3d6e; }
+        .dark .es-sheet-hover:hover .es-sheet-hover-title,
+        .dark .es-sheet-hover:hover .es-sheet-hover-arrow { color: #93c5fd; }
+
+        /* --- The back of the room: fixed-dark band, identical in both modes --- */
+        .es-sheet-band {
+            background-color: #0f0d0b;
+            background-image: radial-gradient(120% 100% at 50% 0%, #1e1912 0%, #13100c 55%, #0a0807 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* --- The sheet: warm ivory in BOTH modes --- */
+        .es-sheet-paper {
+            position: relative;
+            background-image: linear-gradient(170deg, #fdfaf1, #f3ecdb);
+            border: 1px solid #ddd2b8;
+            border-radius: 0.75rem;
+            color: #3f3a33;
+            box-shadow: 0 18px 40px -22px rgba(20, 24, 33, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+        }
+        /* The legal-pad red margin rule, plus room for it. */
+        .es-sheet-margin { padding-inline-start: 3rem; }
+        .es-sheet-margin::before {
             content: "";
             position: absolute;
-            left: 0;
-            right: 0;
-            bottom: -0.12em;
-            height: 3px;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #92400e, #e11d48);
-            transform: scaleX(0);
+            top: 0.5rem;
+            bottom: 0.5rem;
+            inset-inline-start: 2.1rem;
+            width: 1px;
+            background: rgba(185, 28, 28, 0.4);
+            pointer-events: none;
+        }
+        @media (min-width: 640px) {
+            .es-sheet-margin { padding-inline-start: 3.75rem; }
+            .es-sheet-margin::before { inset-inline-start: 2.75rem; }
+        }
+
+        /* --- The clipboard behind the sheet: hardboard, fixed in both modes --- */
+        .es-sheet-board {
+            background-image: linear-gradient(165deg, #8a7554, #6d5a3e 55%, #57472f);
+            border: 1px solid #4a3c28;
+            border-radius: 1.1rem;
+            box-shadow: 0 30px 60px -28px rgba(12, 10, 8, 0.75);
+        }
+        .es-sheet-clip {
+            width: 6.5rem;
+            height: 1.5rem;
+            border-radius: 0.4rem 0.4rem 0.55rem 0.55rem;
+            background-image: linear-gradient(180deg, #e6e3dc, #a9a49a 60%, #7d786e);
+            border: 1px solid #6f6a60;
+            box-shadow: 0 4px 10px -3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+
+        /* --- One ruled line on the sheet --- */
+        .es-sheet-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.6rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(28, 61, 110, 0.16);
+        }
+        .es-sheet-row:last-child { border-bottom: 0; }
+        /* Dotted leader that eats the space between a name and its time. */
+        .es-sheet-leader {
+            flex: 1 1 auto;
+            min-width: 1rem;
+            align-self: flex-end;
+            margin-bottom: 0.28rem;
+            border-bottom: 1px dotted rgba(63, 58, 51, 0.42);
+        }
+        .es-sheet-num {
+            flex: none;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #1c3d6e;
+            letter-spacing: 0.02em;
+        }
+
+        /* --- Handwriting. System stacks only: marketing pages load no
+               webfont, so this degrades to the generic cursive face and,
+               failing that, to the inherited stack. Never used for
+               anything the layout has to measure. --- */
+        .es-sheet-hand {
+            font-family: "Bradley Hand", "Segoe Script", "Ink Free", "Chalkboard SE", "Comic Sans MS", cursive;
+            color: #1c3d6e;
+            letter-spacing: 0.01em;
+        }
+        .es-sheet-hand-red { color: #b91c1c; }
+
+        /* --- The caret waiting on the next empty line --- */
+        .es-sheet-caret {
+            display: inline-block;
+            width: 0.5rem;
+            height: 1.05em;
+            vertical-align: -0.16em;
+            background: #1c3d6e;
+        }
+        html.es-anim .es-sheet-caret { animation: es-sheet-blink 1.15s step-end infinite; }
+        @keyframes es-sheet-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* --- The host's marks in red felt-tip --- */
+        .es-sheet-stamp {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.15rem 0.55rem;
+            border: 2px solid rgba(185, 28, 28, 0.75);
+            border-radius: 0.3rem;
+            color: #b91c1c;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            transform: rotate(-6deg);
+        }
+        /* The circled feature. The stroke length lives on an always-active
+           rule so the ring is fully drawn without JS or with motion off;
+           only the undrawn pre-state is gated. */
+        .es-sheet-ring { stroke-dasharray: 340; stroke-dashoffset: 0; transition: stroke-dashoffset 1.2s ease 0.4s; }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-sheet-ring { stroke-dashoffset: 340; }
+        /* The crossed-off no-show. */
+        .es-sheet-strike { position: relative; }
+        .es-sheet-strike::after {
+            content: "";
+            position: absolute;
+            left: -0.15rem;
+            right: -0.15rem;
+            top: 52%;
+            height: 2px;
+            background: rgba(185, 28, 28, 0.8);
             transform-origin: left center;
-            transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-            transition-delay: 0.2s;
-        }
-        .dark .es-ink-underline::after {
-            background: linear-gradient(90deg, #fcd34d, #fb7185);
-        }
-        [data-reveal].is-revealed .es-ink-underline::after,
-        html:not(.es-anim) .es-ink-underline::after {
             transform: scaleX(1);
+            transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.5s;
+        }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-sheet-strike::after { transform: scaleX(0); }
+
+        /* --- Section slot numeral: a torn tab off the sheet's margin --- */
+        .es-sheet-corner {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem 0.4rem 0.6rem;
+            border-radius: 0.5rem;
+            background-image: linear-gradient(170deg, #fdfaf1, #f3ecdb);
+            border: 1px solid #ddd2b8;
+            box-shadow: 0 8px 18px -12px rgba(20, 24, 33, 0.55);
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            color: #1c3d6e;
+            letter-spacing: 0.04em;
+        }
+        .es-sheet-corner::before {
+            content: "";
+            width: 2px;
+            align-self: stretch;
+            border-radius: 1px;
+            background: rgba(185, 28, 28, 0.6);
         }
 
-        /* Oversized serif quotation mark for the mid-page pull-quote. */
-        .es-quote-mark {
-            font-family: Georgia, 'Times New Roman', serif;
-            font-size: 5rem;
-            line-height: 0.7;
-            background: linear-gradient(135deg, #92400e, #e11d48);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        /* --- Torn paper scraps drifting behind the hero --- */
+        .es-sheet-scrap {
+            position: absolute;
+            border-radius: 0.2rem;
+            background-image: linear-gradient(170deg, rgba(253, 250, 241, 0.9), rgba(243, 236, 219, 0.75));
+            border: 1px solid rgba(221, 210, 184, 0.8);
+            box-shadow: 0 10px 22px -14px rgba(20, 24, 33, 0.55);
+            opacity: 0.55;
         }
-        .dark .es-quote-mark {
-            background: linear-gradient(135deg, #fcd34d, #fb7185);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .dark .es-sheet-scrap { opacity: 0.14; }
+        html.es-anim .es-sheet-scrap {
+            animation: es-sheet-drift 15s ease-in-out infinite alternate;
+            animation-delay: var(--d, 0s);
         }
-        @media (min-width: 768px) {
-            .es-quote-mark { font-size: 6.5rem; }
+        @keyframes es-sheet-drift {
+            from { transform: translate3d(0, 0, 0) rotate(var(--r, -6deg)); }
+            to   { transform: translate3d(0, -18px, 0) rotate(calc(var(--r, -6deg) + 5deg)); }
         }
 
-        /* Small serif pilcrow markers leading each FAQ question. */
-        .es-pilcrow {
-            font-family: Georgia, 'Times New Roman', serif;
-            color: #b45309;
+        /* --- Chips in the hero marquee --- */
+        .es-sheet-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(28, 61, 110, 0.22);
+            background: rgba(253, 250, 241, 0.75);
+            color: #1c3d6e;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
         }
-        .dark .es-pilcrow { color: #fcd34d; }
+        .dark .es-sheet-chip {
+            border-color: rgba(147, 197, 253, 0.22);
+            background: rgba(255, 255, 255, 0.05);
+            color: #bfd7ff;
+        }
 
-        /* Accent recolor for the hard-coded links and related-page card hovers. */
-        .es-link-poetry { color: #b45309; }
-        .dark .es-link-poetry { color: #fcd34d; }
-        .es-relcard:hover { border-color: #fcd34d; background-color: #fffbeb; }
-        .dark .es-relcard:hover { border-color: rgba(252, 211, 77, 0.3); background-color: rgba(252, 211, 77, 0.06); }
-        .es-relcard:hover .es-relcard-title,
-        .es-relcard:hover .es-relcard-arrow { color: #b45309; }
-        .dark .es-relcard:hover .es-relcard-title,
-        .dark .es-relcard:hover .es-relcard-arrow { color: #fcd34d; }
+        /* --- Plan tag: which tier a line on the sheet needs --- */
+        .es-sheet-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.3rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            border: 1px solid rgba(28, 61, 110, 0.3);
+            color: #1c3d6e;
+        }
+        .es-sheet-plan-pro {
+            border-color: rgba(185, 28, 28, 0.45);
+            color: #b91c1c;
+        }
 
+        /* --- Shared-system recolors. The cursor spotlight and the dot-nav
+               pips are hard-coded brand blue in marketing.css. --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(28, 61, 110, 0.14), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(147, 197, 253, 0.14), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(28, 61, 110, 0.7); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(147, 197, 253, 0.7); }
+        .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #1c3d6e, #b91c1c); }
+        .dark .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #93c5fd, #f87171); }
+
+        /* --- Focus rings. Most of the page is paper rather than the shared
+               card components, so the ring at marketing.css:248 does not
+               reach it. This rule is load-bearing for keyboard users. --- */
+        #es-sheet-page a:focus-visible,
+        #es-sheet-page summary:focus-visible,
+        #es-sheet-page button:focus-visible {
+            outline: 2px solid #1c3d6e;
+            outline-offset: 3px;
+            border-radius: 0.35rem;
+        }
+        .dark #es-sheet-page a:focus-visible,
+        .dark #es-sheet-page summary:focus-visible,
+        .dark #es-sheet-page button:focus-visible {
+            outline-color: #93c5fd;
+        }
+        /* Inside the sheet the ground never changes, so keep the ink ring. */
+        .dark .es-sheet-paper a:focus-visible,
+        .dark .es-sheet-paper summary:focus-visible,
+        .dark .es-sheet-paper button:focus-visible {
+            outline-color: #1c3d6e;
+        }
+
+        /* --- The signature on the last line of the finale sheet --- */
+        .es-sheet-signline {
+            border-bottom: 2px solid rgba(28, 61, 110, 0.45);
+            min-height: 3.1rem;
+        }
+
+        /* --- Reduced motion: every page-local effect resolves to its
+               finished state, nothing moves. --- */
         @media (prefers-reduced-motion: reduce) {
-            .es-ink-underline::after { transform: scaleX(1); transition: none; }
+            html.es-anim .es-sheet-caret,
+            html.es-anim .es-sheet-scrap {
+                animation: none !important;
+            }
+            .es-sheet-ring {
+                stroke-dashoffset: 0 !important;
+                transition: none !important;
+            }
+            .es-sheet-strike::after {
+                transform: scaleX(1) !important;
+                transition: none !important;
+            }
+            .es-sheet-scrap { transform: none !important; }
         }
     </style>
 
+    @php
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for open mics and readings?',
+                'a' => 'Yes. Sharing your schedule, running recurring nights, taking free registrations with a capacity limit, and syncing with Google, Outlook, or CalDAV are all free forever. Ticketing, event graphics, and custom questions on the sign-up form are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on tickets.',
+            ],
+            [
+                'q' => 'Can poets sign up for a slot themselves?',
+                'a' => 'Yes. Turn on registration for the night and set how many spots there are. Performers claim a spot from the event page, the page shows how many are left, and it stops taking names once they are gone. Registration is free on every plan.',
+            ],
+            [
+                'q' => "Can I ask performers what they're reading?",
+                'a' => 'Yes, on the Pro plan. Custom fields let you add your own questions to the sign-up form, so a poet answers "what are you reading", "how long is it", or a content note when they take a spot. Text answers can be checked against a pattern with a hint you write. You can also let people submit a whole event for your schedule, and their answers land on your Requests tab.',
+            ],
+            [
+                'q' => 'How do I run a mic that happens every second Tuesday?',
+                'a' => 'Set it up once as a recurring event with a day-of-week pattern, then add date exceptions for the weeks the room is closed or the holiday lands on your night. Recurring events and exceptions are free on every plan.',
+            ],
+            [
+                'q' => 'Can I keep the open mic, the feature series, and workshops on one page?',
+                'a' => 'Yes. Sub-schedules split one schedule into strands, so the weekly mic, the featured reading series, and your workshops each sit in their own section of the same link. Sub-schedules are free on every plan.',
+            ],
+            [
+                'q' => 'Can I sell tickets to a featured reading?',
+                'a' => 'Yes, on the Pro plan. Connect your Stripe account and sell tickets straight from your schedule with QR check-in at the door. Event Schedule takes zero platform fees, so you only pay Stripe processing. You can also sell a pass that covers a whole season of the series.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The list'],
+            ['tonight', 'Tonight'],
+            ['slots', 'The slots'],
+            ['whos-up', "Who's up"],
+            ['order', 'Running order'],
+            ['rest', 'The rest of it'],
+            ['rooms', 'The rooms'],
+            ['who', 'Perfect for'],
+            ['steps', 'Three steps'],
+            ['faq', 'Questions'],
+            ['claim', 'Line 01'],
+        ];
+    @endphp
+
+    <div id="es-sheet-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: the reading                                         -->
+    <!-- 1. Hero: the clipboard by the door (slot 01)                 -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden bg-[#faf8f4] py-16 dark:bg-[#0d0c0b]">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.36), rgba(245, 158, 11, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(225, 29, 72, 0.32), rgba(225, 29, 72, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3"></div>
-            <div class="es-rays absolute inset-0"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(28, 61, 110, 0.24), rgba(28, 61, 110, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(185, 28, 28, 0.18), rgba(185, 28, 28, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <span class="es-word text-6xl italic" style="top:15%;left:8%;transform:rotate(-8deg);">verse</span>
-            <span class="es-word text-5xl" style="top:25%;right:12%;transform:rotate(5deg);">stanza</span>
-            <span class="es-word text-4xl" style="top:46%;left:5%;transform:rotate(12deg);">breath</span>
-            <span class="es-word text-7xl italic" style="bottom:28%;right:8%;transform:rotate(-5deg);">rhythm</span>
-            <span class="es-word text-5xl" style="bottom:15%;left:15%;transform:rotate(3deg);">voice</span>
-            <span class="es-word text-4xl italic" style="top:60%;right:22%;transform:rotate(-10deg);">line break</span>
+            <div class="es-sheet-scrap left-[6%] top-[20%] h-16 w-12" style="--d: 0s; --r: -8deg;"></div>
+            <div class="es-sheet-scrap left-[86%] top-[16%] h-20 w-14" style="--d: 2.6s; --r: 7deg;"></div>
+            <div class="es-sheet-scrap left-[89%] top-[64%] h-14 w-11" style="--d: 5.2s; --r: -4deg;"></div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full border border-amber-300 bg-amber-100 px-5 py-2.5 dark:border-amber-700/40 dark:bg-amber-900/30">
-                <svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
-                <span class="text-sm font-medium tracking-wide text-amber-700 dark:text-amber-200/90">For Poets, Spoken Word Artists & Writers</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For poets, storytellers, and open mic hosts</span>
             </div>
 
-            <h1 class="es-balance mb-8 font-serif text-[2.75rem] font-bold leading-[1.08] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Your words</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-poetry es-gradient-anim italic">deserve witnesses.</span></span></span>
+            <h1 class="es-balance mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">Every open mic has a list.</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-signup">Yours should outlive the night.</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-4 max-w-2xl text-lg font-light text-gray-500 dark:text-gray-400 sm:text-xl">
-                Not followers. Not subscribers. Not engagement metrics.
-            </p>
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-500">
-                Real people in real rooms, listening. One link shows them where to find you.
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+                Sign-ups, features, workshops, and book launches on one link. Free registration with a capacity limit, recurring dates that skip the holidays, and no platform fees when you sell.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See how it works
+                <a href="#slots" class="glass group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                    See how the list works
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-rose-500 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-amber-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-rose-500/40">
-                    Create your reading schedule
+                <a href="{{ app_url('/sign_up?type=talent') }}" class="es-sheet-btn group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                    Start your list
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
             </div>
 
-            <!-- Typewriter-label marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+            <!-- The clipboard itself -->
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-lg text-start" data-reveal>
+                <div class="es-sheet-board relative -rotate-1 px-3 pb-3 pt-7 sm:px-4 sm:pb-4">
+                    <div class="es-sheet-clip absolute -top-3 left-1/2 -translate-x-1/2" aria-hidden="true"></div>
+                    <div class="es-sheet-paper es-sheet-margin px-4 py-4 sm:px-5 sm:py-5">
+                        <div class="mb-1 flex items-baseline justify-between gap-3 border-b-2 border-[rgba(28,61,110,0.3)] pb-2">
+                            <span class="es-sheet-tag">Tuesday open mic</span>
+                            <span class="font-mono text-[0.7rem] font-semibold text-[#1c3d6e]">12 SLOTS</span>
+                        </div>
+
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">01</span>
+                            <span class="es-sheet-hand text-lg">mara g.</span>
+                            <span class="es-sheet-leader"></span>
+                            <span class="font-mono text-xs text-[#6b6459]">3 min</span>
+                        </div>
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">02</span>
+                            <span class="es-sheet-hand text-lg">dez</span>
+                            <span class="es-sheet-leader"></span>
+                            <span class="font-mono text-xs text-[#6b6459]">3 min</span>
+                        </div>
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">03</span>
+                            <span class="relative inline-flex items-center">
+                                <span class="es-sheet-hand es-sheet-hand-red text-lg">feature</span>
+                                <svg class="pointer-events-none absolute -inset-x-3 -inset-y-2 h-[calc(100%+1rem)] w-[calc(100%+1.5rem)]" viewBox="0 0 120 44" preserveAspectRatio="none" fill="none" aria-hidden="true">
+                                    <ellipse class="es-sheet-ring" cx="60" cy="22" rx="55" ry="18" stroke="rgba(185,28,28,0.75)" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="es-sheet-leader"></span>
+                            <span class="font-mono text-xs text-[#6b6459]">15 min</span>
+                        </div>
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">04</span>
+                            <span class="es-sheet-hand text-lg es-sheet-strike">jonah</span>
+                            <span class="es-sheet-leader"></span>
+                            <span class="font-mono text-xs text-[#6b6459]">no show</span>
+                        </div>
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">05</span>
+                            <span class="es-sheet-caret" aria-hidden="true"></span>
+                            <span class="es-sheet-leader"></span>
+                        </div>
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">06</span>
+                            <span class="es-sheet-leader"></span>
+                        </div>
+
+                        <p class="mt-3 flex items-center justify-between gap-3 pt-1 text-xs">
+                            <span class="text-[#6b6459]">Anyone with the link can take a spot.</span>
+                            <span class="font-mono font-bold text-[#b91c1c]">8 left</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Night-type marquee -->
+            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-8 max-w-3xl">
                 <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                    <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['SLAM', 'OPEN MIC', 'FEATURED READING', 'WORKSHOP', 'BOOK LAUNCH', 'LIT FEST', 'CHAPBOOK', 'SALON'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-sm border border-amber-300 bg-amber-100/80 px-3 py-1.5 font-mono text-xs font-semibold tracking-wide text-amber-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        {{ $tag }}
-                                    </span>
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['Open Mic', 'Slam', 'Featured Reading', 'Storytelling', 'Workshop', 'Book Launch', 'Lit Fest', 'Chapbook Release', 'Salon', 'Author Q&A'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-sheet-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
                         </div>
@@ -270,315 +617,431 @@
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. The reality (stats)                                       -->
+    <!-- 2. Tonight: the list that only exists in the room (slot 02)  -->
     <!-- ============================================================ -->
-    <section class="relative overflow-hidden border-t border-gray-200 bg-white py-16 dark:border-white/5 dark:bg-[#0a0a0f]">
-        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-            <span class="es-word text-6xl italic" style="top:6%;left:6%;transform:rotate(-6deg);">stanza</span>
-            <span class="es-word text-5xl" style="bottom:10%;right:9%;transform:rotate(5deg);">breath</span>
-            <span class="es-word text-4xl italic" style="top:22%;right:16%;transform:rotate(-9deg);">verse</span>
+    <section id="tonight" class="relative scroll-mt-24 bg-[#faf8f4] px-2 py-14 dark:bg-[#0d0c0b] sm:px-4 lg:py-20">
+        <div class="es-sheet-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-sheet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Tonight, and then never again</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The list exists in one room, on one sheet, <span class="text-gradient-signup-lit">for about four hours.</span>
+                    </h2>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    <div class="es-sheet-paper -rotate-2 p-6" data-reveal="panel">
+                        <p class="es-sheet-tag mb-3">The clipboard</p>
+                        <h3 class="mb-2 text-lg font-bold">One copy, by the door</h3>
+                        <p class="text-sm text-[#6b6459]">Whoever arrives first writes first. Everyone else texts you to ask if there is still room.</p>
+                    </div>
+                    <div class="es-sheet-paper p-6" data-reveal="panel">
+                        <p class="es-sheet-tag mb-3">The group chat</p>
+                        <h3 class="mb-2 text-lg font-bold">
+                            <span data-count-to="212">212</span> unread
+                        </h3>
+                        <p class="text-sm text-[#6b6459]">The date is in there somewhere, above four photos of a dog and a poll about a bar.</p>
+                    </div>
+                    <div class="es-sheet-paper rotate-2 p-6" data-reveal="panel">
+                        <p class="es-sheet-tag mb-3">The DMs</p>
+                        <h3 class="mb-2 text-lg font-bold">
+                            &ldquo;Can I get on?&rdquo; &times;<span data-count-to="9">9</span>
+                        </h3>
+                        <p class="text-sm text-[#6b6459]">Nine separate conversations, three platforms, and one of them is asking about a night that already happened.</p>
+                    </div>
+                </div>
+
+                <p class="mt-10 text-center text-gray-300" data-reveal>
+                    A schedule holds the same list, and it is still there on Wednesday.
+                    <a href="#slots" class="inline-flex items-center gap-1 font-semibold text-[#93c5fd] transition-all hover:gap-2">
+                        See the slots
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                    </a>
+                </p>
+            </div>
         </div>
-        <div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <figure class="mx-auto mb-14 max-w-3xl text-center" data-reveal>
-                <div class="es-quote-mark mb-1" aria-hidden="true">&ldquo;</div>
-                <blockquote class="es-balance font-serif text-2xl font-medium italic leading-snug text-gray-800 dark:text-gray-100 md:text-3xl">
-                    Real people in real rooms, listening.
-                </blockquote>
-            </figure>
-            <div class="grid grid-cols-1 gap-8 text-center md:grid-cols-3" data-reveal-group="90">
-                <div data-reveal>
-                    <div class="mb-2 font-serif text-3xl text-amber-600 dark:text-amber-300">3 venues</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Different open mics. Different nights. One schedule.</div>
-                </div>
-                <div data-reveal>
-                    <div class="mb-2 font-serif text-3xl text-amber-600 dark:text-amber-300">0 fees</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Keep every dollar from ticket sales. Poetry doesn't pay enough to share.</div>
-                </div>
-                <div data-reveal>
-                    <div class="mb-2 font-serif text-3xl text-amber-600 dark:text-amber-300">Your fans</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">Email readers directly. No algorithm between you and your audience.</div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The slots: one link is the list (slot 03)                 -->
+    <!-- ============================================================ -->
+    <section id="slots" class="scroll-mt-24 bg-white py-20 dark:bg-[#111010] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-sheet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">One link is the list</p>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Put the sheet somewhere <span class="text-gradient-signup">the room cannot lose it.</span>
+                </h2>
+                <p class="mt-5 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
+                    Three things do almost all the work, and all three are on the free plan.
+                </p>
+            </div>
+
+            <div class="mx-auto max-w-3xl" data-reveal="panel">
+                <div class="es-sheet-paper es-sheet-margin px-5 py-6 sm:px-7 sm:py-8">
+                    <div class="es-sheet-row items-start">
+                        <span class="es-sheet-num pt-1">01</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="mb-1 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold">Registration, with a cap</h3>
+                                <span class="es-sheet-plan">Free</span>
+                            </div>
+                            <p class="text-sm leading-relaxed text-[#6b6459]">
+                                Turn on registration for the night and say how many spots there are. The page shows how many are left, and once they are gone it stops taking names instead of quietly overbooking you.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="es-sheet-row items-start">
+                        <span class="es-sheet-num pt-1">02</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="mb-1 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold">Every second Tuesday, minus the holiday</h3>
+                                <span class="es-sheet-plan">Free</span>
+                            </div>
+                            <p class="text-sm leading-relaxed text-[#6b6459]">
+                                Set the pattern once as a recurring event, then add exceptions for the weeks the room is closed. You are not rebuilding the same night twenty-six times a year.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="es-sheet-row items-start">
+                        <span class="es-sheet-num pt-1">03</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="mb-1 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold">The mic, the series, the workshop</h3>
+                                <span class="es-sheet-plan">Free</span>
+                            </div>
+                            <p class="text-sm leading-relaxed text-[#6b6459]">
+                                Sub-schedules split one link into strands, so the weekly mic, the featured reading series, and your workshops each get their own section without needing their own page.
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="mt-5 border-t border-[rgba(28,61,110,0.16)] pt-4 text-sm text-[#6b6459]">
+                        Free also covers unlimited events, two-way Google, Outlook, and CalDAV sync, an embeddable calendar, online and hybrid readings, and an .ics download for anyone who wants the date in their own calendar.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Bento features                                            -->
+    <!-- 4. Who's up: submissions and the questions you ask (slot 04) -->
     <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <section id="whos-up" class="scroll-mt-24 border-t border-gray-200 bg-[#f6f2ea] py-20 dark:border-white/5 dark:bg-[#141211] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-sheet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who's up</p>
+                    <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Stop asking &ldquo;what are you reading&rdquo; <span class="text-gradient-signup">at the door.</span>
+                    </h2>
+                    <p class="mb-6 text-lg leading-relaxed text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
+                        You can let people put an event forward for your schedule at all, on any plan, and their answers land on your Requests tab. On Pro you add your own questions to the sign-up form, so the things you would otherwise shout across a loud room arrive written down.
+                    </p>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-400" data-reveal-group="70">
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Ask what they are reading, how long it runs, and whether it needs a content note.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Text answers can be checked against a pattern, with a hint you write, in the browser and again on the server.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#1c3d6e] dark:text-[#93c5fd]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Export the answers with your sales when you need a running order on paper after all.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-sheet-paper es-sheet-margin px-5 py-6 sm:px-7 sm:py-7">
+                        <div class="mb-4 flex items-baseline justify-between gap-3 border-b-2 border-[rgba(28,61,110,0.3)] pb-2">
+                            <span class="es-sheet-tag">Take a spot</span>
+                            <span class="es-sheet-plan es-sheet-plan-pro">Pro</span>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <p class="mb-1 text-[0.7rem] font-bold uppercase tracking-widest text-[#6b6459]">Your name</p>
+                                <p class="es-sheet-hand border-b border-[rgba(28,61,110,0.25)] pb-1 text-xl">mara g.</p>
+                            </div>
+                            <div>
+                                <p class="mb-1 text-[0.7rem] font-bold uppercase tracking-widest text-[#6b6459]">What are you reading?</p>
+                                <p class="es-sheet-hand border-b border-[rgba(28,61,110,0.25)] pb-1 text-xl">two new ones + the bridge poem</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <p class="mb-1 text-[0.7rem] font-bold uppercase tracking-widest text-[#6b6459]">How long?</p>
+                                    <p class="es-sheet-hand border-b border-[rgba(28,61,110,0.25)] pb-1 text-xl">3 min</p>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="mb-1 text-[0.7rem] font-bold uppercase tracking-widest text-[#6b6459]">Content note</p>
+                                    <p class="es-sheet-hand border-b border-[rgba(28,61,110,0.25)] pb-1 text-xl">grief</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 flex items-center justify-between gap-3 border-t border-[rgba(28,61,110,0.16)] pt-4">
+                            <span class="font-mono text-xs text-[#6b6459]">Spot 05 of 12</span>
+                            <span class="es-sheet-stamp">Saved</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The running order: the same list, lit (slot 05)           -->
+    <!-- ============================================================ -->
+    <section id="order" class="relative scroll-mt-24 bg-[#f6f2ea] px-2 py-14 dark:bg-[#141211] sm:px-4 lg:py-20">
+        <div class="es-sheet-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(28, 61, 110, 0.3), rgba(28, 61, 110, 0) 60%); opacity: 0.55;"></div>
+                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(185, 28, 28, 0.22), rgba(185, 28, 28, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-sheet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Doors</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        The same list, <span class="text-gradient-signup-lit">in your hand at the back of the room.</span>
+                    </h2>
+                </div>
+
+                <div class="grid items-center gap-12 lg:grid-cols-2">
+                    <div class="mx-auto w-full max-w-[17rem]" data-reveal="panel">
+                        <!-- The frame stays light on the dark band: it reads as a lit screen. -->
+                        <div class="rounded-[2rem] border-4 border-[#2a2724] bg-white p-3 shadow-2xl">
+                            <div class="mb-3 flex items-center justify-between px-1">
+                                <span class="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500">Tue 8:00 PM</span>
+                                <span class="rounded-full bg-[#b91c1c] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">Full</span>
+                            </div>
+                            <div class="space-y-1.5">
+                                @foreach ([['01', 'Mara G.', '3 min', false], ['02', 'Dez', '3 min', false], ['03', 'Feature: A. Oyelaran', '15 min', true], ['04', 'Jonah', '3 min', false], ['05', 'Priya', '3 min', false], ['06', 'Tomas', '3 min', false]] as [$ordNum, $ordName, $ordLen, $ordFeature])
+                                    <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs @if ($ordFeature) bg-[#fdeaea] font-bold text-[#b91c1c] @else bg-gray-50 text-gray-700 @endif">
+                                        <span class="font-mono text-[0.65rem] text-gray-400">{{ $ordNum }}</span>
+                                        <span class="min-w-0 flex-1 truncate">{{ $ordName }}</span>
+                                        <span class="font-mono text-[0.65rem] text-gray-400">{{ $ordLen }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="mt-3 px-1 text-[0.65rem] text-gray-400">Updates as people sign up.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-5" data-reveal-group="80">
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-sm" data-reveal>
+                            <h3 class="mb-2 text-lg font-semibold text-white">The night promotes itself</h3>
+                            <p class="text-sm text-gray-400">Generate a flyer from the event and post it, instead of rebuilding the same graphic in a design tool every second Tuesday. <span class="es-sheet-plan es-sheet-plan-pro ms-1 align-middle" style="border-color: rgba(248,113,113,0.5); color: #fca5a5;">Pro</span></p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-sm" data-reveal>
+                            <h3 class="mb-2 text-lg font-semibold text-white">It is in their calendar, not just yours</h3>
+                            <p class="text-sm text-gray-400">Two-way sync with Google, Outlook, and CalDAV, and an .ics download on every event and every recurring date.</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-6 backdrop-blur-sm" data-reveal>
+                            <h3 class="mb-2 text-lg font-semibold text-white">It lives on the venue's site too</h3>
+                            <p class="text-sm text-gray-400">Embed the calendar on the bookstore's page or your own site, so the list is wherever people already look.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. The rest of it: bento (slot 06)                           -->
+    <!-- ============================================================ -->
+    <section id="rest" class="scroll-mt-24 bg-white py-20 dark:bg-[#111010] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-amber-400 to-rose-400" aria-hidden="true"></span>
-                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">The whole reading life</span>
-                </div>
-                <h2 class="es-balance font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything but the <span class="text-gradient-poetry es-ink-underline">writing</span>
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-sheet-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The rest of it</p>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything a scene needs <span class="text-gradient-signup">that is not the writing.</span>
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Your schedule (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                                    Your Schedule
-                                </div>
-                                <h3 class="mb-4 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white lg:text-4xl">Every reading. One place.</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Coffee shops on Tuesdays. The bar series on Thursdays. That bookstore feature next month. Stop telling people to check your Instagram - give them one link that's always current.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Open mics</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Features</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Slams</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Book events</span>
-                                </div>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs rounded-xl border border-gray-800 bg-gray-900 p-5 font-mono text-sm shadow-lg">
-                                        <div class="mb-4 text-xs uppercase tracking-wider text-gray-500">Upcoming Readings</div>
-                                        <div class="space-y-4">
-                                            <div class="es-ai-field border-l-2 border-amber-500/60 pl-3" style="--i: 0;">
-                                                <div class="font-medium text-amber-300">Thu, Jan 30</div>
-                                                <div class="text-gray-400">Open Mic @ Brewhaus</div>
-                                                <div class="text-xs text-gray-600">7pm / sign-up 6:30</div>
-                                            </div>
-                                            <div class="es-ai-field border-l-2 border-rose-500/60 pl-3" style="--i: 1;">
-                                                <div class="font-medium text-rose-300">Sat, Feb 1</div>
-                                                <div class="text-gray-400">Featured @ City Lights</div>
-                                                <div class="text-xs text-gray-600">8pm / $10</div>
-                                            </div>
-                                            <div class="es-ai-field border-l-2 border-gray-600 pl-3" style="--i: 2;">
-                                                <div class="font-medium text-gray-400">Wed, Feb 5</div>
-                                                <div class="text-gray-500">Writing Workshop</div>
-                                                <div class="text-xs text-gray-600">6pm / 4 spots left</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Email your readers -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                <!-- 1 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-800/30 dark:bg-rose-900/40 dark:text-rose-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            Newsletter
-                        </div>
-                        <h3 class="mb-3 font-serif text-2xl font-bold text-gray-900 dark:text-white">Your readers, direct reach</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">New chapbook? Upcoming feature? Email the people who actually want to hear from you. No algorithm deciding who sees it.</p>
-                        <div class="mt-auto rounded-lg border border-gray-800 bg-gray-900 p-4" aria-hidden="true">
-                            <div class="mb-3 flex items-center gap-2">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-rose-500/40 to-amber-500/40"><span class="font-serif text-xs text-amber-200">A</span></div>
-                                <div>
-                                    <div class="text-sm text-gray-300">New Reading Announced</div>
-                                    <div class="text-xs text-gray-600">to 847 subscribers</div>
-                                </div>
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">The scene's mailing list</h3>
+                                <span class="es-sheet-plan dark:border-[rgba(147,197,253,0.4)] dark:text-[#93c5fd]">Free</span>
                             </div>
-                            <div class="border-t border-gray-800 pt-3 text-xs italic text-gray-500">"I'll be featuring at..."</div>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
+                                People follow your schedule and you email them directly when the next night is up. No algorithm deciding which regulars find out.
+                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500">
+                                Free covers 10 newsletter emails a month and Pro raises it to 100, counted per recipient. For a room of regulars that is real, and it is worth knowing the number before you plan around it.
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Workshops -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                            Workshops
-                        </div>
-                        <h3 class="mb-3 font-serif text-2xl font-bold text-gray-900 dark:text-white">Fill your workshops</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Teaching pays. List your writing workshops, craft classes, and generative sessions. Let students find and register easily.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center justify-between rounded border border-emerald-500/20 bg-emerald-500/10 p-2" style="--i: 0;">
-                                <span class="text-sm text-gray-800 dark:text-gray-200">Persona Poems</span>
-                                <span class="text-xs text-emerald-600 dark:text-emerald-400">2 spots</span>
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Clips from the night</h3>
+                                <span class="es-sheet-plan dark:border-[rgba(147,197,253,0.4)] dark:text-[#93c5fd]">Free</span>
                             </div>
-                            <div class="es-ai-field flex items-center justify-between rounded bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;">
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Form & Constraint</span>
-                                <span class="text-xs text-gray-400 dark:text-gray-600">FULL</span>
-                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Attendees add photos, video, and comments to the event with just a name and an email. Everything waits in an approval queue, so the page stays yours. Free covers 25 photos per schedule.
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Tickets + chapbooks (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                                    Tickets & Books
-                                </div>
-                                <h3 class="mb-4 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Keep what you earn</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">Sell tickets to your readings. Bundle with your chapbook. Zero platform fees - because poetry doesn't pay enough to give away a percentage.</p>
-                            </div>
-                            <div class="rounded-xl border border-gray-800 bg-gray-900 p-5" aria-hidden="true">
-                                <div class="space-y-3">
-                                    <div class="es-ai-field flex items-center justify-between rounded-lg border border-gray-700 bg-gray-800/60 p-3" style="--i: 0;">
-                                        <div><div class="font-medium text-gray-200">Reading Only</div><div class="text-xs text-gray-500">General admission</div></div>
-                                        <div class="text-xl font-medium text-gray-300">$8</div>
-                                    </div>
-                                    <div class="es-ai-field flex items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 p-3" style="--i: 1;">
-                                        <div><div class="font-medium text-amber-100">Reading + Chapbook</div><div class="text-xs text-amber-300/70">Signed copy included</div></div>
-                                        <div class="text-xl font-medium text-amber-200">$20</div>
-                                    </div>
-                                </div>
-                                <div class="mt-4 border-t border-gray-800 pt-4 text-center"><span class="text-xs text-gray-600">Stripe processes payment. You keep 100%.</span></div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Virtual readings (link) -->
-                <a href="{{ marketing_url('/features/online-events') }}" class="es-bento group relative block" data-tilt="5" data-reveal="panel">
+                <!-- 3 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            Online
-                        </div>
-                        <h3 class="mb-3 font-serif text-2xl font-bold text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400">Read to anywhere</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Host virtual readings and workshops. Your audience isn't just local - poetry travels well over Zoom.</p>
-                        <span class="mt-auto inline-flex items-center gap-1 text-sm font-medium text-sky-600 transition-all group-hover:gap-2 dark:text-sky-400">
-                            Learn more
-                            <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                        </span>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </a>
-
-                <!-- Google Calendar sync -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Sync
-                        </div>
-                        <h3 class="mb-3 font-serif text-2xl font-bold text-gray-900 dark:text-white">Google Calendar sync</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Two-way sync. Add a reading to your personal calendar, it shows up on your public schedule.</p>
-                        <div class="relative mt-auto flex items-center justify-center gap-8 py-2" aria-hidden="true">
-                            <div class="w-20 rounded-lg border border-amber-400/30 bg-amber-500/15 p-2">
-                                <div class="mb-1 text-center text-[10px] font-medium text-amber-600 dark:text-amber-300">Yours</div>
-                                <div class="mb-1 h-1.5 rounded bg-gray-300/60 dark:bg-white/20"></div>
-                                <div class="h-1.5 w-3/4 rounded bg-amber-400/40"></div>
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">When the feature is ticketed</h3>
+                                <span class="es-sheet-plan es-sheet-plan-pro dark:border-[rgba(248,113,113,0.5)] dark:text-[#fca5a5]">Pro</span>
                             </div>
-                            <div class="absolute left-1/2 top-1/2 h-px w-10 -translate-x-1/2 -translate-y-1/2 border-t border-dashed border-amber-300 dark:border-amber-500/40"></div>
-                            <div class="es-sync-dot" style="left: calc(50% - 24px);"></div>
-                            <div class="w-20 rounded-lg border border-gray-300 bg-gray-100 p-2 dark:border-white/20 dark:bg-white/10">
-                                <div class="mb-1 text-center text-[10px] font-medium text-gray-600 dark:text-gray-300">Google</div>
-                                <div class="mb-1 h-1.5 rounded bg-blue-400/50"></div>
-                                <div class="h-1.5 w-3/4 rounded bg-green-400/50"></div>
-                            </div>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
+                                Connect Stripe and sell straight from the schedule, with QR check-in at the door. Event Schedule takes zero platform fees, so what is left after Stripe's processing is yours.
+                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500">
+                                Discount codes for the regulars, and a pass that covers a whole season of the series rather than one night at a time.
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
-                <!-- Promo graphics -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
+                <!-- 4 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
                     <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-800/30 dark:bg-orange-900/40 dark:text-orange-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Graphics
-                        </div>
-                        <h3 class="mb-3 font-serif text-2xl font-bold text-gray-900 dark:text-white">Post-ready images</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate promo graphics. Share to Instagram without opening Canva.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="relative">
-                                <div class="flex h-28 w-28 flex-col items-center justify-center rounded-lg border border-gray-700 bg-gradient-to-br from-gray-800 to-gray-900 p-3 text-center">
-                                    <div class="mb-1 text-[8px] uppercase tracking-wider text-gray-500">Poetry Reading</div>
-                                    <div class="font-serif text-xs text-amber-200">Maya Torres</div>
-                                    <div class="mt-1 text-[8px] text-gray-500">City Lights / 8pm</div>
-                                </div>
-                                <div class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-orange-500/90">
-                                    <svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </div>
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Let the room decide</h3>
+                                <span class="es-sheet-plan es-sheet-plan-pro dark:border-[rgba(248,113,113,0.5)] dark:text-[#fca5a5]">Pro</span>
                             </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Put a poll on the event and let people vote on the theme, the next feature, or which night of the month the mic should move to.
+                            </p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
 
+                <!-- 5 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Read to the people who could not come</h3>
+                                <span class="es-sheet-plan dark:border-[rgba(147,197,253,0.4)] dark:text-[#93c5fd]">Free</span>
+                            </div>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
+                                Mark a night as an online event and the link sits on the same schedule as the in-person ones. Hybrid workshops and virtual salons do not need a second home.
+                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500">
+                                Analytics on the free plan show which nights people actually opened, which is a better read on the scene than a like count.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 6 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Ask afterwards</h3>
+                                <span class="es-sheet-plan es-sheet-plan-pro dark:border-[rgba(248,113,113,0.5)] dark:text-[#fca5a5]">Pro</span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Collect star ratings and written comments from people who were there, so the next night is planned on something better than the vibe at the bar.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Where poetry happens                                      -->
+    <!-- 7. The rooms: where poetry happens (slot 07)                 -->
     <!-- ============================================================ -->
-    @php
-        $poetryVenues = [
-            ['Coffee Shops', 'bg-amber-100 dark:bg-amber-900/30', 'text-amber-600 dark:text-amber-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />'],
-            ['Bookstores', 'bg-rose-100 dark:bg-rose-900/30', 'text-rose-600 dark:text-rose-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'],
-            ['Bars & Lounges', 'bg-blue-100 dark:bg-blue-900/30', 'text-blue-600 dark:text-blue-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 15.546c-.523 0-1.046.151-1.5.454a2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.704 2.704 0 00-3 0 2.704 2.704 0 01-3 0 2.701 2.701 0 00-1.5-.454M9 6v2m3-2v2m3-2v2M9 3h.01M12 3h.01M15 3h.01M21 21v-7a2 2 0 00-2-2H5a2 2 0 00-2 2v7h18zm-3-9v-2a2 2 0 00-2-2H8a2 2 0 00-2 2v2h12z" />'],
-            ['Universities', 'bg-blue-100 dark:bg-blue-900/30', 'text-blue-600 dark:text-blue-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />'],
-            ['Lit Festivals', 'bg-orange-100 dark:bg-orange-900/30', 'text-orange-600 dark:text-orange-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />'],
-            ['Virtual', 'bg-sky-100 dark:bg-sky-900/30', 'text-sky-600 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
-        ];
-    @endphp
-    <section class="bg-white py-16 dark:bg-[#0a0a0f] lg:py-20">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-10 max-w-3xl text-center">
-                <h2 class="es-balance mb-3 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    Where poetry <span class="text-gradient-poetry es-ink-underline">happens</span>
+    <section id="rooms" class="scroll-mt-24 border-t border-gray-200 bg-[#f6f2ea] py-20 dark:border-white/5 dark:bg-[#141211] lg:py-28">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Where the list <span class="text-gradient-signup">goes up</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">From open mics to festival stages</p>
-            </div>
-            <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6" data-reveal-group="60">
-                @foreach ($poetryVenues as [$vName, $vChip, $vText, $vIcon])
-                    <div data-reveal class="group rounded-2xl border border-gray-200 bg-white p-6 text-center transition-all duration-200 hover:-translate-y-1 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-amber-500/30">
-                        <div class="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl {{ $vChip }} transition-transform group-hover:scale-110">
-                            <svg aria-hidden="true" class="h-6 w-6 {{ $vText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $vIcon !!}</svg>
-                        </div>
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ $vName }}</h3>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. Perfect for (shared sub-audience cards)                   -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for how poets <span class="text-gradient-poetry es-ink-underline">actually work</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Whether you're on the slam circuit or launching a collection
+                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                    One schedule covers all of them, whether you host the night or just read at it.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+            <div data-reveal="panel">
+                <div class="es-sheet-paper es-sheet-margin px-5 py-5 sm:px-7 sm:py-6">
+                    @foreach ([['01', 'Coffee shops', 'Weeknight mics with a sign-up by the register'], ['02', 'Bookstores', 'Launches, signings, and author Q&As'], ['03', 'Bars and lounges', 'Late slams and monthly showcases'], ['04', 'Universities', 'Student series, visiting readers, workshops'], ['05', 'Lit festivals', 'Multi-day programmes across several rooms'], ['06', 'Online', 'Virtual salons and hybrid workshops']] as [$roomNum, $roomName, $roomBlurb])
+                        <div class="es-sheet-row">
+                            <span class="es-sheet-num">{{ $roomNum }}</span>
+                            <span class="font-semibold">{{ $roomName }}</span>
+                            <span class="es-sheet-leader"></span>
+                            <span class="hidden text-xs text-[#6b6459] sm:inline">{{ $roomBlurb }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Perfect for (slot 08)                                     -->
+    <!-- ============================================================ -->
+    <section id="who" class="scroll-mt-24 bg-white py-20 dark:bg-[#111010] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Built for how poets <span class="text-gradient-signup">actually work</span>
+                </h2>
+                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Whether you're on the slam circuit, running the room, or launching a collection
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <!-- Slam Poets -->
                 <x-sub-audience-card
                     name="Slam Poets"
-                    description="Competition circuit, team slams, regional bouts. Track your season and let fans follow your scores."
+                    description="Competition circuit, team slams, regional bouts. Track your season and let fans follow where you're bouting next."
                     icon-color="rose"
                     blog-slug="for-slam-poets"
                 >
@@ -607,11 +1070,11 @@
                 <x-sub-audience-card
                     name="Page Poets"
                     description="Book launches, literary readings, publication events. Promote your collections alongside appearances."
-                    icon-color="purple"
+                    icon-color="sky"
                     blog-slug="for-page-poets"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </x-slot:icon>
@@ -620,7 +1083,7 @@
                 <!-- Open Mic Hosts -->
                 <x-sub-audience-card
                     name="Open Mic Hosts"
-                    description="Running your own series? Build a following for your recurring nights and featured readers."
+                    description="Running your own series? Set the night up once as a recurring event and let poets take their own spots."
                     icon-color="orange"
                     blog-slug="for-poetry-open-mic-hosts"
                 >
@@ -634,12 +1097,12 @@
                 <!-- Literary Curators -->
                 <x-sub-audience-card
                     name="Literary Curators"
-                    description="Organizing reading series, festivals, salon events. Aggregate your programming in one place."
-                    icon-color="indigo"
+                    description="Organizing reading series, festivals, salon events. Aggregate your programming in one place and embed it anywhere."
+                    icon-color="cyan"
                     blog-slug="for-literary-curators"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-5 h-5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </x-slot:icon>
@@ -663,51 +1126,46 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. How it works (dark band)                                  -->
+    <!-- 9. Three steps (slot 09)                                     -->
     <!-- ============================================================ -->
-    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(245, 158, 11, 0.28), rgba(245, 158, 11, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(225, 29, 72, 0.24), rgba(225, 29, 72, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+    <section id="steps" class="scroll-mt-24 border-t border-gray-200 bg-[#f6f2ea] py-20 dark:border-white/5 dark:bg-[#141211] lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Three <span class="text-gradient-signup">steps</span>
+                </h2>
             </div>
 
-            <div class="relative z-10 mx-auto max-w-4xl">
-                <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <h2 class="es-balance font-serif text-3xl font-bold tracking-tight text-white md:text-5xl" data-reveal>
-                        Three <span class="text-gradient-poetry es-ink-underline">steps</span>
-                    </h2>
-                </div>
-
-                <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
-                    <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-rose-500 font-serif text-xl font-bold text-white shadow-lg shadow-amber-500/30">1</div>
-                        <h3 class="mb-2 text-lg font-semibold text-white">Add your readings</h3>
-                        <p class="text-sm text-gray-400">Open mics, features, workshops, launches. Import from Google Calendar or add them yourself.</p>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ([['1', 'Start the list', 'Add the mic as a recurring event, turn on registration, and set how many spots there are. Skip the weeks the room is closed.'], ['2', 'Share one link', 'Your bio, the venue\'s site, the back of your chapbook. Or embed the calendar on a page you already have.'], ['3', 'Let them sign up', 'Poets take a spot themselves. You see the list from anywhere, and it closes itself when the spots are gone.']] as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-sheet-paper es-sheet-margin p-6" data-reveal="panel">
+                        <div class="es-sheet-num mb-3 text-2xl">0{{ $stepNum }}</div>
+                        <h3 class="mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="text-sm leading-relaxed text-[#6b6459]">{{ $stepBody }}</p>
                     </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-rose-500 font-serif text-xl font-bold text-white shadow-lg shadow-amber-500/30">2</div>
-                        <h3 class="mb-2 text-lg font-semibold text-white">Share one link</h3>
-                        <p class="text-sm text-gray-400">Put it in your bio. Your website. The back of your chapbook. Done.</p>
-                    </div>
-                    <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-rose-500 font-serif text-xl font-bold text-white shadow-lg shadow-amber-500/30">3</div>
-                        <h3 class="mb-2 text-lg font-semibold text-white">Build your audience</h3>
-                        <p class="text-sm text-gray-400">Readers follow you. They get notified when you're reading near them.</p>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 10. Key features (slot 10)                                   -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#111010]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
+                <div data-reveal>
+                    <x-feature-link-card name="Recurring Events" description="Set the night once, with exceptions for the weeks you skip" :url="marketing_url('/features/recurring-events')" icon-color="blue">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Custom Fields" description="Ask what they're reading right on the sign-up form" :url="marketing_url('/features/custom-fields')" icon-color="rose">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
                 <div data-reveal>
                     <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
@@ -718,14 +1176,9 @@
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google Calendar" :url="marketing_url('/features/calendar-sync')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-link-poetry inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/features') }}" class="es-sheet-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -738,26 +1191,24 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 11. Related pages (slot 11)                                  -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <section class="border-t border-gray-200 bg-[#f6f2ea] py-16 dark:border-white/5 dark:bg-[#141211]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
                 @foreach ([['/for-comedians', 'Comedians'], ['/for-musicians', 'Musicians'], ['/for-theater-performers', 'Theater Performers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="es-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="es-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                    <a href="{{ marketing_url($relHref) }}" class="es-sheet-hover group flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03]" data-reveal>
+                        <span class="es-sheet-hover-title mb-3 text-sm font-semibold text-gray-900 transition-colors dark:text-white">For {{ $relName }}</span>
+                        <span class="es-sheet-hover-arrow mt-auto inline-flex items-center gap-1 text-xs font-medium text-gray-500 transition-colors dark:text-gray-400">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
                     </a>
                 @endforeach
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-link-poetry inline-flex items-center font-medium hover:underline">
+            <div class="mt-8 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-sheet-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -768,37 +1219,31 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 12. FAQ (slot 12)                                            -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 bg-white py-20 dark:bg-[#111010] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 font-serif text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-poetry es-ink-underline">questions</span>
+            <div class="mb-12 text-center">
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>12</span></div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked <span class="text-gradient-signup">questions</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything spoken word artists ask about Event Schedule.
+                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything poets and hosts ask before they start the list.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for spoken word artists?', 'Yes. Event Schedule is free forever for sharing your performance schedule, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.'],
-                    ['Can I promote open mics, slams, and readings together?', 'Yes. Use sub-schedules to organize by event type - open mics, poetry slams, book readings, workshops, and featured sets. Each event can include descriptions, featured performer info, venue details, and signup information.'],
-                    ['How do poetry fans discover my events?', 'Fans can follow your schedule and receive email notifications when you add new events. Share your schedule link on social media, literary websites, or embed it on your personal site.'],
-                    ['Can I sell tickets to featured shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Set different prices for general admission and featured seating. Event Schedule charges zero platform fees.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
-                            <h3 class="flex items-baseline gap-2 text-lg font-semibold text-gray-900 dark:text-white">
-                                <span class="es-pilcrow shrink-0 font-serif" aria-hidden="true">&para;</span>
-                                <span>{{ $q }}</span>
-                            </h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-sheet-hover group rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-200 dark:border-white/10 dark:bg-white/[0.03]" data-reveal>
+                        <summary class="flex cursor-pointer items-start gap-3 font-semibold text-gray-900 dark:text-white">
+                            <span class="es-sheet-num flex-none dark:text-[#93c5fd]" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-sheet-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-gray-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer mt-4 leading-relaxed text-gray-600 ps-9 dark:text-gray-400">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -806,26 +1251,33 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 13. Finale: line 01 is open (slot 01, again)                 -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#111010] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-amber-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-sheet-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(245, 158, 11, 0.3), rgba(245, 158, 11, 0) 60%); opacity: 0.7;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <span class="es-word text-6xl italic" style="top:20%;left:10%;transform:rotate(-8deg);color:rgba(253,230,138,0.06);">verse</span>
-                    <span class="es-word text-5xl" style="bottom:24%;right:12%;transform:rotate(6deg);color:rgba(253,230,138,0.06);">rhythm</span>
                 </div>
-
                 <div class="relative z-10">
-                    <p class="mb-6 text-sm uppercase tracking-[0.2em] text-gray-400">Free forever</p>
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl font-serif text-3xl font-bold tracking-tight text-white md:text-5xl">
-                        Stop shouting into <span class="text-gradient-poetry es-ink-underline italic">the algorithm.</span>
+                    <p class="es-sheet-tag mb-4">Free forever</p>
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
+                        Line 01 <span class="text-gradient-signup-lit">is open.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        Your words already found their audience once. Help them find you again.
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
+                        Start the list tonight. Nobody has to DM you to get on it, and it is still there in the morning.
                     </p>
+
+                    <!-- The last line of the sheet: the name writes itself in -->
+                    <div class="mx-auto mb-10 max-w-sm" aria-hidden="true">
+                        <div class="es-sheet-paper es-sheet-margin -rotate-1 px-5 py-5">
+                            <div class="es-sheet-signline flex items-baseline gap-3">
+                                <span class="es-sheet-num">01</span>
+                                <span class="es-sheet-hand text-2xl" id="es-sheet-signtext">your-name</span>
+                            </div>
+                            <p class="mt-2 font-mono text-[0.7rem] text-[#6b6459]">.eventschedule.com</p>
+                        </div>
+                    </div>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
@@ -834,9 +1286,9 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 to-rose-500 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-amber-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-rose-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-sheet-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Create your schedule
+                                Start your list
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -850,6 +1302,44 @@
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav: the slot numbers running down the margin -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#1b1917] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
+
+    {{-- Write the claimed name onto the last line of the sheet, applying the
+         same slug transform as the shared claim-input sanitizer. --}}
+    <script {!! nonce_attr() !!}>
+        (function () {
+            var input = document.getElementById('es-claim-input');
+            var sign = document.getElementById('es-sheet-signtext');
+            if (!input || !sign) { return; }
+            var fallback = sign.textContent;
+            input.addEventListener('input', function () {
+                var slug = input.value.toLowerCase()
+                    .replace(/['’]/g, '')
+                    .replace(/[^a-z0-9-]+/g, '-')
+                    .replace(/-{2,}/g, '-')
+                    .replace(/^-+/, '')
+                    .slice(0, 30);
+                sign.textContent = slug || fallback;
+            });
+        })();
+    </script>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
