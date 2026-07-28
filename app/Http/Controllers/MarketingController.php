@@ -48,9 +48,7 @@ class MarketingController extends Controller
      */
     public function features()
     {
-        return view('marketing.features', [
-            'features' => $this->getFeatures(),
-        ]);
+        return view('marketing.features');
     }
 
     /**
@@ -58,9 +56,7 @@ class MarketingController extends Controller
      */
     public function pricing()
     {
-        return view('marketing.pricing', [
-            'plans' => $this->getPlans(),
-        ]);
+        return view('marketing.pricing');
     }
 
     /**
@@ -1328,124 +1324,6 @@ class MarketingController extends Controller
                 'number' => '3',
                 'title' => 'Grow Your Audience',
                 'description' => 'Fans can follow your schedule and get notified about new events. Build your community effortlessly.',
-            ],
-        ];
-    }
-
-    /**
-     * Get features data
-     */
-    protected function getFeatures(): array
-    {
-        return [
-            [
-                'title' => 'Event Scheduling',
-                'icon' => 'calendar',
-                'description' => 'Create and manage events with support for recurring schedules, multiple dates, and time zones.',
-                'details' => [
-                    'One-time and recurring events',
-                    'Multiple date support',
-                    'Automatic timezone handling',
-                    'Import from Google Calendar',
-                ],
-            ],
-            [
-                'title' => 'Ticketing & Payments',
-                'icon' => 'ticket',
-                'description' => 'Sell tickets directly through your schedule with integrated payment processing.',
-                'details' => [
-                    'Multiple ticket types',
-                    'QR code tickets',
-                    'Stripe integration',
-                    'Real-time sales tracking',
-                ],
-            ],
-            [
-                'title' => 'Mobile Optimized',
-                'icon' => 'phone',
-                'description' => 'Your schedule looks great on any device. Fans can browse and buy tickets on the go.',
-                'details' => [
-                    'Responsive design',
-                    'Fast loading',
-                    'Touch-friendly interface',
-                    'Works offline',
-                ],
-            ],
-            [
-                'title' => 'Team Collaboration',
-                'icon' => 'users',
-                'description' => 'Invite team members to help manage your schedule. Control who can add and edit events.',
-                'details' => [
-                    'Multiple team members',
-                    'Role-based permissions',
-                    'Activity tracking',
-                    'Email notifications',
-                ],
-            ],
-            [
-                'title' => 'Custom Branding',
-                'icon' => 'palette',
-                'description' => 'Make your schedule match your brand with custom colors, logos, and domains.',
-                'details' => [
-                    'Custom colors and fonts',
-                    'Logo upload',
-                    'Custom domain support',
-                    'Remove branding (Pro)',
-                ],
-            ],
-            [
-                'title' => 'Analytics & Insights',
-                'icon' => 'chart',
-                'description' => 'Track views, followers, and ticket sales. Understand your audience better.',
-                'details' => [
-                    'View tracking',
-                    'Follower growth',
-                    'Sales reports',
-                    'Export data',
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * Get pricing plans data
-     */
-    protected function getPlans(): array
-    {
-        return [
-            [
-                'name' => 'Free',
-                'price' => '$0',
-                'period' => 'forever',
-                'description' => 'Everything you need to get started',
-                'features' => [
-                    'Unlimited events',
-                    'Custom subdomain',
-                    'Mobile-friendly schedule',
-                    'Basic analytics',
-                    'Email support',
-                    'Follower notifications',
-                ],
-                'cta' => 'Get Started',
-                'highlighted' => false,
-            ],
-            [
-                'name' => 'Pro',
-                'price' => '$5',
-                'period' => '/month',
-                'description' => '7-day free trial, then $5/month',
-                'features' => [
-                    'Everything in Free, plus:',
-                    'Custom domain',
-                    'Remove Event Schedule branding',
-                    'Priority support',
-                    'Advanced analytics',
-                    'Custom CSS styling',
-                    'Event polls',
-                    'API access',
-                ],
-                'cta' => 'Start Free Trial',
-                'highlighted' => true,
             ],
         ];
     }

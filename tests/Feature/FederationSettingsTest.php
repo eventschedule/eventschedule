@@ -169,6 +169,61 @@ class FederationSettingsTest extends TestCase
     }
 
     /**
+     * Saving an unrelated setting must not answer the question on the owner's behalf.
+     *
+     * The field used to be an x-toggle, whose hidden companion input posts "0" whether or not the
+     * owner touched it - so editing a logo turned "never asked" into an explicit opt-out, which
+     * vetoes the whole event and withdrew co-listed schedules' already-published listings.
+     */
+    public function test_an_unrelated_save_leaves_an_undecided_schedule_undecided(): void
+    {
+        Setting::set('federation_enabled', '1');
+
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'venue');
+        $this->assertNull($role->fresh()->federation_enabled);
+
+        // Checked while the schedule is still undecided, and before any save: the round-trips below
+        // only exercise the controller, which already handled all three values - the bug was
+        // entirely in the markup, so without this the toggle could be put back and the suite would
+        // stay green.
+        $html = $this->actingAs($owner)->get('/'.$role->subdomain.'/edit')->assertOk()->getContent();
+        $this->assertStringNotContainsString(
+            '<input type="hidden" name="federation_enabled"',
+            $html,
+            'The field posts a hidden companion again, so an untouched save writes a decision'
+        );
+        $this->assertStringContainsString('<option value="" SELECTED', $html);
+
+        $save = fn (array $extra = []) => $this->actingAs($owner)->put(
+            route('role.update', ['subdomain' => $role->subdomain]),
+            array_merge([
+                'name' => 'Renamed Venue',
+                'timezone' => $role->timezone,
+                'email' => $role->email,
+                'new_subdomain' => $role->subdomain,
+            ], $extra)
+        )->assertRedirect();
+
+        // The three-state control posts '' for "not decided", which arrives as null.
+        $save(['federation_enabled' => '']);
+        $this->assertNull($role->fresh()->federation_enabled);
+
+        // And both real answers still round-trip.
+        $save(['federation_enabled' => '1']);
+        $this->assertTrue($role->fresh()->federation_enabled);
+
+        $save(['federation_enabled' => '0']);
+        $this->assertFalse($role->fresh()->federation_enabled);
+
+        // The stored answer is what the control comes back showing.
+        $this->assertStringContainsString(
+            '<option value="0" SELECTED',
+            $this->actingAs($owner)->get('/'.$role->subdomain.'/edit')->assertOk()->getContent()
+        );
+    }
+
+    /**
      * The reason the column is nullable rather than a boolean defaulting to false.
      *
      * federatableQuery() lets any participating schedule veto an event, because a

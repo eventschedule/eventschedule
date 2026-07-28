@@ -584,7 +584,19 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::post('/{subdomain}/save-event-parts', [EventController::class, 'saveEventParts'])->name('event.save_parts');
 
     Route::get('/{subdomain}/audit-log', [RoleController::class, 'auditLog'])->name('role.audit_log')->where('subdomain', '(?!docs(?=/|$)|admin(?=/|$))[^/]+');
-    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|requests|followers|team|plan|videos')->where('subdomain', '(?!docs(?=/|$))[^/]+');
+    // `features` is excluded for the same reason as `docs`: this group is domain-less and is
+    // registered first, so /features/availability and /features/appointments would otherwise match
+    // here as subdomain+tab and 302 to the login page instead of reaching the marketing pages.
+    //
+    // Only on the nexus, because that is the only place those marketing routes are registered (see
+    // the `if (config('app.is_nexus'))` block below). Excluding it everywhere would cost a selfhost
+    // install a schedule legitimately living at /features - the reserved-subdomain list in Role.php
+    // is gated on config('app.hosted') and is not consulted by the rename path at all, so a
+    // schedule really can hold that subdomain.
+    $adminTabSubdomain = config('app.is_nexus')
+        ? '(?!docs(?=/|$)|features(?=/|$))[^/]+'
+        : '(?!docs(?=/|$))[^/]+';
+    Route::get('/{subdomain}/{tab}', [RoleController::class, 'viewAdmin'])->name('role.view_admin')->where('tab', 'schedule|templates|availability|appointments|requests|followers|team|plan|videos')->where('subdomain', $adminTabSubdomain);
 
     Route::post('/{subdomain}/upload-image', [EventController::class, 'uploadImage'])->name('event.upload_image');
 

@@ -75,6 +75,32 @@ class AppointmentApprovalTest extends TestCase
         $this->assertTrue($this->slotIsOffered($role, $type, $sale->event_date, $slot));
     }
 
+    public function test_editor_of_another_schedule_cannot_decline_or_accept_a_booking(): void
+    {
+        $owner = $this->createOwner();
+        $role = $this->createRole($owner, 'talent', ['timezone' => 'America/New_York']);
+        $type = $this->createAppointmentType($role, ['weekly_windows' => $this->allDays(), 'requires_approval' => true]);
+
+        [$event, $sale] = $this->book($role, $type);
+
+        // isEditor() only answers "do you run THIS schedule". Mallory runs hers, so the guard passes
+        // - the event lookup is what has to reject a hash belonging to somebody else's schedule.
+        $mallory = $this->createOwner();
+        $mallorySchedule = $this->createRole($mallory, 'talent');
+        $hash = UrlUtils::encodeId($event->id);
+
+        foreach (['event.decline', 'event.accept'] as $action) {
+            $this->actingAs($mallory)
+                ->post(route($action, ['subdomain' => $mallorySchedule->subdomain, 'hash' => $hash]))
+                ->assertNotFound();
+        }
+
+        $this->assertNotSame('cancelled', $sale->fresh()->status);
+        $this->assertFalse((bool) $event->fresh()->is_cancelled);
+        $this->assertNull($sale->fresh()->confirmed_at);
+        $this->assertNull($event->roles()->where('roles.id', $role->id)->first()->pivot->is_accepted);
+    }
+
     public function test_owner_cancel_event_cancels_the_booking(): void
     {
         $owner = $this->createOwner();

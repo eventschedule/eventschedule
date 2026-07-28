@@ -1030,8 +1030,14 @@ class EventController extends Controller
 
         $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
+        // Scoped to the schedule, not looked up by id alone: isEditor() only answers "do you run
+        // THIS schedule", so an unscoped lookup let an editor act on any event whose hash they
+        // could produce. Harmless while the only write was updateExistingPivot() (0 rows when the
+        // event is not attached), but the appointment block below resolves the sale by event_id.
+        $event = Event::with(['creatorRole', 'curators'])
+            ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+            ->findOrFail($event_id);
 
         // Approving a booking whose time has already passed would mail the guest "You're booked!"
         // for a slot in the past. cancelBooking() has always guarded this; accept() did not, and the
@@ -1122,8 +1128,13 @@ class EventController extends Controller
 
         $user = $request->user();
         $event_id = UrlUtils::decodeId($hash);
-        $event = Event::with(['creatorRole', 'curators'])->findOrFail($event_id);
         $role = Role::subdomain($subdomain)->firstOrFail();
+        // Scoped to the schedule - see accept(). Declining reaches further than accepting: it
+        // cancels the sale, frees the slot, drops the event from the owner's synced calendar and
+        // mails their guest, so an unscoped lookup let any editor do that to another schedule.
+        $event = Event::with(['creatorRole', 'curators'])
+            ->whereHas('roles', fn ($q) => $q->where('roles.id', $role->id))
+            ->findOrFail($event_id);
 
         if ($user->isEditor($subdomain)) {
             $event->roles()->updateExistingPivot($role->id, ['is_accepted' => false]);

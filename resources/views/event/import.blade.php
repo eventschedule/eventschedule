@@ -668,7 +668,11 @@
                                 $fieldRegexHint = $field['regex_hint'] ?? '';
                             @endphp
                             <div class="mt-4">
-                                <x-input-label for="custom_field_{{ $fieldKey }}_@{{ idx }}" :value="$role->customFieldLabel($field, $fieldKey, $isGuestImport) . (!empty($field['required']) ? ' *' : '')" />
+                                {{-- v-pre on every element below that renders owner-authored text as
+                                     a text node: this view is included by guest-import.blade.php, so
+                                     Vue would compile a mustache in a field label, option or hint
+                                     and run it in the visitor's browser. --}}
+                                <x-input-label v-pre for="custom_field_{{ $fieldKey }}_@{{ idx }}" :value="$role->customFieldLabel($field, $fieldKey, $isGuestImport) . (!empty($field['required']) ? ' *' : '')" />
 
                                 @if(($field['type'] ?? 'string') === 'string')
                                 <x-text-input
@@ -716,7 +720,7 @@
                                     @foreach(explode(',', $field['options'] ?? '') as $option)
                                         @php $option = trim($option); @endphp
                                         @if($option)
-                                        <option value="{{ $option }}">{{ $option }}</option>
+                                        <option v-pre value="{{ $option }}">{{ $option }}</option>
                                         @endif
                                     @endforeach
                                 </select>
@@ -732,7 +736,10 @@
                                                 @change="toggleImportMultiselect(idx, '{{ $fieldKey }}', @js($option), $event)"
                                                 :disabled="savedEvents[idx]"
                                                 class="h-4 w-4 text-[var(--brand-blue)] focus:ring-[var(--brand-blue)] border-gray-300 rounded" />
-                                            {{ $option }}
+                                            {{-- v-pre goes on the span, not the label: the label
+                                                 wraps an input carrying :checked/@change/:disabled,
+                                                 and v-pre would stop those compiling. --}}
+                                            <span v-pre>{{ $option }}</span>
                                         </label>
                                         @endif
                                     @endforeach
@@ -740,7 +747,7 @@
                                 @endif
 
                                 @if ($fieldRegexHint && in_array($field['type'] ?? 'string', ['string', 'multiline_string'], true))
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $fieldRegexHint }}</p>
+                                <p v-pre class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $fieldRegexHint }}</p>
                                 @endif
                             </div>
                             @endforeach

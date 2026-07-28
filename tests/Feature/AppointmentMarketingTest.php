@@ -20,4 +20,18 @@ class AppointmentMarketingTest extends TestCase
         $docs = view('marketing.docs.appointments', $nav)->render();
         $this->assertStringContainsString('Appointment types', $docs);
     }
+
+    /**
+     * The admin group is domain-less and registered first, so /features/{tab} matched
+     * role.view_admin as subdomain=features and 302'd anonymous visitors (and Googlebot, which reads
+     * these URLs from the sitemap) to the login page. Rendering the view is not enough to catch
+     * that - the URL itself has to resolve here.
+     */
+    public function test_feature_urls_resolve_to_the_marketing_pages(): void
+    {
+        foreach (['/features/appointments' => 'marketing.appointments', '/features/availability' => 'marketing.availability'] as $url => $name) {
+            $this->get($url)->assertOk();
+            $this->assertSame($name, app('router')->current()->getName(), $url.' is shadowed by another route');
+        }
+    }
 }

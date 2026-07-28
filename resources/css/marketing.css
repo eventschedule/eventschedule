@@ -539,7 +539,9 @@ html.es-anim .es-d-5 { animation-delay: 1.3s; }
     .es-ring-glow {
         display: block;
         position: absolute; inset: 0;
-        border-radius: 1.5rem;
+        /* Overridable so the ring can follow the frame it outlines - a card is 1.5rem, but the
+           feature-banner mockups are rounded-2xl (1rem) and rounded-[1.75rem]. */
+        border-radius: var(--es-ring-radius, 1.5rem);
         padding: 1.5px;
         opacity: 0;
         transition: opacity 0.35s ease;

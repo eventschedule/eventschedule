@@ -3308,11 +3308,26 @@
                                  operator's customers could opt into a network the
                                  operator never joined. --}}
                             @if (! config('app.is_nexus') && \App\Models\Setting::get('federation_enabled'))
+                            @php
+                                $federationChoice = old('federation_enabled', $role->federation_enabled);
+                                $federationChoice = $federationChoice === null || $federationChoice === '' ? '' : ($federationChoice ? '1' : '0');
+                            @endphp
                             <div class="mb-6">
-                                <x-toggle name="federation_enabled"
-                                    label="{{ __('messages.federation_schedule_toggle') }}"
-                                    checked="{{ old('federation_enabled', $role->federation_enabled) }}"
-                                    help="{{ __('messages.federation_schedule_help') }}" />
+                                {{-- A select rather than the usual x-toggle because the column is
+                                     genuinely tri-state: null means the owner has never answered and
+                                     does NOT suppress anything, while false is an explicit opt-out
+                                     that vetoes the whole event (see FederationService). A toggle
+                                     posts its hidden "0" companion whether or not the owner touched
+                                     it, so saving an unrelated setting silently turned "never asked"
+                                     into a veto that withdrew co-listed schedules' events. --}}
+                                <x-input-label for="federation_enabled" :value="__('messages.federation_schedule_toggle')" />
+                                <select name="federation_enabled" id="federation_enabled"
+                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] rounded-lg shadow-sm">
+                                    <option value="" {{ $federationChoice === '' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_undecided') }}</option>
+                                    <option value="1" {{ $federationChoice === '1' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_listed') }}</option>
+                                    <option value="0" {{ $federationChoice === '0' ? 'SELECTED' : '' }}>{{ __('messages.federation_schedule_choice_hidden') }}</option>
+                                </select>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">{{ __('messages.federation_schedule_help') }}</p>
                                 <x-input-error class="mt-2" :messages="$errors->get('federation_enabled')" />
                             </div>
                             @endif

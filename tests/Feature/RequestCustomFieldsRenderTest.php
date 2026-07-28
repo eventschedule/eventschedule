@@ -60,6 +60,47 @@ class RequestCustomFieldsRenderTest extends TestCase
     }
 
     /**
+     * The AI-import page is included by guest-import.blade.php, so it renders on a PUBLIC page while
+     * sitting inside a Vue mount. Owner-authored labels, options and regex hints are server-rendered
+     * text nodes there, and Vue's full build compiles those - a mustache in a stored hint would run
+     * as JavaScript in every visitor's browser. Each such element carries v-pre.
+     */
+    public function test_the_public_import_page_marks_owner_text_v_pre(): void
+    {
+        $curator = $this->createCurator($this->createOwner(), [
+            'accept_requests' => true,
+            'require_account' => false,
+            'event_custom_fields' => [
+                'ref' => [
+                    'name' => 'Booking reference',
+                    'type' => 'string',
+                    'regex' => '[A-Z]{3}-[0-9]{4}',
+                    'regex_hint' => 'Hint {{ 1+1 }}',
+                    'show_on_request' => true,
+                ],
+                'gear' => [
+                    'name' => 'Gear',
+                    'type' => 'dropdown',
+                    'options' => 'projector,dj controller',
+                    'show_on_request' => true,
+                ],
+            ],
+        ]);
+
+        $html = $this->get(route('event.guest_import', ['subdomain' => $curator->subdomain]))
+            ->assertOk()
+            ->getContent();
+
+        // The hint reaches the page verbatim, inside an element Vue is told not to compile.
+        $this->assertStringContainsString('Hint {{ 1+1 }}', $html);
+        $this->assertMatchesRegularExpression('/<p v-pre[^>]*>\s*Hint \{\{ 1\+1 \}\}\s*<\/p>/', $html);
+        // The label and the dropdown options are the same class of sink. Blade renders a valueless
+        // attribute on a component as v-pre="v-pre"; Vue's compiler keys off the name, not the value.
+        $this->assertMatchesRegularExpression('/<label[^>]*\bv-pre\b[^>]*>\s*Booking reference/', $html);
+        $this->assertStringContainsString('<option v-pre value="projector">', $html);
+    }
+
+    /**
      * The admin event form's custom-fields panel was replaced by <x-custom-field-input>. The rest of
      * the suite only renders that page for schedules with no custom fields, so without this the
      * swapped-in component is never exercised in a real page render.

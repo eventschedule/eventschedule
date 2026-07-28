@@ -75,6 +75,78 @@ class LogoWallTest extends TestCase
         $response->assertDontSee('/images/demo/demo_wall_pending.jpg');
     }
 
+    public function test_logo_wall_excludes_claimed_venues_that_have_not_accepted(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createLogoWallCurator($owner);
+        $accepted = $this->connectVenue($owner, $curator, 'demo_wall_yes.jpg', ['name' => 'Accepted Venue']);
+
+        // The other side of the pivot is tri-state. A venue with an account that the curator picked
+        // but that has not answered (null) or has declined (false) must not be advertised publicly.
+        $pending = $this->createRole($owner, 'venue', [
+            'name' => 'Pending Venue',
+            'profile_image_url' => 'demo_wall_maybe.jpg',
+        ]);
+        $declined = $this->createRole($owner, 'venue', [
+            'name' => 'Declined Venue',
+            'profile_image_url' => 'demo_wall_no.jpg',
+        ]);
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($pending->id, ['is_accepted' => null]);
+        $event->roles()->attach($declined->id, ['is_accepted' => false]);
+
+        $ids = $curator->fresh()->logoWallRoles()->pluck('id');
+        $this->assertTrue($ids->contains($accepted->id));
+        $this->assertFalse($ids->contains($pending->id), 'A venue that never answered is on the wall');
+        $this->assertFalse($ids->contains($declined->id), 'A venue that declined is on the wall');
+
+        $response = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]));
+        $response->assertOk();
+        $response->assertSee('/images/demo/demo_wall_yes.jpg', false);
+        $response->assertDontSee('/images/demo/demo_wall_maybe.jpg');
+        $response->assertDontSee('/images/demo/demo_wall_no.jpg');
+    }
+
+    /**
+     * The counterweight to the test above, and the way the wall is most often populated: venues
+     * typed into the event form become Roles with no user_id, attached at is_accepted = null. No
+     * account exists to promote that pivot, so gating the wall on an explicit true would empty it.
+     * There is also no third party to consent - the owner invented the row.
+     */
+    public function test_logo_wall_keeps_owner_created_placeholder_venues(): void
+    {
+        $owner = $this->createOwner();
+        $curator = $this->createLogoWallCurator($owner);
+
+        $placeholder = $this->createRole($owner, 'venue', [
+            'name' => 'Placeholder Venue',
+            'profile_image_url' => 'demo_wall_placeholder.jpg',
+        ]);
+        // What EventRepo::saveEvent() leaves behind for a venue typed into the form.
+        $placeholder->user_id = null;
+        $placeholder->save();
+
+        $declinedPlaceholder = $this->createRole($owner, 'venue', [
+            'name' => 'Declined Placeholder',
+            'profile_image_url' => 'demo_wall_placeholder_no.jpg',
+        ]);
+        $declinedPlaceholder->user_id = null;
+        $declinedPlaceholder->save();
+
+        $event = $this->createEvent($curator);
+        $event->roles()->attach($placeholder->id, ['is_accepted' => null]);
+        $event->roles()->attach($declinedPlaceholder->id, ['is_accepted' => false]);
+
+        $ids = $curator->fresh()->logoWallRoles()->pluck('id');
+        $this->assertTrue($ids->contains($placeholder->id), 'An owner-created placeholder dropped off the wall');
+        $this->assertFalse($ids->contains($declinedPlaceholder->id), 'An explicit decline still shows');
+
+        $response = $this->get(route('role.view_guest', ['subdomain' => $curator->subdomain]));
+        $response->assertOk();
+        $response->assertSee('/images/demo/demo_wall_placeholder.jpg', false);
+        $response->assertDontSee('/images/demo/demo_wall_placeholder_no.jpg');
+    }
+
     public function test_logo_wall_excludes_draft_unlisted_and_cancelled_events(): void
     {
         $owner = $this->createOwner();

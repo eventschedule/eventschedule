@@ -727,6 +727,22 @@ class Role extends Model implements MustVerifyEmail
             ->join('events', 'events.id', '=', 'er1.event_id')
             ->where('er1.role_id', $this->id)
             ->where('er1.is_accepted', true)
+            // The other side must not have been advertised without its consent. is_accepted is
+            // tri-state (null = never answered, false = declined), so a claimed schedule only
+            // qualifies on an explicit true.
+            //
+            // The exception is a schedule with no user_id: those are placeholders this owner
+            // invented while entering an event (EventRepo::saveEvent() attaches them at null and
+            // nothing can ever promote them, because a role with no account has no member to
+            // accept on its behalf). There is no third party there to consent, and excluding them
+            // would empty the wall for the most common way it gets populated. An explicit false
+            // still drops them.
+            ->where(function ($q) {
+                $q->where('er2.is_accepted', true)
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('er2.is_accepted')->whereNull('roles.user_id');
+                    });
+            })
             // Draft/internal and unlisted events must not leak booking
             // relationships onto the public wall.
             ->where('events.is_draft', false)
