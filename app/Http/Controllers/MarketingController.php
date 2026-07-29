@@ -1071,13 +1071,21 @@ class MarketingController extends Controller
                 // render <use href="#docs-icon-..."> against the page sprite.
                 // The /docs search widget used to carry its own hand-written
                 // 26-entry copy of the icon paths in JavaScript.
+                // Keyed on the short nav_title as well as the title, lowercased:
+                // search rows label the page the way a reader would say it
+                // ("Sharing"), which is exactly what nav_title is for. Matching
+                // on title alone silently fell back to the generic book icon.
                 $icons = [];
                 foreach (DocsUtils::pages() as $page) {
-                    $icons[$page['title']] = $page['icon'];
+                    $icons[mb_strtolower($page['title'])] = $page['icon'];
+
+                    if (! empty($page['nav_title'])) {
+                        $icons[mb_strtolower($page['nav_title'])] = $page['icon'];
+                    }
                 }
 
                 return array_map(function ($row) use ($icons) {
-                    $row['icon'] = $icons[$row['page']] ?? 'book';
+                    $row['icon'] = $icons[mb_strtolower($row['page'])] ?? 'book';
 
                     return $row;
                 }, $this->getDocSearchIndex());
@@ -5234,6 +5242,7 @@ class MarketingController extends Controller
             'account_settings' => route('marketing.docs.account_settings'),
             'scan_agenda' => route('marketing.docs.scan_agenda'),
             'boost' => route('marketing.docs.boost'),
+            'selfhost_index' => route('marketing.docs.selfhost'),
             'selfhost_installation' => route('marketing.docs.selfhost.installation'),
             'selfhost_stripe' => route('marketing.docs.selfhost.stripe'),
             'selfhost_google_calendar' => route('marketing.docs.selfhost.google_calendar'),
@@ -5272,6 +5281,7 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'Details', 'description' => 'Set name, description, website, and URL slug.', 'url' => $r['creating_schedules'].'#details', 'category' => 'User Guide', 'keywords' => 'name description website slug domain custom'],
             ['page' => 'Creating Schedules', 'section' => 'Banner Message', 'description' => 'Show an announcement banner at the top of your schedule\'s guest pages.', 'url' => $r['creating_schedules'].'#details', 'category' => 'User Guide', 'keywords' => 'banner announcement message notice top of page'],
             ['page' => 'Creating Schedules', 'section' => 'Address', 'description' => 'Configure location settings for your schedule.', 'url' => $r['creating_schedules'].'#address', 'category' => 'User Guide', 'keywords' => 'location map'],
+            ['page' => 'Creating Schedules', 'section' => 'Merging Duplicates', 'description' => 'Merge a duplicate venue schedule into another, or bulk-merge look-alike venues on a curator schedule.', 'url' => $r['creating_schedules'].'#merge', 'category' => 'User Guide', 'keywords' => 'merge duplicate venue venues combine consolidate merge into not duplicates unclaimed'],
             ['page' => 'Creating Schedules', 'section' => 'Contact Information', 'description' => 'Add contact methods to your schedule.', 'url' => $r['creating_schedules'].'#contact-info', 'category' => 'User Guide', 'keywords' => 'email phone social contact'],
             ['page' => 'Creating Schedules', 'section' => 'Style', 'description' => 'Visual styling options for your schedule.', 'url' => $r['creating_schedules'].'#style', 'category' => 'User Guide', 'keywords' => 'design theme appearance'],
             ['page' => 'Creating Schedules', 'section' => 'Videos & Links', 'description' => 'Manage YouTube videos, social links, and payment links.', 'url' => $r['creating_schedules'].'#videos-links', 'category' => 'User Guide', 'keywords' => 'youtube social payment links videos'],
@@ -5285,12 +5295,14 @@ class MarketingController extends Controller
             ['page' => 'Creating Schedules', 'section' => 'General Settings', 'description' => 'Timezone, language, and default settings.', 'url' => $r['creating_schedules'].'#settings-general', 'category' => 'User Guide', 'keywords' => 'timezone language defaults'],
             ['page' => 'Creating Schedules', 'section' => 'Custom Domain', 'description' => 'Set up a custom domain for your schedule using Direct (CNAME) or Redirect (Cloudflare) mode.', 'url' => $r['creating_schedules'].'#custom-domain', 'category' => 'User Guide', 'keywords' => 'custom domain cname dns branded url'],
             ['page' => 'Creating Schedules', 'section' => 'Notifications', 'description' => 'Configure email notification preferences for schedule activity.', 'url' => $r['creating_schedules'].'#settings-notifications', 'category' => 'User Guide', 'keywords' => 'notifications email alerts'],
-            ['page' => 'Creating Schedules', 'section' => 'Advanced Settings', 'description' => 'Default new-event visibility, hide videos, default category, first day of week, and other advanced options.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'advanced options visibility default public draft hide videos default category first day week'],
+            ['page' => 'Creating Schedules', 'section' => 'Push Notifications', 'description' => 'Get schedule notifications in your browser and on your phone, in addition to email.', 'url' => $r['creating_schedules'].'#settings-notifications', 'category' => 'User Guide', 'keywords' => 'push notifications browser mobile device test onesignal enable push ios home screen'],
+            ['page' => 'Creating Schedules', 'section' => 'Advanced Settings', 'description' => 'Default new-event visibility, hide past events, hide videos, the accessibility widget, default category, first day of week, and other advanced options.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'advanced options visibility default public draft hide videos hide past events accessibility widget font size contrast motion default category first day week'],
+            ['page' => 'Creating Schedules', 'section' => 'Do Not Show Other Schedules\' Promotions', 'description' => 'Decline to carry other schedules\' paid promotions, and any ads, on your public pages.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'ads adsense advertising promotions opt out opt-out decline hide ads no ads free plan'],
             ['page' => 'Creating Schedules', 'section' => 'List This Schedule on the Network', 'description' => 'Opt a schedule in or out of federation, which shares its public events with the eventschedule.com listings.', 'url' => $r['creating_schedules'].'#settings-advanced', 'category' => 'User Guide', 'keywords' => 'federation network list schedule share events eventschedule.com listings opt out discovery'],
             ['page' => 'Creating Schedules', 'section' => 'Engagement', 'description' => 'Configure visitor interaction features for your schedule.', 'url' => $r['creating_schedules'].'#engagement', 'category' => 'User Guide', 'keywords' => 'engagement interaction community'],
             ['page' => 'Creating Schedules', 'section' => 'Requests', 'description' => 'Configure public event request submissions.', 'url' => $r['creating_schedules'].'#engagement-requests', 'category' => 'User Guide', 'keywords' => 'submissions public requests custom questions extra fields validation pattern'],
             ['page' => 'Creating Schedules', 'section' => 'Fan Content', 'description' => 'Allow visitors to submit photos and videos to events.', 'url' => $r['creating_schedules'].'#engagement-fan-content', 'category' => 'User Guide', 'keywords' => 'fan content photos videos submissions'],
-            ['page' => 'Creating Schedules', 'section' => 'Feedback', 'description' => 'Send feedback requests to attendees after events.', 'url' => $r['creating_schedules'].'#engagement-feedback', 'category' => 'User Guide', 'keywords' => 'feedback reviews ratings attendees'],
+            ['page' => 'Creating Schedules', 'section' => 'Feedback', 'description' => 'Send feedback requests to attendees after events, and optionally publish the results.', 'url' => $r['creating_schedules'].'#engagement-feedback', 'category' => 'User Guide', 'keywords' => 'feedback reviews ratings attendees show feedback publicly public reviews delay'],
             ['page' => 'Creating Schedules', 'section' => 'Carpool', 'description' => 'Enable carpool matching for event attendees.', 'url' => $r['creating_schedules'].'#engagement-carpool', 'category' => 'User Guide', 'keywords' => 'carpool ride sharing matching driver attendee'],
             ['page' => 'Creating Schedules', 'section' => 'Accommodation', 'description' => 'Show nearby hotels and rentals on event pages, and earn affiliate commission.', 'url' => $r['creating_schedules'].'#engagement-accommodation', 'category' => 'User Guide', 'keywords' => 'accommodation hotels lodging stay22 affiliate commission where to stay travel booking rentals'],
             ['page' => 'Creating Schedules', 'section' => 'Auto Import', 'description' => 'Automatically import events from external sources.', 'url' => $r['creating_schedules'].'#auto-import', 'category' => 'User Guide', 'keywords' => 'import automatic feed ical'],
@@ -5307,7 +5319,7 @@ class MarketingController extends Controller
             ['page' => 'Schedule Styling', 'section' => 'Overview', 'description' => 'Introduction to schedule styling options.', 'url' => $r['schedule_styling'].'#overview', 'category' => 'User Guide', 'keywords' => 'design appearance theme'],
             ['page' => 'Schedule Styling', 'section' => 'Event Layout', 'description' => 'Choose between grid and list layout for events.', 'url' => $r['schedule_styling'].'#event-layout', 'category' => 'User Guide', 'keywords' => 'grid list layout display'],
             ['page' => 'Schedule Styling', 'section' => 'Header Style', 'description' => 'Choose the Banner or Compact header style for your public schedule page.', 'url' => $r['schedule_styling'].'#header-style', 'category' => 'User Guide', 'keywords' => 'header style banner compact slim full-width bar'],
-            ['page' => 'Schedule Styling', 'section' => 'Profile Image', 'description' => 'Upload and set your profile or logo image.', 'url' => $r['schedule_styling'].'#profile-image', 'category' => 'User Guide', 'keywords' => 'logo avatar photo'],
+            ['page' => 'Schedule Styling', 'section' => 'Profile Image', 'description' => 'Upload and set your profile or logo image, which also becomes your favicon on Pro.', 'url' => $r['schedule_styling'].'#profile-image', 'category' => 'User Guide', 'keywords' => 'logo avatar photo favicon browser tab icon apple touch home screen'],
             ['page' => 'Schedule Styling', 'section' => 'Header Images', 'description' => 'Set header banners with presets, custom uploads, or a venue logo wall.', 'url' => $r['schedule_styling'].'#header-images', 'category' => 'User Guide', 'keywords' => 'banner cover header logo wall venue logos'],
             ['page' => 'Schedule Styling', 'section' => 'Background Options', 'description' => 'Choose solid color, gradient, or image backgrounds.', 'url' => $r['schedule_styling'].'#backgrounds', 'category' => 'User Guide', 'keywords' => 'background color gradient image'],
             ['page' => 'Schedule Styling', 'section' => 'Color Scheme', 'description' => 'Select accent colors for buttons and interactive elements.', 'url' => $r['schedule_styling'].'#color-scheme', 'category' => 'User Guide', 'keywords' => 'color accent theme palette'],
@@ -5329,6 +5341,7 @@ class MarketingController extends Controller
             ['page' => 'Managing Schedules', 'section' => 'Followers', 'description' => 'Manage followers and follow links.', 'url' => $r['managing_schedules'].'#followers', 'category' => 'User Guide', 'keywords' => 'subscribers audience follow'],
             ['page' => 'Managing Schedules', 'section' => 'Team', 'description' => 'Manage team members and permissions.', 'url' => $r['managing_schedules'].'#team', 'category' => 'User Guide', 'keywords' => 'members permissions collaborate'],
             ['page' => 'Managing Schedules', 'section' => 'Plan', 'description' => 'View and manage your subscription plan.', 'url' => $r['managing_schedules'].'#plan', 'category' => 'User Guide', 'keywords' => 'subscription billing upgrade'],
+            ['page' => 'Managing Schedules', 'section' => 'Ads on Free Schedules', 'description' => 'Why some sites show ads on free schedules, where they never appear, and how to switch them off.', 'url' => $r['managing_schedules'].'#plan', 'category' => 'User Guide', 'keywords' => 'ads adsense advertising free plan remove ads ad-free upgrade pro'],
             ['page' => 'Managing Schedules', 'section' => 'Audit Log', 'description' => 'Track who changed what on your schedule, with filters and per-entry details.', 'url' => $r['managing_schedules'].'#audit-log', 'category' => 'User Guide', 'keywords' => 'audit log activity history changes tracking who'],
 
             // Creating Events
@@ -5388,6 +5401,8 @@ class MarketingController extends Controller
             ['page' => 'Selling Tickets', 'section' => 'Registration (RSVP)', 'description' => 'Enable free event registration with optional capacity limits.', 'url' => $r['tickets'].'#registration', 'category' => 'User Guide', 'keywords' => 'registration rsvp free sign up attend'],
             ['page' => 'Selling Tickets', 'section' => 'Ticketing Setup', 'description' => 'Set up paid or multi-type ticketing for events.', 'url' => $r['tickets'].'#ticketing', 'category' => 'User Guide', 'keywords' => 'ticketing setup paid pro sell'],
             ['page' => 'Selling Tickets', 'section' => 'Ticket Types', 'description' => 'Configure different ticket type options.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'general vip types tiers'],
+            ['page' => 'Selling Tickets', 'section' => 'Volume Discount', 'description' => 'Discount a ticket type once a buyer takes a minimum quantity, as a percentage or a fixed amount.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'volume discount bulk group minimum quantity percentage fixed amount stacks promo code'],
+            ['page' => 'Selling Tickets', 'section' => 'Max Per Order', 'description' => 'Cap how many of one ticket type a single buyer can take in one order.', 'url' => $r['tickets'].'#ticket-types', 'category' => 'User Guide', 'keywords' => 'max per order limit cap quantity per buyer add limit'],
             ['page' => 'Selling Tickets', 'section' => 'Free Tickets', 'description' => 'Offer free tickets by setting the price to zero.', 'url' => $r['tickets'].'#free-events', 'category' => 'User Guide', 'keywords' => 'free no cost zero price ticket'],
             ['page' => 'Selling Tickets', 'section' => 'Payment Processing', 'description' => 'Configure payment methods for ticket sales.', 'url' => $r['tickets'].'#payment', 'category' => 'User Guide', 'keywords' => 'payment stripe invoice ninja'],
             ['page' => 'Selling Tickets', 'section' => 'Invoice Ninja Modes', 'description' => 'Invoice mode vs. payment link mode for Invoice Ninja.', 'url' => $r['tickets'].'#invoiceninja-modes', 'category' => 'User Guide', 'keywords' => 'invoice ninja mode payment link'],
@@ -5482,6 +5497,7 @@ class MarketingController extends Controller
             // Boost
             ['page' => 'Boost', 'section' => 'Overview', 'description' => 'Promote events with Facebook and Instagram ads.', 'url' => $r['boost'].'#overview', 'category' => 'User Guide', 'keywords' => 'boost promote advertise facebook instagram meta'],
             ['page' => 'Boost', 'section' => 'On-Network Promotions', 'description' => 'Buy promoted placement on other schedules on this site, priced per view or per click.', 'url' => $r['boost'].'#on-network', 'category' => 'User Guide', 'keywords' => 'promotion promoted network cpm cpc budget targeting countries review refund'],
+            ['page' => 'Boost', 'section' => 'Hosting Other Schedules\' Promotions', 'description' => 'Decline to carry other schedules\' promotions, and any ads, on your own public pages.', 'url' => $r['boost'].'#on-network', 'category' => 'User Guide', 'keywords' => 'host promotions opt out opt-out decline ads adsense free plan my pages'],
             ['page' => 'Boost', 'section' => 'Quick Mode', 'description' => 'Create ad campaigns quickly with minimal setup.', 'url' => $r['boost'].'#quick-mode', 'category' => 'User Guide', 'keywords' => 'quick fast simple campaign'],
             ['page' => 'Boost', 'section' => 'Advanced Mode', 'description' => 'Full control over budget, targeting, and creative.', 'url' => $r['boost'].'#advanced-mode', 'category' => 'User Guide', 'keywords' => 'advanced targeting budget creative'],
             ['page' => 'Boost', 'section' => 'Smart Defaults', 'description' => 'Automatic configuration based on event type.', 'url' => $r['boost'].'#smart-defaults', 'category' => 'User Guide', 'keywords' => 'defaults automatic smart'],
@@ -5492,6 +5508,9 @@ class MarketingController extends Controller
             ['page' => 'Boost', 'section' => 'Tips', 'description' => 'Best practices for successful ad campaigns.', 'url' => $r['boost'].'#tips', 'category' => 'User Guide', 'keywords' => 'tips best practices advice'],
 
             // ===== SELFHOST =====
+
+            // Overview (the group's landing page)
+            ['page' => 'Selfhost', 'section' => 'Selfhost Guides', 'description' => 'Where to start when deploying Event Schedule on your own server, and which integration guides to add.', 'url' => $r['selfhost_index'].'#guides', 'category' => 'Selfhost', 'keywords' => 'selfhost self hosted on premise own server single tenant guides index overview'],
 
             // Installation
             ['page' => 'Installation', 'section' => 'Overview', 'description' => 'Manual installation guide for selfhosted deployments.', 'url' => $r['selfhost_installation'].'#overview', 'category' => 'Selfhost', 'keywords' => 'install setup deploy server'],
@@ -5506,6 +5525,7 @@ class MarketingController extends Controller
             ['page' => 'Installation', 'section' => 'Verification', 'description' => 'Test and verify the installation.', 'url' => $r['selfhost_installation'].'#verification', 'category' => 'Selfhost', 'keywords' => 'verify test check'],
             ['page' => 'Installation', 'section' => 'Troubleshooting', 'description' => 'Fix setup problems: permission denied on laravel.log, 500 errors, getting back to the setup wizard, and QR codes that will not scan.', 'url' => $r['selfhost_installation'].'#troubleshooting', 'category' => 'Selfhost', 'keywords' => 'troubleshoot fix permission denied laravel.log 500 setup wizard locked out app_url storage qr code will not scan invalid ticket document root public directory'],
             ['page' => 'Installation', 'section' => 'Push Notifications', 'description' => 'Enable optional OneSignal web push notifications that mirror email notifications.', 'url' => $r['selfhost_installation'].'#push-notifications', 'category' => 'Selfhost', 'keywords' => 'push notifications onesignal web push browser mobile alerts ONESIGNAL_APP_ID'],
+            ['page' => 'Installation', 'section' => 'Spam Protection', 'description' => 'Add a Cloudflare Turnstile challenge to checkout, gift card purchases and fan content submissions.', 'url' => $r['selfhost_installation'].'#spam-protection', 'category' => 'Selfhost', 'keywords' => 'spam bots turnstile cloudflare captcha challenge TURNSTILE_SITE_KEY TURNSTILE_SECRET_KEY checkout gift cards fan content'],
 
             // Stripe (Selfhost)
             ['page' => 'Stripe Integration', 'section' => 'Overview', 'description' => 'Set up Stripe for payment processing.', 'url' => $r['selfhost_stripe'].'#overview', 'category' => 'Selfhost', 'keywords' => 'stripe payment setup'],
@@ -5565,6 +5585,7 @@ class MarketingController extends Controller
             ['page' => 'Admin Panel', 'section' => 'Overview', 'description' => 'Admin panel organization and sections.', 'url' => $r['selfhost_admin'].'#overview', 'category' => 'Selfhost', 'keywords' => 'admin panel dashboard'],
             ['page' => 'Admin Panel', 'section' => 'Accessing /admin', 'description' => 'How to access the admin panel.', 'url' => $r['selfhost_admin'].'#accessing', 'category' => 'Selfhost', 'keywords' => 'access login admin url'],
             ['page' => 'Admin Panel', 'section' => 'Dashboard', 'description' => 'Key metrics and overview dashboard.', 'url' => $r['selfhost_admin'].'#dashboard', 'category' => 'Selfhost', 'keywords' => 'dashboard metrics overview'],
+            ['page' => 'Admin Panel', 'section' => 'Needs Attention', 'description' => 'Everything waiting on an admin, collected into one list on the dashboard with matching nav badges.', 'url' => $r['selfhost_admin'].'#dashboard', 'category' => 'Selfhost', 'keywords' => 'needs attention alerts badges failed jobs queue pending domains stuck boosts promotions review federation flagged support unread unverified schedules referral credits'],
             ['page' => 'Admin Panel', 'section' => 'Accommodation Affiliate', 'description' => 'Enable the nearby-lodging map with STAY22_ENABLED and set the fallback affiliate ID.', 'url' => $r['selfhost_admin'].'#system-settings', 'category' => 'Selfhost', 'keywords' => 'accommodation stay22 affiliate commission hotels lodging STAY22_ENABLED STAY22_AID config cache'],
             ['page' => 'Admin Panel', 'section' => 'Users', 'description' => 'User management and administration.', 'url' => $r['selfhost_admin'].'#insights-users', 'category' => 'Selfhost', 'keywords' => 'users management accounts'],
             ['page' => 'Admin Panel', 'section' => 'Revenue', 'description' => 'Revenue analytics and tracking.', 'url' => $r['selfhost_admin'].'#insights-revenue', 'category' => 'Selfhost', 'keywords' => 'revenue income money analytics'],

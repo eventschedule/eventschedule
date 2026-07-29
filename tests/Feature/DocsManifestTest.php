@@ -235,4 +235,269 @@ class DocsManifestTest extends TestCase
             );
         }
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Anchor guards
+    |--------------------------------------------------------------------------
+    |
+    | The checks above validate PAGES. Nothing validated the '#anchor' half of a
+    | link, which is how /docs/tickets#boost, #text-templates and
+    | #available-variables all survived: each named a real page, so every
+    | existing assertion passed while the link landed at the top of the wrong
+    | section.
+    |
+    */
+
+    /**
+     * Every id a page can be linked to, including ids that live in a partial the
+     * page @includes.
+     *
+     * Both federation pages are 16-line shells around
+     * partials/federation-content.blade.php, so scanning the page file alone
+     * reports six of its section ids as missing.
+     *
+     * Skips <x-doc-screenshot id="..."> - there `id` is a prop naming an image
+     * file, not an attribute that reaches the rendered HTML.
+     */
+    private function anchorsFor(string $key): array
+    {
+        $file = resource_path('views/marketing/docs/'.$key.'.blade.php');
+
+        if (! is_file($file)) {
+            return [];
+        }
+
+        $sources = [file_get_contents($file)];
+
+        preg_match_all("#@include\('marketing\.docs\.([a-z0-9._-]+)'#", $sources[0], $includes);
+
+        foreach ($includes[1] as $include) {
+            $partial = resource_path('views/marketing/docs/'.str_replace('.', '/', $include).'.blade.php');
+
+            if (is_file($partial)) {
+                $sources[] = file_get_contents($partial);
+            }
+        }
+
+        $ids = [];
+
+        foreach ($sources as $source) {
+            $source = preg_replace('#<x-doc-screenshot\b[^>]*>#', '', $source);
+            preg_match_all('#\bid="([a-z0-9-]+)"#', $source, $matches);
+            $ids = array_merge($ids, $matches[1]);
+        }
+
+        return array_unique($ids);
+    }
+
+    /** Manifest page key for a /docs URL, or null when the URL is not a doc page. */
+    private function pageKeyForUrl(string $url): ?string
+    {
+        $path = rtrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            if ($page['path'] === $path) {
+                return $key;
+            }
+        }
+
+        return null;
+    }
+
+    public function test_doc_pages_do_not_declare_the_same_anchor_twice(): void
+    {
+        foreach (DocsUtils::pages() as $key => $page) {
+            $source = file_get_contents(resource_path('views/marketing/docs/'.$key.'.blade.php'));
+            $source = preg_replace('#<x-doc-screenshot\b[^>]*>#', '', $source);
+            preg_match_all('#\bid="([a-z0-9-]+)"#', $source, $matches);
+
+            $duplicates = array_keys(array_filter(array_count_values($matches[1]), fn ($n) => $n > 1));
+
+            $this->assertEmpty(
+                $duplicates,
+                "Docs page '{$key}' declares duplicate id(s): ".implode(', ', $duplicates).'.'
+            );
+        }
+    }
+
+    public function test_every_internal_doc_link_resolves_to_a_real_anchor(): void
+    {
+        $routeToKey = [];
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            $routeToKey[$page['route']] = $key;
+        }
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            $source = file_get_contents(resource_path('views/marketing/docs/'.$key.'.blade.php'));
+            $own = $this->anchorsFor($key);
+
+            // Cross-page: route('marketing.docs.x') }}#anchor
+            preg_match_all("#route\('(marketing\.docs\.[a-z_.]+)'\)\s*\}\}\#([a-z0-9-]+)#", $source, $cross, PREG_SET_ORDER);
+
+            foreach ($cross as [, $route, $anchor]) {
+                $target = $routeToKey[$route] ?? null;
+
+                $this->assertNotNull($target, "Docs page '{$key}' links to unknown route '{$route}'.");
+                $this->assertContains(
+                    $anchor,
+                    $this->anchorsFor($target),
+                    "Docs page '{$key}' links to '{$target}#{$anchor}', which does not exist."
+                );
+            }
+
+            // Same-page: href="#anchor"
+            preg_match_all('#href="\#([a-z0-9-]+)"#', $source, $same);
+
+            foreach (array_unique($same[1]) as $anchor) {
+                $this->assertContains(
+                    $anchor,
+                    $own,
+                    "Docs page '{$key}' links to '#{$anchor}' on itself, which does not exist."
+                );
+            }
+        }
+    }
+
+    public function test_help_button_anchors_all_exist(): void
+    {
+        $source = file_get_contents(app_path('Utils/HelpUtils.php'));
+        preg_match_all("#'(/docs/[a-z0-9/-]+)\#([a-z0-9-]+)'#", $source, $matches, PREG_SET_ORDER);
+
+        $this->assertNotEmpty($matches, 'Expected HelpUtils to deep-link into docs with anchors.');
+
+        foreach ($matches as [, $path, $anchor]) {
+            $key = $this->pageKeyForUrl($path);
+
+            $this->assertNotNull($key, "HelpUtils links to '{$path}', which is not a page in config/docs.php.");
+            $this->assertContains(
+                $anchor,
+                $this->anchorsFor($key),
+                "HelpUtils links to '{$path}#{$anchor}', which does not exist."
+            );
+        }
+    }
+
+    public function test_search_index_entries_point_at_real_pages_and_anchors(): void
+    {
+        foreach ($this->searchIndex() as $row) {
+            $label = "Search index entry '{$row['page']} / {$row['section']}'";
+
+            // Rows may point at marketing feature pages rather than docs; only
+            // the doc ones can be checked against the manifest.
+            $key = $this->pageKeyForUrl($row['url']);
+
+            if ($key === null) {
+                $this->assertStringNotContainsString(
+                    '/docs/',
+                    parse_url($row['url'], PHP_URL_PATH) ?? '',
+                    "{$label} points at a /docs URL that is not a page in config/docs.php: {$row['url']}"
+                );
+
+                continue;
+            }
+
+            $anchor = parse_url($row['url'], PHP_URL_FRAGMENT);
+
+            if ($anchor !== null) {
+                $this->assertContains(
+                    $anchor,
+                    $this->anchorsFor($key),
+                    "{$label} links to '{$key}#{$anchor}', which does not exist."
+                );
+            }
+        }
+    }
+
+    /**
+     * The search widget looks its icon up by the row's 'page' value, falling back
+     * to a generic book, so a renamed page degrades silently rather than failing.
+     * A row may use either the full title or the shorter nav_title.
+     */
+    public function test_search_index_page_names_match_manifest_titles(): void
+    {
+        $names = [];
+
+        foreach (DocsUtils::pages() as $page) {
+            $names[] = mb_strtolower($page['title']);
+
+            if (! empty($page['nav_title'])) {
+                $names[] = mb_strtolower($page['nav_title']);
+            }
+        }
+
+        foreach ($this->searchIndex() as $row) {
+            $this->assertContains(
+                mb_strtolower($row['page']),
+                $names,
+                "Search index uses page name '{$row['page']}', which matches no title or nav_title in config/docs.php."
+            );
+
+            $this->assertNotSame(
+                'book',
+                $row['icon'],
+                "Search index row '{$row['page']} / {$row['section']}' fell back to the generic book icon."
+            );
+        }
+    }
+
+    public function test_every_manifest_page_is_reachable_from_search(): void
+    {
+        $covered = [];
+
+        foreach ($this->searchIndex() as $row) {
+            if ($key = $this->pageKeyForUrl($row['url'])) {
+                $covered[$key] = true;
+            }
+        }
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            $this->assertArrayHasKey(
+                $key,
+                $covered,
+                "Docs page '{$key}' has no entry in the docs search index."
+            );
+        }
+    }
+
+    /**
+     * RouteLoadTest renders the doc pages too, but from a hand-maintained list of
+     * paths. Driving this off the manifest means a page added there cannot quietly
+     * end up with no render coverage at all.
+     */
+    public function test_every_manifest_page_renders(): void
+    {
+        foreach (DocsUtils::pages() as $key => $page) {
+            $status = $this->get($page['path'])->status();
+
+            $this->assertSame(200, $status, "Docs page '{$key}' ({$page['path']}) returned {$status}.");
+        }
+    }
+
+    public function test_every_manifest_page_is_in_the_sitemap(): void
+    {
+        $sitemap = file_get_contents(resource_path('views/sitemap.blade.php'));
+
+        foreach (DocsUtils::pages() as $key => $page) {
+            $this->assertTrue(
+                str_contains($sitemap, $page['route']) || str_contains($sitemap, $page['path']),
+                "Docs page '{$key}' is missing from resources/views/sitemap.blade.php."
+            );
+        }
+    }
+
+    /** @return array<int, array{page: string, section: string, url: string}> */
+    private function searchIndex(): array
+    {
+        $response = $this->get(route('marketing.docs.search_index'));
+
+        $response->assertOk();
+
+        $index = $response->json();
+
+        $this->assertNotEmpty($index, 'The docs search index is empty.');
+
+        return $index;
+    }
 }

@@ -85,6 +85,14 @@
             <li>Recent activity feed showing the latest user actions</li>
         </ul>
         <x-doc-screenshot id="selfhost-admin--dashboard" alt="Admin dashboard showing key metrics and recent activity" />
+
+        <h3 class="doc-subheading">Needs attention</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Above the metrics sits a <strong class="text-gray-900 dark:text-white">Needs attention</strong> panel that collects everything waiting on an admin into one list, each row linking straight to the page where you deal with it. It covers failed queue jobs, custom domains that failed or are still pending, boost campaigns that are stuck, failed, disapproved or out of step with Meta, sales totals that do not reconcile, promotions awaiting review, flagged federation listings and instances awaiting approval, unread support messages, pending translation suggestions and unpublished translation overrides, unverified schedules, and referral credits waiting to be applied.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The panel is only rendered when there is something in it, so an empty dashboard means nothing needs you. The same counts drive badges on the admin navigation, each colored by the most serious item it contains: a failed queue will not be softened by sitting in the same group as a routine unverified schedule.</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Rows depend on what you run</div>
+            <p>Only relevant rows can appear. An installation with no boost integration never shows boost rows, and one with federation switched off never shows federation rows.</p>
+        </div>
     </section>
 
     <!-- Insights: Users -->

@@ -423,7 +423,7 @@
             Sell tickets directly from your event pages with built-in Stripe payments. Set up ticket types, manage sales, and check in attendees at the door. See the full <a href="{{ route('marketing.docs.tickets') }}" class="doc-link">Selling Tickets</a> guide for setup, sales management, and check-in details.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-6">
-            If you are not using built-in ticketing or RSVP, the Tickets section shows fields for <strong class="text-gray-900 dark:text-white">external ticketing</strong>: a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (link to your external ticketing page), <strong class="text-gray-900 dark:text-white">Ticket Price</strong> (with currency selector, used in <a href="{{ route('marketing.docs.event_graphics') }}#text-templates" class="doc-link">event graphics text templates</a>), and an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>.
+            If you are not using built-in ticketing or RSVP, the Tickets section shows fields for <strong class="text-gray-900 dark:text-white">external ticketing</strong>: a <strong class="text-gray-900 dark:text-white">Registration URL</strong> (link to your external ticketing page), <strong class="text-gray-900 dark:text-white">Ticket Price</strong> (with currency selector, used in <a href="{{ route('marketing.docs.event_graphics') }}#text-template" class="doc-link">event graphics text templates</a>), and an optional <strong class="text-gray-900 dark:text-white">Coupon Code</strong>.
         </p>
     </section>
 

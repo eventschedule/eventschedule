@@ -332,6 +332,21 @@
             <li><strong>Manage subscription</strong> through the Stripe portal, switch between <strong>monthly and yearly</strong> billing, or <strong>cancel</strong> your subscription</li>
             <li><strong>Resume</strong> your subscription during a cancellation grace period</li>
         </ul>
+
+        <h3 class="doc-subheading">Ads on free schedules</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Some Event Schedule sites cover their costs by showing ads at the bottom of free schedules' public pages. Where that is switched on, upgrading to Pro removes them, in the same way it removes the "Powered by Event Schedule" credit. Paid schedules never carry ads.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Even on a site that does show them, ads stay off your embedded calendars, your shareable event graphics, password-protected pages, custom domains, and any page you or your team members are viewing while signed in.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            You do not have to upgrade to be rid of them. <strong class="text-gray-900 dark:text-white">Do not show other schedules' promotions</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a> turns off ads as well as <a href="{{ route('marketing.docs.boost') }}#on-network" class="doc-link">promotions</a>, and it is free on every plan.
+        </p>
+        <div class="doc-callout doc-callout-info mb-6">
+            <div class="doc-callout-title">Not enabled on eventschedule.com</div>
+            <p>This is a per-site choice made by whoever runs the Event Schedule installation you are on, and it is off unless they turn it on. eventschedule.com does not show ads on free schedules, so if that is where your schedule lives, none of this applies to you.</p>
+        </div>
         @else
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             The <strong class="text-gray-900 dark:text-white">Plan</strong> tab is available on the hosted version of Event Schedule (eventschedule.com). It shows your schedule's current subscription plan and lets you upgrade.

@@ -178,7 +178,7 @@ return [
             'blurb' => 'Configure details, settings, sub-schedules, auto import, and integrations.',
             'icon' => 'cog',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-07-30',
         ],
 
         'schedule-styling' => [
@@ -190,7 +190,7 @@ return [
             'blurb' => 'Customize colors, fonts, and branding for your schedule.',
             'icon' => 'swatch',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-07-30',
         ],
 
         'creating-events' => [
@@ -202,7 +202,7 @@ return [
             'blurb' => 'Add events and configure event settings.',
             'icon' => 'plus',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-07-30',
         ],
 
         'ai-import' => [
@@ -238,7 +238,7 @@ return [
             'blurb' => 'Set up ticketing and manage sales.',
             'icon' => 'ticket',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-07-30',
         ],
 
         'subscriptions' => [
@@ -275,7 +275,7 @@ return [
             'blurb' => 'Let guests book a time with you on a public page.',
             'icon' => 'clock',
             'published' => '2026-07-26',
-            'modified' => '2026-07-26',
+            'modified' => '2026-07-30',
         ],
 
         'sharing' => [
@@ -324,7 +324,7 @@ return [
             'blurb' => 'Promote events with automated Facebook and Instagram ads.',
             'icon' => 'megaphone',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-07-30',
         ],
 
         'managing-schedules' => [
@@ -336,7 +336,7 @@ return [
             'blurb' => 'Manage events, team, availability, requests, and more.',
             'icon' => 'clipboard',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-07-30',
         ],
 
         'analytics' => [
@@ -348,7 +348,7 @@ return [
             'blurb' => 'Track views, devices, traffic sources, and conversions.',
             'icon' => 'chart',
             'published' => '2024-01-01',
-            'modified' => '2026-03-08',
+            'modified' => '2026-07-30',
         ],
 
         'account-settings' => [
@@ -398,7 +398,7 @@ return [
             'blurb' => 'Step-by-step server setup: database, web server, and first run.',
             'icon' => 'terminal',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-07-30',
         ],
 
         'selfhost/stripe' => [
@@ -479,7 +479,7 @@ return [
             'blurb' => 'Monitor users, revenue and analytics, and manage platform settings.',
             'icon' => 'shield',
             'published' => '2024-01-01',
-            'modified' => '2026-02-01',
+            'modified' => '2026-07-30',
         ],
 
         'selfhost/federation' => [

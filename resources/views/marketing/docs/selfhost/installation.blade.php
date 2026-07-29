@@ -13,6 +13,7 @@
         <x-doc-nav-link href="#cron">5. Set Up Cron Job</x-doc-nav-link>
         <x-doc-nav-link href="#verification">Verification</x-doc-nav-link>
         <x-doc-nav-link href="#push-notifications">Push notifications</x-doc-nav-link>
+        <x-doc-nav-link href="#spam-protection">Spam protection</x-doc-nav-link>
         <x-doc-nav-link href="#troubleshooting">Troubleshooting</x-doc-nav-link>
         <x-doc-nav-link href="#translations">Custom translations</x-doc-nav-link>
         <x-doc-nav-link href="#custom-links">Custom dashboard links</x-doc-nav-link>
@@ -356,6 +357,27 @@ ONESIGNAL_REST_API_KEY=your-onesignal-rest-api-key</code></pre>
             </p>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Once configured, schedule owners can turn on push under <strong>Settings &rarr; Notifications</strong> and send a test notification. Apple iOS only supports web push for sites the visitor adds to their home screen (iOS 16.4+); Android and desktop browsers work without installation.</p>
+    </section>
+
+    <!-- Spam protection -->
+    <section id="spam-protection" class="doc-section">
+        <h2 class="doc-heading">
+            <span class="doc-heading-icon">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
+            </span>
+            Spam Protection (Optional)
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Event Schedule can put a <a href="https://www.cloudflare.com/products/turnstile/" target="_blank" rel="noopener noreferrer" class="doc-link">Cloudflare Turnstile</a> challenge in front of the forms strangers can reach: ticket checkout, gift card purchases, and fan photo, video and comment submissions. Turnstile is invisible to most visitors and needs no puzzle-solving.</p>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Create a free Turnstile widget for your domain, then set both values in your <code class="doc-inline-code">.env</code>:</p>
+        <pre class="doc-code-block"><code>TURNSTILE_SITE_KEY=your-turnstile-site-key
+TURNSTILE_SECRET_KEY=your-turnstile-secret-key</code></pre>
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3 my-4">
+            <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <span>Both keys are required. If either is missing the challenge is skipped entirely, so a half-filled configuration leaves those forms unprotected without any warning. Enabling Turnstile loads Cloudflare's widget script on the affected pages.</span>
+            </p>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Turnstile is deliberately inactive on tenant custom domains, because a site key is registered against specific hostnames and would fail to validate on a domain you do not control. If you run a multi-tenant SaaS with <a href="{{ route('marketing.docs.saas.custom_domains') }}" class="doc-link">custom domains</a>, expect those pages to fall back to no challenge.</p>
     </section>
 
     <!-- Troubleshooting -->

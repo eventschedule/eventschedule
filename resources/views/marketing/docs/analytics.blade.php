@@ -138,7 +138,7 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Views Over Time</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">A line chart showing page views grouped by the selected period (daily or monthly). Hover over data points to see exact numbers. If you use <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> or <a href="{{ route('marketing.docs.tickets') }}#boost" class="doc-link">boosts</a>, overlay markers show when those campaigns were sent so you can see their impact on traffic.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">A line chart showing page views grouped by the selected period (daily or monthly). Hover over data points to see exact numbers. If you use <a href="{{ route('marketing.docs.newsletters') }}" class="doc-link">newsletters</a> or <a href="{{ route('marketing.docs.boost') }}" class="doc-link">boosts</a>, overlay markers show when those campaigns were sent so you can see their impact on traffic.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Device Breakdown</h4>

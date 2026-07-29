@@ -205,6 +205,16 @@
             <li><strong class="text-gray-900 dark:text-white">Pass / subscription:</strong> Turn a ticket type into a multi-use pass valid across many events (see below)</li>
         </ul>
 
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Volume discount</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Choose <strong class="text-gray-900 dark:text-white">Add volume discount</strong> on a ticket type to reward buying in bulk. Set the <strong class="text-gray-900 dark:text-white">minimum quantity</strong> that unlocks it, then a <strong class="text-gray-900 dark:text-white">percentage</strong> or <strong class="text-gray-900 dark:text-white">fixed amount</strong> off. A group of four booking together gets the discount; a single buyer does not.</p>
+        <div class="doc-callout mb-6">
+            <div class="doc-callout-title">It applies to that ticket type only</div>
+            <p>The discount comes off the line for that ticket type, not the whole order, and never off <a href="#add-ons" class="doc-link">add-ons</a>. Four discounted tickets plus a parking add-on means the four tickets are discounted and the parking is not. A <a href="#promo-codes" class="doc-link">promo code</a> stacks on top: the volume discount is taken off first, and the code is then worked out on what is left, so the two never double-count the same money.</p>
+        </div>
+
+        <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Max per order</h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Choose <strong class="text-gray-900 dark:text-white">Add limit</strong> to cap how many of one ticket type a single buyer can take in one order. This is what keeps a two-for-one early bird from being bought out by the first person through the door, and it is separate from the ticket type's total <strong class="text-gray-900 dark:text-white">Quantity</strong>: the quantity is how many exist, the limit is how many one order may hold.</p>
+
         <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Passes &amp; subscriptions</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-6">Turn any ticket type into a multi-use <strong class="text-gray-900 dark:text-white">pass or subscription</strong> - one purchase a guest reuses across many events (a visit pass, a membership, a festival pass, or a season pass for a recurring event). See <a href="{{ route('marketing.docs.subscriptions') }}" class="doc-link">Subscriptions &amp; Passes</a> for the full guide.</p>
     </section>

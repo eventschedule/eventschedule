@@ -103,8 +103,16 @@
         </p>
 
         <h3 class="doc-subheading">Cancelling</h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-4">
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
             You can cancel at any time. You keep what has already been delivered and the unspent remainder of your budget is returned - to your card if you paid by card, or to your account balance if you paid from credit. The same applies when a campaign ends on its own, whether it ran out of budget, reached its end date, or its event finished.
+        </p>
+
+        <h3 class="doc-subheading">Hosting other schedules' promotions</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The network works both ways: if promotions can appear on other schedules' pages, they can appear on yours. If you would rather they did not, turn on <strong class="text-gray-900 dark:text-white">Do not show other schedules' promotions</strong> under <a href="{{ route('marketing.docs.creating_schedules') }}#settings-advanced" class="doc-link">Settings &rarr; Advanced</a>. It is free on every plan, including Free, and it does not stop you buying promotions of your own.
+        </p>
+        <p class="text-gray-600 dark:text-gray-300">
+            The one toggle covers everything a site might place on your pages, so it also turns off <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">ads</a> if the site you are on runs those as well.
         </p>
     </section>
 

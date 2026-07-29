@@ -55,6 +55,7 @@
             <li><strong class="text-gray-900 dark:text-white">Name</strong> - what guests see in the list, for example "30 minute intro call".</li>
             <li><strong class="text-gray-900 dark:text-white">Description</strong> - optional detail shown under the name on the booking page.</li>
             <li><strong class="text-gray-900 dark:text-white">Duration</strong> - how long the appointment runs, in minutes.</li>
+            <li><strong class="text-gray-900 dark:text-white">Start times every</strong> - how often a slot is offered, from 5 minutes up to an hour. Leave it on <strong class="text-gray-900 dark:text-white">Same as the duration</strong> and slots line up back to back, so a 30 minute call is offered at 9:00, 9:30, 10:00. Set it to 15 instead and the same call can also start at 9:15 or 9:45, which fills a day more densely at the cost of leaving odd gaps behind.</li>
             <li><strong class="text-gray-900 dark:text-white">Active</strong> - untick to stop taking new bookings for a type without deleting it. Existing bookings are unaffected.</li>
         </ul>
         <p class="text-gray-600 dark:text-gray-300">Create as many types as you need. A free intro call and a paid consultation can sit side by side with different hours, prices, and rules.</p>

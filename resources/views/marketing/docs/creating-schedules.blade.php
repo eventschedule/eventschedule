@@ -13,6 +13,7 @@
         </x-doc-nav-group>
         <x-doc-nav-link href="#ai-details-generator">AI Details Generator</x-doc-nav-link>
         <x-doc-nav-link href="#address">Address</x-doc-nav-link>
+        <x-doc-nav-link href="#merge">Merging Duplicates</x-doc-nav-link>
         <x-doc-nav-link href="#style">Style</x-doc-nav-link>
         <x-doc-nav-link href="#videos-links">Videos & Links</x-doc-nav-link>
         <x-doc-nav-group label="Customize" href="#customize">
@@ -233,6 +234,33 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">For non-Venue schedules, you can specify location details without requiring a full street address. Curator schedules have both City and Country fields. Talent schedules have a Country field only. This appears on your profile to give visitors a sense of your location.</p>
             </div>
         </div>
+    </section>
+
+    <!-- Merge -->
+    <section id="merge" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+            </svg>
+            Merging duplicates
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Importing events tends to create the same venue twice, once as "The Anchor" and again as "Anchor Bar". Rather than leave your calendar pointing at two half-empty pages, merge them. Every event moves to the schedule you keep and the duplicate goes away.</p>
+
+        <h3 class="doc-subheading">Merge Venue</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">A <strong class="text-gray-900 dark:text-white">Merge Venue</strong> section appears on the edit page when a schedule looks mergeable. Pick the schedule to <strong class="text-gray-900 dark:text-white">Merge into</strong> and confirm. All of this schedule's events move to the target and this one is removed. If Event Schedule spots a likely match it names it for you, so usually you only have to confirm.</p>
+        <div class="doc-callout mb-6">
+            <div class="doc-callout-title">Only unclaimed schedules can be merged</div>
+            <p>Merging is offered for schedules nobody has claimed yet, which is exactly the kind an import creates. Once someone claims a schedule it has a real operator behind it, so it can no longer be absorbed into another. Both schedules must also be the same type, so a venue merges into a venue and never into a talent.</p>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">If some events already exist on the target, you are told how many before you commit. Those are not duplicated: where the same event sits on both schedules, the two entries are combined and any detail the target is missing is filled in from the schedule you are merging away.</p>
+
+        <h3 class="doc-subheading">Merge Duplicate Venues</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">Curator schedules get a bulk version. When several venues in your upcoming events look like the same place, a banner on the <strong class="text-gray-900 dark:text-white">Schedule</strong> tab offers to merge them and opens a page that groups the look-alikes together. Each group shows how many future events sit on each venue, with the most-used one preselected as the target.</p>
+        <ul class="doc-list mb-6">
+            <li><strong class="text-gray-900 dark:text-white">Merge</strong> - fold the rest of the group into the selected target.</li>
+            <li><strong class="text-gray-900 dark:text-white">Not duplicates</strong> - for venues that only look alike. The group is dismissed for good and stops being suggested.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300">Work through the groups in any order, and skip any you are unsure about. Nothing is merged until you press the button on that group.</p>
     </section>
 
     <!-- Style -->
@@ -770,6 +798,13 @@
             <p>On the hosted platform, notification emails require <a href="#integrations-email" class="doc-link">Email settings</a> to be configured. Without SMTP settings, notifications will be disabled.</p>
         </div>
 
+        <h4 class="font-semibold text-gray-900 dark:text-white mt-6 mb-2">Push notifications <x-doc-badge plan="pro" /></h4>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">The same notifications can also reach you as browser and mobile push, on top of email rather than instead of it. Choose <strong class="text-gray-900 dark:text-white">Enable push on this device</strong>, allow notifications when your browser asks, then use <strong class="text-gray-900 dark:text-white">Send test push</strong> to confirm it works. Push is per device, so repeat it on your phone and your laptop. Enabling it sends notification data to OneSignal, a third-party service.</p>
+        <div class="doc-callout mb-6">
+            <div class="doc-callout-title">Two things have to be true</div>
+            <p>The panel only appears once the operator of your Event Schedule site has configured push, which is <a href="{{ route('marketing.docs.selfhost.installation') }}#push-notifications" class="doc-link">off by default</a>. On iPhone and iPad, web push only works for sites added to the home screen (iOS 16.4 and later); Android and desktop browsers need no such step.</p>
+        </div>
+
         <!-- Advanced Tab -->
         <h3 id="settings-advanced" class="doc-subheading">Advanced</h3>
         <div class="doc-fields">
@@ -778,8 +813,20 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400">Choose the visibility that new events start with - Public, Draft, or (on Enterprise) Internal or Unlisted. New events default to Public; you can change the visibility on any individual event. See <a href="{{ route('marketing.docs.creating_events') }}#draft" class="doc-link">event visibility</a>.</p>
             </div>
             <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Past Events</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Keep past events off your public schedule so visitors only ever see what is still to come. Your own admin views are unaffected, so nothing is lost - the events are still there when you need them.</p>
+            </div>
+            <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Hide Videos</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Hide the videos panel from your public schedule. Useful for Venue and Curator schedules that don't want to feature video content alongside events.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Accessibility Widget</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add an accessibility panel to your public schedule so visitors can adjust font size, contrast, and motion for themselves. Useful if you are publishing on behalf of an organization with an accessibility commitment to meet.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Do not show other schedules' promotions</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Some Event Schedule sites run a promotions network, where schedules pay to have an event featured on other schedules' public pages. Turn this on and your pages carry nothing of the sort: no other schedule's promotions, and no ads either. It is free on every plan, and it does not stop you buying promotions of your own. See <a href="{{ route('marketing.docs.boost') }}#on-network" class="doc-link">on-network promotions</a> and <a href="{{ route('marketing.docs.managing_schedules') }}#plan" class="doc-link">ads on free schedules</a>. The toggle only appears on sites that have this switched on.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">First Day of Week</h4>
@@ -891,6 +938,10 @@
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Feedback Delay</h4>
                 <p class="text-sm text-gray-500 dark:text-gray-400">Set how long after an event ends before feedback requests are sent. Choose from 1 hour to 48 hours depending on your preference.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show Feedback Publicly</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Publish the ratings and comments you collect on the event page, so people deciding whether to come can see what previous attendees said. Off by default: with it off, feedback is yours alone to read.</p>
             </div>
         </div>
 
@@ -1173,7 +1224,7 @@
 
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Calendar Description Template</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
-            By default, events synced to Google Calendar or CalDAV use the event description as the calendar entry's description. With the <strong class="text-gray-900 dark:text-white">Calendar Description Template</strong>, you can customize what information appears using the same variable system as <a href="{{ route('marketing.docs.event_graphics') }}#available-variables" class="doc-link">event graphics</a>.
+            By default, events synced to Google Calendar or CalDAV use the event description as the calendar entry's description. With the <strong class="text-gray-900 dark:text-white">Calendar Description Template</strong>, you can customize what information appears using the same variable system as <a href="{{ route('marketing.docs.event_graphics') }}#variables" class="doc-link">event graphics</a>.
         </p>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Leave the template empty to use the event description as-is (default behavior). When a template is set, all events synced outbound from Event Schedule to your connected calendar will use the interpolated template.

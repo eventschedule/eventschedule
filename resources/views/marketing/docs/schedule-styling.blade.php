@@ -100,10 +100,13 @@
             Profile Image
         </h2>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Upload a profile image (logo, photo, or avatar) that represents your schedule. This appears at the top of your schedule page and in social media previews.</p>
-        <div class="doc-callout doc-callout-tip">
+        <div class="doc-callout doc-callout-tip mb-6">
             <div class="doc-callout-title">Best Practices</div>
             <p>Use a <strong>square image</strong> (1:1 aspect ratio) for best results. Recommended minimum size is 400x400 pixels. PNG or JPG formats work best.</p>
         </div>
+
+        <h3 class="doc-subheading">It becomes your favicon too <x-doc-badge plan="pro" /></h3>
+        <p class="text-gray-600 dark:text-gray-300">On Pro, your profile image also becomes the icon in the browser tab on your public pages, including ticket pages, and the home-screen icon when a visitor saves your schedule to their phone. Nothing to configure: upload a profile image and the Event Schedule icon is replaced by yours. This is the same reason a square image matters, since a tab icon is cropped to a square either way.</p>
     </section>
 
     <!-- Header Images -->
