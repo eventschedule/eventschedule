@@ -135,7 +135,15 @@
         <div class="doc-fields">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Connecting</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Provide your Invoice Ninja API Token and API URL to link the accounts. You can find your API token in your Invoice Ninja settings under Settings &rarr; Account Management.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Provide your Invoice Ninja API Token and API URL to link the accounts. You can find your API token in your Invoice Ninja settings under Settings &rarr; Account Management. Enter the base address of your installation, without <code>/api/v1</code>, or leave the API URL blank to use the hosted invoicing.co service.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Changing Credentials</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Once connected, click "Edit" next to the company name to correct the API URL or rotate the token. Leave the token blank to keep the existing one. Your current connection is only replaced once the new credentials work.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Troubleshooting</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">If the connection fails, the reason is shown directly under the form and the full detail is written to your application log. Common causes for selfhosted installations are a firewall, Cloudflare or other bot protection blocking API requests from your Event Schedule server, an <code>http</code> URL that redirects to <code>https</code>, and a self-signed TLS certificate the server does not trust.</p>
             </div>
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Checkout Modes</h4>

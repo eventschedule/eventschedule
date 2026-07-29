@@ -103,6 +103,22 @@
 
     <!-- Tab Content: Invoice Ninja -->
     <div id="payment-tab-invoiceninja" class="payment-tab-content hidden">
+        @if (session('invoiceninja_error'))
+            <div class="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600 dark:text-red-400">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ __('messages.error_invoiceninja_connection') }}</p>
+                    <p class="mt-1 text-sm text-red-700 dark:text-red-300">{{ __('messages.'.session('invoiceninja_reason', 'invoiceninja_error_generic')) }}</p>
+                    <p class="mt-2 text-xs font-mono break-words text-red-700 dark:text-red-300" v-pre>{{ session('invoiceninja_error') }}</p>
+                    <p class="mt-2 text-xs">
+                        <x-link href="{{ marketing_url('/docs/account-settings#invoice-ninja') }}" target="_blank">{{ __('messages.learn_more') }}</x-link>
+                    </p>
+                </div>
+            </div>
+        @endif
+
         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
             {{ __('messages.invoiceninja_help') }}
         </p>
@@ -110,13 +126,45 @@
         @if ($user->invoiceninja_api_key)
             <div class="mt-4">
                 <x-text-input type="text" class="mt-1 block w-full" :value="$user->invoiceninja_company_name" readonly/>
-                <div class="text-xs pt-1">
+                <div class="text-xs pt-1 flex items-center gap-3">
+                    <button type="button" id="invoiceninja-change-btn" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.edit') }}</button>
                     <form method="POST" action="{{ route('invoiceninja.unlink') }}" class="inline" data-confirm="{{ __('messages.are_you_sure') }}">
                         @csrf
                         <button type="submit" class="hover:underline text-gray-600 dark:text-gray-400">{{ __('messages.unlink_account') }}</button>
                     </form>
                 </div>
             </div>
+
+            <form method="post" action="{{ route('profile.update_payments') }}" id="invoiceninja-change-form" class="mt-4 hidden">
+                @csrf
+                @method('patch')
+
+                <div class="pt-4">
+                    <x-input-label for="invoiceninja_change_api_key" :value="__('messages.api_token')" />
+                    <x-text-input id="invoiceninja_change_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full"
+                        value="" autocomplete="off" placeholder="{{ str_repeat('•', 10) }}" :disabled="is_demo_mode()" />
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{{ __('messages.invoiceninja_api_token_help') }}</p>
+                </div>
+
+                <div class="pt-4">
+                    <x-input-label for="invoiceninja_change_api_url" :value="__('messages.api_url')" />
+                    <x-text-input id="invoiceninja_change_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full"
+                        :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" placeholder="https://invoices.example.com" :disabled="is_demo_mode()" />
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{{ __('messages.invoiceninja_api_url_help') }}</p>
+                </div>
+
+                <div class="flex items-center gap-4 pt-8">
+                    @if (is_demo_mode())
+                        <button type="button"
+                            data-alert="{{ __('messages.saving_disabled_demo_mode') }}"
+                            class="inline-flex items-center px-4 py-2 bg-gray-400 dark:bg-gray-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest cursor-not-allowed">
+                            {{ __('messages.save') }}
+                        </button>
+                    @else
+                        <x-primary-button>{{ __('messages.save') }}</x-primary-button>
+                    @endif
+                </div>
+            </form>
 
             <form method="POST" action="{{ route('profile.update_invoiceninja_mode') }}" class="mt-6"
                 x-data="{ type: '{{ $user->invoiceninja_mode ?? 'invoice' }}' }">
@@ -178,7 +226,7 @@
                 </x-link>
             </p>
 
-            <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-4">
+            <form method="post" action="{{ route('profile.update_payments') }}" enctype="multipart/form-data" class="mt-4" id="invoiceninja-connect-form">
                 @csrf
                 @method('patch')
 
@@ -186,13 +234,15 @@
                     <x-input-label for="invoiceninja_api_key" :value="__('messages.api_token') . ' *'" />
                     <x-text-input id="invoiceninja_api_key" name="invoiceninja_api_key" type="text" class="mt-1 block w-full"
                         :value="old('invoiceninja_api_key', $user->invoiceninja_api_key)" autocomplete="off" required :disabled="is_demo_mode()" />
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{{ __('messages.invoiceninja_api_token_help') }}</p>
                     <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_key')" />
                 </div>
 
                 <div class="pt-4">
                     <x-input-label for="invoiceninja_api_url" :value="__('messages.api_url')" />
                     <x-text-input id="invoiceninja_api_url" name="invoiceninja_api_url" type="url" class="mt-1 block w-full"
-                        :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" :disabled="is_demo_mode()" />
+                        :value="old('invoiceninja_api_url', $user->invoiceninja_api_url)" placeholder="https://invoices.example.com" :disabled="is_demo_mode()" />
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-0.5">{{ __('messages.invoiceninja_api_url_help') }}</p>
                     <x-input-error class="mt-2" :messages="$errors->get('invoiceninja_api_url')" />
                 </div>
 
@@ -290,6 +340,47 @@ document.addEventListener('DOMContentLoaded', function() {
     if (savedPaymentTab) {
         switchPaymentTab(savedPaymentTab);
     }
+
+    // "Change credentials" reveals the pre-filled form over the connected state.
+    const invoiceninjaChangeBtn = document.getElementById('invoiceninja-change-btn');
+    const invoiceninjaChangeForm = document.getElementById('invoiceninja-change-form');
+    if (invoiceninjaChangeBtn && invoiceninjaChangeForm) {
+        invoiceninjaChangeBtn.addEventListener('click', function() {
+            invoiceninjaChangeForm.classList.remove('hidden');
+            const urlField = document.getElementById('invoiceninja_change_api_url');
+            if (urlField) {
+                urlField.focus();
+            }
+        });
+    }
+
+    // The connect request is synchronous and can take up to 30s, so show progress.
+    ['invoiceninja-connect-form', 'invoiceninja-change-form'].forEach(function(formId) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            return;
+        }
+        form.addEventListener('submit', function() {
+            const button = form.querySelector('button[type="submit"], button:not([type])');
+            if (!button || button.disabled) {
+                return;
+            }
+            button.disabled = true;
+            button.innerHTML = '<svg class="animate-spin h-4 w-4 me-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">'
+                + '<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>'
+                + '<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>'
+                + '</svg>' + @json(__('messages.connecting'), JSON_UNESCAPED_UNICODE);
+        });
+    });
+
+    @if (session('invoiceninja_error'))
+        // A failed connection redirects back here, so make sure the panel is on screen.
+        switchPaymentTab('invoiceninja');
+        try { localStorage.setItem('paymentActiveTab', 'invoiceninja'); } catch (e) {}
+        if (invoiceninjaChangeForm) {
+            invoiceninjaChangeForm.classList.remove('hidden');
+        }
+    @endif
 
     paymentTabs.forEach(tab => {
         tab.addEventListener('click', function() {

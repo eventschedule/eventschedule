@@ -89,6 +89,12 @@ class ReferralController extends Controller
                     $role->plan_expires = $role->plan_expires && $role->plan_expires > now()
                         ? \Carbon\Carbon::parse($role->plan_expires)->addDays(30)
                         : now()->addDays(30);
+                    // Earned, not comped: the guest-footer credit is only for plans an admin
+                    // handed out, so this must not read as one. Only claim provenance when none
+                    // is recorded - the block above STACKS onto an existing plan, so overwriting
+                    // would let one redeemed referral strip the credit from an admin grant for
+                    // good.
+                    $role->plan_source ??= 'referral';
                     $role->save();
                 }
 

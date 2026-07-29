@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InvoiceNinjaException;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Mail\SupportEmail;
 use App\Models\BackupJob;
@@ -354,28 +355,74 @@ class ProfileController extends Controller
         }
 
         $user = $request->user();
-        $apiKey = $request->invoiceninja_api_key;
-        $apiUrl = $request->invoiceninja_api_url;
+        $apiUrl = trim((string) $request->invoiceninja_api_url);
         $paymentUrl = $request->payment_url;
-        $name = '';
+
+        // Only treat this as an Invoice Ninja submission when the form actually carried the
+        // field. The Payment URL form posts to this same route without it, and the blank
+        // token fallback below would otherwise hijack every Payment URL save by a
+        // connected user.
+        $apiKey = $request->has('invoiceninja_api_key')
+            ? trim((string) $request->invoiceninja_api_key)
+            : '';
+
+        // "Change credentials" leaves the token blank (or as the bullet placeholder) to
+        // mean "unchanged", so the owner can correct just the URL. Same idea as the
+        // password sentinel in RoleController::testEmail().
+        if ($apiKey === '' || $apiKey === str_repeat('•', 10)) {
+            $apiKey = $request->has('invoiceninja_api_key') ? (string) $user->invoiceninja_api_key : '';
+        }
 
         if ($apiKey) {
             try {
                 $invoiceNinja = new InvoiceNinja($apiKey, $apiUrl);
                 $company = $invoiceNinja->getCompany();
-                $name = $company['settings']['name'];
 
-                $user->invoiceninja_api_key = $request->invoiceninja_api_key;
-                $user->invoiceninja_api_url = $request->invoiceninja_api_url;
-                $user->invoiceninja_company_name = $name;
-                $user->invoiceninja_webhook_secret = strtolower(\Str::random(32));
+                // Create the webhook before persisting anything. Previously the save ran
+                // first, so a webhook failure left the credentials stored while the UI
+                // reported "failed to connect", and the connected state's only exit was an
+                // Unlink that also failed. This ordering also means a failed re-connect
+                // never wipes a working configuration.
+                $webhookSecret = strtolower(Str::random(32));
+
+                // Runs before the new secret is assigned below, so this still passes the
+                // previous one, which is what identifies the webhook to replace.
+                $this->pruneInvoiceNinjaWebhooks($invoiceNinja, $company, $user->invoiceninja_webhook_secret);
+
+                $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $webhookSecret]));
+
+                $user->invoiceninja_api_key = $apiKey;
+                $user->invoiceninja_api_url = $apiUrl;
+                // Null coalesce rather than a bare index: Laravel promotes the "undefined
+                // key" warning to an ErrorException, which the catch below would then
+                // report as a connection failure even though the connection worked.
+                $user->invoiceninja_company_name = $company['settings']['name'] ?? '';
+                $user->invoiceninja_webhook_secret = $webhookSecret;
                 $user->save();
 
-                $invoiceNinja->createWebhook(route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret]));
-
                 return Redirect::to(route('profile.edit').'#section-payment-methods')->with('message', __('messages.invoiceninja_connected'));
+            } catch (InvoiceNinjaException $e) {
+                // Invoice Ninja, or a proxy in front of it, rejected the request (bad token,
+                // unreachable host, WAF challenge, wrong API URL). Its message is the
+                // actionable content for the account owner configuring their own server,
+                // exactly like the SMTP case in RoleController::testEmail(). Expected
+                // user-config failure, so it is logged but not reported to Sentry.
+                \Log::error('Invoice Ninja connection failed: '.$e->getMessage(), [
+                    'user_id' => $user->id,
+                    'api_url' => $apiUrl,
+                ]);
+
+                return Redirect::to(route('profile.edit').'#section-payment-methods')
+                    ->withInput($request->except('invoiceninja_api_key'))
+                    ->with('error', __('messages.error_invoiceninja_connection'))
+                    ->with('invoiceninja_error', mb_substr($e->getMessage(), 0, 500))
+                    ->with('invoiceninja_reason', $e->reasonKey());
             } catch (\Exception $e) {
-                return Redirect::to(route('profile.edit').'#section-payment-methods')->with('error', __('messages.error_invoiceninja_connection'));
+                report($e);
+
+                return Redirect::to(route('profile.edit').'#section-payment-methods')
+                    ->withInput($request->except('invoiceninja_api_key'))
+                    ->with('error', __('messages.error_invoiceninja_connection'));
             }
         }
 
@@ -393,6 +440,44 @@ class ProfileController extends Controller
         }
 
         return Redirect::to(route('profile.edit').'#section-payment-methods')->with('status', 'payments-updated');
+    }
+
+    /**
+     * Delete this user's previous webhook in Invoice Ninja before registering a new one.
+     *
+     * Every connect mints a fresh invoiceninja_webhook_secret, so without this a reconnect
+     * leaves a dead webhook behind each time.
+     *
+     * Matched on the user's own previous secret, exactly as unlink() does, NOT on the
+     * shared "/invoiceninja/webhook/" URL prefix. That prefix belongs to every user on the
+     * installation (see InvoiceNinjaController::webhook(), which resolves the caller by
+     * scanning all users with a secret), so a prefix match would delete another user's
+     * webhook whenever two accounts share one Invoice Ninja company, silently stopping
+     * their sales from being marked paid.
+     *
+     * Failures here must never block the connection itself.
+     */
+    private function pruneInvoiceNinjaWebhooks(InvoiceNinja $invoiceNinja, $company, ?string $previousSecret): void
+    {
+        if (empty($previousSecret)) {
+            return;
+        }
+
+        try {
+            $previousUrl = route('invoiceninja.webhook', ['secret' => $previousSecret]);
+
+            foreach ($company['webhooks'] ?? [] as $webhook) {
+                if (! isset($webhook['id'], $webhook['target_url'])) {
+                    continue;
+                }
+
+                if ($webhook['target_url'] === $previousUrl) {
+                    $invoiceNinja->deleteWebhook($webhook['id']);
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to prune stale Invoice Ninja webhooks: '.$e->getMessage());
+        }
     }
 
     public function updateInvoiceninjaMode(Request $request): RedirectResponse

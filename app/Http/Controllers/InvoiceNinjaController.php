@@ -21,16 +21,26 @@ class InvoiceNinjaController extends Controller
     {
         $user = auth()->user();
 
-        $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
-        $company = $invoiceNinja->getCompany();
+        // Best effort: if the stored credentials or URL no longer work we still have to
+        // let the owner disconnect. Without this the account could be stuck showing
+        // "connected" with an Unlink button that 500s.
+        try {
+            $invoiceNinja = new InvoiceNinja($user->invoiceninja_api_key, $user->invoiceninja_api_url);
+            $company = $invoiceNinja->getCompany();
 
-        foreach ($company['webhooks'] as $webhook) {
-            if ($webhook['target_url'] == route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret])) {
-                $invoiceNinja->deleteWebhook($webhook['id']);
+            foreach ($company['webhooks'] ?? [] as $webhook) {
+                if ($webhook['target_url'] == route('invoiceninja.webhook', ['secret' => $user->invoiceninja_webhook_secret])) {
+                    $invoiceNinja->deleteWebhook($webhook['id']);
+                }
             }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to remove Invoice Ninja webhook while unlinking: '.$e->getMessage(), [
+                'user_id' => $user->id,
+            ]);
         }
 
         $user->invoiceninja_api_key = null;
+        $user->invoiceninja_api_url = null;
         $user->invoiceninja_company_name = null;
         $user->invoiceninja_webhook_secret = null;
         $user->invoiceninja_mode = 'invoice';

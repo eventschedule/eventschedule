@@ -5605,6 +5605,8 @@ class RoleController extends Controller
 
         $role->plan_type = $plan_type;
         $role->plan_expires = null;
+        // Back on the free tier, so there is no granted plan left to attribute.
+        $role->plan_source = null;
         $role->save();
 
         return redirect()->back()->with('message', __('messages.plan_changed'));

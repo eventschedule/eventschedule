@@ -28,6 +28,7 @@ class SubscriptionWebhookController extends WebhookController
             // Downgrade to free plan when subscription is deleted
             $role->plan_type = 'free';
             $role->plan_expires = null;
+            $role->plan_source = null;
             $role->save();
         }
 
@@ -86,6 +87,9 @@ class SubscriptionWebhookController extends WebhookController
                         $role->plan_term = $planTerm;
                     }
                     $role->plan_expires = null;
+                    // Stripe is paying for this now, so any earlier hand-granted or referral
+                    // provenance no longer applies - and neither does the footer credit.
+                    $role->plan_source = null;
                     $role->save();
                 });
             }
@@ -164,6 +168,7 @@ class SubscriptionWebhookController extends WebhookController
                     $role->plan_type = $isEnterprise ? 'enterprise' : 'pro';
                     $role->plan_term = $isYearly ? 'year' : 'month';
                     $role->plan_expires = null;
+                    $role->plan_source = null;
                     $role->save();
                 });
             }

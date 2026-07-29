@@ -55,7 +55,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
-| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by". One exception: a schedule served on a custom domain keeps a small "Event Schedule" chip in the guest footer, because otherwise nothing on the page links back to us at all - see `layouts/app-guest.blade.php` |
+| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by". One exception on the nexus: an Enterprise plan an admin granted by hand (`roles.plan_source = 'admin'`, no active Stripe subscription) keeps a small "Event Schedule" credit chip below the guest footer - see `layouts/app-guest.blade.php`. Customers paying through Stripe, and referral-earned plans (`plan_source = 'referral'`), never carry it |
 | Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
 | Passes & subscriptions | Tied to ticketing gate, `$ticket->is_pass` | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab; per-pass cancellation deadline and late-cancel policy (forfeit or block) |
 | Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |

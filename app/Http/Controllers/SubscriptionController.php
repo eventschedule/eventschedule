@@ -94,6 +94,7 @@ class SubscriptionController extends Controller
                     $role = \App\Models\Role::lockForUpdate()->find($role->id);
                     $role->plan_type = 'enterprise';
                     $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+                    $role->plan_source = null;
                     $role->save();
                 });
 
@@ -156,6 +157,9 @@ class SubscriptionController extends Controller
                 $role->plan_type = $tier;
                 $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
                 $role->plan_expires = null;
+                // Paying now, so drop any hand-granted or referral provenance along with the
+                // legacy expiry - both are what the guest-footer credit keys off.
+                $role->plan_source = null;
                 $role->save();
             });
 
@@ -326,6 +330,7 @@ class SubscriptionController extends Controller
                 $role = Role::lockForUpdate()->find($role->id);
                 $role->plan_type = $tier;
                 $role->plan_term = $request->plan === 'yearly' ? 'year' : 'month';
+                $role->plan_source = null;
                 $role->save();
             });
         } catch (IncompletePayment $exception) {

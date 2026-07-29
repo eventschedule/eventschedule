@@ -1948,11 +1948,29 @@ class AdminController extends Controller
             'plan_type' => $role->plan_type,
             'plan_term' => $role->plan_term,
             'plan_expires' => $role->plan_expires,
+            'plan_source' => $role->plan_source,
         ];
 
         $role->plan_type = $validated['plan_type'];
         $role->plan_term = $validated['plan_term'] ?? 'year';
         $role->plan_expires = $validated['plan_expires'];
+
+        // Record that this paid plan was granted by hand rather than bought, which is what makes
+        // the guest footer carry the Event Schedule credit.
+        //
+        // Two guards. The subscription check keeps editing a paying customer's plan_term from
+        // labelling them as comped. The isDirty check keeps a re-save that leaves the plan alone
+        // from converting a referral reward into an admin grant, which would put the credit on a
+        // plan the owner earned rather than one we gave away. An admin who actually moves the
+        // plan is granting it, so that case does claim it.
+        // Untagged rows are also claimed, so the migration's fail-closed backfill can be corrected
+        // by re-saving the plan here.
+        if ($validated['plan_type'] === 'free' || $role->hasActiveSubscription()) {
+            $role->plan_source = null;
+        } elseif ($role->isDirty(['plan_type', 'plan_expires']) || $role->plan_source === null) {
+            $role->plan_source = 'admin';
+        }
+
         $role->save();
 
         AuditService::log(
@@ -1965,6 +1983,7 @@ class AdminController extends Controller
                 'plan_type' => $role->plan_type,
                 'plan_term' => $role->plan_term,
                 'plan_expires' => $role->plan_expires,
+                'plan_source' => $role->plan_source,
             ],
             "Plan updated for {$role->subdomain}",
         );

@@ -169,6 +169,15 @@ return [
         ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which nights the interest is actually landing on.'],
     ],
 
+    // The for-restaurants page already links the neighbouring audience pages
+    // inline, so this strip carries the features a ticketed sitting needs.
+    'for-restaurants' => [
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'A fixed covers count, a sales cutoff, and zero platform fees.'],
+        ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Ask for allergies or a course choice at checkout.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Give private dining its own strand and its own link.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Tell the regulars before the seats are gone.'],
+    ],
+
     // The for-comedy-clubs page already links the neighbouring audience pages
     // inline, so this strip carries the features a room reaches for.
     'for-comedy-clubs' => [

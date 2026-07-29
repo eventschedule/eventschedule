@@ -346,7 +346,7 @@
             ],
             [
                 'q' => 'Can I charge different prices for advance and at the door?',
-                'a' => 'Yes. Ticket types each carry their own price, quantity and sales window, so advance can close at six on the night and a door price can open at seven. Check people in by scanning a QR code, and take payment through your own Stripe account with no platform fee on top.',
+                'a' => 'Yes. Set up two ticket types at different prices and sell both from the same night. Each type carries its own count, and the count is kept per occurrence, so a sold-out Friday does not stop next Friday selling. A type can also be given a single date to go on sale or come off it, which applies once to the whole run rather than repeating each week. Check people in by scanning a QR code, and take payment through your own Stripe account with no platform fee on top.',
             ],
         ];
 
@@ -625,11 +625,11 @@
                 <div class="es-night-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
                 <p class="es-night-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Selling the room</p>
                 <h2 class="es-balance es-night-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Advance closes at six. <span class="es-night-grad">Door opens at seven</span>.
+                    Sold out on Friday. <span class="es-night-grad">Still open for next Friday</span>.
                 </h2>
                 <p class="es-night-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
-                    Each ticket type carries its own price, quantity and sales window, so the pricing
-                    changes on its own while you are still setting the room up.
+                    Every ticket type carries its own price and its own count, and the count is kept
+                    per night - so selling out one week leaves the next one untouched.
                 </p>
             </div>
 
@@ -643,21 +643,20 @@
 
                     <div class="space-y-2.5">
                         @foreach ([
-                            ['Advance', 'Closes 6:00pm on the night', '$18', '80'],
-                            ['Door', 'Opens 7:00pm on the night', '$22', '40'],
-                            ['Group of six', 'Closes 24 hours before', '$90', '10'],
-                        ] as [$tName, $tWindow, $tPrice, $tQty])
+                            ['Advance', '$18', '80'],
+                            ['Door', '$22', '40'],
+                            ['Group of six', '$90', '10'],
+                        ] as [$tName, $tPrice, $tQty])
                             <div class="es-night-sub flex items-baseline gap-3 p-3.5">
                                 <span class="es-night-ink min-w-0 flex-1 truncate text-sm font-semibold">{{ $tName }}</span>
-                                <span class="es-night-muted hidden truncate text-xs sm:inline">{{ $tWindow }}</span>
-                                <span class="es-night-muted es-night-hour text-xs">{{ $tQty }}</span>
+                                <span class="es-night-muted hidden text-xs sm:inline">{{ $tQty }} a night</span>
                                 <span class="es-night-ink es-night-hour text-sm">{{ $tPrice }}</span>
                             </div>
                         @endforeach
                     </div>
 
                     <p class="es-night-muted mt-5 border-t border-[rgba(18,20,26,0.1)] pt-4 text-xs dark:border-[rgba(233,235,242,0.12)]">
-                        Quantities are per night, so a sold-out Friday does not close next Friday.
+                        A ticket type can also be given a date to go on sale or come off it, once, for the whole run.
                     </p>
                 </div>
 

@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/subscription-webhook',
             'invoiceninja/webhook/*',
             'invoiceninja/purchase-webhook/*',
+            'invoiceninja/event-purchase-webhook/*',
             'test_database',
             'nl/u/*',
             'webhooks/meta',

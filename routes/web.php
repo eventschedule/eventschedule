@@ -411,7 +411,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
 
     Route::get('/settings', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/settings', [ProfileController::class, 'update'])->name('profile.update');
-    Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments');
+    // Throttled: this makes an outbound request to a user-chosen destination.
+    Route::patch('/settings/payments', [ProfileController::class, 'updatePayments'])->name('profile.update_payments')->middleware('throttle:10,1');
     Route::delete('/settings', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::delete('/settings/profile-image', [ProfileController::class, 'deleteImage'])->name('profile.delete_image');
 

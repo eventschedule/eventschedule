@@ -707,9 +707,6 @@
             <li>Wait for DNS propagation (usually a few minutes, but can take up to 48 hours).</li>
             <li>SSL is provisioned automatically. Once DNS has propagated, your schedule will be accessible at your custom domain over HTTPS.</li>
         </ol>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Pages served this way keep a small "Event Schedule" chip in the footer, the only platform branding on the page. See <a href="{{ route('marketing.docs.schedule_styling') }}#remove-branding" class="doc-link">Remove Branding</a>.
-        </p>
 
         <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Redirect Mode (Cloudflare)</h4>
         <p class="text-gray-600 dark:text-gray-300 mb-4">

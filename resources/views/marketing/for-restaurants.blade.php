@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Restaurants | Fill Your Dining Room</x-slot>
-    <x-slot name="description">Fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and email your regulars directly. Free forever.</x-slot>
+    <x-slot name="title">Restaurant Event Ticketing | Know the Covers Before You Shop</x-slot>
+    <x-slot name="description">A wine dinner for twenty-four means the kitchen buys for twenty-four. Sell the covers, close the door before you shop, and collect the allergies at checkout instead of over email.</x-slot>
     <x-slot name="breadcrumbTitle">For Restaurants</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Restaurants",
-        "description": "Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly. Free forever.",
+        "description": "Ticketed dinners with a fixed covers count, a sales cutoff set before you shop, and dietary questions answered at checkout.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What kinds of events can restaurants list?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Anything that brings guests through the door. Wine tastings, chef's table dinners, live music nights, brunch specials, holiday menus, cooking classes, tasting menus, or seasonal pop-ups. If it's happening at your restaurant, it belongs on your calendar."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to special dining events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Sell tickets for wine dinners, chef's tables, tasting events, and any ticketed experience. Connect Stripe and guests can purchase directly from your calendar. Every ticket includes a QR code, and Event Schedule charges zero platform fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do guests find out about upcoming events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Guests can follow your restaurant's schedule and get email notifications when you add new events. You can also send newsletters directly to followers with your upcoming lineup, and embed the calendar on your restaurant's website."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for restaurants?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Creating your event calendar, sharing it, and building a following are all free forever. Ticketing, newsletters, and advanced features are available on the Pro plan, with zero platform fees on any ticket sales."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -69,9 +29,8 @@
         "@type": "SoftwareApplication",
         "name": "Event Schedule for Restaurants",
         "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Restaurant Event Management Software",
+        "applicationSubCategory": "Restaurant Event Ticketing Software",
         "operatingSystem": "Web",
-        "description": "Email your regulars directly and fill every seat. Announce seasonal menus, sell tickets to wine dinners and prix fixe events, and reach your regulars directly. No algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,17 +38,22 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Seasonal menu announcement newsletters",
-            "Prix fixe and wine dinner ticketing",
-            "Annual dining calendar with holiday events",
-            "Private dining inquiry management",
-            "Multiple dining space calendars",
-            "QR codes for menus and check-in",
-            "Virtual cooking class support",
-            "Auto-generated social media graphics"
+            "A fixed number of covers per sitting, counted per date",
+            "A sales cutoff set on the event, so the count is final before you shop",
+            "Questions attached to the ticket and answered at checkout, for allergies and courses",
+            "Named ticket types with their own prices and quantities",
+            "QR check-in at the door",
+            "Zero platform fees on ticket sales through your own Stripe account",
+            "Private hire enquiries that wait for you to accept them",
+            "Sub-schedules with their own shareable link, for private dining or a supper club",
+            "Draft events that stay members-only until you are ready to announce",
+            "Direct newsletters to the people who follow the restaurant",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Embeddable calendar for your own website",
+            "Online events with the link people join on"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "restaurant event calendar, restaurant live music, dinner event scheduling, restaurant entertainment, free restaurant scheduling",
+        "keywords": "restaurant event ticketing, wine dinner tickets, covers count, supper club booking, private dining enquiries, chef's table tickets",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -107,522 +71,581 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-restaurants "The Table" styles. The shared es-* motion system
-           lives in marketing.css; this holds the burgundy gradient text plus
-           the candlelit dining motifs: a flickering flame, steam wisps, a
-           linen weave, serif menu eyebrows, reservation time chips, and the
-           burgundy link recolors. */
-        .text-gradient-burgundy {
-            background: linear-gradient(135deg, #be123c, #7f1d1d);
+        /* ==============================================================
+           For-restaurants "Twenty-Four Covers" styles.
+
+           CONCEPT: a restaurant is not a venue - it already has a
+           business. Its calendar is not the product; most nights are just
+           service. The few nights that need a page are seat-limited and
+           prepaid, because THE KITCHEN BUYS FOR A FIXED NUMBER. Oversell
+           and you turn people away; undersell and you throw food out. So
+           the count is the product, and the page is built on it.
+
+           THE DEVICE IS THE COUNT ITSELF - a large fraction with a simple
+           fill. Deliberately NOT a row of discrete seat marks: 24 marks in
+           a line would read as /for-theaters' day strip, and anything
+           resembling a seating plan would imply a seat map, which the
+           product does not have (no seat selection exists anywhere).
+
+           THREE MECHANISMS BACK THE SPINE, all checked in code:
+             - Covers = ticket quantity, and inventory is PER DATE
+               (Ticket::soldKey($date) keys the sold tally by occurrence).
+             - The cutoff is Ticket.sales_end_at, a single absolute
+               datetime ("Sales will automatically stop at this date and
+               time"). That was WRONG on the recurring comedy night and had
+               to be removed there; for a one-off dinner it is exactly the
+               feature. The page says plainly that it is one date, not a
+               weekly rule.
+             - Allergies at checkout are Ticket.custom_fields, rendered by
+               the purchase view (event/tickets.blade.php) and gated isPro.
+
+           TIER HONESTY: the covers story is genuinely PRO. The page says
+           so rather than dressing paid features as free; the schedule
+           itself and private-hire enquiries are the free part.
+
+           COLOUR: wine, and the trade-off is named. The audit leaves green
+           120-139 (squeezed against food-trucks at 113, which IS a food
+           neighbour) and blue 240-259 (comedy-clubs just took 231), and
+           neither is materially honest here. Wine is. The claimed roses
+           are circus and comedians at 345-348deg / 73-83% saturation; this
+           is #71243d at 340deg / 51% / 29% - deeper and far more muted.
+           The hue gap is only 5-8deg, but NEITHER of those pages is a
+           restaurant neighbour: the pages a reader reaches from here are
+           bars, breweries, food trucks, farmers markets and hotels, all
+           orange/amber/lime/green. That is the neighbour test that ruled
+           green OUT for food trucks, applied the other way.
+
+           Measured: #71243d 9.47 on ground / 10.05 on card; #e0a8b9 9.60 /
+           8.80 / 9.37 dark. NEVER text-gray-500 - use .es-cover-muted
+           (7.20 light / 7.08 dark).
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-cover-page { background-color: #f6f4f2; color: #16110f; }
+        .dark .es-cover-page { background-color: #100e0e; color: #f0eae8; }
+        .es-cover-ink { color: #16110f; }
+        .dark .es-cover-ink { color: #f0eae8; }
+        .es-cover-muted { color: #57504d; }
+        .dark .es-cover-muted { color: #a49b98; }
+        .es-cover-accent { color: #71243d; }
+        .dark .es-cover-accent { color: #e0a8b9; }
+        /* Always-lit accent for the band, in both colour modes. */
+        .es-cover-lit { color: #e0a8b9; }
+
+        .es-cover-grad {
+            background-image: linear-gradient(100deg, #71243d, #8d3350);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-        .dark .text-gradient-burgundy {
-            background: linear-gradient(135deg, #fb7185, #f43f5e);
-            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+        }
+        .dark .es-cover-grad,
+        .es-cover-band .es-cover-grad {
+            background-image: linear-gradient(100deg, #ecc0cd, #e0a8b9);
         }
 
-        /* Serif small-caps menu eyebrows / course labels */
-        .es-menu-eyebrow {
-            font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-            font-variant: small-caps;
-            letter-spacing: 0.09em;
+        /* --- Surfaces --- */
+        .es-cover-card {
+            background-color: #fcfbfa;
+            border: 1px solid rgba(22, 17, 15, 0.12);
+            border-radius: 0.7rem;
+        }
+        .dark .es-cover-card {
+            background-color: #1b1818;
+            border-color: rgba(240, 234, 232, 0.13);
+        }
+        .es-cover-sub {
+            background-color: rgba(22, 17, 15, 0.045);
+            border-radius: 0.45rem;
+        }
+        .dark .es-cover-sub { background-color: rgba(240, 234, 232, 0.05); }
+        .es-cover-hover { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .es-cover-hover:hover { border-color: rgba(113, 36, 61, 0.45); box-shadow: 0 10px 28px -18px rgba(22, 17, 15, 0.5); }
+        .dark .es-cover-hover:hover { border-color: rgba(224, 168, 185, 0.4); box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.8); }
+
+        /* --- The count -----------------------------------------------
+           The numerals do the work. The fill is a single bar, not a seat
+           plan: its width is set inline from the same figures the text
+           states, so the two cannot disagree. */
+        .es-cover-figure {
+            font-size: clamp(3rem, 9vw, 4.5rem);
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .es-cover-of { font-size: 0.42em; font-weight: 700; letter-spacing: 0.04em; }
+        .es-cover-meter {
+            height: 0.6rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            overflow: hidden;
+        }
+        .es-cover-meter-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: #ecc0cd;
+        }
+        .es-cover-num {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-variant-numeric: tabular-nums;
         }
 
-        /* Candlelit tasting table: a teardrop flame that flickers */
-        .es-candle { position: relative; width: 16px; }
-        .es-flame {
-            display: block;
-            width: 14px;
-            height: 20px;
-            margin: 0 auto 1px;
-            border-radius: 50% 50% 50% 50% / 62% 62% 40% 40%;
-            background: radial-gradient(ellipse at 50% 78%, #fffbeb 0%, #fde68a 22%, #fb923c 58%, #b91c1c 100%);
-            box-shadow: 0 0 12px 3px rgba(251, 146, 60, 0.55), 0 0 26px 10px rgba(245, 158, 11, 0.30);
-            transform-origin: 50% 92%;
-            animation: es-flame-flicker 2.3s ease-in-out infinite;
+        /* --- The sitting card: the one thing being sold --- */
+        .es-cover-sitting {
+            background-color: #71243d;
+            color: #ffffff;
+            border-radius: 0.7rem;
         }
-        .dark .es-flame {
-            background: radial-gradient(ellipse at 50% 78%, #fff7ed 0%, #fcd34d 24%, #fb923c 60%, #dc2626 100%);
-        }
-        .es-candle-body {
-            display: block;
-            width: 9px;
-            height: 30px;
-            margin: 0 auto;
-            border-radius: 3px 3px 2px 2px;
-            background: linear-gradient(to bottom, #fde68a, #f59e0b 45%, #b45309);
-            box-shadow: inset -2px 0 2px rgba(120, 53, 15, 0.4);
-        }
-        .dark .es-candle-body {
-            background: linear-gradient(to bottom, #fcd34d, #d97706 45%, #92400e);
-        }
-        @keyframes es-flame-flicker {
-            0%, 100% { transform: scaleY(1) skewX(0deg); opacity: 0.95; }
-            30% { transform: scaleY(1.08) skewX(3deg); opacity: 1; }
-            55% { transform: scaleY(0.93) skewX(-3deg); opacity: 0.82; }
-            80% { transform: scaleY(1.04) skewX(2deg); opacity: 1; }
-        }
+        .dark .es-cover-sitting { background-color: #5c1c31; }
+        .es-cover-rule { height: 1px; background: rgba(255, 255, 255, 0.22); }
 
-        /* Steam wisps rising over the dining-year band */
-        .es-steam { pointer-events: none; overflow: hidden; }
-        .es-steam span {
-            position: absolute;
-            bottom: 0;
-            width: 8px;
-            height: 60px;
-            border-radius: 9999px;
-            background: linear-gradient(to top, rgba(190, 18, 60, 0), rgba(251, 113, 133, 0.28) 40%, rgba(255, 255, 255, 0.35));
-            filter: blur(5px);
-            opacity: 0;
-            animation: es-steam-rise var(--steam-dur, 9s) ease-in infinite;
-            animation-delay: var(--steam-delay, 0s);
+        /* --- Eyebrow, numerals, plan tags --- */
+        .es-cover-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #71243d;
         }
-        .dark .es-steam span {
-            background: linear-gradient(to top, rgba(190, 18, 60, 0), rgba(251, 113, 133, 0.22) 40%, rgba(255, 255, 255, 0.20));
-        }
-        @keyframes es-steam-rise {
-            0% { transform: translateY(10px) scaleX(1); opacity: 0; }
-            20% { opacity: var(--steam-op, 0.5); }
-            80% { opacity: var(--steam-op, 0.5); }
-            100% { transform: translateY(-70px) scaleX(1.6); opacity: 0; }
-        }
+        .dark .es-cover-tag { color: #e0a8b9; }
+        .es-cover-band .es-cover-tag { color: #e0a8b9; }
 
-        /* Linen weave tint for the candlelit dark band */
-        .es-linen {
-            background-image:
-                repeating-linear-gradient(0deg, rgba(255, 245, 235, 0.045) 0px, rgba(255, 245, 235, 0.045) 1px, transparent 1px, transparent 4px),
-                repeating-linear-gradient(90deg, rgba(255, 245, 235, 0.04) 0px, rgba(255, 245, 235, 0.04) 1px, transparent 1px, transparent 4px);
-            mix-blend-mode: soft-light;
-        }
-
-        /* Reservation-style time chips */
-        .es-time-chip {
+        .es-cover-corner {
+            position: relative;
             display: inline-flex;
             align-items: center;
-            border-radius: 9999px;
-            border: 1px solid rgba(159, 18, 57, 0.35);
-            background: rgba(255, 241, 242, 0.8);
-            padding: 1px 6px;
-            font-size: 8px;
+            justify-content: center;
+            width: 2.5rem;
+            height: 1.9rem;
+            border: 1px solid rgba(22, 17, 15, 0.22);
+            border-radius: 0.25rem;
+            background: rgba(22, 17, 15, 0.035);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.78rem;
             font-weight: 700;
-            color: #9f1239;
+            color: #16110f;
         }
-        .es-time-chip-active {
-            border-color: transparent;
-            background: linear-gradient(135deg, #be123c, #7f1d1d);
-            color: #fff;
+        .dark .es-cover-corner { border-color: rgba(240, 234, 232, 0.22); background: rgba(240, 234, 232, 0.05); color: #f0eae8; }
+        .es-cover-band .es-cover-corner { border-color: rgba(240, 234, 232, 0.22); background: rgba(240, 234, 232, 0.05); color: #f0eae8; }
+        .es-cover-corner::before {
+            content: "";
+            position: absolute;
+            left: 0.4rem;
+            top: 0.4rem;
+            bottom: 0.4rem;
+            width: 2px;
+            background: #71243d;
         }
-        .dark .es-time-chip {
-            border-color: rgba(251, 113, 133, 0.4);
-            background: rgba(190, 18, 60, 0.18);
-            color: #fda4af;
+        .dark .es-cover-corner::before { background: #e0a8b9; }
+        .es-cover-band .es-cover-corner::before { background: #e0a8b9; }
+
+        /* Plan tiers ONLY - never reuse these for a state badge. */
+        .es-cover-plan {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
         }
-        .dark .es-time-chip-active {
-            background: linear-gradient(135deg, #fb7185, #e11d48);
-            color: #4c0519;
+        .es-cover-plan-free { border-color: rgba(22, 17, 15, 0.22); color: #57504d; }
+        .dark .es-cover-plan-free { border-color: rgba(240, 234, 232, 0.26); color: #a49b98; }
+        .es-cover-plan-pro { border-color: rgba(113, 36, 61, 0.5); color: #71243d; background: rgba(113, 36, 61, 0.08); }
+        .dark .es-cover-plan-pro { border-color: rgba(224, 168, 185, 0.42); color: #e0a8b9; background: rgba(224, 168, 185, 0.1); }
+
+        /* --- Buttons --- */
+        .es-cover-btn {
+            background-color: #71243d;
+            color: #ffffff;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .es-cover-btn:hover { background-color: #5c1c31; transform: translateY(-1px); box-shadow: 0 14px 28px -16px rgba(113, 36, 61, 0.9); }
+        .es-cover-ghost {
+            border: 1px solid rgba(22, 17, 15, 0.22);
+            color: #16110f;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-cover-ghost:hover { border-color: rgba(113, 36, 61, 0.5); background-color: rgba(113, 36, 61, 0.06); }
+        .dark .es-cover-ghost { border-color: rgba(240, 234, 232, 0.24); color: #f0eae8; }
+        .dark .es-cover-ghost:hover { border-color: rgba(224, 168, 185, 0.45); background-color: rgba(224, 168, 185, 0.08); }
+
+        /* --- The dark band ------------------------------------------
+           A resolvable background-color under the gradients: it is what
+           paints if they fail and what a contrast audit can read. */
+        .es-cover-band {
+            background-color: #141111;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(113, 36, 61, 0.4), rgba(113, 36, 61, 0) 70%),
+                linear-gradient(180deg, #1b1818, #141111);
         }
 
-        /* Burgundy recolor for the hard-coded blue links */
-        .es-link-accent { color: #be123c; }
-        .es-link-accent:hover { color: #9f1239; }
-        .dark .es-link-accent { color: #fb7185; }
-        .dark .es-link-accent:hover { color: #fda4af; }
+        /* --- Nothing inside the band may change between colour modes --
+           The band has no .dark variant, so any descendant that HAS one
+           would render differently on an identical ground. Two shared
+           classes carry their own .dark rules in marketing.css and are
+           invisible to a grep of this file. */
+        .es-cover-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(240, 234, 232, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(240, 234, 232, 0.05) 1px, transparent 1px);
+        }
+        .es-cover-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-cover-band .es-claim:focus-within {
+            border-color: rgba(224, 168, 185, 0.75);
+            box-shadow: 0 0 0 4px rgba(224, 168, 185, 0.22);
+        }
 
-        /* Related-page cards: burgundy hover */
-        .es-rel-card:hover { border-color: #fecdd3; background-color: #fff1f2; }
-        .dark .es-rel-card:hover { border-color: rgba(190, 18, 60, 0.4); background-color: rgba(190, 18, 60, 0.08); }
-        .group:hover .es-rel-accent { color: #be123c; }
-        .dark .group:hover .es-rel-accent { color: #fb7185; }
+        /* Shared chrome that is hard-coded brand blue. */
+        .es-dot:hover .es-dot-pip { background-color: rgba(113, 36, 61, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(224, 168, 185, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #71243d; }
+        .dark .es-dot.is-active .es-dot-pip { background: #e0a8b9; }
+
+        /* Focus rings. Never set border-radius here: an outline already
+           follows the element's own radius. */
+        #es-cover-page a:focus-visible,
+        #es-cover-page summary:focus-visible,
+        #es-cover-page button:focus-visible,
+        #es-cover-page input:focus-visible {
+            outline: 2px solid #71243d;
+            outline-offset: 2px;
+        }
+        .dark #es-cover-page a:focus-visible,
+        .dark #es-cover-page summary:focus-visible,
+        .dark #es-cover-page button:focus-visible,
+        .dark #es-cover-page input:focus-visible {
+            outline-color: #e0a8b9;
+        }
+        .es-cover-band a:focus-visible,
+        .es-cover-band summary:focus-visible,
+        .es-cover-band button:focus-visible,
+        .es-cover-band input:focus-visible {
+            outline-color: #e0a8b9 !important;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-flame { animation: none !important; }
-            .es-steam span { animation: none !important; opacity: 0.28; transform: none; }
+            .es-cover-btn:hover { transform: none; }
         }
     </style>
 
+    @php
+        // One sitting. Every figure the page states comes from here, and the
+        // meter's width is computed from the same two numbers, so the bar and
+        // the fraction cannot disagree. Asserted at build time: sold < seats,
+        // and the cutoff day precedes the sitting.
+        $sitting = [
+            'name'      => 'Burgundy dinner',
+            'day'       => 'Saturday',
+            'time'      => '7:30pm',
+            'seats'     => 24,
+            'sold'      => 19,
+            'cutoff'    => 'Thursday, 11:59pm',
+            'shop'      => 'Friday morning',
+            'price'     => 85,
+        ];
+        $remaining = $sitting['seats'] - $sitting['sold'];
+        $fillPct   = (int) round($sitting['sold'] / $sitting['seats'] * 100);
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for restaurants?',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling covers is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+            ],
+            [
+                'q' => 'How do I stop selling more covers than the kitchen can cook?',
+                'a' => 'Give the ticket a quantity and that is the number of covers. It is counted per date, so a sold-out Saturday does not stop the following Saturday selling. When the quantity is gone the sitting closes itself, which means the number you are cooking for is the number that sold.',
+            ],
+            [
+                'q' => 'Can sales stop before the night, so I know what to buy?',
+                'a' => 'Yes. A ticket type takes a date and time to come off sale, so you can close Thursday at midnight and do the ordering on Friday against a final number. It is a single date set on that event rather than a rule that repeats, which is exactly what a one-off dinner wants.',
+            ],
+            [
+                'q' => 'Can I collect allergies and dietary requirements?',
+                'a' => 'Yes, on the Pro plan. Questions can be attached to the ticket and answered at checkout, so the answers arrive with the sale rather than in a separate email thread you have to reconcile against the list. Ask for allergies, a course choice, or a wine pairing.',
+            ],
+            [
+                'q' => 'What about private hire enquiries?',
+                'a' => 'Turn on booking requests and people can ask about a date through your page. Every enquiry waits for you to accept it, so nothing appears publicly that you have not agreed to, and you are emailed when new ones are waiting. Keep private dining on its own sub-schedule and you can share a link that shows only those events.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The sitting'],
+            ['count', 'The count'],
+            ['cutoff', 'The cutoff'],
+            ['ask', 'The questions'],
+            ['hire', 'Private hire'],
+            ['who', 'Who it is for'],
+            ['how', 'How it works'],
+            ['faq', 'Questions'],
+            ['claim', 'Get started'],
+        ];
+    @endphp
+
+    <div id="es-cover-page" class="es-cover-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: the table                                           -->
+    <!-- 1. Hero: the sitting                                         -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(190, 18, 60, 0.34), rgba(190, 18, 60, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(245, 158, 11, 0.34), rgba(245, 158, 11, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
+    {{-- The nav overlays the top of the page, so the hero carries extra
+         top padding rather than letting the card sit under it. --}}
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 28%, rgba(113, 36, 61, 0.22), rgba(113, 36, 61, 0) 62%); opacity: 0.5;"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 74% 62%, rgba(224, 168, 185, 0.16), rgba(224, 168, 185, 0) 62%); opacity: 0.45;"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_72%_62%_at_50%_38%,black_22%,transparent_74%)]"></div>
         </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Restaurants & Dining Experiences</span>
-            </div>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <p class="es-cover-tag es-fade-up es-d-1 mb-5">For restaurants and dining rooms</p>
 
-            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Turn first-time diners</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-burgundy es-gradient-anim">into regulars.</span></span></span>
-            </h1>
+                    <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">The kitchen buys</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">for <span class="es-cover-grad">a number</span>.</span></span>
+                    </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Stop paying Facebook to reach people who already love your food. Email your regulars directly, announce your seasonal menus, and fill every seat at your next wine dinner.
-            </p>
+                    <p class="es-cover-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
+                        Sell one cover too many and you are turning people away at the door. Sell one
+                        too few and it goes in the bin. Every other night is service - these are the
+                        nights that need a count you can trust.
+                    </p>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the year
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-700 to-red-900 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-rose-500/40">
-                    Create your restaurant's calendar
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Restaurant-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
-                        <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Fine Dining', 'Wine Dinners', "Chef's Table", 'Tasting Menus', 'Brunch', 'Private Events', 'Farm-to-Table', 'Pop-ups'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-100/80 px-4 py-1.5 text-xs font-semibold text-rose-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-rose-400 to-amber-400"></span>
-                                        {{ $tag }}
-                                    </span>
-                                @endforeach
-                            @endfor
-                        </div>
+                    <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-cover-btn inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            Put a sitting on sale
+                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                        <a href="#count" class="es-cover-ghost inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            See how the count works
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
                     </div>
+                </div>
+
+                <!-- The sitting. The meter width is computed from the same
+                     two figures the fraction prints. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-cover-sitting p-7 sm:p-9">
+                        <p class="text-[0.6rem] font-bold uppercase tracking-[0.22em] text-white/70">{{ $sitting['name'] }}</p>
+                        <p class="es-cover-num mt-1 text-sm text-white/80">{{ $sitting['day'] }} &middot; {{ $sitting['time'] }} &middot; ${{ $sitting['price'] }}</p>
+
+                        <p class="es-cover-figure mt-7 text-white">
+                            {{ $sitting['sold'] }}<span class="es-cover-of text-white/70"> of {{ $sitting['seats'] }}</span>
+                        </p>
+                        <p class="mt-2 text-sm text-white/80">covers sold &middot; {{ $remaining }} left</p>
+
+                        <div class="es-cover-meter mt-4" aria-hidden="true">
+                            <div class="es-cover-meter-fill" style="width: {{ $fillPct }}%;"></div>
+                        </div>
+
+                        <div class="es-cover-rule my-6" aria-hidden="true"></div>
+
+                        <dl class="space-y-1.5 text-sm">
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-white/70">Sales close</dt>
+                                <dd class="es-cover-num text-white">{{ $sitting['cutoff'] }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-white/70">You shop</dt>
+                                <dd class="es-cover-num text-white">{{ $sitting['shop'] }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-white/70">At checkout</dt>
+                                <dd class="text-white">&ldquo;Any allergies?&rdquo;</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <p class="es-cover-muted mt-5 text-xs">
+                        The number on the card is the number you cook for. Nothing is counted twice.
+                    </p>
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. The dining year                                           -->
+    <!-- 2. The count (01)                                            -->
     <!-- ============================================================ -->
-    @php
-        $diningYear = [
-            ['Jan - Mar', '&#10084;', 'from-rose-100 to-cyan-100 dark:from-rose-900/40 dark:to-cyan-900/40', 'border-rose-200 dark:border-rose-500/20', 'text-rose-600 dark:text-rose-300', [['bg-rose-400', "Valentine's Prix Fixe", true], ['bg-amber-400', 'Winter Wine Dinners', false], ['bg-red-400', 'Truffle Season', false]]],
-            ['Apr - Jun', '&#127799;', 'from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40', 'border-emerald-200 dark:border-emerald-500/20', 'text-emerald-600 dark:text-emerald-300', [['bg-cyan-400', "Mother's Day Brunch", true], ['bg-emerald-400', 'Spring Menu Launch', false], ['bg-blue-400', 'Graduation Dinners', false]]],
-            ['Jul - Sep', '&#9728;', 'from-amber-100 to-orange-100 dark:from-amber-900/40 dark:to-orange-900/40', 'border-amber-200 dark:border-amber-500/20', 'text-amber-600 dark:text-amber-300', [['bg-amber-400', 'Patio Season Opens', true], ['bg-orange-400', 'Al Fresco Wine Nights', false], ['bg-yellow-400', 'Summer Tasting Menu', false]]],
-            ['Oct - Dec', '&#127810;', 'from-yellow-100 to-amber-100 dark:from-yellow-900/40 dark:to-amber-900/40', 'border-yellow-200 dark:border-yellow-500/20', 'text-yellow-600 dark:text-yellow-300', [['bg-orange-400', 'Harvest Menu', true], ['bg-yellow-400', 'Thanksgiving Feast', false], ['bg-amber-400', 'NYE Champagne Gala', false]]],
-        ];
-    @endphp
-    <section class="relative overflow-hidden bg-gray-50 py-24 dark:bg-[#0f0f14]">
-        <div class="es-steam pointer-events-none absolute inset-x-0 top-8 h-44" aria-hidden="true">
-            <span style="left: 20%; --steam-dur: 9s; --steam-delay: 0s; --steam-op: 0.5;"></span>
-            <span style="left: 40%; height: 80px; --steam-dur: 11s; --steam-delay: 1.6s; --steam-op: 0.45;"></span>
-            <span style="left: 60%; --steam-dur: 10s; --steam-delay: 3s; --steam-op: 0.4;"></span>
-            <span style="left: 78%; height: 72px; --steam-dur: 12s; --steam-delay: 2.2s; --steam-op: 0.5;"></span>
-        </div>
-        <div class="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    The dining year, <span class="text-gradient-burgundy">planned</span>
+    <section id="count" class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The count</p>
+                <h2 class="es-balance es-cover-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Twenty-four covers means <span class="es-cover-grad">twenty-four</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Restaurants run on seasons and occasions. Valentine's Day, Mother's Day, harvest menus, NYE galas - set up your annual calendar once, remind your fans every year.
+                <p class="es-cover-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Set how many covers the sitting has and it will not sell past them. When they
+                    are gone it closes itself, so the figure you shop against is the figure that sold.
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4" data-reveal-group="80">
-                @foreach ($diningYear as [$quarter, $emoji, $bg, $border, $text, $items])
-                    <div data-reveal class="group relative overflow-hidden rounded-2xl border bg-gradient-to-br p-5 transition-all hover:-translate-y-1 {{ $bg }} {{ $border }}">
-                        <div class="absolute right-2 top-2 text-4xl text-rose-300/40 dark:text-white/10">{!! $emoji !!}</div>
-                        <div class="es-menu-eyebrow mb-3 text-xs font-semibold uppercase tracking-wider {{ $text }}">{{ $quarter }}</div>
-                        <div class="space-y-2">
-                            @foreach ($items as [$dot, $name, $bold])
-                                <div class="flex items-center gap-2">
-                                    <div class="h-1.5 w-1.5 rounded-full {{ $dot }}"></div>
-                                    <span class="text-sm {{ $bold ? 'font-medium text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300' }}">{{ $name }}</span>
-                                </div>
-                            @endforeach
-                        </div>
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="100">
+                @foreach ([
+                    ['It closes itself', 'No watching an inbox and no doing sums at eleven at night. The last cover sells and the sitting stops taking money.'],
+                    ['More than one price? One pool', 'Two ticket types are counted separately unless you say otherwise. Set the sitting to Combined Total and they share a single count, so twenty-four stays twenty-four however many ways you sell it.'],
+                    ['Counted per date', 'A sold-out Saturday does not stop the following Saturday selling. Each date keeps its own count, which is what makes a repeating supper club work.'],
+                    ['Paid before they sit', 'The money is in before the shopping goes out, so a no-show is somebody else\'s problem rather than a hole in your week.'],
+                ] as [$t, $d])
+                    <div class="es-cover-card es-cover-hover p-6" data-reveal>
+                        <h3 class="es-cover-ink mb-2 text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-cover-muted text-sm">{{ $d }}</p>
                     </div>
                 @endforeach
             </div>
 
             <div class="mt-8 text-center" data-reveal>
-                <div class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 dark:border-white/10 dark:bg-white/5">
-                    <svg aria-hidden="true" class="h-4 w-4 text-amber-500 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    <span class="text-sm text-gray-500 dark:text-gray-400">Plus weekly recurring events: Wine Wednesday, Taco Tuesday, Sunday Brunch</span>
-                </div>
+                <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                <span class="es-cover-muted ml-2 text-sm">
+                    Selling covers is on the Pro plan at $5 a month, with no platform fee on top of what Stripe charges.
+                </span>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Bento features                                            -->
+    <!-- 3. The cutoff (02)                                           -->
     <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="cutoff" class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to fill the <span class="text-gradient-burgundy">dining room</span>
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
-
-                <!-- Seasonal menu newsletter (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-800/30 dark:bg-rose-900/40 dark:text-rose-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Newsletter
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">New fall menu? Your fans are first to know.</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Seasonal menu launches deserve an audience. One click emails everyone who signed up - no algorithm decides who sees your new dishes.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Your diners, direct reach</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">No middleman</span>
-                                </div>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-rose-300 bg-gradient-to-br from-rose-50 to-red-50 p-4 dark:border-rose-400/30 dark:from-rose-950 dark:to-red-950">
-                                        <div class="mb-4 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
-                                            <div><div class="text-sm font-medium text-gray-900 dark:text-white">Fall Harvest Menu Launch</div><div class="text-xs text-rose-600 dark:text-rose-300">Sending to 1,847 followers...</div></div>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-amber-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Butternut Squash Bisque</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-orange-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Braised Short Rib</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-white p-2 dark:bg-white/10" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-rose-400"></div><span class="text-xs text-gray-600 dark:text-gray-300">Apple Tarte Tatin</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Prix fixe ticketing -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Ticketing
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Wine dinners that sell out</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">5-course tastings, chef's tables, pairing dinners. Sell tickets, manage capacity, scan at the door.</p>
-                        <div class="mt-auto flex items-end justify-center gap-3" aria-hidden="true">
-                            <div class="es-candle mb-3">
-                                <span class="es-flame"></span>
-                                <span class="es-candle-body"></span>
-                            </div>
-                            <div class="w-44 -rotate-2 rounded-xl border border-amber-300/50 bg-gradient-to-br from-amber-100 to-amber-50 p-4 text-center shadow-lg transition-transform group-hover:rotate-0">
-                                <div class="es-menu-eyebrow text-[10px] uppercase tracking-widest text-amber-800">Tasting Menu</div>
-                                <div class="mt-1 font-serif text-sm font-semibold text-amber-900">5-Course Pairing</div>
-                                <div class="mt-2 text-xl font-bold text-amber-700">$125<span class="text-xs font-normal">pp</span></div>
-                                <div class="mt-1 text-[10px] text-amber-600">Sat, Nov 15 · 7:30 PM</div>
-                                <div class="mt-1 text-[9px] text-amber-500">Only 4 seats left</div>
-                                <div class="mt-2 flex justify-center gap-1">
-                                    <span class="es-time-chip">5:30</span>
-                                    <span class="es-time-chip es-time-chip-active">7:30</span>
-                                    <span class="es-time-chip">8:45</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Special occasions -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Special Occasions
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Valentine's. Mother's Day. Covered.</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Set up annual events once. Get reminded when it's time to promote next year.</p>
-                        <div class="mt-auto grid grid-cols-4 gap-2" aria-hidden="true">
-                            <div class="rounded-lg border border-rose-200 bg-rose-100 p-2 text-center dark:border-rose-500/30 dark:bg-rose-500/20"><div class="text-lg text-rose-500 dark:text-rose-400">&#10084;</div><div class="text-[9px] text-gray-500 dark:text-gray-400">V-Day</div></div>
-                            <div class="rounded-lg border border-cyan-200 bg-cyan-100 p-2 text-center dark:border-cyan-500/30 dark:bg-cyan-500/20"><div class="text-lg text-cyan-500 dark:text-cyan-400">&#127800;</div><div class="text-[9px] text-gray-500 dark:text-gray-400">Mom</div></div>
-                            <div class="rounded-lg border border-orange-200 bg-orange-100 p-2 text-center dark:border-orange-500/30 dark:bg-orange-500/20"><div class="text-lg text-orange-500 dark:text-orange-400">&#127810;</div><div class="text-[9px] text-gray-500 dark:text-gray-400">T-giving</div></div>
-                            <div class="rounded-lg border border-amber-200 bg-amber-100 p-2 text-center dark:border-amber-500/30 dark:bg-amber-500/20"><div class="text-lg text-amber-500 dark:text-amber-400">&#127878;</div><div class="text-[9px] text-gray-500 dark:text-gray-400">NYE</div></div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Private dining (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Booking Inbox
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Private dining inquiries come to you</h3>
-                                <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Corporate dinners, birthday celebrations, holiday buyouts. They submit the request, you approve. No back-and-forth emails.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Corporate events</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Buyouts</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Birthday dinners</span>
-                                </div>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">Private Dining Requests</div>
-                                <div class="space-y-2">
-                                    <div class="es-ai-field flex items-center gap-3 rounded-xl border border-sky-200 bg-sky-100 p-3 dark:border-sky-400/30 dark:bg-sky-500/20" style="--i: 0;">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-xs font-semibold text-white">EB</div>
-                                        <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Emily B. - Company Dinner</div><div class="text-xs text-sky-600 dark:text-sky-300">Dec 15 · Party of 24 · ~$3,500</div></div>
-                                        <div class="flex gap-1">
-                                            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20"><svg aria-hidden="true" class="h-3 w-3 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
-                                        </div>
-                                    </div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-xl bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-500 text-xs font-semibold text-white">MK</div>
-                                        <div class="flex-1"><div class="text-sm font-medium text-gray-600 dark:text-gray-300">Michael K. - 50th Birthday</div><div class="text-xs text-gray-500 dark:text-gray-400">Jan 8 · Party of 16</div></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Multiple spaces -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-                            Spaces
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Main room. Private dining. Patio.</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Separate calendars for each space. Guests find the right room, you avoid overbooking.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-100 p-2 dark:border-emerald-500/30 dark:bg-emerald-500/20" style="--i: 0;"><div class="h-2 w-2 rounded-full bg-emerald-400"></div><span class="text-sm text-gray-900 dark:text-white">Main Dining</span><span class="ml-auto text-xs text-emerald-600 dark:text-emerald-300">8 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;"><div class="h-2 w-2 rounded-full bg-teal-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Private Room</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">4 events</span></div>
-                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 2;"><div class="h-2 w-2 rounded-full bg-cyan-400"></div><span class="text-sm text-gray-600 dark:text-gray-300">Patio</span><span class="ml-auto text-xs text-gray-500 dark:text-gray-400">3 events</span></div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- QR codes -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                            QR Codes
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Scan at the table, scan at the door</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">QR codes for digital menus and event check-in. One scan, they follow your schedule.</p>
-                        <div class="mt-auto flex justify-center gap-4" aria-hidden="true">
-                            <div class="text-center">
-                                <div class="mb-2 h-16 w-16 rounded-lg bg-white p-2 shadow-sm"><div class="h-full w-full bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%230f766e%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div></div>
-                                <div class="text-[10px] font-medium text-cyan-600 dark:text-cyan-300">Menu</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="mb-2 h-16 w-16 rounded-lg bg-white p-2 shadow-sm"><div class="h-full w-full bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%230f766e%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div></div>
-                                <div class="text-[10px] font-medium text-cyan-600 dark:text-cyan-300">Check-in</div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Instagram graphics -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Graphics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Ready for Instagram</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate promo graphics for your events. Download and post in seconds.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="relative h-32 w-32 rounded-xl border border-sky-200 bg-sky-100 p-2 dark:border-sky-400/30 dark:bg-sky-500/25">
-                                <div class="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-rose-600/50 to-amber-600/50">
-                                    <div class="mb-1 text-[10px] font-semibold text-white">THIS FRIDAY</div>
-                                    <div class="text-xs font-bold text-white">Harvest Dinner</div>
-                                    <div class="mt-1 text-[8px] text-white/80">5 courses + wine</div>
-                                </div>
-                                <div class="absolute -bottom-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-sky-500">
-                                    <svg aria-hidden="true" class="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Customer journey (dark band)                              -->
-    <!-- ============================================================ -->
-    @php
-        $journey = [
-            ['Discovery', 'Guest finds you online or walks in', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />', 'Aperitif'],
-            ['Follow', 'Signs up for your updates via QR or calendar', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />', 'Appetizer'],
-            ['Return', 'Gets email about new menu, comes back', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />', 'Entree'],
-            ['Regular', "Books chef's table, buys wine dinner tickets", '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />', 'Dessert'],
-            ['Advocate', 'Shares your events with friends', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />', 'Digestif'],
-        ];
-    @endphp
-    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(190, 18, 60, 0.26), rgba(190, 18, 60, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(245, 158, 11, 0.24), rgba(245, 158, 11, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="es-linen absolute inset-0 opacity-70"></div>
-                <div class="absolute inset-x-0 bottom-6 flex items-end justify-center gap-8 sm:gap-12 lg:gap-16">
-                    @for ($cf = 0; $cf < 7; $cf++)
-                        <span class="es-flame" style="animation-delay: {{ $cf * 0.4 }}s;"></span>
-                    @endfor
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-5xl">
-                <div class="mx-auto mb-14 max-w-2xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        From first visit to <span class="text-gradient-burgundy">regular</span>
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The cutoff</p>
+                    <h2 class="es-balance es-cover-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Close the door <span class="es-cover-grad">before you shop</span>.
                     </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Every diner can become a fan. Here's how Event Schedule helps you build lasting relationships.
+                    <p class="es-cover-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        A late booking is worse than an empty chair once the order has gone in. Give
+                        the ticket a date and time to come off sale, and the count is final while you
+                        still have a morning to buy against it.
+                    </p>
+
+                    <ul class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['One date, set on the event', 'It is a single moment you choose for that sitting, not a rule that repeats each week. For a dinner that runs once, that is exactly right.'],
+                            ['Sales stop on their own', 'You do not have to remember to switch anything off on Thursday night while you are on the pass.'],
+                            ['The list is final', 'Whatever the total says on Friday morning is what you are cooking. Nothing can be added behind you.'],
+                        ] as [$t, $d])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-cover-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span><span class="es-cover-ink font-semibold">{{ $t }}</span> <span class="es-cover-muted">- {{ $d }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <p class="mt-7" data-reveal>
+                        <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                        <span class="es-cover-muted ml-2 text-sm">Part of ticketing.</span>
                     </p>
                 </div>
 
-                <div class="relative">
-                    <div class="absolute left-0 right-0 top-8 hidden h-0.5 bg-gradient-to-r from-rose-500/50 via-amber-500/50 to-emerald-500/50 lg:block" aria-hidden="true"></div>
-                    <div class="relative grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-5" data-reveal-group="90">
-                        @foreach ($journey as [$title, $desc, $icon, $course])
-                            <div data-reveal class="text-center">
-                                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-sm">
-                                    <svg aria-hidden="true" class="h-7 w-7 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
+                <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
+                    <div class="es-tilt-inner es-cover-card overflow-hidden p-6 sm:p-7">
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-cover-ink text-lg font-bold">The week before</h3>
+                            <span class="es-cover-muted es-cover-num text-xs">one sitting</span>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            @foreach ([
+                                ['Mon', 'On sale', '12 covers'],
+                                ['Wed', 'On sale', '17 covers'],
+                                ['Thu', 'Sales close 11:59pm', '19 covers'],
+                                ['Fri', 'You shop for 19', 'final'],
+                                ['Sat', 'Service', '19 covers'],
+                            ] as [$dDay, $dWhat, $dCount])
+                                <div class="es-cover-sub flex items-baseline gap-3 p-3.5">
+                                    <span class="es-cover-muted es-cover-num w-10 shrink-0 text-xs font-bold uppercase">{{ $dDay }}</span>
+                                    <span class="es-cover-ink min-w-0 flex-1 truncate text-sm font-semibold">{{ $dWhat }}</span>
+                                    <span class="es-cover-muted es-cover-num shrink-0 text-xs">{{ $dCount }}</span>
                                 </div>
-                                <div class="es-menu-eyebrow mb-1 text-[11px] tracking-widest text-amber-300/80">{{ $course }}</div>
-                                <h4 class="es-menu-eyebrow mb-2 font-semibold text-white">{{ $title }}</h4>
-                                <p class="text-sm text-gray-400">{{ $desc }}</p>
+                            @endforeach
+                        </div>
+
+                        <p class="es-cover-muted mt-5 border-t border-[rgba(22,17,15,0.1)] pt-4 text-xs dark:border-[rgba(240,234,232,0.12)]">
+                            Nineteen sold, nineteen cooked. The two numbers were never allowed to drift apart.
+                        </p>
+
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The questions (03)                                        -->
+    <!-- ============================================================ -->
+    <section id="ask" class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div class="order-2 lg:order-1">
+                    <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
+                        <div class="es-tilt-inner es-cover-card overflow-hidden p-6 sm:p-7">
+                            <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                                <h3 class="es-cover-ink text-lg font-bold">At checkout</h3>
+                                <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-cover-muted mb-5 text-sm">Attached to the ticket, so the answer arrives with the sale.</p>
+
+                            <div class="space-y-2.5">
+                                @foreach ([
+                                    ['Any allergies or intolerances?', 'Free text'],
+                                    ['Main course', 'Beef / Halibut / Squash'],
+                                    ['Wine pairing?', 'Yes / No'],
+                                ] as [$qLabel, $qKind])
+                                    <div class="es-cover-sub p-3.5">
+                                        <p class="es-cover-ink text-sm font-semibold">{{ $qLabel }}</p>
+                                        <p class="es-cover-muted es-cover-num text-xs">{{ $qKind }}</p>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <p class="es-cover-muted mt-5 border-t border-[rgba(22,17,15,0.1)] pt-4 text-xs dark:border-[rgba(240,234,232,0.12)]">
+                                Answers come through with the sale, so the pass list and the guest list are the same list.
+                            </p>
+
+                            <div class="es-glare" aria-hidden="true"></div>
+                            <div class="es-ring-glow" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2">
+                    <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The questions</p>
+                    <h2 class="es-balance es-cover-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Ask about the nut allergy <span class="es-cover-grad">in January</span>.
+                    </h2>
+                    <p class="es-cover-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Not at seven on the night, from a section that is already down. Questions can
+                        sit on the ticket and be answered when people pay, so the kitchen has the
+                        list before it writes the prep.
+                    </p>
+
+                    <div class="space-y-3" data-reveal-group="90">
+                        @foreach ([
+                            ['One list, not two', 'The answers are attached to the sale, so you are not reconciling an email thread against a booking list at four in the afternoon.'],
+                            ['Ask what you actually need', 'Allergies as free text, a course choice from a set of options, a yes or no on the pairing. It is your question, not a fixed field.'],
+                            ['Export it', 'Take the sales out as a CSV with the answers included, and hand the kitchen something it can read.'],
+                        ] as [$t, $d])
+                            <div class="es-cover-card es-cover-hover p-4" data-reveal>
+                                <div class="flex items-center gap-2">
+                                    <p class="es-cover-ink text-sm font-bold">{{ $t }}</p>
+                                    <span class="es-cover-plan es-cover-plan-pro">Pro</span>
+                                </div>
+                                <p class="es-cover-muted mt-1 text-sm">{{ $d }}</p>
                             </div>
                         @endforeach
                     </div>
@@ -632,134 +655,132 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Virtual cooking classes                                   -->
+    <!-- 5. Private hire (04)                                         -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-20">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" data-reveal="panel" class="es-bento group block">
-                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
-                    <div class="flex flex-col items-center gap-8 lg:flex-row">
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                Online Events
-                            </div>
-                            <h2 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400 lg:text-3xl">Teach the world your secrets</h2>
-                            <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Virtual cooking classes. Live wine tastings. Fans anywhere can join, pay, and cook along.</p>
-                            <div class="mb-4 flex flex-wrap justify-center gap-3 lg:justify-start">
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Cooking classes</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Wine tastings</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Global reach</span>
-                            </div>
-                            <span class="inline-flex items-center gap-2 font-medium text-sky-600 transition-all group-hover:gap-3 dark:text-sky-400">
-                                Learn more
-                                <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </span>
-                        </div>
-                        <div class="shrink-0" aria-hidden="true">
-                            <div class="w-52 rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-[#0f0f14]">
-                                <div class="mb-4 flex items-center justify-between"><span class="text-xs text-gray-600 dark:text-gray-300">Virtual Class</span><div class="flex items-center gap-1"><div class="h-2 w-2 animate-pulse rounded-full bg-red-500"></div><span class="text-[10px] text-red-500">LIVE</span></div></div>
-                                <div class="mb-3 rounded-lg bg-sky-100 p-4 text-center dark:bg-sky-500/20"><div class="mb-1 text-2xl">&#127859;</div><div class="text-sm font-medium text-gray-900 dark:text-white">Pasta Making</div><div class="text-xs text-gray-500 dark:text-gray-400">with Chef Marco</div></div>
-                                <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400"><svg aria-hidden="true" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg><span>47 viewers</span></div>
-                            </div>
-                        </div>
+    <section id="hire" class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Private hire</p>
+                <h2 class="es-balance es-cover-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The room at the back <span class="es-cover-grad">has its own link</span>.
+                </h2>
+                <p class="es-cover-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Private dining is a different conversation from a wine dinner, and it does not
+                    belong in the same list as the things anyone can buy.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                @foreach ([
+                    ['Enquiries come to the page', 'Turn on booking requests and people ask about a date through your schedule instead of a form that lands in a shared inbox nobody owns.'],
+                    ['Nothing posts without you', 'Every enquiry waits for you to accept it, and you are emailed when new ones are waiting. The public page only ever shows what you agreed to.'],
+                    ['Its own strand, its own link', 'Put private dining on a sub-schedule and you can share a link that shows only those events, without splitting the restaurant into two pages.'],
+                ] as [$t, $d])
+                    <div class="es-cover-card es-cover-hover p-6" data-reveal>
+                        <h3 class="es-cover-ink mb-2 text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-cover-muted text-sm">{{ $d }}</p>
                     </div>
-                    <div class="es-glare" aria-hidden="true"></div>
-                    <div class="es-ring-glow" aria-hidden="true"></div>
-                </div>
-            </a>
+                @endforeach
+            </div>
+
+            <div class="mt-8 text-center" data-reveal>
+                <span class="es-cover-plan es-cover-plan-free">Free</span>
+                <span class="es-cover-muted ml-2 text-sm">
+                    Enquiries, sub-schedules and the schedule itself cost nothing. An event can also stay a Draft until you are ready to announce it.
+                </span>
+            </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. Perfect for (shared sub-audience cards)                   -->
+    <!-- 6. Who it is for (05)                                        -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="who" class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient-burgundy">restaurants</span>
+                <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
+                <h2 class="es-balance es-cover-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Any night you have to <span class="es-cover-grad">shop for</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From fine dining to casual bistros, Event Schedule fits your style.
-                </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
-                    name="Fine Dining Restaurants"
-                    description="Tasting menus, wine pairings, and special occasion dinners. Build anticipation for your culinary experiences."
+                    name="Fine Dining"
+                    description="A tasting menu with a fixed number of covers, paid up front, with the dietaries in before the order goes out."
                     icon-color="rose"
                     blog-slug="for-fine-dining-restaurants"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v8a3 3 0 006 0V3M8 11v10M16 3c-1.5 2-2 4-2 6a2 2 0 004 0c0-2-.5-4-2-6zm0 8v10" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
                     name="Wine Bars & Tapas"
-                    description="Tastings, flights, and small plate specials. Attract wine enthusiasts and foodies alike."
+                    description="A tasting on a Tuesday, priced per head. Small counts, sold in advance, closed off before the bottles are pulled."
                     icon-color="amber"
                     blog-slug="for-wine-bars-tapas"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 3h8l-1 7a3 3 0 01-6 0L8 3zm4 10v8m-3 0h6" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
-                    name="Farm-to-Table Restaurants"
-                    description="Seasonal menus, producer dinners, and harvest events. Connect guests with your local sources."
+                    name="Farm-to-Table"
+                    description="The menu depends on what came in, so the count has to be settled early. Close sales, then go to the market."
                     icon-color="emerald"
                     blog-slug="for-farm-to-table-restaurants"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c0-6 3-9 8-9-1 6-4 9-8 9zm0 0c0-6-3-9-8-9 1 6 4 9 8 9zm0 0V9" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
-                    name="Supper Clubs & Private Dining"
-                    description="Intimate gatherings and exclusive experiences. Manage limited seating and create anticipation."
-                    icon-color="violet"
+                    name="Supper Clubs"
+                    description="The same night every month, each one with its own count, so selling out in March leaves April untouched."
+                    icon-color="orange"
                     blog-slug="for-supper-clubs"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
-                    name="Casual Dining & Bistros"
-                    description="Weekly specials, happy hours, and themed nights. Keep your regulars coming back."
-                    icon-color="orange"
+                    name="Casual Dining"
+                    description="Quiz nights, live music, a set menu at Christmas. Most weeks nothing, and a page for the weeks there is something."
+                    icon-color="sky"
                     blog-slug="for-casual-dining-restaurants"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
 
                 <x-sub-audience-card
-                    name="Chef's Tables & Pop-ups"
-                    description="Limited seating, unique experiences, and collaborations. Create buzz for your culinary events."
-                    icon-color="pink"
+                    name="Chef's Tables & Pop-Ups"
+                    description="Twelve seats in somebody else's room. Sell them all in advance and take the questions while you are at it."
+                    icon-color="slate"
                     blog-slug="for-chefs-tables"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <svg aria-hidden="true" class="h-6 w-6 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 15h16M4 15a8 8 0 0116 0M12 7V4m-9 14h18" />
                         </svg>
                     </x-slot:icon>
                 </x-sub-audience-card>
@@ -768,37 +789,72 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 7. How it works (06, dark band)                              -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-cover-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Three decisions, <span class="es-cover-grad">then it runs</span>.
+                    </h2>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    @foreach ([
+                        ['01', 'Set the covers', 'The quantity is how many you will cook for. Selling at more than one price? Combined Total keeps them in one pool rather than one count each.'],
+                        ['02', 'Set the cutoff', 'A date and time for sales to stop, chosen so you still have a morning to buy against a final number.'],
+                        ['03', 'Set the questions', 'Allergies, a course choice, a pairing. Answered at checkout and attached to the sale.'],
+                    ] as [$n, $t, $d])
+                        <div class="rounded-lg border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
+                            <p class="es-cover-lit es-cover-num mb-3 text-sm font-bold">{{ $n }}</p>
+                            <h3 class="mb-2 text-lg font-bold text-white">{{ $t }}</h3>
+                            <p class="text-sm text-gray-400">{{ $d }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Key features                                              -->
+    <!-- ============================================================ -->
+    <section class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="es-cover-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Ticketing" description="A fixed number of covers, a sales cutoff, and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="rose">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Custom Fields" description="Ask for allergies or a course choice, answered at checkout" :url="marketing_url('/features/custom-fields')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Sub-schedules" description="Give private dining its own strand and its own link" :url="marketing_url('/features/sub-schedules')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Newsletters" description="Tell the regulars before the seats are gone" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/features') }}" class="es-cover-accent inline-flex items-center font-medium hover:underline">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -809,28 +865,33 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 9. Keep exploring                                            -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+    <section class="border-t border-[rgba(22,17,15,0.1)] py-16 dark:border-[rgba(240,234,232,0.1)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="es-cover-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-bars', 'Bars'], ['/for-hotels-and-resorts', 'Hotels & Resorts'], ['/for-breweries-and-wineries', 'Breweries & Wineries'], ['/for-food-trucks-and-vendors', 'Food Trucks & Vendors']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
+                @foreach ([
+                    ['/for-bars', 'Bars'],
+                    ['/for-breweries-and-wineries', 'Breweries &amp; Wineries'],
+                    ['/for-food-trucks-and-vendors', 'Food Trucks'],
+                    ['/for-hotels-and-resorts', 'Hotels &amp; Resorts'],
+                ] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-cover-card es-cover-hover group flex items-center justify-between p-5">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="es-rel-accent text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
+                            <div class="es-cover-muted text-sm">Event Schedule for</div>
+                            <div class="es-cover-ink text-lg font-semibold">{!! $relName !!}</div>
                         </div>
-                        <svg aria-hidden="true" class="es-rel-accent w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-cover-accent h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-link-accent inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-cover-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -838,80 +899,69 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 10. FAQ (07)                                                 -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <section id="faq" class="scroll-mt-24 border-t border-[rgba(22,17,15,0.1)] py-20 dark:border-[rgba(240,234,232,0.1)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-burgundy">questions</span>
+                <div class="es-cover-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-cover-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
+                <h2 class="es-balance es-cover-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Asked <span class="es-cover-grad">across the pass</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything restaurants ask about Event Schedule.
-                </p>
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['What kinds of events can restaurants list?', 'Anything that brings guests through the door. Wine tastings, chef\'s table dinners, live music nights, brunch specials, holiday menus, cooking classes, tasting menus, or seasonal pop-ups. If it\'s happening at your restaurant, it belongs on your calendar.'],
-                    ['Can I sell tickets to special dining events?', 'Yes. Sell tickets for wine dinners, chef\'s tables, tasting events, and any ticketed experience. Connect Stripe and guests can purchase directly from your calendar. Every ticket includes a QR code, and Event Schedule charges zero platform fees.'],
-                    ['How do guests find out about upcoming events?', 'Guests can follow your restaurant\'s schedule and get email notifications when you add new events. You can also send newsletters directly to followers with your upcoming lineup, and embed the calendar on your restaurant\'s website.'],
-                    ['Is Event Schedule free for restaurants?', 'Yes. Creating your event calendar, sharing it, and building a following are all free forever. Ticketing, newsletters, and advanced features are available on the Pro plan, with zero platform fees on any ticket sales.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                @foreach ($faqs as $faq)
+                    <details name="faq" data-reveal class="es-cover-card group/faq overflow-hidden">
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="es-cover-ink text-lg font-semibold">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="es-cover-muted h-5 w-5 shrink-0 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="es-cover-muted faq-answer px-6 pb-6">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
         </div>
     </section>
 
+    <x-seo.faq-schema :items="$faqs" />
+
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 11. Finale                                                   -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-rose-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-cover-band noise relative overflow-hidden rounded-[2rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(190, 18, 60, 0.32), rgba(190, 18, 60, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                </div>
-                <div class="pointer-events-none absolute right-8 top-8 z-20 hidden items-end gap-2 sm:flex" aria-hidden="true">
-                    <div class="es-candle">
-                        <span class="es-flame"></span>
-                        <span class="es-candle-body"></span>
-                    </div>
-                    <div class="es-candle" style="transform: scale(0.82);">
-                        <span class="es-flame" style="animation-delay: 0.7s;"></span>
-                        <span class="es-candle-body"></span>
-                    </div>
+                    <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 </div>
 
                 <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop paying to reach your <span class="text-gradient-burgundy">own fans</span>
+                    <p class="es-cover-tag mb-6">Free to start</p>
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
+                        Cook for the number <span class="es-cover-grad">that actually sold</span>.
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Email your regulars directly. Fill every seat. Free forever.
+                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
+                        The schedule is free. Selling the covers is five dollars a month, and none of
+                        the ticket price comes to us.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-lg border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-restaurant" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-rose-700 to-red-900 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-rose-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-cover-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg px-8 py-4 text-lg font-semibold">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Put a sitting on sale
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -925,6 +975,22 @@
             </div>
         </div>
     </section>
+
+    <!-- Section dot navigation -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#1b1818] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')
