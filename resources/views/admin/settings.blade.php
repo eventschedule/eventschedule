@@ -185,5 +185,127 @@
             </form>
         </div>
         @endif
+
+        @if ($adsAvailable)
+        <div id="monetization" class="ap-card rounded-xl p-6 scroll-mt-24">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.monetization_settings_title')</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@lang('messages.monetization_settings_description')</p>
+            </div>
+
+            <div class="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>@lang('messages.monetization_settings_warning')</span>
+                </p>
+            </div>
+
+            {{-- This card posts to its own endpoint rather than sharing admin.settings.update.
+                 The shared-endpoint cards above each have to carry every other card's values
+                 through as hidden inputs, which is quadratic in the number of cards and fails
+                 silently (saving one card wipes another). A dedicated action owns only the
+                 ads_* keys, so no pass-through is needed and no card can clobber another. --}}
+            <form method="POST" action="{{ route('admin.settings.update_ads') }}" class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                @csrf
+
+                <div class="mb-6">
+                    <x-toggle
+                        id="ads_adsense_enabled"
+                        name="ads_adsense_enabled"
+                        :checked="old('ads_adsense_enabled', $adsAdsenseEnabled)"
+                        :label="__('messages.monetization_adsense_enable')"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_adsense_enable_help')</p>
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="ads_adsense_client_id" :value="__('messages.monetization_adsense_client_id')" />
+                    <x-text-input id="ads_adsense_client_id" name="ads_adsense_client_id" type="text"
+                        class="mt-1 block w-full font-mono text-sm" placeholder="ca-pub-0000000000000000"
+                        :value="old('ads_adsense_client_id', $adsAdsenseClientId)"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_adsense_client_id_help')</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('ads_adsense_client_id')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-input-label for="ads_adsense_slot_id" :value="__('messages.monetization_adsense_slot_id')" />
+                    <x-text-input id="ads_adsense_slot_id" name="ads_adsense_slot_id" type="text"
+                        class="mt-1 block w-full font-mono text-sm" placeholder="1234567890"
+                        :value="old('ads_adsense_slot_id', $adsAdsenseSlotId)"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_adsense_slot_id_help')</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('ads_adsense_slot_id')" />
+                </div>
+
+                <div class="mb-6">
+                    <x-toggle
+                        id="ads_personalized"
+                        name="ads_personalized"
+                        :checked="old('ads_personalized', $adsPersonalized)"
+                        :label="__('messages.monetization_personalized')"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_personalized_help')</p>
+                </div>
+
+                <div class="mb-6 border-t border-gray-200 dark:border-[#2d2d30] pt-6">
+                    <x-toggle
+                        id="ads_native_enabled"
+                        name="ads_native_enabled"
+                        :checked="old('ads_native_enabled', $adsNativeEnabled)"
+                        :label="__('messages.monetization_native_enable')"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_native_enable_help')</p>
+                </div>
+
+                <div class="mb-6">
+                    <x-toggle
+                        id="ads_native_priority"
+                        name="ads_native_priority"
+                        :checked="old('ads_native_priority', $adsNativePriority)"
+                        :label="__('messages.monetization_native_priority')"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_native_priority_help')</p>
+                </div>
+
+                <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label for="ads_native_cpm" :value="__('messages.monetization_native_cpm')" />
+                        <x-text-input id="ads_native_cpm" name="ads_native_cpm" type="number" step="0.01" min="0"
+                            class="mt-1 block w-full" :value="old('ads_native_cpm', $adsNativeCpm)"
+                            :disabled="is_demo_mode()" />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_native_cpm_help')</p>
+                        <x-input-error class="mt-2" :messages="$errors->get('ads_native_cpm')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="ads_native_cpc" :value="__('messages.monetization_native_cpc')" />
+                        <x-text-input id="ads_native_cpc" name="ads_native_cpc" type="number" step="0.01" min="0"
+                            class="mt-1 block w-full" :value="old('ads_native_cpc', $adsNativeCpc)"
+                            :disabled="is_demo_mode()" />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.monetization_native_cpc_help')</p>
+                        <x-input-error class="mt-2" :messages="$errors->get('ads_native_cpc')" />
+                    </div>
+                </div>
+
+                @if (is_demo_mode())
+                <div class="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>@lang('messages.demo_mode_settings_disabled')</span>
+                    </p>
+                </div>
+                @endif
+
+                <div class="flex justify-end">
+                    <x-brand-button type="submit">@lang('messages.save')</x-brand-button>
+                </div>
+            </form>
+        </div>
+        @endif
     </div>
 </x-app-admin-layout>

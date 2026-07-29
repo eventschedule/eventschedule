@@ -120,6 +120,7 @@ class Role extends Model implements MustVerifyEmail
         'default_event_visibility',
         'hide_videos',
         'show_accessibility_widget',
+        'promotions_opt_out',
         'default_category_id',
         'event_categories',
         'gift_cards_enabled',
@@ -171,6 +172,7 @@ class Role extends Model implements MustVerifyEmail
         'draft_events_default' => 'boolean',
         'hide_videos' => 'boolean',
         'show_accessibility_widget' => 'boolean',
+        'promotions_opt_out' => 'boolean',
         'email_settings_failed_at' => 'datetime',
         'email_settings_failure_notified_at' => 'datetime',
         'event_categories' => 'array',
@@ -336,7 +338,7 @@ class Role extends Model implements MustVerifyEmail
         static::deleting(function ($model) {
             // Cancel active boost campaigns on Meta and issue refunds
             $activeCampaigns = $model->boostCampaigns()
-                ->whereIn('status', ['active', 'paused', 'pending_payment'])
+                ->unsettled()
                 ->get();
 
             foreach ($activeCampaigns as $campaign) {
@@ -348,15 +350,18 @@ class Role extends Model implements MustVerifyEmail
 
                     $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
 
-                    if (config('app.hosted') && ! config('app.is_testing')) {
-                        $billingService = new \App\Services\BoostBillingService;
-                        if ($campaign->billing_status === 'charged') {
-                            $campaign->actual_spend && $campaign->actual_spend > 0
-                                ? $billingService->refundUnspent($campaign)
-                                : $billingService->refundFull($campaign);
-                        } elseif ($campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
-                            $billingService->cancelPaymentIntent($campaign);
-                        }
+                    $billingService = new \App\Services\BoostBillingService;
+
+                    // Gate the STRIPE call, not the refund. settlePayment()'s credit branch debits
+                    // boost_credit regardless of mode, so gating the whole block meant deleting a
+                    // schedule on selfhost destroyed the advertiser's wallet balance outright.
+                    // refundOnCancellation() reaches Stripe only when there is an intent, which a
+                    // selfhost campaign never has. BoostController::cancel() already works this way.
+                    if ($campaign->billing_status === 'charged') {
+                        $billingService->refundOnCancellation($campaign);
+                    } elseif (config('app.hosted') && ! config('app.is_testing')
+                        && $campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
+                        $billingService->cancelPaymentIntent($campaign);
                     }
                 } catch (\Exception $e) {
                     \Log::error('Failed to cancel boost campaign during role deletion', [
@@ -1305,6 +1310,9 @@ class Role extends Model implements MustVerifyEmail
             'appointments',
             'checkout',
             'settings',
+            'promo',
+            'promotions',
+            'boost',
         ];
 
         if (config('app.hosted') && in_array($subdomain, $reserved)) {
@@ -1716,6 +1724,39 @@ class Role extends Model implements MustVerifyEmail
         } else {
             return ! $this->isWhiteLabeled();
         }
+    }
+
+    /**
+     * Whether this schedule's public pages are monetized (ads / paid promotions).
+     *
+     * Mirrors showBranding(): a free-tier schedule carries them, a paying one does not,
+     * so removing ads is a concrete Pro benefit alongside removing the branding footer.
+     *
+     * Gated on actualPlanTier() rather than config('app.hosted') on purpose. Selfhost
+     * already resolves to 'enterprise' there, so a single-tenant install is never
+     * monetized - while a self-hosted SaaS operator, who legitimately wants to monetize
+     * their own free tier, still is.
+     *
+     * Deliberately free of request state: the embed / graphic / member / custom-domain
+     * guards live in AdsService::isEligible() so this stays safe to call anywhere.
+     */
+    public function showAds(): bool
+    {
+        if (! \App\Services\AdsService::isEnabled()) {
+            return false;
+        }
+
+        // The nexus stays ad-free.
+        if (config('app.is_nexus')) {
+            return false;
+        }
+
+        // The demo schedule is a sales surface.
+        if (is_demo_role($this)) {
+            return false;
+        }
+
+        return $this->actualPlanTier() === 'free';
     }
 
     public function acceptEventRequests()

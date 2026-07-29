@@ -27,8 +27,24 @@ class CaptureUtmParameters
             }
         }
 
+        // Attribution is first-touch, with one deliberate exception: a paid on-network
+        // placement overrides whatever came before it. Without this, a visitor who once
+        // arrived from a newsletter keeps that attribution for 30 days, so an advertiser
+        // who just paid for this click would have the resulting sale credited elsewhere.
+        // The query string is also the only carrier that survives the hop to a custom
+        // domain, where ResolveCustomDomain nulls session.domain.
+        // The signed token is what makes this safe to honour. Without it, appending these two
+        // parameters to any link would let an advertiser overwrite a visitor's existing
+        // attribution at will and claim every subsequent sale in that browser.
+        $isPaidPlacement = $request->query('utm_source') === 'boost'
+            && $request->query('utm_medium') === 'network'
+            && \App\Services\PromotionService::verifyClickToken(
+                $request->query('utm_token'),
+                $request->query('utm_campaign')
+            );
+
         // Only capture if UTM params are present and session doesn't already have them (first-touch)
-        if (! $request->session()->has('utm_params') && $this->hasUtmParams($request)) {
+        if (($isPaidPlacement || ! $request->session()->has('utm_params')) && $this->hasUtmParams($request)) {
             $utmParams = [
                 'utm_source' => $this->sanitize($request->query('utm_source')),
                 'utm_medium' => $this->sanitize($request->query('utm_medium')),

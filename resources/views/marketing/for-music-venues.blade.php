@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Music Venues | Fill Your Stage</x-slot>
-    <x-slot name="description">Your venue's concert calendar without Ticketmaster fees. Let bands apply to play, sell tickets directly to fans, and email your audience. Free forever.</x-slot>
+    <x-slot name="title">Music Venue Calendars | Set Times, Tickets, and the Door</x-slot>
+    <x-slot name="description">Put the whole show day on one link: set times for every band on the bill, tickets with zero platform fees and QR check-in, and one page bands and fans both read.</x-slot>
     <x-slot name="breadcrumbTitle">For Music Venues</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Music Venues",
-        "description": "Your venue's concert calendar without Ticketmaster fees. Let bands apply to play, sell tickets directly to fans. Free forever.",
+        "description": "Publish the whole show day on one link: set times for every band on the bill, tickets with zero platform fees, and QR check-in on the door.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for music venues?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your concert calendar, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I manage multiple stages and event types?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use sub-schedules to organize by stage, genre, or event type - main stage shows, acoustic sets, open mics, and DJ nights. Each event can have its own lineup, description, images, and ticket options."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do music fans discover our shows?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans can follow your venue's schedule and receive email notifications for new shows. Embed your calendar on your website, share on social media, or send newsletters to subscribers with upcoming lineups."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I link performers to their own schedules?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. When you add a performer to your event, it can automatically appear on their schedule too. Both calendars stay in sync. This cross-linking helps fans discover your venue through the artists they follow."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,6 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Music Venue Management Software",
         "operatingSystem": "Web",
-        "description": "Your venue's concert calendar without the Ticketmaster fees. Let bands apply to play, sell tickets directly to fans, and manage load-in to encore.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,20 +38,53 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Zero platform fee ticketing",
-            "Artist booking applications",
-            "Multi-stage venue support",
-            "Show day timeline management",
-            "QR code door check-in",
-            "Venue analytics",
-            "Direct fan newsletters"
+            "Set times for every act on a bill, published on the public event page",
+            "Photos, video and comments attached to the act that played, not just the show",
+            "Sub-schedules that keep each room's listings apart on one link",
+            "A public submission form so bands can ask to play",
+            "Ticket types with their own sales windows, add-ons and group rates",
+            "QR check-in on the door with a real-time check-in dashboard",
+            "Zero platform fees on ticket sales, with payouts through your own Stripe account",
+            "Recurring residencies with date exceptions",
+            "Direct newsletters with open and click rates",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Embeddable calendar for the website you already have"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "music venue calendar, concert venue schedule, venue booking requests, music venue management, free venue scheduling",
+        "keywords": "music venue calendar, set times, concert listings, venue ticketing, QR check-in, band booking requests, live music schedule",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to publish a music venue's show day with Event Schedule",
+        "description": "Get the whole show day, not just the doors time, onto one link.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Add the show",
+                "text": "Create the event once, and use sub-schedules to keep the main room and the back room apart on the same link."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Add the running order",
+                "text": "Give the show its parts. Each act gets a name and a start time, and they appear in order on the public event page."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Open the door",
+                "text": "Add ticket types with their own sales windows, then scan QR codes on the night and watch the check-in dashboard against your capacity."
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -106,307 +98,460 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-music-venues "Soundcheck" styles. The shared es-* motion
-           system lives in marketing.css; this block holds only this page's
-           own effects: the VU-meter tri-gradient (green -> amber -> red)
-           heading text, the swinging analog VU needle gauge, the segmented
-           signal-strength meter, the red/green problem-solution tints, a
-           torn ticket stub, and faint stage-plot glyphs. */
+        /* ==============================================================
+           For-music-venues "The Running Order" styles. The page is a
+           show day on a time axis: load-in, soundcheck, doors, support,
+           headline, curfew.
 
-        /* VU-meter tri-gradient heading text. Legible in both modes; the
-           red end goes rose-tinted in dark mode for contrast. */
-        .text-gradient-soundcheck {
-            background: linear-gradient(100deg, #16a34a 0%, #d97706 52%, #dc2626 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .dark .text-gradient-soundcheck {
-            background: linear-gradient(100deg, #4ade80 0%, #fbbf24 50%, #fb7185 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        /* Always-dark surfaces (dark band, finale) keep the bright variant
-           even in light mode so the heading stays legible on the dark panel. */
-        .es-band-dark .text-gradient-soundcheck,
-        .es-finale-panel .text-gradient-soundcheck {
-            background: linear-gradient(100deg, #4ade80 0%, #fbbf24 50%, #fb7185 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+           THE AXIS IS PROPORTIONAL, NOT A LIST. The vertical distance
+           between two stops is computed from the minutes between them
+           (--min x --es-run-scale), so a three-hour dead stretch is
+           visibly long and the 20:00 -> 21:15 turnaround is visibly
+           tight. The shape of the day reads before any word does.
+           Deliberately NO dotted leaders: /for-comedians owns the
+           "numbered rows + leader dots + right-hand time" component and
+           three sibling pages already use leader rows, so a fourth
+           would make this the most derivative page in the campaign.
 
-        /* "In the green" go-zone CTA gradient (green -> lime -> amber, never red) */
-        .soundcheck-btn {
-            background-image: linear-gradient(110deg, #16a34a 0%, #65a30d 45%, #d97706 100%);
-            box-shadow: 0 10px 24px -6px rgba(217, 119, 6, 0.4), 0 4px 10px -4px rgba(22, 163, 74, 0.35);
-        }
-        .soundcheck-btn:hover {
-            box-shadow: 0 22px 44px -10px rgba(217, 119, 6, 0.5), 0 8px 18px -6px rgba(22, 163, 74, 0.4);
-        }
-        .dark .soundcheck-btn {
-            background-image: linear-gradient(110deg, #22c55e 0%, #84cc16 45%, #f59e0b 100%);
-        }
+           COLOUR IS A HIGHLIGHTER. An audit of all 31 for-* pages found
+           the hue wheel effectively consumed; the only unclaimed
+           non-banned space is 60deg yellow. Dark yellows turn amber or
+           olive (owned by bars, breweries, comedy-clubs, theaters), so
+           yellow is NEVER text on a light ground - it is a marker swipe
+           behind dark ink (11.59:1) and bright text only on dark
+           grounds (12.70:1). Used sparingly, one mark per section, or
+           it stops reading as marking.
 
-        /* Accent link + hover recolors (amber mid-zone reads well both modes) */
-        .soundcheck-link { color: #b45309; }
-        .soundcheck-link:hover { text-decoration: underline; }
-        .dark .soundcheck-link { color: #fbbf24; }
+           This page deliberately uses NO fixed-in-both-modes object:
+           the previous four rebuilds all did, and a fifth would read as
+           sameness. The whole page is free to change with the mode.
 
-        .soundcheck-related:hover { border-color: #fcd34d; background-color: #fffbeb; }
-        .dark .soundcheck-related:hover { border-color: rgba(245, 158, 11, 0.35); background-color: rgba(245, 158, 11, 0.06); }
-        .soundcheck-related:hover .soundcheck-related-title,
-        .soundcheck-related:hover .soundcheck-related-ico { color: #d97706; }
-        .dark .soundcheck-related:hover .soundcheck-related-title,
-        .dark .soundcheck-related:hover .soundcheck-related-ico { color: #fbbf24; }
+           BLADE RULE for this block: never use @supports probes here.
+           A "#" hex inside a parenthesized at-rule condition breaks
+           Blade compilation of every later parenthesized directive.
+           ============================================================== */
 
-        .soundcheck-tile:hover { border-color: #fcd34d; }
-        .dark .soundcheck-tile:hover { border-color: rgba(245, 158, 11, 0.3); }
+        /* --- Ground and ink --- */
+        .es-run-page { background-color: #f7f6f3; color: #17181b; }
+        .dark .es-run-page { background-color: #0c0d0f; color: #eceae6; }
+        .es-run-ink { color: #17181b; }
+        .dark .es-run-ink { color: #eceae6; }
+        .es-run-muted { color: #4b5158; }
+        .dark .es-run-muted { color: #9aa1a9; }
 
-        .soundcheck-dot { background-image: linear-gradient(to right, #22c55e, #f59e0b); }
-
-        /* Recolored step badges on the dark band */
-        .soundcheck-step {
-            background-image: linear-gradient(135deg, #22c55e, #f59e0b);
-            box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
+        /* --- The highlighter: a marker swipe behind dark ink. Never
+               used as text colour on a light ground. --- */
+        .es-run-mark {
+            background-image: linear-gradient(180deg, rgba(250, 204, 21, 0) 52%, rgba(250, 204, 21, 0.92) 52%);
+            -webkit-box-decoration-break: clone;
+            box-decoration-break: clone;
+            padding: 0 0.12em 0.04em;
+            color: #17181b;
         }
+        /* On dark grounds the swipe would fight the ground, so the mark
+           becomes a solid block with the ink flipped back to near-black. */
+        .dark .es-run-mark {
+            background-image: none;
+            background-color: #facc15;
+            color: #17181b;
+            border-radius: 0.15rem;
+        }
+        /* Bright yellow AS TEXT is allowed only on dark grounds. */
+        .es-run-lit { color: #fde047; }
 
-        /* Amber-tinted finale panel glow (replaces the stray blue glow) */
-        .soundcheck-finale-glow {
-            box-shadow: 0 25px 50px -12px rgba(217, 119, 6, 0.3);
-        }
-
-        /* Red "in the red" / green "in the green" problem-solution tints */
-        .soundcheck-red-panel {
-            border-radius: 1rem;
-            padding: 1.75rem;
-            background: linear-gradient(180deg, rgba(239, 68, 68, 0.06), rgba(239, 68, 68, 0.015));
-            border: 1px solid rgba(239, 68, 68, 0.18);
-        }
-        .dark .soundcheck-red-panel {
-            background: linear-gradient(180deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.03));
-            border-color: rgba(239, 68, 68, 0.22);
-        }
-        .soundcheck-green-panel {
-            border-radius: 1rem;
-            padding: 1.75rem;
-            background: linear-gradient(180deg, rgba(34, 197, 94, 0.06), rgba(34, 197, 94, 0.015));
-            border: 1px solid rgba(34, 197, 94, 0.18);
-        }
-        .dark .soundcheck-green-panel {
-            background: linear-gradient(180deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.03));
-            border-color: rgba(34, 197, 94, 0.22);
-        }
-
-        /* Analog VU needle gauge motif (a gauge, not a bar array). The dark
-           faceplate keeps the light needle legible on light and dark pages
-           alike, including the always-dark band and finale. */
-        .es-vu {
+        /* --- The time axis --- */
+        .es-run-axis {
+            --es-run-scale: 0.055rem;      /* rem per minute */
             position: relative;
-            display: inline-block;
-            width: 132px;
-            height: 74px;
-            border-radius: 0.7rem;
-            background: linear-gradient(180deg, #111827, #1f2937);
-            border: 1px solid rgba(148, 163, 184, 0.18);
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55), 0 8px 20px -10px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
+            padding-inline-start: 4.25rem;
         }
-        .es-vu-face {
+        .es-run-axis::before {
+            content: "";
             position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 132px;
-            height: 66px;
-            background: conic-gradient(from 270deg at 50% 100%,
-                #22c55e 0deg, #22c55e 104deg,
-                #f59e0b 104deg, #f59e0b 140deg,
-                #ef4444 140deg, #ef4444 180deg,
-                transparent 180deg);
-            -webkit-mask: radial-gradient(circle at 50% 100%, transparent 0 46px, #000 47px 63px, transparent 64px);
-            mask: radial-gradient(circle at 50% 100%, transparent 0 46px, #000 47px 63px, transparent 64px);
-            opacity: 0.92;
-        }
-        .es-vu-needle {
-            position: absolute;
-            left: 50%;
-            bottom: 4px;
+            inset-block: 0.55rem;
+            inset-inline-start: 3.15rem;
             width: 2px;
-            height: 58px;
-            margin-left: -1px;
-            border-radius: 2px;
-            background: linear-gradient(to top, rgba(148, 163, 184, 0), #e5e7eb 30%, #f8fafc 100%);
-            transform-origin: 50% 100%;
-            transform: rotate(-52deg);
-            animation: es-vu-swing 3.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
-        }
-        .es-vu-cap {
-            position: absolute;
-            left: 50%;
-            bottom: 0;
-            width: 10px;
-            height: 10px;
-            margin-left: -5px;
-            border-radius: 50%;
-            background: #64748b;
-            box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
-        }
-        @keyframes es-vu-swing {
-            0% { transform: rotate(-52deg); }
-            28% { transform: rotate(58deg); }
-            40% { transform: rotate(42deg); }
-            52% { transform: rotate(50deg); }
-            100% { transform: rotate(-52deg); }
-        }
-
-        /* Segmented signal-strength meter (green -> red staircase, not a
-           bouncing equalizer) */
-        .es-signal {
-            display: inline-flex;
-            align-items: flex-end;
-            gap: 2px;
-            height: 16px;
-        }
-        .es-signal i {
-            width: 3px;
             border-radius: 1px;
-            background: currentColor;
-            transform-origin: bottom;
-            animation: es-signal-rise 1.6s ease-in-out infinite;
+            background: linear-gradient(180deg, rgba(23, 24, 27, 0.08), rgba(23, 24, 27, 0.22) 22%, rgba(23, 24, 27, 0.22) 78%, rgba(23, 24, 27, 0.08));
         }
-        .es-signal i:nth-child(1) { height: 32%; color: #22c55e; animation-delay: 0s; }
-        .es-signal i:nth-child(2) { height: 52%; color: #22c55e; animation-delay: 0.12s; }
-        .es-signal i:nth-child(3) { height: 70%; color: #f59e0b; animation-delay: 0.24s; }
-        .es-signal i:nth-child(4) { height: 86%; color: #f59e0b; animation-delay: 0.36s; }
-        .es-signal i:nth-child(5) { height: 100%; color: #ef4444; animation-delay: 0.48s; }
-        @keyframes es-signal-rise {
-            0%, 100% { transform: scaleY(0.55); opacity: 0.55; }
-            50% { transform: scaleY(1); opacity: 1; }
+        .dark .es-run-axis::before {
+            background: linear-gradient(180deg, rgba(236, 234, 230, 0.1), rgba(236, 234, 230, 0.26) 22%, rgba(236, 234, 230, 0.26) 78%, rgba(236, 234, 230, 0.1));
+        }
+        @media (max-width: 640px) {
+            .es-run-axis { --es-run-scale: 0.038rem; padding-inline-start: 3.5rem; }
+            .es-run-axis::before { inset-inline-start: 2.6rem; }
         }
 
-        /* Torn ticket stub (fee-comparison mid-page moment) */
-        .es-ticket-stub {
-            position: relative;
-            display: inline-flex;
-            align-items: stretch;
-            border-radius: 0.7rem;
-            overflow: hidden;
-            transform: rotate(-3deg);
-            box-shadow: 0 12px 26px -12px rgba(217, 119, 6, 0.55);
-        }
-        .es-ticket-stub-main {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            color: #fff;
-            padding: 0.7rem 1rem;
-        }
-        .es-ticket-stub-stub {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.7rem 0.85rem;
-            background: linear-gradient(135deg, #d97706, #b45309);
-            color: #fff;
-            font-size: 0.6rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            line-height: 1.15;
-            text-align: center;
-        }
-        .es-ticket-stub-perf {
-            position: relative;
-            width: 0;
-            border-left: 2px dashed rgba(255, 255, 255, 0.75);
-        }
-        .es-ticket-stub-perf::before,
-        .es-ticket-stub-perf::after {
-            content: '';
+        /* A stop on the axis. */
+        .es-run-stop { position: relative; }
+        .es-run-stop::before {
+            content: "";
             position: absolute;
-            left: -7px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
+            top: 0.62rem;
+            inset-inline-start: -1.2rem;
+            width: 0.6rem;
+            height: 0.6rem;
+            border-radius: 9999px;
+            background: #f7f6f3;
+            border: 2px solid rgba(23, 24, 27, 0.35);
+        }
+        .dark .es-run-stop::before {
+            background: #0c0d0f;
+            border-color: rgba(236, 234, 230, 0.4);
+        }
+        /* The marked stop: filled node, so the highlight is not the only cue. */
+        .es-run-stop-now::before {
+            background: #facc15;
+            border-color: #a16207;
+        }
+        .dark .es-run-stop-now::before { border-color: #facc15; }
+
+        /* The proportional gap. Height comes from the minutes to the next
+           stop; the clamp stops a long dead stretch from becoming screens
+           of empty page on a phone. */
+        .es-run-gap {
+            height: clamp(1.75rem, calc(var(--min, 60) * var(--es-run-scale)), 11rem);
+        }
+
+        /* The time column, hung in the axis gutter. */
+        .es-run-time {
+            position: absolute;
+            inset-inline-start: -4.25rem;
+            top: 0.35rem;
+            width: 3rem;
+            text-align: end;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #4b5158;
+        }
+        .dark .es-run-time { color: #9aa1a9; }
+        @media (max-width: 640px) {
+            .es-run-time { inset-inline-start: -3.5rem; width: 2.5rem; font-size: 0.75rem; }
+        }
+
+        /* --- Eyebrow / labels --- */
+        .es-run-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.26em;
+            text-transform: uppercase;
+            color: #4b5158;
+        }
+        .dark .es-run-tag { color: #9aa1a9; }
+        .es-run-band .es-run-tag { color: #fde047; }
+
+        /* State label, so "now" is never signalled by colour alone. */
+        .es-run-state {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.08rem 0.4rem;
+            border-radius: 0.2rem;
+            background: #17181b;
+            color: #facc15;
+            font-size: 0.58rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        /* --- Plan tags --- */
+        .es-run-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            border: 1px solid rgba(23, 24, 27, 0.32);
+            color: #17181b;
+        }
+        .dark .es-run-plan { border-color: rgba(236, 234, 230, 0.34); color: #eceae6; }
+        .es-run-band .es-run-plan { border-color: rgba(236, 234, 230, 0.34); color: #eceae6; }
+        .es-run-plan-pro { border-color: #a16207; color: #6b4c05; }
+        .dark .es-run-plan-pro { border-color: #facc15; color: #fde047; }
+        .es-run-band .es-run-plan-pro { border-color: #facc15; color: #fde047; }
+
+        /* --- Cards --- */
+        .es-run-card {
+            border: 1px solid rgba(23, 24, 27, 0.12);
+            border-radius: 1rem;
             background: #ffffff;
         }
-        .dark .es-ticket-stub-perf::before,
-        .dark .es-ticket-stub-perf::after {
-            background: #0a0a0f;
+        .dark .es-run-card {
+            border-color: rgba(236, 234, 230, 0.12);
+            background: rgba(236, 234, 230, 0.04);
         }
-        .es-ticket-stub-perf::before { top: -7px; }
-        .es-ticket-stub-perf::after { bottom: -7px; }
+        .es-run-band .es-run-card {
+            border-color: rgba(236, 234, 230, 0.14);
+            background: rgba(236, 234, 230, 0.05);
+        }
 
-        @media (prefers-reduced-motion: reduce) {
-            .es-vu-needle,
-            .es-signal i {
-                animation: none !important;
-            }
+        /* --- Fixed-dark band --- */
+        .es-run-band {
+            background-color: #0a0b0c;
+            background-image: radial-gradient(120% 100% at 50% 0%, #17181b 0%, #101113 55%, #08090a 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(236, 234, 230, 0.05);
+        }
+        /* Shared classes that flip with the colour mode inside a band. */
+        .es-run-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(236, 234, 230, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(236, 234, 230, 0.05) 1px, transparent 1px);
+        }
+        .es-run-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-run-band .es-claim:focus-within {
+            border-color: rgba(250, 204, 21, 0.75);
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.22);
+        }
+
+        /* --- Section numeral: a call-time chip --- */
+        .es-run-corner {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.8rem;
+            border-radius: 0.3rem;
+            border: 1px solid rgba(23, 24, 27, 0.2);
+            background: #ffffff;
+            color: #17181b;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+        .dark .es-run-corner { border-color: rgba(236, 234, 230, 0.2); background: rgba(236, 234, 230, 0.05); color: #eceae6; }
+        .es-run-band .es-run-corner { border-color: rgba(236, 234, 230, 0.2); background: rgba(236, 234, 230, 0.05); color: #eceae6; }
+        .es-run-corner::before {
+            content: "";
+            width: 2px;
+            align-self: stretch;
+            border-radius: 1px;
+            background: #facc15;
+        }
+
+        /* --- Links and buttons --- */
+        .es-run-link { color: #6b4c05; }
+        .es-run-link:hover { color: #17181b; }
+        .dark .es-run-link { color: #fde047; }
+        .dark .es-run-link:hover { color: #eceae6; }
+
+        .es-run-btn {
+            background-color: #17181b;
+            box-shadow: 0 18px 36px -14px rgba(23, 24, 27, 0.5);
+        }
+        .es-run-btn:hover { background-color: #000000; box-shadow: 0 22px 44px -14px rgba(23, 24, 27, 0.6); }
+        .dark .es-run-btn { background-color: #facc15; }
+        .dark .es-run-btn:hover { background-color: #fde047; }
+
+        /* --- FAQ / related hover --- */
+        .es-run-hover:hover { border-color: rgba(161, 98, 7, 0.5); }
+        .dark .es-run-hover:hover { border-color: rgba(250, 204, 21, 0.45); }
+        .es-run-hover:hover .es-run-hover-title,
+        .es-run-hover:hover .es-run-hover-arrow { color: #6b4c05; }
+        .dark .es-run-hover:hover .es-run-hover-title,
+        .dark .es-run-hover:hover .es-run-hover-arrow { color: #fde047; }
+
+        /* --- Chips --- */
+        .es-run-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(23, 24, 27, 0.16);
+            background: rgba(255, 255, 255, 0.7);
+            color: #4b5158;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .dark .es-run-chip {
+            border-color: rgba(236, 234, 230, 0.16);
+            background: rgba(236, 234, 230, 0.05);
+            color: #b9bfc6;
+        }
+
+        /* --- Shared-system recolors (brand blue by default) --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(161, 98, 7, 0.12), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(250, 204, 21, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(23, 24, 27, 0.55); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(236, 234, 230, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #a16207; }
+        .dark .es-dot.is-active .es-dot-pip { background: #facc15; }
+
+        /* --- Focus rings. No border-radius here: setting it changes the
+               element's own shape on focus. Outlines already follow it. --- */
+        #es-run-page a:focus-visible,
+        #es-run-page summary:focus-visible,
+        #es-run-page button:focus-visible {
+            outline: 2px solid #6b4c05;
+            outline-offset: 3px;
+        }
+        .dark #es-run-page a:focus-visible,
+        .dark #es-run-page summary:focus-visible,
+        .dark #es-run-page button:focus-visible {
+            outline-color: #facc15;
+        }
+        .es-run-band a:focus-visible,
+        .es-run-band summary:focus-visible,
+        .es-run-band button:focus-visible {
+            outline-color: #facc15 !important;
         }
     </style>
 
+    @php
+        // The show day. --min on each stop is the real number of minutes to the
+        // NEXT stop, which is what makes the axis proportional rather than a list.
+        $showDay = [
+            ['14:00', 'Load-in',    'The truck is outside and nobody has the code.', 180, false],
+            ['17:00', 'Soundcheck', 'Three acts, one PA, and a support band running late.', 120, false],
+            ['19:00', 'Doors',      'The only time most calendars ever show.',        60,  true],
+            ['20:00', 'Oda',        'Opener. 30 minutes.',                            75,  false],
+            ['21:15', 'The Fell',   'Headline. 70 minutes and a curfew to beat.',     105, false],
+            ['23:00', 'Curfew',     'Lights up, load-out, do it again Thursday.',     0,   false],
+        ];
+
+        $bill = [
+            ['20:00', 'Oda', 'Opener', '12'],
+            ['21:15', 'The Fell', 'Headline', '47'],
+            ['22:40', 'DJ set', 'Late', '5'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for music venues?',
+                'a' => 'Yes. Publishing your listings, adding set times for every act on a bill, running recurring residencies, splitting rooms into sub-schedules, accepting booking requests, and two-way sync with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, event graphics and passes are on the Pro plan at $5 a month.',
+            ],
+            [
+                'q' => 'Can I publish set times for each band on the bill?',
+                'a' => 'Yes, on every plan. Give a show its parts, and each act gets a name, an optional description and a start and end time. They appear in order on the public event page, so the bill answers the question instead of you answering it fourteen times on the day.',
+            ],
+            [
+                'q' => 'Can photos and video be attached to the band that played?',
+                'a' => 'Yes. When a show has parts, fan photos, video and comments attach to the part rather than to the whole night, so a three-band bill ends up with three galleries instead of one pile. Everything waits in an approval queue before it appears.',
+            ],
+            [
+                'q' => 'Can I run more than one room from the same page?',
+                'a' => 'Yes, on every plan. Sub-schedules keep the main room and the back room apart on one link, so somebody looking for the small-room show is not scrolling through two months of everything else.',
+            ],
+            [
+                'q' => 'Can bands ask to play at my venue?',
+                'a' => 'Yes. Turn on Accept requests and artists can submit a show from your public page. Submissions collect on your Requests tab, where you accept or decline before anything reaches your calendar. On Pro you can add your own questions to that form, so the details you always end up chasing arrive with the request.',
+            ],
+            [
+                'q' => 'What do you charge on ticket sales?',
+                'a' => 'Nothing. Event Schedule takes zero platform fees. You connect your own Stripe account, the money lands there, and the only deduction is Stripe\'s own processing. There is no per-ticket cut and no booking fee added on top of your price.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', '14:00 Load-in'],
+            ['cost', 'The gap'],
+            ['order', '19:00 Running order'],
+            ['bill', '20:00 The bill'],
+            ['rooms', 'The rooms'],
+            ['playing', 'Who plays'],
+            ['door', 'The door'],
+            ['rest', 'Everything else'],
+            ['who', 'Perfect for'],
+            ['faq', 'Questions'],
+            ['claim', 'Load in'],
+        ];
+    @endphp
+
+    <div id="es-run-page" class="es-run-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: the stage                                           -->
+    <!-- 1. Hero: the show day on the axis                            -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden py-16">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(34, 197, 94, 0.45), rgba(34, 197, 94, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(239, 68, 68, 0.4), rgba(239, 68, 68, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 60%, rgba(245, 158, 11, 0.34), rgba(245, 158, 11, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(250, 204, 21, 0.16), rgba(250, 204, 21, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(23, 24, 27, 0.1), rgba(23, 24, 27, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
         </div>
 
-        <!-- Soundcheck VU meter -->
-        <div class="absolute right-8 top-24 z-20 hidden opacity-90 sm:block md:right-16" aria-hidden="true">
-            <div class="rounded-2xl border border-gray-200 bg-white/70 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-white/[0.06]">
-                <div class="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em]">
-                    <span class="text-green-600 dark:text-green-400">-20</span>
-                    <span class="text-amber-600 dark:text-amber-400">0</span>
-                    <span class="text-red-600 dark:text-red-400">+3</span>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+                <div>
+                    <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                        <svg aria-hidden="true" class="h-5 w-5 text-[#a16207] dark:text-[#facc15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="es-run-muted text-sm font-medium tracking-wide">For music venues and live rooms</span>
+                    </div>
+
+                    <h1 class="es-balance es-run-ink mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">Every show is nine hours long.</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">Your calendar shows <span class="es-run-mark">one</span> of them.</span></span>
+                    </h1>
+
+                    <p class="es-fade-up es-d-2 es-run-muted mb-10 max-w-xl text-lg sm:text-xl">
+                        Put the whole show day on one link: set times for every act on the bill, tickets with zero platform fees, and a door that knows who is actually inside.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 flex flex-col items-start gap-4 sm:flex-row">
+                        <a href="#order" class="glass group inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                            See the running order
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-run-btn group inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] dark:text-[#17181b]">
+                            Create your venue calendar
+                            <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </a>
+                    </div>
                 </div>
-                <span class="es-vu"><span class="es-vu-face"></span><span class="es-vu-needle"></span><span class="es-vu-cap"></span></span>
-                <div class="mt-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">Soundcheck</div>
-            </div>
-        </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Concert Halls & Live Music Venues</span>
-                <span class="es-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-            </div>
-
-            <h1 class="es-balance mb-8 text-[2.4rem] font-black leading-[1.06] tracking-tight text-gray-900 dark:text-white sm:text-5xl lg:text-6xl">
-                <span class="es-mask"><span class="es-mask-line">The venue calendar that</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-soundcheck es-gradient-anim">pays you, not Ticketmaster</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Bands apply to play. You sell tickets direct. Fans get email updates without you paying for reach. Zero platform fees.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See how it works
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl soundcheck-btn px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
-                    Create Your Venue Calendar
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
+                <!-- The axis. Gaps are computed from real minutes. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-run-card p-6 sm:p-8">
+                        <p class="es-run-tag mb-6">Thursday &middot; main room</p>
+                        <div class="es-run-axis">
+                            @foreach ($showDay as [$time, $name, $note, $gap, $isNow])
+                                <div class="es-run-stop @if ($isNow) es-run-stop-now @endif">
+                                    <span class="es-run-time">{{ $time }}</span>
+                                    <div class="flex flex-wrap items-baseline gap-2">
+                                        <span class="es-run-ink font-bold @if ($isNow) es-run-mark @endif">{{ $name }}</span>
+                                        @if ($isNow)<span class="es-run-state">Published</span>@endif
+                                    </div>
+                                    <p class="es-run-muted mt-0.5 text-sm">{{ $note }}</p>
+                                </div>
+                                @if ($gap > 0)
+                                    <div class="es-run-gap" style="--min: {{ $gap }};" aria-hidden="true"></div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Venue-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+            <div class="es-fade-up es-d-4 mx-auto mt-14 max-w-3xl">
                 <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                    <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Concert Halls', 'Jazz Clubs', 'Rock Venues', 'Folk Rooms', 'Amphitheaters', 'Listening Rooms', 'Indie Clubs', 'Acoustic'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="soundcheck-dot h-1.5 w-1.5 rounded-full"></span>
-                                        {{ $tag }}
-                                    </span>
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['Listening Room', 'Small Club', 'Mid-Size', 'Concert Hall', 'Jazz Club', 'Amphitheater', 'Multi-Room', 'House Concert', 'Folk Club', 'Warehouse'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-run-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
                         </div>
@@ -414,33 +559,205 @@
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Problem / solution                                        -->
+    <!-- 2. The gap (fixed-dark band)                                 -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-start gap-12 md:grid-cols-2">
-                <div data-reveal class="soundcheck-red-panel">
-                    <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white"><span class="text-red-500 dark:text-red-400">Tired of this?</span></h2>
-                    <div class="space-y-4">
-                        @foreach ([['Ticketing platforms eating into your door revenue', 'Service fees, facility fees, processing fees...'], ['Endless email chains with booking agents', 'Back and forth for every show, every detail'], ['Paying to reach your own fans on social', 'Algorithm changes, boosted posts, declining reach']] as [$t, $sub])
-                            <div class="flex items-start gap-3">
-                                <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/20"><svg aria-hidden="true" class="h-3 w-3 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
-                                <div><div class="font-medium text-gray-900 dark:text-white">{{ $t }}</div><div class="text-sm text-gray-500 dark:text-gray-500">{{ $sub }}</div></div>
-                            </div>
-                        @endforeach
+    <section id="cost" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-run-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The gap</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        You run nine hours. You publish <span class="es-run-lit">one number.</span>
+                    </h2>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    <div class="es-run-card p-6" data-reveal="panel">
+                        <p class="es-run-tag mb-3">The day</p>
+                        <h3 class="mb-2 text-lg font-bold text-[#eceae6]">
+                            <span data-count-to="9">9</span> hours
+                        </h3>
+                        <p class="text-sm text-[#9aa1a9]">Load-in at two, curfew at eleven. That is the job, and it is the same shape every show night.</p>
+                    </div>
+                    <div class="es-run-card p-6" data-reveal="panel">
+                        <p class="es-run-tag mb-3">The listing</p>
+                        <h3 class="mb-2 text-lg font-bold text-[#eceae6]">
+                            <span data-count-to="1">1</span> time
+                        </h3>
+                        <p class="text-sm text-[#9aa1a9]">Doors. Everything else lives in a group chat, a pinned message, and your head.</p>
+                    </div>
+                    <div class="es-run-card p-6" data-reveal="panel">
+                        <p class="es-run-tag mb-3">The consequence</p>
+                        <h3 class="mb-2 text-lg font-bold text-[#eceae6]">
+                            <span data-count-to="3">3</span> bands asking
+                        </h3>
+                        <p class="text-sm text-[#9aa1a9]">Plus a tour manager, the engineer, and everyone who bought a ticket for the opener.</p>
                     </div>
                 </div>
-                <div data-reveal style="--reveal-delay: 0.1s;" class="soundcheck-green-panel">
-                    <h2 class="mb-6 text-2xl font-bold text-gray-900 dark:text-white"><span class="text-emerald-500 dark:text-emerald-400">Here's the fix</span></h2>
-                    <div class="space-y-4">
-                        @foreach ([['Sell tickets with $0 platform fees', "Just Stripe's 2.9% + 30c. That's it."], ['Artists apply with press kits built-in', 'Music samples, social links, everything in one place'], ['Email your fans directly for free', 'New show? One click reaches everyone who follows you']] as [$t, $sub])
-                            <div class="flex items-start gap-3">
-                                <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                <div><div class="font-medium text-gray-900 dark:text-white">{{ $t }}</div><div class="text-sm text-gray-500 dark:text-gray-500">{{ $sub }}</div></div>
+
+                <p class="mt-10 text-center text-gray-300" data-reveal>
+                    The running order already exists. It just is not anywhere the public can read it.
+                    <a href="#order" class="es-run-lit inline-flex items-center gap-1 font-semibold transition-all hover:gap-2">
+                        Put it on the page
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The running order                                         -->
+    <!-- ============================================================ -->
+    <section id="order" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The running order</p>
+                <h2 class="es-balance es-run-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Give the show its <span class="es-run-mark">parts.</span>
+                </h2>
+                <p class="es-run-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A show is not one time. Add each act with its own start time and they publish in order on the event page, on every plan.
+                </p>
+            </div>
+
+            <div class="grid items-start gap-10 lg:grid-cols-2">
+                <div class="space-y-5" data-reveal-group="80">
+                    <div class="es-run-card p-6" data-reveal>
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-run-ink text-lg font-bold">Each act, its own time</h3>
+                            <span class="es-run-plan">Free</span>
+                        </div>
+                        <p class="es-run-muted text-sm">Name, start, end, and a description if the act needs one. Put them in order once and the public page shows the bill exactly as you set it.</p>
+                    </div>
+                    <div class="es-run-card p-6" data-reveal>
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-run-ink text-lg font-bold">It answers the question for you</h3>
+                            <span class="es-run-plan">Free</span>
+                        </div>
+                        <p class="es-run-muted text-sm">"What time is the headline on" stops being a message you reply to and starts being a line on the page you already sent them.</p>
+                    </div>
+                    <div class="es-run-card p-6" data-reveal>
+                        <div class="mb-2 flex flex-wrap items-center gap-2">
+                            <h3 class="es-run-ink text-lg font-bold">One link for the band too</h3>
+                            <span class="es-run-plan">Free</span>
+                        </div>
+                        <p class="es-run-muted text-sm">Add a performer to the show and it can surface on their schedule as well, so their followers find your room through them.</p>
+                    </div>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-run-card p-6 sm:p-8">
+                        <p class="es-run-tag mb-6">Public event page</p>
+                        <div class="es-run-axis">
+                            @foreach ([['19:00', 'Doors', 60], ['20:00', 'Oda', 75], ['21:15', 'The Fell', 0]] as [$oTime, $oName, $oGap])
+                                <div class="es-run-stop">
+                                    <span class="es-run-time">{{ $oTime }}</span>
+                                    <span class="es-run-ink font-bold">{{ $oName }}</span>
+                                </div>
+                                @if ($oGap > 0)
+                                    <div class="es-run-gap" style="--min: {{ $oGap }};" aria-hidden="true"></div>
+                                @endif
+                            @endforeach
+                        </div>
+                        <p class="es-run-muted mt-6 border-t border-[rgba(23,24,27,0.1)] pt-4 text-xs dark:border-[rgba(236,234,230,0.12)]">
+                            Times render publicly whenever an act has one. Leave them off and the bill still lists in order.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The bill: per-act galleries                               -->
+    <!-- ============================================================ -->
+    <section id="bill" class="scroll-mt-24 border-y border-[rgba(23,24,27,0.08)] py-20 dark:border-[rgba(236,234,230,0.08)] lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The bill</p>
+                <h2 class="es-balance es-run-ink text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Three bands played. <span class="es-run-mark">Three galleries.</span>
+                </h2>
+                <p class="es-run-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Once a show has parts, photos, video and comments attach to the act rather than to the night, so the opener's set is not buried under the headline's.
+                </p>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-3" data-reveal-group="90">
+                @foreach ($bill as [$bTime, $bName, $bRole, $bCount])
+                    <div class="es-run-card p-6" data-reveal="panel">
+                        <div class="mb-3 flex items-baseline justify-between gap-3">
+                            <span class="font-mono text-sm font-bold text-[#4b5158] dark:text-[#9aa1a9]">{{ $bTime }}</span>
+                            <span class="es-run-tag">{{ $bRole }}</span>
+                        </div>
+                        <h3 class="es-run-ink mb-4 text-xl font-bold">{{ $bName }}</h3>
+                        <div class="mb-3 grid grid-cols-4 gap-1.5" aria-hidden="true">
+                            @for ($t = 0; $t < 4; $t++)
+                                <div class="aspect-square rounded bg-[rgba(23,24,27,0.07)] dark:bg-[rgba(236,234,230,0.08)]"></div>
+                            @endfor
+                        </div>
+                        <p class="es-run-muted text-sm">{{ $bCount }} photos from this set</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="es-run-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                Attendees add them with just a name and an email, and everything waits in an approval queue before it appears. Free covers 25 photos per schedule.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. The rooms                                                 -->
+    <!-- ============================================================ -->
+    <section id="rooms" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The rooms</p>
+                    <h2 class="es-balance es-run-ink mb-5 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Main room and back room, <span class="es-run-mark">one link.</span>
+                    </h2>
+                    <p class="es-run-muted mb-6 text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Sub-schedules split one schedule into strands, so somebody who only cares about the 80-cap room is not scrolling past two months of main-room shows to find it. Free on every plan.
+                    </p>
+                    <ul class="es-run-muted space-y-3" data-reveal-group="70">
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#a16207] dark:text-[#facc15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>A residency is one recurring event with a day-of-week pattern, plus exceptions for the weeks you are dark.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#a16207] dark:text-[#facc15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Embed the calendar on the site you already have, so the listings live where people look you up.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#a16207] dark:text-[#facc15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Two-way sync with Google, Outlook and CalDAV keeps what is on the wall and what is in your phone from drifting apart.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div data-reveal="panel">
+                    <div class="es-run-card overflow-hidden">
+                        @foreach ([['Main room', '450 cap', 'The Fell', 'Thu 12'], ['Back room', '80 cap', 'Oda solo', 'Fri 13'], ['Main room', '450 cap', 'Residency', 'Every Tue']] as $ri => [$rRoom, $rCap, $rShow, $rWhen])
+                            <div class="flex items-center gap-3 px-5 py-4 @if ($ri > 0) border-t border-[rgba(23,24,27,0.08)] dark:border-[rgba(236,234,230,0.08)] @endif">
+                                <div class="min-w-0 flex-1">
+                                    <p class="es-run-ink truncate text-sm font-bold">{{ $rShow }}</p>
+                                    <p class="es-run-muted truncate text-xs">{{ $rRoom }} &middot; {{ $rCap }}</p>
+                                </div>
+                                <span class="font-mono text-xs text-[#4b5158] dark:text-[#9aa1a9]">{{ $rWhen }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -450,243 +767,252 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. Feature deep dives                                        -->
+    <!-- 6. Who plays (fixed-dark band)                               -->
     <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-white py-24 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-6xl space-y-24 px-4 sm:px-6 lg:px-8 lg:space-y-32">
+    <section id="playing" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-run-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(250, 204, 21, 0.12), rgba(250, 204, 21, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
 
-            <!-- Artist booking -->
-            <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div data-reveal>
-                    <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" /></svg>
-                        Artist Booking
-                    </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Bands apply to play. <span class="text-gradient-soundcheck">You pick the good ones.</span></h2>
-                    <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">No more digging through email, DMs, and voicemails. Artists submit through your calendar with their music, videos, social stats, and draw history. Listen to their tracks, check their following, book or pass.</p>
-                    <ul class="space-y-3">
-                        @foreach (['Embedded music players (Spotify, SoundCloud, YouTube)', 'Social follower counts at a glance', 'One-click approve or decline'] as $item)
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300"><svg aria-hidden="true" class="h-5 w-5 shrink-0 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>{{ $item }}</li>
-                        @endforeach
-                    </ul>
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who plays</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Let bands come to you, <span class="es-run-lit">with the details attached.</span>
+                    </h2>
                 </div>
-                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
-                        <div class="mb-4 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Booking Request</div>
-                        <div class="mb-4 flex items-start gap-4">
-                            <div class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-xl font-bold text-white">MS</div>
-                            <div class="flex-1">
-                                <div class="text-lg font-semibold text-gray-900 dark:text-white">Midnight Sons</div>
-                                <div class="text-sm text-sky-600 dark:text-sky-300">Indie Rock / Brooklyn, NY</div>
-                                <div class="mt-2 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400"><span>2.4K Spotify listeners</span><span>890 Instagram</span></div>
-                                <div class="mt-2 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 dark:border-white/10 dark:bg-white/[0.04]">
-                                    <span class="es-signal" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-                                    <span class="text-[10px] font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Strong local draw</span>
-                                </div>
+
+                <div class="grid items-start gap-10 lg:grid-cols-2">
+                    <div class="space-y-5" data-reveal-group="80">
+                        <div class="es-run-card p-6" data-reveal>
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-[#eceae6]">Accept requests</h3>
+                                <span class="es-run-plan">Free</span>
+                            </div>
+                            <p class="text-sm text-[#9aa1a9]">Switch it on and artists submit a show from your public page. Everything waits on your Requests tab until you accept or decline it.</p>
+                        </div>
+                        <div class="es-run-card p-6" data-reveal>
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-[#eceae6]">Ask for what you always chase</h3>
+                                <span class="es-run-plan es-run-plan-pro">Pro</span>
+                            </div>
+                            <p class="text-sm text-[#9aa1a9]">Add your own questions to that form so set length, party size and a link arrive with the request instead of four emails later.</p>
+                        </div>
+                        <div class="es-run-card p-6" data-reveal>
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-[#eceae6]">Nothing lands unannounced</h3>
+                                <span class="es-run-plan">Free</span>
+                            </div>
+                            <p class="text-sm text-[#9aa1a9]">A declined request never touches your calendar, and an accepted one arrives as a real event you can add the running order to.</p>
+                        </div>
+                    </div>
+
+                    <div data-reveal="panel">
+                        <div class="es-run-card p-6">
+                            <div class="mb-4 flex items-baseline justify-between gap-3 border-b border-[rgba(236,234,230,0.14)] pb-3">
+                                <span class="es-run-tag">Requests</span>
+                                <span class="font-mono text-xs text-[#9aa1a9]">3 waiting</span>
+                            </div>
+                            <div class="space-y-3">
+                                @foreach ([['Kestrel Hall', 'Fri 2 May', '4-piece', '45 min'], ['Oda', 'Sat 10 May', 'Solo', '30 min'], ['The Fell', 'Thu 22 May', '5-piece', '70 min']] as [$qName, $qDate, $qSize, $qLen])
+                                    <div class="flex items-center gap-3 rounded-lg bg-[rgba(236,234,230,0.05)] p-3">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="truncate text-sm font-bold text-[#eceae6]">{{ $qName }}</p>
+                                            <p class="truncate text-xs text-[#9aa1a9]">{{ $qDate }} &middot; {{ $qSize }} &middot; {{ $qLen }}</p>
+                                        </div>
+                                        <span class="es-run-state flex-none" aria-hidden="true">Accept</span>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                        <div class="mb-4 rounded-xl bg-gray-100 p-3 dark:bg-[#0f0f14]">
-                            <div class="mb-2 text-xs text-gray-500 dark:text-gray-400">Latest track</div>
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded bg-gradient-to-br from-emerald-500 to-teal-600"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-                                <div class="flex-1"><div class="text-sm text-gray-900 dark:text-white">Neon Heartbreak</div><div class="text-xs text-gray-500 dark:text-gray-500">3:42 / 45K streams</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. The door                                                  -->
+    <!-- ============================================================ -->
+    <section id="door" class="scroll-mt-24 py-20 lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The door</p>
+                <h2 class="es-balance es-run-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    You keep <span class="es-run-mark">all of it.</span>
+                </h2>
+                <p class="es-run-muted mt-5 text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Event Schedule charges zero platform fees on ticket sales. You connect your own Stripe account, the money lands in it, and the only deduction is Stripe's own processing.
+                </p>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="100">
+                <div class="es-run-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-run-ink text-lg font-bold">Tiers that move on the clock</h3>
+                        <span class="es-run-plan es-run-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-run-muted text-sm">Give a show more than one ticket type, each with its own sales window, plus add-ons and a rate that kicks in when someone buys several at once.</p>
+                </div>
+                <div class="es-run-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-run-ink text-lg font-bold">A QR on every ticket</h3>
+                        <span class="es-run-plan es-run-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-run-muted text-sm">Scan on the way in and the check-in dashboard counts who is actually inside, with a per-ticket breakdown so you can see which tier turned up.</p>
+                </div>
+                <div class="es-run-card p-7" data-reveal="panel">
+                    <div class="mb-3 flex flex-wrap items-center gap-2">
+                        <h3 class="es-run-ink text-lg font-bold">Everyone gets their own</h3>
+                        <span class="es-run-plan es-run-plan-pro">Pro</span>
+                    </div>
+                    <p class="es-run-muted text-sm">Per-attendee tickets give each guest in a group their own confirmation and their own code, so one person is not stood at the door holding six.</p>
+                </div>
+            </div>
+
+            <p class="es-run-muted mx-auto mt-8 max-w-2xl text-center text-sm" data-reveal>
+                For a free show, registration with a capacity limit works on every plan, so the room still has a real number attached to it.
+            </p>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. Everything else: bento                                    -->
+    <!-- ============================================================ -->
+    <section id="rest" class="scroll-mt-24 border-t border-[rgba(23,24,27,0.08)] py-20 dark:border-[rgba(236,234,230,0.08)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-run-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Everything else</p>
+                <h2 class="es-balance es-run-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The rest of the week.
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
+                <!-- 1 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-run-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-run-ink text-xl font-bold">Tell them yourself</h3>
+                                <span class="es-run-plan">Free</span>
                             </div>
+                            <p class="es-run-muted mb-4">People follow your schedule and you email them when a show goes on sale. You can see open and click rates afterwards, so you know whether the announcement actually landed.</p>
+                            <p class="es-run-muted text-sm">The numbers worth knowing before you plan around it: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send.</p>
                         </div>
-                        <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">"We're touring the west coast in March and would love to stop in LA. We can draw 50-75 and have full backline..."</div>
-                        <div class="flex gap-3">
-                            <span class="flex-1 rounded-xl bg-emerald-500/20 py-2.5 text-center font-medium text-emerald-600 dark:text-emerald-400">Book them</span>
-                            <span class="flex-1 rounded-xl bg-gray-100 py-2.5 text-center font-medium text-gray-500 dark:bg-white/5 dark:text-gray-400">Pass</span>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-run-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-run-ink text-xl font-bold">When it sells out</h3>
+                                <span class="es-run-plan es-run-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-run-muted">Turn on the waitlist and people join once tickets are gone. If one is released they are notified automatically instead of you working back through replies.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 3 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-run-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-run-ink text-xl font-bold">Know what is working</h3>
+                                <span class="es-run-plan">Free</span>
+                            </div>
+                            <p class="es-run-muted mb-4">Built-in analytics show page views, the devices people are on, and where the traffic came from. Enough to tell whether the announcement did anything, without installing a thing.</p>
+                            <p class="es-run-muted text-sm">Add a poll to a show and let the room vote on the support slot or which night a residency should move to.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 4 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-run-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-run-ink text-xl font-bold">Passes for the regulars</h3>
+                                <span class="es-run-plan es-run-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-run-muted">Sell a multi-use pass or a membership that runs across a season of shows, with its own usage tracking and cancellation policy.</p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 5 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner es-run-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-run-ink text-xl font-bold">The announcement post</h3>
+                                <span class="es-run-plan es-run-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-run-muted mb-4">Generate a graphic from a show in a story, square, portrait or landscape crop. It is built from the event, so the date, the room and the bill are already right.</p>
+                            <p class="es-run-muted text-sm">
+                                Running it online as well? Mark the show as an online event and paste the link to wherever you are streaming.
+                                <a href="{{ marketing_url('/features/online-events') }}" class="es-run-link font-medium hover:underline">How online events work</a>
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 6 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner es-run-card relative flex h-full flex-col overflow-hidden p-7">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="es-run-ink text-xl font-bold">Hold it back</h3>
+                                <span class="es-run-plan">Free</span>
+                            </div>
+                            <p class="es-run-muted">A show you have not announced yet can sit on the calendar as a draft, visible to you and never published to the public page.</p>
                         </div>
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Multi-stage -->
-            <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div class="order-2 lg:order-1">
-                    <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                        <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
-                            <div class="border-b border-gray-200 bg-gray-100 px-4 py-3 dark:border-white/5 dark:bg-[#0d0d12]"><div class="text-sm font-medium text-gray-900 dark:text-white">Tonight at The Echo</div></div>
-                            <div class="space-y-3 p-4">
-                                <div class="rounded-xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 to-transparent p-4">
-                                    <div class="mb-2 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-blue-500"></div><span class="font-medium text-gray-900 dark:text-white">Main Stage</span></div><span class="text-xs text-gray-500 dark:text-gray-400">Cap: 350</span></div>
-                                    <div class="ml-5 space-y-2 text-sm">
-                                        <div class="flex items-center justify-between"><span class="text-gray-600 dark:text-gray-300">8:00pm - The Openers</span><span class="text-gray-500 dark:text-gray-500">45 min</span></div>
-                                        <div class="flex items-center justify-between"><span class="font-medium text-gray-900 dark:text-white">9:30pm - Midnight Sons</span><span class="text-blue-600 dark:text-blue-300">Headliner</span></div>
-                                    </div>
-                                </div>
-                                <div class="rounded-xl border border-sky-500/20 bg-gradient-to-r from-sky-500/10 to-transparent p-4">
-                                    <div class="mb-2 flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-sky-500"></div><span class="font-medium text-gray-900 dark:text-white">Back Room</span></div><span class="text-xs text-gray-500 dark:text-gray-400">Cap: 75</span></div>
-                                    <div class="ml-5 space-y-2 text-sm"><div class="flex items-center justify-between"><span class="text-gray-600 dark:text-gray-300">8:30pm - Jazz Trio</span><span class="text-gray-500 dark:text-gray-500">2 sets</span></div></div>
-                                </div>
-                                <div class="rounded-xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-transparent p-4 opacity-60">
-                                    <div class="flex items-center justify-between"><div class="flex items-center gap-2"><div class="h-3 w-3 rounded-full bg-amber-500/50"></div><span class="font-medium text-gray-900 dark:text-white">Outdoor Patio</span></div><span class="text-xs italic text-amber-500 dark:text-amber-400/70">Closed for season</span></div>
-                                </div>
-                            </div>
-                            <div class="es-glare" aria-hidden="true"></div>
-                            <div class="es-ring-glow" aria-hidden="true"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="order-1 lg:order-2" data-reveal>
-                    <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                        Multiple Rooms
-                    </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Main stage. Back room. Patio. <span class="text-gradient-soundcheck">All in one place.</span></h2>
-                    <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Run separate calendars for each performance space. Visitors filter by room. Artists know exactly where they're playing. No double-booking, no confusion at load-in.</p>
-                    <ul class="space-y-3">
-                        @foreach (['Separate capacities per room', 'Fans filter by their preferred space', 'Seasonal rooms (open/close as needed)'] as $item)
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300"><svg aria-hidden="true" class="h-5 w-5 shrink-0 text-blue-500 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Ticket comparison -->
-            <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div data-reveal>
-                    <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        Ticketing
-                    </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Keep your door money. <span class="text-gradient-soundcheck">All of it.</span></h2>
-                    <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">On a $35 ticket, the big platforms take $10-15 in fees. We take $0. Stripe handles payment processing at their standard rate, and the rest goes straight to your bank account.</p>
-                    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-                        <div class="mb-2 font-medium text-emerald-600 dark:text-emerald-300">On 1,000 tickets at $35 each:</div>
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div><div class="text-gray-500 dark:text-gray-400">Ticketmaster</div><div class="font-semibold text-gray-900 dark:text-white">You keep: ~$25,000</div></div>
-                            <div><div class="text-emerald-600 dark:text-emerald-300">Event Schedule</div><div class="font-semibold text-gray-900 dark:text-white">You keep: ~$33,950</div></div>
-                        </div>
-                    </div>
-                    <div class="mt-6 flex justify-center lg:justify-start" aria-hidden="true">
-                        <div class="es-ticket-stub">
-                            <div class="es-ticket-stub-main">
-                                <div class="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">Platform fee</div>
-                                <div class="text-2xl font-black leading-none">$0.00</div>
-                            </div>
-                            <div class="es-ticket-stub-perf"></div>
-                            <div class="es-ticket-stub-stub"><span>ADMIT<br>ONE</span></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-4" data-reveal="panel">
-                    <div class="rounded-2xl border border-red-500/20 bg-red-500/5 p-5">
-                        <div class="mb-4 flex items-center justify-between"><span class="text-sm font-medium text-red-500 line-through dark:text-red-300">Other platforms</span><span class="text-sm text-gray-500 dark:text-gray-400">$35 ticket</span></div>
-                        <div class="mb-4 space-y-2 text-sm">
-                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Service fee</span><span class="text-red-500 dark:text-red-300">+$8.50</span></div>
-                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Facility charge</span><span class="text-red-500 dark:text-red-300">+$3.00</span></div>
-                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-400">Order processing</span><span class="text-red-500 dark:text-red-300">+$2.95</span></div>
-                        </div>
-                        <div class="flex justify-between border-t border-red-500/20 pt-3"><span class="text-gray-500 dark:text-gray-400">Fan pays</span><span class="text-lg font-bold text-red-500 dark:text-red-400">$49.45</span></div>
-                    </div>
-                    <div class="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-5">
-                        <div class="mb-4 flex items-center justify-between"><span class="text-sm font-medium text-emerald-600 dark:text-emerald-300">Event Schedule</span><span class="text-sm text-gray-500 dark:text-gray-400">$35 ticket</span></div>
-                        <div class="mb-4 space-y-2 text-sm">
-                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-500">Platform fee</span><span class="text-emerald-600 dark:text-emerald-300">$0.00</span></div>
-                            <div class="flex justify-between"><span class="text-gray-500 dark:text-gray-500">Stripe processing</span><span class="text-gray-500 dark:text-gray-400">~$1.32</span></div>
-                        </div>
-                        <div class="flex justify-between border-t border-emerald-500/30 pt-3"><span class="text-gray-500 dark:text-gray-400">Fan pays</span><span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">$35.00</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fan newsletter -->
-            <div class="relative grid items-center gap-12 lg:grid-cols-2">
-                <div class="order-2 lg:order-1">
-                    <div class="es-bento group relative mx-auto max-w-md" data-tilt="4" data-reveal="panel">
-                        <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
-                            <div class="border-b border-gray-200 bg-gradient-to-r from-sky-500/20 to-blue-500/20 px-5 py-4 dark:border-white/5">
-                                <div class="flex items-center gap-2"><svg aria-hidden="true" class="h-5 w-5 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg><span class="font-medium text-gray-900 dark:text-white">New Show Announcement</span></div>
-                            </div>
-                            <div class="p-5">
-                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">To: 2,847 venue followers</div>
-                                <div class="mb-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-sky-500/20 p-4">
-                                    <div class="mb-1 text-xs font-medium text-sky-600 dark:text-sky-300">JUST ANNOUNCED</div>
-                                    <div class="mb-1 text-xl font-bold text-gray-900 dark:text-white">Phoebe Bridgers</div>
-                                    <div class="text-sm text-gray-600 dark:text-gray-300">Saturday, March 15 / Doors 7pm</div>
-                                    <div class="mt-3 flex items-center gap-2"><span class="inline-flex items-center rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-900 dark:bg-white/10 dark:text-white">$45</span><span class="inline-flex items-center rounded-full bg-blue-500/30 px-3 py-1 text-xs text-blue-600 dark:text-blue-300">On Sale Now</span></div>
-                                </div>
-                                <div class="flex items-center justify-between text-xs"><div class="flex items-center gap-4"><span class="text-emerald-600 dark:text-emerald-400">2,704 delivered</span><span class="text-sky-600 dark:text-sky-300">892 opened</span></div><span class="text-gray-500 dark:text-gray-400">33% open rate</span></div>
-                            </div>
-                            <div class="es-glare" aria-hidden="true"></div>
-                            <div class="es-ring-glow" aria-hidden="true"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="order-1 lg:order-2" data-reveal>
-                    <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
-                        Fan Newsletter
-                    </div>
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Your fans. Your inbox. <span class="text-gradient-soundcheck">No algorithm in between.</span></h2>
-                    <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">When someone follows your venue, they're opting in to hear from you. Announce a show, and it goes straight to their inbox - not buried in a feed, not paywalled behind boosted posts.</p>
-                    <ul class="space-y-3">
-                        @foreach (['One-click announcements to all followers', 'See open rates and engagement', 'Never pay to reach your own audience'] as $item)
-                            <li class="flex items-center gap-3 text-gray-600 dark:text-gray-300"><svg aria-hidden="true" class="h-5 w-5 shrink-0 text-sky-500 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Also included                                             -->
+    <!-- 9. Perfect for                                               -->
     <!-- ============================================================ -->
-    @php
-        $alsoIncluded = [
-            ['QR Door Scanning', 'Use any smartphone. No hardware needed.', 'bg-blue-500/20', 'text-blue-500 dark:text-blue-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />'],
-            ['Recurring Shows', 'Jazz Wednesdays auto-repeat every week.', 'bg-sky-500/20', 'text-sky-500 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
-            ['Promo Graphics', 'Auto-generate flyers for socials.', 'bg-amber-500/20', 'text-amber-500 dark:text-amber-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />'],
-            ['Venue Analytics', 'See which genres fill your room.', 'bg-cyan-500/20', 'text-cyan-500 dark:text-cyan-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />'],
-            ['Google Cal Sync', 'Two-way sync with your existing calendar.', 'bg-rose-500/20', 'text-rose-500 dark:text-rose-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />'],
-            ['Load-in Info', 'Share parking, backline, PA details.', 'bg-emerald-500/20', 'text-emerald-500 dark:text-emerald-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />'],
-            ['Live Streaming', 'Sell tickets to virtual attendees.', 'bg-sky-500/20', 'text-sky-500 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />'],
-            ['Embed Anywhere', 'Add your calendar to your website.', 'bg-blue-500/20', 'text-blue-500 dark:text-blue-400', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />'],
-        ];
-    @endphp
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-soundcheck">Also included</span></h2>
-                <p class="text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">Everything else you need to run your room</p>
-            </div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" data-reveal-group="60">
-                @foreach ($alsoIncluded as [$name, $desc, $chip, $text, $icon])
-                    <div data-reveal class="soundcheck-tile rounded-xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-lg {{ $chip }}">
-                            <svg aria-hidden="true" class="h-5 w-5 {{ $text }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icon !!}</svg>
-                        </div>
-                        <h3 class="mb-1 font-medium text-gray-900 dark:text-white">{{ $name }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-500">{{ $desc }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. Perfect for (shared sub-audience cards)                   -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
+    <section id="who" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for every kind of <span class="text-gradient-soundcheck">music room</span>
+                <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <h2 class="es-balance es-run-ink mb-4 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Built for every kind of <span class="es-run-mark">music room</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    50 seats or 5,000 - if you book live music, this is for you.
+                <p class="es-run-muted text-lg sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Eighty capacity or two thousand, the show day is the same shape.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
                 <x-sub-audience-card
                     name="Concert Halls"
-                    description="Seated performances, classical music, acoustic shows. Manage reserved seating and season subscriptions."
-                    icon-color="violet"
+                    description="Seated performances, classical programmes and acoustic shows. Publish the interval and the running time, and sell a season pass."
+                    icon-color="blue"
                     blog-slug="for-concert-halls"
                 >
                     <x-slot:icon>
@@ -699,7 +1025,7 @@
                 <x-sub-audience-card
                     name="Live Music Bars & Clubs"
                     description="Standing-room venues with regular programming. Build a local following for weekly shows."
-                    icon-color="indigo"
+                    icon-color="sky"
                     blog-slug="for-small-music-clubs"
                 >
                     <x-slot:icon>
@@ -711,12 +1037,12 @@
 
                 <x-sub-audience-card
                     name="Jazz Clubs"
-                    description="Intimate sets, residencies, and guest headliners. Cultivate your jazz community."
-                    icon-color="purple"
+                    description="Intimate sets, residencies and guest headliners. Two sets a night, each with its own start time on the page."
+                    icon-color="cyan"
                     blog-slug="for-mid-size-music-venues"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                         </svg>
                     </x-slot:icon>
@@ -724,7 +1050,7 @@
 
                 <x-sub-audience-card
                     name="Folk & Acoustic Venues"
-                    description="Singer-songwriter nights, open mics, and listening rooms. Create a space for acoustic performances."
+                    description="Singer-songwriter nights, open mics and listening rooms. Create a space for acoustic performances."
                     icon-color="amber"
                     blog-slug="for-house-concerts"
                 >
@@ -737,7 +1063,7 @@
 
                 <x-sub-audience-card
                     name="Rock & Indie Venues"
-                    description="Touring bands, local acts, and multi-band bills. Manage green room schedules and load-in times."
+                    description="Touring bands, local acts and multi-band bills. Every act on the bill gets its own set time and its own photos."
                     icon-color="rose"
                     blog-slug="for-multi-purpose-venues"
                 >
@@ -750,7 +1076,7 @@
 
                 <x-sub-audience-card
                     name="Outdoor Amphitheaters"
-                    description="Seasonal programming, festival-style events. Handle weather-dependent scheduling."
+                    description="Seasonal programming and festival-style bills. Set the season up once as recurring dates and skip the weeks you are closed."
                     icon-color="emerald"
                     blog-slug="for-outdoor-amphitheaters"
                 >
@@ -765,70 +1091,58 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 6. How it works (dark band)                                  -->
+    <!-- 10. Three steps                                              -->
     <!-- ============================================================ -->
-    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(34, 197, 94, 0.26), rgba(34, 197, 94, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(239, 68, 68, 0.22), rgba(239, 68, 68, 0) 60%); opacity: 0.5;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+    <section class="scroll-mt-24 border-t border-[rgba(23,24,27,0.08)] py-20 dark:border-[rgba(236,234,230,0.08)] lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <h2 class="es-balance es-run-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal>
+                    Three steps
+                </h2>
             </div>
 
-            <div class="relative z-10 mx-auto max-w-4xl">
-                <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Get your venue calendar online in <span class="text-gradient-soundcheck">three steps</span>
-                    </h2>
-                </div>
-
-                <div class="mb-14 flex justify-center" data-reveal aria-hidden="true">
-                    <span class="es-vu"><span class="es-vu-face"></span><span class="es-vu-needle"></span><span class="es-vu-cap"></span></span>
-                </div>
-
-                <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
-                    @foreach ([['1', 'Create Your Calendar', 'Sign up and add your venue details. Set up stages or rooms as sub-schedules if you have multiple spaces.'], ['2', 'Add Your Events', 'Add events manually, import from Google Calendar, or accept booking requests from performers.'], ['3', 'Share & Sell', 'Embed on your website, share on social, and start selling tickets with QR check-in.']] as [$n, $title, $desc])
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                            <div class="soundcheck-step mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-bold text-white">{{ $n }}</div>
-                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
-                            <p class="text-sm text-gray-400">{{ $desc }}</p>
-                        </div>
-                    @endforeach
-                </div>
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ([['01', 'Add the show', 'Create the event once, and use sub-schedules to keep the main room and the back room apart on the same link.'], ['02', 'Add the running order', 'Give the show its parts. Each act gets a name and a start time, and they publish in order on the event page.'], ['03', 'Open the door', 'Ticket types with their own sales windows, then scan QR codes on the night and watch the dashboard against your capacity.']] as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-run-card p-7" data-reveal="panel">
+                        <div class="mb-3 font-mono text-2xl font-black text-[#a16207] dark:text-[#facc15]">{{ $stepNum }}</div>
+                        <h3 class="es-run-ink mb-2 text-lg font-bold">{{ $stepTitle }}</h3>
+                        <p class="es-run-muted text-sm leading-relaxed">{{ $stepBody }}</p>
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 11. Key features                                             -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section class="border-t border-[rgba(23,24,27,0.08)] py-20 dark:border-[rgba(236,234,230,0.08)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-soundcheck">Key features</span></h2>
+            <h2 class="es-run-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
+                    <x-feature-link-card name="Ticketing" description="Ticket types, QR check-in, and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                    <x-feature-link-card name="Sub-schedules" description="Keep each room's listings apart on one link" :url="marketing_url('/features/sub-schedules')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Recurring Events" description="Set a residency once, and skip the weeks you are dark" :url="marketing_url('/features/recurring-events')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Email the people who follow your venue, with open rates" :url="marketing_url('/features/newsletters')" icon-color="green">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="soundcheck-link inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/features') }}" class="es-run-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -841,26 +1155,24 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 12. Related pages                                            -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal><span class="text-gradient-soundcheck">Related pages</span></h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
+    <section class="border-t border-[rgba(23,24,27,0.08)] py-16 dark:border-[rgba(236,234,230,0.08)]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <h2 class="es-run-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
                 @foreach ([['/for-venues', 'Venues'], ['/for-nightclubs', 'Nightclubs'], ['/for-bars', 'Bars'], ['/for-musicians', 'Musicians']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="soundcheck-related group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="soundcheck-related-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="soundcheck-related-ico w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                    <a href="{{ marketing_url($relHref) }}" class="es-run-hover es-run-card group flex flex-col p-5 transition-all duration-200 hover:shadow-md" data-reveal>
+                        <span class="es-run-hover-title es-run-ink mb-3 text-sm font-semibold transition-colors">For {{ $relName }}</span>
+                        <span class="es-run-hover-arrow es-run-muted mt-auto inline-flex items-center gap-1 text-xs font-medium transition-colors">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
                     </a>
                 @endforeach
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="soundcheck-link inline-flex items-center font-medium hover:underline">
+            <div class="mt-8 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-run-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -871,34 +1183,31 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 13. FAQ                                                      -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 py-20 lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-soundcheck">questions</span>
+            <div class="mb-12 text-center">
+                <div class="es-run-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <h2 class="es-balance es-run-ink mb-4 text-3xl font-black tracking-tight md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked questions
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything music venues ask about Event Schedule.
+                <p class="es-run-muted text-lg" data-reveal style="--reveal-delay: 0.1s;">
+                    What venue bookers ask before they move a calendar.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for music venues?', 'Yes. Event Schedule is free forever for sharing your concert calendar, building an audience following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.'],
-                    ['Can I manage multiple stages and event types?', 'Yes. Use sub-schedules to organize by stage, genre, or event type - main stage shows, acoustic sets, open mics, and DJ nights. Each event can have its own lineup, description, images, and ticket options.'],
-                    ['How do music fans discover our shows?', 'Fans can follow your venue\'s schedule and receive email notifications for new shows. Embed your calendar on your website, share on social media, or send newsletters to subscribers with upcoming lineups.'],
-                    ['Can I link performers to their own schedules?', 'Yes. When you add a performer to your event, it can automatically appear on their schedule too. Both calendars stay in sync. This cross-linking helps fans discover your venue through the artists they follow.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-run-hover es-run-card group p-6 transition-all duration-200" data-reveal>
+                        <summary class="es-run-ink flex cursor-pointer items-start gap-3 font-semibold">
+                            <span class="flex-none font-mono text-sm font-bold text-[#a16207] dark:text-[#facc15]" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-run-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#4b5158] transition-transform group-open:rotate-180 dark:text-[#9aa1a9]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer es-run-muted mt-4 leading-relaxed ps-9">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -906,26 +1215,21 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 14. Finale                                                   -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel soundcheck-finale-glow noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-run-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 35%, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0) 60%); opacity: 0.55;"></div>
-                    <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 60%, rgba(239, 68, 68, 0.24), rgba(239, 68, 68, 0) 60%); opacity: 0.5;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
                 </div>
-
                 <div class="relative z-10">
-                    <div class="mb-8 flex justify-center" aria-hidden="true">
-                        <span class="es-vu"><span class="es-vu-face"></span><span class="es-vu-needle"></span><span class="es-vu-cap"></span></span>
-                    </div>
+                    <p class="es-run-tag mb-4">Free forever</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop paying to fill your <span class="text-gradient-soundcheck">own room</span>
+                        Load-in is at two. <span class="es-run-lit">The page can be ready by one.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Your venue. Your calendar. Your ticket revenue. Free forever.
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
+                        Put the whole day on one link, keep every penny of the door, and stop answering the same question fourteen times before soundcheck.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
@@ -935,9 +1239,9 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl soundcheck-btn px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-run-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] dark:text-[#17181b]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Create Your Venue Calendar
+                                Create your calendar
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -951,6 +1255,24 @@
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav: pips labelled with call times -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 font-mono text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#17181b] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

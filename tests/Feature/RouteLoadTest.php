@@ -238,6 +238,9 @@ class RouteLoadTest extends TestCase
             '/docs/saas',
             '/docs/saas/custom-domains',
             '/docs/saas/twilio',
+            '/docs/saas/federation',
+            '/docs/saas/monetization',
+            '/docs/selfhost/federation',
             '/docs/developer/api',
             '/docs/developer/webhooks',
         ]);

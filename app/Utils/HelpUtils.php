@@ -158,6 +158,10 @@ class HelpUtils
                 'tab-checkins' => '/docs/analytics#checkins',
             ],
         ],
+        // Buying an on-network promotion lives under /promotions, so the boost* pattern below
+        // never matches it. Without this the Help button on the purchase form would open the
+        // Facebook/Instagram docs, which describe a different product entirely.
+        'promotions*' => '/docs/boost#on-network',
         'boost*' => '/docs/boost',
         'scan' => '/docs/tickets#check-in',
         'checkin' => '/docs/tickets#check-in',

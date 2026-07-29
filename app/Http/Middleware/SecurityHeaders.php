@@ -69,39 +69,20 @@ class SecurityHeaders
         $isLocal = app()->environment('local');
         $host = $request->getHost();
 
-        // Build CSP based on environment
-        if ($isLocal) {
-            // More permissive CSP for development
-            $csp = [
-                "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com *.sentry.io challenges.cloudflare.com cdn.jsdelivr.net cdn.onesignal.com *.onesignal.com",
-                "style-src 'self' 'unsafe-inline' {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com cdn.jsdelivr.net",
-                "img-src 'self' data: https: {$host}:* *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com eventschedule.nyc3.digitaloceanspaces.com cdn.jsdelivr.net",
-                "font-src 'self' data: {$host}:* *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
-                "connect-src 'self' {$host}:* ws://{$host}:* wss://{$host}:* *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co *.onesignal.com *.os.tc",
-                "worker-src 'self' cdn.onesignal.com *.onesignal.com",
-                "manifest-src 'self'",
-                "frame-src 'self' *.{$host} *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com *.google.com challenges.cloudflare.com",
-                "object-src 'none'",
-                "base-uri 'self'",
-            ];
-        } else {
-            // Stricter CSP for production
-            // Note: 'unsafe-inline' is kept as a fallback for CSP Level 1 browsers; Level 2+ browsers ignore it when nonces are present
-            $csp = [
-                "default-src 'self'",
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-{$nonce}' *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com unpkg.com js.sentry-cdn.com browser.sentry-cdn.com *.sentry.io challenges.cloudflare.com cdn.jsdelivr.net cdn.onesignal.com *.onesignal.com",
-                "style-src 'self' 'unsafe-inline' *.googleapis.com *.gstatic.com *.bootstrapcdn.com cdn.jsdelivr.net",
-                "img-src 'self' data: https: *.googleapis.com *.gstatic.com *.googletagmanager.com *.stripe.com *.ytimg.com eventschedule.nyc3.cdn.digitaloceanspaces.com eventschedule.nyc3.digitaloceanspaces.com cdn.jsdelivr.net",
-                "font-src 'self' data: *.googleapis.com *.gstatic.com *.bootstrapcdn.com",
-                "connect-src 'self' *.googleapis.com *.google-analytics.com *.googletagmanager.com *.jsdelivr.net *.stripe.com *.sentry.io *.sentry-cdn.com ipapi.co *.onesignal.com *.os.tc",
-                "worker-src 'self' cdn.onesignal.com *.onesignal.com",
-                "manifest-src 'self'",
-                "frame-src 'self' *.eventschedule.com *.stripe.com *.youtube.com *.youtube-nocookie.com *.googletagmanager.com *.google.com challenges.cloudflare.com",
-                "object-src 'none'",
-                "base-uri 'self'",
-                'upgrade-insecure-requests',
-            ];
+        $directives = $this->baseDirectives($isLocal, $host, $nonce);
+
+        // Opt-in third-party integrations widen the policy only when they are actually
+        // configured, so an install that uses none of them keeps the tight default.
+        foreach ($this->conditionalSources() as $directive => $sources) {
+            if (isset($directives[$directive])) {
+                $directives[$directive] = array_merge($directives[$directive], $sources);
+            }
+        }
+
+        $csp = [];
+        foreach ($directives as $directive => $sources) {
+            // A valueless directive (upgrade-insecure-requests) is stored with an empty source list.
+            $csp[] = $sources === [] ? $directive : $directive.' '.implode(' ', $sources);
         }
 
         // Allow frame-ancestors only on validated embeddable routes
@@ -117,5 +98,131 @@ class SecurityHeaders
         }
 
         return $response;
+    }
+
+    /**
+     * The always-on CSP directives, as directive => list of source expressions.
+     *
+     * This used to be two hand-maintained arrays (one for local, one for production) that
+     * had to be edited in lockstep - adding a host to one and forgetting the other was a
+     * silent, environment-specific failure. The two differ only in the marked spots.
+     *
+     * Note: 'unsafe-inline' is kept as a fallback for CSP Level 1 browsers; Level 2+
+     * browsers ignore it when nonces are present.
+     *
+     * @return array<string, list<string>>
+     */
+    protected function baseDirectives(bool $isLocal, string $host, string $nonce): array
+    {
+        return [
+            'default-src' => ["'self'"],
+
+            'script-src' => array_merge(
+                ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'nonce-{$nonce}'"],
+                $isLocal ? ["{$host}:*"] : [],
+                ['*.googleapis.com', '*.gstatic.com', '*.googletagmanager.com', '*.stripe.com',
+                    'unpkg.com', 'js.sentry-cdn.com'],
+                $isLocal ? [] : ['browser.sentry-cdn.com'],
+                ['*.sentry.io', 'challenges.cloudflare.com', 'cdn.jsdelivr.net',
+                    'cdn.onesignal.com', '*.onesignal.com'],
+            ),
+
+            'style-src' => array_merge(
+                ["'self'", "'unsafe-inline'"],
+                $isLocal ? ["{$host}:*"] : [],
+                ['*.googleapis.com', '*.gstatic.com', '*.bootstrapcdn.com', 'cdn.jsdelivr.net'],
+            ),
+
+            'img-src' => array_merge(
+                ["'self'", 'data:', 'https:'],
+                $isLocal ? ["{$host}:*"] : [],
+                ['*.googleapis.com', '*.gstatic.com', '*.googletagmanager.com', '*.stripe.com',
+                    '*.ytimg.com', 'eventschedule.nyc3.cdn.digitaloceanspaces.com',
+                    'eventschedule.nyc3.digitaloceanspaces.com', 'cdn.jsdelivr.net'],
+            ),
+
+            'font-src' => array_merge(
+                ["'self'", 'data:'],
+                $isLocal ? ["{$host}:*"] : [],
+                ['*.googleapis.com', '*.gstatic.com', '*.bootstrapcdn.com'],
+            ),
+
+            'connect-src' => array_merge(
+                ["'self'"],
+                $isLocal ? ["{$host}:*", "ws://{$host}:*", "wss://{$host}:*"] : [],
+                ['*.googleapis.com', '*.google-analytics.com', '*.googletagmanager.com',
+                    '*.jsdelivr.net', '*.stripe.com', '*.sentry.io', '*.sentry-cdn.com',
+                    'ipapi.co', '*.onesignal.com', '*.os.tc'],
+            ),
+
+            'worker-src' => ["'self'", 'cdn.onesignal.com', '*.onesignal.com'],
+
+            'manifest-src' => ["'self'"],
+
+            // Production hardcodes *.eventschedule.com rather than *.{$host}. That is wrong for a
+            // self-hosted SaaS operator on their own domain, but fixing it is a behaviour change
+            // that does not belong in a monetization PR - left as-is deliberately.
+            'frame-src' => array_merge(
+                ["'self'", $isLocal ? "*.{$host}" : '*.eventschedule.com'],
+                ['*.stripe.com', '*.youtube.com', '*.youtube-nocookie.com',
+                    '*.googletagmanager.com', '*.google.com', 'challenges.cloudflare.com'],
+            ),
+
+            'object-src' => ["'none'"],
+
+            'base-uri' => ["'self'"],
+
+            ...($isLocal ? [] : ['upgrade-insecure-requests' => []]),
+        ];
+    }
+
+    /**
+     * Extra sources contributed by optional integrations, keyed by directive.
+     *
+     * Each block is gated on that integration actually being configured, so a install that
+     * has not opted in keeps exactly the policy it had before the integration existed.
+     *
+     * @return array<string, list<string>>
+     */
+    protected function conditionalSources(): array
+    {
+        $extra = [];
+
+        // Google AdSense. Host-source allow-listing is sufficient and 'strict-dynamic' would
+        // be actively harmful here: it makes conforming browsers ignore EVERY host-source
+        // expression in the directive, which would silently disable Stripe, Turnstile,
+        // jsDelivr, unpkg and anything an operator injects via custom_header_code. The
+        // creatives themselves render in cross-origin iframes, into which this policy does
+        // not propagate, so frame-src is all that is needed to reach them.
+        if (\App\Services\AdsService::adSenseConfigured()) {
+            $extra['script-src'] = [
+                'pagead2.googlesyndication.com', '*.googlesyndication.com',
+                'partner.googleadservices.com', '*.googletagservices.com',
+                'adservice.google.com', '*.doubleclick.net',
+                // Google's own consent management platform, which an operator serving the
+                // EEA/UK has to enable in their AdSense account.
+                'fundingchoicesmessages.google.com',
+            ];
+            $extra['frame-src'] = [
+                '*.googlesyndication.com', '*.doubleclick.net', '*.adtrafficquality.google',
+            ];
+            $extra['connect-src'] = [
+                '*.googlesyndication.com', '*.doubleclick.net', '*.google.com',
+                '*.adtrafficquality.google', 'fundingchoicesmessages.google.com',
+            ];
+            // img-src already carries the bare `https:` scheme source, so creatives load
+            // without any addition there.
+        }
+
+        // The Meta Pixel bootstrap in app-guest.blade.php script-inserts fbevents.js. A
+        // script-inserted script is still matched against script-src host sources (no
+        // 'strict-dynamic' here, and Meta's snippet does not copy our nonce onto the tag),
+        // so without this the pixel was silently blocked and fbq never flushed its queue.
+        if (config('services.meta.pixel_id')) {
+            $extra['script-src'][] = 'connect.facebook.net';
+            $extra['connect-src'][] = 'www.facebook.com';
+        }
+
+        return $extra;
     }
 }

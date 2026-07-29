@@ -301,7 +301,7 @@ class Event extends Model
         static::deleting(function ($event) {
             // Cancel active boost campaigns on Meta and issue refunds
             $activeCampaigns = $event->boostCampaigns()
-                ->whereIn('status', ['active', 'paused', 'pending_payment'])
+                ->unsettled()
                 ->get();
 
             foreach ($activeCampaigns as $campaign) {
@@ -313,15 +313,18 @@ class Event extends Model
 
                     $campaign->update(['status' => 'cancelled', 'meta_status' => $campaign->meta_campaign_id ? 'DELETED' : null]);
 
-                    if (config('app.hosted') && ! config('app.is_testing')) {
-                        $billingService = new \App\Services\BoostBillingService;
-                        if ($campaign->billing_status === 'charged') {
-                            $campaign->actual_spend && $campaign->actual_spend > 0
-                                ? $billingService->refundUnspent($campaign)
-                                : $billingService->refundFull($campaign);
-                        } elseif ($campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
-                            $billingService->cancelPaymentIntent($campaign);
-                        }
+                    $billingService = new \App\Services\BoostBillingService;
+
+                    // Gate the STRIPE call, not the refund. settlePayment()'s credit branch debits
+                    // boost_credit regardless of mode, so gating the whole block meant deleting a
+                    // schedule on selfhost destroyed the advertiser's wallet balance outright.
+                    // refundOnCancellation() reaches Stripe only when there is an intent, which a
+                    // selfhost campaign never has. BoostController::cancel() already works this way.
+                    if ($campaign->billing_status === 'charged') {
+                        $billingService->refundOnCancellation($campaign);
+                    } elseif (config('app.hosted') && ! config('app.is_testing')
+                        && $campaign->billing_status === 'pending' && $campaign->stripe_payment_intent_id) {
+                        $billingService->cancelPaymentIntent($campaign);
                     }
                 } catch (\Exception $e) {
                     \Log::error('Failed to cancel boost campaign during event deletion', [
@@ -3367,9 +3370,32 @@ class Event extends Model
         return $this->hasMany(BoostCampaign::class);
     }
 
+    /**
+     * The event's active Meta Ads campaign, if any.
+     *
+     * Scoped to channel='meta' deliberately. This relation gates two things that talk to
+     * Facebook: the Meta Pixel in app-guest.blade.php, and StripeController::sendMetaConversion(),
+     * which POSTs the buyer's hashed email to Meta's Conversions API. An on-network promotion
+     * has nothing to do with Meta, so without this filter promoting an event on this platform
+     * would silently start sending its purchase data to Facebook.
+     */
     public function activeBoostCampaign()
     {
-        return $this->hasOne(BoostCampaign::class)->where('status', 'active')->latest();
+        return $this->hasOne(BoostCampaign::class)
+            ->where('channel', 'meta')
+            ->where('status', 'active')
+            ->latest();
+    }
+
+    /**
+     * The event's active on-network promotion, if any.
+     */
+    public function activeNetworkPromotion()
+    {
+        return $this->hasOne(BoostCampaign::class)
+            ->where('channel', 'network')
+            ->where('status', 'active')
+            ->latest();
     }
 
     /**

@@ -150,6 +150,13 @@ class AuditService
 
     const BOOST_CANCEL = 'boost.cancel';
 
+    // On-network promotion actions
+    const PROMO_CREATE = 'promo.create';
+
+    const PROMO_APPROVE = 'promo.approve';
+
+    const PROMO_REJECT = 'promo.reject';
+
     // Webhook actions
     const WEBHOOK_CREATE = 'webhook.create';
 

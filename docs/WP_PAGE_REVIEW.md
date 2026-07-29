@@ -76,7 +76,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 > **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; never use decorative line drawings (outline SVG illustrations of objects or scenes) - see CLAUDE.md; no new dependencies or external assets.
 
-**Restyle progress:** 6 / 31 applied
+**Restyle progress:** 14 / 31 applied
 
 **Verified (Jul 2026 audit):** 31 / 31 audited faithful to their briefs; 8 pages received small brief-completion fixes (see the Verified column).
 
@@ -88,14 +88,14 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | ✅ | ✅ | For Circus and Acrobatics | `/for-circus-acrobatics` | "The Center Ring" ground-up rebuild |
 | ✅ | ✅ | ✅ | For Magicians | `/for-magicians` | "Pick a Card" ground-up rebuild |
 | ✅ | ✅ | ✅ | For Spoken Word | `/for-spoken-word` | "The Sign-Up Sheet" ground-up rebuild |
-| ✅ |  | ✅ FAQ accent hover | For Bars | `/for-bars` | |
-| ✅ |  | ✅ | For Nightclubs | `/for-nightclubs` | |
-| ✅ |  | ✅ | For Music Venues | `/for-music-venues` | |
-| ✅ |  | ✅ added season pass | For Theaters | `/for-theaters` | |
-| ✅ |  | ✅ | For Dance Groups | `/for-dance-groups` | |
-| ✅ |  | ✅ | For Theater Performers | `/for-theater-performers` | |
-| ✅ |  | ✅ finale motif added | For Food Trucks and Vendors | `/for-food-trucks-and-vendors` | |
-| ✅ |  | ✅ | For Comedy Clubs | `/for-comedy-clubs` | |
+| ✅ | ✅ | ✅ FAQ accent hover | For Bars | `/for-bars` | "The Chalkboard" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Nightclubs | `/for-nightclubs` | "The Door" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Music Venues | `/for-music-venues` | "The Running Order" ground-up rebuild |
+| ✅ | ✅ | ✅ added season pass | For Theaters | `/for-theaters` | "The Run" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Dance Groups | `/for-dance-groups` | "The Barre" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Theater Performers | `/for-theater-performers` | "The Résumé" ground-up rebuild |
+| ✅ | ✅ | ✅ finale motif added | For Food Trucks and Vendors | `/for-food-trucks-and-vendors` | "Today's Stop" ground-up rebuild |
+| ✅ | ✅ | ✅ | For Comedy Clubs | `/for-comedy-clubs` | "Friday at Eight" ground-up rebuild |
 | ✅ |  | ✅ course labels | For Restaurants | `/for-restaurants` | |
 | ✅ |  | ✅ FAQ accent hover | For Breweries and Wineries | `/for-breweries-and-wineries` | |
 | ✅ |  | ✅ finale aurora recolored | For Art Galleries | `/for-art-galleries` | |

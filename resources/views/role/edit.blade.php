@@ -3303,6 +3303,23 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('hide_past_events')" />
                             </div>
 
+                            {{-- Free rather than Pro-gated on purpose: forcing a schedule to
+                                 carry a competitor's promotion with no way out is exactly the
+                                 abuse this feature has to avoid, and opting out only removes
+                                 that schedule's own inventory.
+                                 Shown when EITHER half is on: the toggle now suppresses AdSense
+                                 too, so gating it on the promotions network alone left an
+                                 AdSense-only instance with ads and no way to decline them. --}}
+                            @if (\App\Services\PromotionService::isEnabled() || \App\Services\AdsService::adSenseConfigured())
+                            <div class="mb-6">
+                                <x-toggle name="promotions_opt_out"
+                                    label="{{ __('messages.promotions_opt_out') }}"
+                                    checked="{{ old('promotions_opt_out', $role->promotions_opt_out) }}"
+                                    help="{{ __('messages.promotions_opt_out_help') }}" />
+                                <x-input-error class="mt-2" :messages="$errors->get('promotions_opt_out')" />
+                            </div>
+                            @endif
+
                             {{-- Only rendered once the operator has switched the network
                                  on for the whole install. Without that gate a SaaS
                                  operator's customers could opt into a network the

@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for farmers markets?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your market schedule, building a shopper following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan."
+                    "text": "Yes. Event Schedule is free forever for sharing your market schedule, building a shopper following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan."
                 }
             },
             {
@@ -834,7 +834,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for farmers markets?', 'Yes. Event Schedule is free forever for sharing your market schedule, building a shopper following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan.'],
+                    ['Is Event Schedule free for farmers markets?', 'Yes. Event Schedule is free forever for sharing your market schedule, building a shopper following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan.'],
                     ['Can I list vendors and special events for each market day?', 'Yes. Create recurring events for your regular market days and add special events like cooking demos, live music, and seasonal festivals. Use sub-schedules to organize by vendor type, entertainment, or special programming.'],
                     ['How do shoppers find out about market days and events?', 'Shoppers can follow your market\'s schedule and receive email notifications for upcoming events. Embed your calendar on your website, share on social media, or send newsletters with weekly highlights and featured vendors.'],
                     ['Can I manage vendor applications and booth fees?', 'Yes. Use ticketing to manage vendor booth reservations and collect fees through Stripe with zero platform fees. Vendors receive confirmation with QR codes for check-in on market day.'],

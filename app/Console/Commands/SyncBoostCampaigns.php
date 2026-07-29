@@ -25,7 +25,12 @@ class SyncBoostCampaigns extends Command
     {
         $metaService = $this->getMetaService();
 
-        $campaigns = BoostCampaign::whereIn('status', ['active', 'paused'])
+        // The meta_campaign_id filter already excludes network promotions, but state the
+        // channel explicitly: this whole command talks to the Meta API, and relying on a
+        // side effect would make a future change here quietly start calling Meta for
+        // campaigns Meta has never heard of. Network promotions have their own promo:sync.
+        $campaigns = BoostCampaign::meta()
+            ->whereIn('status', ['active', 'paused'])
             ->whereNotNull('meta_campaign_id')
             ->with(['ads', 'user'])
             ->get();
@@ -207,6 +212,29 @@ class SyncBoostCampaigns extends Command
             });
     }
 
+    /**
+     * Bring a recovered campaign out of pending_payment, respecting its channel.
+     *
+     * The two channels diverge here. A Meta campaign goes straight to active and hands off
+     * to the API. A network promotion has not been reviewed yet, so sending it to active
+     * would let it start serving on other schedules' pages without ever passing through
+     * moderation - the one thing the review queue exists to prevent.
+     */
+    private function activateRecoveredCampaign(BoostCampaign $campaign): void
+    {
+        if ($campaign->isNetwork()) {
+            $campaign->update([
+                'status' => \App\Services\PromotionModerationService::activationStatusFor($campaign),
+                'moderation_status' => \App\Services\PromotionModerationService::moderationStatusFor($campaign),
+            ]);
+
+            return;
+        }
+
+        $campaign->update(['status' => 'active']);
+        \App\Jobs\CreateBoostCampaign::dispatch($campaign);
+    }
+
     private function recoverStalePendingPayments(): void
     {
         $staleCampaigns = BoostCampaign::where('status', 'pending_payment')
@@ -225,8 +253,7 @@ class SyncBoostCampaigns extends Command
             try {
                 if (config('app.is_testing')) {
                     // In testing mode, activate stale campaigns without Stripe check
-                    $campaign->update(['status' => 'active']);
-                    \App\Jobs\CreateBoostCampaign::dispatch($campaign);
+                    $this->activateRecoveredCampaign($campaign);
                     Log::info('Recovered stale pending_payment campaign (testing) - activated', ['campaign_id' => $campaign->id]);
 
                     continue;
@@ -241,8 +268,7 @@ class SyncBoostCampaigns extends Command
                         // Payment was charged - confirm and activate the campaign
                         $confirmed = $billingService->confirmPayment($campaign, $campaign->stripe_payment_intent_id);
                         if ($confirmed) {
-                            $campaign->update(['status' => 'active']);
-                            \App\Jobs\CreateBoostCampaign::dispatch($campaign);
+                            $this->activateRecoveredCampaign($campaign);
                             Log::info('Recovered stale pending_payment campaign - activated', ['campaign_id' => $campaign->id]);
 
                             continue;

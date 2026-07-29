@@ -14,6 +14,17 @@ class ExpireBoostCampaigns extends Command
 
     public function handle()
     {
+        // Deliberately channel-blind. SyncBoostCampaigns::recoverStalePendingPayments() selects
+        // the identical set at the identical threshold and RECOVERS it when the intent actually
+        // succeeded - but that lives inside boost:sync, which is gated on Meta being configured.
+        // So on a network-only install a buyer whose card was charged and whose store() request
+        // then died is expired here rather than recovered: cancelPaymentIntent() refunds them in
+        // full, so no money is lost, but they have to buy again.
+        //
+        // Scoping this to ::meta() would be worse - nothing else cleans up network
+        // pending_payment rows on such an install, so they would sit forever. Teaching the
+        // network path its own recovery means duplicating the Stripe retrieve-and-confirm logic
+        // above; worth doing if this turns out to happen in practice.
         $staleCampaigns = BoostCampaign::where('status', 'pending_payment')
             ->where('created_at', '<', now()->subMinutes(30))
             ->get();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AdminPlanUpdateRequest;
+use App\Mail\PromotionDecision;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsReferrersDaily;
@@ -25,6 +26,7 @@ use App\Services\AuditService;
 use App\Services\BoostBillingService;
 use App\Services\DemoService;
 use App\Services\DigitalOceanService;
+use App\Services\OneSignalService;
 use App\Utils\UrlUtils;
 use Carbon\Carbon;
 use Illuminate\Auth\Events\Verified;
@@ -35,6 +37,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Laravel\Cashier\Subscription;
@@ -2566,12 +2569,24 @@ class AdminController extends Controller
         $totalCampaignsInPeriod = BoostCampaign::whereBetween('created_at', [$startDate, $endDate])->count();
         $activeCampaigns = BoostCampaign::where('status', 'active')->count();
 
+        // Net of refunds. A refund record writes markup_amount = 0 (there is no markup to
+        // reverse - the money goes back as principal), so summing charges alone reported the
+        // full markup on a campaign that was refunded most of its budget.
         $markupRevenue = BoostBillingRecord::where('type', 'charge')
             ->where('status', 'completed')
             ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('markup_amount');
+            ->sum('markup_amount')
+            - BoostBillingRecord::where('type', 'refund')
+                ->where('status', 'completed')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->sum('markup_amount');
 
-        $totalAdSpend = BoostCampaign::whereBetween('created_at', [$startDate, $endDate])
+        // Meta only. This tile means "money that left for an external ad platform"; a network
+        // promotion buys inventory on this instance, so its delivery is revenue the operator
+        // KEPT, not a cost. Summing both channels counted the same money as spend and as
+        // revenue, and disagreed with the SUM(meta_spend) chart rendered beside it.
+        $totalAdSpend = BoostCampaign::meta()
+            ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('actual_spend');
 
         $totalRefunds = BoostBillingRecord::where('type', 'refund')
@@ -2741,7 +2756,18 @@ class AdminController extends Controller
             ->limit(30)
             ->get();
 
+        // Approve-before-serve review queue. Same predicate as AdminAlertService's
+        // promos_pending count, so the dashboard badge and this panel can never disagree.
+        $pendingPromotions = \App\Services\PromotionService::isEnabled()
+            ? BoostCampaign::awaitingReview()
+                ->with(['event', 'role', 'user', 'ads'])
+                ->orderBy('created_at')
+                ->limit(50)
+                ->get()
+            : collect();
+
         return view('admin.boost', compact(
+            'pendingPromotions',
             'range',
             'totalCampaignsAllTime',
             'totalCampaignsInPeriod',
@@ -2867,7 +2893,97 @@ class AdminController extends Controller
             'federationUnverified' => $federationAvailable ? $federation->unverifiedScheduleCount() : 0,
             // The other reason the preview is shorter than the operator expects.
             'federationUndecided' => $federationAvailable ? $federation->undecidedScheduleCount() : 0,
+
+            // Monetization is off unless the deploy opted in via ADS_ENABLED, so the card
+            // stays hidden entirely rather than offering a switch that does nothing.
+            // Hosted-only, and not on the nexus - the same two conditions Role::showAds() uses
+            // to decide whether any page can carry an ad. Off-hosted, actualPlanTier() returns
+            // 'enterprise' for every schedule, so there is no free tier and nothing can ever
+            // render; the card previously accepted a publisher ID, saved it successfully, and
+            // did nothing, with no indication why.
+            'adsAvailable' => \App\Services\AdsService::isEnabled()
+                && config('app.hosted')
+                && ! config('app.is_nexus'),
+            'adsAdsenseEnabled' => \App\Services\AdsService::boolSetting('adsense_enabled'),
+            'adsAdsenseClientId' => \App\Services\AdsService::setting('adsense_client_id'),
+            'adsAdsenseSlotId' => \App\Services\AdsService::setting('adsense_slot_id'),
+            'adsPersonalized' => \App\Services\AdsService::boolSetting('personalized'),
+            'adsNativeEnabled' => \App\Services\AdsService::boolSetting('native_enabled'),
+            'adsNativePriority' => \App\Services\AdsService::boolSetting('native_priority'),
+            'adsNativeCpm' => \App\Services\AdsService::setting('native_cpm'),
+            'adsNativeCpc' => \App\Services\AdsService::setting('native_cpc'),
         ]);
+    }
+
+    /**
+     * Persist the monetization settings (AdSense + native promotions network).
+     *
+     * Deliberately a separate endpoint from updateSettings(). The cards that share that
+     * action each have to carry every other card's values through as hidden inputs, which
+     * grows quadratically and fails silently - saving one card wipes another. Owning only
+     * the ads_* keys means this card needs no pass-through and can clobber nothing.
+     */
+    public function updateAdsSettings(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Same three conditions as the card's own visibility, so a POST cannot store settings
+        // for a deployment that can never act on them.
+        if (! \App\Services\AdsService::isEnabled() || ! config('app.hosted') || config('app.is_nexus')) {
+            return redirect()->route('admin.settings')->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate([
+            'ads_adsense_enabled' => ['nullable', 'boolean'],
+            // Both of these are interpolated into a <script src> URL, so they are validated
+            // rather than trusted just because a super-admin typed them.
+            'ads_adsense_client_id' => ['nullable', 'string', 'max:64', 'regex:/^ca-pub-\d{10,20}$/'],
+            'ads_adsense_slot_id' => ['nullable', 'string', 'max:32', 'regex:/^\d+$/'],
+            'ads_personalized' => ['nullable', 'boolean'],
+            'ads_native_enabled' => ['nullable', 'boolean'],
+            'ads_native_priority' => ['nullable', 'boolean'],
+            'ads_native_cpm' => ['nullable', 'numeric', 'min:0', 'max:10000'],
+            'ads_native_cpc' => ['nullable', 'numeric', 'min:0', 'max:10000'],
+        ]);
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $flags = ['adsense_enabled', 'personalized', 'native_enabled', 'native_priority'];
+        $values = ['adsense_client_id', 'adsense_slot_id', 'native_cpm', 'native_cpc'];
+
+        $old = [];
+        $new = [];
+
+        // Booleans are stored as '1'/'0', never '1'/null. A null read falls through to the
+        // config/env default in AdsService::setting(), so storing null for "off" would make
+        // the switch silently mean "on" wherever the matching env var is set.
+        foreach ($flags as $flag) {
+            $old['ads_'.$flag] = Setting::get('ads_'.$flag);
+            $new['ads_'.$flag] = $request->boolean('ads_'.$flag) ? '1' : '0';
+            Setting::set('ads_'.$flag, $new['ads_'.$flag]);
+        }
+
+        foreach ($values as $value) {
+            $old['ads_'.$value] = Setting::get('ads_'.$value);
+            $new['ads_'.$value] = $request->input('ads_'.$value);
+            Setting::set('ads_'.$value, $new['ads_'.$value]);
+        }
+
+        AuditService::log(
+            AuditService::ADMIN_SETTINGS_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            $old,
+            $new,
+            'Updated monetization settings',
+        );
+
+        return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));
     }
 
     /**
@@ -3078,6 +3194,143 @@ class AdminController extends Controller
         AuditService::log(AuditService::ADMIN_UPDATE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'Refunded amount_mismatch boost');
 
         return redirect()->back()->with('success', __('messages.boost_refunded'));
+    }
+
+    /**
+     * Approve an on-network promotion so it can start serving.
+     */
+    public function approvePromotion(Request $request, $campaignId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $campaign = BoostCampaign::awaitingReview()->find($campaignId);
+
+        if (! $campaign) {
+            return redirect()->back()->with('error', __('messages.boost_not_found'));
+        }
+
+        $campaign->update([
+            'moderation_status' => 'approved',
+            'moderated_by' => auth()->id(),
+            'moderated_at' => now(),
+            // Only a paid campaign starts delivering; one still awaiting payment stays put.
+            'status' => $campaign->billing_status === 'charged' ? 'active' : $campaign->status,
+        ]);
+
+        // The candidate snapshot is cached, so without this the approval would not take
+        // effect until the TTL expired.
+        app(\App\Services\PromotionService::class)->forgetCandidates();
+
+        $this->notifyPromotionDecision($campaign->fresh(), true);
+
+        AuditService::log(AuditService::PROMO_APPROVE, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id);
+
+        return redirect()->back()->with('success', __('messages.promotion_approved'));
+    }
+
+    /**
+     * Reject an on-network promotion and refund the advertiser.
+     */
+    public function rejectPromotion(Request $request, $campaignId)
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate(['moderation_notes' => ['nullable', 'string', 'max:2000']]);
+
+        $campaign = BoostCampaign::awaitingReview()->find($campaignId);
+
+        if (! $campaign) {
+            return redirect()->back()->with('error', __('messages.boost_not_found'));
+        }
+
+        $campaign->update([
+            'moderation_status' => 'rejected',
+            'moderation_notes' => $request->input('moderation_notes'),
+            'moderated_by' => auth()->id(),
+            'moderated_at' => now(),
+            'status' => 'rejected',
+        ]);
+
+        // Set the ad's own status, NOT meta_status: 'DISAPPROVED' there is Meta's verdict and
+        // drives the boosts_disapproved alert, which must stay uncontaminated by this channel.
+        $campaign->ads()->update(['status' => 'rejected']);
+
+        $this->refundRejectedPromotion($campaign);
+
+        app(\App\Services\PromotionService::class)->forgetCandidates();
+
+        $this->notifyPromotionDecision($campaign->fresh(), false);
+
+        AuditService::log(AuditService::PROMO_REJECT, auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id);
+
+        return redirect()->back()->with('success', __('messages.promotion_rejected'));
+    }
+
+    /**
+     * Tell the advertiser what happened to their campaign.
+     *
+     * An advertiser who has already paid and is waiting on a review must not be left
+     * guessing, so both outcomes notify - mail plus push, mirroring what the Meta channel
+     * already does on campaign creation.
+     */
+    private function notifyPromotionDecision(?BoostCampaign $campaign, bool $approved): void
+    {
+        // fresh() returns null if the row vanished mid-request, and ->user on null is fatal.
+        if (! $campaign || ! $campaign->user) {
+            return;
+        }
+
+        try {
+            Mail::to($campaign->user->email)->send(new PromotionDecision($campaign, $approved));
+        } catch (\Throwable $e) {
+            // A failed notification must not roll back a completed moderation decision.
+            Log::warning('Failed to send promotion decision email', [
+                'campaign_id' => $campaign->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        OneSignalService::pushToUser($campaign->user, [
+            'title_key' => $approved ? 'messages.push_promotion_approved_title' : 'messages.push_promotion_rejected_title',
+            'body_key' => $approved ? 'messages.push_promotion_approved_body' : 'messages.push_promotion_rejected_body',
+            'url' => route('boost.show', ['hash' => $campaign->hashedId()]),
+            'options' => [],
+        ]);
+    }
+
+    /**
+     * Return the money for a rejected promotion.
+     *
+     * A rejected campaign has never served, so this is always a full refund - down the same
+     * fork BoostController::cancel() uses: credit back to the wallet when it was paid that
+     * way, Stripe otherwise.
+     */
+    private function refundRejectedPromotion(BoostCampaign $campaign): void
+    {
+        if ($campaign->billing_status !== 'charged') {
+            return;
+        }
+
+        if (! $campaign->stripe_payment_intent_id) {
+            // Delegated: the inline version checked billing_status outside its transaction and
+            // locked only the Role, so two admins working the queue - or one double-click -
+            // both passed the guard and both credited the wallet. refundCreditRemainder()
+            // locks the CAMPAIGN and re-reads the status under that lock.
+            //
+            // Same amount: a rejected promotion never served, so actual_spend is 0 and
+            // min(user_budget * (1 + markup_rate), total_charged) is exactly total_charged.
+            (new BoostBillingService)->refundCreditRemainder($campaign);
+
+            return;
+        }
+
+        if (config('app.hosted') && ! config('app.is_testing')) {
+            (new BoostBillingService)->refundFull($campaign);
+        }
     }
 
     /**

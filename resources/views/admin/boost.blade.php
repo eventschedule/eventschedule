@@ -43,6 +43,60 @@
             </x-stat-panel>
         </div>
 
+        {{-- Promotion review queue. Approve-before-serve: a campaign here has already been
+             paid for and is waiting, so it sits above the general campaign table. --}}
+        @if ($pendingPromotions->count() > 0)
+        <div id="promo-queue" class="ap-card rounded-xl shadow p-6 scroll-mt-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                {{ trans_choice('messages.admin_alert_promos_pending', $pendingPromotions->count(), ['count' => $pendingPromotions->count()]) }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">@lang('messages.promotion_review_intro')</p>
+
+            <div class="space-y-4">
+                @foreach ($pendingPromotions as $promo)
+                @php $ad = $promo->ads->first(); @endphp
+                <div class="rounded-xl border border-gray-200 dark:border-[#2d2d30] p-4">
+                    <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div class="flex items-start gap-4 min-w-0">
+                            @if ($ad?->image_url)
+                            <img src="{{ $ad->image_url }}" alt="" class="h-16 w-16 flex-none rounded-lg object-cover bg-gray-100 dark:bg-[#252526]">
+                            @endif
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $ad?->headline ?? $promo->event?->name }}</p>
+                                @if ($ad?->primary_text)
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $ad->primary_text }}</p>
+                                @endif
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $promo->role?->name }} &middot; {{ $promo->user?->email }}
+                                    &middot; {{ $promo->getCurrencySymbol() }}{{ number_format($promo->user_budget, 2) }}
+                                    &middot; {{ strtoupper($promo->pricing_model) }}
+                                </p>
+                                @if ($ad?->destination_url)
+                                <p class="mt-1 text-xs break-all text-gray-400 dark:text-gray-500">{{ $ad->destination_url }}</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="flex flex-none flex-col gap-2 sm:flex-row">
+                            <form method="POST" action="{{ route('admin.promotions.approve', ['campaign' => $promo->id]) }}">
+                                @csrf
+                                <x-brand-button type="submit">@lang('messages.approve')</x-brand-button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.promotions.reject', ['campaign' => $promo->id]) }}" class="flex gap-2">
+                                @csrf
+                                <input type="text" name="moderation_notes" maxlength="2000"
+                                    placeholder="{{ __('messages.reason') }}"
+                                    class="w-40 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-[var(--brand-blue)] focus:ring-[var(--brand-blue)] text-sm">
+                                <x-danger-button type="submit">@lang('messages.reject')</x-danger-button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Alerts --}}
         @if ($stuckPending->count() > 0 || $failedCampaigns->count() > 0 || $disapprovedCampaigns->count() > 0)
         <div id="boost-alerts" class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 scroll-mt-4">

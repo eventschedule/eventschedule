@@ -1325,6 +1325,14 @@ class MarketingController extends Controller
         return view('marketing.docs.saas.federation');
     }
 
+    /**
+     * Monetization documentation page (SaaS operators).
+     */
+    public function docsSaasMonetization()
+    {
+        return view('marketing.docs.saas.monetization');
+    }
+
     public function docsSelfhostFederation()
     {
         return view('marketing.docs.selfhost.federation');
@@ -5239,6 +5247,7 @@ class MarketingController extends Controller
             'saas_custom_domains' => route('marketing.docs.saas.custom_domains'),
             'saas_twilio' => route('marketing.docs.saas.twilio'),
             'saas_federation' => route('marketing.docs.saas.federation'),
+            'saas_monetization' => route('marketing.docs.saas.monetization'),
             'selfhost_federation' => route('marketing.docs.selfhost.federation'),
             'developer_api' => route('marketing.docs.developer.api'),
             'developer_webhooks' => route('marketing.docs.developer.webhooks'),
@@ -5471,6 +5480,7 @@ class MarketingController extends Controller
 
             // Boost
             ['page' => 'Boost', 'section' => 'Overview', 'description' => 'Promote events with Facebook and Instagram ads.', 'url' => $r['boost'].'#overview', 'category' => 'User Guide', 'keywords' => 'boost promote advertise facebook instagram meta'],
+            ['page' => 'Boost', 'section' => 'On-Network Promotions', 'description' => 'Buy promoted placement on other schedules on this site, priced per view or per click.', 'url' => $r['boost'].'#on-network', 'category' => 'User Guide', 'keywords' => 'promotion promoted network cpm cpc budget targeting countries review refund'],
             ['page' => 'Boost', 'section' => 'Quick Mode', 'description' => 'Create ad campaigns quickly with minimal setup.', 'url' => $r['boost'].'#quick-mode', 'category' => 'User Guide', 'keywords' => 'quick fast simple campaign'],
             ['page' => 'Boost', 'section' => 'Advanced Mode', 'description' => 'Full control over budget, targeting, and creative.', 'url' => $r['boost'].'#advanced-mode', 'category' => 'User Guide', 'keywords' => 'advanced targeting budget creative'],
             ['page' => 'Boost', 'section' => 'Smart Defaults', 'description' => 'Automatic configuration based on event type.', 'url' => $r['boost'].'#smart-defaults', 'category' => 'User Guide', 'keywords' => 'defaults automatic smart'],
@@ -5618,6 +5628,12 @@ class MarketingController extends Controller
             ['page' => 'Twilio Integration', 'section' => 'WhatsApp Setup', 'description' => 'Register and configure WhatsApp messaging.', 'url' => $r['saas_twilio'].'#whatsapp', 'category' => 'SaaS', 'keywords' => 'whatsapp messaging sender'],
             ['page' => 'Twilio Integration', 'section' => 'Testing', 'description' => 'Test SMS and WhatsApp functionality.', 'url' => $r['saas_twilio'].'#testing', 'category' => 'SaaS', 'keywords' => 'test sms whatsapp verify'],
             ['page' => 'Federation', 'section' => 'Overview', 'description' => 'Share your public events with the eventschedule.com listings.', 'url' => $r['saas_federation'].'#overview', 'category' => 'SaaS', 'keywords' => 'federation network listings discovery traffic backlink'],
+            ['page' => 'Monetization', 'section' => 'Overview', 'description' => 'Show ads on free schedules and sell promotional placement to paid ones.', 'url' => $r['saas_monetization'].'#overview', 'category' => 'SaaS', 'keywords' => 'monetization ads adsense revenue advertising free tier earn'],
+            ['page' => 'Monetization', 'section' => 'Consent and privacy', 'description' => 'Consent management, non-personalized ads and Global Privacy Control.', 'url' => $r['saas_monetization'].'#consent', 'category' => 'SaaS', 'keywords' => 'consent gdpr cmp privacy personalized ads sec-gpc eea uk'],
+            ['page' => 'Monetization', 'section' => 'Google AdSense', 'description' => 'Configure your publisher ID and ad slot for free-tier pages.', 'url' => $r['saas_monetization'].'#adsense', 'category' => 'SaaS', 'keywords' => 'adsense google publisher id ad slot ca-pub display unit'],
+            ['page' => 'Monetization', 'section' => 'The promotions network', 'description' => 'Let paid schedules buy promotional placement on free schedules.', 'url' => $r['saas_monetization'].'#promotions', 'category' => 'SaaS', 'keywords' => 'promotions network cpm cpc budget placement advertise sponsored'],
+            ['page' => 'Monetization', 'section' => 'Reviewing promotions', 'description' => 'Approve or reject campaigns before they run.', 'url' => $r['saas_monetization'].'#review', 'category' => 'SaaS', 'keywords' => 'review approve reject moderation queue refund'],
+            ['page' => 'Monetization', 'section' => 'Where ads appear', 'description' => 'Which pages carry ads, and which never do.', 'url' => $r['saas_monetization'].'#where', 'category' => 'SaaS', 'keywords' => 'where ads appear checkout embed preview custom domain'],
             ['page' => 'Federation', 'section' => 'Turning it on', 'description' => 'Enable the network and register your install for review.', 'url' => $r['saas_federation'].'#enable', 'category' => 'SaaS', 'keywords' => 'enable turn on register approve settings'],
             ['page' => 'Federation', 'section' => 'Per-schedule control', 'description' => 'Each schedule opts in or out for itself; new schedules start out unlisted.', 'url' => $r['saas_federation'].'#per-schedule', 'category' => 'SaaS', 'keywords' => 'opt in opt out per schedule toggle undecided co-listed veto'],
             ['page' => 'Federation', 'section' => 'What a listing looks like', 'description' => 'Listings link straight back to the event on your site.', 'url' => $r['saas_federation'].'#listings', 'category' => 'SaaS', 'keywords' => 'listing card link backlink filter country language'],

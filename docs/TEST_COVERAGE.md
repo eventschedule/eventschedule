@@ -212,7 +212,9 @@ New Feature-test suites added this session (all use `tests/Feature/Concerns/Crea
 | Event graphics generator (Pro) | ✓ | `EventGraphicStructuralTest` (all 3 layouts generate valid PNGs) |
 | Scheduled graphic emails (Ent) | ✗ | — |
 | Built-in analytics dashboard | ✓ | `AdminFeaturesTest` (view recording + dashboard) |
-| Event boosting / Meta Ads (Pro) | ✗ | — (needs Meta Ads) |
+| Event boosting / Meta Ads (Pro) | ✓ | `BoostStoreCharacterizationTest` (purchase branches, markup, credit, caps; Meta API itself is faked) |
+| On-network promotions (Pro) | ✓ | `PromotionPurchaseTest`, `PromotionServingTest`, `PromotionBillingTest`, `PromotionClickTest`, `PromotionAnalyticsTest`, `PromotionRefundRoutingTest`, `PromotionSlotRenderTest` |
+| Tier-based ads (AdSense) | ✓ | `AdsGateTest`, `AdsSettingsTest`, `PromotionOptOutBackupTest`, `SecurityHeadersCspTest` |
 
 ### Customization & Branding
 | Feature | Tested | Test |

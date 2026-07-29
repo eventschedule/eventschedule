@@ -1,7 +1,7 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Food Trucks & Vendors</x-slot>
-    <x-slot name="description">Tell hungry customers where to find you. Share daily locations, build a following, and take catering bookings. Zero platform fees. Free forever.</x-slot>
-    <x-slot name="breadcrumbTitle">For Food Trucks & Vendors</x-slot>
+    <x-slot name="title">Food Truck Schedules | One Link That Always Has Today's Stop</x-slot>
+    <x-slot name="description">Your address changes every week. Put the whole route on one link that never goes stale, set the regular pitches up once, and turn a customer at the window into someone you can email. Free forever.</x-slot>
+    <x-slot name="breadcrumbTitle">For Food Trucks &amp; Vendors</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Food Trucks & Vendors",
-        "description": "Tell hungry customers where to find you. Share daily locations, build a following, and take catering bookings. Free forever.",
+        "description": "A public schedule that always carries today's stop, with the regular pitches set up once as recurring events and a QR code for the serving window.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for food trucks?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your location schedule, building a customer following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan, with zero platform fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I show where my truck will be each day?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Create events with location details for each stop on your route. Customers can see your full weekly schedule at a glance and know exactly where to find you. Add venue names, addresses, and hours for every location."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do customers find out where I'll be?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Customers can follow your schedule and receive email notifications when you add new stops. Share your schedule link on social media, embed it on your website, or send newsletters with your weekly route."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Does it work for farmers market and festival schedules?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. List all your market appearances, festivals, and pop-up locations in one schedule. Use sub-schedules to organize by type. Customers always see your complete calendar of upcoming appearances."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -71,7 +31,6 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Food Truck Location and Schedule Software",
         "operatingSystem": "Web",
-        "description": "Tell hungry customers where to find you. Share daily locations, build a following, and take catering bookings. No algorithm. Free forever.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,16 +38,22 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Weekly route and daily location scheduling",
-            "One-click location newsletters",
-            "Instant follower notifications on new stops",
-            "QR code for your truck window",
-            "Auto-generated find-us social graphics",
-            "Catering and private event bookings",
-            "Google Calendar two-way sync"
+            "One public link carrying every stop, opening on the next one",
+            "A list layout that reads as a route rather than a month grid",
+            "Regular pitches set up once as recurring events with their own hours",
+            "Date exceptions for the weeks you lose a pitch",
+            "A street address and map on every stop",
+            "A downloadable QR code for the serving window that takes people to your schedule",
+            "Followers you can email directly, with newsletters on the free plan",
+            "Booking requests for catering and private hire, each waiting for your approval",
+            "An email to you when a new booking request lands",
+            "Sub-schedules that keep markets, festivals and private hire apart",
+            "Auto-generated share graphics for any stop",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Embeddable calendar for your own website"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "food truck schedule, food truck location tracker, mobile vendor calendar, food truck finder, free food truck scheduling",
+        "keywords": "food truck schedule, food truck locations, mobile vendor calendar, where is the food truck, catering booking requests, street food route",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -106,577 +71,728 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-food-trucks-and-vendors "On the Route" styles. The shared es-*
-           motion system lives in marketing.css; this holds the street-food
-           gradient text, the map-pin ping + the single travelling pin that
-           bobs on the hero route, the dashed street route, the dotted
-           road-line section dividers, the serving-window awning, the road
-           sign chips, and the bumper-sticker QR frame. */
-        .text-gradient-food {
-            background: linear-gradient(135deg, #f97316, #eab308);
+        /* ==============================================================
+           For-food-trucks-and-vendors "Today's Stop" styles.
+
+           CONCEPT: a truck is not a restaurant - its address is the news,
+           and it changes. So the page inverts the usual hierarchy: TODAY
+           is the largest thing on it and the rest of the week sits beneath
+           at small scale, because that is the only question a hungry
+           person is actually asking. A "where to find us" post expires
+           every week; a link does not.
+
+           TWO DEVICES DROPPED BECAUSE THEY WOULD DEPICT FEATURES THAT DO
+           NOT EXIST - the same error class as an invented feature:
+             - AN "OPEN NOW" STATUS LIGHT. There is no live open/closed
+               state in the product. What is real is the event's own start
+               time and duration, and that the calendar marks today. The
+               board shows hours; it does not claim a live indicator.
+             - A STRUCK-THROUGH "no pitch" ROW. Cancelling HIDES an event
+               (Event.php: "'cancel' -> hides the event via is_cancelled")
+               and a date exception removes the date outright, so a guest
+               sees the day simply absent. The week therefore has a GAP on
+               Thursday and the copy carries the meaning.
+
+           TREATMENT: die-cut vinyl. A truck is covered in decals, so the
+           page is too - a light keyline around each panel, a soft drop
+           shadow, and a slight rotation on the loose ones. Unclaimed by
+           any page, and it pays off in the QR sticker section.
+
+           COLOUR: deep forest green, and the trade-off is named rather
+           than hidden. Blue 220-259 is the only other free band but its
+           best candidate sits 2deg from brand blue, which appears on this
+           very page in the nav and every "Read more". Green's problem is
+           that /for-farmers-markets - the NEAREST audience, which this
+           page links to - is already the green food page (#a3e635,
+           #22c55e, #4ade80 at 141-142deg, #4d7c0f at 85deg). Mine is a
+           deep forest at 28% lightness against their bright grass at
+           45-65%, with 28deg clearance either side, and the vinyl
+           treatment means the two pages share nothing but a family.
+           LESSON: include UNREBUILT neighbours in a palette audit.
+
+           Measured: #2d6b26 5.74 on ground / 6.22 on card, #9ada78 11.37
+           on dark. NEVER text-gray-500 - use .es-stop-muted (6.87 / 7.31).
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-stop-page { background-color: #eff2ee; color: #14181d; }
+        .dark .es-stop-page { background-color: #0f1210; color: #e8ecf1; }
+        .es-stop-ink { color: #14181d; }
+        .dark .es-stop-ink { color: #e8ecf1; }
+        .es-stop-muted { color: #4b535d; }
+        .dark .es-stop-muted { color: #98a2ae; }
+        .es-stop-accent { color: #2d6b26; }
+        .dark .es-stop-accent { color: #9ada78; }
+        /* Always-lit accent for the band, in both colour modes. */
+        .es-stop-lit { color: #9ada78; }
+
+        .es-stop-grad {
+            background-image: linear-gradient(100deg, #2d6b26, #3f8433);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-        .dark .text-gradient-food {
-            background: linear-gradient(135deg, #fb923c, #facc15);
-            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
+        }
+        .dark .es-stop-grad,
+        .es-stop-band .es-stop-grad {
+            background-image: linear-gradient(100deg, #b7e6a0, #9ada78);
         }
 
-        /* The single travelling pin bobs above the route (repurposed float) */
-        @keyframes es-pin-bob {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+        /* --- Surfaces --- */
+        .es-stop-card {
+            background-color: #f9fbf8;
+            border: 1px solid rgba(20, 24, 29, 0.12);
+            border-radius: 0.75rem;
         }
-        .es-pin-bob { animation: es-pin-bob 3s ease-in-out infinite; }
+        .dark .es-stop-card {
+            background-color: #181c19;
+            border-color: rgba(232, 236, 241, 0.13);
+        }
+        .es-stop-sub {
+            background-color: rgba(20, 24, 29, 0.045);
+            border-radius: 0.5rem;
+        }
+        .dark .es-stop-sub { background-color: rgba(232, 236, 241, 0.05); }
+        .es-stop-hover { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .es-stop-hover:hover { border-color: rgba(45, 107, 38, 0.45); box-shadow: 0 10px 28px -18px rgba(20, 24, 29, 0.5); }
+        .dark .es-stop-hover:hover { border-color: rgba(154, 218, 120, 0.4); box-shadow: 0 10px 28px -18px rgba(0, 0, 0, 0.8); }
 
-        /* Map-pin ping - concentric rings from a "you are here" pin */
-        .es-ping span {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            height: 18px;
-            width: 18px;
-            margin: -9px 0 0 -9px;
-            border-radius: 9999px;
-            border: 2px solid rgba(16, 185, 129, 0.5);
-            transform: scale(0.3);
-            opacity: 0;
-            animation: es-ping var(--ping-dur, 3s) ease-out infinite;
-            animation-delay: var(--ping-delay, 0s);
-        }
-        @keyframes es-ping {
-            0% { transform: scale(0.3); opacity: 0.7; }
-            100% { transform: scale(4.5); opacity: 0; }
-        }
-
-        /* Dashed street route snaking behind the hero headline */
-        .es-route { color: rgba(249, 115, 22, 0.55); }
-        .dark .es-route { color: rgba(251, 146, 60, 0.5); }
-        .es-route-path {
-            stroke-dasharray: 10 12;
-            animation: es-route-dash 22s linear infinite;
-        }
-        @keyframes es-route-dash { to { stroke-dashoffset: -264; } }
-
-        /* Dotted center-line road divider between sections */
-        .es-roadline {
-            height: 4px;
-            background-image: repeating-linear-gradient(to right, rgba(249, 115, 22, 0.6) 0 24px, transparent 24px 44px);
-            -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-            mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
-        }
-        .dark .es-roadline {
-            background-image: repeating-linear-gradient(to right, rgba(251, 146, 60, 0.5) 0 24px, transparent 24px 44px);
-        }
-
-        /* Serving-window awning (striped canopy) */
-        .es-awning {
-            height: 22px;
-            border-radius: 14px 14px 2px 2px;
-            background: repeating-linear-gradient(to right, #ea580c 0 15px, #fde3c4 15px 30px);
-            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.12);
-        }
-        .dark .es-awning {
-            background: repeating-linear-gradient(to right, #9a3412 0 15px, #b45309 15px 30px);
-        }
-
-        /* Road-sign chip (rounded diamond) for the Perfect-for icons */
-        .es-signchip {
-            transform: rotate(45deg);
-            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.06);
-        }
-        .dark .es-signchip { box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.08); }
-        .es-signchip > svg { transform: rotate(-45deg); }
-
-        /* Bumper-sticker QR frame (rotated with a peeled corner) */
-        .es-sticker {
-            transform: translateX(-50%) rotate(-3deg);
+        /* --- Die-cut vinyl -------------------------------------------
+           The keyline is the cut edge of the decal. It inverts with the
+           page, because a decal is not a fixed object - only the bands are
+           mode-stable. */
+        .es-stop-decal {
             border: 3px solid #ffffff;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 22px -10px rgba(20, 24, 29, 0.45);
         }
-        .es-sticker::after {
+        .dark .es-stop-decal {
+            border-color: #2b322c;
+            box-shadow: 0 8px 22px -10px rgba(0, 0, 0, 0.85);
+        }
+        .es-stop-tilt-l { transform: rotate(-1.1deg); }
+        .es-stop-tilt-r { transform: rotate(0.9deg); }
+
+        /* --- The today board -----------------------------------------
+           Deliberately outsized: the hierarchy IS the concept. */
+        .es-stop-today {
+            background-color: #2d6b26;
+            color: #ffffff;
+            border-radius: 0.75rem;
+        }
+        .dark .es-stop-today { background-color: #24551e; }
+        .es-stop-today-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.34em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.78);
+        }
+        .es-stop-mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* --- Eyebrow, numerals, plan tags --- */
+        .es-stop-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #2d6b26;
+        }
+        .dark .es-stop-tag { color: #9ada78; }
+        .es-stop-band .es-stop-tag { color: #9ada78; }
+
+        .es-stop-corner {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 1.9rem;
+            border: 1px solid rgba(20, 24, 29, 0.22);
+            border-radius: 0.3rem;
+            background: rgba(20, 24, 29, 0.035);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #14181d;
+        }
+        .dark .es-stop-corner { border-color: rgba(232, 236, 241, 0.22); background: rgba(232, 236, 241, 0.05); color: #e8ecf1; }
+        .es-stop-band .es-stop-corner { border-color: rgba(232, 236, 241, 0.22); background: rgba(232, 236, 241, 0.05); color: #e8ecf1; }
+        .es-stop-corner::before {
             content: "";
             position: absolute;
-            right: -3px;
-            bottom: -3px;
-            width: 22px;
-            height: 22px;
-            background: linear-gradient(135deg, transparent 46%, rgba(0, 0, 0, 0.12) 50%, #e5e7eb 54%);
-            border-bottom-right-radius: 10px;
-            pointer-events: none;
+            left: 0.4rem;
+            top: 0.4rem;
+            bottom: 0.4rem;
+            width: 2px;
+            background: #2d6b26;
+        }
+        .dark .es-stop-corner::before { background: #9ada78; }
+        .es-stop-band .es-stop-corner::before { background: #9ada78; }
+
+        /* Plan tiers ONLY - never reuse these for a state badge. */
+        .es-stop-plan {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        /* Only the Free modifier exists, because nothing this audience needs
+           is gated: every section on this page is on the free plan. A Pro
+           variant would be a dead class. */
+        .es-stop-plan-free { border-color: rgba(20, 24, 29, 0.22); color: #4b535d; }
+        .dark .es-stop-plan-free { border-color: rgba(232, 236, 241, 0.26); color: #98a2ae; }
+
+        /* --- Buttons --- */
+        .es-stop-btn {
+            background-color: #2d6b26;
+            color: #ffffff;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .es-stop-btn:hover { background-color: #24551e; transform: translateY(-1px); box-shadow: 0 14px 28px -16px rgba(45, 107, 38, 0.9); }
+        .es-stop-ghost {
+            border: 1px solid rgba(20, 24, 29, 0.22);
+            color: #14181d;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-stop-ghost:hover { border-color: rgba(45, 107, 38, 0.5); background-color: rgba(45, 107, 38, 0.06); }
+        .dark .es-stop-ghost { border-color: rgba(232, 236, 241, 0.24); color: #e8ecf1; }
+        .dark .es-stop-ghost:hover { border-color: rgba(154, 218, 120, 0.45); background-color: rgba(154, 218, 120, 0.08); }
+
+        /* --- The dark band ------------------------------------------
+           A resolvable background-color under the gradients: it is what
+           paints if they fail and what a contrast audit can read. */
+        .es-stop-band {
+            background-color: #121613;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(45, 107, 38, 0.3), rgba(45, 107, 38, 0) 70%),
+                linear-gradient(180deg, #1a201b, #121613);
         }
 
-        /* Related-page cards - street-food accent hover wash (light + dark) */
-        .es-relcard:hover { background-color: #fff7ed; }
-        .dark .es-relcard:hover { background-color: rgba(249, 115, 22, 0.06); }
+        /* --- Nothing inside the band may change between colour modes --
+           The band has no .dark variant, so any descendant that HAS one
+           would render differently on an identical ground. Two shared
+           classes carry their own .dark rules in marketing.css and are
+           invisible to a grep of this file. */
+        .es-stop-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(232, 236, 241, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(232, 236, 241, 0.05) 1px, transparent 1px);
+        }
+        .es-stop-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-stop-band .es-claim:focus-within {
+            border-color: rgba(154, 218, 120, 0.75);
+            box-shadow: 0 0 0 4px rgba(154, 218, 120, 0.22);
+        }
+
+        /* Shared chrome that is hard-coded brand blue. */
+        .es-dot:hover .es-dot-pip { background-color: rgba(45, 107, 38, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(154, 218, 120, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #2d6b26; }
+        .dark .es-dot.is-active .es-dot-pip { background: #9ada78; }
+
+        /* Focus rings. Never set border-radius here: an outline already
+           follows the element's own radius. */
+        #es-stop-page a:focus-visible,
+        #es-stop-page summary:focus-visible,
+        #es-stop-page button:focus-visible,
+        #es-stop-page input:focus-visible {
+            outline: 2px solid #2d6b26;
+            outline-offset: 2px;
+        }
+        .dark #es-stop-page a:focus-visible,
+        .dark #es-stop-page summary:focus-visible,
+        .dark #es-stop-page button:focus-visible,
+        .dark #es-stop-page input:focus-visible {
+            outline-color: #9ada78;
+        }
+        .es-stop-band a:focus-visible,
+        .es-stop-band summary:focus-visible,
+        .es-stop-band button:focus-visible,
+        .es-stop-band input:focus-visible {
+            outline-color: #9ada78 !important;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-pin-bob, .es-route-path, .es-ping span { animation: none !important; }
-            .es-ping span { opacity: 0; }
+            .es-stop-btn:hover { transform: none; }
         }
     </style>
 
-    <!-- ============================================================ -->
-    <!-- 1. Hero: where to find you                                   -->
-    <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 30%, rgba(249, 115, 22, 0.3), rgba(249, 115, 22, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(234, 179, 8, 0.28), rgba(234, 179, 8, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 55% 75%, rgba(16, 185, 129, 0.14), rgba(16, 185, 129, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <!-- Dashed street route snaking behind the headline -->
-            <div class="es-route absolute inset-0" style="-webkit-mask-image: radial-gradient(ellipse 84% 74% at 50% 46%, black 28%, transparent 80%); mask-image: radial-gradient(ellipse 84% 74% at 50% 46%, black 28%, transparent 80%);">
-                <svg class="h-full w-full" viewBox="0 0 1200 600" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M-60 400 C 180 180, 340 540, 560 340 S 940 140, 1260 320" stroke="currentColor" stroke-width="26" stroke-linecap="round" opacity="0.12"/>
-                    <path class="es-route-path" d="M-60 400 C 180 180, 340 540, 560 340 S 940 140, 1260 320" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
-                </svg>
-            </div>
-        </div>
-
-        <!-- One travelling map pin, bobbing on the route -->
-        <div class="es-pin-bob absolute hidden sm:block" aria-hidden="true" style="right: 9%; top: 6.5rem; z-index: 6;">
-            <span class="es-ping relative flex h-10 w-10 items-center justify-center">
-                <span style="--ping-dur: 3s; --ping-delay: 0s;"></span>
-                <span style="--ping-dur: 3s; --ping-delay: 1.5s;"></span>
-                <svg class="relative h-9 w-9 text-orange-500 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
-                </svg>
-            </span>
-        </div>
-
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-orange-500 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Food Trucks, Vendors & Mobile Kitchens</span>
-            </div>
-
-            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">Tell hungry customers</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-food es-gradient-anim">where to find you</span></span></span>
-            </h1>
-
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Share your daily locations, build a following, and let regulars know where you're parking next.
-            </p>
-
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#route" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the route
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-orange-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/40">
-                    Create your schedule
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Vendor-type marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
-                        <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Food Trucks', 'Taco Trucks', 'Coffee Carts', 'BBQ', 'Pop-ups', 'Catering', 'Ice Cream', 'Festival Vendors'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100/80 px-4 py-1.5 text-xs font-semibold text-orange-800 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-orange-400 to-amber-400"></span>
-                                        {{ $tag }}
-                                    </span>
-                                @endforeach
-                            @endfor
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 2. Sound familiar? (problem)                                 -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
-            <div class="mb-10 text-center">
-                <h2 class="es-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Sound <span class="text-gradient-food">familiar?</span></h2>
-            </div>
-
-            <div class="mx-auto mb-8 max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/[0.04]" data-reveal="panel">
-                <div class="mb-4 flex items-center gap-3 border-b border-gray-200 pb-4 dark:border-white/10">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-sm font-bold text-white">TT</div>
-                    <div>
-                        <div class="text-sm font-medium text-gray-900 dark:text-white">Taco Truck Tony</div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">Posted a photo</div>
-                    </div>
-                </div>
-                <div class="space-y-3" data-reveal-group="80">
-                    @foreach ([['bg-blue-500/30', 'Where are you today?'], ['bg-cyan-500/30', 'Where are you guys today??'], ['bg-green-500/30', 'Location???'], ['bg-blue-500/30', 'Where will you be tomorrow?'], ['bg-yellow-500/30', 'Are you at the food park today?']] as [$dot, $q])
-                        <div data-reveal class="flex items-start gap-2">
-                            <div class="h-6 w-6 shrink-0 rounded-full {{ $dot }}"></div>
-                            <div class="rounded-xl bg-gray-100 px-3 py-2 dark:bg-white/10">
-                                <span class="text-sm text-gray-600 dark:text-gray-300">{{ $q }}</span>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <div class="text-center" data-reveal>
-                <p class="mb-2 text-lg text-gray-500 dark:text-gray-400">You post once. Get asked <span data-count-to="47" class="font-semibold text-orange-600 dark:text-orange-400">47</span> times.</p>
-                <p class="text-gray-500 dark:text-gray-400">Facebook shows your posts to 3% of followers. Your regulars can't find you.</p>
-                <p class="mt-6 text-lg font-medium text-orange-600 dark:text-orange-400">There's a better way.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. Your weekly route (dark band)                             -->
-    <!-- ============================================================ -->
     @php
-        $route = [
-            ['Mon', 'Downtown Food Park', '11am - 2pm', 'past', ''],
-            ['TODAY', 'Tech Campus - Building A', '11am - 2pm', 'now', 'Now serving'],
-            ['Wed', 'Farmers Market', '8am - 1pm', 'next', ''],
-            ['Thu', 'Private event (not shown publicly)', '', 'private', ''],
-            ['Fri', 'Brewery District Food Truck Rally', '5pm - 10pm', 'next', ''],
+        // The week is the single source of truth: the today board reads
+        // from the SAME array the week list renders, so the two cannot
+        // drift apart. Thursday is deliberately absent rather than struck
+        // through - a date exception removes the date, and a cancelled
+        // event is hidden, so a customer sees the day simply not there.
+        $week = [
+            ['Mon', 'Mill Lane Office Park', '11:30am', '2:00pm', true],
+            ['Tue', 'Mill Lane Office Park', '11:30am', '2:00pm', false],
+            ['Wed', 'Northgate Brewery',     '5:00pm',  '9:00pm', false],
+            ['Fri', 'Riverside Market',      '12:00pm', '8:00pm', false],
+            ['Sat', 'Riverside Market',      '10:00am', '8:00pm', false],
+        ];
+
+        $todayStop = null;
+        foreach ($week as $row) {
+            if ($row[4]) {
+                $todayStop = $row;
+                break;
+            }
+        }
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for food trucks?',
+                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling tickets to a ticketed event is on the Pro plan at $5 a month, with zero platform fees on sales.',
+            ],
+            [
+                'q' => 'How do customers know where I am today?',
+                'a' => 'They open the one link you have been sharing all along. Set the layout to List and it reads as a route, opening on the next stop with the ones you have already done below a divider. Nothing has to be reposted, so the link is right on a Tuesday in February without you touching it.',
+            ],
+            [
+                'q' => 'Do my followers get an alert when I add a stop?',
+                'a' => 'No, and it is worth being straight about that. Following does not fire off an automatic message. What it does is give you their email address with their consent, so you can send the week\'s route yourself as a newsletter - ten emails a month on the free plan, a hundred on Pro. That is the difference between a list you own and a feed that decides who sees you.',
+            ],
+            [
+                'q' => 'What happens the week I lose a pitch?',
+                'a' => 'Add a date exception for that date and the stop is simply not on the schedule that week. The rest of the recurring pattern carries on untouched, so you are not rebuilding the week around one cancellation.',
+            ],
+            [
+                'q' => 'Can people book me for catering and private events?',
+                'a' => 'Yes. Turn on booking requests and people can ask to book you, with their own date and details attached. Every request waits for you to accept it, and you get an email when a new one lands, so an enquiry does not sit unread in a comment thread.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', "Today's stop"],
+            ['today', 'The link'],
+            ['week', 'The week'],
+            ['sticker', 'The window'],
+            ['catering', 'Catering'],
+            ['who', 'Who it is for'],
+            ['how', 'How it works'],
+            ['faq', 'Questions'],
+            ['claim', 'Get started'],
         ];
     @endphp
-    <section id="route" class="scroll-mt-24 bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 25% 30%, rgba(249, 115, 22, 0.24), rgba(249, 115, 22, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 75% 60%, rgba(16, 185, 129, 0.18), rgba(16, 185, 129, 0) 60%); opacity: 0.55;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+
+    <div id="es-stop-page" class="es-stop-page">
+
+    <!-- ============================================================ -->
+    <!-- 1. Hero: today's stop                                        -->
+    <!-- ============================================================ -->
+    {{-- The nav overlays the top of the page, so the hero carries extra
+         top padding rather than letting the board sit under it. --}}
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 26% 30%, rgba(45, 107, 38, 0.2), rgba(45, 107, 38, 0) 62%); opacity: 0.5;"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 74% 62%, rgba(154, 218, 120, 0.16), rgba(154, 218, 120, 0) 62%); opacity: 0.45;"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_72%_62%_at_50%_38%,black_22%,transparent_74%)]"></div>
+        </div>
+
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
+                <div>
+                    <p class="es-stop-tag es-fade-up es-d-1 mb-5">For food trucks, carts and mobile kitchens</p>
+
+                    <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">Your address is</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="es-stop-grad">the news</span>.</span></span>
+                    </h1>
+
+                    <p class="es-stop-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
+                        A restaurant has one for good. You have a new one every week, and you are
+                        retyping it into a post that expires by Friday. Put the whole route on one
+                        link instead.
+                    </p>
+
+                    <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-stop-btn inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            Put your route online
+                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                        <a href="#today" class="es-stop-ghost inline-flex items-center justify-center gap-2 rounded-lg px-7 py-4 text-base font-semibold">
+                            See how the link works
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- The board. Today is outsized; the week sits beneath it. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-stop-decal es-stop-tilt-r es-stop-today p-6 sm:p-8">
+                        <p class="es-stop-today-label mb-4">Today</p>
+                        <p class="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">{{ $todayStop[1] }}</p>
+                        <p class="es-stop-mono mt-2 text-base text-white/85">{{ $todayStop[2] }} &ndash; {{ $todayStop[3] }}</p>
+                    </div>
+
+                    <div class="es-stop-decal es-stop-tilt-l es-stop-card mt-5 p-5 sm:p-6">
+                        <p class="es-stop-tag mb-3">The rest of the week</p>
+                        <div class="space-y-1">
+                            @foreach ($week as [$wDay, $wPlace, $wFrom, $wTo, $wIsToday])
+                                @continue($wIsToday)
+                                <div class="es-stop-sub flex items-baseline gap-3 px-3 py-2">
+                                    <span class="es-stop-muted es-stop-mono w-9 shrink-0 text-xs font-bold uppercase">{{ $wDay }}</span>
+                                    <span class="es-stop-ink min-w-0 flex-1 truncate text-sm font-semibold">{{ $wPlace }}</span>
+                                    <span class="es-stop-muted es-stop-mono shrink-0 text-xs">{{ $wFrom }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <p class="es-stop-muted mt-3 text-xs">
+                            No Thursday this week. It is not crossed out, it is just not there.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 2. The link (01)                                             -->
+    <!-- ============================================================ -->
+    <section id="today" class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The link</p>
+                <h2 class="es-balance es-stop-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    A post expires. <span class="es-stop-grad">A link does not</span>.
+                </h2>
+                <p class="es-stop-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    You already write the week out every Sunday. Write it once somewhere that keeps
+                    it, and put that address on the truck, the socials and the receipt.
+                </p>
             </div>
 
-            <div class="relative z-10 mx-auto max-w-2xl">
-                <div class="mx-auto mb-12 max-w-xl text-center">
-                    <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Your weekly route, <span class="text-gradient-food">always up to date</span>
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                @foreach ([
+                    ['One address, all year', 'The same link in every bio and on every flyer. It is never last week\'s post, because there is no post to go stale.'],
+                    ['Reads as a route', 'Set the layout to List and the schedule reads as a run of stops with the next one at the top, rather than a month grid to decode.'],
+                    ['The next stop is first', 'The list opens on what is coming, with everything you have already done tucked below a divider. Nobody has to work out which line is current.'],
+                ] as [$t, $d])
+                    <div class="es-stop-card es-stop-hover p-6" data-reveal>
+                        <h3 class="es-stop-ink mb-2 text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-stop-muted text-sm">{{ $d }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-8 text-center" data-reveal>
+                <span class="es-stop-plan es-stop-plan-free">Free</span>
+                <span class="es-stop-muted ml-2 text-sm">The schedule, the list layout and the address are all on the free plan.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 3. The week that repeats (02)                                -->
+    <!-- ============================================================ -->
+    <section id="week" class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The week</p>
+                    <h2 class="es-balance es-stop-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Most of your week <span class="es-stop-grad">already repeats</span>.
                     </h2>
-                    <p class="text-lg text-gray-300 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                        Post your rotation once. Customers see where you are now and where you'll be next.
+                    <p class="es-stop-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        The office park every Monday and Tuesday, the brewery on Wednesday, the
+                        market at the weekend. Each regular pitch is one recurring event with its
+                        own hours, not fifty entries you retype.
+                    </p>
+
+                    <ul class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['One pitch, one event', 'Pick the days it runs and the hours you serve. Change the hours once and every future date follows.'],
+                            ['The week you lose it', 'Take that single date out with an exception. The stop is not on the schedule that week and the pattern carries on.'],
+                            ['One-offs sit alongside', 'A festival or a private booking is just another event on the same link, so the route stays in one place.'],
+                        ] as [$t, $d])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-stop-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span><span class="es-stop-ink font-semibold">{{ $t }}</span> <span class="es-stop-muted">- {{ $d }}</span></span>
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <p class="mt-7" data-reveal>
+                        <span class="es-stop-plan es-stop-plan-free">Free</span>
+                        <span class="es-stop-muted ml-2 text-sm">Recurring stops and date exceptions are on the free plan.</span>
                     </p>
                 </div>
 
-                <div class="space-y-4" data-reveal-group="90">
-                    @foreach ($route as [$day, $place, $time, $state, $badge])
-                        <div data-reveal class="flex items-center gap-4">
-                            <div class="w-16 shrink-0 text-right">
-                                @if ($state === 'now')
-                                    <span class="text-sm font-bold text-emerald-400">{{ $day }}</span>
-                                @else
-                                    <span class="text-sm font-medium text-gray-400">{{ $day }}</span>
-                                @endif
+                <div class="es-bento group relative" data-tilt="3" data-reveal="panel">
+                    <div class="es-tilt-inner es-stop-card overflow-hidden p-6 sm:p-7">
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-stop-ink text-lg font-bold">Your pitches</h3>
+                            <span class="es-stop-muted es-stop-mono text-xs">3 recurring events</span>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            @foreach ([
+                                ['Mill Lane Office Park', 'Mon &amp; Tue', '11:30am &ndash; 2:00pm'],
+                                ['Northgate Brewery', 'Wed', '5:00pm &ndash; 9:00pm'],
+                                ['Riverside Market', 'Fri &amp; Sat', 'from 10:00am'],
+                            ] as [$pName, $pDays, $pHours])
+                                <div class="es-stop-sub p-3.5">
+                                    <p class="es-stop-ink text-sm font-semibold">{{ $pName }}</p>
+                                    <p class="es-stop-muted es-stop-mono text-xs">{!! $pDays !!} &middot; {!! $pHours !!}</p>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="mt-5 border-t border-[rgba(20,24,29,0.1)] pt-4 dark:border-[rgba(232,236,241,0.12)]">
+                            <p class="es-stop-tag mb-2">Date exceptions</p>
+                            <p class="es-stop-muted text-xs">
+                                Thu 14 Aug taken out at Northgate. Every other Wednesday is unaffected.
+                            </p>
+                        </div>
+
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The sticker in the window (03)                            -->
+    <!-- ============================================================ -->
+    <section id="sticker" class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div class="order-2 lg:order-1">
+                    <div class="es-stop-decal es-stop-tilt-l es-stop-card p-6 sm:p-8" data-reveal="panel">
+                        <p class="es-stop-tag mb-4">In the window</p>
+                        <div class="flex items-center gap-5">
+                            <div class="es-stop-sub grid h-24 w-24 shrink-0 place-items-center" aria-hidden="true">
+                                <svg class="es-stop-accent h-14 w-14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M3,11H5V13H3V11M11,5H13V9H11V5M9,11H13V15H11V13H9V11M15,11H17V13H19V11H21V13H19V15H21V19H19V21H17V19H13V21H11V17H15V15H17V13H15V11M19,19V15H17V19H19M15,3H21V9H15V3M17,5V7H19V5H17M3,3H9V9H3V3M5,5V7H7V5H5M3,15H9V21H3V15M5,17V19H7V17H5Z" />
+                                </svg>
                             </div>
-                            <div class="relative flex w-4 shrink-0 justify-center">
-                                @if ($state === 'now')
-                                    <span class="es-ping relative flex h-4 w-4 items-center justify-center">
-                                        <span style="--ping-dur: 3s; --ping-delay: 0s;"></span>
-                                        <span style="--ping-dur: 3s; --ping-delay: 1.5s;"></span>
-                                        <span class="relative h-4 w-4 rounded-full border-2 border-emerald-400 bg-emerald-500"></span>
-                                    </span>
-                                @elseif ($state === 'past')
-                                    <span class="h-4 w-4 rounded-full border-2 border-white/30 bg-white/20"></span>
-                                @elseif ($state === 'private')
-                                    <span class="h-4 w-4 rounded-full border-2 border-amber-400/40 bg-amber-500/30"></span>
-                                @else
-                                    <span class="h-4 w-4 rounded-full border-2 border-orange-400/50 bg-orange-500/50"></span>
-                                @endif
+                            <div class="min-w-0">
+                                <p class="es-stop-ink text-base font-bold">Where are we tomorrow?</p>
+                                <p class="es-stop-muted mt-1 text-sm">
+                                    One scan and they have the whole route, and the option to follow.
+                                </p>
                             </div>
-                            <div class="flex-1">
-                                @if ($state === 'now')
-                                    <div class="flex items-center justify-between rounded-xl border border-emerald-400/30 bg-emerald-500/15 p-3">
-                                        <div>
-                                            <div class="text-sm font-medium text-emerald-200">{{ $place }}</div>
-                                            <div class="text-xs text-emerald-300/70">{{ $time }}</div>
-                                        </div>
-                                        <div class="flex items-center gap-1 rounded-full bg-emerald-500/30 px-2 py-1">
-                                            <div class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></div>
-                                            <span class="text-xs font-medium text-emerald-200">{{ $badge }}</span>
-                                        </div>
-                                    </div>
-                                @elseif ($state === 'private')
-                                    <div class="rounded-xl border border-dashed border-white/15 bg-white/[0.04] p-3">
-                                        <span class="text-sm italic text-gray-400">{{ $place }}</span>
-                                    </div>
-                                @else
-                                    <div class="rounded-xl bg-white/[0.05] p-3">
-                                        <div class="text-sm text-gray-300">{{ $place }}</div>
-                                        @if ($time)
-                                            <div class="text-xs text-gray-500">{{ $time }}</div>
-                                        @endif
-                                    </div>
-                                @endif
+                        </div>
+                        <p class="es-stop-muted mt-5 border-t border-[rgba(20,24,29,0.1)] pt-4 text-xs dark:border-[rgba(232,236,241,0.12)]">
+                            The QR downloads from your Followers page and points at your schedule.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2">
+                    <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The window</p>
+                    <h2 class="es-balance es-stop-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        They already <span class="es-stop-grad">came to you once</span>.
+                    </h2>
+                    <p class="es-stop-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Somebody standing at the window has found you at your hardest moment - when
+                        they did not know where you were. A sticker beside the hatch is how that
+                        becomes a second visit.
+                    </p>
+
+                    <div class="space-y-3" data-reveal-group="90">
+                        @foreach ([
+                            ['Print the QR, tape it up', 'Download it from your Followers page. It points at your schedule, so it never needs reprinting when the route changes.'],
+                            ['They follow, you get the email address', 'With their consent, and they can unfollow whenever they like. It is your list, not a platform\'s.'],
+                            ['You send the week out', 'Nothing goes automatically - you write the route and send it. Ten emails a month free, a hundred on Pro.'],
+                        ] as [$t, $d])
+                            <div class="es-stop-card es-stop-hover p-4" data-reveal>
+                                <p class="es-stop-ink text-sm font-bold">{{ $t }}</p>
+                                <p class="es-stop-muted mt-1 text-sm">{{ $d }}</p>
                             </div>
+                        @endforeach
+                    </div>
+
+                    <p class="mt-6" data-reveal>
+                        <span class="es-stop-plan es-stop-plan-free">Free</span>
+                        <span class="es-stop-muted ml-2 text-sm">The QR, the followers and the first ten emails a month cost nothing.</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Catering (04)                                             -->
+    <!-- ============================================================ -->
+    <section id="catering" class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Catering</p>
+                <h2 class="es-balance es-stop-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The bookings that <span class="es-stop-grad">pay for January</span>.
+                </h2>
+                <p class="es-stop-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A wedding or an office lunch is worth a fortnight of service, and it usually
+                    arrives as a message somebody nearly missed.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3" data-reveal-group="100">
+                @foreach ([
+                    ['They ask through your page', 'Turn on booking requests and anyone can ask to book you, with their date and details attached, instead of a comment you scroll past.'],
+                    ['You get an email', 'A new request is emailed to you, so an enquiry worth a fortnight of trading does not sit unread.'],
+                    ['Nothing posts without you', 'Every request waits for you to accept it. Nothing appears on your public schedule that you did not agree to.'],
+                ] as [$t, $d])
+                    <div class="es-stop-card es-stop-hover p-6" data-reveal>
+                        <h3 class="es-stop-ink mb-2 text-lg font-bold">{{ $t }}</h3>
+                        <p class="es-stop-muted text-sm">{{ $d }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-8 text-center" data-reveal>
+                <span class="es-stop-plan es-stop-plan-free">Free</span>
+                <span class="es-stop-muted ml-2 text-sm">
+                    Booking requests are on the free plan. A confirmed private booking can stay a Draft if you would rather it did not show up on the public route.
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. Who it is for (05)                                        -->
+    <!-- ============================================================ -->
+    <section id="who" class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
+                <h2 class="es-balance es-stop-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Anything with <span class="es-stop-grad">wheels and a hatch</span>.
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                <x-sub-audience-card
+                    name="Taco Trucks"
+                    description="The same three pitches most weeks, with the late-night one that only runs in summer taken out for the winter."
+                    icon-color="amber"
+                    blog-slug="for-taco-trucks"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 14a9 9 0 0118 0M3 14h18M3 14l-1 3h20l-1-3" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Festival Vendors"
+                    description="A summer of one-off weekends, each with its own dates and gates, on the same link as the regular pitches."
+                    icon-color="orange"
+                    blog-slug="for-festival-vendors"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 21V4m0 0l8 3-8 3m8-6l8 3-8 3" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Pop-Up Restaurants"
+                    description="A short residency in somebody else's room, sold by the seat, with the dates ending on their own."
+                    icon-color="rose"
+                    blog-slug="for-popup-kitchens"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v8a3 3 0 006 0V3M8 11v10M16 3c-1.5 2-2 4-2 6a2 2 0 004 0c0-2-.5-4-2-6zm0 8v10" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Caterers"
+                    description="Almost all of it is private hire, so the bookings arrive as requests and the public page stays a shop window."
+                    icon-color="sky"
+                    blog-slug="for-mobile-catering-businesses"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 15h16M4 15a8 8 0 0116 0M12 7V4m-9 14h18" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Coffee & Beverage Carts"
+                    description="Early, short and every weekday. One recurring morning that people can put in their own calendar."
+                    icon-color="teal"
+                    blog-slug="for-coffee-beverage-carts"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8h12v6a4 4 0 01-4 4H8a4 4 0 01-4-4V8zm12 1h2a2 2 0 010 4h-2M5 21h14" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="BBQ & Smoker Trucks"
+                    description="You sell out and go home. Say the hours, and let people follow so they know to come early."
+                    icon-color="slate"
+                    blog-slug="for-bbq-smoker-trucks"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c1.5 2.5 3 4 3 6a3 3 0 11-6 0c0-2 1.5-3.5 3-6zM6 14h12l-1.5 6h-9L6 14z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. How it works (06, dark band)                              -->
+    <!-- ============================================================ -->
+    <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-stop-band noise relative overflow-hidden rounded-[2rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                    <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A Sunday evening, <span class="es-stop-grad">once</span>.
+                    </h2>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    @foreach ([
+                        ['01', 'Put the regular pitches in', 'One recurring event per spot, with the days and the hours you serve. The one-offs go in as you get them.'],
+                        ['02', 'Share the one address', 'On the truck, in every bio, on the receipt. It is the last time you have to update where it points.'],
+                        ['03', 'Tape the QR to the hatch', 'People who already found you once can follow, and you can tell them where you are next week.'],
+                    ] as [$n, $t, $d])
+                        <div class="rounded-xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
+                            <p class="es-stop-lit es-stop-mono mb-3 text-sm font-bold">{{ $n }}</p>
+                            <h3 class="mb-2 text-lg font-bold text-white">{{ $t }}</h3>
+                            <p class="text-sm text-gray-400">{{ $d }}</p>
                         </div>
                     @endforeach
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 4. Put this on your truck (QR)                               -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-24">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
-            <div class="es-bento group relative" data-reveal="panel">
-                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
-                    <div class="grid items-center gap-12 md:grid-cols-2">
-                        <div>
-                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" /></svg>
-                                QR Code
-                            </div>
-                            <h2 class="mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">Put this on your <span class="text-gradient-food">truck</span></h2>
-                            <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Print the QR code and stick it on your window. Customers scan once, follow your truck forever. No app download needed.</p>
-                            <ul class="space-y-3 text-gray-500 dark:text-gray-400">
-                                @foreach (['They follow once, never miss you again', "Build an audience that's YOURS, not Facebook's", 'Get notified when they book catering'] as $point)
-                                    <li class="flex items-center gap-3">
-                                        <svg aria-hidden="true" class="h-5 w-5 shrink-0 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                        <span>{{ $point }}</span>
-                                    </li>
-                                @endforeach
-                            </ul>
-                        </div>
-
-                        <div class="flex justify-center" aria-hidden="true">
-                            <div class="relative">
-                                <div class="relative h-80 w-64 overflow-hidden rounded-t-3xl border-4 border-gray-600 bg-gradient-to-b from-gray-700 to-gray-800">
-                                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
-                                    <div class="es-sticker absolute left-1/2 top-8 rounded-xl bg-white p-3">
-                                        <div class="h-28 w-28 bg-contain bg-[url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2029%2029%22%3E%3Cpath%20fill%3D%22%23c2410c%22%20d%3D%22M0%200h7v7H0zm2%202v3h3V2zm8%200h1v1h1v1h-1v1h-1V3h-1V2h1zm4%200h1v4h-1V4h-1V3h1V2zm4%200h3v1h-2v1h-1V2zm5%200h7v7h-7zm2%202v3h3V4zM2%2010h1v1h1v1H2v-1H1v-1h1zm4%200h1v1H5v1H4v-1h1v-1h1zm3%200h1v3h1v1h-1v-1H9v-1h1v-1H9v-1zm5%200h1v2h1v-2h1v3h-1v1h-1v-1h-1v-1h-1v-1h1v-1zm5%200h1v1h-1v1h-1v-1h1v-1zm3%200h1v2h1v-1h1v3h-1v-1h-1v2h-1v-3h-1v-1h1v-1zM0%2014h1v1h1v-1h2v1h-1v1h1v2H3v-2H2v-1H0v-1zm4%200h1v1H4v-1zm9%200h1v1h-1v-1zm8%200h2v1h-2v-1zm0%202v1h1v1h1v1h-1v1h1v1h-2v-2h-1v-1h1v-1h-1v-1h1zm4%200h1v1h-1v-1zM0%2018h1v1H0v-1zm2%200h2v1h1v2H4v-1H3v1H2v-2h1v-1H2v-1zm5%200h3v1h1v2h-1v1h-1v-2H8v1H7v-1H6v-1h1v-1zm6%200h2v1h1v-1h1v2h-2v1h-1v-2h-1v-1zm-5%202h1v1H8v-1zM0%2022h7v7H0zm2%202v3h3v-3zm9-2h1v1h-1v-1zm2%200h1v1h1v2h-2v-1h-1v-1h1v-1zm3%200h3v1h-2v2h2v1h2v2h-1v1h-2v-1h-1v1h-2v-2h1v-2h-1v-2h1v-1zm7%200h1v1h1v1h-1v3h1v-2h1v3h1v-1h1v2h-2v1h-1v-1h-1v-1h-1v1h-2v-1h1v-2h1v-1h-1v-2h1v-1zm-9%202h1v1h-1v-1zm-2%202h1v1h-1v-1zm7%200h1v1h-1v-1zm-5%202h1v1h-1v-1zm2%200h2v1h-2v-1z%22%2F%3E%3C%2Fsvg%3E')]"></div>
-                                        <div class="mt-2 text-center">
-                                            <div class="text-xs font-bold text-gray-800">SCAN TO FOLLOW</div>
-                                            <div class="text-[10px] font-medium text-orange-600">tacotrucktony.eventschedule.com</div>
-                                        </div>
-                                    </div>
-                                    <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-900/80 to-transparent"></div>
-                                </div>
-                                <div class="-mt-1 mx-auto h-4 w-72 rounded-b-sm bg-gradient-to-b from-orange-600 to-orange-700"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="es-glare" aria-hidden="true"></div>
-                    <div class="es-ring-glow" aria-hidden="true"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. Features grid                                             -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Everything to feed your <span class="text-gradient-food">following</span>
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2" data-reveal-group="110">
-
-                <!-- Newsletter -->
-                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-800/30 dark:bg-orange-900/40 dark:text-orange-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            Newsletter
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Announce your week's spots in one click</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">No algorithm. 100% of your followers see it. Send your Monday-Friday locations every Sunday night.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="es-awning"></div>
-                            <div class="rounded-xl border border-orange-500/20 bg-gray-100 p-4 dark:bg-[#0f0f14]" style="border-top-left-radius: 0; border-top-right-radius: 0; border-top-width: 0;">
-                                <div class="mb-3 flex items-center gap-3">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500"><svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
-                                    <div><div class="font-medium text-gray-900 dark:text-white">This Week's Spots</div><div class="text-sm text-orange-600 dark:text-orange-300">Sending to 1,247 hungry fans...</div></div>
-                                </div>
-                                <div class="space-y-1 text-sm">
-                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 0;"><span class="text-orange-500 dark:text-orange-400">Mon:</span> Downtown Food Park</div>
-                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 1;"><span class="text-orange-500 dark:text-orange-400">Tue:</span> Tech Campus</div>
-                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 2;"><span class="text-orange-500 dark:text-orange-400">Wed:</span> Farmers Market</div>
-                                    <div class="es-ai-field flex gap-2 text-gray-500 dark:text-gray-400" style="--i: 3;"><span class="text-orange-500 dark:text-orange-400">Fri:</span> Brewery District</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Instant notifications -->
-                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                            Notifications
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Customers get pinged instantly</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Post a new location, your followers get notified. Last-minute spot change? They know immediately.</p>
-                        <div class="mx-auto mt-auto w-full max-w-xs rounded-2xl border border-gray-200 bg-gray-100 p-4 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="flex items-start gap-3">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-500"><span class="text-xs font-bold text-white">TT</span></div>
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">Taco Truck Tony</div>
-                                    <div class="text-xs text-emerald-500 dark:text-emerald-400">New location posted!</div>
-                                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">Tech Campus - Building A</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Promo graphics -->
-                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Promo Graphics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">"Find us today" posts, ready to share</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate Instagram-ready graphics with your location. One click to download and post.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="relative h-32 w-32 rounded-xl border border-sky-400/30 bg-sky-500/20 p-2">
-                                <div class="flex h-full w-full flex-col items-center justify-center rounded-lg bg-gradient-to-br from-orange-600/40 to-amber-600/40">
-                                    <svg aria-hidden="true" class="mb-1 h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
-                                    <div class="text-xs font-semibold text-white">FIND US TODAY</div>
-                                    <div class="mt-0.5 text-[10px] text-sky-200">Downtown Food Park</div>
-                                </div>
-                                <div class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-sky-500 shadow-lg">
-                                    <svg aria-hidden="true" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Catering & private events -->
-                <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            Bookings
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">Take catering inquiries</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Corporate lunches, weddings, private parties. Customers can request bookings right from your page. Zero platform fees.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/10" style="--i: 0;">
-                                <div><span class="text-sm text-gray-900 dark:text-white">Corporate Lunch</span><span class="block text-xs text-gray-500 dark:text-gray-400">50 people, March 15</span></div>
-                                <span class="text-sm font-medium text-amber-600 dark:text-amber-400">$650</span>
-                            </div>
-                            <div class="es-ai-field flex items-center justify-between rounded-lg border border-amber-400/30 bg-amber-500/20 p-3" style="--i: 1;">
-                                <div><span class="text-sm text-gray-900 dark:text-white">Wedding Catering</span><span class="block text-xs text-amber-700/70 dark:text-amber-300/70">150 people, June 22</span></div>
-                                <span class="text-sm font-medium text-amber-600 dark:text-amber-300">$3,200</span>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. Perfect for (shared sub-audience cards)                   -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for every <span class="text-gradient-food">kitchen on wheels</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From taco trucks to coffee carts, Event Schedule helps mobile vendors connect with customers.
-                </p>
-            </div>
-
-            @php
-                $vendorTypes = [
-                    ['Taco Trucks', 'Authentic tacos, burritos, and Mexican street food - let fans track your daily location and specials.', 'for-taco-trucks', 'bg-orange-100 dark:bg-orange-500/20', 'text-orange-600 dark:text-orange-400', 'hover:border-orange-200 dark:hover:border-orange-500/30', 'text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />'],
-                    ['Coffee & Beverage Carts', 'Mobile espresso, smoothies, juice bars - let caffeine seekers find their morning fix.', 'for-coffee-beverage-carts', 'bg-amber-100 dark:bg-amber-500/20', 'text-amber-600 dark:text-amber-400', 'hover:border-amber-200 dark:hover:border-amber-500/30', 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />'],
-                    ['BBQ & Smoker Trucks', 'Low and slow on the go. Share when the brisket\'s ready and where fans can find it.', 'for-bbq-smoker-trucks', 'bg-red-100 dark:bg-red-500/20', 'text-red-600 dark:text-red-400', 'hover:border-red-200 dark:hover:border-red-500/30', 'text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />'],
-                    ['Catering Businesses', 'Private events and corporate lunches. Take bookings and manage your catering calendar in one place.', 'for-mobile-catering-businesses', 'bg-emerald-100 dark:bg-emerald-500/20', 'text-emerald-600 dark:text-emerald-400', 'hover:border-emerald-200 dark:hover:border-emerald-500/30', 'text-emerald-600 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />'],
-                    ['Pop-up Kitchens', 'Temporary restaurant experiences. Announce your next pop-up and build anticipation.', 'for-popup-kitchens', 'bg-blue-100 dark:bg-blue-500/20', 'text-blue-600 dark:text-blue-400', 'hover:border-blue-200 dark:hover:border-blue-500/30', 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />'],
-                    ['Festival Vendors', 'Music festivals, county fairs, and outdoor events - let fans know which festivals you\'ll be serving at.', 'for-festival-vendors', 'bg-teal-100 dark:bg-teal-500/20', 'text-teal-600 dark:text-teal-400', 'hover:border-teal-200 dark:hover:border-teal-500/30', 'text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300', '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />'],
-                ];
-            @endphp
-
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                @foreach ($vendorTypes as [$vName, $vDesc, $vSlug, $vBg, $vText, $vBorderHover, $vLink, $vIcon])
-                    @php $vPost = get_sub_audience_blog($vSlug); @endphp
-                    <div class="flex flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all hover:shadow-lg {{ $vBorderHover }} dark:border-white/10 dark:bg-white/5">
-                        <div class="mb-4 flex h-12 w-12 items-center justify-center">
-                            <div class="es-signchip flex h-11 w-11 items-center justify-center rounded-lg {{ $vBg }}">
-                                <svg aria-hidden="true" class="h-6 w-6 {{ $vText }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $vIcon !!}</svg>
-                            </div>
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $vName }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $vDesc }}</p>
-                        @if ($vPost)
-                            <a href="{{ blog_url('/' . $vPost->slug) }}" class="group mt-auto inline-flex items-center pt-3 text-sm font-medium {{ $vLink }}">
-                                Learn more
-                                <svg aria-hidden="true" class="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </a>
-                        @endif
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. How it works                                              -->
-    <!-- ============================================================ -->
-    @php
-        $steps = [
-            ['1', 'Add Your Spots', 'Enter your weekly rotation or daily locations. Add addresses so customers can find you.'],
-            ['2', 'Share Your Link', 'One URL for all your locations. Put it in your bio, on your truck, everywhere.'],
-            ['3', 'Feed Your Fans', 'Customers follow and get notified of new locations. They find you, you feed them.'],
-        ];
-    @endphp
-    <section class="bg-white py-20 dark:bg-[#0a0a0f] lg:py-24">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="es-roadline mx-auto mb-12 max-w-3xl" aria-hidden="true"></div>
-            <div class="mx-auto mb-14 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    How it <span class="text-gradient-food">works</span>
-                </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Get your schedule online in three steps.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($steps as [$num, $title, $desc])
-                    <div data-reveal class="text-center">
-                        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-2xl font-bold text-white shadow-lg shadow-orange-500/25">
-                            {{ $num }}
-                        </div>
-                        <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ $desc }}</p>
-                    </div>
-                @endforeach
             </div>
         </div>
     </section>
@@ -684,30 +800,35 @@
     <!-- ============================================================ -->
     <!-- 8. Key features                                              -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="es-stop-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Recurring Events" description="A regular pitch set up once, with exceptions for the weeks you lose it" :url="marketing_url('/features/recurring-events')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Recurring Events" description="Set events to repeat weekly on chosen days" :url="marketing_url('/features/recurring-events')" icon-color="lime">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-lime-600 dark:text-lime-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Newsletters" description="Send the week's route to the people who follow you" :url="marketing_url('/features/newsletters')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Sub-schedules" description="Keep markets, festivals and private hire on their own strands" :url="marketing_url('/features/sub-schedules')" icon-color="amber">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Embed Calendar" description="Drop the route into the site you already have" :url="marketing_url('/features/embed-calendar')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="inline-flex items-center font-medium text-orange-600 hover:underline dark:text-orange-400">
+                <a href="{{ marketing_url('/features') }}" class="es-stop-accent inline-flex items-center font-medium hover:underline">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -718,28 +839,33 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 9. Related pages                                             -->
+    <!-- 9. Keep exploring                                            -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+    <section class="border-t border-[rgba(20,24,29,0.1)] py-16 dark:border-[rgba(232,236,241,0.1)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="es-stop-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-farmers-markets', 'Farmers Markets'], ['/for-breweries-and-wineries', 'Breweries & Wineries'], ['/for-restaurants', 'Restaurants'], ['/for-bars', 'Bars']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:hover:border-orange-500/30">
+                @foreach ([
+                    ['/for-farmers-markets', 'Farmers Markets'],
+                    ['/for-breweries-and-wineries', 'Breweries &amp; Wineries'],
+                    ['/for-restaurants', 'Restaurants'],
+                    ['/for-bars', 'Bars'],
+                ] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-stop-card es-stop-hover group flex items-center justify-between p-5">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="text-lg font-semibold text-gray-900 transition-colors group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-400">{{ $relName }}</div>
+                            <div class="es-stop-muted text-sm">Event Schedule for</div>
+                            <div class="es-stop-ink text-lg font-semibold">{!! $relName !!}</div>
                         </div>
-                        <svg aria-hidden="true" class="w-5 h-5 text-gray-400 transition-colors group-hover:text-orange-600 dark:group-hover:text-orange-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-stop-accent h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="inline-flex items-center font-medium text-orange-600 hover:underline dark:text-orange-400">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-stop-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -747,86 +873,69 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 10. FAQ                                                      -->
+    <!-- 10. FAQ (07)                                                 -->
     <!-- ============================================================ -->
-    <section class="bg-gray-100 py-20 dark:bg-black/30 lg:py-28">
+    <section id="faq" class="scroll-mt-24 border-t border-[rgba(20,24,29,0.1)] py-20 dark:border-[rgba(232,236,241,0.1)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-food">questions</span>
+                <div class="es-stop-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <p class="es-stop-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
+                <h2 class="es-balance es-stop-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Asked <span class="es-stop-grad">at the hatch</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything food truck owners ask about Event Schedule.
-                </p>
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for food trucks?', 'Yes. Event Schedule is free forever for sharing your location schedule, building a customer following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan, with zero platform fees.'],
-                    ['Can I show where my truck will be each day?', 'Yes. Create events with location details for each stop on your route. Customers can see your full weekly schedule at a glance and know exactly where to find you. Add venue names, addresses, and hours for every location.'],
-                    ['How do customers find out where I\'ll be?', 'Customers can follow your schedule and receive email notifications when you add new stops. Share your schedule link on social media, embed it on your website, or send newsletters with your weekly route.'],
-                    ['Does it work for farmers market and festival schedules?', 'Yes. List all your market appearances, festivals, and pop-up locations in one schedule. Use sub-schedules to organize by type. Customers always see your complete calendar of upcoming appearances.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                @foreach ($faqs as $faq)
+                    <details name="faq" data-reveal class="es-stop-card group/faq overflow-hidden">
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="es-stop-ink text-lg font-semibold">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="es-stop-muted h-5 w-5 shrink-0 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="es-stop-muted faq-answer px-6 pb-6">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
         </div>
     </section>
 
+    <x-seo.faq-schema :items="$faqs" />
+
     <!-- ============================================================ -->
     <!-- 11. Finale                                                   -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-orange-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-stop-band noise relative overflow-hidden rounded-[2rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 50% 20%, rgba(249, 115, 22, 0.32), rgba(249, 115, 22, 0) 60%); opacity: 0.7;"></div>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <!-- Route motif echoed into the finale (the third full-bleed layer) -->
-                    <div class="es-route absolute inset-0 text-orange-400" style="-webkit-mask-image: radial-gradient(ellipse 90% 82% at 50% 50%, black 18%, transparent 80%); mask-image: radial-gradient(ellipse 90% 82% at 50% 50%, black 18%, transparent 80%);">
-                        <svg class="h-full w-full" viewBox="0 0 1200 400" fill="none" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                            <path d="M-60 260 C 200 120, 380 360, 620 220 S 980 100, 1260 240" stroke="currentColor" stroke-width="20" stroke-linecap="round" opacity="0.10"/>
-                            <path class="es-route-path" d="M-60 260 C 200 120, 380 360, 620 220 S 980 100, 1260 240" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
-                        </svg>
-                    </div>
-                    <div class="es-pin-bob absolute hidden sm:block" style="left: 8%; top: 2.75rem;">
-                        <span class="es-ping relative flex h-9 w-9 items-center justify-center">
-                            <span style="--ping-dur: 3s; --ping-delay: 0s;"></span>
-                            <span style="--ping-dur: 3s; --ping-delay: 1.5s;"></span>
-                            <svg class="relative h-8 w-8 text-orange-500 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>
-                            </svg>
-                        </span>
-                    </div>
+                    <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 </div>
 
                 <div class="relative z-10">
-                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Stop answering <span class="text-gradient-food">"Where are you today?"</span>
+                    <p class="es-stop-tag mb-6">Free forever</p>
+                    <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
+                        Stop retyping <span class="es-stop-grad">the week</span>.
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Let your regulars find you. Free forever.
+                    <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
+                        One address for the whole route, and a QR for the window that turns tonight's
+                        queue into next week's.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
-                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
+                        <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-lg border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
                             <input id="es-claim-input" type="text" placeholder="your-truck" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-orange-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-orange-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-stop-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-lg px-8 py-4 text-lg font-semibold">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Put your route online
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -840,6 +949,22 @@
             </div>
         </div>
     </section>
+
+    <!-- Section dot navigation -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#181c19] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

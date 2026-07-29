@@ -554,6 +554,19 @@ return [
             'modified' => '2026-07-26',
         ],
 
+        // SaaS group only: a single-tenant selfhost has no free tier, so nothing is ever
+        // monetized there and the page would only confuse.
+        'saas/monetization' => [
+            'group' => 'saas',
+            'route' => 'marketing.docs.saas.monetization',
+            'path' => '/docs/saas/monetization',
+            'title' => 'Monetization',
+            'blurb' => 'Show ads on free schedules and sell promotional placement to paid ones.',
+            'icon' => 'megaphone',
+            'published' => '2026-07-28',
+            'modified' => '2026-07-28',
+        ],
+
         // ---- Developer ------------------------------------------------------
 
         'developer/api' => [

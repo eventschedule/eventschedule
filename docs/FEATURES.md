@@ -55,7 +55,7 @@ Gated by `$role->isPro()`. Enterprise users also get all Pro features.
 
 | Feature | Gate location | Notes |
 |---------|--------------|-------|
-| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by" |
+| Remove Event Schedule branding | `$role->isWhiteLabeled()` / `$role->showBranding()` | White-label, removes "Powered by". One exception: a schedule served on a custom domain keeps a small "Event Schedule" chip in the guest footer, because otherwise nothing on the page links back to us at all - see `layouts/app-guest.blade.php` |
 | Ticketing & QR code check-ins | `$event->isPro()` in views and controllers | Create ticket types, scan QR codes |
 | Passes & subscriptions | Tied to ticketing gate, `$ticket->is_pass` | Multi-use passes redeemable across events (visit pass, membership, festival pass, season pass); usage tracked on the Subscriptions tab; per-pass cancellation deadline and late-cancel policy (forfeit or block) |
 | Individual tickets | Tied to ticketing gate, `$event->individual_tickets` | Collect per-attendee details; each guest gets own confirmation email and QR code |
@@ -130,6 +130,21 @@ operator, not per schedule.
 |---------|--------------|-------|
 | Federation | `FederationService::isEnabled()` - `! config('app.is_nexus') && Setting::get('federation_enabled')` | Shares public events with the eventschedule.com listings; every listing links back to the event on the origin site. Off by default, enabled by an admin at `/admin/settings`. Each schedule can opt out via `roles.federation_enabled` |
 | Federation moderation | `AdminFederationController`, `config('app.is_nexus')` | Nexus-only. Approve, suspend or delist instances, and block individual listings, at `/admin/federation` |
+
+## Monetization (operator-enabled)
+
+Off by default and **not a plan tier feature**: it exists only when the instance operator sets
+`ADS_ENABLED=true` and configures it at `/admin/settings`. eventschedule.com does not enable it.
+Multi-tenant hosted installs only - a single-tenant selfhost resolves to Enterprise, so it has no
+free tier and is never monetized. See `/docs/saas/monetization`.
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Ads on free schedules | `Role::showAds()` + `AdsService::isEligible()` | Google AdSense on free-tier public schedule and event pages. Never on paid tiers, embeds, checkout/booking/submission pages, password-gated pages, custom domains, or for the schedule's own members. Non-personalized by default; honours `Sec-GPC` |
+| Ad-free public pages | `Role::showAds()` returns false above free | The Pro-side benefit that mirrors "Remove Event Schedule branding" |
+| Buy network promotions | `PromotionController`, `$role->isPro()` | Pro schedules buy placement for a public event on free schedules' pages (CPM or CPC, prepaid, unspent budget refunded). Stored as `boost_campaigns` rows with `channel = 'network'` |
+| Host promotions opt-out | `roles.promotions_opt_out` | Free on all tiers: any schedule can decline to carry other schedules' promotions. Does not affect AdSense |
+| Promotion review queue | `AdminController::approvePromotion/rejectPromotion` | Approve-before-serve, at `/admin/boost#promo-queue`. Rejection refunds in full. Auto-approves after `PROMOTIONS_AUTO_APPROVE_AFTER` clean campaigns |
 
 ## Newsletter Email Limits
 

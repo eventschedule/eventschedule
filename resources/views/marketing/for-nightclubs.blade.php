@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Nightclubs | Fill Your Calendar</x-slot>
-    <x-slot name="description">Fill your club with DJ lineups and themed nights. Email your crowd directly - no algorithm. Sell tickets, accept DJ bookings. Free forever.</x-slot>
+    <x-slot name="title">Nightclub Event Calendars | Entry, Capacity and Tickets</x-slot>
+    <x-slot name="description">Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door. Recurring themed nights, and zero platform fees when you sell.</x-slot>
     <x-slot name="breadcrumbTitle">For Nightclubs</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Nightclubs",
-        "description": "Fill your club with DJ lineups and themed nights. Email your crowd directly. Sell tickets, accept DJ bookings. Free forever.",
+        "description": "Run the entry side of your club from one link: capacity, cover, timed ticket tiers and QR check-in at the door, with zero platform fees on ticket sales.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -18,48 +18,8 @@
         "serviceType": "Event Management",
         "audience": {
             "@type": "Audience",
-            "audienceType": "Nightclubs"
+            "audienceType": "Nightclubs and Dance Venues"
         }
-    }
-    </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for nightclubs?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your lineup, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I promote DJ lineups and themed nights?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Create events with detailed descriptions, flyer images, and lineup information. Use sub-schedules to organize by night type - EDM Fridays, Latin Saturdays, or themed events. Each event can have its own ticket tiers for VIP, general admission, and bottle service."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do partygoers find out about upcoming events?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans can follow your club's schedule and get email notifications when new events are added. Share your schedule link on social media, embed it on your website, or send newsletters directly to followers with upcoming lineups."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets with different tiers like VIP and general admission?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Create multiple ticket types per event with different prices and quantities. Connect your Stripe account and sell directly - Event Schedule charges zero platform fees. Every ticket includes a QR code for door check-in."
-                }
-            }
-        ]
     }
     </script>
     <!-- Product Schema for Rich Snippets -->
@@ -71,7 +31,6 @@
         "applicationCategory": "BusinessApplication",
         "applicationSubCategory": "Nightclub Event Management Software",
         "operatingSystem": "Web",
-        "description": "Fill your club's calendar with DJ lineups and themed nights. Email your crowd directly - no paying for ads. Sell tickets with QR check-in, accept booking requests from DJs.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,20 +38,54 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Weekly lineup blast newsletter",
-            "Guest list signups and management",
-            "VIP table and bottle service requests",
-            "DJ booking inbox with SoundCloud links",
-            "Auto-generate lineup graphics for social",
-            "Ticketed events with QR check-in",
-            "Themed night scheduling"
+            "Free registration with an optional capacity limit for each night",
+            "Ticket types with their own sales windows, so cover can change at a set time",
+            "QR check-in on the door with a real-time check-in dashboard",
+            "Per-attendee tickets, each with its own confirmation email and QR code",
+            "Automatic waitlist notifications when a sold-out night frees up",
+            "Multi-use passes and memberships for regulars",
+            "Recurring themed nights with date exceptions",
+            "Sub-schedules that keep each night apart on one link",
+            "A public submission form so DJs can ask to play",
+            "Direct newsletters to the people who follow your schedule",
+            "Story-sized event graphics for social",
+            "Two-way Google, Outlook and CalDAV calendar sync"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "nightclub event calendar, club night schedule, DJ booking management, nightclub event software, free nightclub scheduling",
+        "keywords": "nightclub event calendar, club night ticketing, door capacity management, QR check-in nightclub, recurring club nights, free nightclub scheduling",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
         }
+    }
+    </script>
+    <!-- HowTo Schema for Rich Snippets -->
+    <script type="application/ld+json" {!! nonce_attr() !!}>
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to run a nightclub's entry and calendar with Event Schedule",
+        "description": "Get your club's nights and door online in three steps.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "position": 1,
+                "name": "Add your nights",
+                "text": "Set each regular night up once as a recurring event, and use sub-schedules to keep the house night, the hip-hop night and the headline shows apart on the same link."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 2,
+                "name": "Set the door",
+                "text": "Turn on registration with a capacity limit for free nights, or add ticket types with their own sales windows so cover changes at a set time."
+            },
+            {
+                "@type": "HowToStep",
+                "position": 3,
+                "name": "Scan them in",
+                "text": "Every ticket carries a QR code. Scan on the door and the check-in dashboard shows who is actually inside against the capacity you set."
+            }
+        ]
     }
     </script>
     </x-slot>
@@ -106,176 +99,495 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-nightclubs "Peak Hour" styles. The shared es-* motion system
-           (aurora, reveals, bento, marquee, finale) lives in marketing.css;
-           this block holds only this page's own room-POV effects: the UV
-           blue-to-cyan accent gradient, overhead crossing laser beams, a rare
-           soft strobe swell, genre glows, a gold-foil VIP chip, a velvet-rope
-           divider, and laser-dot step numbers. Peak Hour = electric blue
-           #2563eb to cyan #22d3ee with a laser-red #ef4444 secondary. */
+        /* ==============================================================
+           For-nightclubs "The Door" styles. The page stands OUTSIDE the
+           club, at the entrance - the one part of the room /for-djs does
+           not occupy, and the thing a club actually sells. The spine is
+           one in, one out.
 
-        .text-gradient-peak {
-            background: linear-gradient(120deg, #2563eb 0%, #22d3ee 100%);
+           The door is a physical object: .es-door-face is FIXED brushed
+           steel in both colour modes and only the street around it
+           changes (daylight pavement / wet night pavement), so anything
+           inside the door deliberately carries no dark: variants.
+
+           This page's accent is a MATERIAL, not a hue. Every colour in
+           this neighbourhood is taken - cyan/sky (djs, venues), amber
+           (djs, comedy, theaters, breweries), rose/red (theaters,
+           magicians, live-concerts), lime-olive (bars) - and violet is a
+           banned brand colour. So the identity is brushed steel, and the
+           ONE signal colour, EXIT-sign green, is confined to state (the
+           exit sign, doors-open, capacity, links, active nav pip) so it
+           never reads as the page's hue.
+
+           Contrast is measured, not eyeballed: light grounds need
+           #166534 (6.54:1) because #15803d is only 4.60 with no
+           headroom; steel and dark grounds take #4ade80 (10.20:1).
+
+           BLADE RULE for this block: never use @supports probes here.
+           A "#" hex inside a parenthesized at-rule condition breaks
+           Blade compilation of every later parenthesized directive.
+           ============================================================== */
+
+        /* --- Steel headings. Stops weighted late: an even ramp washes
+               out through the middle. --- */
+        .text-gradient-steel {
+            background-image: linear-gradient(135deg, #3f4650 0%, #3f4650 35%, #0f1216 88%);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
         }
-        .dark .text-gradient-peak {
-            background: linear-gradient(120deg, #60a5fa 0%, #67e8f9 100%);
+        .dark .text-gradient-steel {
+            background-image: linear-gradient(135deg, #e5e9ee 0%, #e5e9ee 35%, #9aa4b2 88%);
+        }
+        /* Always-lit variant for the fixed-dark bands (both colour modes). */
+        .text-gradient-steel-lit {
+            background-image: linear-gradient(135deg, #e5e9ee 0%, #e5e9ee 35%, #9aa4b2 88%);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
         }
 
-        /* Near-black room surfaces (hero dark mode + finale panel) */
-        .dark .nc-void { background-color: #08080c; }
-        .nc-panel-deep { background-color: #08080c; }
-
-        /* Overhead crossing laser beams (room POV, lasers overhead) */
-        .nc-lasers { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
-        .nc-beam {
-            position: absolute;
-            top: -30%;
-            height: 160%;
-            width: 2px;
-            border-radius: 9999px;
-            opacity: 0.3;
-            transform-origin: 50% 0%;
-            animation: nc-sweep 22s ease-in-out infinite alternate;
-            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 66%, transparent 100%);
-            mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 66%, transparent 100%);
+        /* --- The door: brushed steel, fixed in BOTH colour modes --- */
+        .es-door-face {
+            position: relative;
+            background-color: #16181c;
+            background-image:
+                repeating-linear-gradient(90deg, rgba(229, 233, 238, 0.035) 0 1px, transparent 1px 3px),
+                linear-gradient(168deg, #24282e, #16181c 55%, #101216);
+            border-radius: 0.35rem;
+            color: #e5e9ee;
+            box-shadow:
+                inset 0 1px 0 rgba(229, 233, 238, 0.12),
+                inset 0 0 60px rgba(0, 0, 0, 0.5),
+                0 26px 55px -26px rgba(4, 5, 6, 0.85);
         }
-        .nc-beam::before {
-            content: "";
-            position: absolute;
-            inset: 0 -3px;
-            border-radius: inherit;
-            background: inherit;
-            filter: blur(5px);
-            opacity: 0.7;
+        /* The jamb the door sits in. */
+        .es-door-jamb {
+            background-image: linear-gradient(168deg, #1c1f24, #101216 60%, #0a0b0d);
+            border: 1px solid #2c3138;
+            border-radius: 0.55rem;
+            box-shadow: 0 30px 60px -28px rgba(4, 5, 6, 0.9);
         }
-        .nc-beam-1 { left: 26%; background: linear-gradient(to bottom, transparent, #2563eb, transparent); --a1: -24deg; --a2: -4deg; animation-duration: 19s; }
-        .nc-beam-2 { left: 50%; background: linear-gradient(to bottom, transparent, #22d3ee, transparent); --a1: 16deg; --a2: -14deg; animation-duration: 24s; animation-delay: -7s; }
-        .nc-beam-3 { left: 72%; background: linear-gradient(to bottom, transparent, #ef4444, transparent); --a1: 28deg; --a2: 6deg; animation-duration: 29s; animation-delay: -13s; opacity: 0.2; }
-        @keyframes nc-sweep { from { transform: rotate(var(--a1)); } to { transform: rotate(var(--a2)); } }
-        .dark .nc-beam { opacity: 0.5; }
-        .dark .nc-beam-3 { opacity: 0.34; }
+        /* Kick plate / push plate, used as a card surface on the door. */
+        .es-door-plate {
+            background-image: linear-gradient(168deg, rgba(229, 233, 238, 0.08), rgba(229, 233, 238, 0.03));
+            border: 1px solid rgba(229, 233, 238, 0.14);
+            border-radius: 0.4rem;
+        }
+        .es-door-plate-open {
+            border-color: rgba(74, 222, 128, 0.45);
+            background-image: linear-gradient(168deg, rgba(74, 222, 128, 0.12), rgba(74, 222, 128, 0.04));
+            box-shadow: inset 0 0 24px rgba(74, 222, 128, 0.08);
+        }
 
-        /* Rare, soft strobe swell (long interval, low contrast, never a harsh flash) */
-        .nc-strobe {
-            position: absolute;
-            inset: 0;
+        /* --- The EXIT sign: the only colour on the page --- */
+        .es-door-exit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.3rem 1.1rem;
+            border-radius: 0.25rem;
+            background: #0b1f13;
+            border: 1px solid rgba(74, 222, 128, 0.45);
+            color: #4ade80;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.42em;
+            text-indent: 0.42em;
+            text-shadow: 0 0 10px rgba(74, 222, 128, 0.55);
+            box-shadow: 0 0 22px rgba(74, 222, 128, 0.18);
+        }
+
+        /* --- The clicker: checked in against capacity --- */
+        .es-door-clicker {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.35rem;
+            background: #0c0e11;
+            border: 1px solid rgba(229, 233, 238, 0.16);
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+            font-variant-numeric: tabular-nums;
+        }
+        .es-door-clicker-in { color: #4ade80; font-weight: 800; }
+        .es-door-clicker-cap { color: #9aa4b2; }
+
+        /* --- The rope: two stanchions and a slung line, all boxes --- */
+        .es-door-post {
+            width: 0.5rem;
+            height: 2.6rem;
+            border-radius: 0.15rem 0.15rem 0 0;
+            background-image: linear-gradient(180deg, #b7bec8, #6b7480 45%, #454c55);
+            box-shadow: 0 6px 14px -8px rgba(4, 5, 6, 0.9);
+        }
+        .es-door-rope {
+            flex: 1 1 auto;
+            height: 1.4rem;
+            margin: 0 -0.15rem;
+            border-bottom: 3px solid #4a5058;
+            border-bottom-left-radius: 60% 100%;
+            border-bottom-right-radius: 60% 100%;
+        }
+
+        /* --- The street the door opens onto --- */
+        .es-door-asphalt {
+            background-image:
+                repeating-linear-gradient(90deg, rgba(15, 18, 22, 0.05) 0 1px, transparent 1px 78px),
+                linear-gradient(180deg, transparent, rgba(15, 18, 22, 0.08));
+        }
+        .dark .es-door-asphalt {
+            background-image:
+                repeating-linear-gradient(90deg, rgba(229, 233, 238, 0.04) 0 1px, transparent 1px 78px),
+                linear-gradient(180deg, transparent, rgba(74, 222, 128, 0.05));
+        }
+        /* Light pooling on wet ground under the exit sign at night. */
+        .es-door-spill {
+            background-image: radial-gradient(55% 100% at 50% 0%, rgba(74, 222, 128, 0.14), transparent 72%);
+            filter: blur(7px);
+        }
+
+        /* --- Slow sheen travelling across the steel --- */
+        .es-door-sheen {
             pointer-events: none;
-            opacity: 0;
-            --nc-sp: 0.2;
-            background: radial-gradient(ellipse 100% 55% at 50% -5%, rgba(125, 185, 255, 0.9), rgba(125, 185, 255, 0) 70%);
-            animation: nc-strobe 16s ease-in-out infinite;
+            background-image: linear-gradient(104deg, transparent 35%, rgba(229, 233, 238, 0.07) 48%, transparent 61%);
+            background-size: 260% 100%;
         }
-        .dark .nc-strobe { --nc-sp: 0.38; }
-        @keyframes nc-strobe {
-            0%, 80%, 100% { opacity: 0; }
-            88%, 92% { opacity: var(--nc-sp); }
+        html.es-anim .es-door-sheen { animation: es-door-sheen 14s ease-in-out infinite; }
+        @keyframes es-door-sheen {
+            0%, 100% { background-position: 130% 0; }
+            50% { background-position: -30% 0; }
         }
 
-        /* Genre glows for the club-weekend cards (THU sky, FRI amber, SAT cyan) */
-        .nc-glow-thu { box-shadow: 0 0 24px -8px rgba(56, 189, 248, 0.55); }
-        .nc-glow-fri { box-shadow: 0 0 24px -8px rgba(245, 158, 11, 0.55); }
-        .nc-glow-sat { box-shadow: 0 0 24px -8px rgba(34, 211, 238, 0.6); }
-        .dark .nc-glow-thu { box-shadow: 0 0 32px -8px rgba(56, 189, 248, 0.65); }
-        .dark .nc-glow-fri { box-shadow: 0 0 32px -8px rgba(245, 158, 11, 0.6); }
-        .dark .nc-glow-sat { box-shadow: 0 0 32px -8px rgba(34, 211, 238, 0.7); }
-
-        /* Gold-foil VIP chip (sweeping foil sheen) */
-        .nc-vip-foil {
-            color: #5b3f0a;
-            background: linear-gradient(115deg, #fde68a 0%, #f59e0b 34%, #fffbeb 50%, #f59e0b 66%, #b45309 100%);
-            background-size: 220% 220%;
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 1px 4px rgba(180, 120, 10, 0.45);
-            letter-spacing: 0.04em;
-            animation: nc-foil 5.5s ease-in-out infinite;
-        }
-        .dark .nc-vip-foil { color: #3d2a06; }
-        @keyframes nc-foil {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        /* Laser-dot step numbers (radiating ping ring) */
-        .nc-step-dot::before {
+        /* --- Engraved rule that scores itself in on reveal. The drawn
+               state lives on the ALWAYS-ACTIVE rule; only the undrawn
+               pre-state is gated, so no-JS and reduced-motion rest
+               scored. --- */
+        .es-door-rule { position: relative; }
+        .es-door-rule::after {
             content: "";
             position: absolute;
-            inset: -5px;
-            border-radius: 1.25rem;
-            border: 1px solid rgba(96, 165, 250, 0.55);
-            opacity: 0;
-            animation: nc-ping 3.6s cubic-bezier(0, 0, 0.2, 1) infinite;
-            animation-delay: var(--pd, 0s);
+            left: 0;
+            right: 0;
+            bottom: -0.4rem;
+            height: 2px;
+            border-radius: 1px;
+            background: linear-gradient(90deg, transparent, #166534 12%, #166534 88%, transparent);
+            transform-origin: left center;
+            transform: scaleX(1);
+            transition: transform 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
         }
-        .dark .nc-step-dot::before { border-color: rgba(103, 232, 249, 0.6); }
-        @keyframes nc-ping {
-            0% { transform: scale(0.9); opacity: 0.7; }
-            70%, 100% { transform: scale(1.42); opacity: 0; }
+        .dark .es-door-rule::after,
+        .es-door-face .es-door-rule::after,
+        .es-door-band .es-door-rule::after {
+            background: linear-gradient(90deg, transparent, #4ade80 12%, #4ade80 88%, transparent);
+        }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-door-rule::after { transform: scaleX(0); }
+
+        /* --- The bolt sliding BACK in the finale. Finished state is
+               retracted and centred (translateX(0)); the gated pre-state is
+               the bolt thrown into the strike plate. Getting these the wrong
+               way round both reverses the meaning (it would lock, under a
+               heading that says "Unlock it") and leaves no-JS and
+               reduced-motion users looking at an off-centre bar. --- */
+        .es-door-bolt {
+            display: block;
+            height: 0.55rem;
+            width: 3.4rem;
+            border-radius: 0.15rem;
+            background-image: linear-gradient(180deg, #c3cad3, #79828e 50%, #4a5058);
+            transform: translateX(0);
+            transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s;
+        }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-door-bolt { transform: translateX(2.2rem); }
+
+        /* --- Section numeral: an engraved steel plate --- */
+        .es-door-corner {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.95rem;
+            border-radius: 0.3rem;
+            background-image: linear-gradient(168deg, #24282e, #16181c);
+            border: 1px solid rgba(229, 233, 238, 0.18);
+            color: #e5e9ee;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.06em;
+            box-shadow: inset 0 1px 0 rgba(229, 233, 238, 0.12), 0 8px 18px -12px rgba(4, 5, 6, 0.9);
+        }
+        .es-door-corner::before {
+            content: "";
+            width: 2px;
+            align-self: stretch;
+            border-radius: 1px;
+            background: rgba(74, 222, 128, 0.7);
         }
 
-        /* Accent link + related-card hover recolor (replaces hard-coded blue) */
-        .nc-link { color: #2563eb; }
-        .dark .nc-link { color: #38bdf8; }
-        .nc-rel-card:hover { border-color: #7dd3fc; background-color: #ecfeff; }
-        .dark .nc-rel-card:hover { border-color: rgba(56, 189, 248, 0.35); background-color: rgba(56, 189, 248, 0.06); }
-        .nc-rel-card:hover .nc-rel-title,
-        .nc-rel-card:hover .nc-rel-arrow { color: #2563eb; }
-        .dark .nc-rel-card:hover .nc-rel-title,
-        .dark .nc-rel-card:hover .nc-rel-arrow { color: #38bdf8; }
+        /* --- Eyebrow tags --- */
+        .es-door-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: #166534;
+        }
+        .dark .es-door-tag { color: #4ade80; }
+        .es-door-face .es-door-tag,
+        .es-door-band .es-door-tag { color: #4ade80; }
 
+        /* --- State chip: the only other place green is allowed --- */
+        .es-door-state {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid rgba(22, 101, 52, 0.4);
+            color: #166534;
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+        .dark .es-door-state { border-color: rgba(74, 222, 128, 0.45); color: #4ade80; }
+        .es-door-face .es-door-state,
+        .es-door-band .es-door-state { border-color: rgba(74, 222, 128, 0.45); color: #4ade80; }
+
+        /* --- Plan tags --- */
+        .es-door-plan {
+            display: inline-flex;
+            align-items: center;
+            flex: none;
+            padding: 0.1rem 0.45rem;
+            border-radius: 0.25rem;
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            border: 1px solid rgba(22, 101, 52, 0.4);
+            color: #166534;
+        }
+        .dark .es-door-plan { border-color: rgba(74, 222, 128, 0.45); color: #4ade80; }
+        .es-door-face .es-door-plan,
+        .es-door-band .es-door-plan { border-color: rgba(74, 222, 128, 0.45); color: #4ade80; }
+        .es-door-plan-pro { border-color: rgba(15, 18, 22, 0.4); color: #0f1216; }
+        .dark .es-door-plan-pro { border-color: rgba(229, 233, 238, 0.4); color: #e5e9ee; }
+        .es-door-face .es-door-plan-pro,
+        .es-door-band .es-door-plan-pro { border-color: rgba(229, 233, 238, 0.4); color: #e5e9ee; }
+
+        /* --- Links and buttons: steel, never green-dominant --- */
+        .es-door-link { color: #166534; }
+        .es-door-link:hover { color: #0f1216; }
+        .dark .es-door-link { color: #4ade80; }
+        .dark .es-door-link:hover { color: #e5e9ee; }
+
+        .es-door-btn {
+            background-image: linear-gradient(to right, #24282e, #0f1216);
+            box-shadow: 0 20px 40px -12px rgba(15, 18, 22, 0.5);
+        }
+        .es-door-btn:hover {
+            background-image: linear-gradient(to right, #2f343c, #16181c);
+            box-shadow: 0 24px 48px -12px rgba(15, 18, 22, 0.6);
+        }
+
+        /* --- FAQ / related-card hover recolor --- */
+        .es-door-hover:hover { border-color: rgba(22, 101, 52, 0.4); }
+        .dark .es-door-hover:hover { border-color: rgba(74, 222, 128, 0.38); }
+        .es-door-hover:hover .es-door-hover-title,
+        .es-door-hover:hover .es-door-hover-arrow { color: #166534; }
+        .dark .es-door-hover:hover .es-door-hover-title,
+        .dark .es-door-hover:hover .es-door-hover-arrow { color: #4ade80; }
+
+        /* --- Full-bleed fixed-dark band: the street after 2am --- */
+        .es-door-band {
+            background-color: #0a0b0c;
+            background-image: radial-gradient(120% 100% at 50% 0%, #16191d 0%, #0e1013 55%, #070809 100%);
+            box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(229, 233, 238, 0.05);
+        }
+
+        /* --- Hero chips --- */
+        .es-door-chip {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            padding: 0.4rem 0.9rem;
+            border-radius: 9999px;
+            border: 1px solid rgba(15, 18, 22, 0.2);
+            background: rgba(255, 255, 255, 0.6);
+            color: #3f4650;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .dark .es-door-chip {
+            border-color: rgba(229, 233, 238, 0.18);
+            background: rgba(229, 233, 238, 0.06);
+            color: #cbd2da;
+        }
+
+        /* --- Shared-system recolors: the cursor spotlight and dot-nav
+               pips are hard-coded brand blue in marketing.css. --- */
+        .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(63, 70, 80, 0.16), transparent 60%);
+        }
+        .dark .es-hero .es-spot {
+            background: radial-gradient(560px circle at var(--mx, 50%) var(--my, 40%), rgba(74, 222, 128, 0.1), transparent 60%);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(63, 70, 80, 0.7); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(229, 233, 238, 0.7); }
+        .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #3f4650, #166534); }
+        .dark .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #e5e9ee, #4ade80); }
+
+        /* --- Shared classes that break the fixed-object contract inside the
+               bands. .grid-overlay flips its line colour with the colour
+               mode (marketing.css:118/125) and .es-claim:focus-within is
+               hard-coded brand blue (marketing.css:695), so both are pinned
+               here to the band's own always-dark treatment. --- */
+        .es-door-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(229, 233, 238, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(229, 233, 238, 0.05) 1px, transparent 1px);
+        }
+        /* .animate-shimmer is also mode-dependent (white 0.3 light / 0.15
+           dark, marketing.css:67/72); the band is always dark, so pin it. */
+        .es-door-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-door-band .es-claim:focus-within {
+            border-color: rgba(74, 222, 128, 0.75);
+            box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.22);
+        }
+
+        /* --- Focus rings. Steel surfaces are not the shared card
+               components, so the ring at marketing.css:248 does not reach
+               them. This rule is load-bearing for keyboard users. --- */
+        #es-door-page a:focus-visible,
+        #es-door-page summary:focus-visible,
+        #es-door-page button:focus-visible {
+            outline: 2px solid #166534;
+            outline-offset: 3px;
+        }
+        .dark #es-door-page a:focus-visible,
+        .dark #es-door-page summary:focus-visible,
+        .dark #es-door-page button:focus-visible {
+            outline-color: #4ade80;
+        }
+        /* On the door and the bands the ground never changes. */
+        .es-door-face a:focus-visible,
+        .es-door-face summary:focus-visible,
+        .es-door-face button:focus-visible,
+        .es-door-band a:focus-visible,
+        .es-door-band summary:focus-visible,
+        .es-door-band button:focus-visible {
+            outline-color: #4ade80 !important;
+        }
+
+        /* --- Reduced motion: every page-local effect resolves to its
+               finished state, nothing moves. --- */
         @media (prefers-reduced-motion: reduce) {
-            .nc-beam { animation: none !important; }
-            .nc-strobe { animation: none !important; opacity: 0 !important; }
-            .nc-vip-foil { animation: none !important; }
-            .nc-step-dot::before { animation: none !important; opacity: 0 !important; }
+            html.es-anim .es-door-sheen { animation: none !important; }
+            .es-door-rule::after {
+                transform: scaleX(1) !important;
+                transition: none !important;
+            }
+            .es-door-bolt {
+                transform: translateX(0) !important;
+                transition: none !important;
+            }
         }
     </style>
 
+    @php
+        $clubWeekend = [
+            ['Thu', 'Industry night', 'Free entry before midnight', 'Registration with a capacity limit'],
+            ['Fri', 'House residency', 'Weekly, same DJs', 'One recurring event, set once'],
+            ['Sat', 'Headline show', 'Ticketed, sells out', 'Timed tiers, then the waitlist'],
+        ];
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for nightclubs?',
+                'a' => 'Yes. Sharing your nights, running recurring residencies, splitting them into sub-schedules, taking free registrations with a capacity limit, and two-way sync with Google, Outlook or CalDAV are all free forever. Ticketing with QR check-in, the check-in dashboard, event graphics and passes are on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on tickets.',
+            ],
+            [
+                'q' => 'Can people sign up for a free night without paying?',
+                'a' => 'Yes, on every plan. Turn on registration for the night and set how many places there are. The page shows how many are left and stops taking names once they are gone, so a free night still has a real capacity rather than an open door.',
+            ],
+            [
+                'q' => 'How do I charge less before a certain time?',
+                'a' => 'Give the night more than one ticket type and put a sales window on each. A cheap early tier can stop selling at 11pm and a full-price tier take over after it, so cover changes on the clock without anyone editing the page at the door.',
+            ],
+            [
+                'q' => 'Can I sell different ticket types for one night?',
+                'a' => 'Yes, on the Pro plan. Create as many ticket types as the night needs, each with its own price and quantity, plus add-ons that attach to a ticket and discounts that kick in when someone buys several at once. Connect Stripe and sell straight from your calendar with zero platform fees.',
+            ],
+            [
+                'q' => 'Can DJs ask to play at my club?',
+                'a' => 'Yes. Turn on Accept requests and artists can submit a night from your public page. Submissions land on your Requests tab, where you accept or decline before anything reaches your calendar. On Pro you can add your own questions to that form, so a DJ sends their genre and a link to their mixes with the request.',
+            ],
+            [
+                'q' => 'What happens when a night sells out?',
+                'a' => 'Turn on the waitlist for that event and people can join it once tickets are gone. If a ticket is released, the waitlist is notified automatically instead of you working through replies. The waitlist is a Pro feature.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The door'],
+            ['decides', 'What it decides'],
+            ['entry', 'The list'],
+            ['scan', 'The door itself'],
+            ['playing', "Who's playing"],
+            ['rest', 'The rest of it'],
+            ['weekend', 'The weekend'],
+            ['who', 'Perfect for'],
+            ['steps', 'Three steps'],
+            ['faq', 'Questions'],
+            ['claim', 'Open it'],
+        ];
+    @endphp
+
+    <div id="es-door-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: tonight's lineup                                    -->
+    <!-- 1. Hero: the door                                            -->
     <!-- ============================================================ -->
-    <section class="es-hero nc-void relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden bg-[#f4f5f7] py-16 dark:bg-[#0a0b0c]">
         <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 32%, rgba(34, 211, 238, 0.4), rgba(34, 211, 238, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(14, 165, 233, 0.42), rgba(14, 165, 233, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3"></div>
-            <div class="es-rays absolute inset-0"></div>
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(63, 70, 80, 0.22), rgba(63, 70, 80, 0) 65%);"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 40%, rgba(74, 222, 128, 0.12), rgba(74, 222, 128, 0) 65%);"></div>
+            <div class="es-spot absolute inset-0"></div>
+            <div class="es-door-asphalt absolute inset-x-0 bottom-0 h-1/3"></div>
             <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <div class="nc-lasers">
-                <span class="nc-beam nc-beam-1"></span>
-                <span class="nc-beam nc-beam-2"></span>
-                <span class="nc-beam nc-beam-3"></span>
-            </div>
-            <div class="nc-strobe"></div>
         </div>
 
         <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <svg aria-hidden="true" class="h-5 w-5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+            <div class="es-fade-up es-d-1 glass mb-8 inline-flex items-center gap-3 rounded-full px-5 py-2.5">
+                <svg aria-hidden="true" class="h-5 w-5 text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                 </svg>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Nightclubs & Dance Venues</span>
+                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For nightclubs and dance venues</span>
             </div>
 
-            <h1 class="es-balance mb-8 text-[2.6rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line"><span class="text-gradient-peak es-gradient-anim">Pack the dancefloor.</span></span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line">Own your crowd.</span></span>
+            <h1 class="es-balance mb-8 text-[2.4rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
+                <span class="es-mask"><span class="es-mask-line">The night is won at the door.</span></span>
+                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-steel">Not in the booth.</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                Stop paying to reach your own followers. Email your crowd directly, announce your lineups, and fill your club - without the algorithm getting in the way.
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
+                Capacity, cover, who is on for tonight, and who actually walked in. Put the entry side of your club on one link, with QR check-in on the door and zero platform fees when you sell.
             </p>
 
             <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See the lineup
+                <a href="#entry" class="glass group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
+                    See how entry works
                     <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
                 </a>
-                <a href="{{ app_url('/sign_up?type=venue') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-cyan-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
+                <a href="{{ app_url('/sign_up?type=venue') }}" class="es-door-btn group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                     Create your club's calendar
                     <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -283,17 +595,48 @@
                 </a>
             </div>
 
-            <!-- Genre marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
+            <!-- The door itself -->
+            <div class="es-fade-up es-d-4 relative mx-auto mt-14 max-w-md" data-reveal>
+                <div class="es-door-jamb p-3">
+                    <div class="es-door-face overflow-hidden px-6 py-8">
+                        <div class="es-door-sheen absolute inset-0" aria-hidden="true"></div>
+
+                        <div class="relative text-center">
+                            <div class="es-door-exit mb-8">EXIT</div>
+
+                            <div class="es-door-clicker mb-2">
+                                <span class="es-door-clicker-in text-3xl">241</span>
+                                <span class="es-door-clicker-cap text-lg">/ 300</span>
+                            </div>
+                            <p class="text-xs text-[#9aa4b2]">Checked in against tonight's capacity</p>
+
+                            <div class="mt-7 flex items-center justify-center gap-2 text-start">
+                                <span class="es-door-state">Doors open</span>
+                                <span class="text-xs text-[#9aa4b2]">59 places left</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The rope, out front -->
+                <div class="mt-6 flex items-end justify-center gap-0 px-6" aria-hidden="true">
+                    <span class="es-door-post"></span>
+                    <span class="es-door-rope"></span>
+                    <span class="es-door-post"></span>
+                    <span class="es-door-rope"></span>
+                    <span class="es-door-post"></span>
+                </div>
+                <div class="es-door-spill absolute inset-x-10 -bottom-2 h-8 opacity-0 dark:opacity-100" aria-hidden="true"></div>
+            </div>
+
+            <!-- Club-type marquee -->
+            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-12 max-w-3xl">
                 <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
+                    <div class="es-marquee" data-marquee="1">
                         <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['EDM', 'Hip-Hop', 'Latin', 'Rooftop', 'Underground', 'Lounge', 'Techno', 'House'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-sky-400"></span>
-                                        {{ $tag }}
-                                    </span>
+                            @for ($chipCopy = 0; $chipCopy < 2; $chipCopy++)
+                                @foreach (['House', 'Techno', 'Hip-Hop', 'Latin', 'Disco', 'Drum & Bass', 'Rooftop', 'Warehouse', 'Lounge', 'Residency'] as $chip)
+                                    <span @if ($chipCopy === 1) aria-hidden="true" @endif class="es-door-chip">{{ $chip }}</span>
                                 @endforeach
                             @endfor
                         </div>
@@ -301,273 +644,408 @@
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. Bento features                                            -->
+    <!-- 2. What the door decides (fixed-dark band)                   -->
     <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <div class="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-1.5" data-reveal>
-                    <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-cyan-400 to-sky-400" aria-hidden="true"></span>
-                    <span class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-600 dark:text-gray-300">Everything after dark</span>
-                </div>
-                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.08s;">
-                    Everything to fill the <span class="text-gradient-peak">floor</span>
-                </h2>
+    <section id="decides" class="relative scroll-mt-24 bg-[#f4f5f7] px-2 py-14 dark:bg-[#0a0b0c] sm:px-4 lg:py-20">
+        <div class="es-door-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-12 max-w-3xl text-center">
+                    <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                    <p class="es-door-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">What the door decides</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Nobody remembers the set. <span class="text-gradient-steel-lit">They remember the queue.</span>
+                    </h2>
+                </div>
 
-                <!-- Weekly lineup blast (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="flex flex-col gap-8 lg:flex-row lg:items-center">
-                            <div class="flex-1">
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                    Weekly Lineup Blast
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white lg:text-4xl">Drop your weekend lineup</h3>
-                                <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">Thursday rolls around, you blast out the weekend's DJs to everyone who follows you. No algorithm. No pay-to-play. Just your crowd, hyped and ready.</p>
-                                <div class="flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">One-click send</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Your crowd, direct reach</span>
-                                </div>
-                            </div>
-                            <div class="w-full shrink-0 lg:w-auto" aria-hidden="true">
-                                <div class="animate-float">
-                                    <div class="max-w-xs rounded-2xl border border-cyan-300 bg-gradient-to-br from-cyan-50 to-sky-50 p-4 dark:border-cyan-400/30 dark:from-cyan-950 dark:to-sky-950">
-                                        <div class="mb-4 flex items-center gap-3">
-                                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-sky-500">
-                                                <svg aria-hidden="true" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                            </div>
-                                            <div><div class="text-sm font-medium text-gray-900 dark:text-white">This Weekend at Vortex</div><div class="text-xs text-cyan-600 dark:text-cyan-300">Sending to 2,341 followers...</div></div>
-                                        </div>
-                                        <div class="space-y-2">
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-cyan-100 p-2 dark:bg-white/10" style="--i: 0;"><span class="h-2 w-2 rounded-full bg-sky-500 dark:bg-sky-400"></span><span class="text-xs text-gray-600 dark:text-gray-300">Thu - Industry Night (free entry)</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-cyan-100 p-2 dark:bg-white/10" style="--i: 1;"><span class="h-2 w-2 rounded-full bg-cyan-500 dark:bg-cyan-400"></span><span class="text-xs text-gray-600 dark:text-gray-300">Fri - DJ Nova (House)</span></div>
-                                            <div class="es-ai-field flex items-center gap-2 rounded-lg bg-cyan-100 p-2 dark:bg-white/10" style="--i: 2;"><span class="h-2 w-2 rounded-full bg-blue-500 dark:bg-blue-400"></span><span class="text-xs text-gray-600 dark:text-gray-300">Sat - Latin Nights with DJ Fuego</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    <div class="es-door-plate p-6" data-reveal="panel">
+                        <p class="es-door-tag mb-3">Capacity</p>
+                        <h3 class="mb-2 text-lg font-bold text-[#e5e9ee]">
+                            <span data-count-to="300">300</span> in, and no more
+                        </h3>
+                        <p class="text-sm text-[#9aa4b2]">A number on a clipboard is a guess. A number the page enforces is a limit.</p>
+                    </div>
+                    <div class="es-door-plate p-6" data-reveal="panel">
+                        <p class="es-door-tag mb-3">Cover</p>
+                        <h3 class="mb-2 text-lg font-bold text-[#e5e9ee]">
+                            Changes at 11pm
+                        </h3>
+                        <p class="text-sm text-[#9aa4b2]">Cheap early, full price after. Someone has to remember to switch it, or the page does it on the clock.</p>
+                    </div>
+                    <div class="es-door-plate es-door-plate-open p-6" data-reveal="panel">
+                        <p class="es-door-tag mb-3">The answer</p>
+                        <h3 class="mb-2 text-lg font-bold text-[#e5e9ee]">One link runs entry</h3>
+                        <p class="text-sm text-[#9aa4b2]">Sign-ups, tiers, and the scan at the door, all reading from the same night.</p>
                     </div>
                 </div>
 
-                <!-- Guest list -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-900/40 dark:text-emerald-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                            Guest List
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Get on the list</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Fans sign up for your guest list right from your calendar. Reduced cover before 11pm - the status thing that fills your early crowd.</p>
-                        <div class="mt-auto space-y-2" aria-hidden="true">
-                            <div class="es-ai-field flex items-center gap-3 rounded-lg border border-emerald-400/30 bg-emerald-500/15 p-2" style="--i: 0;">
-                                <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-[10px] font-semibold text-white">MR</div>
-                                <div class="flex-1 text-sm text-gray-900 dark:text-white">Marco R. +3</div>
-                                <span class="inline-flex items-center rounded bg-emerald-300 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">Confirmed</span>
-                            </div>
-                            <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-2 dark:bg-white/5" style="--i: 1;">
-                                <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-[10px] font-semibold text-white">SK</div>
-                                <div class="flex-1 text-sm text-gray-600 dark:text-gray-300">Sarah K. +1</div>
-                                <span class="inline-flex items-center rounded bg-emerald-300 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/30 dark:text-emerald-300">Confirmed</span>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Themed nights -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                            Branded Nights
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Your signature nights</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Latin Fridays. 80s Saturdays. Techno Sundays. Set them up once - they show automatically every week. Build the brand.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="grid grid-cols-7 gap-1">
-                                @foreach ([['M', ''], ['T', ''], ['W', ''], ['T', 'bg-sky-500'], ['F', 'bg-orange-500'], ['S', 'bg-cyan-500'], ['S', 'bg-blue-500']] as [$dl, $dot])
-                                    <div class="text-center">
-                                        <div class="mb-1 text-[10px] {{ $dot ? 'font-medium text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400' }}">{{ $dl }}</div>
-                                        <div class="mx-auto h-6 w-6 rounded-full {{ $dot ?: 'bg-gray-200 dark:bg-white/5' }}"></div>
-                                    </div>
-                                @endforeach
-                            </div>
-                            <div class="mt-3 text-center text-xs text-gray-500 dark:text-gray-400">Color-coded. Repeating. Memorable.</div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- VIP tables (2 cols) -->
-                <div class="es-bento group relative md:col-span-2" data-tilt="3.5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04] lg:p-9">
-                        <div class="grid items-center gap-8 md:grid-cols-2">
-                            <div>
-                                <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800/30 dark:bg-amber-900/40 dark:text-amber-300">
-                                    <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-                                    VIP & Bottle Service
-                                </div>
-                                <h3 class="mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white">Table bookings, handled</h3>
-                                <p class="text-lg text-gray-500 dark:text-gray-400">VIP table requests, bottle service inquiries, birthday packages - all in one inbox. See party size, minimum spend, special requests. Your biggest revenue driver, organized.</p>
-                                <div class="mt-4 flex flex-wrap gap-3">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Table reservations</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Bottle service</span>
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Birthday packages</span>
-                                </div>
-                            </div>
-                            <div class="rounded-2xl border border-gray-200 bg-gray-50 p-5 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                                <div class="mb-3 text-xs text-gray-500 dark:text-gray-400">VIP Requests - Saturday</div>
-                                <div class="space-y-2">
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-500/15 p-3" style="--i: 0;">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-[10px] font-semibold text-white">MR</div>
-                                        <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">Marco R.</div><div class="text-xs text-amber-600 dark:text-amber-300">Table for 8 &bull; $500 min</div></div>
-                                        <span class="nc-vip-foil inline-flex items-center rounded px-2 py-0.5 text-[10px] font-bold">VIP</span>
-                                    </div>
-                                    <div class="es-ai-field flex items-center gap-3 rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
-                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-[10px] font-semibold text-white">JT</div>
-                                        <div class="flex-1"><div class="text-sm font-medium text-gray-600 dark:text-gray-300">James T.</div><div class="text-xs text-gray-500 dark:text-gray-400">Birthday party &bull; 12 guests</div></div>
-                                        <span class="inline-flex items-center rounded bg-cyan-500/30 px-2 py-0.5 text-[10px] font-medium text-cyan-600 dark:text-cyan-300">BDAY</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- DJ inbox -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-800/30 dark:bg-sky-900/40 dark:text-sky-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            DJ Inbox
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">DJs come to you</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Artists submit to play your club. See their SoundCloud, genre, and past gigs. Accept or pass - no endless email threads.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="flex items-center gap-3 rounded-xl border border-sky-400/30 bg-sky-500/15 p-3">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-blue-500 text-xs font-semibold text-white">KR</div>
-                                <div class="flex-1"><div class="text-sm font-medium text-gray-900 dark:text-white">DJ Kira</div><div class="text-[10px] text-sky-600 dark:text-sky-300">Tech House &bull; SoundCloud linked</div></div>
-                                <div class="flex gap-1">
-                                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20"><svg aria-hidden="true" class="h-3 w-3 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></div>
-                                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-red-500/20"><svg aria-hidden="true" class="h-3 w-3 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Lineup graphics -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-800/30 dark:bg-blue-900/40 dark:text-blue-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            Social Graphics
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Insta-ready lineups</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">Auto-generate lineup graphics for Instagram stories and posts. Your DJs, your branding, ready to share.</p>
-                        <div class="mt-auto flex justify-center" aria-hidden="true">
-                            <div class="relative">
-                                <div class="h-36 w-28 rounded-xl border border-blue-400/30 bg-gradient-to-br from-blue-600 to-blue-700 p-3 shadow-xl">
-                                    <div class="mb-1 text-[8px] font-bold text-blue-200">SATURDAY</div>
-                                    <div class="mb-2 text-[6px] text-blue-300/70">CLUB VORTEX</div>
-                                    <div class="space-y-1">
-                                        <div class="rounded bg-white/20 px-1 py-0.5 text-[6px] font-medium text-white">DJ NOVA</div>
-                                        <div class="rounded bg-white/10 px-1 py-0.5 text-[6px] text-blue-200">MAX LUNA</div>
-                                        <div class="rounded bg-white/10 px-1 py-0.5 text-[6px] text-blue-200">KIRA B2B ECHO</div>
-                                    </div>
-                                </div>
-                                <div class="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-sky-500 shadow-lg">
-                                    <svg aria-hidden="true" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
-                <!-- Sold out Saturdays -->
-                <div class="es-bento group relative" data-tilt="5" data-reveal="panel">
-                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mb-5 inline-flex items-center gap-2 self-start rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-800/30 dark:bg-rose-900/40 dark:text-rose-300">
-                            <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg>
-                            Ticketing
-                        </div>
-                        <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Sold out Saturdays</h3>
-                        <p class="mb-6 text-gray-500 dark:text-gray-400">NYE. Headliner shows. Theme party takeovers. Sell tickets, scan QR codes at the door. Zero platform fees.</p>
-                        <div class="mt-auto" aria-hidden="true">
-                            <div class="rounded-xl border border-rose-400/30 bg-rose-500/15 p-3">
-                                <div class="mb-1 text-[10px] font-semibold text-rose-600 dark:text-rose-300">NYE {{ date('Y') + 1 }}</div>
-                                <div class="flex items-center gap-2"><span class="text-sm font-bold text-gray-900 dark:text-white">342</span><span class="text-xs text-gray-500 dark:text-gray-400">tickets sold</span></div>
-                                <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-rose-500/30"><div class="h-full w-[85%] rounded-full bg-gradient-to-r from-rose-500 to-cyan-500"></div></div>
-                                <div class="mt-1 text-[10px] text-rose-600 dark:text-rose-300">Almost sold out</div>
-                            </div>
-                        </div>
-                        <div class="es-glare" aria-hidden="true"></div>
-                        <div class="es-ring-glow" aria-hidden="true"></div>
-                    </div>
-                </div>
-
+                <p class="mt-10 text-center text-gray-300" data-reveal>
+                    The booth is handled. This is the other half of the room.
+                    <a href="#entry" class="inline-flex items-center gap-1 font-semibold text-[#4ade80] transition-all hover:gap-2">
+                        Start at the list
+                        <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                    </a>
+                </p>
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 3. The club weekend                                          -->
+    <!-- 3. The list is a ticket                                      -->
     <!-- ============================================================ -->
-    @php
-        $clubWeekend = [
-            ['THU', 'Industry Night', 'Service industry', 'sky', ['Lower cover / free entry', 'Late night crowd arrives late', 'Resident DJs on rotation']],
-            ['FRI', 'Themed Night', 'Latin, Hip-Hop, 80s', 'orange', ['Branded recurring night', 'Loyal theme-specific crowd', 'Guest list before 11pm']],
-            ['SAT', 'Headliner Night', 'Touring DJ, premium', 'cyan', ['Premium pricing / ticketed', 'VIP tables sell out', 'Guest headliner draw']],
-        ];
-    @endphp
-    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-12 max-w-2xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                    The club <span class="text-gradient-peak">weekend</span>
+    <section id="entry" class="scroll-mt-24 bg-white py-20 dark:bg-[#111315] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                <p class="es-door-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The list</p>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The list is just <span class="text-gradient-steel">a ticket that costs nothing.</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Clubs run on a rhythm. Thursday builds momentum, Friday brings the theme, Saturday's the headliner. Show your crowd what's coming.
+                <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
+                    Free entry, reduced cover and a full-price door are the same mechanic with different numbers on it.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3" data-reveal-group="90">
-                @foreach ($clubWeekend as [$day, $title, $sub, $color, $points])
-                    <div data-reveal class="rounded-2xl border p-6 transition-all hover:-translate-y-1 hover:shadow-lg
-                        {{ $color === 'sky' ? 'border-sky-200 bg-gradient-to-br from-sky-100 to-blue-100 dark:border-sky-500/30 dark:from-sky-900/40 dark:to-blue-900/40' : ($color === 'orange' ? 'border-orange-200 bg-gradient-to-br from-orange-100 to-amber-100 dark:border-orange-500/30 dark:from-orange-900/40 dark:to-amber-900/40' : 'border-cyan-200 bg-gradient-to-br from-cyan-100 to-rose-100 dark:border-cyan-500/30 dark:from-cyan-900/40 dark:to-rose-900/40') }} {{ $color === 'sky' ? 'nc-glow-thu' : ($color === 'orange' ? 'nc-glow-fri' : 'nc-glow-sat') }}">
-                        <div class="mb-4 flex items-center gap-3">
-                            <div class="flex h-12 w-12 items-center justify-center rounded-xl {{ $color === 'sky' ? 'bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400' : ($color === 'orange' ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' : 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400') }} text-lg font-bold">{{ $day }}</div>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $title }}</h3>
-                                <p class="text-sm {{ $color === 'sky' ? 'text-sky-600 dark:text-sky-300' : ($color === 'orange' ? 'text-orange-600 dark:text-orange-300' : 'text-cyan-600 dark:text-cyan-300') }}">{{ $sub }}</p>
+            <div class="mx-auto max-w-3xl" data-reveal="panel">
+                <div class="es-door-jamb p-3">
+                    <div class="es-door-face overflow-hidden px-6 py-7 sm:px-8">
+                        <div class="es-door-sheen absolute inset-0" aria-hidden="true"></div>
+                        <div class="relative space-y-5">
+                            <div class="es-door-plate p-5">
+                                <div class="mb-2 flex flex-wrap items-center gap-2">
+                                    <h3 class="text-lg font-bold text-[#e5e9ee]">On the list, free, capped</h3>
+                                    <span class="es-door-plan">Free</span>
+                                </div>
+                                <p class="text-sm leading-relaxed text-[#9aa4b2]">
+                                    Turn on registration and set how many places the night has. People claim one from the event page, it shows what is left, and it closes itself when they are gone. That is the guest list, without anyone keeping a separate one.
+                                </p>
+                            </div>
+
+                            <div class="es-door-plate p-5">
+                                <div class="mb-2 flex flex-wrap items-center gap-2">
+                                    <h3 class="text-lg font-bold text-[#e5e9ee]">Cover that changes on the clock</h3>
+                                    <span class="es-door-plan es-door-plan-pro">Pro</span>
+                                </div>
+                                <p class="text-sm leading-relaxed text-[#9aa4b2]">
+                                    Give a night more than one ticket type and put a sales window on each. The cheap tier stops selling at 11pm, the full-price tier takes over, and nobody has to remember to change anything at the door.
+                                </p>
+                                <div class="mt-4 space-y-1.5">
+                                    @foreach ([['Before 11pm', '$10', 'Closed 23:00', true], ['After 11pm', '$18', 'On sale', false], ['Group of 6+', '$15 each', 'On sale', false]] as [$tierName, $tierPrice, $tierState, $tierClosed])
+                                        <div class="flex items-center gap-3 rounded px-3 py-2 text-xs {{ $tierClosed ? 'bg-[rgba(229,233,238,0.04)]' : 'bg-[rgba(74,222,128,0.07)]' }}">
+                                            <span class="min-w-0 flex-1 truncate font-semibold text-[#e5e9ee]">{{ $tierName }}</span>
+                                            <span class="font-mono text-[#e5e9ee]">{{ $tierPrice }}</span>
+                                            <span class="font-mono text-[0.65rem] {{ $tierClosed ? 'text-[#9aa4b2]' : 'text-[#4ade80]' }}">{{ $tierState }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="es-door-plate p-5">
+                                <div class="mb-2 flex flex-wrap items-center gap-2">
+                                    <h3 class="text-lg font-bold text-[#e5e9ee]">Tables, add-ons and groups</h3>
+                                    <span class="es-door-plan es-door-plan-pro">Pro</span>
+                                </div>
+                                <p class="text-sm leading-relaxed text-[#9aa4b2]">
+                                    A table is a ticket type with a price and a quantity. Anything that comes with it is an add-on that attaches to the booking, and a group rate can kick in automatically once someone buys several at once.
+                                </p>
                             </div>
                         </div>
-                        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                            @foreach ($points as $point)
-                                <div class="flex items-center gap-2">
-                                    <div class="h-1.5 w-1.5 rounded-full {{ $color === 'sky' ? 'bg-sky-400' : ($color === 'orange' ? 'bg-orange-400' : 'bg-cyan-400') }}"></div>
-                                    <span>{{ $point }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The door itself                                           -->
+    <!-- ============================================================ -->
+    <section id="scan" class="scroll-mt-24 border-t border-gray-200 bg-[#eef0f3] py-20 dark:border-white/5 dark:bg-[#141618] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                    <p class="es-door-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The door itself</p>
+                    <h2 class="es-balance mb-5 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Know who is inside, <span class="text-gradient-steel">not who bought.</span>
+                    </h2>
+                    <p class="mb-6 text-lg leading-relaxed text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
+                        Every ticket carries a QR code. Scan on the way in and the check-in dashboard counts against the capacity you set, so the number on the clicker is the number in the room.
+                    </p>
+                    <ul class="space-y-3 text-gray-600 dark:text-gray-400" data-reveal-group="70">
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Real-time attendance with a per-ticket breakdown, so you can see which tier is actually turning up.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Per-attendee tickets give every guest in a group their own confirmation email and their own QR, so one person is not holding six.</span>
+                        </li>
+                        <li class="flex gap-3" data-reveal>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-[#166534] dark:text-[#4ade80]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            <span>Check-in and the dashboard are Pro. The capacity limit on a free night is not.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mx-auto w-full max-w-[19rem]" data-reveal="panel">
+                    <!-- The frame stays light on the dark surround: it reads as a lit screen. -->
+                    <div class="rounded-[2rem] border-4 border-[#24282e] bg-white p-3 shadow-2xl">
+                        <div class="mb-3 flex items-center justify-between px-1">
+                            <span class="text-[0.65rem] font-bold uppercase tracking-widest text-gray-600">Check-in</span>
+                            <span class="rounded bg-[#166534] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">Live</span>
+                        </div>
+                        <div class="mb-3 rounded-xl bg-gray-50 px-3 py-3 text-center">
+                            <p class="font-mono text-3xl font-black text-[#166534]">241</p>
+                            <p class="text-[0.65rem] text-gray-600">of 300 capacity</p>
+                        </div>
+                        <div class="space-y-1.5">
+                            @foreach ([['Before 11pm', '128', 'of 140'], ['After 11pm', '96', 'of 140'], ['Table 4', '17', 'of 20']] as [$ciName, $ciIn, $ciOf])
+                                <div class="flex items-center gap-2 rounded-lg bg-gray-50 px-2 py-1.5 text-xs text-gray-700">
+                                    <span class="min-w-0 flex-1 truncate">{{ $ciName }}</span>
+                                    <span class="font-mono font-bold text-gray-900">{{ $ciIn }}</span>
+                                    <span class="font-mono text-[0.65rem] text-gray-600">{{ $ciOf }}</span>
                                 </div>
                             @endforeach
+                        </div>
+                        <p class="mt-3 px-1 text-[0.65rem] text-gray-600">Updates as each code is scanned.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 5. Who's playing (fixed-dark band)                           -->
+    <!-- ============================================================ -->
+    <section id="playing" class="relative scroll-mt-24 bg-[#eef0f3] px-2 py-14 dark:bg-[#141618] sm:px-4 lg:py-20">
+        <div class="es-door-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(74, 222, 128, 0.12), rgba(74, 222, 128, 0) 60%); opacity: 0.5;"></div>
+                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-6xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                    <p class="es-door-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who's playing</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Let them come to you, <span class="text-gradient-steel-lit">and keep the calendar clean.</span>
+                    </h2>
+                </div>
+
+                <div class="grid items-start gap-10 lg:grid-cols-2">
+                    <div class="space-y-5" data-reveal-group="80">
+                        <div class="es-door-plate p-6" data-reveal>
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-[#e5e9ee]">Accept requests</h3>
+                                <span class="es-door-plan">Free</span>
+                            </div>
+                            <p class="text-sm text-[#9aa4b2]">Switch it on and artists can submit a night from your public page. Everything waits on your Requests tab until you accept or decline it, so nothing reaches your calendar by surprise.</p>
+                        </div>
+                        <div class="es-door-plate p-6" data-reveal>
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-[#e5e9ee]">Ask what you need up front</h3>
+                                <span class="es-door-plan es-door-plan-pro">Pro</span>
+                            </div>
+                            <p class="text-sm text-[#9aa4b2]">Add your own questions to that form and a DJ sends their genre, set length and a link to their mixes with the request, instead of three replies later.</p>
+                        </div>
+                        <div class="es-door-plate p-6" data-reveal>
+                            <div class="mb-2 flex flex-wrap items-center gap-2">
+                                <h3 class="text-lg font-bold text-[#e5e9ee]">Residencies set themselves</h3>
+                                <span class="es-door-plan">Free</span>
+                            </div>
+                            <p class="text-sm text-[#9aa4b2]">A weekly night is one recurring event with a day-of-week pattern, plus date exceptions for the weeks you are closed or the room is booked out.</p>
+                        </div>
+                    </div>
+
+                    <div data-reveal="panel">
+                        <div class="es-door-jamb p-3">
+                            <div class="es-door-face px-6 py-6">
+                                <div class="mb-4 flex items-baseline justify-between gap-3 border-b border-[rgba(229,233,238,0.16)] pb-3">
+                                    <span class="es-door-tag">Requests</span>
+                                    <span class="font-mono text-xs text-[#9aa4b2]">3 waiting</span>
+                                </div>
+                                <div class="space-y-3">
+                                    @foreach ([['Kaya Sol', 'Sat 12 Apr', 'House', '2 hr'], ['NULL/VOID', 'Fri 18 Apr', 'Techno', '90 min'], ['Duo Prisma', 'Sat 26 Apr', 'Latin', 'live set']] as [$reqName, $reqDate, $reqGenre, $reqLen])
+                                        <div class="es-door-plate flex items-center gap-3 p-3">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="truncate text-sm font-bold text-[#e5e9ee]">{{ $reqName }}</p>
+                                                <p class="truncate text-xs text-[#9aa4b2]">{{ $reqDate }} &middot; {{ $reqGenre }} &middot; {{ $reqLen }}</p>
+                                            </div>
+                                            <span class="es-door-state flex-none" aria-hidden="true">Accept</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <p class="mt-4 text-xs text-[#9aa4b2]">Declined requests never touch your calendar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 6. The rest of it: bento                                     -->
+    <!-- ============================================================ -->
+    <section id="rest" class="scroll-mt-24 bg-white py-20 dark:bg-[#111315] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-door-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The rest of it</p>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything behind <span class="text-gradient-steel">the door.</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="110">
+                <!-- 1 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Tell the regulars first</h3>
+                                <span class="es-door-plan">Free</span>
+                            </div>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
+                                People follow your schedule and you email them directly when a night goes up or a headliner is announced. Nothing sits between the two of you deciding who finds out.
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Worth knowing the numbers before you plan around it: 10 emails a month on Free, 100 on Pro and 1,000 on Enterprise, counted per recipient rather than per send.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 2 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">When it sells out</h3>
+                                <span class="es-door-plan es-door-plan-pro">Pro</span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Turn on the waitlist and people can join once tickets are gone. If one is released they are notified automatically, instead of you working back through a hundred replies.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 3 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Every night in its own lane</h3>
+                                <span class="es-door-plan">Free</span>
+                            </div>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
+                                Sub-schedules split one link into strands, so somebody who only comes for the techno night is not scrolling past two months of everything else to find it.
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Built-in analytics show page views, devices and where the traffic came from, so you can tell which night the interest is actually landing on.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 4 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Passes for the regulars</h3>
+                                <span class="es-door-plan es-door-plan-pro">Pro</span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Sell a multi-use pass or a membership that works across a run of nights, with its own usage tracking and cancellation policy.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 5 -->
+                <div class="es-bento group relative lg:col-span-2" data-reveal="panel" data-tilt="3.5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">The post, without opening a design tool</h3>
+                                <span class="es-door-plan es-door-plan-pro">Pro</span>
+                            </div>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">
+                                Generate a graphic from a night in a story, square, portrait or landscape crop, and post it. It is built from that event, so the date and the room are already right.
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                Running it online as well? Mark the night as an online event and paste the link to wherever you are streaming.
+                                <a href="{{ marketing_url('/features/online-events') }}" class="es-door-link font-medium hover:underline">How online events work</a>
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- 6 -->
+                <div class="es-bento group relative" data-reveal="panel" data-tilt="5">
+                    <div class="es-tilt-inner relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white p-7 dark:border-white/10 dark:bg-white/[0.04]">
+                        <div class="relative z-10">
+                            <div class="mb-4 flex flex-wrap items-center gap-2">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">On the site you already have</h3>
+                                <span class="es-door-plan">Free</span>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Embed the calendar on your own site so tonight is wherever people already look you up, and every night syncs two ways with Google, Outlook and CalDAV.
+                            </p>
+                        </div>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. The club weekend                                          -->
+    <!-- ============================================================ -->
+    <section id="weekend" class="scroll-mt-24 border-t border-gray-200 bg-[#eef0f3] py-20 dark:border-white/5 dark:bg-[#141618] lg:py-28">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-12 max-w-3xl text-center">
+                <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Three nights, one <span class="text-gradient-steel es-door-rule">door</span>
+                </h2>
+                <p class="mt-6 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                    The same page, set up three different ways.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ($clubWeekend as [$wDay, $wName, $wDetail, $wHow])
+                    <div class="es-door-jamb p-3" data-reveal="panel">
+                        <div class="es-door-face px-5 py-6">
+                            <p class="es-door-tag mb-3">{{ $wDay }}</p>
+                            <h3 class="mb-1 text-lg font-bold text-[#e5e9ee]">{{ $wName }}</h3>
+                            <p class="mb-4 text-sm text-[#9aa4b2]">{{ $wDetail }}</p>
+                            <div class="border-t border-[rgba(229,233,238,0.16)] pt-3">
+                                <p class="text-xs text-[#9aa4b2]">{{ $wHow }}</p>
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -576,16 +1054,17 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Perfect for (shared sub-audience cards)                   -->
+    <!-- 8. Perfect for                                               -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <section id="who" class="scroll-mt-24 bg-white py-20 dark:bg-[#111315] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Perfect for all types of <span class="text-gradient-peak">clubs</span>
+                <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Perfect for all types of <span class="text-gradient-steel es-door-rule">clubs</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From underground warehouses to rooftop lounges, Event Schedule fits your vibe.
+                <p class="mt-6 text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Different crowds, different music, the same door.
                 </p>
             </div>
 
@@ -594,7 +1073,7 @@
                 <x-sub-audience-card
                     name="Dance Clubs & EDM Venues"
                     description="House, techno, trance crowds. Big rooms, bigger sound systems, and lineups that matter."
-                    icon-color="pink"
+                    icon-color="cyan"
                     blog-slug="for-dance-clubs-edm"
                 >
                     <x-slot:icon>
@@ -608,7 +1087,7 @@
                 <x-sub-audience-card
                     name="Hip-Hop & Urban Clubs"
                     description="Hip-hop nights, R&B showcases, urban music events. Build your scene's go-to spot."
-                    icon-color="fuchsia"
+                    icon-color="sky"
                     blog-slug="for-hip-hop-clubs"
                 >
                     <x-slot:icon>
@@ -637,7 +1116,7 @@
                 <x-sub-audience-card
                     name="Rooftop Clubs"
                     description="Sunset sessions, seasonal programming, skyline views. Weather-dependent vibes done right."
-                    icon-color="violet"
+                    icon-color="blue"
                     blog-slug="for-rooftop-clubs"
                 >
                     <x-slot:icon>
@@ -651,11 +1130,11 @@
                 <x-sub-audience-card
                     name="Underground & Warehouse"
                     description="Intimate sets, warehouse parties, curated crowds. Where the real heads gather."
-                    icon-color="indigo"
+                    icon-color="slate"
                     blog-slug="for-underground-clubs"
                 >
                     <x-slot:icon>
-                        <svg aria-hidden="true" class="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="w-6 h-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
                     </x-slot:icon>
@@ -664,7 +1143,7 @@
                 <!-- VIP Lounges -->
                 <x-sub-audience-card
                     name="VIP Lounges"
-                    description="Bottle service focused, upscale nightlife, exclusive atmosphere. Premium experiences only."
+                    description="Table-led nights, upscale nightlife, smaller rooms. Premium experiences with a strict door."
                     icon-color="amber"
                     blog-slug="for-vip-lounges"
                 >
@@ -679,116 +1158,61 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 5. Stream to the world                                       -->
+    <!-- 9. Three steps                                               -->
     <!-- ============================================================ -->
-    <section class="bg-white py-16 dark:bg-[#0a0a0f] lg:py-20">
+    <section id="steps" class="scroll-mt-24 border-t border-gray-200 bg-[#eef0f3] py-20 dark:border-white/5 dark:bg-[#141618] lg:py-28">
         <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" data-reveal="panel" class="es-bento group block">
-                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-10">
-                    <div class="flex flex-col items-center gap-8 lg:flex-row">
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-100 px-3 py-1.5 text-sm font-medium text-cyan-700 dark:border-cyan-800/30 dark:bg-cyan-900/40 dark:text-cyan-300">
-                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                Online Events
-                            </div>
-                            <h3 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-cyan-600 dark:text-white dark:group-hover:text-cyan-400 lg:text-3xl">Stream to the world</h3>
-                            <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Broadcast your DJ sets worldwide. Sell tickets to viewers anywhere - no capacity limits.</p>
-                            <div class="mb-4 flex flex-wrap justify-center gap-3 lg:justify-start">
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Twitch</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">YouTube Live</span>
-                                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 dark:bg-white/10 dark:text-gray-300">Zoom</span>
-                            </div>
-                            <span class="inline-flex items-center gap-2 font-medium text-cyan-600 transition-all group-hover:gap-3 dark:text-cyan-400">
-                                Learn more
-                                <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </span>
-                        </div>
-                        <div class="shrink-0" aria-hidden="true">
-                            <div class="w-52 rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-[#0f0f14]">
-                                <div class="mb-4 flex items-center justify-between">
-                                    <span class="text-xs text-gray-600 dark:text-gray-300">Live Stream</span>
-                                    <div class="flex items-center gap-1"><div class="h-2 w-2 animate-pulse rounded-full bg-red-500"></div><span class="text-xs font-medium text-red-500">LIVE</span></div>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center gap-2 rounded-lg bg-gray-100 px-2 py-1.5 dark:bg-white/5"><div class="h-2 w-2 rounded-full bg-blue-500"></div><span class="text-xs text-gray-600 dark:text-gray-300">2,341 watching</span></div>
-                                    <div class="flex items-center gap-2 rounded-lg bg-gray-100 px-2 py-1.5 dark:bg-white/5"><div class="h-2 w-2 rounded-full bg-green-500"></div><span class="text-xs text-gray-600 dark:text-gray-300">Global audience</span></div>
-                                </div>
-                            </div>
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>09</span></div>
+                <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Three <span class="text-gradient-steel es-door-rule">steps</span>
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-3" data-reveal-group="120">
+                @foreach ([['01', 'Add your nights', 'Each regular night once as a recurring event, with sub-schedules keeping the house night, the hip-hop night and the headline shows apart.'], ['02', 'Set the door', 'Registration with a capacity limit for free nights, or ticket types with their own sales windows so cover changes on the clock.'], ['03', 'Scan them in', 'Every ticket carries a QR code. Scan on the door and the dashboard counts who is inside against the capacity you set.']] as [$stepNum, $stepTitle, $stepBody])
+                    <div class="es-door-jamb p-3" data-reveal="panel">
+                        <div class="es-door-face px-5 py-6">
+                            <div class="mb-3 font-mono text-2xl font-black text-[#4ade80]">{{ $stepNum }}</div>
+                            <h3 class="mb-2 text-lg font-bold text-[#e5e9ee]">{{ $stepTitle }}</h3>
+                            <p class="text-sm leading-relaxed text-[#9aa4b2]">{{ $stepBody }}</p>
                         </div>
                     </div>
-                    <div class="es-glare" aria-hidden="true"></div>
-                    <div class="es-ring-glow" aria-hidden="true"></div>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. How it works (dark band)                                  -->
-    <!-- ============================================================ -->
-    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="opacity: 0.28;"></div>
-                <div class="es-aurora es-aurora-2" style="opacity: 0.22;"></div>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
-                <div class="nc-lasers">
-                    <span class="nc-beam nc-beam-1"></span>
-                    <span class="nc-beam nc-beam-2"></span>
-                    <span class="nc-beam nc-beam-3"></span>
-                </div>
-            </div>
-
-            <div class="relative z-10 mx-auto max-w-4xl">
-                <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        Get your club's calendar online in <span class="text-gradient-peak">three steps</span>
-                    </h2>
-                </div>
-
-                <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
-                    @foreach ([['1', 'Set up your club', 'Add your name, rooms (main floor, rooftop, VIP), and upload your logo. Takes two minutes.'], ['2', 'Add your lineup', 'Resident DJs, guest headliners, themed nights. Set recurring events or add one-offs as bookings come in.'], ['3', 'Let your crowd follow', 'Share your link. Clubbers follow. They get the week\'s lineup in their inbox - no checking Instagram required.']] as [$n, $title, $desc])
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                            <div class="nc-step-dot relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-500 text-xl font-bold text-white shadow-lg shadow-cyan-500/30" style="--pd: {{ ($n - 1) * 0.7 }}s;">{{ $n }}</div>
-                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
-                            <p class="text-sm text-gray-400">{{ $desc }}</p>
-                        </div>
-                    @endforeach
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
 
     <!-- ============================================================ -->
-    <!-- 7. Key features                                              -->
+    <!-- 10. Key features                                             -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section class="border-t border-gray-200 bg-white py-20 dark:border-white/5 dark:bg-[#111315]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
+                    <x-feature-link-card name="Ticketing" description="Ticket types, QR check-in, and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
+                    <x-feature-link-card name="Recurring Events" description="Set a residency once, with exceptions for the weeks you close" :url="marketing_url('/features/recurring-events')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Sub-schedules" description="Keep every night in its own lane on one link" :url="marketing_url('/features/sub-schedules')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Email the people who follow your schedule" :url="marketing_url('/features/newsletters')" icon-color="green">
                         <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Analytics" description="Track page views, devices, and traffic sources" :url="marketing_url('/features/analytics')" icon-color="emerald">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></x-slot:icon>
-                    </x-feature-link-card>
-                </div>
-                <div data-reveal>
-                    <x-feature-link-card name="Sub-Schedules" description="Organize events into categories and groups" :url="marketing_url('/features/sub-schedules')" icon-color="rose">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="nc-link inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/features') }}" class="es-door-link inline-flex items-center font-medium hover:underline">
                     See all features
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -801,26 +1225,24 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 8. Related pages                                             -->
+    <!-- 11. Related pages                                            -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+    <section class="border-t border-gray-200 bg-[#eef0f3] py-16 dark:border-white/5 dark:bg-[#141618]">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-music-venues', 'Music Venues'], ['/for-bars', 'Bars'], ['/for-djs', 'DJs'], ['/for-venues', 'Venues']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="nc-rel-card group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                        <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="nc-rel-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
-                        </div>
-                        <svg aria-hidden="true" class="nc-rel-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4" data-reveal-group="70">
+                @foreach ([['/for-djs', 'DJs'], ['/for-music-venues', 'Music Venues'], ['/for-bars', 'Bars'], ['/for-venues', 'Venues']] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" class="es-door-hover group flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03]" data-reveal>
+                        <span class="es-door-hover-title mb-3 text-sm font-semibold text-gray-900 transition-colors dark:text-white">For {{ $relName }}</span>
+                        <span class="es-door-hover-arrow mt-auto inline-flex items-center gap-1 text-xs font-medium text-gray-600 transition-colors dark:text-gray-400">
+                            Read more
+                            <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </span>
                     </a>
                 @endforeach
             </div>
-            <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="nc-link inline-flex items-center font-medium hover:underline">
+            <div class="mt-8 text-center">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-door-link inline-flex items-center font-medium hover:underline">
                     See all use cases
                     <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -831,34 +1253,31 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 9. FAQ                                                       -->
+    <!-- 12. FAQ                                                      -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <x-seo.faq-schema :items="$faqs" />
+
+    <section id="faq" class="scroll-mt-24 bg-white py-20 dark:bg-[#111315] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-peak">questions</span>
+            <div class="mb-12 text-center">
+                <div class="es-door-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
+                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
+                    Frequently asked <span class="text-gradient-steel es-door-rule">questions</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything nightclub owners ask about Event Schedule.
+                <p class="mt-6 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                    Everything club owners ask about the door.
                 </p>
             </div>
 
-            <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for nightclubs?', 'Yes. Event Schedule is free forever for sharing your lineup, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.'],
-                    ['Can I promote DJ lineups and themed nights?', 'Yes. Create events with detailed descriptions, flyer images, and lineup information. Use sub-schedules to organize by night type - EDM Fridays, Latin Saturdays, or themed events. Each event can have its own ticket tiers for VIP, general admission, and bottle service.'],
-                    ['How do partygoers find out about upcoming events?', 'Fans can follow your club\'s schedule and get email notifications when new events are added. Share your schedule link on social media, embed it on your website, or send newsletters directly to followers with upcoming lineups.'],
-                    ['Can I sell tickets with different tiers like VIP and general admission?', 'Yes. Create multiple ticket types per event with different prices and quantities. Connect your Stripe account and sell directly - Event Schedule charges zero platform fees. Every ticket includes a QR code for door check-in.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
+            <div class="space-y-3" data-reveal-group="80">
+                @foreach ($faqs as $faqIndex => $faq)
+                    <details name="faq" class="es-door-hover group rounded-2xl border border-gray-200 bg-white p-6 transition-all duration-200 dark:border-white/10 dark:bg-white/[0.03]" data-reveal>
+                        <summary class="flex cursor-pointer items-start gap-3 font-semibold text-gray-900 dark:text-white">
+                            <span class="flex-none font-mono text-sm font-bold text-[#166534] dark:text-[#4ade80]" aria-hidden="true">{{ str_pad($faqIndex + 1, 2, '0', STR_PAD_LEFT) }}</span>
+                            <span class="es-door-hover-title flex-1 transition-colors">{{ $faq['q'] }}</span>
+                            <svg aria-hidden="true" class="mt-0.5 h-5 w-5 flex-none text-gray-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="faq-answer mt-4 leading-relaxed text-gray-600 ps-9 dark:text-gray-400">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
@@ -866,28 +1285,38 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. Finale                                                   -->
+    <!-- 13. Finale: open it                                          -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#111315] sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel nc-panel-deep noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-cyan-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-door-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="opacity: 0.3;"></div>
                     <div class="grid-overlay absolute inset-0 opacity-30"></div>
-                    <div class="nc-lasers">
-                        <span class="nc-beam nc-beam-1"></span>
-                        <span class="nc-beam nc-beam-3"></span>
-                    </div>
-                    <div class="nc-strobe"></div>
                 </div>
-
                 <div class="relative z-10">
+                    <p class="es-door-tag mb-4">Free forever</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black tracking-tight text-white md:text-5xl">
-                        Your crowd. Direct reach. <span class="text-gradient-peak">Pack the floor.</span>
+                        Unlock it. <span class="text-gradient-steel-lit">The queue is already outside.</span>
                     </h2>
-                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-300 sm:text-xl">
-                        Email your crowd directly. Fill your dancefloor. Free forever.
+                    <p class="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
+                        Set the capacity, set the cover, and put the whole thing on one link before Friday.
                     </p>
+
+                    <!-- The bolt slides back -->
+                    <div class="mx-auto mb-10 max-w-sm" aria-hidden="true">
+                        <div class="es-door-jamb p-3">
+                            <div class="es-door-face overflow-hidden px-5 py-7">
+                                <div class="es-door-sheen absolute inset-0" aria-hidden="true"></div>
+                                <div class="relative">
+                                    <div class="mb-5 flex justify-center">
+                                        <span class="es-door-bolt"></span>
+                                    </div>
+                                    <p class="font-mono text-xl font-bold text-[#4ade80]" id="es-door-signtext">your-club</p>
+                                    <p class="mt-1 font-mono text-[0.7rem] text-[#9aa4b2]">.eventschedule.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
@@ -896,9 +1325,9 @@
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=venue') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-600 to-sky-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-cyan-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/40">
+                        <a href="{{ app_url('/sign_up?type=venue') }}" class="es-door-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]">
                             <span class="relative z-10 flex items-center gap-2">
-                                Get Started Free
+                                Create your calendar
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -912,6 +1341,44 @@
             </div>
         </div>
     </section>
+
+    <!-- Desktop dot nav: steel pips -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#1b1e22] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
+
+    <x-marketing.related-pages />
+
+    {{-- Stencil the claimed name onto the door, applying the same slug
+         transform as the shared claim-input sanitizer. --}}
+    <script {!! nonce_attr() !!}>
+        (function () {
+            var input = document.getElementById('es-claim-input');
+            var sign = document.getElementById('es-door-signtext');
+            if (!input || !sign) { return; }
+            var fallback = sign.textContent;
+            input.addEventListener('input', function () {
+                var slug = input.value.toLowerCase()
+                    .replace(/['’]/g, '')
+                    .replace(/[^a-z0-9-]+/g, '-')
+                    .replace(/-{2,}/g, '-')
+                    .replace(/^-+/, '')
+                    .slice(0, 30);
+                sign.textContent = slug || fallback;
+            });
+        })();
+    </script>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

@@ -102,7 +102,7 @@ return [
         ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set the weekly mic once, and skip the weeks you are closed.'],
         ['title' => 'Custom Fields', 'path' => '/features/custom-fields', 'blurb' => 'Ask what they are reading right on the sign-up form.'],
         ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep the mic, the reading series, and workshops apart.'],
-        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Email the regulars when the next night is up."],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the regulars when the next night is up.'],
     ],
 
     'for-circus-acrobatics' => [
@@ -140,6 +140,69 @@ return [
         ['title' => 'For Bars & Pubs', 'path' => '/for-bars', 'blurb' => 'Fill the room with trivia, bands, and events.'],
         ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Sell tickets with QR check-in and zero platform fees.'],
         ['title' => 'Eventbrite Alternative', 'path' => '/eventbrite-alternative', 'blurb' => 'Why venues are moving off Eventbrite.'],
+    ],
+
+    // The for-theaters page already links the neighbouring audience pages
+    // inline, so this strip carries the features a run reaches for.
+    'for-theaters' => [
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a run once, with dark days and a closing performance.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Named ticket types, QR check-in, and zero platform fees.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep mainstage, studio and family programming apart.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow your theater, with open rates.'],
+    ],
+
+    // The for-music-venues page already links the neighbouring audience pages
+    // inline, so this strip carries the features a show day reaches for.
+    'for-music-venues' => [
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in, and zero platform fees.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => "Keep each room's listings apart on one link."],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a residency once, and skip the weeks you are dark.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow your venue, with open rates.'],
+    ],
+
+    // The for-nightclubs page already links the neighbouring audience pages
+    // inline, so this strip carries the features the door side reaches for.
+    'for-nightclubs' => [
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in, and zero platform fees.'],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a residency once, and skip the weeks you close.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep every night in its own lane on one link.'],
+        ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which nights the interest is actually landing on.'],
+    ],
+
+    // The for-comedy-clubs page already links the neighbouring audience pages
+    // inline, so this strip carries the features a room reaches for.
+    'for-comedy-clubs' => [
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a weekly night once, and take out the weeks you are dark.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Advance and door pricing, QR check-in, and zero platform fees.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep the open mic, the showcase and the weekend apart.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow the room, with open rates.'],
+    ],
+
+    // The for-food-trucks-and-vendors page already links the neighbouring
+    // audience pages inline, so this strip carries the features a route needs.
+    'for-food-trucks-and-vendors' => [
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a regular pitch once, and take out the weeks you lose it.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => "Send the week's route to the people who follow you."],
+        ['title' => 'Embed Calendar', 'path' => '/features/embed-calendar', 'blurb' => 'Drop the route into the website you already have.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep markets, festivals and private hire apart on one link.'],
+    ],
+
+    // The for-theater-performers page already links the neighbouring audience
+    // pages inline, so this strip carries the features a performer reaches for.
+    'for-theater-performers' => [
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep productions, teaching and auditions apart on one link.'],
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a run once, with a closing performance.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Ticket types, QR check-in, and zero platform fees.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow you, with open rates.'],
+    ],
+
+    // The for-dance-groups page already links the neighbouring audience pages
+    // inline, so this strip carries the features a studio week reaches for.
+    'for-dance-groups' => [
+        ['title' => 'Recurring Events', 'path' => '/features/recurring-events', 'blurb' => 'Set a weekly class once, and skip the weeks you are closed.'],
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'Class cards, memberships and show tickets with zero platform fees.'],
+        ['title' => 'Sub-schedules', 'path' => '/features/sub-schedules', 'blurb' => 'Keep classes, rehearsals and performances apart on one link.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email the people who follow your studio, with open rates.'],
     ],
 
     'for-bars' => [

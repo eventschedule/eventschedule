@@ -409,6 +409,27 @@
         .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #1c3d6e, #b91c1c); }
         .dark .es-dot.is-active .es-dot-pip { background: linear-gradient(180deg, #93c5fd, #f87171); }
 
+        /* --- Shared classes that break the fixed-object contract inside the
+               bands. .grid-overlay flips its line colour with the colour
+               mode (marketing.css:118/125) and .es-claim:focus-within is
+               hard-coded brand blue (marketing.css:695), so both are pinned
+               here to the band's own always-dark treatment. --- */
+        .es-sheet-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(244, 239, 230, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(244, 239, 230, 0.05) 1px, transparent 1px);
+        }
+        /* .animate-shimmer is also mode-dependent (white 0.3 light / 0.15
+           dark, marketing.css:67/72); the band is always dark, so pin it. */
+        .es-sheet-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-sheet-band .es-claim:focus-within {
+            border-color: rgba(147, 197, 253, 0.75);
+            box-shadow: 0 0 0 4px rgba(147, 197, 253, 0.22);
+        }
+
         /* --- Focus rings. Most of the page is paper rather than the shared
                card components, so the ring at marketing.css:248 does not
                reach it. This rule is load-bearing for keyboard users. --- */
@@ -417,7 +438,6 @@
         #es-sheet-page button:focus-visible {
             outline: 2px solid #1c3d6e;
             outline-offset: 3px;
-            border-radius: 0.35rem;
         }
         .dark #es-sheet-page a:focus-visible,
         .dark #es-sheet-page summary:focus-visible,
@@ -528,7 +548,7 @@
                 <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-signup">Yours should outlive the night.</span></span></span>
             </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
+            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-3xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
                 Sign-ups, features, workshops, and book launches on one link. Free registration with a capacity limit, recurring dates that skip the holidays, and no platform fees when you sell.
             </p>
 
@@ -681,7 +701,7 @@
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
                     Put the sheet somewhere <span class="text-gradient-signup">the room cannot lose it.</span>
                 </h2>
-                <p class="mt-5 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
+                <p class="mt-5 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.15s;">
                     Three things do almost all the work, and all three are on the free plan.
                 </p>
             </div>
@@ -829,19 +849,19 @@
                         <!-- The frame stays light on the dark band: it reads as a lit screen. -->
                         <div class="rounded-[2rem] border-4 border-[#2a2724] bg-white p-3 shadow-2xl">
                             <div class="mb-3 flex items-center justify-between px-1">
-                                <span class="text-[0.65rem] font-bold uppercase tracking-widest text-gray-500">Tue 8:00 PM</span>
+                                <span class="text-[0.65rem] font-bold uppercase tracking-widest text-gray-600">Tue 8:00 PM</span>
                                 <span class="rounded-full bg-[#b91c1c] px-2 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">Full</span>
                             </div>
                             <div class="space-y-1.5">
                                 @foreach ([['01', 'Mara G.', '3 min', false], ['02', 'Dez', '3 min', false], ['03', 'Feature: A. Oyelaran', '15 min', true], ['04', 'Jonah', '3 min', false], ['05', 'Priya', '3 min', false], ['06', 'Tomas', '3 min', false]] as [$ordNum, $ordName, $ordLen, $ordFeature])
                                     <div class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs @if ($ordFeature) bg-[#fdeaea] font-bold text-[#b91c1c] @else bg-gray-50 text-gray-700 @endif">
-                                        <span class="font-mono text-[0.65rem] text-gray-400">{{ $ordNum }}</span>
+                                        <span class="font-mono text-[0.65rem] text-gray-600">{{ $ordNum }}</span>
                                         <span class="min-w-0 flex-1 truncate">{{ $ordName }}</span>
-                                        <span class="font-mono text-[0.65rem] text-gray-400">{{ $ordLen }}</span>
+                                        <span class="font-mono text-[0.65rem] text-gray-600">{{ $ordLen }}</span>
                                     </div>
                                 @endforeach
                             </div>
-                            <p class="mt-3 px-1 text-[0.65rem] text-gray-400">Updates as people sign up.</p>
+                            <p class="mt-3 px-1 text-[0.65rem] text-gray-600">Updates as people sign up.</p>
                         </div>
                     </div>
 
@@ -889,7 +909,7 @@
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
                                 People follow your schedule and you email them directly when the next night is up. No algorithm deciding which regulars find out.
                             </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Free covers 10 newsletter emails a month and Pro raises it to 100, counted per recipient. For a room of regulars that is real, and it is worth knowing the number before you plan around it.
                             </p>
                         </div>
@@ -926,7 +946,7 @@
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
                                 Connect Stripe and sell straight from the schedule, with QR check-in at the door. Event Schedule takes zero platform fees, so what is left after Stripe's processing is yours.
                             </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Discount codes for the regulars, and a pass that covers a whole season of the series rather than one night at a time.
                             </p>
                         </div>
@@ -963,7 +983,7 @@
                             <p class="mb-4 text-gray-600 dark:text-gray-400">
                                 Mark a night as an online event and the link sits on the same schedule as the in-person ones. Hybrid workshops and virtual salons do not need a second home.
                             </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500">
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
                                 Analytics on the free plan show which nights people actually opened, which is a better read on the scene than a like count.
                             </p>
                         </div>
@@ -1002,7 +1022,7 @@
                 <h2 class="es-balance text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Where the list <span class="text-gradient-signup">goes up</span>
                 </h2>
-                <p class="mt-4 text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                <p class="mt-4 text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
                     One schedule covers all of them, whether you host the night or just read at it.
                 </p>
             </div>
@@ -1032,7 +1052,7 @@
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal style="--reveal-delay: 0.05s;">
                     Built for how poets <span class="text-gradient-signup">actually work</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
+                <p class="text-lg text-gray-600 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
                     Whether you're on the slam circuit, running the room, or launching a collection
                 </p>
             </div>
@@ -1200,7 +1220,7 @@
                 @foreach ([['/for-comedians', 'Comedians'], ['/for-musicians', 'Musicians'], ['/for-theater-performers', 'Theater Performers'], ['/for-libraries', 'Libraries']] as [$relHref, $relName])
                     <a href="{{ marketing_url($relHref) }}" class="es-sheet-hover group flex flex-col rounded-2xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03]" data-reveal>
                         <span class="es-sheet-hover-title mb-3 text-sm font-semibold text-gray-900 transition-colors dark:text-white">For {{ $relName }}</span>
-                        <span class="es-sheet-hover-arrow mt-auto inline-flex items-center gap-1 text-xs font-medium text-gray-500 transition-colors dark:text-gray-400">
+                        <span class="es-sheet-hover-arrow mt-auto inline-flex items-center gap-1 text-xs font-medium text-gray-600 transition-colors dark:text-gray-400">
                             Read more
                             <svg aria-hidden="true" class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                         </span>
@@ -1226,11 +1246,11 @@
     <section id="faq" class="scroll-mt-24 bg-white py-20 dark:bg-[#111010] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mb-12 text-center">
-                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>12</span></div>
+                <div class="es-sheet-corner mb-6" data-reveal aria-hidden="true"><span>10</span></div>
                 <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal style="--reveal-delay: 0.05s;">
                     Frequently asked <span class="text-gradient-signup">questions</span>
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
+                <p class="text-lg text-gray-600 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
                     Everything poets and hosts ask before they start the list.
                 </p>
             </div>

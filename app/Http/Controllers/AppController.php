@@ -213,6 +213,23 @@ class AppController extends Controller
                     \Log::error('Scheduled command boost:expire-pending failed: '.$e->getMessage());
                     report($e);
                 }
+
+                // Gated separately from boost:sync: an operator can run the on-network
+                // promotions engine without configuring Meta at all.
+                //
+                // The gate is the deploy-time master switch, NOT PromotionService::isEnabled().
+                // The command settles and refunds prepaid campaigns, so gating it on "is the
+                // network serving" would let switching the network off strand advertisers'
+                // money. SyncPromotions::handle() reads isEnabled() itself to decide which
+                // steps still apply.
+                if (\App\Services\AdsService::isEnabled()) {
+                    try {
+                        \Artisan::call('promo:sync');
+                    } catch (\Exception $e) {
+                        \Log::error('Scheduled command promo:sync failed: '.$e->getMessage());
+                        report($e);
+                    }
+                }
             }
 
             // === HOURLY ===
@@ -413,7 +430,9 @@ class AppController extends Controller
     {
         // /appointment/ carries the booking secret in the path, so it must never be crawled or indexed.
         // The pages themselves also send noindex; this stops the URL being fetched at all.
-        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /appointment/\nDisallow: /admin\n";
+        // /promo/ is a click-counting redirect, so crawling it would spend advertisers'
+        // budgets on traffic that was never a person.
+        $disallowRules = "User-agent: *\nDisallow: /login\nDisallow: /sign_up\nDisallow: /reset-password\nDisallow: /update-password\nDisallow: /confirm-password\nDisallow: /verify-email\nDisallow: /two-factor-challenge\nDisallow: /auth/\nDisallow: /events\nDisallow: /settings\nDisallow: /checkout\nDisallow: /appointment/\nDisallow: /promo/\nDisallow: /admin\n";
 
         $isAppSubdomain = config('app.hosted') && str_starts_with(request()->getHost(), 'app.');
 

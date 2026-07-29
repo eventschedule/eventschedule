@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for visual artists?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your exhibition and event schedule, building a collector following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan."
+                    "text": "Yes. Event Schedule is free forever for sharing your exhibition and event schedule, building a collector following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan."
                 }
             },
             {
@@ -879,7 +879,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for visual artists?', 'Yes. Event Schedule is free forever for sharing your exhibition and event schedule, building a collector following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan.'],
+                    ['Is Event Schedule free for visual artists?', 'Yes. Event Schedule is free forever for sharing your exhibition and event schedule, building a collector following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan.'],
                     ['Can I list exhibitions, open studios, and art fairs together?', 'Yes. Use sub-schedules to organize by event type - solo exhibitions, group shows, open studios, art fairs, and workshops. Each event can include descriptions, images, venue details, and ticketing options.'],
                     ['How do collectors and art lovers discover my events?', 'Followers can receive email notifications when you add new exhibitions or events. Share your schedule link in your artist bio, on social media, or embed it on your portfolio website.'],
                     ['Can I sell tickets to openings and workshops?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Perfect for ticketed opening receptions, art workshops, or studio tours. Zero platform fees - you only pay Stripe\'s processing fees.'],

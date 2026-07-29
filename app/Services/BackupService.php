@@ -54,6 +54,9 @@ class BackupService
         // Per-schedule federation opt-out. ROLE_EXPORT_FIELDS is an explicit allowlist,
         // so a new column silently vanishes on export and returns as its default.
         'federation_enabled',
+        // Same reasoning: a schedule that declined to host paid promotions must not
+        // silently start hosting them again after a restore.
+        'promotions_opt_out',
         'feedback_enabled', 'feedback_delay_hours', 'feedback_public', 'fan_comments_enabled',
         'fan_photos_enabled', 'fan_videos_enabled', 'fan_content_require_account',
         'first_day_of_week', 'sponsor_logos', 'sponsor_background_color', 'sponsor_section_title',

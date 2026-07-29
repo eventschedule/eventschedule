@@ -41,6 +41,13 @@ class SyncBoostAnalytics implements ShouldBeUnique, ShouldQueue
         $campaign = $this->campaign;
         $campaign->loadMissing('ads');
 
+        // Network promotions measure themselves from analytics_promotions_daily; there are
+        // no Meta insights to pull, and asking for them would be an API call for a campaign
+        // Meta has never heard of.
+        if ($campaign->isNetwork()) {
+            return;
+        }
+
         $metaService = $this->getMetaService();
 
         try {

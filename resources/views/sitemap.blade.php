@@ -970,6 +970,13 @@ echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 @include('partials.sitemap-hreflang', ['url' => url('/docs/saas/federation')])
     </url>
     <url>
+        <loc>{{ url('/docs/saas/monetization') }}</loc>
+        <lastmod>{{ $lastmod }}</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+@include('partials.sitemap-hreflang', ['url' => url('/docs/saas/monetization')])
+    </url>
+    <url>
         <loc>{{ url('/docs/selfhost/federation') }}</loc>
         <lastmod>{{ $lastmod }}</lastmod>
         <changefreq>monthly</changefreq>

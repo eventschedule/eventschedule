@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for libraries?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your program schedule, building a patron following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan."
+                    "text": "Yes. Event Schedule is free forever for sharing your program schedule, building a patron following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan."
                 }
             },
             {
@@ -872,7 +872,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for libraries?', 'Yes. Event Schedule is free forever for sharing your program schedule, building a patron following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan.'],
+                    ['Is Event Schedule free for libraries?', 'Yes. Event Schedule is free forever for sharing your program schedule, building a patron following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan.'],
                     ['Can I manage story times, author events, and workshops together?', 'Yes. Use sub-schedules to organize by program type - children\'s story times, author talks, book clubs, technology workshops, and community meetings. Each program can have its own description, images, and registration details.'],
                     ['How do patrons find out about library programs?', 'Patrons can follow your library\'s schedule and receive email notifications for new programs. Embed your calendar on your library website, share on social media, or send newsletters to your community.'],
                     ['Can patrons register for programs?', 'Yes. Enable registration on any event to manage attendance and capacity. Patrons receive confirmation and reminders. For paid programs, connect Stripe to handle payments with zero platform fees.'],

@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Mail\BoostCompleted;
-use App\Models\BoostBillingRecord;
 use App\Models\BoostCampaign;
 use App\Models\Role;
 use App\Services\BoostBillingService;
@@ -13,7 +12,6 @@ use App\Services\OneSignalService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -57,45 +55,40 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        // Fetch final spend data from Meta
-        $metaService = $this->getMetaService();
-        $insights = $metaService->fetchCampaignInsights($campaign);
+        if ($campaign->isNetwork()) {
+            // A network promotion has no external spend to fetch: it accrues into
+            // spent_micros as impressions and clicks land. Mirroring it onto actual_spend
+            // is what makes the shared refund and reporting paths below correct.
+            (new BoostBillingService)->syncNetworkSpend($campaign);
+            $campaign->update(['analytics_synced_at' => now()]);
+        } else {
+            // Fetch final spend data from Meta
+            $metaService = $this->getMetaService();
+            $insights = $metaService->fetchCampaignInsights($campaign);
 
-        if ($insights) {
-            $campaign->update([
-                'actual_spend' => (float) ($insights['spend'] ?? $campaign->actual_spend ?? 0),
-                'analytics_synced_at' => now(),
-            ]);
+            if ($insights) {
+                $campaign->update([
+                    'actual_spend' => (float) ($insights['spend'] ?? $campaign->actual_spend ?? 0),
+                    'analytics_synced_at' => now(),
+                ]);
+            }
         }
 
         // Refund unspent budget
         $campaign->refresh();
         if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
             if (! $campaign->stripe_payment_intent_id && $campaign->billing_status === 'charged') {
-                // Credit-paid campaign - return unspent credit to role
-                $actualSpend = $campaign->actual_spend ?? 0;
-                $unspentBudget = $campaign->user_budget - $actualSpend;
-
-                if ($unspentBudget > 0) {
-                    $refundAmount = round($unspentBudget * (1 + $campaign->markup_rate), 2);
-                    DB::transaction(function () use ($campaign, $refundAmount, $actualSpend, $unspentBudget) {
-                        $role = Role::lockForUpdate()->find($campaign->role_id);
-                        if (! $role) {
-                            return;
-                        }
-                        $role->increment('boost_credit', $refundAmount);
-                        BoostBillingRecord::create([
-                            'boost_campaign_id' => $campaign->id,
-                            'type' => 'refund',
-                            'amount' => $refundAmount,
-                            'meta_spend' => $actualSpend,
-                            'markup_amount' => round($unspentBudget * $campaign->markup_rate, 2),
-                            'status' => 'completed',
-                            'notes' => 'Credit returned - unspent budget',
-                        ]);
-                        $campaign->update(['billing_status' => 'partially_refunded']);
-                    });
-                }
+                // Delegated rather than reimplemented. The inline copy that used to live here
+                // differed from the service in three ways that all mattered:
+                //   - it locked only the Role, not the campaign, so two dispatches could both
+                //     credit the wallet;
+                //   - it ignored total_charged, so on selfhost (which records a zero charge
+                //     while user_budget keeps the requested amount) it minted free credit;
+                //   - `if ($unspentBudget > 0)` had no else, so a campaign that delivered its
+                //     whole budget never moved off 'charged' - which kept it matching
+                //     SyncPromotions::completeFinishedCampaigns()'s selector every 24 hours and
+                //     re-sending the completion email forever.
+                (new BoostBillingService)->refundCreditRemainder($campaign);
             } elseif (config('app.hosted') && ! config('app.is_testing')) {
                 $billingService = new BoostBillingService;
                 if (! $billingService->refundUnspent($campaign)) {
@@ -129,7 +122,12 @@ class ReconcileBoostCampaign implements ShouldBeUnique, ShouldQueue
 
         // Auto-increase trust limit for hosted mode
         if (config('app.hosted') && $campaign->role_id) {
-            $completedCount = BoostCampaign::where('role_id', $campaign->role_id)
+            // Meta only. boost_max_budget is the per-campaign ceiling for META spend
+            // (BoostController checks it via Role::getBoostMaxBudget), so counting network
+            // completions here would let a few cheap on-network promotions permanently
+            // ratchet up how much a schedule may spend on Facebook and Instagram.
+            $completedCount = BoostCampaign::meta()
+                ->where('role_id', $campaign->role_id)
                 ->where('status', 'completed')
                 ->count();
 

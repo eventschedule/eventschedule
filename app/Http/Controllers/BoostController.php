@@ -141,11 +141,16 @@ class BoostController extends Controller
         }
 
         // Check concurrent boost limit (trust-based)
-        $completedCampaigns = BoostCampaign::where('role_id', $role->id)
+        $completedCampaigns = BoostCampaign::meta()
+            ->where('role_id', $role->id)
             ->where('status', 'completed')
             ->count();
 
-        $activeCampaigns = BoostCampaign::where('role_id', $role->id)
+        // ::meta() matters: network promotions have their own cap
+        // (ads.native_max_concurrent), so letting them count here would let one channel
+        // starve the other.
+        $activeCampaigns = BoostCampaign::meta()
+            ->where('role_id', $role->id)
             ->whereIn('status', ['active', 'pending_payment'])
             ->count();
 
@@ -325,11 +330,15 @@ class BoostController extends Controller
         try {
             DB::table('roles')->where('id', $roleId)->lockForUpdate()->first();
 
-            $activeCampaigns = BoostCampaign::where('role_id', $roleId)
+            // Meta-only: network promotions are capped separately by
+            // ads.native_max_concurrent in PromotionController::store().
+            $activeCampaigns = BoostCampaign::meta()
+                ->where('role_id', $roleId)
                 ->whereIn('status', ['active', 'pending_payment'])
                 ->count();
 
-            $completedCampaigns = BoostCampaign::where('role_id', $roleId)
+            $completedCampaigns = BoostCampaign::meta()
+                ->where('role_id', $roleId)
                 ->where('status', 'completed')
                 ->count();
 
@@ -539,6 +548,20 @@ class BoostController extends Controller
             }
         }
 
+        // Same ownership checks either way; only the reporting differs.
+        if ($campaign->isNetwork()) {
+            $analytics = app(\App\Services\PromotionAnalyticsService::class);
+
+            return view('boost.show-network', [
+                'campaign' => $campaign,
+                'summary' => $analytics->summary($campaign),
+                'dailySeries' => $analytics->dailySeries($campaign)->all(),
+                'countries' => $analytics->countries($campaign),
+                'placements' => $analytics->placementSummary($campaign),
+                'conversions' => $analytics->conversions($campaign),
+            ]);
+        }
+
         return view('boost.show', [
             'campaign' => $campaign,
         ]);
@@ -556,6 +579,13 @@ class BoostController extends Controller
             if (! $campaign->event || ! auth()->user()->canEditEvent($campaign->event)) {
                 abort(403);
             }
+        }
+
+        // A network promotion is served by this platform, so pausing is purely local -
+        // there is nothing to tell Meta, and no meta_campaign_id will ever exist. Without
+        // this branch the guard below would reject every pause/resume on the channel.
+        if ($campaign->isNetwork()) {
+            return $this->toggleNetworkPause($campaign);
         }
 
         if (! $campaign->meta_campaign_id) {
@@ -599,6 +629,43 @@ class BoostController extends Controller
         }
 
         return back()->with('error', __('messages.boost_cannot_toggle'));
+    }
+
+    /**
+     * Pause or resume an on-network promotion.
+     *
+     * Purely a local status flip: delivery is decided by PromotionService's candidate
+     * query, which only considers active campaigns. The snapshot is dropped so the change
+     * takes effect immediately rather than after the cache TTL.
+     */
+    private function toggleNetworkPause(BoostCampaign $campaign)
+    {
+        if (! $campaign->isActive() && ! $campaign->isPaused()) {
+            return back()->with('error', __('messages.boost_cannot_toggle'));
+        }
+
+        $paused = $campaign->isActive();
+
+        DB::transaction(function () use ($campaign, $paused) {
+            $locked = BoostCampaign::lockForUpdate()->find($campaign->id);
+
+            if ($paused && $locked->isActive()) {
+                $locked->update(['status' => 'paused']);
+            } elseif (! $paused && $locked->isPaused()) {
+                // Clearing the alert flag lets the 75% budget warning fire again for the
+                // remainder of the run, as it does on the Meta side.
+                $locked->update(['status' => 'active', 'budget_alert_sent_at' => null]);
+            }
+        });
+
+        app(\App\Services\PromotionService::class)->forgetCandidates();
+
+        AuditService::log(
+            $paused ? AuditService::BOOST_PAUSE : AuditService::BOOST_RESUME,
+            auth()->id(), 'BoostCampaign', $campaign->id, null, null, 'role_id:'.$campaign->role_id
+        );
+
+        return back()->with('success', $paused ? __('messages.boost_paused') : __('messages.boost_resumed'));
     }
 
     /**
@@ -654,25 +721,12 @@ class BoostController extends Controller
         $campaign->refresh();
         if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
             if (! $campaign->stripe_payment_intent_id && $campaign->billing_status === 'charged') {
-                // Credit-paid campaign - return credit to role
-                $refundAmount = $campaign->total_charged ?? 0;
-                if ($refundAmount > 0) {
-                    DB::transaction(function () use ($campaign, $refundAmount) {
-                        $role = Role::lockForUpdate()->find($campaign->role_id);
-                        if (! $role) {
-                            return;
-                        }
-                        $role->increment('boost_credit', $refundAmount);
-                        BoostBillingRecord::create([
-                            'boost_campaign_id' => $campaign->id,
-                            'type' => 'refund',
-                            'amount' => $refundAmount,
-                            'status' => 'completed',
-                            'notes' => 'Credit returned - campaign cancelled',
-                        ]);
-                        $campaign->update(['billing_status' => 'refunded']);
-                    });
-                }
+                // Credit-paid campaign - return the UNDELIVERED portion to the wallet.
+                // This used to hand back total_charged in full without subtracting delivered
+                // spend, so a campaign could be run to near-exhaustion and then cancelled for a
+                // complete refund. refundOnCancellation() syncs spend first and returns only
+                // what was never delivered.
+                (new BoostBillingService)->refundOnCancellation($campaign);
             } elseif (config('app.hosted') && ! config('app.is_testing')) {
                 $billingService = new BoostBillingService;
 
@@ -702,9 +756,7 @@ class BoostController extends Controller
                         }
                     }
 
-                    $refunded = $campaign->actual_spend && $campaign->actual_spend > 0
-                        ? $billingService->refundUnspent($campaign)
-                        : $billingService->refundFull($campaign);
+                    $refunded = $billingService->refundOnCancellation($campaign);
 
                     if (! $refunded) {
                         Log::warning('Boost cancellation refund failed', [

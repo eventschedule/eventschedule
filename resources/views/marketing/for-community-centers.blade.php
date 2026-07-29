@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for community centers?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your program calendar, building a community following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan."
+                    "text": "Yes. Event Schedule is free forever for sharing your program calendar, building a community following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan."
                 }
             },
             {
@@ -864,7 +864,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for community centers?', 'Yes. Event Schedule is free forever for sharing your program calendar, building a community following, and syncing with Google Calendar. Newsletters and advanced features are available on the Pro plan.'],
+                    ['Is Event Schedule free for community centers?', 'Yes. Event Schedule is free forever for sharing your program calendar, building a community following, and syncing with Google Calendar. Newsletters are free with a monthly send limit, and ticketing is available on the Pro plan.'],
                     ['Can I organize classes, meetings, and events by category?', 'Yes. Use sub-schedules to organize programs by type - fitness classes, youth programs, senior activities, community meetings, and special events. Each program can have its own schedule, description, and registration options.'],
                     ['How do community members stay informed about programs?', 'Members can follow your center\'s schedule and receive email notifications for new programs. Embed your calendar on your website, share on social media, or send newsletters to keep the community informed.'],
                     ['Can we handle event registration and payments?', 'Yes. Enable registration on any program to manage attendance. For paid classes or events, connect Stripe to handle payments with zero platform fees. Attendees receive QR codes for easy check-in.'],

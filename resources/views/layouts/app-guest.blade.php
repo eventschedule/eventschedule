@@ -570,6 +570,13 @@
         {{ $slot }}
     </div>
 
+    {{-- Monetization slot. Deliberately outside #main-content (and so outside the
+         #calendar-app Vue mount), directly above the free-tier branding footer that it
+         shares a gate with. Opt-in per view: see AppGuestLayout::$adSlot. --}}
+    @if ($adSlot)
+        @include('partials.promo-slot')
+    @endif
+
     @if (! request()->embed && config('app.hosted') && $role->showBranding())
     <footer class="bg-gray-800">
       <div class="container mx-auto relative flex flex-row justify-center items-center py-5 px-5">
@@ -589,10 +596,39 @@
     </footer>
     @endif
 
-    @if (! request()->embed && ! config('app.is_nexus') && $role->showBranding())
+    @php
+        // On the nexus, a schedule served on its own domain carries no footer at all: the black bar
+        // above is free-tier only (Role::showBranding()) and custom domains are Enterprise, so
+        // eventschedule.com ends up with no link from any custom-domain page - and ResolveCustomDomain
+        // rewrites every other URL in the body to the custom host. This chip is that one backlink.
+        //
+        // Keyed off the request attribute ResolveCustomDomain sets rather than the stored
+        // custom_domain_* columns, so it renders only on the third-party host that actually needs it,
+        // never on the {subdomain}.eventschedule.com twin where linking our own domain buys nothing.
+        // Same reasoning as AdsService::isEligible().
+        //
+        // The showBranding() guard covers the lapsed-Enterprise case: the schedule keeps its custom
+        // domain after a downgrade, so the black bar comes back and already carries the link.
+        //
+        // ?graphic=1 is excluded: that mode exists to be captured as an image and is already noindex
+        // (see the robots block at the top of this file), so it offers nothing for SEO while baking a
+        // badge into a paying schedule's shareable graphic. AdsService skips it for the same reason.
+        $showCustomDomainBacklink = config('app.is_nexus')
+            && request()->attributes->get('custom_domain_host')
+            && ! request()->has('graphic')
+            && ! $role->showBranding();
+
+        // Tagged so the /admin traffic sources report can attribute signups to these backlinks. The
+        // marketing layout builds its canonical from request()->path(), so the query string
+        // self-canonicalizes away and costs nothing for SEO.
+        $backlinkUrl = 'https://eventschedule.com'
+            .($showCustomDomainBacklink ? '?utm_source=custom-domain&utm_medium=referral' : '');
+    @endphp
+
+    @if (! request()->embed && ((! config('app.is_nexus') && $role->showBranding()) || $showCustomDomainBacklink))
     <div class="flex justify-{{ $isRtl ? 'start' : 'end' }} p-4">
         {{-- Per the AAL license, please do not remove the link to Event Schedule --}}
-        <a href="https://eventschedule.com" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
+        <a href="{{ $backlinkUrl }}" target="_blank" rel="noopener" title="{{ __('messages.powered_by_event_schedule') }}"
            class="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm ring-1 ring-black/5 backdrop-blur transition-colors hover:bg-white hover:text-gray-900">
             <span aria-hidden="true" class="flex h-4 w-4 items-center justify-center rounded-[5px] bg-gradient-to-br from-[#4E81FA] to-[#22D3EE] text-[8px] font-black leading-none text-white">ES</span>
             <span>Event Schedule</span>

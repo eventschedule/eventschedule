@@ -112,6 +112,7 @@ class RoleUpdateRequest extends FormRequest
             'translation_language_code' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('app.supported_languages')))],
             'direct_registration' => ['nullable', 'boolean'],
             'hide_past_events' => ['nullable', 'boolean'],
+            'promotions_opt_out' => ['nullable', 'boolean'],
             'federation_enabled' => ['nullable', 'boolean'],
             'draft_events_default' => ['nullable', 'boolean'],
             'default_event_visibility' => ['nullable', 'string', 'in:public,draft,internal,unlisted'],

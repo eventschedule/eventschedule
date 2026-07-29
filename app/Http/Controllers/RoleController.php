@@ -261,7 +261,7 @@ class RoleController extends Controller
 
         // Cancel active boost campaigns before deletion (prevents orphaned Meta campaigns)
         $activeCampaigns = BoostCampaign::where('role_id', $role->id)
-            ->whereIn('status', ['active', 'paused', 'pending_payment'])
+            ->unsettled()
             ->get();
 
         foreach ($activeCampaigns as $campaign) {
@@ -284,19 +284,20 @@ class RoleController extends Controller
                         (new MetaAdsService)->deleteCampaign($campaign);
                     }
 
-                    if (config('app.hosted') && ! config('app.is_testing')) {
-                        $campaign->refresh();
-                        if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
-                            $billingService = new BoostBillingService;
-                            if ($campaign->billing_status === 'pending') {
-                                if ($campaign->stripe_payment_intent_id) {
-                                    $billingService->cancelPaymentIntent($campaign);
-                                }
-                            } else {
-                                $campaign->actual_spend && $campaign->actual_spend > 0
-                                    ? $billingService->refundUnspent($campaign)
-                                    : $billingService->refundFull($campaign);
+                    // Gate the STRIPE call, not the refund. settlePayment()'s credit branch
+                    // debits boost_credit regardless of mode, so gating the whole block meant
+                    // deleting on selfhost destroyed the advertiser's wallet balance outright.
+                    // refundOnCancellation() reaches Stripe only when there is an intent, which
+                    // a selfhost campaign never has.
+                    $campaign->refresh();
+                    if (! in_array($campaign->billing_status, ['refunded', 'partially_refunded'])) {
+                        $billingService = new BoostBillingService;
+                        if ($campaign->billing_status === 'pending') {
+                            if (config('app.hosted') && ! config('app.is_testing') && $campaign->stripe_payment_intent_id) {
+                                $billingService->cancelPaymentIntent($campaign);
                             }
+                        } else {
+                            $billingService->refundOnCancellation($campaign);
                         }
                     }
                 }
@@ -1861,14 +1862,13 @@ class RoleController extends Controller
             return;
         }
 
-        $ip = $request->ip();
+        // ipHash, not visitorHash: this is a flood cap, and visitorHash mixes in the
+        // client-chosen User-Agent, so rotating it would mint a fresh bucket per request and
+        // the cap would stop existing. See the note on PageView::ipHash().
+        $ip = PageView::clientIp($request);
         if ($ip) {
-            $dailySalt = config('app.key').now()->format('Y-m-d');
-            $ipHash = hash('sha256', $ip.$dailySalt);
-            $cacheKey = "social_click:{$role->id}:{$ipHash}";
-            $secondsUntilMidnight = now()->endOfDay()->diffInSeconds(now());
-            Cache::add($cacheKey, 0, $secondsUntilMidnight);
-            if (Cache::increment($cacheKey) > 10) {
+            $ipHash = PageView::ipHash($ip);
+            if (PageView::incrementDailyCounter("social_click:{$role->id}:{$ipHash}") > 10) {
                 return;
             }
         }

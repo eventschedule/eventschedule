@@ -5,6 +5,7 @@
 >
     <x-slot:toc>
         <x-doc-nav-link href="#overview">Overview</x-doc-nav-link>
+        <x-doc-nav-link href="#on-network">On-Network Promotions</x-doc-nav-link>
         <x-doc-nav-link href="#quick-mode">Quick Mode</x-doc-nav-link>
         <x-doc-nav-link href="#advanced-mode">Advanced Mode</x-doc-nav-link>
         <x-doc-nav-link href="#smart-defaults">Smart Defaults</x-doc-nav-link>
@@ -47,6 +48,63 @@
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">
             Boost offers two modes: <strong>Quick Mode</strong> for a streamlined experience and <strong>Advanced Mode</strong> for full control over every parameter.
+        </p>
+    </section>
+
+    <!-- On-Network Promotions -->
+    <section id="on-network" class="doc-section">
+        <h2 class="doc-heading">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+            </svg>
+            On-Network Promotions
+        </h2>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Alongside Facebook and Instagram, some Event Schedule sites run their own promotions network. Your event appears as a promoted card on other schedules' public pages, in front of people already browsing events on the same site.
+        </p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Availability</div>
+            <p>This is a per-site feature: it only appears if the operator of your Event Schedule site has switched it on. If you do not see a <strong>Promote on this site</strong> option on the Boost page, the site is not running a promotions network.</p>
+        </div>
+
+        <h3 class="doc-subheading">Choosing how you pay</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            You prepay a fixed budget and pick one of two pricing models:
+        </p>
+        <ul class="doc-list mb-6">
+            <li><strong>CPM</strong> - you pay per thousand times your promotion is shown. Best when you want maximum visibility for an event with broad appeal.</li>
+            <li><strong>CPC</strong> - you pay only when someone clicks through to your event. Impressions are free, so this is the safer choice when you care about visits rather than awareness.</li>
+        </ul>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The form shows what your budget buys at the current rate, and separately tells you how much traffic the site's eligible schedules have actually been getting. Read both: a large budget cannot deliver more views than the site has visitors, and the second line is what tells you roughly how long the campaign will take to run.
+        </p>
+
+        <h3 class="doc-subheading">Targeting</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Targeting is optional, and leaving it empty reaches the widest audience:
+        </p>
+        <ul class="doc-list mb-6">
+            <li><strong>Countries</strong> - show your promotion only to visitors in the countries you pick. Useful for a local event on a site with international traffic.</li>
+            <li><strong>Schedule types</strong> - restrict to talent, venue or curator schedules, so a gig promotion can run on venue pages rather than everywhere.</li>
+        </ul>
+        <div class="doc-callout doc-callout-warning">
+            <div class="doc-callout-title">Narrow targeting can stall a campaign</div>
+            <p>Every filter you add reduces the pages your promotion can appear on. If you target a country the site gets little traffic from, the campaign may spend slowly or not at all. Your budget is not lost - unspent money is refunded when the campaign ends.</p>
+        </div>
+
+        <h3 class="doc-subheading">Review</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Because your promotion appears on other people's schedules, your first campaigns are checked by the site operator before they go live. You will see <strong>Awaiting review</strong> on the campaign until then, and an email when it is approved or rejected. A rejected campaign is refunded in full. Once you have a track record of approved campaigns, later ones start immediately.
+        </p>
+
+        <h3 class="doc-subheading">Results</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            The campaign page reports impressions, clicks, click-through rate, the countries your promotion reached, the kinds of schedules it ran on, and any ticket sales attributed to it. Individual host schedules are never named - placement is reported by type, not by page.
+        </p>
+
+        <h3 class="doc-subheading">Cancelling</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            You can cancel at any time. You keep what has already been delivered and the unspent remainder of your budget is returned - to your card if you paid by card, or to your account balance if you paid from credit. The same applies when a campaign ends on its own, whether it ran out of budget, reached its end date, or its event finished.
         </p>
     </section>
 

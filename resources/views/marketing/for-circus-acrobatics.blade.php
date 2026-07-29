@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for circus performers?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your performance schedule, building a fan following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales."
+                    "text": "Yes. Event Schedule is free forever for sharing your performance schedule, building a fan following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit."
                 }
             },
             {
@@ -1182,7 +1182,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for circus performers?', 'Yes. Event Schedule is free forever for sharing your performance schedule, building a fan following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.'],
+                    ['Is Event Schedule free for circus performers?', 'Yes. Event Schedule is free forever for sharing your performance schedule, building a fan following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit.'],
                     ['Can I manage tour dates and local shows in one schedule?', 'Yes. List all your performances in one place - touring shows, local gigs, festival appearances, and private events. Use sub-schedules to organize by show type or tour leg. Fans see everything in one calendar.'],
                     ['How do audiences discover my performances?', 'Fans can follow your schedule and receive email notifications for new shows. Share your schedule link on social media, your booking page, or embed it on your website. Send newsletters to followers with upcoming tour dates.'],
                     ['Can I sell tickets to my shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create different ticket types for different seating or experiences. Zero platform fees - you only pay Stripe\'s standard processing fees.'],

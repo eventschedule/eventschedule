@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for art galleries?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your exhibition calendar, building a collector following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees."
+                    "text": "Yes. Event Schedule is free forever for sharing your exhibition calendar, building a collector following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees, and newsletters are free with a monthly send limit."
                 }
             },
             {
@@ -820,7 +820,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for art galleries?', 'Yes. Event Schedule is free forever for sharing your exhibition calendar, building a collector following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.'],
+                    ['Is Event Schedule free for art galleries?', 'Yes. Event Schedule is free forever for sharing your exhibition calendar, building a collector following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees, and newsletters are free with a monthly send limit.'],
                     ['Can I manage exhibitions, openings, and artist talks in one place?', 'Yes. Use sub-schedules to organize by event type - exhibitions, opening receptions, artist talks, workshops, and private viewings. Each event can include descriptions, artist bios, images, and ticket options.'],
                     ['How do art lovers and collectors discover our events?', 'Visitors can follow your gallery\'s schedule and receive email notifications for new exhibitions and events. Embed your calendar on your website, share on social media, or send newsletters to your mailing list.'],
                     ['Can I sell tickets to openings and special events?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create different ticket types for general admission, VIP previews, or ticketed talks. Zero platform fees - you only pay Stripe\'s processing fees.'],

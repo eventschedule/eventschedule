@@ -195,7 +195,7 @@
     </div>
 
     @if ($campaign->daily_analytics && count($campaign->daily_analytics) > 1)
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" {!! nonce_attr() !!}></script>
+    <script src="{{ asset('js/chart.min.js') }}" {!! nonce_attr() !!}></script>
     <script {!! nonce_attr() !!}>
         const dailyData = @json($campaign->daily_analytics);
         const labels = Object.keys(dailyData);

@@ -1099,7 +1099,12 @@ class TicketController extends Controller
                 $sale->utm_medium = $utmParams['utm_medium'] ?? null;
                 $sale->utm_campaign = $utmParams['utm_campaign'] ?? null;
                 if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
-                    $sale->boost_campaign_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+                    // Verify the campaign exists before assigning it: sales.boost_campaign_id
+                    // carries a foreign key, so a crafted utm_campaign that decodes to an unknown
+                    // id would fail the INSERT and take the whole checkout down with it.
+                    $sale->boost_campaign_id = \App\Models\BoostCampaign::whereKey(
+                        UrlUtils::decodeId($utmParams['utm_campaign'])
+                    )->value('id');
                 }
                 if (($utmParams['utm_source'] ?? null) === 'newsletter' && ($utmParams['utm_campaign'] ?? null)) {
                     $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);
@@ -1737,7 +1742,12 @@ class TicketController extends Controller
                 $sale->utm_medium = $utmParams['utm_medium'] ?? null;
                 $sale->utm_campaign = $utmParams['utm_campaign'] ?? null;
                 if (($utmParams['utm_source'] ?? null) === 'boost' && ($utmParams['utm_campaign'] ?? null)) {
-                    $sale->boost_campaign_id = UrlUtils::decodeId($utmParams['utm_campaign']);
+                    // Verify the campaign exists before assigning it: sales.boost_campaign_id
+                    // carries a foreign key, so a crafted utm_campaign that decodes to an unknown
+                    // id would fail the INSERT and take the whole checkout down with it.
+                    $sale->boost_campaign_id = \App\Models\BoostCampaign::whereKey(
+                        UrlUtils::decodeId($utmParams['utm_campaign'])
+                    )->value('id');
                 }
                 if (($utmParams['utm_source'] ?? null) === 'newsletter' && ($utmParams['utm_campaign'] ?? null)) {
                     $sale->newsletter_id = UrlUtils::decodeId($utmParams['utm_campaign']);

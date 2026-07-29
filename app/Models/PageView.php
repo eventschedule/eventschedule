@@ -234,7 +234,7 @@ class PageView
      * signed diffs, and Cache::add/put reject a non-positive TTL (storing nothing, or leaving the
      * key with no expiry so it never resets). max(1, ...) also guards the day's final second.
      */
-    protected static function secondsUntilEndOfDay(): int
+    public static function secondsUntilEndOfDay(): int
     {
         return max(1, (int) now()->diffInSeconds(now()->endOfDay()));
     }
@@ -256,6 +256,86 @@ class PageView
 
         // Cache::add is atomic and returns true only when the key was absent (first visit today).
         return Cache::add($key, 1, self::secondsUntilEndOfDay());
+    }
+
+    /**
+     * A daily-salted, privacy-preserving identifier for one visitor.
+     *
+     * Returns null when there is no resolvable IP, in which case callers must not
+     * count the request - the same rule isFirstDailyVisit() applies, since without
+     * an IP there is no way to dedup safely.
+     */
+    public static function visitorHash(?string $ip, ?string $userAgent): ?string
+    {
+        if (! $ip) {
+            return null;
+        }
+
+        return self::getIpHash($ip.'|'.($userAgent ?? ''));
+    }
+
+    /**
+     * A daily-salted hash of the IP alone.
+     *
+     * Use this - not visitorHash() - for anything that RATE LIMITS or bills. visitorHash()
+     * mixes in the User-Agent, which the client picks freely, so rotating it mints a fresh
+     * bucket per request and any cap keyed on it stops existing. The User-Agent belongs in
+     * identity/dedup keys (where a fresh bucket only costs an over-count) and never in a
+     * key that guards spend.
+     */
+    public static function ipHash(?string $ip): ?string
+    {
+        return $ip ? self::getIpHash($ip) : null;
+    }
+
+    /**
+     * The client IP, preferring Cloudflare's header over the socket address.
+     *
+     * Extracted from recordView() so every counter resolves the IP the same way -
+     * recordSocialClick() used a bare $request->ip() and undercounted behind Cloudflare.
+     */
+    public static function clientIp(Request $request): ?string
+    {
+        return $request->header('CF-Connecting-IP') ?? $request->ip();
+    }
+
+    /**
+     * Atomically increment a per-visitor counter that resets at midnight, returning the new count.
+     *
+     * Generalises hasExceededViewLimit() so rate caps elsewhere do not have to re-derive
+     * the TTL - getting the operand order wrong there silently disables the cap
+     * (see the note on secondsUntilEndOfDay()).
+     */
+    public static function incrementDailyCounter(string $key): int
+    {
+        Cache::add($key, 0, self::secondsUntilEndOfDay());
+
+        return (int) Cache::increment($key);
+    }
+
+    /**
+     * Whether this is one of Google's advertising crawlers.
+     *
+     * These match isBot() and are correctly excluded from analytics, but an ad slot must
+     * still RENDER for them: Mediapartners-Google is how AdSense reads a page to pick
+     * contextually relevant ads, so hiding the unit from it degrades ad relevance (and
+     * revenue) with no visible symptom.
+     */
+    public static function isGoogleAdsCrawler(?string $userAgent): bool
+    {
+        if (! $userAgent) {
+            return false;
+        }
+
+        $userAgentLower = strtolower($userAgent);
+
+        foreach (['mediapartners-google', 'adsbot-google'] as $pattern) {
+            if (str_contains($userAgentLower, $pattern)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

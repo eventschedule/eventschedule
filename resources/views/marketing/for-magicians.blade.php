@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for magicians?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales."
+                    "text": "Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit."
                 }
             },
             {
@@ -1075,7 +1075,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for magicians?', 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.'],
+                    ['Is Event Schedule free for magicians?', 'Yes. Event Schedule is free forever for sharing your show schedule, building a following, and syncing with Google Calendar. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit.'],
                     ['Can I keep private and corporate bookings off my public schedule?', 'Yes. Save any booking as a draft and it stays off your public schedule until you publish it. Drafts are free and unlimited, so you can hold close-up gigs and corporate dates privately. On the Enterprise plan you can also make events internal or unlisted with an optional password for private and corporate clients.'],
                     ['Can I sell gift cards or season passes for my shows?', 'Yes. On the Pro plan you can sell balance-tracked gift cards that buyers send to a recipient by email, redeemable toward tickets for any show on your schedule. You can also sell multi-use passes like a parlor-show season pass, with usage tracked automatically. Zero platform fees apply to both.'],
                     ['Can I sell tickets to my magic shows?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Create ticket types for general admission, VIP, and meet-and-greet packages, each with a QR code for check-in at the door. When a show sells out, a waitlist notifies fans if seats open up. Zero platform fees, you only pay Stripe\'s processing.'],

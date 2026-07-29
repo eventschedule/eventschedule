@@ -114,9 +114,13 @@
                     dropdownOpen.value = false;
                 }
 
-                function boostEvent() {
+                // channel: 'meta' buys Facebook/Instagram ads, 'network' buys placement on
+                // free schedules' pages here. Two destinations, one event picker.
+                function boostEvent(channel) {
                     if (!selectedEvent.value) return;
-                    const base = @json(route('boost.create'));
+                    const base = channel === 'network'
+                        ? @json(route('promotions.create'))
+                        : @json(route('boost.create'));
                     const params = new URLSearchParams();
                     params.set('event_id', selectedEvent.value.id);
                     if (selectedEvent.value.role_id) {
@@ -174,11 +178,19 @@
                 <div class="px-5 pb-3">
                     <x-event-selector />
                 </div>
-                <div class="flex justify-end px-5 pb-5 pt-2">
-                    <button @click="boostEvent" :disabled="!selectedEvent"
-                        class="inline-flex items-center gap-2 px-5 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
-                        {{ __('messages.boost') }}
+                <div class="flex flex-col gap-2 px-5 pb-5 pt-2 sm:flex-row sm:justify-end">
+                    @if (\App\Services\PromotionService::isEnabled())
+                    <button @click="boostEvent('network')" :disabled="!selectedEvent"
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-white dark:bg-[#2d2d30] hover:bg-gray-50 dark:hover:bg-[#3a3a3d] border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {{ __('messages.promotion_channel_network') }}
                     </button>
+                    @endif
+                    @if (\App\Services\MetaAdsService::isBoostConfigured())
+                    <button @click="boostEvent('meta')" :disabled="!selectedEvent"
+                        class="inline-flex items-center justify-center gap-2 px-5 py-2 bg-[var(--brand-button-bg)] hover:bg-[var(--brand-button-bg-hover)] border border-transparent rounded-lg font-semibold text-sm text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-blue)] focus:ring-offset-2 dark:focus:ring-offset-[#1e1e1e] transition ease-in-out duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {{ __('messages.promotion_channel_meta') }}
+                    </button>
+                    @endif
                 </div>
             </template>
             <div v-else class="text-center px-5 pb-5 pt-2">

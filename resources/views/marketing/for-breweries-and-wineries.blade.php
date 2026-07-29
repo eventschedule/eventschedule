@@ -32,7 +32,7 @@
                 "name": "Is Event Schedule free for breweries and wineries?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your tasting events, live music nights, and seasonal happenings. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales."
+                    "text": "Yes. Event Schedule is free forever for sharing your tasting events, live music nights, and seasonal happenings. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit."
                 }
             },
             {
@@ -852,7 +852,7 @@
 
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
-                    ['Is Event Schedule free for breweries and wineries?', 'Yes. Event Schedule is free forever for sharing your tasting events, live music nights, and seasonal happenings. Ticketing and newsletters are available on the Pro plan, with zero platform fees on ticket sales.'],
+                    ['Is Event Schedule free for breweries and wineries?', 'Yes. Event Schedule is free forever for sharing your tasting events, live music nights, and seasonal happenings. Ticketing is available on the Pro plan with zero platform fees on ticket sales, and newsletters are free with a monthly send limit.'],
                     ['Can I manage tastings, live music, and seasonal events together?', 'Yes. Use sub-schedules to organize events by type - tastings, live music, seasonal releases, food pairings, and private events. Each event can include descriptions, images, pricing, and ticket options all in one place.'],
                     ['How do customers discover our events?', 'Customers can follow your schedule and receive email notifications when you add new events. Embed your calendar on your website, share the link on social media, or send newsletters to followers with your upcoming calendar.'],
                     ['Does it sync with Google Calendar?', 'Yes. Two-way Google Calendar sync keeps your events updated across platforms. Add an event in either place and it appears in both. Your staff and customers always see the latest schedule.'],

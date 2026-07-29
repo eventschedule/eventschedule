@@ -1,6 +1,6 @@
 <x-marketing-layout>
-    <x-slot name="title">Free Event Schedule for Dance Groups | Share Your Shows</x-slot>
-    <x-slot name="description">Share your dance performances with fans worldwide. Email your fans directly and sell tickets to recitals and workshops with zero fees. Free forever.</x-slot>
+    <x-slot name="title">Dance Schedules | Classes, Rehearsals, Shows and Class Cards</x-slot>
+    <x-slot name="description">Run weekly classes as recurring events with per-class capacity, keep rehearsal calls off the public page, and sell 10-visit cards, unlimited memberships and show tickets with zero platform fees.</x-slot>
     <x-slot name="breadcrumbTitle">For Dance Groups</x-slot>
 
     <x-slot name="structuredData">
@@ -9,7 +9,7 @@
         "@context": "https://schema.org",
         "@type": "Service",
         "name": "Event Schedule for Dance Groups",
-        "description": "Share your dance performances with fans worldwide. Sell tickets to recitals and workshops with zero fees. Free forever.",
+        "description": "One schedule for the class, the rehearsal and the show. Weekly classes run as recurring events with per-class capacity, rehearsal calls stay members-only, and passes cover a set number of visits.",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule",
@@ -22,46 +22,6 @@
         }
     }
     </script>
-    <script type="application/ld+json" {!! nonce_attr() !!}>
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "Is Event Schedule free for dance groups?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Event Schedule is free forever for sharing your performance and class schedule, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I manage performances, classes, and rehearsals together?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Use sub-schedules to organize by type - performances, classes, workshops, auditions, and rehearsals. Each event can include details, images, and ticket options. Keep public events visible while keeping rehearsals private."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How do audiences discover our performances?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Fans can follow your dance group's schedule and receive email notifications for new performances. Share your schedule link on social media, embed it on your website, or send newsletters to followers with upcoming shows."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Can I sell tickets to performances and recitals?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Yes. Connect your Stripe account and sell tickets directly from your schedule. Set up different pricing for adults, students, and groups. Event Schedule charges zero platform fees - every dollar goes to your dance group."
-                }
-            }
-        ]
-    }
-    </script>
     <!-- Product Schema for Rich Snippets -->
     <script type="application/ld+json" {!! nonce_attr() !!}>
     {
@@ -69,9 +29,8 @@
         "@type": "SoftwareApplication",
         "name": "Event Schedule for Dance Groups",
         "applicationCategory": "BusinessApplication",
-        "applicationSubCategory": "Dance Performance Scheduling Software",
+        "applicationSubCategory": "Dance Studio Scheduling Software",
         "operatingSystem": "Web",
-        "description": "Share your dance performances with fans worldwide. Email your audience directly - no algorithm. Sell tickets to recitals, workshops, and showcases with zero platform fees.",
         "offers": {
             "@type": "Offer",
             "price": "0",
@@ -79,17 +38,23 @@
             "description": "Free forever"
         },
         "featureList": [
-            "Season planning for dance companies",
-            "Class and workshop scheduling",
-            "Zero-fee ticket sales for performances",
-            "Direct newsletter communication with audiences",
-            "Virtual performance and livestream support",
-            "Two-way Google Calendar sync",
-            "Team collaboration for ensembles",
-            "Auto-generated promotional graphics"
+            "Weekly classes as recurring events with day-of-week patterns and date exceptions",
+            "Per-class capacity with free registration and a remaining-spots count",
+            "Draft events that stay members-only, so rehearsal calls are not public",
+            "Visit passes for a set number of classes, such as a 10-visit card",
+            "Memberships with unlimited visits until the pass expires",
+            "Season passes valid for every occurrence of a recurring event",
+            "Per-pass cancellation deadline and late-cancel policy",
+            "Named ticket types with their own prices, quantities and sales windows",
+            "QR check-in for shows and classes",
+            "Zero platform fees on ticket sales through your own Stripe account",
+            "Sub-schedules that keep classes, rehearsals and performances apart",
+            "Direct newsletters to the people who follow your schedule",
+            "Two-way Google, Outlook and CalDAV calendar sync",
+            "Embeddable calendar for the website you already have"
         ],
         "url": "{{ url()->current() }}",
-        "keywords": "dance schedule, dance performance calendar, dance group booking, dance recital management, free dance scheduling",
+        "keywords": "dance studio schedule, dance class calendar, class card, dance company rehearsal schedule, recital ticketing, dance recurring classes",
         "provider": {
             "@type": "Organization",
             "name": "Event Schedule"
@@ -107,228 +72,585 @@
     </script>
 
     <style {!! nonce_attr() !!}>
-        /* For-dance-groups "In Motion" styles. The shared es-* motion system
-           lives in marketing.css; this holds the rose->cyan->sky gradient text,
-           the drifting motion lines (now carried from the hero through the dark
-           band and finale), motion-trail card hovers, and a curtain-to-curtain
-           season progress line. Motion trails stay exclusive to this page. */
-        .text-gradient-dance {
-            background: linear-gradient(120deg, #f43f5e, #06b6d4, #0ea5e9);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .dark .text-gradient-dance {
-            background: linear-gradient(120deg, #fda4af, #67e8f9, #7dd3fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        @keyframes es-flow {
-            0%, 100% { transform: translateX(0) translateY(0); }
-            50% { transform: translateX(12px) translateY(-8px); }
-        }
-        .es-flow { animation: es-flow 9s ease-in-out infinite; }
+        /* ==============================================================
+           For-dance-groups "The Barre" styles.
 
-        /* Motion-trail hover: the card slides a few pixels and a rose edge
-           lags behind and fades, like a body leaving a trail through a move. */
-        .es-trail { position: relative; transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
-        .es-trail::after {
+           NAME: not "The Studio Wall" - /for-visual-artists already uses
+           that nickname for a painter's wall (es-brush-*). "The Barre"
+           matches this page's own es-barre-* prefix anyway.
+
+           CONCEPT: the wall every dancer faces - mirror, barre, floor.
+           The editorial spine is that the SAME WALL sees three different
+           things (the class, the rehearsal, the show) belonging to three
+           different audiences, which is exactly what sub-schedules plus
+           visibility states plus one public link are for.
+
+           WHY NOT "MOTION": the outgoing page was nicknamed "In Motion"
+           and drew drifting curves via .es-flow - but the neighbouring
+           /for-fitness-and-yoga is literally "The Flow" and owns that
+           idea. Anything flowing, trailing or curving is off limits here.
+
+           THE BARRE is built from CSS BOXES (a rounded bar plus bracket
+           blocks), never an outline SVG - CLAUDE.md bans decorative line
+           drawings of objects. Same construction as /for-nightclubs' door
+           and /for-bars' A-frame legs.
+
+           REFLECTIONS are CSS gradients only. Never duplicate text into a
+           flipped copy: it would be read twice by assistive tech and
+           indexed twice.
+
+           COLOUR: mirror glass. After ten rebuilds no hue is unclaimed, so
+           the accent comes from the MATERIAL rather than the wheel - real
+           mirror glass is green-tinted from its iron content, which is why
+           a mirror tunnel looks green. Same move as /for-nightclubs'
+           brushed steel. Teal is unclaimed as a primary by any rebuilt
+           page. Measured on this page's grounds:
+             #115e59  6.97 studio / 6.51 panel   <- accent TEXT
+             #0f766e  5.47 under white           <- fills, borders, CTA only
+                      (only 4.70 on the light panel, so never body text)
+             #2dd4bf  9.88 band / 9.24 panel     <- dark-mode accent text
+           NEVER use text-gray-500: it measures 4.83 on white but only
+           4.2-4.5 on a tinted ground like this one. Use .es-barre-muted
+           (7.35 studio / 6.87 panel light, 7.12 / 6.66 dark).
+
+           Dark mode is the same wall at night - an ordinary dark mode, NOT
+           a single lit object floating in blackness. /for-theater-performers
+           is "The Ghost Light" and owns that.
+           ============================================================== */
+
+        /* --- Ground and ink --- */
+        .es-barre-page { background-color: #f3f6f5; color: #0f1a18; }
+        .dark .es-barre-page { background-color: #0b1211; color: #e6edeb; }
+        .es-barre-ink { color: #0f1a18; }
+        .dark .es-barre-ink { color: #e6edeb; }
+        .es-barre-muted { color: #48534f; }
+        .dark .es-barre-muted { color: #93a5a0; }
+        .es-barre-accent { color: #115e59; }
+        .dark .es-barre-accent { color: #2dd4bf; }
+        /* Always-lit accent for the dark band, in both colour modes. */
+        .es-barre-lit { color: #2dd4bf; }
+
+        .es-barre-grad {
+            background-image: linear-gradient(100deg, #115e59, #0f766e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .dark .es-barre-grad,
+        .es-barre-band .es-barre-grad {
+            background-image: linear-gradient(100deg, #5eead4, #2dd4bf);
+        }
+
+        /* --- The barre: a rounded rail on two bracket blocks --------
+           CSS boxes, not an SVG drawing. The rail draws from its left
+           bracket on reveal; the FINISHED state lives on the always-active
+           rule so no-JS and reduced-motion visitors see a complete barre. */
+        .es-barre-rail {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .es-barre-bracket {
+            width: 0.6rem;
+            height: 1.5rem;
+            flex: 0 0 auto;
+            border-radius: 0.2rem;
+            background: linear-gradient(180deg, #c3cfcb, #94a6a1 55%, #74857f);
+        }
+        .dark .es-barre-bracket {
+            background: linear-gradient(180deg, #3d4d49, #2a3733 55%, #1c2521);
+        }
+        .es-barre-bar {
+            flex: 1 1 auto;
+            height: 0.5rem;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #cbd6d2, #8fa19c 42%, #63756f);
+            box-shadow: 0 1px 2px rgba(15, 26, 24, 0.18);
+            transform-origin: left center;
+            transform: scaleX(1);
+            transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .dark .es-barre-bar {
+            background: linear-gradient(180deg, #536660, #35443f 42%, #212c28);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        html.es-anim [data-reveal]:not(.is-revealed) .es-barre-bar { transform: scaleX(0); }
+
+        /* --- The floor reflection under a panel ---------------------
+           A gradient only. Nothing here is readable, so nothing here is
+           duplicated content. */
+        .es-barre-reflect { position: relative; }
+        .es-barre-reflect::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 8%;
+            right: 8%;
+            height: 2.4rem;
+            background: radial-gradient(ellipse 62% 100% at 50% 0%, rgba(17, 94, 89, 0.16), rgba(17, 94, 89, 0) 72%);
+            pointer-events: none;
+        }
+        .dark .es-barre-reflect::after {
+            background: radial-gradient(ellipse 62% 100% at 50% 0%, rgba(45, 212, 191, 0.15), rgba(45, 212, 191, 0) 72%);
+        }
+
+        /* --- Surfaces --- */
+        .es-barre-card {
+            background-color: #ffffff;
+            border: 1px solid rgba(15, 26, 24, 0.1);
+            border-radius: 1rem;
+        }
+        .dark .es-barre-card {
+            background-color: #141d1b;
+            border-color: rgba(230, 237, 235, 0.12);
+        }
+        .es-barre-sub {
+            background-color: #e9efed;
+            border: 1px solid rgba(15, 26, 24, 0.07);
+            border-radius: 0.65rem;
+        }
+        .dark .es-barre-sub {
+            background-color: #0f1917;
+            border-color: rgba(230, 237, 235, 0.09);
+        }
+        .es-barre-hover { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+        .es-barre-hover:hover { border-color: rgba(15, 118, 110, 0.45); box-shadow: 0 10px 30px -18px rgba(15, 26, 24, 0.45); }
+        .dark .es-barre-hover:hover { border-color: rgba(45, 212, 191, 0.4); box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.8); }
+
+        /* --- The mirror duplex ---------------------------------------
+           One section only. Left is the wall the company sees, right is
+           the wall the audience sees. The seam is the mirror's edge.
+           (The wrapper needs no rule of its own: .es-barre-reflect already
+           makes it the positioning context.) */
+        .es-barre-seam {
+            background: linear-gradient(180deg, rgba(15, 26, 24, 0), rgba(15, 26, 24, 0.16) 18%, rgba(15, 26, 24, 0.16) 82%, rgba(15, 26, 24, 0));
+        }
+        .dark .es-barre-seam {
+            background: linear-gradient(180deg, rgba(230, 237, 235, 0), rgba(230, 237, 235, 0.18) 18%, rgba(230, 237, 235, 0.18) 82%, rgba(230, 237, 235, 0));
+        }
+        /* A single soft specular sweep, the way a lit mirror catches the
+           room. Static: no animation to kill.
+
+           The card is WHITE in light mode, so an additive white sweep is
+           invisible - white over white is white. The light-mode sweep is
+           therefore SUBTRACTIVE: two faint glass-tinted bands with the card
+           left untouched between them, which is how a highlight reads on a
+           pale surface. Dark mode can stay additive. Both stops are weak
+           enough that text over them keeps its AA margin. */
+        .es-barre-glass { position: relative; overflow: hidden; }
+        .es-barre-glass::before {
             content: "";
             position: absolute;
             inset: 0;
-            border-radius: inherit;
-            border: 1.5px solid rgba(244, 63, 94, 0.45);
-            opacity: 0;
-            transform: translate(0, 0);
-            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            background: linear-gradient(118deg,
+                rgba(17, 94, 89, 0) 28%,
+                rgba(17, 94, 89, 0.05) 41%,
+                rgba(17, 94, 89, 0) 50%,
+                rgba(17, 94, 89, 0.05) 59%,
+                rgba(17, 94, 89, 0) 72%);
             pointer-events: none;
         }
-        .es-trail:hover { transform: translate(3px, -3px); }
-        .es-trail:hover::after { opacity: 1; transform: translate(-6px, 6px); }
-
-        /* Curtain-to-curtain season progress line; fills on reveal. */
-        .es-season-progress {
-            width: 0;
-            transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
-            transition-delay: 0.35s;
+        .dark .es-barre-glass::before {
+            background: linear-gradient(118deg,
+                rgba(255, 255, 255, 0) 34%,
+                rgba(255, 255, 255, 0.055) 47%,
+                rgba(255, 255, 255, 0) 60%);
         }
-        [data-reveal].is-revealed .es-season-progress,
-        html:not(.es-anim) .es-season-progress { width: 62%; }
 
-        /* Accent recolor for the hard-coded links and related-page card hovers. */
-        .es-link-dance { color: #0891b2; }
-        .dark .es-link-dance { color: #67e8f9; }
-        .es-relcard:hover { border-color: #fda4af; background-color: #fff1f2; }
-        .dark .es-relcard:hover { border-color: rgba(244, 63, 94, 0.3); background-color: rgba(244, 63, 94, 0.06); }
-        .es-relcard:hover .es-relcard-title,
-        .es-relcard:hover .es-relcard-arrow { color: #e11d48; }
-        .dark .es-relcard:hover .es-relcard-title,
-        .dark .es-relcard:hover .es-relcard-arrow { color: #fda4af; }
+        /* --- Eyebrow, numerals, plan tags --- */
+        .es-barre-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #115e59;
+        }
+        .dark .es-barre-tag { color: #2dd4bf; }
+        .es-barre-band .es-barre-tag { color: #2dd4bf; }
+
+        .es-barre-corner {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.6rem;
+            height: 2rem;
+            border: 1px solid rgba(15, 26, 24, 0.18);
+            border-radius: 0.35rem;
+            background: rgba(15, 26, 24, 0.03);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #0f1a18;
+        }
+        .dark .es-barre-corner { border-color: rgba(230, 237, 235, 0.2); background: rgba(230, 237, 235, 0.05); color: #e6edeb; }
+        .es-barre-band .es-barre-corner { border-color: rgba(230, 237, 235, 0.2); background: rgba(230, 237, 235, 0.05); color: #e6edeb; }
+        .es-barre-corner::before {
+            content: "";
+            position: absolute;
+            left: 0.42rem;
+            top: 0.42rem;
+            bottom: 0.42rem;
+            width: 2px;
+            border-radius: 1px;
+            background: #115e59;
+        }
+        .dark .es-barre-corner::before { background: #2dd4bf; }
+        .es-barre-band .es-barre-corner::before { background: #2dd4bf; }
+
+        .es-barre-plan {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .es-barre-plan-free { border-color: rgba(15, 26, 24, 0.2); color: #48534f; }
+        .dark .es-barre-plan-free { border-color: rgba(230, 237, 235, 0.24); color: #93a5a0; }
+        .es-barre-plan-pro { border-color: rgba(15, 118, 110, 0.45); color: #115e59; background: rgba(15, 118, 110, 0.08); }
+        .dark .es-barre-plan-pro { border-color: rgba(45, 212, 191, 0.4); color: #2dd4bf; background: rgba(45, 212, 191, 0.1); }
+        .es-barre-plan-ent { border-color: rgba(15, 26, 24, 0.28); color: #0f1a18; background: rgba(15, 26, 24, 0.06); }
+        .dark .es-barre-plan-ent { border-color: rgba(230, 237, 235, 0.3); color: #e6edeb; background: rgba(230, 237, 235, 0.08); }
+
+        /* --- Visibility states are NOT plan tiers -------------------
+           These must not borrow the plan palette. A teal pill means Pro
+           everywhere else on the page, so styling "Public" teal reads as
+           "Public needs Pro" - the exact opposite of this section's point,
+           which is that Draft is free. States are distinguished by SHAPE:
+           published is solid, a draft is hollow with a dashed edge, the
+           way an unpublished thing is drawn everywhere else in the app. */
+        .es-barre-state {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 0.3rem;
+            border: 1px solid transparent;
+            padding: 0.1rem 0.45rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .es-barre-state-public {
+            border-color: rgba(15, 26, 24, 0.16);
+            background: rgba(15, 26, 24, 0.075);
+            color: #2f3a36;
+        }
+        .dark .es-barre-state-public {
+            border-color: rgba(230, 237, 235, 0.2);
+            background: rgba(230, 237, 235, 0.1);
+            color: #cbd6d2;
+        }
+        .es-barre-state-draft {
+            border-style: dashed;
+            border-color: rgba(15, 26, 24, 0.32);
+            background: transparent;
+            color: #48534f;
+        }
+        .dark .es-barre-state-draft {
+            border-color: rgba(230, 237, 235, 0.34);
+            color: #93a5a0;
+        }
+
+        /* --- Buttons --- */
+        .es-barre-btn {
+            background-color: #0f766e;
+            color: #ffffff;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .es-barre-btn:hover { background-color: #115e59; transform: translateY(-1px); box-shadow: 0 14px 30px -16px rgba(15, 118, 110, 0.9); }
+        .es-barre-ghost {
+            border: 1px solid rgba(15, 26, 24, 0.2);
+            color: #0f1a18;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        .es-barre-ghost:hover { border-color: rgba(15, 118, 110, 0.5); background-color: rgba(15, 118, 110, 0.06); }
+        .dark .es-barre-ghost { border-color: rgba(230, 237, 235, 0.22); color: #e6edeb; }
+        .dark .es-barre-ghost:hover { border-color: rgba(45, 212, 191, 0.45); background-color: rgba(45, 212, 191, 0.08); }
+
+        /* --- The dark band --- */
+        .es-barre-band {
+            /* A resolvable colour under the gradients: it is what paints if the
+               gradients fail, and it is what a contrast audit can actually read. */
+            background-color: #0d1614;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(15, 118, 110, 0.16), rgba(15, 118, 110, 0) 70%),
+                linear-gradient(180deg, #0f1a18, #0d1614);
+        }
+
+        /* --- The band does not change between colour modes, so nothing
+               inside it may either ----------------------------------
+           .es-barre-band has no .dark variant. Anything within it that DOES
+           have one renders differently on an identical ground. That covers
+           two shared classes which carry their own .dark rules in
+           marketing.css and are invisible to a grep of this file's markup
+           (.grid-overlay flips its lines black->white, .animate-shimmer
+           flips white 0.3->0.15), AND the page's own barre, whose dark
+           gradient would drop from silver to gunmetal here. Pin all three. */
+        .es-barre-band .grid-overlay {
+            background-image:
+                linear-gradient(rgba(230, 237, 235, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(230, 237, 235, 0.05) 1px, transparent 1px);
+        }
+        .es-barre-band .animate-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background-size: 200% 100%;
+        }
+        .es-barre-band .es-barre-bar {
+            background: linear-gradient(180deg, #cbd6d2, #8fa19c 42%, #63756f);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        }
+        .es-barre-band .es-barre-bracket {
+            background: linear-gradient(180deg, #c3cfcb, #94a6a1 55%, #74857f);
+        }
+
+        /* --- Shared-chrome recolour --- */
+        .es-barre-band .es-claim:focus-within {
+            border-color: rgba(45, 212, 191, 0.75);
+            box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.22);
+        }
+        .es-dot:hover .es-dot-pip { background-color: rgba(15, 118, 110, 0.6); }
+        .dark .es-dot:hover .es-dot-pip { background-color: rgba(45, 212, 191, 0.6); }
+        .es-dot.is-active .es-dot-pip { background: #115e59; }
+        .dark .es-dot.is-active .es-dot-pip { background: #2dd4bf; }
+
+        /* Focus rings. Never set border-radius here: an outline already
+           follows the element's own radius, and overriding it changes the
+           element's shape on focus. */
+        #es-barre-page a:focus-visible,
+        #es-barre-page summary:focus-visible,
+        #es-barre-page button:focus-visible,
+        #es-barre-page input:focus-visible {
+            outline: 2px solid #0f766e;
+            outline-offset: 2px;
+        }
+        .dark #es-barre-page a:focus-visible,
+        .dark #es-barre-page summary:focus-visible,
+        .dark #es-barre-page button:focus-visible,
+        .dark #es-barre-page input:focus-visible {
+            outline-color: #2dd4bf;
+        }
+        .es-barre-band a:focus-visible,
+        .es-barre-band summary:focus-visible,
+        .es-barre-band button:focus-visible,
+        .es-barre-band input:focus-visible {
+            outline-color: #2dd4bf !important;
+        }
 
         @media (prefers-reduced-motion: reduce) {
-            .es-flow { animation: none !important; }
-            .es-season-progress { width: 62%; transition: none; }
-            .es-trail, .es-trail::after { transition: none; }
-            .es-trail:hover { transform: none; }
-            .es-trail:hover::after { opacity: 0; transform: none; }
+            .es-barre-bar { transition: none; transform: scaleX(1); }
+            .es-barre-btn:hover { transform: none; }
         }
     </style>
 
+    @php
+        // The studio's week. One recurring event per class: a day-of-week
+        // pattern, a curtain time, and a capacity that applies to each
+        // occurrence. "Spots left" is capacity minus signed-up, and every
+        // number below is asserted rather than eyeballed.
+        $classes = [
+            ['Ballet I',              'Tue &amp; Thu',  '6:00pm', 18, 15],
+            ['Contemporary Technique','Wed',            '7:00pm', 20, 12],
+            ['Hip-Hop Foundations',   'Sat',            '2:00pm', 24, 24],
+        ];
+
+        // 24 and 31 Dec 2026 are both Thursdays, so they fall on the
+        // Ballet I pattern and are genuine date exceptions for it.
+        $closures = ['Thu 24 Dec', 'Thu 31 Dec'];
+
+        $faqs = [
+            [
+                'q' => 'Is Event Schedule free for dance groups?',
+                'a' => 'The parts you use every week are free forever: weekly classes as recurring events, date exceptions for the weeks you are closed, free registration with a capacity per class, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling anything - class cards, memberships and show tickets - is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+            ],
+            [
+                'q' => 'How do I set up a weekly class?',
+                'a' => 'Create the class once as a recurring event, choose the days of the week it runs and the time, then add date exceptions for the weeks the studio is closed. Set a capacity and the class shows how many spots are left, counted separately for each date rather than across the whole term.',
+            ],
+            [
+                'q' => 'Can I sell a 10-class card instead of single classes?',
+                'a' => 'Yes. A visit pass covers a set number of visits across the classes you attach it to, so a 10-visit card is one purchase that the dancer uses ten times. A membership gives unlimited visits until it expires, and a season pass covers every occurrence of one recurring event. Usage is tracked per visit, and each pass can carry its own cancellation deadline and late-cancel policy.',
+            ],
+            [
+                'q' => 'Can I keep rehearsal calls off the public page?',
+                'a' => 'Yes. Saving an event as a Draft keeps it members-only, so a rehearsal call sits on the same schedule as the class it belongs to without appearing on your public page. The Enterprise plan adds two more states: Internal, which is never public, and Unlisted, which is hidden from the schedule but reachable by direct link with an optional password.',
+            ],
+            [
+                'q' => 'Can my choreographers and company manager edit the schedule?',
+                'a' => 'A schedule includes one team member on the free plan. The Enterprise plan raises that to multiple team members and adds availability tracking, so you can record who is available before you set a rehearsal call.',
+            ],
+        ];
+
+        $dotSections = [
+            ['top', 'The wall'],
+            ['week', 'The week'],
+            ['rehearsal', 'The rehearsal'],
+            ['card', 'The card'],
+            ['show', 'The show'],
+            ['public', 'In public'],
+            ['who', 'Who it is for'],
+            ['how', 'How it works'],
+            ['faq', 'Questions'],
+            ['claim', 'Get started'],
+        ];
+    @endphp
+
+    <div id="es-barre-page" class="es-barre-page">
+
     <!-- ============================================================ -->
-    <!-- 1. Hero: in motion                                           -->
+    <!-- 1. Hero: the wall                                            -->
     <!-- ============================================================ -->
-    <section class="es-hero relative flex min-h-[calc(88svh-4rem)] items-center overflow-hidden bg-white py-16 dark:bg-[#0a0a0f] noise">
-        <div class="absolute inset-0" aria-hidden="true">
-            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 28% 32%, rgba(244, 63, 94, 0.34), rgba(244, 63, 94, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 42%, rgba(6, 182, 212, 0.4), rgba(6, 182, 212, 0) 65%);"></div>
-            <div class="es-aurora es-aurora-3" style="background: radial-gradient(circle at 50% 70%, rgba(14, 165, 233, 0.3), rgba(14, 165, 233, 0) 60%);"></div>
-            <div class="es-rays absolute inset-0"></div>
-            <div class="grid-pattern absolute inset-0 bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_40%,black_25%,transparent_75%)]"></div>
-            <svg class="es-flow absolute left-6 top-24 h-64 w-64 text-rose-400/40" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
-                <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.3"/>
-            </svg>
-            <svg class="es-flow absolute bottom-24 right-10 h-52 w-52 text-cyan-400/40" style="animation-delay: 2s;" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
-            </svg>
+    {{-- The nav overlays the top of the page, so the hero carries extra top
+         padding: the barre's brackets are the first thing in the right column
+         and would otherwise be clipped by it. --}}
+    <section id="top" class="es-hero noise relative flex min-h-[calc(88svh-4rem)] scroll-mt-24 items-center overflow-hidden pb-16 pt-28">
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 26%, rgba(15, 118, 110, 0.22), rgba(15, 118, 110, 0) 62%); opacity: 0.55;"></div>
+            <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 72% 62%, rgba(45, 212, 191, 0.16), rgba(45, 212, 191, 0) 62%); opacity: 0.5;"></div>
+            <div class="grid-pattern absolute inset-0 bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_72%_62%_at_50%_38%,black_22%,transparent_74%)]"></div>
         </div>
 
-        <div class="pointer-events-none relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-            <div class="es-fade-up es-d-1 mb-8 inline-flex items-center gap-3 rounded-full glass px-5 py-2.5">
-                <span class="h-2 w-2 rounded-full bg-gradient-to-r from-rose-400 to-cyan-400"></span>
-                <span class="text-sm font-medium tracking-wide text-gray-600 dark:text-gray-300">For Dance Companies, Troupes & Studios</span>
-            </div>
+        <div class="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-16">
+                <div>
+                    <p class="es-barre-tag es-fade-up es-d-1 mb-5">For dance companies, studios and crews</p>
 
-            <h1 class="es-balance mb-8 text-[2.75rem] font-black leading-[1.05] tracking-tight text-gray-900 dark:text-white sm:text-6xl lg:text-7xl">
-                <span class="es-mask"><span class="es-mask-line">From studio</span></span>
-                <span class="es-mask es-mask-2"><span class="es-mask-line"><span class="text-gradient-dance es-gradient-anim">to stage</span></span></span>
-            </h1>
+                    <h1 class="es-balance mb-7 text-[2.6rem] font-black leading-[1.05] tracking-tight sm:text-6xl">
+                        <span class="es-mask"><span class="es-mask-line">Three things happen</span></span>
+                        <span class="es-mask es-mask-2"><span class="es-mask-line">at <span class="es-barre-grad">the same wall</span>.</span></span>
+                    </h1>
 
-            <p class="es-fade-up es-d-2 mx-auto mb-10 max-w-2xl text-lg text-gray-500 dark:text-gray-400 sm:text-xl">
-                One schedule for rehearsals, performances, and classes. One link for your audience to find you.
-            </p>
+                    <p class="es-barre-muted es-fade-up es-d-2 mb-9 max-w-xl text-lg sm:text-xl">
+                        The class, the rehearsal, the show. Three different audiences, one schedule -
+                        and only the parts you choose are public.
+                    </p>
 
-            <div class="es-fade-up es-d-3 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <a href="#features" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl glass px-7 py-4 text-lg font-semibold text-gray-800 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:text-white">
-                    See how it flows
-                    <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
-                </a>
-                <a href="{{ app_url('/sign_up?type=talent') }}" class="group pointer-events-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-rose-500/25 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-rose-500/40">
-                    Create your schedule
-                    <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Dance-style marquee -->
-            <div class="es-fade-up es-d-4 pointer-events-auto mx-auto mt-14 max-w-3xl">
-                <div class="es-marquee-mask">
-                    <div class="es-marquee" data-marquee="1" aria-hidden="true">
-                        <div class="es-marquee-track">
-                            @for ($tc = 0; $tc < 2; $tc++)
-                                @foreach (['Ballet', 'Hip-Hop', 'Contemporary', 'Ballroom', 'Tap', 'Jazz', 'Folk', 'Latin'] as $tag)
-                                    <span class="inline-flex items-center gap-2 rounded-full border border-gray-200/70 bg-gray-100/80 px-4 py-1.5 text-xs font-semibold text-gray-700 dark:border-white/10 dark:bg-white/[0.06] dark:text-gray-300">
-                                        <span class="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-rose-400 to-cyan-400"></span>
-                                        {{ $tag }}
-                                    </span>
-                                @endforeach
-                            @endfor
-                        </div>
+                    <div class="es-fade-up es-d-3 flex flex-col gap-3 sm:flex-row">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-barre-btn inline-flex items-center justify-center gap-2 rounded-xl px-7 py-4 text-base font-semibold">
+                            Create your schedule
+                            <svg aria-hidden="true" class="h-5 w-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                        <a href="#week" class="es-barre-ghost inline-flex items-center justify-center gap-2 rounded-xl px-7 py-4 text-base font-semibold">
+                            See how the week works
+                            <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                        </a>
                     </div>
+                </div>
+
+                <!-- The barre, with the week's three strands hanging from it. -->
+                <div class="es-fade-up es-d-4" data-reveal>
+                    <div class="es-barre-rail mb-6 mt-2" aria-hidden="true">
+                        <span class="es-barre-bracket"></span>
+                        <span class="es-barre-bar"></span>
+                        <span class="es-barre-bracket"></span>
+                    </div>
+
+                    <div class="es-barre-reflect grid gap-3">
+                        @foreach ([
+                            ['Class', 'Ballet I', 'Tue &amp; Thu &middot; 6:00pm', '3 spots left', false],
+                            ['Rehearsal', 'Spring Gala, act two', 'Sat &middot; 10:00am', 'Draft &middot; members only', true],
+                            ['Show', 'Spring Gala', 'Sat 30 May &middot; 7:30pm', 'Tickets from $22', false],
+                        ] as [$strand, $name, $when, $note, $isDraft])
+                            <div class="es-barre-card es-barre-hover p-4 sm:p-5">
+                                <div class="mb-1.5 flex items-center justify-between gap-3">
+                                    <span class="es-barre-tag">{{ $strand }}</span>
+                                    <span class="es-barre-muted font-mono text-xs">{!! $when !!}</span>
+                                </div>
+                                <p class="es-barre-ink text-base font-bold">{!! $name !!}</p>
+                                <p class="@if ($isDraft) es-barre-muted @else es-barre-accent @endif mt-1 text-sm font-semibold">{!! $note !!}</p>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <p class="es-barre-muted mt-10 text-xs">
+                        One schedule. The class takes sign-ups, the rehearsal never reaches the public page,
+                        and the show sells tickets.
+                    </p>
                 </div>
             </div>
         </div>
-
     </section>
 
     <!-- ============================================================ -->
-    <!-- 2. The dance life (emoji stats)                              -->
+    <!-- 2. The week (01)                                             -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/5 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 gap-6 text-center md:grid-cols-4" data-reveal-group="70">
-                @foreach ([
-                    ['text-rose-500 dark:text-rose-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />', 'Rehearsals sync to your public schedule'],
-                    ['text-cyan-500 dark:text-cyan-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />', 'Sell tickets to performances directly'],
-                    ['text-sky-500 dark:text-sky-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />', 'Email your fans directly, own the relationship'],
-                    ['text-rose-500 dark:text-rose-400', '<path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />', 'Fill your classes and workshops'],
-                ] as [$statColor, $statIcon, $text])
-                    <div data-reveal class="es-trail rounded-2xl border border-gray-200 bg-white p-6 transition-all hover:shadow-md dark:border-white/10 dark:bg-white/[0.04]">
-                        <svg aria-hidden="true" class="mx-auto mb-3 h-8 w-8 {{ $statColor }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">{!! $statIcon !!}</svg>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $text }}</div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 3. Season planning                                           -->
-    <!-- ============================================================ -->
-    <section id="features" class="scroll-mt-24 bg-white py-24 dark:bg-[#0a0a0f]">
+    <section id="week" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-16 lg:grid-cols-2">
-                <div data-reveal>
-                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-100 px-3 py-1.5 text-sm font-medium text-rose-700 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300">
-                        Season Planning
-                    </div>
-                    <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
-                        Your entire season, <span class="text-gradient-dance">one view</span>
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div>
+                    <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>01</span></div>
+                    <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The week</p>
+                    <h2 class="es-balance es-barre-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A weekly class is <span class="es-barre-grad">one event</span>, not forty.
                     </h2>
-                    <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
-                        Fall program. Winter showcase. Spring recital. Nutcracker run. Import from Google Calendar or add performances manually. Your audience sees everything in one place.
+                    <p class="es-barre-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        Set the class up once as a recurring event: the days it runs, the time it starts, and
+                        date exceptions for the weeks the studio is closed. Change the time in September and
+                        every Tuesday after it follows.
                     </p>
-                    <ul class="space-y-4">
-                        @foreach (['Two-way Google Calendar sync for rehearsals and shows', 'Multiple venues - theater, studio, outdoor stages', 'Share one link everywhere - programs, posters, social bios'] as $item)
-                            <li class="flex items-start gap-3">
-                                <svg aria-hidden="true" class="mt-0.5 h-5 w-5 shrink-0 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                <span class="text-gray-600 dark:text-gray-300">{{ $item }}</span>
+
+                    <ul class="space-y-4" data-reveal-group="90">
+                        @foreach ([
+                            ['Day-of-week patterns', 'Tuesday and Thursday, or just Saturdays. The pattern is the event.'],
+                            ['Date exceptions', 'Take individual dates out for a closure, or add a one-off extra date in.'],
+                            ['Capacity per class', 'A limit applies to each date on its own, so a full Tuesday does not close the Thursday.'],
+                        ] as [$t, $d])
+                            <li class="flex items-start gap-3" data-reveal>
+                                <svg aria-hidden="true" class="es-barre-accent mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                <span><span class="es-barre-ink font-semibold">{{ $t }}</span> <span class="es-barre-muted">- {{ $d }}</span></span>
                             </li>
                         @endforeach
                     </ul>
+
+                    <p class="mt-7" data-reveal>
+                        <span class="es-barre-plan es-barre-plan-free">Free</span>
+                        <span class="es-barre-muted ml-2 text-sm">Recurring events, date exceptions and registration are all on the free plan.</span>
+                    </p>
                 </div>
+
                 <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                    <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-2xl dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                        <div class="mb-6 flex items-center justify-between">
-                            <span class="font-medium text-gray-900 dark:text-white">2025-26 Season</span>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">City Dance Company</span>
+                    <div class="es-tilt-inner es-barre-card overflow-hidden p-6 sm:p-7">
+                        <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                            <h3 class="es-barre-ink text-lg font-bold">This week</h3>
+                            <span class="es-barre-muted font-mono text-xs">3 recurring events</span>
                         </div>
-                        <div class="space-y-3">
-                            @foreach ([
-                                ['OCT', '18-20', 'Fall Repertory', 'Mainstage Theater', 'border-amber-400', 'from-amber-500/10', 'text-amber-700 dark:text-amber-300'],
-                                ['DEC', '6-22', 'The Nutcracker', 'Historic Opera House', 'border-rose-400', 'from-rose-500/10', 'text-rose-700 dark:text-rose-300'],
-                                ['MAR', '14-16', 'Contemporary Showcase', 'Black Box Studio', 'border-cyan-400', 'from-cyan-500/10', 'text-cyan-700 dark:text-cyan-300'],
-                                ['MAY', '30-31', 'Spring Gala', 'City Amphitheater', 'border-sky-400', 'from-sky-500/10', 'text-sky-700 dark:text-sky-300'],
-                            ] as $idx => [$mo, $day, $name, $venue, $bcls, $gcls, $tcls])
-                                <div class="es-ai-field flex items-center gap-4 rounded-xl border-l-2 {{ $bcls }} bg-gradient-to-r {{ $gcls }} to-transparent p-3" style="--i: {{ $idx }};">
-                                    <div class="w-12 text-center"><div class="text-xs {{ $tcls }}">{{ $mo }}</div><div class="font-medium text-gray-900 dark:text-white">{{ $day }}</div></div>
-                                    <div><div class="text-sm font-medium text-gray-900 dark:text-white">{{ $name }}</div><div class="text-xs text-gray-500 dark:text-gray-500">{{ $venue }}</div></div>
+
+                        <div class="space-y-2.5">
+                            @foreach ($classes as [$cName, $cDays, $cTime, $cCap, $cTaken])
+                                @php $left = $cCap - $cTaken; @endphp
+                                <div class="es-barre-sub flex items-center justify-between gap-3 p-3.5">
+                                    <div class="min-w-0">
+                                        <p class="es-barre-ink truncate text-sm font-semibold">{{ $cName }}</p>
+                                        <p class="es-barre-muted font-mono text-xs">{!! $cDays !!} &middot; {{ $cTime }}</p>
+                                    </div>
+                                    <div class="shrink-0 text-right">
+                                        @if ($left > 0)
+                                            <p class="es-barre-accent text-sm font-bold">{{ $left }} spots left</p>
+                                        @else
+                                            <p class="es-barre-muted text-sm font-bold">Full</p>
+                                        @endif
+                                        <p class="es-barre-muted font-mono text-[0.65rem]">{{ $cTaken }} of {{ $cCap }}</p>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
-                        <div class="mt-5 border-t border-gray-200 pt-4 dark:border-white/10">
-                            <div class="flex items-center gap-2">
-                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 4v10a3 3 0 003-3V4" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 4v10a3 3 0 01-3-3V4" />
-                                </svg>
-                                <div class="relative h-1.5 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
-                                    <div class="es-season-progress h-full rounded-full bg-gradient-to-r from-rose-400 via-cyan-400 to-sky-400"></div>
-                                </div>
-                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 4v10a3 3 0 003-3V4" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 4v10a3 3 0 01-3-3V4" />
-                                </svg>
+
+                        <div class="mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 dark:border-[rgba(230,237,235,0.12)]">
+                            <p class="es-barre-tag mb-2">Date exceptions</p>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($closures as $closed)
+                                    <span class="es-barre-sub es-barre-muted px-2.5 py-1 font-mono text-xs">{{ $closed }} &middot; closed</span>
+                                @endforeach
                             </div>
-                            <div class="mt-2 flex justify-between text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                                <span>Curtain up</span>
-                                <span>Season close</span>
-                            </div>
+                            <p class="es-barre-muted mt-3 text-xs">
+                                Both fall on a Thursday, so Ballet I skips them and the Tuesday runs as normal.
+                            </p>
                         </div>
+
                         <div class="es-glare" aria-hidden="true"></div>
                         <div class="es-ring-glow" aria-hidden="true"></div>
                     </div>
@@ -338,309 +660,176 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 4. Classes & workshops                                       -->
+    <!-- 3. The rehearsal - the mirror duplex (02)                    -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-24 dark:bg-[#0f0f14]">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-16 lg:grid-cols-2">
-                <div class="order-2 lg:order-1">
-                    <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
-                        <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-white/[0.04]" aria-hidden="true">
-                            <div class="mb-4 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Weekly Classes</div>
-                            <div class="space-y-2">
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 0;">
-                                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-cyan-400"></span><span class="text-sm text-gray-900 dark:text-white">Ballet Fundamentals</span></div>
-                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Mon/Wed 6pm</div><div class="mt-1"><span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-0.5 text-[10px] font-semibold text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">3 spots left</span></div></div>
-                                </div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 1;">
-                                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-blue-400"></span><span class="text-sm text-gray-900 dark:text-white">Contemporary Technique</span></div>
-                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Tue/Thu 7pm</div><div class="mt-1"><span class="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-700 dark:bg-sky-500/15 dark:text-sky-300">5 spots left</span></div></div>
-                                </div>
-                                <div class="es-ai-field flex items-center justify-between rounded-lg bg-gray-100 p-3 dark:bg-white/5" style="--i: 2;">
-                                    <div class="flex items-center gap-3"><span class="h-2 w-2 rounded-full bg-amber-400"></span><span class="text-sm text-gray-900 dark:text-white">Hip-Hop Foundations</span></div>
-                                    <div class="text-right"><div class="text-xs text-gray-500 dark:text-gray-400">Sat 2pm</div><div class="mt-1"><span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">FULL</span></div></div>
-                                </div>
-                            </div>
-                            <div class="mt-4 border-t border-gray-200 pt-4 dark:border-white/10">
-                                <div class="mb-3 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Upcoming Workshops</div>
-                                <div class="rounded-lg border border-rose-500/20 bg-gradient-to-r from-rose-500/10 to-sky-500/10 p-3">
-                                    <div class="flex items-center justify-between">
-                                        <div><div class="text-sm font-medium text-gray-900 dark:text-white">Partnering Intensive</div><div class="text-xs text-gray-500 dark:text-gray-400">Feb 15-16 with Guest Artist</div></div>
-                                        <div class="text-sm font-medium text-rose-500 dark:text-rose-300">$85</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="es-glare" aria-hidden="true"></div>
-                            <div class="es-ring-glow" aria-hidden="true"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="order-1 lg:order-2" data-reveal>
-                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
-                        Classes & Workshops
-                    </div>
-                    <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
-                        Teach and perform <span class="text-gradient-dance">from one schedule</span>
-                    </h2>
-                    <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
-                        Most dance groups teach alongside performing. List your weekly classes, drop-ins, and intensive workshops. Sell registrations with zero platform fees - you keep everything.
-                    </p>
-                    <div class="flex flex-wrap gap-3">
-                        @foreach (['Weekly technique', 'Drop-in classes', 'Masterclasses', 'Summer intensives'] as $tag)
-                            <span class="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 dark:border-white/10 dark:bg-white/10 dark:text-gray-300">{{ $tag }}</span>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 5. Stop relying on the algorithm                             -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 class="es-balance mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl" data-reveal>
-                Stop relying on the <span class="text-gradient-dance">algorithm</span>
-            </h2>
-            <p class="mx-auto mb-12 max-w-2xl text-xl text-gray-500 dark:text-gray-400" data-reveal style="--reveal-delay: 0.1s;">
-                You post about your show. Facebook shows it to 3% of your followers. Unless you pay. <span class="font-semibold text-rose-500 dark:text-rose-300">There's a better way.</span>
-            </p>
-            <div class="grid gap-6 md:grid-cols-3" data-reveal-group="90">
-                @foreach ([
-                    ['M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'Email your fans directly', 'Fans follow your schedule. You email them directly - no algorithm in the way.'],
-                    ['M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9', 'Notify on new shows', 'New performance? Email goes out. Everyone who wants to know, knows.'],
-                    ['M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'Zero platform fees', 'Sell tickets directly. Stripe processes payment. You keep 100%.'],
-                ] as [$icon, $title, $desc])
-                    <div data-reveal class="es-trail rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-white/[0.04]">
-                        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-rose-500/10">
-                            <svg aria-hidden="true" class="h-6 w-6 text-rose-500 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" /></svg>
-                        </div>
-                        <h3 class="mb-2 font-semibold text-gray-900 dark:text-white">{{ $title }}</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $desc }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 6. Virtual performances                                      -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-16 dark:bg-[#0f0f14] lg:py-20">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <a href="{{ marketing_url('/features/online-events') }}" data-reveal="panel" class="es-bento group block">
-                <div class="es-tilt-inner relative overflow-hidden rounded-3xl border border-gray-200 bg-white p-8 dark:border-white/10 dark:bg-white/[0.04] lg:p-12">
-                    <div class="flex flex-col items-center gap-8 lg:flex-row">
-                        <div class="flex-1 text-center lg:text-left">
-                            <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-100 px-3 py-1.5 text-sm font-medium text-sky-700 dark:border-sky-500/20 dark:bg-sky-500/10 dark:text-sky-300">
-                                <svg aria-hidden="true" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                                Livestream
-                            </div>
-                            <h3 class="mb-3 text-2xl font-black tracking-tight text-gray-900 transition-colors group-hover:text-sky-600 dark:text-white dark:group-hover:text-sky-400 lg:text-3xl">Perform for audiences anywhere</h3>
-                            <p class="mb-4 text-lg text-gray-500 dark:text-gray-400">Livestream your showcase. Host a virtual masterclass. Reach audiences who can't make it to the theater - and sell tickets to viewers worldwide.</p>
-                            <span class="inline-flex items-center gap-2 font-medium text-sky-600 transition-all group-hover:gap-3 dark:text-sky-400">
-                                Learn about online events
-                                <svg aria-hidden="true" class="h-4 w-4 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                            </span>
-                        </div>
-                        <div class="shrink-0" aria-hidden="true">
-                            <div class="relative flex h-32 w-48 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50 dark:border-white/10 dark:bg-[#0f0f14]">
-                                <div class="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-cyan-500/10"></div>
-                                <div class="relative text-center">
-                                    <div class="mx-auto mb-2 flex h-8 w-8 animate-pulse items-center justify-center rounded-full bg-red-500"><div class="h-2 w-2 rounded-full bg-white"></div></div>
-                                    <div class="text-xs font-medium text-gray-900 dark:text-white">LIVE</div>
-                                    <div class="text-[10px] text-gray-500 dark:text-gray-500">347 watching</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="es-glare" aria-hidden="true"></div>
-                    <div class="es-ring-glow" aria-hidden="true"></div>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 7. Team coordination                                         -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-16 lg:grid-cols-2">
-                <div data-reveal>
-                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-300">
-                        Company Management
-                    </div>
-                    <h2 class="es-balance mb-6 text-3xl font-black leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl">
-                        Coordinate your <span class="text-gradient-dance">entire company</span>
-                    </h2>
-                    <p class="mb-8 text-lg leading-relaxed text-gray-500 dark:text-gray-400">
-                        Invite your artistic director, choreographers, rehearsal directors, and company managers. Everyone can update the schedule. Changes sync everywhere instantly.
-                    </p>
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/10">
-                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-medium text-white">AD</div>
-                            <div class="flex-1"><div class="text-sm text-gray-900 dark:text-white">Sarah Chen</div><div class="text-xs text-gray-500 dark:text-gray-500">Artistic Director</div></div>
-                            <span class="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">Owner</span>
-                        </div>
-                        <div class="flex items-center gap-3 rounded-xl border border-gray-200/50 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/5">
-                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-cyan-600 text-sm font-medium text-white">MR</div>
-                            <div class="flex-1"><div class="text-sm text-gray-600 dark:text-gray-300">Marcus Rivera</div><div class="text-xs text-gray-500 dark:text-gray-500">Choreographer</div></div>
-                            <span class="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700 dark:bg-rose-500/20 dark:text-rose-300">Admin</span>
-                        </div>
-                        <div class="flex items-center gap-3 rounded-xl border border-gray-200/50 bg-gray-50 p-3 dark:border-white/5 dark:bg-white/5">
-                            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600 text-sm font-medium text-white">JT</div>
-                            <div class="flex-1"><div class="text-sm text-gray-600 dark:text-gray-300">Jamie Torres</div><div class="text-xs text-gray-500 dark:text-gray-500">Company Manager</div></div>
-                            <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">Admin</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex justify-center">
-                    <div class="es-bento group relative w-full max-w-sm" data-tilt="5" data-reveal="panel">
-                        <div class="es-tilt-inner relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-6 dark:border-white/10 dark:bg-[#0f0f14]" aria-hidden="true">
-                            <div class="mb-4 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">Recent Activity</div>
-                            <div class="space-y-4">
-                                <div class="es-ai-field flex gap-3" style="--i: 0;"><div class="w-1 rounded-full bg-blue-500"></div><div><div class="text-sm text-gray-900 dark:text-white">Sarah added "Spring Gala"</div><div class="text-xs text-gray-500 dark:text-gray-500">2 hours ago</div></div></div>
-                                <div class="es-ai-field flex gap-3" style="--i: 1;"><div class="w-1 rounded-full bg-rose-500"></div><div><div class="text-sm text-gray-900 dark:text-white">Marcus updated rehearsal times</div><div class="text-xs text-gray-500 dark:text-gray-500">Yesterday</div></div></div>
-                                <div class="es-ai-field flex gap-3" style="--i: 2;"><div class="w-1 rounded-full bg-amber-500"></div><div><div class="text-sm text-gray-900 dark:text-white">Jamie added ticket link</div><div class="text-xs text-gray-500 dark:text-gray-500">2 days ago</div></div></div>
-                            </div>
-                            <div class="es-glare" aria-hidden="true"></div>
-                            <div class="es-ring-glow" aria-hidden="true"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 8. Perfect for (shared sub-audience cards)                   -->
-    <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="rehearsal" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Built for every style of <span class="text-gradient-dance">dance</span>
+                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>02</span></div>
+                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The rehearsal</p>
+                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The wall the company sees.<br class="hidden sm:block">
+                    The wall <span class="es-barre-grad">the audience sees</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    From classical technique to street dance, we understand how you work.
+                <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    A rehearsal call belongs on the same schedule as the show it is for. It just does not
+                    belong on your public page.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
-                <!-- Ballet Companies -->
-                <x-sub-audience-card
-                    name="Ballet Companies"
-                    description="Season planning for classical and contemporary repertoire. Nutcracker runs, spring galas, studio performances."
-                    icon-color="rose"
-                    blog-slug="for-ballet-companies"
-                >
-                    <x-slot:icon>
-                        <span class="text-2xl">🩰</span>
-                    </x-slot:icon>
-                </x-sub-audience-card>
+            <div class="es-barre-reflect" data-reveal="panel">
+                <div class="es-barre-card es-barre-glass">
+                    <div class="relative z-10 grid lg:grid-cols-[1fr_1px_1fr]">
+                        <!-- Company side -->
+                        <div class="p-6 sm:p-8">
+                            <div class="mb-5 flex items-center justify-between gap-3">
+                                <p class="es-barre-tag">Signed in</p>
+                                <span class="es-barre-plan es-barre-plan-free">Free</span>
+                            </div>
+                            <div class="space-y-2.5">
+                                @foreach ([
+                                    ['Ballet I', 'Tue & Thu 6:00pm', 'Public'],
+                                    ['Spring Gala, act two', 'Sat 10:00am', 'Draft'],
+                                    ['Spacing call, main stage', 'Fri 4:00pm', 'Draft'],
+                                    ['Spring Gala', 'Sat 30 May 7:30pm', 'Public'],
+                                ] as [$eName, $eWhen, $eState])
+                                    <div class="es-barre-sub flex items-center justify-between gap-3 p-3">
+                                        <div class="min-w-0">
+                                            <p class="es-barre-ink truncate text-sm font-semibold">{!! $eName !!}</p>
+                                            <p class="es-barre-muted font-mono text-xs">{{ $eWhen }}</p>
+                                        </div>
+                                        <span class="es-barre-state shrink-0 @if ($eState === 'Draft') es-barre-state-draft @else es-barre-state-public @endif">{{ $eState }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="es-barre-muted mt-4 text-xs">Everything the company needs, in one place.</p>
+                        </div>
 
-                <!-- Hip-Hop Crews -->
-                <x-sub-audience-card
-                    name="Hip-Hop Crews"
-                    description="Battles, showcases, cyphers, and workshops. Street dance, breaking, popping, locking - share where you're performing."
-                    icon-color="violet"
-                    blog-slug="for-hip-hop-crews"
-                >
-                    <x-slot:icon>
-                        <span class="text-2xl">🎤</span>
-                    </x-slot:icon>
-                </x-sub-audience-card>
+                        <!-- The mirror's edge -->
+                        <div class="es-barre-seam mx-6 my-0 h-px lg:mx-0 lg:my-8 lg:h-auto lg:w-px" aria-hidden="true"></div>
 
-                <!-- Ballroom & Latin Studios -->
-                <x-sub-audience-card
-                    name="Ballroom & Latin Studios"
-                    description="Class schedules, social dances, showcases, and competition prep. Salsa nights to formal balls."
-                    icon-color="amber"
-                    blog-slug="for-ballroom-latin-studios"
-                >
-                    <x-slot:icon>
-                        <span class="text-2xl">💃</span>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Contemporary & Modern Troupes -->
-                <x-sub-audience-card
-                    name="Contemporary & Modern"
-                    description="Experimental work, site-specific performances, residencies, and immersive experiences. Art that moves."
-                    icon-color="cyan"
-                    blog-slug="for-contemporary-modern-dance"
-                >
-                    <x-slot:icon>
-                        <span class="text-2xl">🌊</span>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Folk & Cultural Ensembles -->
-                <x-sub-audience-card
-                    name="Folk & Cultural Ensembles"
-                    description="Traditional dance, heritage celebrations, cultural festivals. Keeping traditions alive through movement."
-                    icon-color="emerald"
-                    blog-slug="for-folk-cultural-dance"
-                >
-                    <x-slot:icon>
-                        <span class="text-2xl">🌍</span>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-
-                <!-- Dance Schools & Academies -->
-                <x-sub-audience-card
-                    name="Dance Schools & Academies"
-                    description="Structured dance education, student recitals, and showcase performances. Manage class schedules and enrollment."
-                    icon-color="pink"
-                    blog-slug="for-dance-schools-academies"
-                >
-                    <x-slot:icon>
-                        <span class="text-2xl">❤️‍🔥</span>
-                    </x-slot:icon>
-                </x-sub-audience-card>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================================ -->
-    <!-- 9. Social promo graphics                                     -->
-    <!-- ============================================================ -->
-    <section class="bg-white py-24 dark:bg-[#0a0a0f]">
-        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div class="grid items-center gap-12 lg:grid-cols-2">
-                <div data-reveal>
-                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-100 px-3 py-1.5 text-sm font-medium text-orange-700 dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400">
-                        Promo Graphics
+                        <!-- Audience side -->
+                        <div class="p-6 sm:p-8">
+                            <div class="mb-5 flex items-center justify-between gap-3">
+                                <p class="es-barre-tag">Your public page</p>
+                                <span class="es-barre-muted font-mono text-xs">yourstudio.eventschedule.com</span>
+                            </div>
+                            <div class="space-y-2.5">
+                                @foreach ([
+                                    ['Ballet I', 'Tue & Thu 6:00pm'],
+                                    ['Spring Gala', 'Sat 30 May 7:30pm'],
+                                ] as [$pName, $pWhen])
+                                    <div class="es-barre-sub flex items-center justify-between gap-3 p-3">
+                                        <div class="min-w-0">
+                                            <p class="es-barre-ink truncate text-sm font-semibold">{!! $pName !!}</p>
+                                            <p class="es-barre-muted font-mono text-xs">{{ $pWhen }}</p>
+                                        </div>
+                                        <svg aria-hidden="true" class="es-barre-accent h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <p class="es-barre-muted mt-4 text-xs">The two rehearsal calls are simply not here.</p>
+                        </div>
                     </div>
-                    <h2 class="es-balance mb-6 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
-                        Share-ready images for every performance
-                    </h2>
-                    <p class="mb-6 text-lg text-gray-500 dark:text-gray-400">
-                        Auto-generate promotional graphics sized perfectly for Instagram, Facebook, and stories. No design skills needed - just download and post.
+                </div>
+            </div>
+
+            <div class="mt-16 grid gap-4 md:grid-cols-2" data-reveal-group="100">
+                <div class="es-barre-card p-6" data-reveal>
+                    <div class="mb-3 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Two more states</h3>
+                        <span class="es-barre-plan es-barre-plan-ent">Enterprise</span>
+                    </div>
+                    <p class="es-barre-muted text-sm">
+                        Internal events are never public at all, and Unlisted events are hidden from the
+                        schedule but still reachable by direct link, with an optional password - useful for a
+                        preview you want the board to see and nobody else.
                     </p>
-                    <ul class="space-y-3 text-gray-600 dark:text-gray-400">
-                        @foreach (['Square posts for feed', 'Vertical for stories', 'Your branding, automatically applied'] as $item)
-                            <li class="flex items-center gap-2">
-                                <svg aria-hidden="true" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                                {{ $item }}
-                            </li>
-                        @endforeach
-                    </ul>
                 </div>
-                <div class="flex justify-center gap-4" data-reveal aria-hidden="true">
-                    <div class="flex h-36 w-36 rotate-[-4deg] flex-col items-center justify-center rounded-xl border border-rose-200 bg-gradient-to-br from-rose-100 to-cyan-100 p-3 text-center shadow-lg">
-                        <div class="mb-1 text-[10px] uppercase tracking-wider text-rose-600">Spring Gala</div>
-                        <div class="text-sm font-semibold text-stone-800">City Dance Co.</div>
-                        <div class="mt-1 text-[10px] text-stone-500">May 30 · 7:30pm</div>
-                        <div class="mt-2 text-[10px] font-medium text-rose-600">Tickets Available</div>
+                <div class="es-barre-card p-6" data-reveal>
+                    <div class="mb-3 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Who can edit</h3>
+                        <span class="es-barre-plan es-barre-plan-ent">Enterprise</span>
                     </div>
-                    <div class="mt-8 flex h-40 w-24 rotate-[4deg] flex-col items-center justify-center rounded-xl border border-sky-200 bg-gradient-to-br from-sky-100 to-blue-100 p-2 text-center shadow-lg">
-                        <div class="mb-1 text-[8px] uppercase tracking-wider text-sky-600">Story</div>
-                        <div class="text-xs font-semibold text-stone-800">Tonight!</div>
-                        <div class="mt-1 text-[8px] text-stone-500">Nutcracker</div>
-                        <div class="mt-2 text-[8px] text-sky-600">Swipe up</div>
+                    <p class="es-barre-muted text-sm">
+                        A schedule includes one team member on the free plan. Enterprise raises that to
+                        multiple team members and adds availability tracking, so you can see who is free
+                        before you call the rehearsal.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 4. The card (03)                                             -->
+    <!-- ============================================================ -->
+    <section id="card" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+                <div class="order-2 lg:order-1">
+                    <div class="es-bento group relative" data-tilt="4" data-reveal="panel">
+                        <div class="es-tilt-inner es-barre-card overflow-hidden p-6 sm:p-7">
+                            <div class="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                                <h3 class="es-barre-ink text-lg font-bold">What people buy</h3>
+                                <span class="es-barre-plan es-barre-plan-pro">Pro</span>
+                            </div>
+
+                            <div class="space-y-2.5">
+                                @foreach ([
+                                    ['Ten-class card', 'Visit pass', '10 visits, used one at a time', '$180'],
+                                    ['Unlimited month', 'Membership', 'Every class until it expires', '$140'],
+                                    ['Spring Gala season pass', 'Season pass', 'Every performance of the run, once each', '$95'],
+                                    ['Drop-in', 'Single ticket', 'One class', '$22'],
+                                ] as [$pName, $pKind, $pScope, $pPrice])
+                                    <div class="es-barre-sub p-3.5">
+                                        <div class="flex items-baseline justify-between gap-3">
+                                            <p class="es-barre-ink min-w-0 flex-1 truncate text-sm font-semibold">{{ $pName }}</p>
+                                            <p class="es-barre-ink shrink-0 font-mono text-sm">{{ $pPrice }}</p>
+                                        </div>
+                                        <div class="mt-1 flex flex-wrap items-baseline gap-x-2">
+                                            <span class="es-barre-accent text-xs font-semibold">{{ $pKind }}</span>
+                                            <span class="es-barre-muted text-xs">{{ $pScope }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <p class="es-barre-muted mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 text-xs dark:border-[rgba(230,237,235,0.12)]">
+                                Usage is tracked per visit, so you can see how much of a card is left without
+                                anyone keeping a paper tally.
+                            </p>
+
+                            <div class="es-glare" aria-hidden="true"></div>
+                            <div class="es-ring-glow" aria-hidden="true"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-1 lg:order-2">
+                    <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>03</span></div>
+                    <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The card</p>
+                    <h2 class="es-balance es-barre-ink mb-6 text-3xl font-black leading-tight tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        Nobody buys <span class="es-barre-grad">one ballet class</span>.
+                    </h2>
+                    <p class="es-barre-muted mb-8 max-w-xl text-lg leading-relaxed" data-reveal style="--reveal-delay: 0.15s;">
+                        They buy ten of them, or a month of them. A pass is one purchase that covers many
+                        visits, so the dancer books in without paying again and you are not reconciling a
+                        punch card at the desk.
+                    </p>
+
+                    <div class="space-y-3" data-reveal-group="90">
+                        @foreach ([
+                            ['A set number of visits', 'A visit pass covers a fixed count across the classes you attach it to - a ten-visit card is one purchase used ten times.'],
+                            ['Unlimited until it expires', 'A membership covers every covered class until the expiry date, with no per-visit counting at all.'],
+                            ['Every date of one class', 'A season pass covers each occurrence of a single recurring event, once per occurrence.'],
+                            ['Cancellation, decided in advance', 'Each pass can carry its own cancellation deadline and a late-cancel policy - forfeit the visit, or block the cancellation.'],
+                        ] as [$t, $d])
+                            <div class="es-barre-card es-barre-hover p-4" data-reveal>
+                                <p class="es-barre-ink text-sm font-bold">{{ $t }}</p>
+                                <p class="es-barre-muted mt-1 text-sm">{{ $d }}</p>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -648,36 +837,63 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 10. How it works (dark band)                                 -->
+    <!-- 5. The show (04)                                             -->
     <!-- ============================================================ -->
-    <section class="relative bg-white px-2 py-14 dark:bg-[#0a0a0f] sm:px-4 lg:py-20">
-        <div class="es-band-dark noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
-            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 30% 30%, rgba(244, 63, 94, 0.26), rgba(244, 63, 94, 0) 60%); opacity: 0.6;"></div>
-                <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.55;"></div>
-                <svg class="es-flow absolute -left-10 top-8 h-72 w-72 text-rose-400/40" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                    <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.6"/>
-                    <path d="M20,120 Q70,40 110,120 T180,120" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.4"/>
-                </svg>
-                <svg class="es-flow absolute -right-8 bottom-6 h-64 w-64 text-cyan-400/40" style="animation-delay: 2.4s;" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                    <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.55"/>
-                </svg>
-                <div class="grid-overlay absolute inset-0 opacity-25"></div>
+    <section id="show" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
+        <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>04</span></div>
+                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">The show</p>
+                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    The night the whole year <span class="es-barre-grad">points at</span>.
+                </h2>
+                <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    Named ticket types, each with its own price, quantity and sales window - so the family
+                    rate closes when you want it to and the door price does not open early.
+                </p>
             </div>
 
-            <div class="relative z-10 mx-auto max-w-4xl">
-                <div class="mx-auto mb-14 max-w-3xl text-center">
-                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal>
-                        From sign-up to <span class="text-gradient-dance">sold-out</span>
-                    </h2>
+            <div class="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
+                <div class="es-barre-card es-barre-reflect p-6 sm:p-7" data-reveal="panel">
+                    <div class="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Spring Gala</h3>
+                        <span class="es-barre-muted font-mono text-xs">Sat 30 May &middot; 7:30pm</span>
+                    </div>
+                    <p class="es-barre-muted mb-5 text-sm">Four ticket types on one event.</p>
+
+                    <div class="space-y-2.5">
+                        @foreach ([
+                            ['Adult', 'On sale now', '$28', '120'],
+                            ['Student &amp; senior', 'On sale now', '$18', '80'],
+                            ['Under 12', 'On sale now', '$12', '60'],
+                            ['Family of four', 'Closes 7 days before', '$72', '40'],
+                        ] as [$tName, $tWindow, $tPrice, $tQty])
+                            <div class="es-barre-sub flex items-baseline gap-3 p-3.5">
+                                <span class="es-barre-ink min-w-0 flex-1 truncate text-sm font-semibold">{!! $tName !!}</span>
+                                <span class="es-barre-muted hidden truncate text-xs sm:inline">{{ $tWindow }}</span>
+                                <span class="es-barre-muted font-mono text-xs">{{ $tQty }}</span>
+                                <span class="es-barre-ink font-mono text-sm">{{ $tPrice }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <p class="es-barre-muted mt-5 border-t border-[rgba(15,26,24,0.1)] pt-4 text-xs dark:border-[rgba(230,237,235,0.12)]">
+                        Payment goes through your own Stripe account. Event Schedule takes no cut of it.
+                    </p>
                 </div>
 
-                <div class="grid grid-cols-1 gap-8 md:grid-cols-3" data-reveal-group="120">
-                    @foreach ([['1', 'Add your season', 'Import from Google Calendar or add performances manually. Classes, workshops, shows - all in one place.'], ['2', 'Share your link', 'Put it on your website, in programs, on posters, in your social bios. One URL that\'s always current.'], ['3', 'Fill your seats', 'Fans subscribe and get notified about new performances. Sell tickets directly. Build your audience.']] as [$n, $title, $desc])
-                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 text-center backdrop-blur-sm" data-reveal="panel">
-                            <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-cyan-600 text-xl font-bold text-white shadow-lg shadow-rose-500/30">{{ $n }}</div>
-                            <h3 class="mb-2 text-lg font-semibold text-white">{{ $title }}</h3>
-                            <p class="text-sm text-gray-400">{{ $desc }}</p>
+                <div class="grid gap-4" data-reveal-group="100">
+                    @foreach ([
+                        ['Zero platform fees', 'You keep the whole ticket price minus what Stripe charges to process the card. There is no per-ticket cut on top.', 'pro'],
+                        ['QR check-in', 'Scan tickets at the door from a phone, with a live check-in view so two people can work the queue.', 'pro'],
+                        ['Questions at checkout', 'Ask for the dancer\'s name, the class they are in, or a photo consent - collected with the sale instead of chased afterwards.', 'pro'],
+                    ] as [$t, $d, $tier])
+                        <div class="es-barre-card es-barre-hover p-6" data-reveal>
+                            <div class="mb-2 flex items-center gap-2">
+                                <h3 class="es-barre-ink text-base font-bold">{{ $t }}</h3>
+                                <span class="es-barre-plan es-barre-plan-pro">Pro</span>
+                            </div>
+                            <p class="es-barre-muted text-sm">{{ $d }}</p>
                         </div>
                     @endforeach
                 </div>
@@ -686,32 +902,266 @@
     </section>
 
     <!-- ============================================================ -->
-    <!-- 11. Key features                                             -->
+    <!-- 6. The wall in public (05)                                   -->
     <!-- ============================================================ -->
-    <section class="border-t border-gray-200 bg-gray-50 py-20 dark:border-white/5 dark:bg-[#0f0f14]">
+    <section id="public" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>05</span></div>
+                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">In public</p>
+                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    One link, on <span class="es-barre-grad">everything you print</span>.
+                </h2>
+                <p class="es-barre-muted text-lg" data-reveal style="--reveal-delay: 0.15s;">
+                    The studio window, the programme, the bio on your profile. It is the same address all
+                    year and it is never out of date.
+                </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="80">
+                <div class="es-bento group relative md:col-span-2" data-tilt="3" data-reveal="panel">
+                    <div class="es-tilt-inner es-barre-card h-full overflow-hidden p-6">
+                        <div class="mb-2 flex items-center gap-2">
+                            <h3 class="es-barre-ink text-lg font-bold">Embed it on the site you already have</h3>
+                            <span class="es-barre-plan es-barre-plan-free">Free</span>
+                        </div>
+                        <p class="es-barre-muted text-sm">
+                            Drop the calendar into your existing website in an iframe. It keeps itself current,
+                            so the term timetable on your homepage stops being a screenshot somebody has to
+                            remember to replace.
+                        </p>
+                        <div class="es-glare" aria-hidden="true"></div>
+                        <div class="es-ring-glow" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <div class="es-barre-card es-barre-hover p-6" data-reveal>
+                    <div class="mb-2 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Followers</h3>
+                        <span class="es-barre-plan es-barre-plan-free">Free</span>
+                    </div>
+                    <p class="es-barre-muted text-sm">
+                        People follow your schedule and hear about a new date from you, in their inbox,
+                        rather than from a feed that decides who sees it.
+                    </p>
+                </div>
+
+                <div class="es-barre-card es-barre-hover p-6" data-reveal>
+                    <div class="mb-2 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Newsletters</h3>
+                        <span class="es-barre-plan es-barre-plan-free">Free</span>
+                    </div>
+                    <p class="es-barre-muted text-sm">
+                        Write and send from the same place, with open and click rates afterwards. Ten emails a
+                        month on the free plan, a hundred on Pro, a thousand on Enterprise.
+                    </p>
+                </div>
+
+                <div class="es-barre-card es-barre-hover p-6 md:col-span-2" data-reveal>
+                    <div class="mb-2 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Calendar sync</h3>
+                        <span class="es-barre-plan es-barre-plan-free">Free</span>
+                    </div>
+                    <p class="es-barre-muted text-sm">
+                        Two-way sync with Google, Outlook and CalDAV, so a rehearsal moved on your phone moves
+                        on the schedule too.
+                    </p>
+                </div>
+
+                <div class="es-barre-card es-barre-hover p-6" data-reveal>
+                    <div class="mb-2 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Share graphics</h3>
+                        <span class="es-barre-plan es-barre-plan-free">Free</span>
+                    </div>
+                    <p class="es-barre-muted text-sm">
+                        Every event can generate a post-sized and a story-sized image with your own branding
+                        on it, ready to download.
+                    </p>
+                </div>
+
+                <div class="es-barre-card es-barre-hover p-6 lg:col-span-2" data-reveal>
+                    <div class="mb-2 flex items-center gap-2">
+                        <h3 class="es-barre-ink text-lg font-bold">Online classes</h3>
+                        <span class="es-barre-plan es-barre-plan-free">Free</span>
+                    </div>
+                    <p class="es-barre-muted text-sm">
+                        Mark an event as online and add the link people join on - any platform that gives you
+                        a URL. Ticket holders get it with their ticket.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 7. Who it is for (06)                                        -->
+    <!-- ============================================================ -->
+    <section id="who" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto mb-14 max-w-3xl text-center">
+                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>06</span></div>
+                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Who it is for</p>
+                <h2 class="es-balance es-barre-ink mb-5 text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Every kind of room with <span class="es-barre-grad">a mirror in it</span>.
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-reveal-group="70">
+                <x-sub-audience-card
+                    name="Ballet Companies"
+                    description="A repertory season, a Nutcracker run and a studio showcase, each set up once and sold from the same link."
+                    icon-color="teal"
+                    blog-slug="for-ballet-companies"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v9m0 0a3 3 0 103 3M12 12a3 3 0 11-3 3m0 0v3m6-3v3" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Hip-Hop Crews"
+                    description="Battles, showcases and cyphers. Post the date, take sign-ups with a capacity, sell at the door with QR check-in."
+                    icon-color="amber"
+                    blog-slug="for-hip-hop-crews"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l11-2v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm11-2a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Ballroom & Latin Studios"
+                    description="Weekly technique, a social every month and a showcase in the spring - three sub-schedules, one public page."
+                    icon-color="rose"
+                    blog-slug="for-ballroom-latin-studios"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-rose-600 dark:text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 21V9m8 12V9M8 9a3 3 0 116 0m-6 0h8M6 4h4m4 0h4" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Contemporary & Modern"
+                    description="Residencies, site-specific work and shared bills. Keep the making private and publish only the dates that are ready."
+                    icon-color="emerald"
+                    blog-slug="for-contemporary-modern-dance"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 18c2.5 0 2.5-4 5-4s2.5 4 5 4 2.5-4 5-4M4 10c2.5 0 2.5-4 5-4s2.5 4 5 4 2.5-4 5-4" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Folk & Cultural Ensembles"
+                    description="Festival appearances, heritage nights and community performances, in a calendar people can subscribe to."
+                    icon-color="sky"
+                    blog-slug="for-folk-cultural-dance"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c2.5-2.5 3.5-5.5 3.5-9S14.5 5.5 12 3m0 18c-2.5-2.5-3.5-5.5-3.5-9S9.5 5.5 12 3M3.5 9h17M3.5 15h17" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+
+                <x-sub-audience-card
+                    name="Dance Schools & Academies"
+                    description="A full timetable of graded classes with a capacity on each, and a recital at the end of it that sells its own tickets."
+                    icon-color="slate"
+                    blog-slug="for-dance-schools-academies"
+                >
+                    <x-slot:icon>
+                        <svg aria-hidden="true" class="h-6 w-6 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        </svg>
+                    </x-slot:icon>
+                </x-sub-audience-card>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 8. How it works (07, dark band)                              -->
+    <!-- ============================================================ -->
+    <section id="how" class="relative scroll-mt-24 px-2 py-14 sm:px-4 lg:py-20">
+        <div class="es-barre-band noise relative overflow-hidden rounded-[2.5rem] border border-white/[0.06] px-4 py-16 sm:px-6 lg:px-8 lg:py-20 2xl:mx-auto 2xl:max-w-[100rem]">
+            <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+                <div class="grid-overlay absolute inset-0 opacity-20"></div>
+            </div>
+
+            <div class="relative z-10 mx-auto max-w-5xl">
+                <div class="mx-auto mb-14 max-w-3xl text-center">
+                    <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>07</span></div>
+                    <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">How it works</p>
+                    <h2 class="es-balance text-3xl font-black tracking-tight text-white md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                        A term takes <span class="es-barre-grad">an afternoon</span> to set up.
+                    </h2>
+                </div>
+
+                <div class="es-barre-rail mb-12" data-reveal aria-hidden="true">
+                    <span class="es-barre-bracket"></span>
+                    <span class="es-barre-bar"></span>
+                    <span class="es-barre-bracket"></span>
+                </div>
+
+                <div class="grid gap-6 md:grid-cols-3" data-reveal-group="110">
+                    @foreach ([
+                        ['01', 'Put the timetable up', 'One recurring event per class, with the days it runs and the weeks you are closed. Sub-schedules keep classes, rehearsals and shows on their own strands.'],
+                        ['02', 'Decide what is public', 'Classes and shows go out. Rehearsal calls stay as Drafts, on the same schedule, members-only.'],
+                        ['03', 'Sell the card, not the class', 'A ten-visit card, an unlimited month, or a ticket to the gala - all from the one link you already share.'],
+                    ] as [$n, $t, $d])
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.05] p-7 backdrop-blur-sm" data-reveal="panel">
+                            <p class="es-barre-lit mb-3 font-mono text-sm font-bold">{{ $n }}</p>
+                            <h3 class="mb-2 text-lg font-bold text-white">{{ $t }}</h3>
+                            <p class="text-sm text-gray-400">{{ $d }}</p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 9. Key features                                              -->
+    <!-- ============================================================ -->
+    <section class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Key features</h2>
+            <h2 class="es-barre-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Key features</h2>
             <div class="space-y-3" data-reveal-group="70">
                 <div data-reveal>
-                    <x-feature-link-card name="Ticketing" description="Sell tickets with QR check-in and zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Recurring Events" description="A weekly class set up once, with date exceptions for the weeks you are closed" :url="marketing_url('/features/recurring-events')" icon-color="teal">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-teal-600 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Newsletters" description="Send event updates directly to followers' inboxes" :url="marketing_url('/features/newsletters')" icon-color="green">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Ticketing" description="Class cards, memberships and show tickets with zero platform fees" :url="marketing_url('/features/ticketing')" icon-color="sky">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
                 <div data-reveal>
-                    <x-feature-link-card name="Calendar Sync" description="Two-way sync with Google Calendar" :url="marketing_url('/features/calendar-sync')" icon-color="blue">
-                        <x-slot:icon><svg aria-hidden="true" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></x-slot:icon>
+                    <x-feature-link-card name="Sub-schedules" description="Keep classes, rehearsals and performances on their own strands" :url="marketing_url('/features/sub-schedules')" icon-color="emerald">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10" /></svg></x-slot:icon>
+                    </x-feature-link-card>
+                </div>
+                <div data-reveal>
+                    <x-feature-link-card name="Newsletters" description="Email the people who follow your studio, with open and click rates" :url="marketing_url('/features/newsletters')" icon-color="green">
+                        <x-slot:icon><svg aria-hidden="true" class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></x-slot:icon>
                     </x-feature-link-card>
                 </div>
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/features') }}" class="es-link-dance inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/features') }}" class="es-barre-accent inline-flex items-center font-medium hover:underline">
                     See all features
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -722,28 +1172,33 @@
     @include('marketing.partials.pricing-nudge')
 
     <!-- ============================================================ -->
-    <!-- 12. Related pages                                            -->
+    <!-- 10. Keep exploring                                           -->
     <!-- ============================================================ -->
-    <section class="bg-white py-20 dark:bg-[#0a0a0f]">
+    <section class="border-t border-[rgba(15,26,24,0.08)] py-16 dark:border-[rgba(230,237,235,0.08)]">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 class="mb-8 text-center text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl" data-reveal>Related pages</h2>
+            <h2 class="es-barre-ink mb-8 text-center text-2xl font-black tracking-tight md:text-3xl" data-reveal>Related pages</h2>
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2" data-reveal-group="70">
-                @foreach ([['/for-musicians', 'Musicians'], ['/for-theater-performers', 'Theater Performers'], ['/for-fitness-and-yoga', 'Fitness & Yoga'], ['/for-circus-acrobatics', 'Circus & Acrobatics']] as [$relHref, $relName])
-                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-relcard group flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 p-5 transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-white/10 dark:bg-white/5">
+                @foreach ([
+                    ['/for-theaters', 'Theaters'],
+                    ['/for-theater-performers', 'Theater Performers'],
+                    ['/for-fitness-and-yoga', 'Fitness &amp; Yoga'],
+                    ['/for-workshop-instructors', 'Workshop Instructors'],
+                ] as [$relHref, $relName])
+                    <a href="{{ marketing_url($relHref) }}" data-reveal class="es-barre-card es-barre-hover group flex items-center justify-between p-5">
                         <div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">Event Schedule for</div>
-                            <div class="es-relcard-title text-lg font-semibold text-gray-900 transition-colors dark:text-white">{{ $relName }}</div>
+                            <div class="es-barre-muted text-sm">Event Schedule for</div>
+                            <div class="es-barre-ink text-lg font-semibold">{!! $relName !!}</div>
                         </div>
-                        <svg aria-hidden="true" class="es-relcard-arrow w-5 h-5 text-gray-400 transition-colors rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg aria-hidden="true" class="es-barre-accent h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
                     </a>
                 @endforeach
             </div>
             <div class="mt-6 text-center">
-                <a href="{{ marketing_url('/use-cases') }}" class="es-link-dance inline-flex items-center font-medium hover:underline">
+                <a href="{{ marketing_url('/use-cases') }}" class="es-barre-accent inline-flex items-center font-medium hover:underline">
                     See all use cases
-                    <svg aria-hidden="true" class="ml-1 w-4 h-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" class="ml-1 h-4 w-4 rtl:ml-0 rtl:mr-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </a>
@@ -751,78 +1206,74 @@
         </div>
     </section>
 
+    <x-marketing.related-pages />
+
     <!-- ============================================================ -->
-    <!-- 13. FAQ                                                      -->
+    <!-- 11. FAQ (08)                                                 -->
     <!-- ============================================================ -->
-    <section class="bg-gray-50 py-20 dark:bg-[#0f0f14] lg:py-28">
+    <section id="faq" class="scroll-mt-24 border-t border-[rgba(15,26,24,0.08)] py-20 dark:border-[rgba(230,237,235,0.08)] lg:py-28">
         <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto mb-14 max-w-3xl text-center">
-                <h2 class="es-balance mb-4 text-3xl font-black tracking-tight text-gray-900 dark:text-white md:text-5xl" data-reveal>
-                    Frequently asked <span class="text-gradient-dance">questions</span>
+                <div class="es-barre-corner mb-6" data-reveal aria-hidden="true"><span>08</span></div>
+                <p class="es-barre-tag mb-4" data-reveal style="--reveal-delay: 0.05s;">Questions</p>
+                <h2 class="es-balance es-barre-ink text-3xl font-black tracking-tight md:text-5xl" data-reveal style="--reveal-delay: 0.1s;">
+                    Asked in <span class="es-barre-grad">the studio office</span>.
                 </h2>
-                <p class="text-lg text-gray-500 dark:text-gray-400 sm:text-xl" data-reveal style="--reveal-delay: 0.1s;">
-                    Everything dance groups ask about Event Schedule.
-                </p>
             </div>
 
             <div class="space-y-4" data-reveal-group="80">
-                @foreach ([
-                    ['Is Event Schedule free for dance groups?', 'Yes. Event Schedule is free forever for sharing your performance and class schedule, building a following, and syncing with Google Calendar. Ticketing and newsletters are available on the Pro plan, with zero platform fees.'],
-                    ['Can I manage performances, classes, and rehearsals together?', 'Yes. Use sub-schedules to organize by type - performances, classes, workshops, auditions, and rehearsals. Each event can include details, images, and ticket options. Keep public events visible while keeping rehearsals private.'],
-                    ['How do audiences discover our performances?', 'Fans can follow your dance group\'s schedule and receive email notifications for new performances. Share your schedule link on social media, embed it on your website, or send newsletters to followers with upcoming shows.'],
-                    ['Can I sell tickets to performances and recitals?', 'Yes. Connect your Stripe account and sell tickets directly from your schedule. Set up different pricing for adults, students, and groups. Event Schedule charges zero platform fees - every dollar goes to your dance group.'],
-                ] as [$q, $a])
-                    <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <summary class="flex cursor-pointer items-center justify-between p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $q }}</h3>
-                            <svg aria-hidden="true" class="w-5 h-5 shrink-0 text-gray-500 transition-transform duration-300 group-open/faq:rotate-180 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                @foreach ($faqs as $faq)
+                    <details name="faq" data-reveal class="es-barre-card group/faq overflow-hidden">
+                        <summary class="flex cursor-pointer items-center justify-between gap-4 p-6">
+                            <h3 class="es-barre-ink text-lg font-semibold">{{ $faq['q'] }}</h3>
+                            <svg aria-hidden="true" class="es-barre-muted h-5 w-5 shrink-0 transition-transform duration-300 group-open/faq:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </summary>
-                        <p class="faq-answer px-6 pb-6 text-gray-600 dark:text-gray-400">{{ $a }}</p>
+                        <p class="es-barre-muted faq-answer px-6 pb-6">{{ $faq['a'] }}</p>
                     </details>
                 @endforeach
             </div>
         </div>
     </section>
 
+    <x-seo.faq-schema :items="$faqs" />
+
     <!-- ============================================================ -->
-    <!-- 14. Finale                                                   -->
+    <!-- 12. Finale                                                   -->
     <!-- ============================================================ -->
-    <section id="claim" class="relative scroll-mt-24 bg-white px-2 py-16 dark:bg-[#0a0a0f] sm:px-4 lg:py-24">
+    <section id="claim" class="relative scroll-mt-24 px-2 py-16 sm:px-4 lg:py-24">
         <div class="mx-auto max-w-6xl">
-            <div class="es-finale-panel noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl shadow-rose-500/20 sm:px-12 lg:py-24" data-confetti data-reveal="panel">
+            <div class="es-barre-band noise relative overflow-hidden rounded-[2.5rem] border border-white/10 px-6 py-16 text-center shadow-2xl sm:px-12 lg:py-24" data-confetti data-reveal="panel">
                 <div class="pointer-events-none absolute inset-0" aria-hidden="true">
-                    <div class="es-aurora es-aurora-1" style="background: radial-gradient(circle at 35% 25%, rgba(244, 63, 94, 0.3), rgba(244, 63, 94, 0) 60%); opacity: 0.7;"></div>
-                    <div class="es-aurora es-aurora-2" style="background: radial-gradient(circle at 65% 70%, rgba(6, 182, 212, 0.26), rgba(6, 182, 212, 0) 60%); opacity: 0.6;"></div>
-                    <svg class="es-flow absolute -left-8 top-6 h-64 w-64 text-rose-400/40" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                        <path d="M20,100 Q60,20 100,100 T180,100" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
-                    </svg>
-                    <svg class="es-flow absolute -right-6 bottom-4 h-56 w-56 text-cyan-400/40" style="animation-delay: 1.8s;" viewBox="0 0 200 200" fill="none" aria-hidden="true">
-                        <path d="M100,20 Q180,60 100,100 T100,180" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.5"/>
-                    </svg>
-                    <div class="grid-overlay absolute inset-0 opacity-30"></div>
+                    <div class="grid-overlay absolute inset-0 opacity-25"></div>
                 </div>
 
                 <div class="relative z-10">
-                    <p class="mb-6 text-sm uppercase tracking-[0.2em] text-gray-400">Free forever</p>
+                    <div class="es-barre-rail mx-auto mb-10 max-w-md" aria-hidden="true">
+                        <span class="es-barre-bracket"></span>
+                        <span class="es-barre-bar"></span>
+                        <span class="es-barre-bracket"></span>
+                    </div>
+
+                    <p class="es-barre-tag mb-6">Free forever</p>
                     <h2 class="es-balance mx-auto mb-6 max-w-3xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
-                        Let audiences find <span class="text-gradient-dance">your next performance</span>
+                        Put the timetable <span class="es-barre-grad">where people look</span>.
                     </h2>
                     <p class="mx-auto mb-10 max-w-xl text-lg text-gray-300 sm:text-xl">
-                        Join dance companies, studios, and troupes who've simplified how they share their schedule.
+                        Classes, rehearsal calls and the gala, on one schedule with one address.
                     </p>
 
                     <div class="mx-auto flex max-w-2xl flex-col items-stretch justify-center gap-3 sm:flex-row">
                         <label for="es-claim-input" class="sr-only">Your schedule name</label>
                         <div dir="ltr" class="es-claim flex min-w-0 flex-1 items-center rounded-2xl border border-white/15 bg-white/[0.07] px-5 py-4 backdrop-blur-md transition-all">
-                            <input id="es-claim-input" type="text" placeholder="your-company" autocomplete="off" spellcheck="false" maxlength="30"
+                            <input id="es-claim-input" type="text" placeholder="your-studio" autocomplete="off" spellcheck="false" maxlength="30"
                                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-right font-mono text-sm font-semibold text-white placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-base">
                             <span class="shrink-0 select-none font-mono text-sm text-gray-400 sm:text-base">.eventschedule.com</span>
                         </div>
-                        <a href="{{ app_url('/sign_up?type=talent') }}" class="group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-rose-500 to-cyan-600 px-8 py-4 text-lg font-semibold text-white shadow-xl shadow-rose-500/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-2xl hover:shadow-cyan-500/40">
+                        <a href="{{ app_url('/sign_up?type=talent') }}" class="es-barre-btn group relative inline-flex shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-8 py-4 text-lg font-semibold">
                             <span class="relative z-10 flex items-center gap-2">
-                                Create Your Schedule
+                                Create your schedule
                                 <svg aria-hidden="true" class="h-5 w-5 transition-transform group-hover:translate-x-1 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
@@ -836,6 +1287,22 @@
             </div>
         </div>
     </section>
+
+    <!-- Section dot navigation -->
+    <nav class="es-dotnav fixed top-1/2 z-40 hidden -translate-y-1/2 lg:block ltr:right-5 rtl:left-5" aria-label="Page sections">
+        <ul class="glass flex flex-col items-center gap-1.5 rounded-full px-2 py-3">
+            @foreach ($dotSections as [$sectionId, $sectionLabel])
+                <li class="relative">
+                    <a href="#{{ $sectionId }}" class="es-dot group block rounded-full" aria-label="{{ $sectionLabel }}">
+                        <span class="es-dot-pip block h-2 w-2 rounded-full bg-gray-400/60 dark:bg-white/30"></span>
+                        <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-700 opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100 ltr:right-full ltr:mr-3 rtl:left-full rtl:ml-3 dark:border-white/10 dark:bg-[#141d1b] dark:text-gray-300">{{ $sectionLabel }}</span>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </nav>
+
+    </div>
 
     <script src="{{ asset('vendor/canvas-confetti/confetti.browser.min.js') }}" {!! nonce_attr() !!} defer></script>
     @vite('resources/js/marketing-home.js')

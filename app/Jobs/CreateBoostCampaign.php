@@ -47,6 +47,13 @@ class CreateBoostCampaign implements ShouldBeUnique, ShouldQueue
         $campaign->refresh();
         $campaign->loadMissing(['event', 'role', 'ads', 'user']);
 
+        // Network promotions are served by this platform and must never reach the Meta API.
+        // PromotionController does not dispatch this job, but the stale-payment recovery in
+        // SyncBoostCampaigns can reach any campaign, so guard at the entry point too.
+        if ($campaign->isNetwork()) {
+            return;
+        }
+
         if ($campaign->status !== 'active') {
             return;
         }

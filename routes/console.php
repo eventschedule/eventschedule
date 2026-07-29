@@ -124,6 +124,20 @@ Schedule::call(function () {
     Artisan::call('boost:expire-pending');
 })->everyFifteenMinutes()->appendOutputTo(storage_path('logs/scheduler.log'));
 
+// Separate from boost-sync above: that one is gated on Meta being configured, so an
+// operator running only the on-network promotions engine would never see it fire.
+//
+// Gated on the deploy-time master switch, NOT on PromotionService::isEnabled(). Campaigns
+// are prepaid, and the command settles and refunds them; gating on "is the network serving"
+// would mean switching the network off stops settlement and strands advertisers' money,
+// which is exactly what SyncPromotions::handle() was written to prevent. handle() reads
+// isEnabled() itself to decide which steps still apply.
+Schedule::call(function () {
+    if (\App\Services\AdsService::isEnabled()) {
+        Artisan::call('promo:sync');
+    }
+})->everyFifteenMinutes()->name('promo-sync')->withoutOverlapping()->appendOutputTo(storage_path('logs/scheduler.log'));
+
 Schedule::call(function () {
     if (config('app.hosted')) {
         Artisan::call('app:sync-domain-statuses');

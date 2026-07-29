@@ -6,9 +6,11 @@ use App\Models\AnalyticsAppearancesDaily;
 use App\Models\AnalyticsDaily;
 use App\Models\AnalyticsEventsDaily;
 use App\Models\AnalyticsLocationsDaily;
+use App\Models\AnalyticsPromotionsDaily;
 use App\Models\AnalyticsReferrersDaily;
 use App\Models\AnalyticsSocialClicksDaily;
 use App\Models\AnalyticsUtmDaily;
+use App\Models\PromotionLocationsDaily;
 use Illuminate\Console\Command;
 
 class ClearAnalytics extends Command
@@ -70,7 +72,15 @@ class ClearAnalytics extends Command
         AnalyticsLocationsDaily::truncate();
         $this->line("Deleted {$locationsCount} location analytics records.");
 
-        $total = $dailyCount + $eventsCount + $appearancesCount + $referrersCount + $utmCount + $socialClicksCount + $locationsCount;
+        $promotionsCount = AnalyticsPromotionsDaily::count();
+        AnalyticsPromotionsDaily::truncate();
+        $this->line("Deleted {$promotionsCount} promotion analytics records.");
+
+        $promoLocationsCount = PromotionLocationsDaily::count();
+        PromotionLocationsDaily::truncate();
+        $this->line("Deleted {$promoLocationsCount} promotion location records.");
+
+        $total = $dailyCount + $eventsCount + $appearancesCount + $referrersCount + $utmCount + $socialClicksCount + $locationsCount + $promotionsCount + $promoLocationsCount;
         $this->info("All analytics data cleared. Total records deleted: {$total}");
 
         return 0;

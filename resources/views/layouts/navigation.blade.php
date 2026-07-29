@@ -209,7 +209,10 @@
                 </li>
                 @endforeach
 
-                @if (\App\Services\MetaAdsService::isBoostConfigured())
+                {{-- Either channel is enough to make the section reachable. Gating on Meta
+                     alone hid the whole feature from an operator who had enabled only the
+                     on-network promotions engine. --}}
+                @if (\App\Services\MetaAdsService::isBoostConfigured() || \App\Services\PromotionService::isEnabled())
                 <li>
                     <a href="{{ route('boost.index') }}"
                         class="dark-nav-hover group flex gap-x-4 items-center rounded-lg p-2 text-lg font-semibold leading-6 text-gray-400 hover:text-white {{ request()->is('boost*') ? 'dark-nav-active text-white' : '' }}">

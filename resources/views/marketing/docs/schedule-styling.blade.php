@@ -255,10 +255,14 @@
         <div class="space-y-3 mb-6">
             <div class="doc-field">
                 <h4 class="font-semibold text-gray-900 dark:text-white mb-2">White-Label Your Schedule</h4>
-                <p class="text-sm text-gray-500 dark:text-gray-400">When branding is removed, your schedule appears entirely as your own - no Event Schedule branding is visible to visitors. This is ideal for businesses, venues, and organizations that want a professional, branded presence.</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">When branding is removed, your schedule appears entirely as your own - the "Powered by Event Schedule" badge is gone and visitors see only your branding. This is ideal for businesses, venues, and organizations that want a professional, branded presence.</p>
             </div>
         </div>
         <p class="text-gray-600 dark:text-gray-300 mb-4">Branding is automatically removed for all Pro and Enterprise plans. Selfhosted installations also have branding removed by default.</p>
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Schedules on a custom domain</div>
+            <p>One exception: when your schedule is served on your own <a href="{{ route('marketing.docs.creating_schedules') }}#custom-domain" class="doc-link">custom domain</a>, a small "Event Schedule" chip stays in the page footer. It is a single unobtrusive link and the only Event Schedule branding on the page. Everything else remains white-labeled.</p>
+        </div>
     </section>
 
     <!-- Custom CSS -->

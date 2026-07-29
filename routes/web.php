@@ -35,6 +35,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NewsletterTrackingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromoCodeController;
+use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\PushController;
 use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\RoleController;
@@ -74,6 +75,17 @@ if (config('app.hosted') && ! config('app.is_testing')) {
         Route::get('/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
         Route::get('/request', [RoleController::class, 'request'])->name('role.request');
         Route::get('/follow', [RoleController::class, 'follow'])->name('role.follow');
+        // Promotion click-through. Counted and billed here, then redirected, so the
+        // advertiser only pays for clicks that actually left this page.
+        //
+        // {hash} is constrained to the encodeId charset, matching the event routes below. Two
+        // segments means this pattern sits in front of /{slug}/{id}, so an event slugged
+        // "promo" would otherwise hand every one of its URLs to this controller; the
+        // constraint at least keeps non-hash paths (/promo/photos and friends) on the event
+        // routes where they belong.
+        Route::get('/promo/{hash}', [PromotionController::class, 'click'])
+            ->where(['hash' => '[A-Za-z0-9+=]+'])
+            ->name('promo.click')->middleware('throttle:60,1');
         Route::get('/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
         Route::get('/guest-submit', [EventController::class, 'showGuestSubmit'])->name('event.guest_submit');
         Route::post('/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');
@@ -381,6 +393,12 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
     Route::get('/boost/estimate-reach', [BoostController::class, 'estimateReach'])->name('boost.estimate_reach');
     Route::post('/boost/generate-content', [BoostController::class, 'generateContent'])->name('boost.generate_content');
     Route::post('/boost/translate-defaults', [BoostController::class, 'translateDefaults'])->name('boost.translate_defaults');
+    // On-network promotions. Separate from the boost.* endpoints on purpose: the Meta
+    // payment path hardcodes its markup rate, so sharing it would flag every network
+    // purchase as an amount mismatch.
+    Route::get('/promotions/create', [PromotionController::class, 'create'])->name('promotions.create');
+    Route::post('/promotions/payment-intent', [PromotionController::class, 'createPaymentIntent'])->name('promotions.payment_intent');
+    Route::post('/promotions', [PromotionController::class, 'store'])->name('promotions.store');
     Route::get('/boost/{hash}', [BoostController::class, 'show'])->name('boost.show');
     Route::post('/boost/{hash}/toggle-pause', [BoostController::class, 'togglePause'])->name('boost.toggle_pause');
     Route::post('/boost/{hash}/cancel', [BoostController::class, 'cancel'])->name('boost.cancel');
@@ -644,6 +662,9 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::post('/admin/translation/retry', [AdminController::class, 'retryTranslation'])->name('admin.translation.retry');
         Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
         Route::post('/admin/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
+        // Own endpoint, not admin.settings.update: cards sharing that action have to carry
+        // each other's values through as hidden inputs, and a miss silently wipes settings.
+        Route::post('/admin/settings/monetization', [AdminController::class, 'updateAdsSettings'])->name('admin.settings.update_ads');
 
         // Federation moderation. Registered everywhere but runtime-404s off the nexus,
         // because phpunit pins IS_NEXUS=true and a registration-time gate would be
@@ -673,6 +694,8 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         Route::get('/admin/audit-log', [AdminController::class, 'auditLog'])->name('admin.audit_log');
         Route::post('/admin/sale/{sale}/approve', [AdminController::class, 'approveSale'])->name('admin.sale.approve');
         Route::post('/admin/sale/{sale}/refund', [AdminController::class, 'refundSale'])->name('admin.sale.refund');
+        Route::post('/admin/promotions/{campaign}/approve', [AdminController::class, 'approvePromotion'])->name('admin.promotions.approve');
+        Route::post('/admin/promotions/{campaign}/reject', [AdminController::class, 'rejectPromotion'])->name('admin.promotions.reject');
         Route::post('/admin/boost/{campaign}/approve', [AdminController::class, 'approveBoost'])->name('admin.boost.approve');
         Route::post('/admin/boost/{campaign}/refund', [AdminController::class, 'refundBoost'])->name('admin.boost.refund');
 
@@ -967,6 +990,7 @@ if (config('app.is_nexus')) {
         Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
         Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
         Route::get('/docs/saas/federation', [MarketingController::class, 'docsSaasFederation'])->name('marketing.docs.saas.federation');
+        Route::get('/docs/saas/monetization', [MarketingController::class, 'docsSaasMonetization'])->name('marketing.docs.saas.monetization');
         Route::get('/docs/selfhost/federation', [MarketingController::class, 'docsSelfhostFederation'])->name('marketing.docs.selfhost.federation');
         // Developer section
         Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
@@ -1183,6 +1207,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas/custom-domains', [MarketingController::class, 'docsSaasCustomDomains'])->name('marketing.docs.saas.custom_domains');
             Route::get('/docs/saas/twilio', [MarketingController::class, 'docsSaasTwilio'])->name('marketing.docs.saas.twilio');
             Route::get('/docs/saas/federation', [MarketingController::class, 'docsSaasFederation'])->name('marketing.docs.saas.federation');
+            Route::get('/docs/saas/monetization', [MarketingController::class, 'docsSaasMonetization'])->name('marketing.docs.saas.monetization');
             Route::get('/docs/selfhost/federation', [MarketingController::class, 'docsSelfhostFederation'])->name('marketing.docs.selfhost.federation');
             // Developer section
             Route::get('/docs/developer/api', [MarketingController::class, 'docsDeveloperApi'])->name('marketing.docs.developer.api');
@@ -1373,6 +1398,7 @@ if (config('app.is_nexus')) {
             Route::get('/docs/saas/custom-domains', fn () => redirect('https://'._base_domain().'/docs/saas/custom-domains', 301));
             Route::get('/docs/saas/twilio', fn () => redirect('https://'._base_domain().'/docs/saas/twilio', 301));
             Route::get('/docs/saas/federation', fn () => redirect('https://'._base_domain().'/docs/saas/federation', 301));
+            Route::get('/docs/saas/monetization', fn () => redirect('https://'._base_domain().'/docs/saas/monetization', 301));
             Route::get('/docs/selfhost/federation', fn () => redirect('https://'._base_domain().'/docs/selfhost/federation', 301));
             // Developer section
             Route::get('/docs/developer/api', fn () => redirect('https://'._base_domain().'/docs/developer/api', 301));
@@ -1514,6 +1540,7 @@ if (config('app.is_nexus')) {
     Route::get('/docs/saas/custom-domains', fn () => redirect()->route('home'))->name('marketing.docs.saas.custom_domains');
     Route::get('/docs/saas/twilio', fn () => redirect()->route('home'))->name('marketing.docs.saas.twilio');
     Route::get('/docs/saas/federation', fn () => redirect()->route('home'))->name('marketing.docs.saas.federation');
+    Route::get('/docs/saas/monetization', fn () => redirect()->route('home'))->name('marketing.docs.saas.monetization');
     Route::get('/docs/selfhost/federation', fn () => redirect()->route('home'))->name('marketing.docs.selfhost.federation');
     // Developer section
     Route::get('/docs/developer', fn () => redirect()->route('home'));
@@ -1544,6 +1571,12 @@ if (! config('app.hosted') || config('app.is_testing')) {
     Route::get('/{subdomain}/api/calendar-events', [RoleController::class, 'calendarEvents'])->name('role.calendar_events');
     Route::get('/{subdomain}/request', [RoleController::class, 'request'])->name('role.request');
     Route::get('/{subdomain}/follow', [RoleController::class, 'follow'])->name('role.follow');
+    // Nested under the tenant path so it cannot collide with a schedule whose subdomain
+    // happens to be "promo" - selfhost serves every tenant from this same path space.
+    // {hash} constrained for the same reason as the hosted twin above.
+    Route::get('/{subdomain}/promo/{hash}', [PromotionController::class, 'click'])
+        ->where(['hash' => '[A-Za-z0-9+=]+'])
+        ->name('promo.click')->middleware('throttle:60,1');
     Route::get('/{subdomain}/guest-add', [EventController::class, 'showGuestImport'])->name('event.guest_import');
     Route::get('/{subdomain}/guest-submit', [EventController::class, 'showGuestSubmit'])->name('event.guest_submit');
     Route::post('/{subdomain}/guest-add', [EventController::class, 'guestImport'])->name('event.guest_import.store')->middleware('throttle:10,1');

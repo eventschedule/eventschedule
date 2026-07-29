@@ -41,6 +41,7 @@ class AdminAlertService
         'boosts_failed',
         'sales_mismatch',
         'boosts_mismatch',
+        'promos_pending',
         'federation_flagged',
         'federation',
         'translation_suggestions',
@@ -112,6 +113,14 @@ class AdminAlertService
             'sales_mismatch' => fn () => Sale::where('status', 'amount_mismatch')->count(),
 
             'boosts_mismatch' => fn () => BoostCampaign::where('billing_status', 'amount_mismatch')->count(),
+
+            // Approve-before-serve: a paid campaign sitting here is an advertiser who has
+            // been charged and is waiting, so it is queued as actionable rather than
+            // informational. Gated on the operator switch so an instance that never enabled
+            // the network cannot accrue a queue it has no screen for.
+            'promos_pending' => fn () => \App\Services\PromotionService::isEnabled()
+                ? BoostCampaign::awaitingReview()->count()
+                : 0,
 
             // Nexus-only: AdminFederationController and the suggestion endpoints abort
             // at runtime on the wrong install type, so counting there would badge a 404.
@@ -246,6 +255,10 @@ class AdminAlertService
             'boosts_failed' => ['manage', 'boost', 'admin.boost', [], '#boost-alerts', 'red', 'Boost'],
             'sales_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
             'boosts_mismatch' => ['insights', 'revenue', 'admin.revenue', [], '#amount-mismatch', 'red', __('messages.revenue')],
+            // Points at the existing Boost screen rather than adding a nav item, so there is
+            // no new Route::has failure mode and the badge lands where the operator already
+            // manages campaigns.
+            'promos_pending' => ['manage', 'boost', 'admin.boost', [], '#promo-queue', 'amber', 'Boost'],
             'federation_flagged' => ['system', 'federation', 'admin.federation', ['status' => 'approved'], '', 'red', __('messages.federation')],
             'federation' => ['system', 'federation', 'admin.federation', [], '', 'amber', __('messages.federation')],
             'translation_suggestions' => ['system', 'translations', 'admin.translations.suggestions', [], '', 'blue', __('messages.translations')],
