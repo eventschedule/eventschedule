@@ -169,6 +169,17 @@ return [
         ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which nights the interest is actually landing on.'],
     ],
 
+    // The for-art-galleries page already links the neighbouring audience pages
+    // inline, and its own Key features block covers recurring events,
+    // sub-schedules, custom fields and embed, so this strip carries the rest of
+    // what a gallery reaches for across a run.
+    'for-art-galleries' => [
+        ['title' => 'Ticketing', 'path' => '/features/ticketing', 'blurb' => 'For the collector dinner: a capacity, QR check-in and zero platform fees.'],
+        ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google, Outlook and CalDAV.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Tell the collectors yourself, within a monthly allowance counted per recipient.'],
+        ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which evening of the run people are actually looking at.'],
+    ],
+
     // The for-breweries-and-wineries page already links the neighbouring
     // audience pages inline, and its own Key features block covers recurring
     // events, sub-schedules, ticketing and embed, so this strip carries the
