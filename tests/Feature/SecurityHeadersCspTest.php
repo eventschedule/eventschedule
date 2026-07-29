@@ -59,14 +59,16 @@ class SecurityHeadersCspTest extends TestCase
 
     public function test_local_policy_is_unchanged(): void
     {
-        config(['services.meta.pixel_id' => null]);
+        // stay22.enabled is pinned rather than trusted to default false, so a future change to
+        // the env default surfaces as a failure here and not as a confusing golden mismatch.
+        config(['services.meta.pixel_id' => null, 'stay22.enabled' => false]);
 
         $this->assertSame(self::EXPECTED_LOCAL, $this->cspFor('local'));
     }
 
     public function test_production_policy_is_unchanged(): void
     {
-        config(['services.meta.pixel_id' => null]);
+        config(['services.meta.pixel_id' => null, 'stay22.enabled' => false]);
 
         $this->assertSame(self::EXPECTED_PRODUCTION, $this->cspFor('production'));
     }
@@ -166,6 +168,57 @@ class SecurityHeadersCspTest extends TestCase
         foreach ($directives['img-src'] as $source) {
             $this->assertStringNotContainsString('googlesyndication', $source);
         }
+    }
+
+    public function test_stay22_host_is_absent_until_the_integration_is_enabled(): void
+    {
+        config(['services.meta.pixel_id' => null, 'stay22.enabled' => false]);
+
+        $this->assertStringNotContainsString('stay22', $this->cspFor('production'));
+        $this->assertStringNotContainsString('stay22', $this->cspFor('local'));
+    }
+
+    public function test_stay22_widens_frame_src_and_only_frame_src(): void
+    {
+        config(['services.meta.pixel_id' => null, 'stay22.enabled' => true]);
+
+        $directives = $this->directiveMap($this->cspFor('production'));
+
+        $this->assertContains('*.stay22.com', $directives['frame-src']);
+
+        // The widget is a bare iframe: no SDK to script-src, no XHR to connect-src, and
+        // img-src already carries the https: scheme source.
+        foreach ($directives as $name => $sources) {
+            if ($name === 'frame-src') {
+                continue;
+            }
+
+            foreach ($sources as $source) {
+                $this->assertStringNotContainsString('stay22', $source, "{$name} must not gain a Stay22 host.");
+            }
+        }
+    }
+
+    public function test_stay22_widening_applies_in_both_environments(): void
+    {
+        // The bug class this whole file exists to prevent: a host added to one environment's
+        // policy and forgotten in the other.
+        config(['services.meta.pixel_id' => null, 'stay22.enabled' => true]);
+
+        $this->assertContains('*.stay22.com', $this->directiveMap($this->cspFor('local'))['frame-src']);
+        $this->assertContains('*.stay22.com', $this->directiveMap($this->cspFor('production'))['frame-src']);
+    }
+
+    public function test_stay22_widening_is_independent_of_the_ads_switch(): void
+    {
+        // Stay22 is not part of the monetization feature: it keys off STAY22_ENABLED, applies
+        // to paid schedules, and must widen the policy on an install with ADS_ENABLED=false.
+        config(['services.meta.pixel_id' => null, 'stay22.enabled' => true, 'ads.enabled' => false]);
+
+        $csp = $this->cspFor('production');
+
+        $this->assertStringContainsString('*.stay22.com', $csp);
+        $this->assertStringNotContainsString('googlesyndication', $csp);
     }
 
     public function test_strict_dynamic_is_never_emitted(): void

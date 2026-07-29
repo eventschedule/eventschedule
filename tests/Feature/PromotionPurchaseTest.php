@@ -200,7 +200,13 @@ class PromotionPurchaseTest extends TestCase
 
     public function test_the_buy_form_renders_the_card_payment_path_on_hosted(): void
     {
-        config(['app.hosted' => true, 'app.is_testing' => false]);
+        // The card block is gated on a configured publisher key as well as the mode, so pin one:
+        // STRIPE_PLATFORM_KEY is set in a real hosted .env but empty in CI's .env.example.
+        config([
+            'app.hosted' => true,
+            'app.is_testing' => false,
+            'services.stripe_platform.key' => 'pk_test_x',
+        ]);
 
         [$owner, $role, $event] = $this->advertiser();
         $owner->forceFill(['phone_verified_at' => now()])->save();

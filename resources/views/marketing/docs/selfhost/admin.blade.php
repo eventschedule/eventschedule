@@ -340,6 +340,7 @@
             <div class="doc-callout-title">Privacy &amp; consent</div>
             <p>Injected analytics are not automatically gated by the cookie-consent banner. You are responsible for configuring consent (for example, Google consent mode) to comply with the privacy regulations in your region.</p>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mt-6">An <strong class="text-gray-900 dark:text-white">Accommodation</strong> card also appears on this page once you set <code class="doc-inline-code">STAY22_ENABLED=true</code>, letting schedules show a map of lodging near their venues and earn affiliate commission. Because the Content Security Policy is built from that variable on every request, it can only be set in <code class="doc-inline-code">.env</code> and never from the admin panel - and you must run <code class="doc-inline-code">php artisan config:cache</code> after changing it, or the setting will save while the map stays blocked. See <a href="{{ route('marketing.docs.saas.monetization') }}#accommodation" class="doc-link">Accommodation affiliate</a> for the disclosure obligations it places on you.</p>
     </section>
 
     <!-- System: Translations -->

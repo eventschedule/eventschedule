@@ -21,10 +21,14 @@ class MetaAdsService
 
     public function __construct()
     {
-        $this->apiVersion = config('services.meta.api_version', 'v21.0');
+        // META_ACCESS_TOKEN and META_AD_ACCOUNT_ID have no env() default, so an install that
+        // never set them holds the key with a null value and config()'s fallback never applies.
+        // These properties are typed, so the cast is what keeps an unconfigured install (and
+        // MetaAdsServiceFake, which inherits this constructor) from fataling on construction.
+        $this->apiVersion = (string) config('services.meta.api_version', 'v21.0');
         $this->baseUrl = "https://graph.facebook.com/{$this->apiVersion}";
-        $this->accessToken = config('services.meta.access_token', '');
-        $this->adAccountId = config('services.meta.ad_account_id', '');
+        $this->accessToken = (string) config('services.meta.access_token');
+        $this->adAccountId = (string) config('services.meta.ad_account_id');
     }
 
     public static function isBoostConfigured(): bool

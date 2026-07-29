@@ -465,7 +465,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for dance groups?',
-                'a' => 'The parts you use every week are free forever: weekly classes as recurring events, date exceptions for the weeks you are closed, free registration with a capacity per class, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling anything - class cards, memberships and show tickets - is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The parts you use every week are free forever: weekly classes as recurring events, date exceptions for the weeks you are closed, free registration with a capacity per class, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling anything - class cards, memberships and show tickets - is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'How do I set up a weekly class?',
@@ -953,7 +953,7 @@
                     </div>
                     <p class="es-barre-muted text-sm">
                         Write and send from the same place, with open and click rates afterwards. Ten emails a
-                        month on the free plan, a hundred on Pro, a thousand on Enterprise.
+                        month on the free plan, a hundred on Pro and a thousand on Enterprise, counted per recipient rather than per send.
                     </p>
                 </div>
 

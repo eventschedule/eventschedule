@@ -20,6 +20,14 @@ class RoleUpdateRequest extends FormRequest
         if (! $this->input('custom_domain')) {
             $this->merge(['custom_domain_mode' => null]);
         }
+
+        // '' and null must not both be storable: Stay22Service::resolveAid() reads null as
+        // "fall back to the instance operator's ID", and an empty string would compare
+        // differently everywhere that distinction is made.
+        if ($this->has('stay22_aid')) {
+            $aid = trim((string) $this->input('stay22_aid'));
+            $this->merge(['stay22_aid' => $aid === '' ? null : $aid]);
+        }
     }
 
     public function rules(): array
@@ -113,6 +121,12 @@ class RoleUpdateRequest extends FormRequest
             'direct_registration' => ['nullable', 'boolean'],
             'hide_past_events' => ['nullable', 'boolean'],
             'promotions_opt_out' => ['nullable', 'boolean'],
+            'stay22_enabled' => ['nullable', 'boolean'],
+            // Interpolated into the embed URL as the FIRST query parameter, so a value
+            // containing '&' or '#' could append arbitrary Stay22 parameters or truncate the
+            // query. This is the primary control; Stay22Service::sanitizeAid() re-checks at
+            // read time because the operator-level Setting bypasses this rule entirely.
+            'stay22_aid' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9._-]+$/'],
             'federation_enabled' => ['nullable', 'boolean'],
             'draft_events_default' => ['nullable', 'boolean'],
             'default_event_visibility' => ['nullable', 'string', 'in:public,draft,internal,unlisted'],

@@ -355,7 +355,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for restaurants?',
-                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling covers is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The schedule itself is free forever: your public page and its link, sub-schedules for private dining or a supper club, enquiries for private hire, Drafts that keep an event off the public page until you announce it, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling covers is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'How do I stop selling more covers than the kitchen can cook?',

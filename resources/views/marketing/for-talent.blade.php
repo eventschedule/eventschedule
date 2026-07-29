@@ -32,7 +32,7 @@
         $performerTypes = ['Musicians', 'DJs', 'Comedians', 'Dancers', 'Magicians', 'Poets', 'Acrobats', 'Actors', 'Bands', 'Instructors', 'Artists', 'Vendors'];
 
         $faqs = [
-            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, and letting fans follow you are all free forever, and so are the first 10 newsletter emails each month. Ticketing, event graphics and larger newsletter sends are on the Pro plan at $' . $proMonthly . '/month, and there are still no platform fees on ticket sales.'],
+            ['q' => 'Is Event Schedule free for performers?', 'a' => 'Yes. Sharing your show schedule, syncing your calendar, taking booking requests from venues, and letting fans follow you are all free forever, and so is a newsletter allowance of 10 emails each month, counted per recipient rather than per send. Ticketing, event graphics and a larger newsletter allowance are on the Pro plan at $' . $proMonthly . '/month, and there are still no platform fees on ticket sales.'],
             ['q' => 'What happens when a venue books me for a show?', 'a' => 'The venue adds you to their event and you get a request. Accept it and the gig appears on your schedule automatically, with the venue listed on it. You never type the same date into two calendars, and both schedules stay in sync from then on.'],
             ['q' => 'I already have a Linktree. Why would I need this?', 'a' => 'A link page shows buttons. A schedule shows dates. Your Event Schedule page lists your actual upcoming shows with venues, times and ticket links, updates itself as you add dates, and lets fans follow you for an email when a new show lands. You can keep your link page and point it here, or replace it entirely.'],
             ['q' => 'Can I put my dates on my own website and social profiles?', 'a' => 'Yes. Embed your schedule on any website with a single iframe, or share your schedule URL on social profiles, EPKs and booking platforms. There are also iCal and RSS feeds, so your dates can flow into other calendars and sites automatically. Everything updates the moment you add a show.'],
@@ -549,7 +549,7 @@
                         @foreach ([
                             'Sell tickets with QR check-in and zero platform fees',
                             'Season passes, visit passes and promo codes',
-                            '100 newsletter emails a month, up from 10',
+                            '100 newsletter recipients a month, up from 10',
                             'Auto-generated event graphics for socials',
                             'Remove Event Schedule branding',
                             'Boost events with Meta Ads',

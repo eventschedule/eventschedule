@@ -2,6 +2,7 @@ import './bootstrap';
 import './cookie-consent';
 
 import { mountAccessibilityWidget } from './accessibility-widget-boot';
+import { mountStay22Map } from './stay22-boot';
 
 import Alpine from 'alpinejs';
 window.Alpine = Alpine;
@@ -215,8 +216,15 @@ window.initTinyMDE = function(element, onChange) {
     return easyMDE;
 };
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mountAccessibilityWidget);
-} else {
+const mountVueWidgets = () => {
     mountAccessibilityWidget();
+    // Both bail out immediately when their host element is absent, so this stays cheap on
+    // the pages that render neither.
+    mountStay22Map();
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountVueWidgets);
+} else {
+    mountVueWidgets();
 }

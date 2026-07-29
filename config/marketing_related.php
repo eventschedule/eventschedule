@@ -169,6 +169,17 @@ return [
         ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which nights the interest is actually landing on.'],
     ],
 
+    // The for-breweries-and-wineries page already links the neighbouring
+    // audience pages inline, and its own Key features block covers recurring
+    // events, sub-schedules, ticketing and embed, so this strip carries the
+    // rest of what a taproom reaches for.
+    'for-breweries-and-wineries' => [
+        ['title' => 'Calendar Sync', 'path' => '/features/calendar-sync', 'blurb' => 'Two-way sync with Google, Outlook and CalDAV.'],
+        ['title' => 'Analytics', 'path' => '/features/analytics', 'blurb' => 'See which nights people are actually looking at.'],
+        ['title' => 'Event Graphics', 'path' => '/features/event-graphics', 'blurb' => 'Generate the post for Friday without opening a design app.'],
+        ['title' => 'Newsletters', 'path' => '/features/newsletters', 'blurb' => 'Email your followers about a release, within a monthly allowance counted per recipient.'],
+    ],
+
     // The for-restaurants page already links the neighbouring audience pages
     // inline, so this strip carries the features a ticketed sitting needs.
     'for-restaurants' => [

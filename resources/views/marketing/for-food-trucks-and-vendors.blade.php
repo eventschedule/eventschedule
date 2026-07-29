@@ -1,7 +1,7 @@
 <x-marketing-layout>
     <x-slot name="title">Food Truck Schedules | One Link That Always Has Today's Stop</x-slot>
     <x-slot name="description">Your address changes every week. Put the whole route on one link that never goes stale, set the regular pitches up once, and turn a customer at the window into someone you can email. Free forever.</x-slot>
-    <x-slot name="breadcrumbTitle">For Food Trucks &amp; Vendors</x-slot>
+    <x-slot name="breadcrumbTitle">For Food Trucks and Vendors</x-slot>
 
     <x-slot name="structuredData">
     <script type="application/ld+json" {!! nonce_attr() !!}>
@@ -353,7 +353,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for food trucks?',
-                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling tickets to a ticketed event is on the Pro plan at $5 a month, with zero platform fees on sales.',
+                'a' => 'The parts you use every week are free forever: your public schedule and its list layout, the regular pitches as recurring events, date exceptions for the weeks you lose a spot, an address and map on every stop, a QR code for the serving window, booking requests for catering, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to a ticketed event is on the Pro plan at $5 a month, with zero platform fees on sales.',
             ],
             [
                 'q' => 'How do customers know where I am today?',
@@ -361,7 +361,7 @@
             ],
             [
                 'q' => 'Do my followers get an alert when I add a stop?',
-                'a' => 'No, and it is worth being straight about that. Following does not fire off an automatic message. What it does is give you their email address with their consent, so you can send the week\'s route yourself as a newsletter - ten emails a month on the free plan, a hundred on Pro. That is the difference between a list you own and a feed that decides who sees you.',
+                'a' => 'No, and it is worth being straight about that. Following does not fire off an automatic message. What it does is give you their email address with their consent, so you can send the week\'s route yourself as a newsletter - ten emails a month on the free plan and a hundred on Pro, counted per recipient rather than per send. That is the difference between a list you own and a feed that decides who sees you.',
             ],
             [
                 'q' => 'What happens the week I lose a pitch?',
@@ -610,7 +610,7 @@
                         @foreach ([
                             ['Print the QR, tape it up', 'Download it from your Followers page. It points at your schedule, so it never needs reprinting when the route changes.'],
                             ['They follow, you get the email address', 'With their consent, and they can unfollow whenever they like. It is your list, not a platform\'s.'],
-                            ['You send the week out', 'Nothing goes automatically - you write the route and send it. Ten emails a month free, a hundred on Pro.'],
+                            ['You send the week out', 'Nothing goes automatically - you write the route and send it. Ten a month free and a hundred on Pro, counted per recipient rather than per send.'],
                         ] as [$t, $d])
                             <div class="es-stop-card es-stop-hover p-4" data-reveal>
                                 <p class="es-stop-ink text-sm font-bold">{{ $t }}</p>
@@ -621,7 +621,7 @@
 
                     <p class="mt-6" data-reveal>
                         <span class="es-stop-plan es-stop-plan-free">Free</span>
-                        <span class="es-stop-muted ml-2 text-sm">The QR, the followers and the first ten emails a month cost nothing.</span>
+                        <span class="es-stop-muted ml-2 text-sm">The QR and the followers cost nothing; the free newsletter allowance is ten emails a month, counted per recipient.</span>
                     </p>
                 </div>
             </div>

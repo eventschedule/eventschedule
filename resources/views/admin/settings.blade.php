@@ -307,5 +307,51 @@
             </form>
         </div>
         @endif
+
+        {{-- Deliberately its own card and its own endpoint rather than part of the
+             monetization card above. updateAdsSettings() hard-returns unless
+             ADS_ENABLED && hosted && ! nexus, which would make this field unreachable in the
+             two cases that matter most: an install with ads switched off, and the nexus,
+             which is precisely the operator that wants a fallback affiliate ID. The
+             monetization heading would also misdescribe it, since that feature is scoped to
+             free-tier schedules on multi-tenant hosted installs and this one is none of
+             those. --}}
+        @if ($stay22Available)
+        <div id="accommodation" class="ap-card rounded-xl p-6 scroll-mt-24">
+            <div class="mb-4">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">@lang('messages.stay22_settings_title')</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">@lang('messages.stay22_settings_description')</p>
+            </div>
+
+            <form method="POST" action="{{ route('admin.settings.update_stay22') }}" class="{{ is_demo_mode() ? 'opacity-50 pointer-events-none' : '' }}">
+                @csrf
+
+                <div class="mb-6">
+                    <x-input-label for="stay22_aid" :value="__('messages.stay22_operator_aid')" />
+                    <x-text-input id="stay22_aid" name="stay22_aid" type="text"
+                        class="mt-1 block w-full font-mono text-sm"
+                        :value="old('stay22_aid', $stay22Aid)"
+                        :disabled="is_demo_mode()" />
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">@lang('messages.stay22_operator_aid_help')</p>
+                    <x-input-error class="mt-2" :messages="$errors->get('stay22_aid')" />
+                </div>
+
+                @if (is_demo_mode())
+                <div class="mb-6 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg">
+                    <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                        <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>@lang('messages.demo_mode_settings_disabled')</span>
+                    </p>
+                </div>
+                @endif
+
+                <div class="flex justify-end">
+                    <x-brand-button type="submit">@lang('messages.save')</x-brand-button>
+                </div>
+            </form>
+        </div>
+        @endif
     </div>
 </x-app-admin-layout>

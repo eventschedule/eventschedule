@@ -2931,6 +2931,12 @@ class AdminController extends Controller
             'adsNativePriority' => \App\Services\AdsService::boolSetting('native_priority'),
             'adsNativeCpm' => \App\Services\AdsService::setting('native_cpm'),
             'adsNativeCpc' => \App\Services\AdsService::setting('native_cpc'),
+
+            // Only the env master switch gates this card. Unlike monetization it is not
+            // hosted-only and not nexus-excluded: a single-tenant selfhost can run it, and the
+            // nexus is precisely the operator most likely to want a fallback affiliate ID.
+            'stay22Available' => \App\Services\Stay22Service::isEnabled(),
+            'stay22Aid' => \App\Services\Stay22Service::operatorAid(),
         ]);
     }
 
@@ -3000,6 +3006,57 @@ class AdminController extends Controller
             $old,
             $new,
             'Updated monetization settings',
+        );
+
+        return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));
+    }
+
+    /**
+     * Persist the operator's fallback Stay22 affiliate ID.
+     *
+     * Its own endpoint rather than part of updateAdsSettings(), which refuses the request
+     * unless ADS_ENABLED && hosted && ! nexus - conditions that do not apply here and would
+     * make the field unreachable exactly where it is wanted. Also its own Setting key,
+     * without the `ads_` prefix, because AdsService::setting() short-circuits on the ads
+     * master switch and would make the value unreadable whenever ADS_ENABLED is false.
+     */
+    public function updateStay22Settings(Request $request): RedirectResponse
+    {
+        if (! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', __('messages.not_authorized'));
+        }
+
+        // Same condition as the card's own visibility, so a POST cannot store a setting for
+        // a deployment that can never act on it.
+        if (! \App\Services\Stay22Service::isEnabled()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.not_authorized'));
+        }
+
+        $request->validate([
+            // Interpolated into the embed URL as the first query parameter, so it is validated
+            // rather than trusted just because a super-admin typed it.
+            'stay22_aid' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9._-]+$/'],
+        ]);
+
+        if (is_demo_mode()) {
+            return redirect()->route('admin.settings')->with('error', __('messages.demo_mode_settings_disabled'));
+        }
+
+        $aid = trim((string) $request->input('stay22_aid'));
+
+        $old = ['stay22_aid' => Setting::get('stay22_aid')];
+        $new = ['stay22_aid' => $aid === '' ? null : $aid];
+
+        Setting::set('stay22_aid', $new['stay22_aid']);
+
+        AuditService::log(
+            AuditService::ADMIN_SETTINGS_UPDATE,
+            auth()->id(),
+            null,
+            null,
+            $old,
+            $new,
+            'Updated Stay22 accommodation settings',
         );
 
         return redirect()->route('admin.settings')->with('success', __('messages.settings_saved'));

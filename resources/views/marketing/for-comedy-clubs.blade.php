@@ -330,7 +330,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for comedy clubs?',
-                'a' => 'Running the room is free forever: the weekly nights as recurring events, date exceptions for the weeks you are dark, free registration with a capacity for open mics, booking requests from comics with an approved list for your regulars, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling tickets is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'Running the room is free forever: the weekly nights as recurring events, date exceptions for the weeks you are dark, free registration with a capacity for open mics, booking requests from comics with an approved list for your regulars, sub-schedules, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'Can I put tickets on sale before I have booked the lineup?',

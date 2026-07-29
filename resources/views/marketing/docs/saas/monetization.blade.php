@@ -11,6 +11,7 @@
         <x-doc-nav-link href="#promotions">The promotions network</x-doc-nav-link>
         <x-doc-nav-link href="#review">Reviewing promotions</x-doc-nav-link>
         <x-doc-nav-link href="#where">Where ads appear</x-doc-nav-link>
+        <x-doc-nav-link href="#accommodation">Accommodation affiliate</x-doc-nav-link>
         <x-doc-nav-link href="#environment">Environment variables</x-doc-nav-link>
     </x-slot:toc>
 
@@ -72,6 +73,12 @@
             The promotions network has none of these obligations. It is served entirely by your own
             install, sets no third-party cookies, and makes no external requests. When a promotion
             fills the slot, the page contacts Google not at all.
+        </p>
+        <p>
+            The <a href="#accommodation" class="doc-link">accommodation affiliate</a> is a third case.
+            It does involve a third party that sets its own cookies, so the same disclosure obligation
+            applies - but it is never loaded on page load. A visitor who has not accepted cookies sees
+            an explanation and a button, and nothing reaches Stay22 until they click it.
         </p>
     </section>
 
@@ -174,11 +181,74 @@
         </p>
     </section>
 
+    <!-- Accommodation affiliate -->
+    <section id="accommodation" class="doc-section">
+        <h2 class="doc-heading">Accommodation affiliate</h2>
+        <p>
+            A separate, independent way to earn from your instance: schedules can show a map of hotels
+            and rentals near an event's venue, powered by <a href="https://www.stay22.com" target="_blank" rel="noopener" class="doc-link">Stay22</a>,
+            and bookings made through it pay an affiliate commission.
+        </p>
+
+        <div class="doc-callout doc-callout-info">
+            <p><strong>This is not part of the monetization feature above.</strong> It has its own
+            switch, it is unaffected by <code>ADS_ENABLED</code>, it works on a single-tenant selfhost,
+            and it applies to <strong>paid schedules as well as free ones</strong>. Most importantly,
+            each schedule owner can supply their own affiliate ID and keep the commission themselves.</p>
+        </div>
+
+        <p>Set <code>STAY22_ENABLED=true</code> and an <strong>Accommodation</strong> tab appears in
+        every schedule's Engagement settings. Nothing is shown to visitors until a schedule owner turns
+        it on there; it is off by default for every schedule.</p>
+
+        <h3 class="doc-subheading">Who gets the commission</h3>
+        <p>
+            A schedule that enters its own Stay22 affiliate ID keeps its own commission. A schedule that
+            leaves the field blank falls back to the ID you set at <strong>Settings &rarr;
+            Accommodation</strong> in the admin panel, so the commission comes to you instead. The
+            settings page states this plainly to the schedule owner, both on the toggle itself and as a
+            warning once the map is live without their own ID.
+        </p>
+        <p>
+            The fallback is never used on a schedule's own custom domain. A customer paying for a
+            white-label domain should not have commission taken from it, so on those pages the map
+            appears only when the owner keeps the commission.
+        </p>
+
+        <h3 class="doc-subheading">Consent, and when the map loads</h3>
+        <p>
+            Stay22 sets its own third-party cookies to attribute bookings, so the map is never loaded
+            when the page opens. Visitors who have already accepted cookies get it immediately.
+            Everyone else sees a short explanation and a button, and no request reaches Stay22 until
+            they click. Visitors sending a
+            <a href="https://globalprivacycontrol.org/" target="_blank" rel="noopener" class="doc-link">Global Privacy Control</a>
+            signal are never shown the map at all, and withdrawing consent removes it from the page.
+        </p>
+        <p>
+            <strong>You still have to disclose it.</strong> Add Stay22 to the third-party processors
+            listed in your privacy policy, and describe the map in your cookie notice. Enabling this
+            makes your instance an affiliate publisher, which is a disclosure obligation of yours, not
+            Stay22's.
+        </p>
+
+        <h3 class="doc-subheading">Where it appears</h3>
+        <p>The map is shown on a public event page only when all of the following hold. Otherwise it is
+        silently absent, which is the intended behaviour rather than an error:</p>
+        <ul>
+            <li>the operator set <code>STAY22_ENABLED=true</code>, and an affiliate ID resolves;</li>
+            <li>the schedule owner enabled it, and the event has a venue with a validated address;</li>
+            <li>the event has not already happened;</li>
+            <li>the page is not an embed, a generated share image, or password-protected;</li>
+            <li>the schedule is not the demo schedule.</li>
+        </ul>
+    </section>
+
     <!-- Environment variables -->
     <section id="environment" class="doc-section">
         <h2 class="doc-heading">Environment variables</h2>
         <p>
-            Only <code>ADS_ENABLED</code> has to be set here. Everything else is configured in the
+            Of these, only <code>ADS_ENABLED</code> and <code>STAY22_ENABLED</code> have to be set here.
+            Everything else is configured in the
             admin panel; these variables just supply the starting values.
         </p>
 
@@ -199,7 +269,13 @@
 <span class="code-variable">PROMOTIONS_MIN_BUDGET</span>=<span class="code-value">5.00</span>
 <span class="code-variable">PROMOTIONS_MAX_BUDGET</span>=<span class="code-value">1000.00</span>
 <span class="code-variable">PROMOTIONS_FREQUENCY_CAP</span>=<span class="code-value">3</span>          <span class="code-comment"># views of one promotion per visitor per day</span>
-<span class="code-variable">PROMOTIONS_AUTO_APPROVE_AFTER</span>=<span class="code-value">3</span>     <span class="code-comment"># approved campaigns before a schedule skips review</span></code></pre>
+<span class="code-variable">PROMOTIONS_AUTO_APPROVE_AFTER</span>=<span class="code-value">3</span>     <span class="code-comment"># approved campaigns before a schedule skips review</span>
+
+<span class="code-comment"># Accommodation affiliate. Independent of ADS_ENABLED; also a master switch that</span>
+<span class="code-comment"># cannot be overridden from the admin panel, because the Content-Security-Policy</span>
+<span class="code-comment"># is built from it on every request. Run config:cache after changing it.</span>
+<span class="code-variable">STAY22_ENABLED</span>=<span class="code-value">true</span>
+<span class="code-variable">STAY22_AID</span>=<span class="code-string">your-stay22-affiliate-id</span>   <span class="code-comment"># fallback only; editable in the admin panel</span></code></pre>
         </div>
 
         <div class="doc-callout doc-callout-info">

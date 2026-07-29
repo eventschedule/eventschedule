@@ -666,6 +666,7 @@ Route::middleware(['auth', 'verified', 'app_subdomain'])->group(function () {
         // Own endpoint, not admin.settings.update: cards sharing that action have to carry
         // each other's values through as hidden inputs, and a miss silently wipes settings.
         Route::post('/admin/settings/monetization', [AdminController::class, 'updateAdsSettings'])->name('admin.settings.update_ads');
+        Route::post('/admin/settings/accommodation', [AdminController::class, 'updateStay22Settings'])->name('admin.settings.update_stay22');
 
         // Federation moderation. Registered everywhere but runtime-404s off the nexus,
         // because phpunit pins IS_NEXUS=true and a registration-time gate would be

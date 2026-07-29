@@ -57,6 +57,12 @@ class BackupService
         // Same reasoning: a schedule that declined to host paid promotions must not
         // silently start hosting them again after a restore.
         'promotions_opt_out',
+        // And the sharpest version of it: without these, a restore silently drops the
+        // owner's Stay22 affiliate ID, so the accommodation map keeps rendering but the
+        // commission falls back to the instance operator. That is precisely the outcome the
+        // disclosure on the settings page exists to prevent.
+        'stay22_enabled',
+        'stay22_aid',
         'feedback_enabled', 'feedback_delay_hours', 'feedback_public', 'fan_comments_enabled',
         'fan_photos_enabled', 'fan_videos_enabled', 'fan_content_require_account',
         'first_day_of_week', 'sponsor_logos', 'sponsor_background_color', 'sponsor_section_title',

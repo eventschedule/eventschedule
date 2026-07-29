@@ -33,6 +33,7 @@
             <x-doc-nav-link href="#engagement-feedback">Feedback</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-carpool">Carpool</x-doc-nav-link>
             <x-doc-nav-link href="#engagement-sponsors">Sponsors</x-doc-nav-link>
+            <x-doc-nav-link href="#engagement-accommodation">Accommodation</x-doc-nav-link>
         </x-doc-nav-group>
         <x-doc-nav-link href="#auto-import">Auto Import</x-doc-nav-link>
         <x-doc-nav-group label="Integrations" href="#integrations">
@@ -938,6 +939,35 @@
         <div class="doc-callout doc-callout-tip mt-4">
             <div class="doc-callout-title">Tip</div>
             <p>You can also override sponsors for individual events. See <a href="{{ route('marketing.docs.creating_events') }}#sponsors" class="doc-link">Per-Event Sponsors</a>.</p>
+        </div>
+
+        <!-- Accommodation -->
+        <h3 id="engagement-accommodation" class="doc-subheading">Accommodation</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Show a map of hotels and rentals near the venue on your public event pages, so attendees travelling in can find somewhere to stay without leaving your schedule. Bookings made through the map earn an affiliate commission.
+        </p>
+        <div class="doc-fields">
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Show nearby accommodation</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Off by default. Turn it on and an accommodation section appears on event pages whose venue has a validated address. Check-in and check-out dates are filled in from the event: a single evening becomes one night, and a multi-day event covers its full run.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Stay22 affiliate ID</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Add your own Stay22 affiliate ID to earn the commission from bookings on your pages. A Stay22 account is free. If you leave this blank, the commission goes to whoever runs this Event Schedule instance instead.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Venue address required</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The map centers on the venue's coordinates, so nothing appears for events whose venue has no validated address. It is also hidden for past events, embedded calendars, and shareable event graphics.</p>
+            </div>
+            <div class="doc-field">
+                <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Visitor privacy</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">The map is not loaded when the page opens. Visitors see a short explanation and a button, and nothing is requested from Stay22 until they either accept cookies or click to show the map. Visitors sending a Global Privacy Control signal are never shown it.</p>
+            </div>
+        </div>
+
+        <div class="doc-callout doc-callout-info">
+            <div class="doc-callout-title">Availability</div>
+            <p>This section only appears if the operator of your Event Schedule instance has enabled the integration. It is available on <strong class="text-gray-900 dark:text-white">all plans</strong>, including Free.</p>
         </div>
     </section>
 

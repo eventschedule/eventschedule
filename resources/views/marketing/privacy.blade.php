@@ -126,6 +126,7 @@
                     <li>Google Apps - Email and productivity services</li>
                     <li>Stripe - Payment processing</li>
                     <li>SendGrid/Twilio - Email delivery</li>
+                    <li>Stay22 - Accommodation search, on event pages where the schedule has enabled the accommodation map, and only once the map has been loaded</li>
                 </ul>
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">Restriction/Erasure: Purging PII Data</h2>
@@ -155,8 +156,11 @@
                 <p class="text-gray-600 dark:text-gray-300 mb-4">
                     If you accept, Google Analytics sets first-party cookies named <code>_ga</code> and <code>_ga_&lt;measurement-id&gt;</code>, used to distinguish unique visitors and sessions. We also set <code>ads_data_redaction</code> on every page so any beacons that do fire are stripped of advertising identifiers.
                 </p>
+                <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    Some event pages show an <strong>accommodation map</strong> of hotels and rentals near the venue, provided by <a href="https://www.stay22.com" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 hover:underline">Stay22</a>. It appears only where the schedule owner has switched it on, and bookings made through it may earn a commission for that schedule or for us. Stay22 sets its own third-party cookies to attribute those bookings, so the map is <em>never</em> loaded until you have either accepted cookies or explicitly asked to see it. If you have already clicked "Allow", it loads with the page. Otherwise you see a short notice and a button, and nothing at all is requested from Stay22 until you click that button. If your browser sends Global Privacy Control, the map is never loaded and no button is offered.
+                </p>
                 <p class="text-gray-600 dark:text-gray-300 mb-6">
-                    You can withdraw consent at any time. Use the "Cookie preferences" button in the next section to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)).
+                    You can withdraw consent at any time. Use the "Cookie preferences" button in the next section to reopen the banner and change your choice. Withdrawing consent is as easy as giving it (GDPR Article 7(3)), and it also removes any accommodation map already loaded on the page.
                 </p>
 
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4">{{ __('messages.cookie_consent_privacy_heading') }}</h2>

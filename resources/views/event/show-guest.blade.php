@@ -516,6 +516,7 @@
                 width="100%" height="200" style="border:0"
                 loading="lazy" allowfullscreen
                 referrerpolicy="no-referrer-when-downgrade"
+                title="{{ __('messages.map_of_venue', ['venue' => $event->venue->translatedName()]) }}"
                 src="https://www.google.com/maps/embed/v1/place?key={{ config('services.google.maps') }}&q={{ $event->venue->google_place_id ? 'place_id:' . $event->venue->google_place_id : urlencode($event->venue->bestAddress()) }}">
             </iframe>
           </div>
@@ -532,6 +533,13 @@
           @endif
         </div>
         @endif
+
+        {{-- Accommodation near the venue. A sibling of the venue card rather than a child of
+             it: the card's last element carries sm:rounded-b-2xl, so appending inside would
+             break that edge, and "where to stay" is a different subject that wants its own
+             heading and landmark. Its own gate is the venue's coordinates, which is not the
+             same predicate as the card's formatted_address. --}}
+        <x-stay22-map :role="$role" :event="$event" :date="$date" :accent-color="$accentColor" />
 
         {{-- Calendar links dropdown (fallback when no venue) --}}
         @if (!$event->is_draft && !($event->venue && ($event->venue->name || $event->venue->formatted_address)) && $event->tickets_enabled && $event->isPro())

@@ -146,6 +146,25 @@ free tier and is never monetized. See `/docs/saas/monetization`.
 | Host promotions opt-out | `roles.promotions_opt_out` | Free on all tiers: any schedule can decline to carry other schedules' promotions. Does not affect AdSense |
 | Promotion review queue | `AdminController::approvePromotion/rejectPromotion` | Approve-before-serve, at `/admin/boost#promo-queue`. Rejection refunds in full. Auto-approves after `PROMOTIONS_AUTO_APPROVE_AFTER` clean campaigns |
 
+## Accommodation Affiliate (operator-enabled)
+
+Off by default and **not a plan tier feature**: it exists only when the instance operator sets
+`STAY22_ENABLED=true`. Deliberately separate from Monetization above - it is independent of
+`ADS_ENABLED`, it applies to **paid schedules as well as free ones**, and a schedule owner can
+supply their own affiliate ID and keep the commission themselves. Works on single-tenant selfhosts
+and on the nexus. See `/docs/saas/monetization#accommodation`.
+
+The map loads nothing until the visitor has either accepted cookies or explicitly clicked to show
+it, so no third-party request is made on page load. Suppressed for past events, embeds, `?graphic=1`,
+password-gated pages, demo schedules, venues without coordinates, and - when the schedule has not set
+its own affiliate ID - custom domains.
+
+| Feature | Gate location | Notes |
+|---------|--------------|-------|
+| Nearby accommodation map | `roles.stay22_enabled` + `Stay22Service::embedFor()` | Free on all tiers. Per-schedule toggle in the Engagement section, off by default. Shows lodging near the venue on public event pages, with check-in/check-out derived from the occurrence |
+| Keep your own commission | `roles.stay22_aid` | Free on all tiers, deliberately not Pro-gated. Blank means the commission goes to the instance operator, which the settings page discloses |
+| Operator fallback ID | `Setting stay22_aid`, `/admin/settings` | Used for schedules that enabled the map without their own ID. Never used on a customer's custom domain |
+
 ## Newsletter Email Limits
 
 Managed by `Role::newsletterLimit()` (`app/Models/Role.php`). Limits count individual email recipients, not newsletters. A newsletter sent to 100 followers uses 100 of the monthly allowance.

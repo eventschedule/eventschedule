@@ -76,7 +76,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 
 > **Restyle briefs.** Each note below can be pasted into Claude as the instruction for making that page's design more unique to its audience. Each page lives at `resources/views/marketing/for-{slug}.blade.php`. On most pages the existing signature is the accent gradient on the seven section headings plus a motif rendered in exactly three full-bleed layers (hero art, dark band, finale); the briefs below extend it deeper into the page. Shared ground rules for every brief: keep the shared es-* skeleton and section order; implement theming inside the page's nonce'd `<style>` block following the `/* For-x "Nickname" styles */` convention; every gradient needs light and dark variants; every animation needs a reduced-motion kill-switch; carry the accent and motif into at least one mid-page moment (bento, stats or week grid) and recolor the hard-coded blue "See all features" link and related-card hovers to the page accent; remove or actually use any dead `es-*-float` class; never use purple, violet, indigo, fuchsia or pink as accents; never use decorative line drawings (outline SVG illustrations of objects or scenes) - see CLAUDE.md; no new dependencies or external assets.
 
-**Restyle progress:** 15 / 31 applied
+**Restyle progress:** 16 / 31 applied
 
 **Verified (Jul 2026 audit):** 31 / 31 audited faithful to their briefs; 8 pages received small brief-completion fixes (see the Verified column).
 
@@ -97,7 +97,7 @@ A checklist of every WP (marketing) site page, used to track review progress as 
 | ✅ | ✅ | ✅ finale motif added | For Food Trucks and Vendors | `/for-food-trucks-and-vendors` | "Today's Stop" ground-up rebuild |
 | ✅ | ✅ | ✅ | For Comedy Clubs | `/for-comedy-clubs` | "Friday at Eight" ground-up rebuild |
 | ✅ | ✅ | ✅ course labels | For Restaurants | `/for-restaurants` | "Twenty-Four Covers" ground-up rebuild |
-| ✅ |  | ✅ FAQ accent hover | For Breweries and Wineries | `/for-breweries-and-wineries` | |
+| ✅ | ✅ | ✅ FAQ accent hover | For Breweries and Wineries | `/for-breweries-and-wineries` | "Most Nights Are Free" ground-up rebuild |
 | ✅ |  | ✅ finale aurora recolored | For Art Galleries | `/for-art-galleries` | |
 | ✅ |  | ✅ | For Community Centers | `/for-community-centers` | |
 | ✅ |  | ✅ | For Fitness and Yoga | `/for-fitness-and-yoga` | |

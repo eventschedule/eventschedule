@@ -3533,6 +3533,21 @@
                                 <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="sponsors">
                                     {{ __('messages.sponsors') }}
                                 </button>
+                                {{-- Only rendered once the operator has enabled the integration for the
+                                     whole install. Without that gate a schedule owner could opt into an
+                                     affiliate programme the operator never joined, and the map would then
+                                     be blocked by the Content-Security-Policy with no visible cause.
+
+                                     Kept LAST on purpose. Which tab paints as active is hand-rolled
+                                     above: $showRequestsTab decides both whether the requests button
+                                     renders and, via the ternary on the fan_content button, which tab
+                                     gets the active border. A conditionally-rendered tab inserted
+                                     anywhere but the end would disturb that. --}}
+                                @if (\App\Services\Stay22Service::isEnabled())
+                                <button type="button" class="engagement-tab text-center whitespace-nowrap px-3 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600" data-tab="accommodation">
+                                    {{ __('messages.accommodation') }}
+                                </button>
+                                @endif
                             </nav>
                         </div>
 
@@ -3940,6 +3955,50 @@
                         @endif
                         </div>
                         <!-- End Tab Content: Sponsors -->
+
+                        <!-- Tab Content: Accommodation -->
+                        @if (\App\Services\Stay22Service::isEnabled())
+                        <div id="engagement-tab-accommodation" class="engagement-tab-content hidden">
+
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('messages.stay22_help') }}</p>
+
+                        <div class="mb-6">
+                            <x-toggle name="stay22_enabled"
+                                label="{{ __('messages.stay22_enabled') }}"
+                                checked="{{ old('stay22_enabled', $role->stay22_enabled) }}"
+                                help="{{ __('messages.stay22_enabled_help', ['operator' => marketing_domain()]) }}" />
+                            <x-input-error class="mt-2" :messages="$errors->get('stay22_enabled')" />
+                        </div>
+
+                        <div class="mb-6">
+                            <x-input-label for="stay22_aid" :value="__('messages.stay22_aid')" />
+                            <x-text-input id="stay22_aid" name="stay22_aid" type="text"
+                                class="mt-1 block w-full font-mono text-sm"
+                                :value="old('stay22_aid', $role->stay22_aid)"
+                                placeholder="{{ __('messages.stay22_aid_placeholder') }}" />
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                {{ __('messages.stay22_aid_help', ['operator' => marketing_domain()]) }}
+                            </p>
+                            <x-input-error class="mt-2" :messages="$errors->get('stay22_aid')" />
+
+                            {{-- Restates the consequence as a present-tense fact about THIS schedule
+                                 once the map is actually live. The toggle's own help text carries the
+                                 same disclosure, because an owner may never scroll this far. --}}
+                            @if ($role->stay22_enabled && ! \App\Services\Stay22Service::hasOwnAid($role) && \App\Services\Stay22Service::operatorAid())
+                            <div class="mt-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                                    <svg class="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <span>{{ __('messages.stay22_no_own_aid_warning', ['operator' => marketing_domain()]) }}</span>
+                                </p>
+                            </div>
+                            @endif
+                        </div>
+
+                        </div>
+                        @endif
+                        <!-- End Tab Content: Accommodation -->
                     </div>
                 </div>
 

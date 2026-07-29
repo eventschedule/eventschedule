@@ -214,6 +214,23 @@ class SecurityHeaders
             // without any addition there.
         }
 
+        // The Stay22 accommodation map renders in a plain cross-origin iframe, so frame-src
+        // is the only directive it needs: our policy does not propagate into that document,
+        // and the widget loads no script or stylesheet of ours. img-src already carries the
+        // bare `https:` scheme source.
+        //
+        // Gated on config only - never on Setting::get() and never on "an affiliate ID
+        // resolves". This method runs on every request including health checks, so it must
+        // not touch the database; and a schedule owner can set their own ID on an install
+        // where the operator has none, so gating on a resolvable ID would block the frame
+        // with no visible cause. STAY22_ENABLED is the operator saying "my customers may
+        // opt into this". Note this widening is independent of ADS_ENABLED, and unlike the
+        // hardcoded *.eventschedule.com above it is host-independent, so it is enforced
+        // identically on a customer's custom domain.
+        if (\App\Services\Stay22Service::isEnabled()) {
+            $extra['frame-src'][] = '*.stay22.com';
+        }
+
         // The Meta Pixel bootstrap in app-guest.blade.php script-inserts fbevents.js. A
         // script-inserted script is still matched against script-src host sources (no
         // 'strict-dynamic' here, and Meta's snippet does not copy our nonce onto the tag),

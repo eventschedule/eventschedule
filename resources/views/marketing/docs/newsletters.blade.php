@@ -46,12 +46,13 @@
 
         <div class="doc-callout doc-callout-info">
             <div class="doc-callout-title">Sending Limits by Plan</div>
-            <p>Newsletter sending limits vary by plan tier:</p>
+            <p>Newsletter sending limits vary by plan tier. They count <strong class="text-gray-900 dark:text-white">individual recipients, not newsletters</strong>: a newsletter sent to 100 followers uses 100 of the monthly allowance.</p>
             <ul class="doc-list mt-2">
                 <li><strong class="text-gray-900 dark:text-white">Free:</strong> 10 newsletter emails per month</li>
                 <li><strong class="text-gray-900 dark:text-white">Pro:</strong> 100 newsletter emails per month</li>
                 <li><strong class="text-gray-900 dark:text-white">Enterprise:</strong> 1,000 newsletter emails per month</li>
-                <li><strong class="text-gray-900 dark:text-white">Selfhosted</strong> (with own email settings): Unlimited</li>
+                <li><strong class="text-gray-900 dark:text-white">Selfhosted:</strong> Unlimited</li>
+                <li><strong class="text-gray-900 dark:text-white">Own email settings:</strong> Unlimited, on any plan</li>
             </ul>
             <p class="mt-2">A usage meter at the top of the Newsletters page shows how many emails you have sent this month relative to your plan limit (e.g. "5 of 100 sent").</p>
         </div>

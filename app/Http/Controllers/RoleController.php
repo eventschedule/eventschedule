@@ -3458,6 +3458,19 @@ class RoleController extends Controller
             $request->merge(['carpool_enabled' => $role->carpool_enabled]);
         }
 
+        // Guard the Stay22 fields behind the instance-level switch. The fields are only
+        // rendered when the operator has enabled the integration, and the save below is
+        // fill($request->all()) rather than validated(), so without this a hand-crafted POST
+        // could store them on an install that never opted in. Restoring the stored values
+        // (rather than nulling them) means an owner's choice survives an operator toggling
+        // the integration off and back on.
+        if (! \App\Services\Stay22Service::isEnabled()) {
+            $request->merge([
+                'stay22_enabled' => $role->stay22_enabled,
+                'stay22_aid' => $role->stay22_aid,
+            ]);
+        }
+
         // Normalize gift card denominations (unique, positive, sorted)
         if ($request->has('gift_card_amounts')) {
             $request->merge([

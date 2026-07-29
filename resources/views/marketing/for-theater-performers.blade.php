@@ -368,7 +368,7 @@
         $faqs = [
             [
                 'q' => 'Is Event Schedule free for theater performers?',
-                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month. Selling tickets to work you produce yourself is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
+                'a' => 'The parts you use every day are free forever: your public schedule and its list layout, past productions kept and dated, sub-schedules, booking requests from companies that want to cast you, Drafts that keep auditions off the public page, two-way calendar sync, an embeddable calendar and up to 10 newsletter emails a month, counted per recipient rather than per send. Selling tickets to work you produce yourself is on the Pro plan at $5 a month, and Event Schedule charges zero platform fees on sales.',
             ],
             [
                 'q' => 'How does my schedule become a credits list?',
@@ -745,7 +745,7 @@
                     </div>
                     <p class="es-cred-muted text-sm">
                         Write and send from the same place, with open and click rates afterwards. Ten
-                        emails a month on the free plan, a hundred on Pro, a thousand on Enterprise.
+                        emails a month on the free plan, a hundred on Pro and a thousand on Enterprise, counted per recipient rather than per send.
                     </p>
                 </div>
 

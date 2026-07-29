@@ -36,7 +36,7 @@
                 "name": "How many newsletters can I send?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The free plan includes 10 newsletter emails per month per schedule. The Pro plan increases this to 100 newsletter emails per month, giving you plenty of capacity for regular audience communication."
+                    "text": "The limits count recipients rather than sends: a newsletter to 100 followers uses 100 of the monthly allowance. The free plan includes 10 newsletter emails per month per schedule, and the Pro plan increases this to 100."
                 }
             },
             {
@@ -44,7 +44,7 @@
                 "name": "How does email deliverability work?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Event Schedule handles email delivery infrastructure for you with proper authentication headers. Pro users can also configure custom SMTP servers per schedule for maximum deliverability and branding control."
+                    "text": "Event Schedule handles email delivery infrastructure for you with proper authentication headers. Any schedule can also configure its own SMTP server for maximum deliverability and branding control, which removes the monthly recipient limit."
                 }
             }
         ]
@@ -535,8 +535,8 @@
             <div class="space-y-4" data-reveal-group="80">
                 @foreach ([
                     ['How do subscribers join my newsletter?', 'Visitors can follow your schedule directly from your public schedule page. You can also target ticket buyers and manually add email addresses. All subscribers can unsubscribe with one click.'],
-                    ['How many newsletters can I send?', 'The free plan includes 10 newsletter emails per month per schedule. The Pro plan increases this to 100 newsletter emails per month, giving you plenty of capacity for regular audience communication.'],
-                    ['How does email deliverability work?', 'Event Schedule handles email delivery infrastructure for you with proper authentication headers. Pro users can also configure custom SMTP servers per schedule for maximum deliverability and branding control.'],
+                    ['How many newsletters can I send?', 'The limits count recipients rather than sends: a newsletter to 100 followers uses 100 of the monthly allowance. The free plan includes 10 newsletter emails per month per schedule, and the Pro plan increases this to 100.'],
+                    ['How does email deliverability work?', 'Event Schedule handles email delivery infrastructure for you with proper authentication headers. Any schedule can also configure its own SMTP server for maximum deliverability and branding control, which removes the monthly recipient limit.'],
                 ] as [$q, $a])
                     <details name="faq" data-reveal class="group/faq overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
                         <summary class="flex cursor-pointer items-center justify-between p-6">
